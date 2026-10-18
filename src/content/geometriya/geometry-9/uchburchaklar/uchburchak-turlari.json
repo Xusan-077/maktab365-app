@@ -1,0 +1,247 @@
+{
+  "status": "draft",
+  "order": 1,
+  "title": {
+    "uz": "Uchburchak turlari",
+    "ru": "Виды треугольников"
+  },
+  "blocks": [
+    {
+      "id": "goal",
+      "type": "goal",
+      "text": {
+        "uz": "Uchburchakni tomonlari va burchaklariga qarab turlarga ajratishni, burchaklar yig'indisi va uchburchak tengsizligidan foydalanishni o'rganasiz."
+      }
+    },
+    {
+      "id": "explanation-definition",
+      "type": "explanation",
+      "title": {
+        "uz": "Uchburchak nima?"
+      },
+      "text": {
+        "uz": "Bir to'g'ri chiziqda yotmaydigan uchta nuqtani kesmalar bilan tutashtirsak, uchburchak hosil bo'ladi. Nuqtalar uchburchakning uchlari, kesmalar esa tomonlari deyiladi. Uchburchakning uchta tomoni va uchta burchagi bor."
+      }
+    },
+    {
+      "id": "explanation-by-sides",
+      "type": "explanation",
+      "title": {
+        "uz": "Tomonlariga ko'ra"
+      },
+      "text": {
+        "uz": "Uch tomoni ham teng uchburchak teng tomonli deyiladi. Kamida ikki tomoni teng uchburchak teng yonli, hamma tomonlari turlicha uchburchak esa turli tomonli deyiladi."
+      }
+    },
+    {
+      "id": "explanation-by-angles",
+      "type": "explanation",
+      "title": {
+        "uz": "Burchaklariga ko'ra"
+      },
+      "text": {
+        "uz": "Barcha burchaklari 90° dan kichik uchburchak o'tkir burchakli, bitta burchagi 90° bo'lsa to'g'ri burchakli, bitta burchagi 90° dan katta bo'lsa o'tmas burchakli deyiladi. Uchburchakda 90° va undan katta burchak ko'pi bilan bitta bo'ladi."
+      }
+    },
+    {
+      "id": "rule-angle-sum",
+      "type": "rule",
+      "title": {
+        "uz": "Burchaklar yig'indisi"
+      },
+      "text": {
+        "uz": "Har qanday uchburchakning ichki burchaklari yig'indisi 180° ga teng."
+      },
+      "formula": "\\angle A + \\angle B + \\angle C = 180^\\circ"
+    },
+    {
+      "id": "rule-triangle-inequality",
+      "type": "rule",
+      "title": {
+        "uz": "Uchburchak tengsizligi"
+      },
+      "text": {
+        "uz": "Uchburchakning har bir tomoni qolgan ikki tomon yig'indisidan kichik. Bu shart bajarilmasa, bunday tomonli uchburchak mavjud emas."
+      },
+      "formula": "a < b + c,\\quad b < a + c,\\quad c < a + b"
+    },
+    {
+      "id": "widget-points",
+      "type": "widget",
+      "kind": "geometry-points",
+      "props": {
+        "points": [
+          {
+            "label": "A",
+            "x": 1,
+            "y": 1
+          },
+          {
+            "label": "B",
+            "x": 8,
+            "y": 2
+          },
+          {
+            "label": "C",
+            "x": 4,
+            "y": 7
+          }
+        ]
+      }
+    },
+    {
+      "id": "example-third-angle",
+      "type": "example",
+      "title": {
+        "uz": "Ikki burchagi 50° va 60° bo'lgan uchburchakning uchinchi burchagini toping va turini ayting"
+      },
+      "steps": [
+        {
+          "text": {
+            "uz": "Burchaklar yig'indisi 180° ekanini ishlatamiz."
+          },
+          "formula": "\\angle C = 180^\\circ - 50^\\circ - 60^\\circ"
+        },
+        {
+          "text": {
+            "uz": "Hisoblaymiz."
+          },
+          "formula": "\\angle C = 70^\\circ"
+        },
+        {
+          "text": {
+            "uz": "Uchala burchak (50°, 60°, 70°) 90° dan kichik, demak uchburchak o'tkir burchakli."
+          }
+        }
+      ]
+    },
+    {
+      "id": "example-exists",
+      "type": "example",
+      "title": {
+        "uz": "Tomonlari 5 sm, 5 sm va 8 sm bo'lgan uchburchak mavjudmi?"
+      },
+      "steps": [
+        {
+          "text": {
+            "uz": "Eng katta tomonni qolgan ikkitasining yig'indisi bilan solishtiramiz."
+          },
+          "formula": "5 + 5 = 10 > 8"
+        },
+        {
+          "text": {
+            "uz": "Boshqa tengsizliklar ham bajariladi (5 + 8 > 5), demak uchburchak mavjud."
+          }
+        },
+        {
+          "text": {
+            "uz": "Ikki tomoni teng (5 sm va 5 sm), shuning uchun bu teng yonli uchburchak."
+          }
+        }
+      ]
+    },
+    {
+      "id": "exercise-third-angle",
+      "type": "exercise",
+      "answerType": "choice",
+      "question": {
+        "uz": "Uchburchakning ikki burchagi 90° va 35°. Uchinchi burchagi nechaga teng?"
+      },
+      "options": [
+        {
+          "uz": "45°"
+        },
+        {
+          "uz": "55°"
+        },
+        {
+          "uz": "65°"
+        },
+        {
+          "uz": "125°"
+        }
+      ],
+      "answer": 1,
+      "hint": {
+        "uz": "Uchala burchak yig'indisi 180° ekanini eslang."
+      },
+      "explanation": {
+        "uz": "180° − 90° − 35° = 55°. Bu to'g'ri burchakli uchburchak."
+      }
+    },
+    {
+      "id": "exercise-angle",
+      "type": "exercise",
+      "answerType": "input",
+      "question": {
+        "uz": "Uchburchakning ikki burchagi 40° va 70°. Uchinchi burchagini toping (faqat son, gradusda)."
+      },
+      "answer": ["70"],
+      "hint": {
+        "uz": "Ikki burchak yig'indisini 180° dan ayiring."
+      },
+      "explanation": {
+        "uz": "40° + 70° = 110°, 180° − 110° = 70°."
+      }
+    },
+    {
+      "id": "exercise-exists",
+      "type": "exercise",
+      "answerType": "truefalse",
+      "question": {
+        "uz": "Tomonlari 3 sm, 4 sm va 8 sm bo'lgan uchburchak mavjud."
+      },
+      "answer": false,
+      "hint": {
+        "uz": "Ikki kichik tomon yig'indisini eng katta tomon bilan solishtiring."
+      },
+      "explanation": {
+        "uz": "3 + 4 = 7, bu 8 dan kichik. Uchburchak tengsizligi bajarilmaydi, shuning uchun bunday uchburchak mavjud emas."
+      }
+    },
+    {
+      "id": "exercise-equilateral",
+      "type": "exercise",
+      "answerType": "choice",
+      "question": {
+        "uz": "Uch tomoni ham teng bo'lgan uchburchak qanday ataladi?"
+      },
+      "options": [
+        {
+          "uz": "teng yonli"
+        },
+        {
+          "uz": "teng tomonli"
+        },
+        {
+          "uz": "turli tomonli"
+        },
+        {
+          "uz": "to'g'ri burchakli"
+        }
+      ],
+      "answer": 1,
+      "hint": {
+        "uz": "Tur nomi tomonlar tengligidan olingan."
+      },
+      "explanation": {
+        "uz": "Uchala tomoni teng bo'lsa, u teng tomonli uchburchak. Teng yonli uchburchakda kamida ikki tomon teng."
+      }
+    },
+    {
+      "id": "summary",
+      "type": "summary",
+      "points": [
+        {
+          "uz": "Tomonlariga ko'ra: teng tomonli, teng yonli, turli tomonli. Burchaklariga ko'ra: o'tkir, to'g'ri, o'tmas burchakli."
+        },
+        {
+          "uz": "Uchburchakning ichki burchaklari yig'indisi 180°."
+        },
+        {
+          "uz": "Har bir tomon qolgan ikki tomon yig'indisidan kichik bo'lishi shart."
+        }
+      ]
+    }
+  ]
+}

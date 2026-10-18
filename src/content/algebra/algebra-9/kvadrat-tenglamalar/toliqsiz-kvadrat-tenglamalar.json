@@ -1,0 +1,254 @@
+{
+  "status": "draft",
+  "order": 2,
+  "title": {
+    "uz": "To'liqsiz kvadrat tenglamalar"
+  },
+  "blocks": [
+    {
+      "id": "goal",
+      "type": "goal",
+      "text": {
+        "uz": "b yoki c nolga teng bo'lgan kvadrat tenglamalarni diskriminantsiz, oddiy usullar bilan yechishni o'rganasiz."
+      }
+    },
+    {
+      "id": "explanation-what",
+      "type": "explanation",
+      "title": {
+        "uz": "To'liqsiz tenglama nima?"
+      },
+      "text": {
+        "uz": "ax² + bx + c = 0 tenglamada b yoki c nolga teng bo'lsa, tenglama to'liqsiz kvadrat tenglama deyiladi. Uch xil holat bor: c = 0, b = 0 va b = c = 0. Ularning har birini oddiy usul bilan yechish mumkin."
+      }
+    },
+    {
+      "id": "explanation-c-zero",
+      "type": "explanation",
+      "title": {
+        "uz": "c = 0 bo'lgan holat"
+      },
+      "text": {
+        "uz": "ax² + bx = 0 tenglamada x ni qavsdan chiqaramiz: x(ax + b) = 0. Ko'paytma nolga teng bo'lishi uchun ko'paytuvchilardan kamida bittasi nolga teng bo'lishi kerak: x = 0 yoki ax + b = 0. Demak, bunday tenglamaning bitta ildizi doim nolga teng."
+      }
+    },
+    {
+      "id": "explanation-b-zero",
+      "type": "explanation",
+      "title": {
+        "uz": "b = 0 bo'lgan holat"
+      },
+      "text": {
+        "uz": "ax² + c = 0 tenglamada x² ni yolg'iz qoldiramiz: x² = −c/a. Agar o'ng tomon musbat bo'lsa, kvadrati shu songa teng ikkita son bor: +√(−c/a) va −√(−c/a). Agar o'ng tomon manfiy bo'lsa, ildiz yo'q: sonning kvadrati hech qachon manfiy bo'lmaydi."
+      }
+    },
+    {
+      "id": "rule-c-zero",
+      "type": "rule",
+      "title": {
+        "uz": "c = 0 bo'lganda"
+      },
+      "text": {
+        "uz": "Ildizlardan biri doim 0, ikkinchisi −b/a ga teng."
+      },
+      "formula": "ax^2 + bx = 0 \\;\\Rightarrow\\; x_1 = 0,\\quad x_2 = -\\frac{b}{a}"
+    },
+    {
+      "id": "rule-b-zero",
+      "type": "rule",
+      "title": {
+        "uz": "b = 0 bo'lganda"
+      },
+      "text": {
+        "uz": "−c/a > 0 bo'lsa, ikkita qarama-qarshi ildiz bor; −c/a < 0 bo'lsa, haqiqiy ildiz yo'q."
+      },
+      "formula": "ax^2 + c = 0 \\;\\Rightarrow\\; x^2 = -\\frac{c}{a}"
+    },
+    {
+      "id": "rule-both-zero",
+      "type": "rule",
+      "title": {
+        "uz": "b = c = 0 bo'lganda"
+      },
+      "text": {
+        "uz": "ax² = 0 tenglamaning yagona ildizi x = 0."
+      },
+      "formula": "ax^2 = 0 \\;\\Rightarrow\\; x = 0"
+    },
+    {
+      "id": "example-b-zero",
+      "type": "example",
+      "title": {
+        "uz": "x² − 9 = 0 tenglamani yeching"
+      },
+      "steps": [
+        {
+          "text": {
+            "uz": "9 ni o'ng tomonga o'tkazamiz."
+          },
+          "formula": "x^2 = 9"
+        },
+        {
+          "text": {
+            "uz": "Kvadrati 9 bo'ladigan ikkita son bor: 3 va −3."
+          },
+          "formula": "x = \\pm 3"
+        },
+        {
+          "text": {
+            "uz": "Javob: x₁ = −3, x₂ = 3."
+          }
+        }
+      ]
+    },
+    {
+      "id": "example-c-zero",
+      "type": "example",
+      "title": {
+        "uz": "3x² − 12x = 0 tenglamani yeching"
+      },
+      "steps": [
+        {
+          "text": {
+            "uz": "Umumiy ko'paytuvchi 3x ni qavsdan chiqaramiz."
+          },
+          "formula": "3x(x - 4) = 0"
+        },
+        {
+          "text": {
+            "uz": "Ko'paytma nolga teng: 3x = 0 yoki x − 4 = 0."
+          }
+        },
+        {
+          "text": {
+            "uz": "Javob: x₁ = 0, x₂ = 4."
+          },
+          "formula": "x_1 = 0,\\quad x_2 = 4"
+        }
+      ]
+    },
+    {
+      "id": "example-no-roots",
+      "type": "example",
+      "title": {
+        "uz": "x² + 4 = 0 tenglamani yeching"
+      },
+      "steps": [
+        {
+          "text": {
+            "uz": "4 ni o'ng tomonga o'tkazamiz."
+          },
+          "formula": "x^2 = -4"
+        },
+        {
+          "text": {
+            "uz": "Hech bir sonning kvadrati manfiy bo'lmaydi, demak tenglamaning haqiqiy ildizi yo'q."
+          }
+        }
+      ]
+    },
+    {
+      "id": "exercise-b-zero",
+      "type": "exercise",
+      "answerType": "choice",
+      "question": {
+        "uz": "x² − 25 = 0 tenglamaning ildizlari qaysi javobda to'g'ri ko'rsatilgan?"
+      },
+      "options": [
+        {
+          "uz": "5"
+        },
+        {
+          "uz": "−5"
+        },
+        {
+          "uz": "5 va −5"
+        },
+        {
+          "uz": "ildiz yo'q"
+        }
+      ],
+      "answer": 2,
+      "hint": {
+        "uz": "Avval x² = 25 ni yozing. Kvadrati 25 bo'ladigan nechta son bor?"
+      },
+      "explanation": {
+        "uz": "x² = 25 dan x = 5 yoki x = −5: ikkala son kvadratga ko'tarilganda 25 beradi."
+      }
+    },
+    {
+      "id": "exercise-c-zero",
+      "type": "exercise",
+      "answerType": "input",
+      "question": {
+        "uz": "x² − 6x = 0 tenglamaning nolga teng bo'lmagan ildizini toping."
+      },
+      "answer": ["6"],
+      "hint": {
+        "uz": "x ni qavsdan chiqaring: x(x − 6) = 0."
+      },
+      "explanation": {
+        "uz": "x(x − 6) = 0 dan x = 0 yoki x = 6. Nolga teng bo'lmagan ildiz 6."
+      }
+    },
+    {
+      "id": "exercise-no-roots",
+      "type": "exercise",
+      "answerType": "truefalse",
+      "question": {
+        "uz": "x² + 16 = 0 tenglama haqiqiy ildizga ega."
+      },
+      "answer": false,
+      "hint": {
+        "uz": "x² ni yolg'iz qoldiring va o'ng tomon ishorasiga qarang."
+      },
+      "explanation": {
+        "uz": "x² = −16 chiqadi, kvadrat esa manfiy bo'lmaydi. Haqiqiy ildiz yo'q."
+      }
+    },
+    {
+      "id": "exercise-both-zero",
+      "type": "exercise",
+      "answerType": "choice",
+      "question": {
+        "uz": "2x² = 0 tenglama nechta ildizga ega?"
+      },
+      "options": [
+        {
+          "uz": "ildiz yo'q"
+        },
+        {
+          "uz": "bitta: x = 0"
+        },
+        {
+          "uz": "ikkita: x = 2 va x = −2"
+        },
+        {
+          "uz": "cheksiz ko'p"
+        }
+      ],
+      "answer": 1,
+      "hint": {
+        "uz": "Ikkala tomonni 2 ga bo'lsangiz, nima qoladi?"
+      },
+      "explanation": {
+        "uz": "x² = 0 dan x = 0 — yagona ildiz."
+      }
+    },
+    {
+      "id": "summary",
+      "type": "summary",
+      "points": [
+        {
+          "uz": "c = 0 bo'lsa, x ni qavsdan chiqaramiz: x(ax + b) = 0, ildizlar x = 0 va x = −b/a."
+        },
+        {
+          "uz": "b = 0 bo'lsa, x² = −c/a: o'ng tomon musbat bo'lsa ikkita ildiz, manfiy bo'lsa ildiz yo'q."
+        },
+        {
+          "uz": "b = c = 0 bo'lsa, yagona ildiz x = 0."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,181 @@
+{
+  "status": "draft",
+  "order": 1,
+  "title": {
+    "uz": "Present Perfect va Past Simple",
+    "ru": "Present Perfect и Past Simple",
+    "en": "Present Perfect vs Past Simple"
+  },
+  "blocks": [
+    {
+      "id": "goal",
+      "type": "goal",
+      "text": {
+        "uz": "Present Perfect va Past Simple zamonlarini farqlashni va sayohat haqidagi gaplarda to'g'ri qo'llashni o'rganasiz.",
+        "ru": "Вы научитесь различать Present Perfect и Past Simple и правильно использовать их в предложениях о путешествиях.",
+        "en": "You will learn to tell Present Perfect from Past Simple and use them correctly when talking about travel."
+      }
+    },
+    {
+      "id": "explanation",
+      "type": "explanation",
+      "text": {
+        "uz": "Past Simple tugagan va vaqti aniq harakatni bildiradi: I visited Samarkand last summer. Present Perfect esa hozirgi payt bilan bog'liq tajriba yoki natijani bildiradi, qachon bo'lgani muhim emas: I have visited Samarkand twice."
+      }
+    },
+    {
+      "id": "rule-past-simple",
+      "type": "rule",
+      "title": {
+        "uz": "Past Simple"
+      },
+      "text": {
+        "uz": "Aniq o'tgan vaqt bilan ishlatiladi: yesterday, last year, in 2019, two days ago, when."
+      },
+      "formula": "\\text{Subject} + \\text{V}_2 \\qquad (\\text{did not} + \\text{V}_1)"
+    },
+    {
+      "id": "rule-present-perfect",
+      "type": "rule",
+      "title": {
+        "uz": "Present Perfect"
+      },
+      "text": {
+        "uz": "Tajriba va natija uchun: ever, never, already, yet, just, since, for, so far."
+      },
+      "formula": "\\text{Subject} + \\text{have/has} + \\text{V}_3"
+    },
+    {
+      "id": "example-travel",
+      "type": "example",
+      "title": {
+        "uz": "Sayohat haqida ikki xil gap"
+      },
+      "steps": [
+        {
+          "text": {
+            "uz": "Tajriba, qachon ekani muhim emas: Bukharada bo'lganman."
+          },
+          "formula": "\\text{I have been to Bukhara.}"
+        },
+        {
+          "text": {
+            "uz": "Vaqt aniq: 2022-yilda Buxoroga borganman."
+          },
+          "formula": "\\text{I went to Bukhara in 2022.}"
+        },
+        {
+          "text": {
+            "uz": "Savol Present Perfect'da, javobning tafsiloti Past Simple'da."
+          },
+          "formula": "\\text{Have you ever tried plov?} \\\\ \\text{Yes, I have. I tried it last week.}"
+        }
+      ]
+    },
+    {
+      "id": "widget-choose-tense",
+      "type": "widget",
+      "kind": "choice-explain",
+      "props": {
+        "prompt": "I ___ to Samarkand in 2019.",
+        "options": [
+          {
+            "text": "have been",
+            "correct": false,
+            "reason": {
+              "uz": "“In 2019” — aniq o'tgan vaqt. Present Perfect aniq vaqt bilan ishlatilmaydi."
+            }
+          },
+          {
+            "text": "went",
+            "correct": true,
+            "reason": {
+              "uz": "To'g'ri: vaqt aniq (2019), tugagan harakat — Past Simple."
+            }
+          },
+          {
+            "text": "have gone",
+            "correct": false,
+            "reason": {
+              "uz": "Present Perfect, shuningdek aniq vaqt (in 2019) bilan mos kelmaydi."
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "exercise-choice",
+      "type": "exercise",
+      "answerType": "choice",
+      "question": {
+        "uz": "Choose the correct form: She ___ to Paris three times."
+      },
+      "options": [
+        {
+          "uz": "has been"
+        },
+        {
+          "uz": "went"
+        },
+        {
+          "uz": "was going"
+        },
+        {
+          "uz": "is"
+        }
+      ],
+      "answer": 0,
+      "hint": {
+        "uz": "Gap tajriba haqida, vaqt aniq ko'rsatilmagan."
+      },
+      "explanation": {
+        "uz": "“Three times” — tajriba, shuning uchun Present Perfect: has been."
+      }
+    },
+    {
+      "id": "exercise-input",
+      "type": "exercise",
+      "answerType": "input",
+      "question": {
+        "uz": "Write the correct form of the verb: We ___ (visit) Khiva last spring."
+      },
+      "answer": ["visited"],
+      "hint": {
+        "uz": "“Last spring” — aniq o'tgan vaqt."
+      },
+      "explanation": {
+        "uz": "Aniq vaqt ko'rsatilgan, shuning uchun Past Simple: visited."
+      }
+    },
+    {
+      "id": "exercise-truefalse",
+      "type": "exercise",
+      "answerType": "truefalse",
+      "question": {
+        "uz": "The sentence “I have seen this film yesterday.” is correct."
+      },
+      "answer": false,
+      "hint": {
+        "uz": "Gapdagi vaqt ko'rsatkichiga (yesterday) e'tibor bering."
+      },
+      "explanation": {
+        "uz": "Yesterday aniq vaqt, shuning uchun to'g'risi: I saw this film yesterday."
+      }
+    },
+    {
+      "id": "summary",
+      "type": "summary",
+      "points": [
+        {
+          "uz": "Aniq o'tgan vaqt bor bo'lsa — Past Simple."
+        },
+        {
+          "uz": "Tajriba yoki hozirgi natija muhim bo'lsa — Present Perfect."
+        },
+        {
+          "uz": "Present Perfect bilan yesterday, last year, ago ishlatilmaydi."
+        }
+      ]
+    }
+  ]
+}

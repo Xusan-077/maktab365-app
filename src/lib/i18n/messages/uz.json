@@ -1,0 +1,813 @@
+{
+  "meta": {
+    "title": "maktab365 — 1–11-sinf darsliklari",
+    "description": "1–11-sinf darsliklari mavzular bo'yicha. Bepul, o'quvchi va o'qituvchi uchun."
+  },
+  "brand": {
+    "name": "maktab365",
+    "tagline": "1–11-sinf darsliklari mavzular bo'yicha — bepul, o'quvchi va o'qituvchi uchun."
+  },
+  "home": {
+    "hero": {
+      "title": "Maktabdagi har bir mavzu — tushunarliroq.",
+      "subtitle": "1–11-sinf darsliklari mavzular bo'yicha: qisqa tushuntirish, misol va mashq. Bepul, ro'yxatdan o'tmasdan.",
+      "cta": "Darsliklarni ko'rish",
+      "how": "Qanday ishlaydi?"
+    },
+    "demo": {
+      "badge": "Mini-dars",
+      "subjectLabel": "Fan tanlang",
+      "explanationLabel": "Tushuntirish",
+      "questionLabel": "Savol",
+      "optionsLabel": "Javob variantlari",
+      "correctTitle": "To'g'ri!",
+      "wrongTitle": "Deyarli! Yana urinib ko'ring",
+      "footnote": "Haqiqiy mavzularda ham shunday: o'qing, mashq qiling, natijani ko'ring.",
+      "subjects": {
+        "math": {
+          "name": "Matematika",
+          "explanation": "Viyet teoremasi: ildizlar yig'indisi x₁ + x₂ = −p, ko'paytmasi x₁ · x₂ = q.",
+          "question": "x² − 7x + 12 = 0 tenglama ildizlarining yig'indisi nechaga teng?",
+          "option0": "7",
+          "option1": "−7",
+          "option2": "12",
+          "correct": "Tenglamada p = −7, yig'indi esa −p = 7.",
+          "wrong": "Eslang: x₁ + x₂ = −p. Bu yerda p = −7."
+        },
+        "english": {
+          "name": "Ingliz tili",
+          "explanation": "Ingliz tilida tugagan va vaqti aniq harakat fe'lning ikkinchi shakli bilan ifodalanadi. Masalan:",
+          "exampleVerbatim": "I went to school yesterday.",
+          "question": "Gapni to'ldiring:",
+          "questionVerbatim": "Yesterday I ___ to the library.",
+          "option0": "go",
+          "option1": "went",
+          "option2": "gone",
+          "correct": "To'g'ri! Aniq o'tgan vaqt bor, shuning uchun fe'lning ikkinchi shakli ishlatiladi.",
+          "wrong": "Gapdagi aniq o'tgan vaqt fe'lning ikkinchi shaklini talab qiladi."
+        }
+      }
+    },
+    "grades": {
+      "title": "Sinfingizni tanlang",
+      "hint": "Sinfni tanlang — pastda shu sinf fanlari chiqadi.",
+      "label": "Sinflar",
+      "chip": "{grade}-sinf",
+      "reset": "Barcha sinflar"
+    },
+    "subjects": {
+      "title": "Fanlar",
+      "subtitleAll": "Barcha sinflar bo'yicha fanlar",
+      "subtitleGrade": "{grade}-sinf fanlari",
+      "booksCount": "{count} ta darslik",
+      "ready": "Mavzular tayyor",
+      "soon": "Tez orada",
+      "empty": "Bu sinf uchun fanlar topilmadi.",
+      "error": "Fanlarni yuklab bo'lmadi. Sahifani yangilab ko'ring.",
+      "loading": "Fanlar yuklanmoqda"
+    },
+    "anatomy": {
+      "title": "Bitta mavzuda nimalar bor?",
+      "subtitle": "Har bir mavzu bir xil, tushunarli tartibda qurilgan. Misol: {book} — {topic}.",
+      "book": "9-sinf Algebra",
+      "stepOf": "{step}-blok",
+      "blocks": {
+        "goal": "Maqsad",
+        "explanation": "Tushuntirish",
+        "rule": "Qoida",
+        "example": "Misol",
+        "exercise": "Mashq",
+        "summary": "Xulosa",
+        "widget": "Interaktiv vidjet"
+      },
+      "widgetText": "Koeffitsiyentlarni o'zgartiring va ildizlar qanday o'zgarishini o'zingiz ko'ring.",
+      "exerciseTypes": "Variant tanlash, javobni yozish yoki “to'g'ri/noto'g'ri”"
+    },
+    "audience": {
+      "title": "O'quvchilar va o'qituvchilar uchun",
+      "student": {
+        "title": "O'quvchi uchun",
+        "items": {
+          "a": "Uzun matn emas, mavzu: kerakli joyni tez toping.",
+          "b": "Mashq darrov, javobning tushuntirishi bilan.",
+          "c": "Qayerda to'xtaganingiz eslab qolinadi."
+        }
+      },
+      "teacher": {
+        "title": "O'qituvchi uchun",
+        "items": {
+          "a": "Dars rejasi uchun tayyor mavzular ketma-ketligi.",
+          "b": "Misol va mashqlarni sinfda birga ko'rib chiqish mumkin.",
+          "c": "Hammasi bepul, har bir mavzuni havola bilan ulashish mumkin."
+        }
+      }
+    },
+    "how": {
+      "title": "Qanday ishlaydi?",
+      "steps": {
+        "one": {
+          "title": "Sinf va fanni tanlang",
+          "text": "Darslikni sinf va fan bo'yicha toping yoki qidiruvdan foydalaning."
+        },
+        "two": {
+          "title": "Mavzuni o'qing",
+          "text": "Qisqa maqsad, tushuntirish, qoida va misollar."
+        },
+        "three": {
+          "title": "Mashq qiling",
+          "text": "Savollarga javob bering — natija va tushuntirish darrov chiqadi."
+        },
+        "four": {
+          "title": "Davom eting",
+          "text": "Mavzular bo'yicha oldinga yuring, kerak bo'lsa qaytib takrorlang."
+        }
+      }
+    },
+    "faq": {
+      "title": "Ko'p so'raladigan savollar",
+      "items": {
+        "free": {
+          "q": "Platforma bepulmi?",
+          "a": "Ha, barcha darsliklar va mavzular bepul."
+        },
+        "account": {
+          "q": "Account kerakmi?",
+          "a": "O'qish va mashq qilish uchun kerak emas. Kirish ixtiyoriy: u natijalaringizni saqlashga yordam beradi."
+        },
+        "phone": {
+          "q": "Telefonda ishlaydimi?",
+          "a": "Ha. Sayt telefon uchun moslashtirilgan, pastdagi panel orqali darsliklar va qidiruvga bir tegish bilan o'tasiz."
+        },
+        "languages": {
+          "q": "Qaysi tillarda?",
+          "a": "O'zbek (lotin va kirill), rus va ingliz tillarida. Mavzu matnlari tarjima qilinishi bilan til qamrovi kengayib boradi."
+        }
+      }
+    },
+    "cta": {
+      "title": "Birinchi mavzuni hoziroq oching",
+      "text": "Sinfingizni tanlang va bugungi mavzudan boshlang.",
+      "button": "Darsliklarni ko'rish"
+    }
+  },
+  "ui": {
+    "close": "Yopish",
+    "dismiss": "Xabarni yopish"
+  },
+  "a11y": {
+    "skipToContent": "Asosiy kontentga o'tish"
+  },
+  "nav": {
+    "textbooks": "Darsliklar",
+    "subjects": "Fanlar",
+    "about": "Loyiha haqida",
+    "login": "Kirish",
+    "search": "Qidiruv",
+    "menu": "Menyu",
+    "main": "Asosiy navigatsiya",
+    "mobile": "Mobil navigatsiya",
+    "home": "Bosh sahifa",
+    "goToCabinet": "Kabinetga o'tish",
+    "goToTeacher": "Ustoz paneliga o'tish"
+  },
+  "search": {
+    "label": "Saytdan qidirish",
+    "placeholder": "Mavzu, fan yoki sinf qidiring…",
+    "submit": "Qidirish"
+  },
+  "language": {
+    "label": "Til",
+    "names": {
+      "uz": "O'zbekcha",
+      "uz-Cyrl": "Ўзбекча",
+      "ru": "Русский",
+      "en": "English"
+    }
+  },
+  "theme": {
+    "label": "Mavzu",
+    "toggle": "Rang rejimini almashtirish",
+    "system": "Tizim",
+    "light": "Yorug'",
+    "dark": "Qorong'i"
+  },
+  "textSize": {
+    "label": "Matn hajmi",
+    "s": "Kichik",
+    "m": "O'rta",
+    "l": "Katta"
+  },
+  "menu": {
+    "title": "Menyu",
+    "appearance": "Ko'rinish"
+  },
+  "footer": {
+    "platform": "Platforma",
+    "help": "Yordam va aloqa",
+    "helpCenter": "Yordam markazi",
+    "contact": "Biz bilan aloqa",
+    "note": "Barcha darsliklar bepul."
+  },
+  "dev": {
+    "title": "UI komponentlari",
+    "intro": "Faqat development rejimida ko'rinadi.",
+    "sampleLabel": "Ism",
+    "samplePlaceholder": "Ismingizni kiriting",
+    "sampleHint": "Bu yordamchi matn.",
+    "sampleError": "Bu maydon to'ldirilishi shart.",
+    "sampleTitle": "Mavzu sarlavhasi",
+    "sampleBody": "Kalit tushuncha yoki qisqa izoh shu yerda ko'rsatiladi.",
+    "note": "Eslatma",
+    "important": "Muhim fikr: ta'rifni yodlab olish shart emas, uni tushunish kifoya.",
+    "grade": "5-sinf",
+    "subject": "Matematika",
+    "done": "Tugallangan",
+    "failed": "Xato",
+    "tabOne": "Nazariya",
+    "tabTwo": "Mashqlar",
+    "tabThree": "Test",
+    "tabsLabel": "Mavzu bo'limlari",
+    "accordionOne": "Bu nima?",
+    "accordionTwo": "Qanday ishlatiladi?",
+    "accordionBody": "Bu yerda qisqa javob yoziladi.",
+    "progress": "Mavzu bo'yicha progress",
+    "openDialog": "Dialogni ochish",
+    "dialogTitle": "Dialog sarlavhasi",
+    "dialogBody": "Esc yoki tashqariga bosish bilan yopiladi.",
+    "toastInfo": "Ma'lumot",
+    "toastSuccess": "Saqlandi",
+    "toastError": "Xatolik yuz berdi",
+    "toastDescription": "Qo'shimcha tafsilot shu yerda.",
+    "loading": "Yuklanmoqda",
+    "selectOne": "Birinchi variant",
+    "selectTwo": "Ikkinchi variant",
+    "colors": "Ranglar",
+    "buttons": "Tugmalar",
+    "fields": "Maydonlar",
+    "badges": "Badge va Chip",
+    "surfaces": "Card va aksent",
+    "disclosure": "Tabs va Accordion",
+    "feedback": "Progress, Skeleton, Dialog, Toast",
+    "primary": "Asosiy",
+    "secondary": "Ikkilamchi",
+    "ghost": "Shaffof",
+    "accent": "Aksent",
+    "danger": "Xavfli",
+    "disabled": "O'chirilgan",
+    "small": "Kichik",
+    "medium": "O'rta",
+    "large": "Katta"
+  },
+  "catalog": {
+    "meta": {
+      "title": "Darsliklar",
+      "description": "1–11-sinf darsliklari: sinf va fan bo'yicha toping yoki kitob va mavzu nomini qidiring."
+    },
+    "title": "Darsliklar",
+    "subtitle": "Sinf va fan bo'yicha toping yoki kitob yoki mavzu nomini qidiring.",
+    "searchLabel": "Kitob yoki mavzu qidirish",
+    "searchPlaceholder": "Kitob yoki mavzu nomi…",
+    "gradeLabel": "Sinf",
+    "subjectLabel": "Fan",
+    "allSubjects": "Barcha fanlar",
+    "activeFilters": "Faol filtrlar",
+    "removeFilter": "{label} filtrini olib tashlash",
+    "searchChip": "Qidiruv: “{query}”",
+    "clearAll": "Hammasini tozalash",
+    "resultCount": "{count} ta darslik topildi",
+    "matchedTopics": "Mos mavzular",
+    "loading": "Darsliklar yuklanmoqda",
+    "error": "Darsliklarni yuklab bo'lmadi. Sahifani yangilab ko'ring.",
+    "empty": {
+      "title": "Hech narsa topilmadi",
+      "text": "Tanlangan filtrlarga mos darslik yo'q.",
+      "tryGrade": "Boshqa sinfni sinab ko'ring:",
+      "tryQuery": "So'zni qisqartiring yoki boshqa so'z bilan qidiring."
+    },
+    "readProgress": "{done} / {total} mavzu o'qilgan",
+    "readProgressLabel": "{title}: o'qilgan mavzular"
+  },
+  "book": {
+    "author": "Muallif",
+    "year": "Nashr yili",
+    "edition": "Nashr",
+    "grade": "Sinf",
+    "subject": "Fan",
+    "pdfRead": "PDF o'qish",
+    "pdfMissing": "PDF hali yuklanmagan",
+    "learn": "Mavzular orqali o'rganish",
+    "soon": "Tez orada",
+    "details": "Kitob sahifasi",
+    "chapters": "Boblar va mavzular",
+    "chapterLabel": "{order}-bob",
+    "topicsCount": "{count} ta mavzu",
+    "noChapters": "Mavzular tez orada qo'shiladi.",
+    "meta": {
+      "description": "{grade}-sinf {subject} darsligi. Muallif: {author}. Nashr yili: {year}, {edition}."
+    }
+  },
+  "topicStatus": {
+    "none": "O'qilmagan",
+    "started": "Boshlangan",
+    "completed": "O'qilgan"
+  },
+  "topic": {
+    "meta": {
+      "description": "{book} · {chapter}: «{title}» mavzusi — tushuntirish, misollar va mashqlar."
+    },
+    "notReady": "Bu mavzu hali tayyor emas",
+    "toc": {
+      "label": "Mavzu mundarijasi",
+      "title": "Mundarija"
+    },
+    "sections": {
+      "goal": "Nimani o'rganasiz",
+      "explanation": "Sodda tushuntirish",
+      "rule": "Asosiy qoida",
+      "example": "Yechilgan misol",
+      "exercise": "O'zingiz bajaring",
+      "summary": "Qisqa xulosa"
+    },
+    "toolbar": {
+      "label": "Mavzu amallari",
+      "bookmark": "Xatcho'pga qo'shish",
+      "bookmarked": "Xatcho'pda",
+      "print": "Chop etish",
+      "bookmarkAdded": "Xatcho'pga qo'shildi",
+      "bookmarkRemoved": "Xatcho'pdan olib tashlandi",
+      "error": "Amalni bajarib bo'lmadi, qayta urinib ko'ring",
+      "bookmarkGuestHint": "Kirsangiz, xatcho'plar akkauntga ko'chiriladi."
+    },
+    "resume": {
+      "message": "Oxirgi o'qigan joyingiz saqlangan.",
+      "action": "Davom ettirish",
+      "dismiss": "Yopish"
+    },
+    "example": {
+      "stepLabel": "{current}-qadam, jami {total} ta",
+      "next": "Keyingi qadam",
+      "showAll": "Hammasini ko'rsatish",
+      "restart": "Qaytadan boshlash",
+      "done": "Barcha qadamlar ko'rsatildi"
+    },
+    "exercise": {
+      "label": "{order}-mashq",
+      "check": "Tekshirish",
+      "hint": "Maslahat",
+      "hideHint": "Maslahatni yashirish",
+      "showExplanation": "Tushuntirishni ko'rish",
+      "hideExplanation": "Tushuntirishni yashirish",
+      "explanationTitle": "Tushuntirish",
+      "answerLabel": "Javobingiz",
+      "answerPlaceholder": "Javobni yozing",
+      "answerRequired": "Avval javobni kiriting yoki tanlang.",
+      "true": "To'g'ri",
+      "false": "Noto'g'ri",
+      "correct": "To'g'ri! Barakalla.",
+      "incorrect": "Hali to'g'ri emas. Maslahatni ko'rib, yana urinib ko'ring.",
+      "correctAnswer": "To'g'ri javob: {answer}",
+      "progress": "{done} / {total} mashq bajarildi",
+      "allDone": "Barcha mashqlar bajarildi",
+      "saveInvite": "Natijangizni saqlash uchun kiring.",
+      "saveInviteAction": "Kirish",
+      "saved": "Natija saqlandi",
+      "teacherAnswer": "Javob (o'qituvchi uchun)",
+      "syncing": "Natija yuborilmoqda; internet bo'lmasa, qaytganda yuboriladi",
+      "orderHint": "Tugmalar yordamida to'g'ri tartibga keltiring.",
+      "moveUp": "{item} — yuqoriga",
+      "moveDown": "{item} — pastga"
+    },
+    "choiceExplain": {
+      "title": "Variantni tanlang va sababini ko'ring",
+      "hint": "Har bir variantning nega to'g'ri yoki noto'g'ri ekanini ko'rasiz.",
+      "correct": "To'g'ri",
+      "incorrect": "Noto'g'ri",
+      "reason": "Sabab",
+      "reset": "Qayta boshlash"
+    },
+    "graph": {
+      "title": "Koeffitsiyentlarni o'zgartirib ko'ring",
+      "hint": "Slayderlarni suring: grafik va ildizlar bir zumda o'zgaradi.",
+      "figure": "Kvadrat funksiya grafigi",
+      "discriminant": "Diskriminant",
+      "roots": "Ildizlar",
+      "noRoots": "Haqiqiy ildiz yo'q",
+      "sum": "Yig'indi",
+      "product": "Ko'paytma",
+      "vertex": "Uchi",
+      "aZero": "a nolga teng bo'lmasligi kerak: parabola to'g'ri chiziqqa aylanadi.",
+      "reset": "Boshlang'ich qiymatlar",
+      "loading": "Widget yuklanmoqda…"
+    },
+    "next": {
+      "label": "Keyingi mavzu",
+      "title": "Keyingi mavzu",
+      "last": "Bu kitobdagi oxirgi mavzu",
+      "toBook": "Kitob mundarijasiga qaytish",
+      "previous": "Oldingi mavzu"
+    },
+    "teacher": {
+      "title": "O'qituvchi uchun",
+      "present": "Darsda ko'rsatish",
+      "hint": "F — darsda ko'rsatish. Rejimda: bo'sh joy yoki → keyingi qadam, ← orqaga, A javoblar, Esc chiqish.",
+      "showAnswers": "Javoblarni ko'rsatish",
+      "hideAnswers": "Javoblarni yashirish",
+      "barLabel": "Darsda ko'rsatish boshqaruvi",
+      "prevStep": "Oldingi qadam",
+      "nextStep": "Keyingi qadam",
+      "exit": "Chiqish",
+      "share": {
+        "open": "Havola va QR",
+        "title": "Havola va QR kod",
+        "description": "O'quvchilar telefon kamerasi bilan skanerlab, mavzuni ochishadi.",
+        "linkLabel": "Mavzu havolasi",
+        "copy": "Nusxalash",
+        "copied": "Havola nusxalandi",
+        "copyFailed": "Nusxalab bo'lmadi. Havolani qo'lda belgilab nusxalang.",
+        "qrLabel": "Mavzu havolasining QR kodi",
+        "larger": "Kattalashtirish",
+        "smaller": "Kichraytirish"
+      },
+      "print": {
+        "open": "Tanlab chop etish",
+        "title": "Chop etish",
+        "description": "Faqat tanlangan bo'limlar chop etiladi.",
+        "sections": "Bo'limlar",
+        "withAnswers": "Mashq javoblari bilan",
+        "action": "Chop etish",
+        "cancel": "Bekor qilish"
+      }
+    },
+    "markRead": {
+      "action": "Mavzuni o'qidim",
+      "done": "Mavzu o'qilgan deb belgilandi"
+    },
+    "draft": "Tekshiruvdan o'tmagan",
+    "draftHint": "Bu mavzu matni darslik bilan hali solishtirilmagan; xatolar bo'lishi mumkin.",
+    "geometryPoints": {
+      "title": "Nuqtalarni surib ko'ring",
+      "hint": "Uchlarni sichqoncha yoki barmoq bilan suring, yoki tanlab, o'q tugmalarini bosing.",
+      "figure": "Uchburchak va uning uchlari",
+      "point": "{label} nuqta: ({x}; {y})",
+      "reset": "Boshlang'ich holat",
+      "angle": {
+        "right": "To'g'ri burchakli uchburchak",
+        "acute": "O'tkir burchakli uchburchak",
+        "obtuse": "O'tmas burchakli uchburchak",
+        "degenerate": "Uchlar bir to'g'ri chiziqda — uchburchak hosil bo'lmadi"
+      },
+      "side": {
+        "equilateral": "teng tomonli",
+        "isosceles": "teng yonli",
+        "scalene": "turli tomonli"
+      },
+      "pythagoras": "Katetlar kvadratlari yig'indisi gipotenuza kvadratiga teng: {a} + {b} = {c}."
+    },
+    "timeline": {
+      "title": "Vaqt chizig'i",
+      "hint": "Sanani bosing — qisqa izoh ochiladi. Sanalar orasida o'q tugmalari bilan yuring."
+    }
+  },
+  "subjectsPage": {
+    "meta": {
+      "title": "Fanlar",
+      "description": "Maktab fanlari bo'yicha darsliklar: sinfni tanlab, kerakli kitobni toping."
+    },
+    "title": "Fanlar",
+    "subtitle": "Fanni tanlang va u bo'yicha barcha sinflardagi darsliklarni ko'ring.",
+    "booksCount": "{count} ta darslik",
+    "metaSubject": "{subject} darsliklari — 1–11-sinf",
+    "gradeHeading": "{grade}-sinf",
+    "empty": "Bu fan bo'yicha darsliklar hali qo'shilmagan."
+  },
+  "breadcrumb": {
+    "label": "Sahifa yo'li",
+    "home": "Bosh sahifa"
+  },
+  "errors": {
+    "title": "Nimadir xato ketdi",
+    "text": "Sahifani yuklab bo'lmadi. Qayta urinib ko'ring.",
+    "retry": "Qayta urinish",
+    "home": "Bosh sahifaga qaytish",
+    "notFoundTitle": "Sahifa topilmadi",
+    "notFoundText": "Bunday sahifa mavjud emas yoki ko'chirilgan."
+  },
+  "auth": {
+    "signInGoogle": "Google bilan kirish",
+    "loginTitle": "maktab365 ga kirish",
+    "loginText": "Kirish ixtiyoriy: darsliklarni hisobsiz ham o'qiy olasiz. Kirsangiz, progress va xatcho'plar akkauntda saqlanadi.",
+    "continueAsGuest": "Kirmasdan davom etish",
+    "loading": "Yuklanmoqda…",
+    "menuLabel": "Foydalanuvchi menyusi: {name}",
+    "cabinet": "Kabinet",
+    "teacherPanel": "Ustoz paneli",
+    "settings": "Sozlamalar",
+    "signOut": "Chiqish",
+    "guestMerged": "Mehmon ma'lumotlari akkauntga qo'shildi",
+    "guestMergedHint": "Progress va xatcho'plaringiz endi akkauntingizda."
+  },
+  "onboarding": {
+    "title": "maktab365'dan qanday foydalanasiz?",
+    "text": "Bu bir marta so'raladi. Keyin sozlamalarda o'zgartirishingiz mumkin.",
+    "roleLegend": "Siz kimsiz?",
+    "roleStudent": "O'quvchiman",
+    "roleStudentHint": "Mavzularni o'qiyman va mashq qilaman",
+    "roleTeacher": "O'qituvchiman",
+    "roleTeacherHint": "Dars uchun materiallarni qidiraman",
+    "nameLabel": "Ismingiz",
+    "gradeLabel": "Sinfingiz",
+    "gradePlaceholder": "Sinfni tanlang",
+    "gradeOption": "{grade}-sinf",
+    "subjectsLabel": "Qaysi fanlarni o'qitasiz?",
+    "gradesLabel": "Qaysi sinflarda dars berasiz?",
+    "submit": "Davom etish",
+    "saveFailed": "Saqlab bo'lmadi. Qayta urinib ko'ring.",
+    "errors": {
+      "roleRequired": "Rolni tanlang",
+      "nameRequired": "Ismingizni kiriting",
+      "nameTooLong": "Ism 60 belgidan oshmasin",
+      "gradeRequired": "Sinfni tanlang",
+      "subjectsRequired": "Kamida bitta fanni tanlang",
+      "gradesRequired": "Kamida bitta sinfni tanlang"
+    }
+  },
+  "settings": {
+    "title": "Sozlamalar",
+    "profile": "Profil",
+    "save": "Saqlash",
+    "saved": "Sozlamalar saqlandi",
+    "appearance": "Ko'rinish",
+    "language": "Til",
+    "theme": "Mavzu (rang sxemasi)",
+    "textSize": "Matn hajmi",
+    "account": "Akkaunt",
+    "signOut": "Akkauntdan chiqish",
+    "about": {
+      "title": "Loyiha haqida",
+      "text": "maktab365 — 1–11-sinf darsliklarini mavzular bo'yicha o'qish uchun bepul platforma.",
+      "free": "Barcha darsliklar va mashqlar bepul.",
+      "topics": "Har bir mavzu: qoida, yechilgan misol, mashq va xulosa.",
+      "languages": "O'zbek (lotin va kirill), rus va ingliz tillarida."
+    }
+  },
+  "cabinet": {
+    "title": "Kabinet",
+    "greeting": "Salom, {name}!",
+    "lead": "Oxirgi boshlagan mavzuingizni davom ettiring.",
+    "browse": "Darsliklarga o'tish",
+    "loadFailed": "Ma'lumotni yuklab bo'lmadi. Sahifani yangilab ko'ring.",
+    "nav": {
+      "label": "Kabinet bo'limlari",
+      "home": "Bosh sahifa",
+      "subjects": "Fanlarim",
+      "textbooks": "Darsliklar",
+      "results": "Natijalar",
+      "saved": "Saqlanganlar"
+    },
+    "continue": {
+      "title": "{subject} · {topic}",
+      "titleNoSubject": "{topic}",
+      "lastPart": "Oxirgi o'qilgan qism: {part}",
+      "partStart": "mavzuning boshi",
+      "partWithTitle": "{section} — {title}",
+      "partExercise": "{section}, {order}-mashq",
+      "action": "Davom ettirish",
+      "actionLabel": "{topic} mavzusini davom ettirish",
+      "emptyTitle": "Birinchi mavzuni boshlang",
+      "emptyText": "Darslikni tanlab, bitta mavzuni o'qing. Davom ettirish kartochkasi shu yerda paydo bo'ladi.",
+      "doneTitle": "Boshlagan mavzularingiz tugagan",
+      "doneText": "Yangi mavzuni tanlang yoki «Natijalar»da takrorlash kerak mavzularni ko'ring."
+    },
+    "status": {
+      "read": {
+        "none": "Mavzu o'qilmagan",
+        "started": "O'qish boshlangan",
+        "completed": "Mavzuni o'qidim"
+      },
+      "exercise": {
+        "none": "Mashqlar bajarilmagan",
+        "in_progress": "Mashqlar jarayonda",
+        "completed": "Mashqlardan o'tdim"
+      },
+      "mistakes": "{count} ta mashqda xato"
+    },
+    "subjects": {
+      "title": "Mening fanlarim",
+      "pageLead": "{grade}-sinf fanlari va ulardagi o'qish holatingiz.",
+      "empty": "Sinfingizga mos darsliklar hali qo'shilmagan.",
+      "noGrade": "Sinfingiz belgilanmagan. Sozlamalarda sinfni tanlasangiz, shu yerda fanlaringiz chiqadi.",
+      "settings": "Sozlamalarga o'tish",
+      "soon": "Mavzular tez orada",
+      "topicsRead": "{done} / {total} mavzu o'qilgan",
+      "progressLabel": "{title}: o'qilgan mavzular",
+      "all": "Barcha fanlar"
+    },
+    "review": {
+      "title": "Takrorlash kerak",
+      "empty": "Takrorlash kerak mavzu yo'q. Mashqda xato qilsangiz, mavzu shu yerda paydo bo'ladi.",
+      "action": "Mashqlarga o'tish",
+      "all": "Barchasi ({count})"
+    },
+    "saved": {
+      "title": "Saqlanganlar",
+      "empty": "Hali hech narsa saqlamagansiz. Mavzu sahifasidagi xatcho'p tugmasi bilan keyin o'qish uchun saqlang.",
+      "remove": "{topic} — saqlanganlardan olib tashlash",
+      "removeAction": "Olib tashlash",
+      "all": "Barchasi ({count})"
+    },
+    "weekly": {
+      "title": "Haftalik natija",
+      "period": "Oxirgi 7 kun",
+      "finished": "Tugatilgan mavzular",
+      "read": "O'qilgan mavzular",
+      "passed": "Mashqdan o'tilgan mavzular",
+      "mistakes": "Xato qilingan mashqlar",
+      "empty": "Bu hafta hali natija yo'q. Bitta mavzuni o'qib, mashqlarini bajaring.",
+      "more": "Mavzular kesimida ko'rish"
+    },
+    "results": {
+      "title": "Natijalar",
+      "lead": "Mavzular kesimida: nimani yaxshi o'zlashtirdingiz va nimani takrorlash kerak.",
+      "summary": "{mastered} ta yaxshi o'zlashtirilgan · {review} ta takrorlash kerak · {progress} ta jarayonda",
+      "statesNote": "«Mavzuni o'qidim» va «Mashqlardan o'tdim» alohida hisoblanadi.",
+      "mastered": {
+        "title": "Yaxshi o'zlashtirilgan",
+        "text": "Mashqlar xatosiz bajarilgan.",
+        "empty": "Hali yaxshi o'zlashtirilgan mavzu yo'q."
+      },
+      "review": {
+        "title": "Takrorlash kerak",
+        "text": "Mashqlarda xato qilingan.",
+        "empty": "Takrorlash kerak mavzu yo'q."
+      },
+      "inProgress": {
+        "title": "Jarayonda",
+        "text": "Boshlangan, lekin mashqlari tugamagan.",
+        "empty": "Jarayonda mavzu yo'q."
+      },
+      "emptyTitle": "Birinchi mavzuni boshlang",
+      "emptyText": "Natijalar mavzu o'qib, mashq bajargandan keyin shu yerda paydo bo'ladi: nimani yaxshi bilasiz va nimani takrorlash kerak."
+    },
+    "plan": {
+      "title": "O'qish rejasi",
+      "lead": "O'zingiz uchun kichik maqsadlar qo'shing va bajarilganini belgilang.",
+      "listLabel": "Maqsadlar ro'yxati",
+      "fieldLabel": "Yangi maqsad",
+      "placeholder": "Masalan: Viyet teoremasini takrorlash",
+      "add": "Qo'shish",
+      "empty": "Reja bo'sh. Birinchi maqsadni yozing, masalan: bugun bitta mavzu o'qish.",
+      "progress": "{done} / {total} bajarildi",
+      "edit": "Tahrirlash: {title}",
+      "remove": "O'chirish: {title}",
+      "editLabel": "Maqsad matni",
+      "save": "Saqlash",
+      "cancel": "Bekor qilish",
+      "removed": "Maqsad o'chirildi",
+      "failed": "Amalni bajarib bo'lmadi, qayta urinib ko'ring",
+      "errors": {
+        "titleRequired": "Maqsadni yozing",
+        "titleTooLong": "Maqsad 120 belgidan oshmasin"
+      }
+    }
+  },
+  "teacher": {
+    "title": "Ustoz paneli",
+    "greeting": "Salom, {name}!",
+    "lead": "Kerakli materialni tez toping.",
+    "nav": {
+      "label": "Ustoz paneli bo'limlari",
+      "books": "Darsliklar",
+      "topics": "Mavzular",
+      "saved": "Saqlanganlar"
+    },
+    "search": {
+      "label": "Kitob yoki mavzuni qidiring",
+      "placeholder": "Kitob yoki mavzuni qidiring…"
+    },
+    "filter": {
+      "subjects": "Fanlar",
+      "grades": "Sinflar",
+      "reset": "Mening fan va sinflarimga qaytish"
+    },
+    "books": {
+      "title": "Kitoblar",
+      "empty": "Tanlangan fan va sinflar bo'yicha kitob topilmadi.",
+      "clearFilters": "Filtrni tozalash",
+      "loadFailed": "Kitoblarni yuklab bo'lmadi. Sahifani yangilab ko'ring."
+    },
+    "recent": {
+      "title": "Yaqinda ochilgan mavzular",
+      "empty": "Hali mavzu ochmagansiz. Ochgan mavzularingiz shu yerda (shu qurilmada) ko'rinadi."
+    },
+    "saved": {
+      "title": "Saqlangan materiallar",
+      "pageTitle": "Saqlanganlar",
+      "books": "Kitoblar",
+      "topics": "Mavzular",
+      "emptyBooks": "Saqlangan kitob yo'q. Kitob kartochkasidagi «Saqlash» tugmasi bilan qo'shing.",
+      "emptyTopics": "Saqlangan mavzu yo'q. Mavzudagi «Saqlash» yoki xatcho'p tugmasi bilan qo'shing.",
+      "all": "Barcha saqlanganlar"
+    },
+    "results": {
+      "books": "Kitoblar",
+      "topics": "Mavzular",
+      "soon": "Tez orada",
+      "empty": "«{query}» bo'yicha tanlangan fan va sinflarda hech narsa topilmadi.",
+      "hidden": "Filtr tufayli {count} ta natija yashirilgan."
+    },
+    "topicsPage": {
+      "title": "Mavzular",
+      "lead": "Tanlangan fan va sinflardagi mavzular. Tayyor mavzuni ochib, darsda ko'rsating.",
+      "empty": "Tanlangan fan va sinflarda mavzulari tayyor kitob yo'q.",
+      "chapter": "{order}-bob. {title}",
+      "soon": "Tez orada"
+    },
+    "save": {
+      "save": "Saqlash",
+      "saved": "Saqlangan",
+      "saveLabel": "{title} — saqlash",
+      "removeLabel": "{title} — saqlanganlardan olib tashlash",
+      "added": "Saqlandi",
+      "removed": "Saqlanganlardan olib tashlandi",
+      "error": "Amalni bajarib bo'lmadi, qayta urinib ko'ring"
+    }
+  },
+  "panel": {
+    "help": "Yordam",
+    "roleStudent": "O'quvchi",
+    "roleTeacher": "O'qituvchi",
+    "nav": {
+      "main": "Panel menyusi",
+      "mobile": "Panelning pastki menyusi"
+    },
+    "search": {
+      "open": "Qidiruvni ochish",
+      "title": "Qidiruv",
+      "label": "Kitob yoki mavzu qidirish",
+      "placeholder": "Kitob yoki mavzu qidirish",
+      "hint": "Kamida 2 ta harf kiriting. Tez ochish: Ctrl+K yoki /.",
+      "empty": "«{query}» bo'yicha hech narsa topilmadi.",
+      "books": "Darsliklar",
+      "topics": "Mavzular",
+      "soon": "Tez orada"
+    },
+    "helpPage": {
+      "title": "Yordam",
+      "lead": "Savolingiz, taklifingiz bor yoki xatolik topdingizmi? Bizga yozing.",
+      "tipsTitle": "Tezkor maslahatlar",
+      "tips": {
+        "search": "Istalgan sahifada Ctrl+K (yoki /) bosib, kitob va mavzularni tez qidiring.",
+        "bookmarks": "Mavzuni «Saqlash» bilan xatcho'plang — u «Saqlanganlar» bo'limida turadi.",
+        "present": "Mavzu sahifasida F tugmasi «Darsda ko'rsatish» rejimini yoqadi, Esc esa undan chiqaradi.",
+        "progress": "Mavzuni o'qib, mashqlarni yechsangiz, natijalar «Natijalar» bo'limida ko'rinadi."
+      },
+      "formTitle": "Xabar yuborish",
+      "kindLabel": "Xabar turi",
+      "kinds": {
+        "question": "Savol",
+        "idea": "Taklif",
+        "bug": "Xatolik haqida"
+      },
+      "messageLabel": "Xabaringiz",
+      "messageHint": "{min} dan {max} gacha belgi.",
+      "submit": "Yuborish",
+      "sent": "Xabaringiz yuborildi",
+      "sentHint": "Rahmat! Tez orada ko'rib chiqamiz.",
+      "sendFailed": "Yuborib bo'lmadi. Keyinroq qayta urinib ko'ring.",
+      "errors": {
+        "kindRequired": "Xabar turini tanlang",
+        "messageRequired": "Xabarni yozing",
+        "messageTooShort": "Xabar kamida {min} ta belgidan iborat bo'lsin",
+        "messageTooLong": "Xabar {max} ta belgidan oshmasin"
+      }
+    }
+  },
+  "aboutPage": {
+    "title": "Loyiha haqida",
+    "lead": "maktab365 — 1–11-sinf darsliklari mavzular bo'yicha, bepul, o'quvchi va o'qituvchi uchun.",
+    "points": {
+      "free": {
+        "title": "Hammasi bepul",
+        "text": "Darsliklar, mavzular va mashqlar uchun to'lov yo'q."
+      },
+      "topics": {
+        "title": "Mavzular bo'yicha",
+        "text": "Darslik boblarga, boblar qisqa mavzularga bo'lingan: qoida, misol, mashq va xulosa bir joyda."
+      },
+      "roles": {
+        "title": "O'quvchi va o'qituvchi uchun",
+        "text": "O'quvchi progressini kuzatadi, o'qituvchi mavzuni darsda ko'rsatadi va materiallarni saqlaydi."
+      },
+      "languages": {
+        "title": "Bir necha tilda",
+        "text": "O'zbek (lotin va kirill), rus va ingliz tillari."
+      }
+    },
+    "cta": "Darsliklarni ko'rish"
+  },
+  "helpPage": {
+    "title": "Yordam markazi",
+    "lead": "Eng ko'p beriladigan savollarga javoblar.",
+    "signedInHint": "Savolingizga javob topmadingizmi? Kirgandan keyin kabinetdagi «Yordam» bo'limidan bizga yozing."
+  }
+}

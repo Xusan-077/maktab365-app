@@ -1,0 +1,52 @@
+{
+  "name": "maktab365",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "prebuild": "npm run content:validate",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "content:validate": "tsx scripts/validate-content.ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.9.2",
+    "@tanstack/react-query": "^5.104.4",
+    "clsx": "^2.1.1",
+    "framer-motion": "^14.3.0",
+    "katex": "^0.16.22",
+    "lucide-react": "^1.59.0",
+    "next": "16.4.2",
+    "next-auth": "^5.0.0-beta.32",
+    "next-intl": "^4.14.9",
+    "qrcode.react": "^4.2.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-hook-form": "^7.90.0",
+    "tailwind-merge": "^3.7.0",
+    "yup": "^1.7.1",
+    "zustand": "^5.0.15"
+  },
+  "devDependencies": {
+    "@tailwindcss/turbopack": "^4",
+    "@types/katex": "^0.16.8",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.2",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.9.10",
+    "prettier-plugin-tailwindcss": "^0.8.1",
+    "tailwindcss": "^4",
+    "tsx": "^4.23.15",
+    "typescript": "^5",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.5"
+  }
+}

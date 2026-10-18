@@ -1,0 +1,210 @@
+{
+  "status": "draft",
+  "order": 1,
+  "title": {
+    "uz": "Kvadrat tenglama tushunchasi",
+    "ru": "Понятие квадратного уравнения"
+  },
+  "blocks": [
+    {
+      "id": "goal",
+      "type": "goal",
+      "text": {
+        "uz": "Kvadrat tenglama nima ekanini, uning a, b, c koeffitsiyentlarini aniqlashni va tenglamani umumiy ko'rinishga keltirishni o'rganasiz."
+      }
+    },
+    {
+      "id": "explanation-what",
+      "type": "explanation",
+      "title": {
+        "uz": "Kvadrat tenglama nima?"
+      },
+      "text": {
+        "uz": "Noma'lum son kvadrat ko'rinishida (x²) qatnashgan tenglama kvadrat tenglama deyiladi. Masalan, x² − 5x + 6 = 0 yoki 2x² + 3x − 2 = 0. Noma'lumning eng katta darajasi aynan ikkita bo'lishi shart."
+      }
+    },
+    {
+      "id": "explanation-coefficients",
+      "type": "explanation",
+      "title": {
+        "uz": "Koeffitsiyentlar"
+      },
+      "text": {
+        "uz": "Kvadrat tenglama umumiy ko'rinishda ax² + bx + c = 0 shaklida yoziladi. Bunda a — x² oldidagi son, b — x oldidagi son, c — x qatnashmagan had (ozod had). a nolga teng bo'lishi mumkin emas: a = 0 bo'lsa x² yo'qoladi va tenglama chiziqli tenglamaga aylanadi."
+      }
+    },
+    {
+      "id": "explanation-standard-form",
+      "type": "explanation",
+      "title": {
+        "uz": "Umumiy ko'rinishga keltirish"
+      },
+      "text": {
+        "uz": "Koeffitsiyentlarni aniqlashdan oldin barcha hadlarni chap tomonga o'tkazamiz (o'tkazganda ishorasi teskarisiga o'zgaradi), o'ng tomonda esa 0 qoladi. Koeffitsiyentlarni ishorasi bilan yozish muhim: x² − 3x − 4 = 0 da b = −3, c = −4."
+      }
+    },
+    {
+      "id": "rule-general",
+      "type": "rule",
+      "title": {
+        "uz": "Kvadrat tenglamaning umumiy ko'rinishi"
+      },
+      "text": {
+        "uz": "a, b, c — berilgan sonlar, x — noma'lum. Muhim shart: a ≠ 0."
+      },
+      "formula": "ax^2 + bx + c = 0,\\quad a \\neq 0"
+    },
+    {
+      "id": "rule-reduced",
+      "type": "rule",
+      "title": {
+        "uz": "Keltirilgan kvadrat tenglama"
+      },
+      "text": {
+        "uz": "x² oldidagi koeffitsiyent 1 ga teng bo'lsa (a = 1), tenglama keltirilgan deyiladi. Odatda uni x² + px + q = 0 deb yozishadi."
+      },
+      "formula": "x^2 + px + q = 0"
+    },
+    {
+      "id": "example-coefficients",
+      "type": "example",
+      "title": {
+        "uz": "2x² − 7x + 3 = 0 tenglamaning koeffitsiyentlarini aniqlang"
+      },
+      "steps": [
+        {
+          "text": {
+            "uz": "Tenglama allaqachon umumiy ko'rinishda: ax² + bx + c = 0."
+          },
+          "formula": "2x^2 - 7x + 3 = 0"
+        },
+        {
+          "text": {
+            "uz": "x² oldida 2 turibdi, demak a = 2. x oldidagi son ishorasi bilan −7, demak b = −7. Ozod had c = 3."
+          }
+        },
+        {
+          "text": {
+            "uz": "Javob: a = 2, b = −7, c = 3. a ≠ 1, shuning uchun tenglama keltirilgan emas."
+          },
+          "formula": "a = 2,\\quad b = -7,\\quad c = 3"
+        }
+      ]
+    },
+    {
+      "id": "example-standard-form",
+      "type": "example",
+      "title": {
+        "uz": "x² = 3x + 4 tenglamani umumiy ko'rinishga keltiring"
+      },
+      "steps": [
+        {
+          "text": {
+            "uz": "3x va 4 ni chap tomonga o'tkazamiz, ishoralari o'zgaradi."
+          },
+          "formula": "x^2 - 3x - 4 = 0"
+        },
+        {
+          "text": {
+            "uz": "Endi o'ng tomon 0, tenglama umumiy ko'rinishda. a = 1, b = −3, c = −4."
+          },
+          "formula": "a = 1,\\quad b = -3,\\quad c = -4"
+        },
+        {
+          "text": {
+            "uz": "a = 1 bo'lgani uchun bu keltirilgan tenglama: p = −3, q = −4."
+          }
+        }
+      ]
+    },
+    {
+      "id": "exercise-which",
+      "type": "exercise",
+      "answerType": "choice",
+      "question": {
+        "uz": "Quyidagilardan qaysi biri kvadrat tenglama?"
+      },
+      "options": [
+        {
+          "uz": "3x + 5 = 0"
+        },
+        {
+          "uz": "x² − 4x + 1 = 0"
+        },
+        {
+          "uz": "x³ − x = 0"
+        },
+        {
+          "uz": "2x − x = 7"
+        }
+      ],
+      "answer": 1,
+      "hint": {
+        "uz": "Kvadrat tenglamada x ning eng katta darajasi aynan 2 bo'lishi kerak."
+      },
+      "explanation": {
+        "uz": "Faqat x² − 4x + 1 = 0 da x ning eng katta darajasi 2. Qolganlari chiziqli (1-daraja) yoki kubik (3-daraja) tenglama."
+      }
+    },
+    {
+      "id": "exercise-b-coefficient",
+      "type": "exercise",
+      "answerType": "input",
+      "question": {
+        "uz": "5x² − 2x + 8 = 0 tenglamada b koeffitsiyent nechaga teng?"
+      },
+      "answer": ["-2"],
+      "hint": {
+        "uz": "b — x oldidagi son. Uning ishorasini ham yozing."
+      },
+      "explanation": {
+        "uz": "x oldida −2 turibdi, demak b = −2. (a = 5, c = 8.)"
+      }
+    },
+    {
+      "id": "exercise-free-term",
+      "type": "exercise",
+      "answerType": "truefalse",
+      "question": {
+        "uz": "x² + 3x = 0 tenglamada c = 3 ga teng."
+      },
+      "answer": false,
+      "hint": {
+        "uz": "c — x qatnashmagan had. Tenglamada bunday had bormi?"
+      },
+      "explanation": {
+        "uz": "Tenglamada ozod had yo'q, shuning uchun c = 0. 3 esa x oldidagi son, ya'ni b = 3."
+      }
+    },
+    {
+      "id": "exercise-standard-c",
+      "type": "exercise",
+      "answerType": "input",
+      "question": {
+        "uz": "x² = 2x + 5 tenglamani umumiy ko'rinishga keltirib, ozod had c ni toping."
+      },
+      "answer": ["-5"],
+      "hint": {
+        "uz": "2x va 5 ni chap tomonga o'tkazing: ishoralari teskarisiga o'zgaradi."
+      },
+      "explanation": {
+        "uz": "x² − 2x − 5 = 0 hosil bo'ladi, demak c = −5."
+      }
+    },
+    {
+      "id": "summary",
+      "type": "summary",
+      "points": [
+        {
+          "uz": "Kvadrat tenglamaning umumiy ko'rinishi: ax² + bx + c = 0, bunda a ≠ 0."
+        },
+        {
+          "uz": "a — x² oldidagi, b — x oldidagi koeffitsiyent, c — ozod had; ularni ishorasi bilan yozing."
+        },
+        {
+          "uz": "a = 1 bo'lsa, tenglama keltirilgan: x² + px + q = 0."
+        }
+      ]
+    }
+  ]
+}

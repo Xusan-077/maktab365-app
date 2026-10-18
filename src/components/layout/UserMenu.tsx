@@ -1,0 +1,176 @@
+"use client";
+
+import { useEffect, useId, useRef, useState } from "react";
+import { signOut } from "next-auth/react";
+import { LayoutDashboard, LifeBuoy, LogOut, Settings } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { buttonVariants } from "@/components/ui/Button";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { useAppBase } from "@/hooks/useAppBase";
+import { useAuth } from "@/hooks/useAuth";
+import { useMe } from "@/hooks/useMe";
+import { Link } from "@/lib/i18n/navigation";
+import { cn } from "@/lib/utils/cn";
+import { dashboardPath, helpPath, ROUTES } from "@/lib/utils/routes";
+import { SignInButton } from "./SignInButton";
+
+const itemClasses =
+  "hover:bg-subtle flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium";
+
+function initialsOf(name: string) {
+  return (
+    name
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase())
+      .join("") || "?"
+  );
+}
+
+export function Avatar({
+  name,
+  image,
+  className,
+}: {
+  name: string;
+  image?: string | null;
+  className?: string;
+}) {
+  const [failed, setFailed] = useState(false);
+  return image && !failed ? (
+    // Google avatari tashqi domen: next/image uchun remotePatterns kerak bo'lmasligi uchun oddiy <img>.
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={image}
+      alt=""
+      referrerPolicy="no-referrer"
+      onError={() => setFailed(true)}
+      className={cn("size-9 rounded-full object-cover", className)}
+    />
+  ) : (
+    <span
+      aria-hidden
+      className={cn(
+        "bg-primary-soft text-primary-soft-foreground inline-flex size-9 items-center justify-center rounded-full text-sm font-semibold",
+        className,
+      )}
+    >
+      {initialsOf(name)}
+    </span>
+  );
+}
+
+/**
+ * Marketing headerida: "Kirish" (Google) yoki "Kabinetga o'tish" + avatar menyusi.
+ * Panel topbar'ida (`variant="panel"`): avatar menyusi (sozlamalar, yordam, chiqish).
+ */
+export function UserMenu({ variant = "site" }: { variant?: "site" | "panel" }) {
+  const t = useTranslations("auth");
+  const tn = useTranslations("nav");
+  const tp = useTranslations("panel");
+  const locale = useLocale();
+  const base = useAppBase();
+  const { status, sessionUser } = useAuth();
+  const { data: me } = useMe();
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const menuId = useId();
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (event: PointerEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+        buttonRef.current?.focus();
+      }
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
+  if (status === "loading") return <Skeleton className="h-10 w-24" />;
+  if (!sessionUser) return <SignInButton>{tn("login")}</SignInButton>;
+
+  const name = me?.name ?? sessionUser.name ?? sessionUser.email ?? "";
+  const close = () => setOpen(false);
+
+  const panel = variant === "panel";
+  const goTo = me ? dashboardPath(me.role) : me === null ? ROUTES.onboarding : undefined;
+
+  return (
+    <div ref={rootRef} className="relative flex items-center gap-2">
+      {!panel && goTo && (
+        <Link href={goTo} className={buttonVariants({ className: "hidden sm:inline-flex" })}>
+          {me?.role === "teacher" ? tn("goToTeacher") : tn("goToCabinet")}
+        </Link>
+      )}
+      <button
+        ref={buttonRef}
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-controls={menuId}
+        aria-label={t("menuLabel", { name })}
+        onClick={() => setOpen((value) => !value)}
+        className="hover:bg-subtle inline-flex size-10 items-center justify-center rounded-full"
+      >
+        <Avatar name={name} image={sessionUser.image} />
+      </button>
+      {open && (
+        <div
+          id={menuId}
+          role="menu"
+          className="border-border bg-surface absolute right-0 z-50 mt-2 w-64 rounded-xl border p-2 shadow-lg"
+        >
+          <div className="px-3 py-2">
+            <p className="truncate text-sm font-semibold">{name}</p>
+            {sessionUser.email && (
+              <p className="text-muted truncate text-xs">{sessionUser.email}</p>
+            )}
+          </div>
+          <div className="border-border border-t pt-1">
+            {!panel && me && (
+              <Link
+                role="menuitem"
+                href={dashboardPath(me.role)}
+                onClick={close}
+                className={itemClasses}
+              >
+                <LayoutDashboard className="size-4" aria-hidden />
+                {me.role === "teacher" ? t("teacherPanel") : t("cabinet")}
+              </Link>
+            )}
+            {panel && base !== "marketing" && (
+              <Link role="menuitem" href={helpPath(base)} onClick={close} className={itemClasses}>
+                <LifeBuoy className="size-4" aria-hidden />
+                {tp("help")}
+              </Link>
+            )}
+            <Link role="menuitem" href={ROUTES.settings} onClick={close} className={itemClasses}>
+              <Settings className="size-4" aria-hidden />
+              {t("settings")}
+            </Link>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => void signOut({ redirectTo: `/${locale}` })}
+              className={itemClasses}
+            >
+              <LogOut className="size-4" aria-hidden />
+              {t("signOut")}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

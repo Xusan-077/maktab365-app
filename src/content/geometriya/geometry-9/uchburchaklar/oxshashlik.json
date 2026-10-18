@@ -1,0 +1,205 @@
+{
+  "status": "draft",
+  "order": 3,
+  "title": {
+    "uz": "Uchburchaklarning o'xshashligi",
+    "ru": "Подобие треугольников"
+  },
+  "blocks": [
+    {
+      "id": "goal",
+      "type": "goal",
+      "text": {
+        "uz": "O'xshash uchburchaklarni taniysiz, o'xshashlik alomatlarini bilib olasiz va o'xshashlik koeffitsiyenti yordamida tomonlar, perimetr va yuzni solishtirasiz."
+      }
+    },
+    {
+      "id": "explanation-definition",
+      "type": "explanation",
+      "title": {
+        "uz": "O'xshash uchburchaklar"
+      },
+      "text": {
+        "uz": "Ikki uchburchakning mos burchaklari teng, mos tomonlari esa proporsional bo'lsa, ular o'xshash deyiladi. O'xshash uchburchaklar shakli bir xil, lekin o'lchami har xil bo'lishi mumkin — masalan, rasmning kattalashtirilgan nusxasi kabi."
+      }
+    },
+    {
+      "id": "explanation-coefficient",
+      "type": "explanation",
+      "title": {
+        "uz": "O'xshashlik koeffitsiyenti"
+      },
+      "text": {
+        "uz": "Mos tomonlar nisbati bir xil songa teng, bu son o'xshashlik koeffitsiyenti deyiladi va k bilan belgilanadi. Mos tomonlarni to'g'ri juftlash uchun teng burchaklar qarshisidagi tomonlarni olamiz."
+      }
+    },
+    {
+      "id": "explanation-criteria",
+      "type": "explanation",
+      "title": {
+        "uz": "O'xshashlik alomatlari"
+      },
+      "text": {
+        "uz": "Uchburchaklar o'xshashligini barcha burchak va tomonlarni tekshirmasdan ham aniqlash mumkin. Buning uchta alomati bor: ikki burchagi bo'yicha (ikki burchagi mos ravishda teng); ikki tomoni va ular orasidagi burchagi bo'yicha (tomonlari proporsional, orasidagi burchaklar teng); uch tomoni bo'yicha (uch juft mos tomon proporsional)."
+      }
+    },
+    {
+      "id": "rule-ratio",
+      "type": "rule",
+      "title": {
+        "uz": "Mos tomonlar nisbati"
+      },
+      "text": {
+        "uz": "ΔABC va ΔA₁B₁C₁ o'xshash bo'lsa, mos tomonlar nisbati bir xil k ga teng. Perimetrlar nisbati ham k ga teng."
+      },
+      "formula": "\\frac{AB}{A_1B_1} = \\frac{BC}{B_1C_1} = \\frac{AC}{A_1C_1} = k"
+    },
+    {
+      "id": "rule-area",
+      "type": "rule",
+      "title": {
+        "uz": "Yuzlar nisbati"
+      },
+      "text": {
+        "uz": "O'xshash uchburchaklar yuzlarining nisbati o'xshashlik koeffitsiyentining kvadratiga teng."
+      },
+      "formula": "\\frac{S_{ABC}}{S_{A_1B_1C_1}} = k^2"
+    },
+    {
+      "id": "example-sides",
+      "type": "example",
+      "title": {
+        "uz": "ΔABC ning tomonlari 4, 6, 8. O'xshash ΔA₁B₁C₁ ning eng kichik tomoni 6. Qolgan tomonlarini toping"
+      },
+      "steps": [
+        {
+          "text": {
+            "uz": "Eng kichik tomonlar o'zaro mos: 4 va 6. O'xshashlik koeffitsiyenti:"
+          },
+          "formula": "k = \\frac{6}{4} = 1{,}5"
+        },
+        {
+          "text": {
+            "uz": "Qolgan mos tomonlarni k ga ko'paytiramiz."
+          },
+          "formula": "6 \\cdot 1{,}5 = 9,\\quad 8 \\cdot 1{,}5 = 12"
+        },
+        {
+          "text": {
+            "uz": "Javob: 9 va 12. Tekshiruv: perimetrlar 18 va 27, nisbati 27 : 18 = 1,5 = k."
+          }
+        }
+      ]
+    },
+    {
+      "id": "example-area",
+      "type": "example",
+      "title": {
+        "uz": "O'xshashlik koeffitsiyenti 3, kichik uchburchakning yuzi 4 sm². Katta uchburchakning yuzini toping"
+      },
+      "steps": [
+        {
+          "text": {
+            "uz": "Yuzlar nisbati k² ga teng."
+          },
+          "formula": "k^2 = 3^2 = 9"
+        },
+        {
+          "text": {
+            "uz": "Katta uchburchakning yuzi kichigidan 9 marta katta."
+          },
+          "formula": "S = 4 \\cdot 9 = 36\\ \\text{sm}^2"
+        }
+      ]
+    },
+    {
+      "id": "exercise-angles",
+      "type": "exercise",
+      "answerType": "choice",
+      "question": {
+        "uz": "ΔABC ning ikki burchagi 40° va 80°, ΔMNK ning ikki burchagi 80° va 60°. Ular o'xshashmi?"
+      },
+      "options": [
+        {
+          "uz": "Ha, burchaklari mos ravishda teng"
+        },
+        {
+          "uz": "Yo'q, burchaklari turlicha"
+        },
+        {
+          "uz": "Ma'lumot yetarli emas"
+        },
+        {
+          "uz": "Faqat tomonlari berilsa aniqlanadi"
+        }
+      ],
+      "answer": 0,
+      "hint": {
+        "uz": "Har ikkala uchburchakda uchinchi burchakni toping."
+      },
+      "explanation": {
+        "uz": "ΔABC da uchinchi burchak 60°, ΔMNK da 40°. Ikkalasida ham burchaklar 40°, 60°, 80°, demak ular ikki burchak alomati bo'yicha o'xshash."
+      }
+    },
+    {
+      "id": "exercise-perimeter",
+      "type": "exercise",
+      "answerType": "input",
+      "question": {
+        "uz": "O'xshashlik koeffitsiyenti 2, kichik uchburchakning perimetri 9 sm. Katta uchburchakning perimetri necha santimetr?"
+      },
+      "answer": ["18"],
+      "hint": {
+        "uz": "Perimetrlar nisbati ham k ga teng."
+      },
+      "explanation": {
+        "uz": "Katta uchburchakning perimetri 9 · 2 = 18 sm."
+      }
+    },
+    {
+      "id": "exercise-area-ratio",
+      "type": "exercise",
+      "answerType": "input",
+      "question": {
+        "uz": "O'xshashlik koeffitsiyenti 5 bo'lsa, yuzlar nisbati nechaga teng?"
+      },
+      "answer": ["25"],
+      "hint": {
+        "uz": "Yuzlar nisbati k² ga teng."
+      },
+      "explanation": {
+        "uz": "k² = 5² = 25."
+      }
+    },
+    {
+      "id": "exercise-area-is-k",
+      "type": "exercise",
+      "answerType": "truefalse",
+      "question": {
+        "uz": "O'xshash uchburchaklar yuzlarining nisbati o'xshashlik koeffitsiyentiga teng."
+      },
+      "answer": false,
+      "hint": {
+        "uz": "Yuz — ikki o'lchamli kattalik. Uzunlik k marta o'zgarsa, yuz necha marta o'zgaradi?"
+      },
+      "explanation": {
+        "uz": "Yuzlar nisbati k ga emas, k² ga teng. Tomonlar 2 marta katta bo'lsa, yuz 4 marta katta bo'ladi."
+      }
+    },
+    {
+      "id": "summary",
+      "type": "summary",
+      "points": [
+        {
+          "uz": "O'xshash uchburchaklarda mos burchaklar teng, mos tomonlar proporsional (nisbati k)."
+        },
+        {
+          "uz": "Alomatlar: ikki burchak bo'yicha, ikki tomon va orasidagi burchak bo'yicha, uch tomon bo'yicha."
+        },
+        {
+          "uz": "Perimetrlar nisbati k ga, yuzlar nisbati k² ga teng."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,195 @@
+{
+  "status": "draft",
+  "order": 2,
+  "title": {
+    "uz": "Sayohat lug'ati",
+    "ru": "Лексика о путешествиях",
+    "en": "Travel vocabulary"
+  },
+  "blocks": [
+    {
+      "id": "goal",
+      "type": "goal",
+      "text": {
+        "uz": "Sayohatga oid asosiy so'zlarni (passport, luggage, ticket, delay…) o'rganasiz va travel, trip, journey so'zlarini farqlashni mashq qilasiz."
+      }
+    },
+    {
+      "id": "explanation-airport",
+      "type": "explanation",
+      "title": {
+        "uz": "Aeroportda kerak bo'ladigan so'zlar"
+      },
+      "text": {
+        "uz": "Sayohatda eng ko'p uchraydigan so'zlar: passport (pasport), ticket (chipta), boarding pass (bortga chiqish talon), luggage yoki baggage (yuk), flight (reys), gate (chiqish eshigi), departure (jo'nab ketish), arrival (yetib kelish), delay (kechikish). Bu so'zlarni aeroport e'lonlari va chipta ustida uchratasiz."
+      }
+    },
+    {
+      "id": "explanation-travel-trip-journey",
+      "type": "explanation",
+      "title": {
+        "uz": "Travel, trip va journey"
+      },
+      "text": {
+        "uz": "Bu uch so'z o'zbekchada deyarli bir xil — «sayohat» — deb tarjima qilinadi, lekin inglizchada ishlatilishi farq qiladi. Travel — umuman sayohat qilish jarayoni (travel is fun). Trip — qisqa borib-qaytish safari (a trip to Bukhara). Journey — bir joydan ikkinchi joyga bo'lgan yo'l, ko'pincha uzunroq (a long journey by train)."
+      }
+    },
+    {
+      "id": "explanation-luggage",
+      "type": "explanation",
+      "title": {
+        "uz": "Luggage — sanalmaydigan ot"
+      },
+      "text": {
+        "uz": "Luggage va baggage sanalmaydigan otlar: ularga -s qo'shilmaydi va a/an bilan ishlatilmaydi. Biz some luggage, a lot of luggage deymiz. Donasini aytish kerak bo'lsa, a piece of luggage yoki a bag deymiz."
+      }
+    },
+    {
+      "id": "rule-countable",
+      "type": "rule",
+      "title": {
+        "uz": "Sanaladigan va sanalmaydigan otlar"
+      },
+      "text": {
+        "uz": "Trip va journey sanaladi: a trip, two journeys. Travel va luggage sanalmaydi: some travel, a lot of luggage. Sanalmaydigan otlardan keyin fe'l birlikda keladi: My luggage is heavy."
+      }
+    },
+    {
+      "id": "rule-check-in",
+      "type": "rule",
+      "title": {
+        "uz": "Foydali iboralar"
+      },
+      "text": {
+        "uz": "Check in — ro'yxatdan o'tish; board a plane — samolyotga chiqish; miss a flight — reysga kech qolish; book a ticket — chipta band qilish; pack a suitcase — yuk yig'ish."
+      }
+    },
+    {
+      "id": "example-check-in",
+      "type": "example",
+      "title": {
+        "uz": "Ro'yxatdan o'tish stoykasida"
+      },
+      "steps": [
+        {
+          "text": {
+            "uz": "Xodim hujjatlarni so'raydi: «May I see your passport and ticket, please?» — «Pasport va chiptangizni ko'rsam bo'ladimi?»"
+          }
+        },
+        {
+          "text": {
+            "uz": "Yo'lovchi yukni topshiradi: «I have one suitcase to check in.» — «Topshiradigan bitta chemodanim bor.»"
+          }
+        },
+        {
+          "text": {
+            "uz": "Xodim gate haqida aytadi: «Your flight leaves from gate 12.» — «Reysingiz 12-eshikdan jo'naydi.»"
+          }
+        }
+      ]
+    },
+    {
+      "id": "exercise-luggage",
+      "type": "exercise",
+      "answerType": "choice",
+      "question": {
+        "uz": "Choose the correct sentence."
+      },
+      "options": [
+        {
+          "uz": "I lost my luggages at the airport."
+        },
+        {
+          "uz": "I lost my luggage at the airport."
+        },
+        {
+          "uz": "I lost my a luggage at the airport."
+        },
+        {
+          "uz": "I lost many luggages at the airport."
+        }
+      ],
+      "answer": 1,
+      "hint": {
+        "uz": "Luggage — sanalmaydigan ot: ko'plik -s va a/an olmaydi."
+      },
+      "explanation": {
+        "uz": "To'g'ri variant: I lost my luggage at the airport. Luggage sanalmaydi, shuning uchun luggages deb bo'lmaydi."
+      }
+    },
+    {
+      "id": "exercise-passport",
+      "type": "exercise",
+      "answerType": "input",
+      "question": {
+        "uz": "Write the missing word: You must show your ___ at passport control."
+      },
+      "answer": ["passport"],
+      "hint": {
+        "uz": "Chet elga chiqishda ko'rsatiladigan hujjat; p harfidan boshlanadi."
+      },
+      "explanation": {
+        "uz": "Passport control — pasport nazorati, u yerda passport ko'rsatiladi."
+      }
+    },
+    {
+      "id": "exercise-travel-countable",
+      "type": "exercise",
+      "answerType": "truefalse",
+      "question": {
+        "uz": "The sentence “I went on two travels last year.” is correct."
+      },
+      "answer": false,
+      "hint": {
+        "uz": "Travel sanaladigan otmi? Qisqa safar uchun qaysi so'z mos?"
+      },
+      "explanation": {
+        "uz": "Travel sanalmaydi. To'g'risi: I went on two trips last year."
+      }
+    },
+    {
+      "id": "exercise-journey",
+      "type": "exercise",
+      "answerType": "choice",
+      "question": {
+        "uz": "Choose the best word: The ___ from Tashkent to Khiva by train took almost a whole day."
+      },
+      "options": [
+        {
+          "uz": "travel"
+        },
+        {
+          "uz": "journey"
+        },
+        {
+          "uz": "luggage"
+        },
+        {
+          "uz": "delay"
+        }
+      ],
+      "answer": 1,
+      "hint": {
+        "uz": "Bir joydan boshqa joyga uzoq yo'l haqida gap ketyapti."
+      },
+      "explanation": {
+        "uz": "Journey — bir joydan ikkinchisiga bo'lgan yo'l. Travel bu yerda mos kelmaydi: «the travel» deyilmaydi."
+      }
+    },
+    {
+      "id": "summary",
+      "type": "summary",
+      "points": [
+        {
+          "uz": "Asosiy so'zlar: passport, ticket, boarding pass, luggage, flight, gate, departure, arrival, delay."
+        },
+        {
+          "uz": "Travel — umumiy sayohat (sanalmaydi); trip — qisqa safar; journey — yo'l."
+        },
+        {
+          "uz": "Luggage sanalmaydi: some luggage, a piece of luggage."
+        }
+      ]
+    }
+  ]
+}

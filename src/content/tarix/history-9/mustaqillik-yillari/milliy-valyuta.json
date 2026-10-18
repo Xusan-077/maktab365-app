@@ -1,0 +1,240 @@
+{
+  "status": "draft",
+  "order": 3,
+  "title": {
+    "uz": "Milliy valyuta va iqtisodiy mustaqillik"
+  },
+  "notes": [
+    "TODO: darslikdan tekshirish — So'm-kupon muomalaga kiritilgan sana (15-noyabr 1993) va so'mga o'tish sanasi (1-iyul 1994) — aniq sanalar tasdiqlansin.",
+    "TODO: darslikdan tekshirish — So'm-kupondan so'mga almashtirish kursi va tartibi (matnga kiritilmagan, ishonch yo'q).",
+    "TODO: darslikdan tekshirish — Mustaqillikdan keyingi dastlabki iqtisodiy islohotlar: narxlarni erkinlashtirish sanasi va boshqa tadbirlar (matnga kiritilmagan).",
+    "TODO: darslikdan tekshirish — Pul islohotini amalga oshirgan organ(lar) va qaror/farmonning rasmiy nomi («Kim?» qismi umumiy yozilgan).",
+    "TODO: darslikdan tekshirish — O'zbekistonning rubl zonasidan chiqish sharoitlari va sabablarining darslikdagi talqini."
+  ],
+  "blocks": [
+    {
+      "id": "goal",
+      "type": "goal",
+      "text": {
+        "uz": "Milliy valyuta nima uchun iqtisodiy mustaqillikning muhim belgisi ekanini, so'm qanday joriy etilganini va pul bilan bog'liq asosiy tushunchalarni bilib olasiz."
+      }
+    },
+    {
+      "id": "explanation-currency",
+      "type": "explanation",
+      "title": {
+        "uz": "Valyuta nima?"
+      },
+      "text": {
+        "uz": "Valyuta — mamlakatning pul birligi. Sovet davrida O'zbekistonda ham, boshqa respublikalarda ham bitta umumiy pul — rubl ishlatilgan. Mustaqillikdan keyin ham rubl bir muddat muomalada qoldi, ammo mamlakat o'z iqtisodiyotini mustaqil boshqarishi uchun o'z pul birligiga ehtiyoj bor edi."
+      }
+    },
+    {
+      "id": "explanation-introduction",
+      "type": "explanation",
+      "title": {
+        "uz": "So'm joriy etilishi"
+      },
+      "text": {
+        "uz": "1993-yil 15-noyabrda muomalaga so'm-kupon kiritildi, 1994-yil 1-iyulda esa milliy valyuta — so'm joriy etildi. Milliy valyutaga o'tish O'zbekistonga o'z pul-kredit siyosatini mustaqil yuritish imkonini berdi."
+      }
+    },
+    {
+      "id": "explanation-inflation",
+      "type": "explanation",
+      "title": {
+        "uz": "Inflyatsiya"
+      },
+      "text": {
+        "uz": "Inflyatsiya — narxlarning umumiy o'sishi va natijada pulning qadrsizlanishi. Milliy valyutani joriy etishdan maqsadlardan biri pul muomalasini tartibga solish va narxlarning keskin o'sishiga qarshi kurashishdir."
+      }
+    },
+    {
+      "id": "rule-concepts",
+      "type": "rule",
+      "title": {
+        "uz": "Asosiy sanalar va tushunchalar"
+      },
+      "text": {
+        "uz": "Sanalar: 1991-yil 31-avgust — siyosiy mustaqillik; 1993-yil 15-noyabr — so'm-kupon; 1994-yil 1-iyul — so'm. Tushunchalar: valyuta — mamlakatning pul birligi; milliy valyuta — davlatning o'z pul birligi; inflyatsiya — narxlarning umumiy o'sishi va pulning qadrsizlanishi; iqtisodiy mustaqillik — davlatning iqtisodiy qarorlarni o'zi qabul qilishi."
+      }
+    },
+    {
+      "id": "widget-timeline",
+      "type": "widget",
+      "kind": "timeline",
+      "props": {
+        "events": [
+          {
+            "id": "mustaqillik",
+            "sortKey": 19910831,
+            "date": {
+              "uz": "1991-yil 31-avgust"
+            },
+            "title": {
+              "uz": "Siyosiy mustaqillik"
+            },
+            "description": {
+              "uz": "O'zbekiston mustaqilligi e'lon qilindi. Iqtisodiy mustaqillikka erishish keyingi vazifa bo'ldi."
+            }
+          },
+          {
+            "id": "som-kupon",
+            "sortKey": 19931115,
+            "date": {
+              "uz": "1993-yil 15-noyabr"
+            },
+            "title": {
+              "uz": "So'm-kupon muomalaga kiritildi"
+            },
+            "description": {
+              "uz": "Rubl o'rniga o'tish davri pul birligi — so'm-kupon joriy etildi."
+            }
+          },
+          {
+            "id": "som",
+            "sortKey": 19940701,
+            "date": {
+              "uz": "1994-yil 1-iyul"
+            },
+            "title": {
+              "uz": "So'm joriy etildi"
+            },
+            "description": {
+              "uz": "O'zbekistonning milliy valyutasi — so'm muomalaga kiritildi."
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "example-analysis",
+      "type": "example",
+      "title": {
+        "uz": "Manba tahlili: milliy valyutaning joriy etilishi"
+      },
+      "steps": [
+        {
+          "text": {
+            "uz": "Kim? Qarorni O'zbekiston davlat rahbariyati va hukumati qabul qildi."
+          }
+        },
+        {
+          "text": {
+            "uz": "Qachon? Avval 1993-yil 15-noyabrda so'm-kupon, so'ng 1994-yil 1-iyulda so'm."
+          }
+        },
+        {
+          "text": {
+            "uz": "Nega? O'z pul-kredit siyosatini mustaqil yuritish, pul muomalasini tartibga solish va iqtisodiy mustaqillikni mustahkamlash uchun."
+          }
+        },
+        {
+          "text": {
+            "uz": "Natijasi nima? Mamlakat o'z milliy valyutasiga ega bo'ldi; so'm O'zbekiston iqtisodiy mustaqilligining muhim belgisiga aylandi."
+          }
+        }
+      ]
+    },
+    {
+      "id": "exercise-sequence",
+      "type": "exercise",
+      "answerType": "order",
+      "question": {
+        "uz": "Voqealarni sanasi bo'yicha eng avvalgisidan boshlab tartibga qo'ying."
+      },
+      "items": [
+        {
+          "uz": "So'm joriy etildi"
+        },
+        {
+          "uz": "Mustaqillik Bayonoti qabul qilindi"
+        },
+        {
+          "uz": "So'm-kupon muomalaga kiritildi"
+        }
+      ],
+      "answer": [1, 2, 0],
+      "hint": {
+        "uz": "Siyosiy mustaqillik pul islohotidan oldin bo'lgan; so'm-kupon so'mdan oldin kiritilgan."
+      },
+      "explanation": {
+        "uz": "To'g'ri tartib: Mustaqillik Bayonoti (1991), so'm-kupon (1993-yil 15-noyabr), so'm (1994-yil 1-iyul)."
+      }
+    },
+    {
+      "id": "exercise-year",
+      "type": "exercise",
+      "answerType": "choice",
+      "question": {
+        "uz": "Milliy valyuta — so'm qaysi yilda joriy etildi?"
+      },
+      "options": [
+        {
+          "uz": "1991-yil"
+        },
+        {
+          "uz": "1992-yil"
+        },
+        {
+          "uz": "1994-yil"
+        },
+        {
+          "uz": "1996-yil"
+        }
+      ],
+      "answer": 2,
+      "hint": {
+        "uz": "So'm-kupondan keyin, 1994-yilning yozida."
+      },
+      "explanation": {
+        "uz": "So'm 1994-yil 1-iyulda muomalaga kiritildi."
+      }
+    },
+    {
+      "id": "exercise-inflation",
+      "type": "exercise",
+      "answerType": "truefalse",
+      "question": {
+        "uz": "Inflyatsiya — narxlarning umumiy o'sishi va pulning qadrsizlanishi."
+      },
+      "answer": true,
+      "hint": {
+        "uz": "So'zning ma'nosini darsdagi ta'rif bilan solishtiring."
+      },
+      "explanation": {
+        "uz": "To'g'ri: inflyatsiya narxlarning umumiy o'sishi va pulning qadrsizlanishini bildiradi."
+      }
+    },
+    {
+      "id": "exercise-som-year",
+      "type": "exercise",
+      "answerType": "input",
+      "question": {
+        "uz": "So'm qaysi yilda muomalaga kiritilgan? (faqat yilni yozing)"
+      },
+      "answer": ["1994"],
+      "hint": {
+        "uz": "So'm-kupon 1993-yilda kiritilgan, so'm esa undan keyin."
+      },
+      "explanation": {
+        "uz": "So'm 1994-yil 1-iyulda joriy etilgan."
+      }
+    },
+    {
+      "id": "summary",
+      "type": "summary",
+      "points": [
+        {
+          "uz": "Valyuta — mamlakatning pul birligi; milliy valyuta iqtisodiy mustaqillikning muhim belgisi."
+        },
+        {
+          "uz": "1993-yil 15-noyabrda so'm-kupon, 1994-yil 1-iyulda so'm joriy etildi."
+        },
+        {
+          "uz": "Inflyatsiya — narxlarning umumiy o'sishi va pulning qadrsizlanishi."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,250 @@
+{
+  "status": "draft",
+  "order": 4,
+  "title": {
+    "uz": "Viyet teoremasi",
+    "ru": "Теорема Виета",
+    "en": "Vieta's theorem"
+  },
+  "blocks": [
+    {
+      "id": "goal",
+      "type": "goal",
+      "text": {
+        "uz": "Kvadrat tenglama ildizlari bilan koeffitsiyentlari orasidagi bog'lanishni o'rganasiz va ildizlarni diskriminantsiz, tez topishni mashq qilasiz.",
+        "ru": "Вы узнаете связь между корнями квадратного уравнения и его коэффициентами и научитесь быстро находить корни без дискриминанта.",
+        "en": "You will learn how the roots of a quadratic equation relate to its coefficients and practise finding roots quickly, without the discriminant."
+      }
+    },
+    {
+      "id": "explanation-roots",
+      "type": "explanation",
+      "title": {
+        "uz": "Ildizlar orqali yozamiz",
+        "ru": "Запишем через корни",
+        "en": "Write it through the roots"
+      },
+      "text": {
+        "uz": "x² + px + q = 0 keltirilgan kvadrat tenglama ikkita x₁ va x₂ ildizga ega bo'lsin. Unda uni ko'paytuvchilarga ajratish mumkin: x² + px + q = (x − x₁)(x − x₂).",
+        "ru": "Пусть приведённое квадратное уравнение x² + px + q = 0 имеет два корня x₁ и x₂. Тогда его можно разложить на множители: x² + px + q = (x − x₁)(x − x₂).",
+        "en": "Suppose the reduced quadratic equation x² + px + q = 0 has two roots, x₁ and x₂. Then it factors as x² + px + q = (x − x₁)(x − x₂)."
+      }
+    },
+    {
+      "id": "explanation-expand",
+      "type": "explanation",
+      "title": {
+        "uz": "Qavslarni ochamiz",
+        "ru": "Раскроем скобки",
+        "en": "Expand the brackets"
+      },
+      "text": {
+        "uz": "O'ng tomondagi qavslarni ochsak: (x − x₁)(x − x₂) = x² − (x₁ + x₂)x + x₁x₂. Endi ikki tomonda ham x² ning oldida 1 turibdi, qolgan koeffitsiyentlarni solishtirish mumkin.",
+        "ru": "Раскрыв скобки справа, получаем (x − x₁)(x − x₂) = x² − (x₁ + x₂)x + x₁x₂. Теперь можно сравнить остальные коэффициенты.",
+        "en": "Expanding the right-hand side gives (x − x₁)(x − x₂) = x² − (x₁ + x₂)x + x₁x₂. Now we can compare the remaining coefficients."
+      }
+    },
+    {
+      "id": "explanation-compare",
+      "type": "explanation",
+      "title": {
+        "uz": "Koeffitsiyentlarni solishtiramiz",
+        "ru": "Сравним коэффициенты",
+        "en": "Compare the coefficients"
+      },
+      "text": {
+        "uz": "x ning oldidagi koeffitsiyentlar teng: p = −(x₁ + x₂). Ozod hadlar teng: q = x₁x₂. Mana, ildizlar bilan p va q orasidagi bog'lanish.",
+        "ru": "Коэффициенты при x равны: p = −(x₁ + x₂). Свободные члены равны: q = x₁x₂. Это и есть связь корней с p и q.",
+        "en": "The coefficients of x match: p = −(x₁ + x₂). The constant terms match: q = x₁x₂. That is the link between the roots and p, q."
+      }
+    },
+    {
+      "id": "rule-reduced",
+      "type": "rule",
+      "title": {
+        "uz": "Viyet teoremasi",
+        "ru": "Теорема Виета",
+        "en": "Vieta's theorem"
+      },
+      "text": {
+        "uz": "x² + px + q = 0 tenglama ildizlarining yig'indisi qarama-qarshi ishora bilan olingan p ga, ko'paytmasi esa q ga teng.",
+        "ru": "Сумма корней уравнения x² + px + q = 0 равна −p, а произведение корней равно q.",
+        "en": "For x² + px + q = 0, the sum of the roots equals −p and their product equals q."
+      },
+      "formula": "x_1 + x_2 = -p,\\quad x_1 \\cdot x_2 = q"
+    },
+    {
+      "id": "rule-general",
+      "type": "rule",
+      "title": {
+        "uz": "Umumiy ko'rinish",
+        "ru": "Общий вид",
+        "en": "General form"
+      },
+      "text": {
+        "uz": "ax² + bx + c = 0 (a ≠ 0) tenglama uchun ham xuddi shunday: ildizlar yig'indisi −b/a ga, ko'paytmasi c/a ga teng.",
+        "ru": "Для уравнения ax² + bx + c = 0 (a ≠ 0): сумма корней равна −b/a, произведение равно c/a.",
+        "en": "For ax² + bx + c = 0 (a ≠ 0): the sum of the roots is −b/a and the product is c/a."
+      },
+      "formula": "x_1 + x_2 = -\\frac{b}{a},\\quad x_1 \\cdot x_2 = \\frac{c}{a}"
+    },
+    {
+      "id": "widget-graph",
+      "type": "widget",
+      "kind": "quadratic-graph",
+      "props": {
+        "a": 1,
+        "b": -5,
+        "c": 6
+      }
+    },
+    {
+      "id": "example-positive",
+      "type": "example",
+      "title": {
+        "uz": "x² − 5x + 6 = 0 tenglamaning ildizlarini toping",
+        "ru": "Найдите корни уравнения x² − 5x + 6 = 0",
+        "en": "Find the roots of x² − 5x + 6 = 0"
+      },
+      "steps": [
+        {
+          "text": {
+            "uz": "Koeffitsiyentlarni aniqlaymiz."
+          },
+          "formula": "p = -5,\\quad q = 6"
+        },
+        {
+          "text": {
+            "uz": "Viyet teoremasi bo'yicha yig'indi va ko'paytmani yozamiz."
+          },
+          "formula": "x_1 + x_2 = 5,\\quad x_1 \\cdot x_2 = 6"
+        },
+        {
+          "text": {
+            "uz": "Yig'indisi 5, ko'paytmasi 6 bo'lgan ikki sonni tanlaymiz: 2 va 3."
+          }
+        },
+        {
+          "text": {
+            "uz": "Tekshiramiz: 2 + 3 = 5 va 2 · 3 = 6. Javob: x₁ = 2, x₂ = 3."
+          },
+          "formula": "x_1 = 2,\\quad x_2 = 3"
+        }
+      ]
+    },
+    {
+      "id": "example-negative",
+      "type": "example",
+      "title": {
+        "uz": "x² + 3x − 10 = 0 tenglamaning ildizlarini toping"
+      },
+      "steps": [
+        {
+          "text": {
+            "uz": "Koeffitsiyentlarni aniqlaymiz."
+          },
+          "formula": "p = 3,\\quad q = -10"
+        },
+        {
+          "text": {
+            "uz": "Yig'indi va ko'paytma:"
+          },
+          "formula": "x_1 + x_2 = -3,\\quad x_1 \\cdot x_2 = -10"
+        },
+        {
+          "text": {
+            "uz": "Ko'paytma manfiy, demak ildizlar turli ishorali. Ko'paytmasi −10 bo'lgan juftliklardan yig'indisi −3 chiqadiganini tanlaymiz: −5 va 2."
+          }
+        },
+        {
+          "text": {
+            "uz": "Tekshiruv: −5 + 2 = −3, (−5) · 2 = −10. Javob: x₁ = −5, x₂ = 2."
+          },
+          "formula": "x_1 = -5,\\quad x_2 = 2"
+        }
+      ]
+    },
+    {
+      "id": "exercise-sum",
+      "type": "exercise",
+      "answerType": "choice",
+      "question": {
+        "uz": "x² − 7x + 12 = 0 tenglama ildizlarining yig'indisi nechaga teng?",
+        "ru": "Чему равна сумма корней уравнения x² − 7x + 12 = 0?",
+        "en": "What is the sum of the roots of x² − 7x + 12 = 0?"
+      },
+      "options": [
+        {
+          "uz": "7"
+        },
+        {
+          "uz": "−7"
+        },
+        {
+          "uz": "12"
+        },
+        {
+          "uz": "−12"
+        }
+      ],
+      "answer": 0,
+      "hint": {
+        "uz": "Yig'indi −p ga teng."
+      },
+      "explanation": {
+        "uz": "Bu yerda p = −7, shuning uchun x₁ + x₂ = −(−7) = 7."
+      }
+    },
+    {
+      "id": "exercise-second-root",
+      "type": "exercise",
+      "answerType": "input",
+      "question": {
+        "uz": "x² + 2x − 15 = 0 tenglamaning ildizlaridan biri 3 ga teng. Ikkinchi ildizni toping."
+      },
+      "answer": ["-5", "−5"],
+      "hint": {
+        "uz": "Avval ildizlar yig'indisini −p orqali toping."
+      },
+      "explanation": {
+        "uz": "x₁ + x₂ = −2 bo'lgani uchun x₂ = −2 − 3 = −5. Tekshiruv: 3 · (−5) = −15 = q."
+      }
+    },
+    {
+      "id": "exercise-truefalse",
+      "type": "exercise",
+      "answerType": "truefalse",
+      "question": {
+        "uz": "x² + 5x + 6 = 0 tenglama ildizlarining yig'indisi 5 ga teng."
+      },
+      "answer": false,
+      "hint": {
+        "uz": "Yig'indi p emas, −p ga teng."
+      },
+      "explanation": {
+        "uz": "Yig'indi −p = −5 (ildizlar −2 va −3). Shuning uchun fikr noto'g'ri."
+      }
+    },
+    {
+      "id": "summary",
+      "type": "summary",
+      "points": [
+        {
+          "uz": "x² + px + q = 0 uchun x₁ + x₂ = −p va x₁ · x₂ = q.",
+          "ru": "Для x² + px + q = 0: x₁ + x₂ = −p и x₁ · x₂ = q.",
+          "en": "For x² + px + q = 0: x₁ + x₂ = −p and x₁ · x₂ = q."
+        },
+        {
+          "uz": "ax² + bx + c = 0 uchun x₁ + x₂ = −b/a va x₁ · x₂ = c/a.",
+          "ru": "Для ax² + bx + c = 0: x₁ + x₂ = −b/a и x₁ · x₂ = c/a.",
+          "en": "For ax² + bx + c = 0: x₁ + x₂ = −b/a and x₁ · x₂ = c/a."
+        },
+        {
+          "uz": "Ildizlarni topishda yig'indi va ko'paytmaga mos ikki sonni tanlash tez usul.",
+          "ru": "Корни быстро находятся подбором двух чисел по сумме и произведению.",
+          "en": "A quick way to find roots is to pick two numbers that match the sum and product."
+        }
+      ]
+    }
+  ]
+}

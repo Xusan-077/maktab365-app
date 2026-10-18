@@ -1,0 +1,224 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+/* "Darsda ko'rsatish" rejimi (o'qituvchi): <html data-present="true"> ichidagi elementlar. */
+@custom-variant present (&:where(html[data-present="true"] *));
+
+/* Statik shkalalar: primary (ko'k) va accent (och sariq). */
+@theme {
+  --color-primary-50: #eff6ff;
+  --color-primary-100: #dbeafe;
+  --color-primary-200: #bfdbfe;
+  --color-primary-300: #93c5fd;
+  --color-primary-400: #60a5fa;
+  --color-primary-500: #3b82f6;
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+  --color-primary-800: #1e40af;
+  --color-primary-900: #1e3a8a;
+  --color-primary: var(--color-primary-500);
+
+  --color-accent-50: #fefce8;
+  --color-accent-100: #fef9c3;
+  --color-accent-200: #fef08a;
+  --color-accent-300: #fde047;
+  --color-accent-400: #facc15;
+  --color-accent-500: #eab308;
+  --color-accent: var(--color-accent-300);
+  --color-on-accent: #422006;
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+
+  --shadow-xs: 0 1px 2px 0 rgb(15 23 42 / 0.05);
+  --shadow-sm: 0 1px 3px 0 rgb(15 23 42 / 0.07), 0 1px 2px -1px rgb(15 23 42 / 0.05);
+  --shadow-md: 0 4px 12px -2px rgb(15 23 42 / 0.08), 0 2px 4px -2px rgb(15 23 42 / 0.05);
+  --shadow-lg: 0 12px 28px -6px rgb(15 23 42 / 0.14), 0 4px 8px -4px rgb(15 23 42 / 0.08);
+}
+
+/* Tema bo'yicha o'zgaradigan semantik tokenlar (CSS o'zgaruvchilar orqali). */
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-subtle: var(--subtle);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --color-link: var(--link);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-soft-foreground: var(--primary-soft-foreground);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-soft-foreground: var(--accent-soft-foreground);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-success-soft-foreground: var(--success-soft-foreground);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-soft-foreground: var(--danger-soft-foreground);
+
+  --font-sans:
+    var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+:root {
+  color-scheme: light;
+  --background: #f8fafc;
+  --surface: #ffffff;
+  --subtle: #f1f5f9;
+  --foreground: #0f172a;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --ring: #3b82f6;
+  --link: #1d4ed8;
+  --primary-soft: #eff6ff;
+  --primary-soft-foreground: #1d4ed8;
+  --accent-soft: #fef9c3;
+  --accent-soft-foreground: #713f12;
+  --success: #15803d;
+  --success-soft: #dcfce7;
+  --success-soft-foreground: #166534;
+  --danger: #dc2626;
+  --danger-soft: #fee2e2;
+  --danger-soft-foreground: #991b1b;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #0b1120;
+  --surface: #111a2e;
+  --subtle: #1a2540;
+  --foreground: #e8edf6;
+  --muted: #94a3b8;
+  --border: #263248;
+  --ring: #60a5fa;
+  --link: #8dbafc;
+  --primary-soft: #14264d;
+  --primary-soft-foreground: #93c5fd;
+  --accent-soft: #3a3210;
+  --accent-soft-foreground: #fde047;
+  --success: #4ade80;
+  --success-soft: #12301f;
+  --success-soft-foreground: #86efac;
+  --danger: #f87171;
+  --danger-soft: #3b1518;
+  --danger-soft-foreground: #fca5a5;
+}
+
+/* Matn hajmi: S / M / L (rem asosida, hamma narsa mutanosib o'zgaradi). */
+html {
+  font-size: 16px;
+  scroll-padding-top: 5rem;
+}
+html[data-text-size="s"] {
+  font-size: 14.5px;
+}
+html[data-text-size="m"] {
+  font-size: 16px;
+}
+html[data-text-size="l"] {
+  font-size: 18px;
+}
+
+/* Darsda ko'rsatish: proyektor uchun matn va formulalar kattalashadi (ekran kengligiga qarab). */
+html[data-present="true"][data-text-size] {
+  font-size: clamp(20px, 0.9vw + 14px, 34px);
+  scroll-padding-top: 1rem;
+}
+html[data-present="true"] .katex {
+  font-size: 1.4em;
+}
+html[data-present="true"] body {
+  padding-bottom: 0;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+body:has(dialog[open]) {
+  overflow: hidden;
+}
+
+@keyframes ui-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes ui-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+@keyframes ui-slide-up {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+dialog[open] {
+  animation: ui-pop-in 0.18s ease-out;
+}
+dialog[open][data-placement="bottom"] {
+  animation: ui-slide-up 0.22s ease-out;
+}
+dialog[open]::backdrop {
+  animation: ui-fade-in 0.18s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Chop etish: faqat mavzu mazmuni, oq fon va qora matn, qoidalar rangi saqlanadi. */
+@media print {
+  /* Tanlab chop etish: tanlanmagan bo'limlar chiqmaydi. */
+  [data-print-hidden] {
+    display: none !important;
+  }
+  :root,
+  :root[data-theme="dark"] {
+    color-scheme: light;
+    --background: #ffffff;
+    --surface: #ffffff;
+    --subtle: #f1f5f9;
+    --foreground: #0f172a;
+    --muted: #475569;
+    --border: #cbd5e1;
+    --link: #0f172a;
+    --primary-soft: #eff6ff;
+    --primary-soft-foreground: #1d4ed8;
+    --accent-soft: #fef9c3;
+    --accent-soft-foreground: #713f12;
+    --success-soft: #dcfce7;
+    --success-soft-foreground: #166534;
+    --danger-soft: #fee2e2;
+    --danger-soft-foreground: #991b1b;
+  }
+  html {
+    font-size: 14px !important;
+  }
+  body {
+    padding-bottom: 0 !important;
+    background: #ffffff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  h2,
+  h3 {
+    break-after: avoid;
+  }
+}

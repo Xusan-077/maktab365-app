@@ -1,0 +1,225 @@
+{
+  "status": "draft",
+  "order": 2,
+  "title": {
+    "uz": "Pifagor teoremasi",
+    "ru": "Теорема Пифагора",
+    "en": "Pythagorean theorem"
+  },
+  "blocks": [
+    {
+      "id": "goal",
+      "type": "goal",
+      "text": {
+        "uz": "To'g'ri burchakli uchburchakda tomonlar orasidagi bog'lanishni — Pifagor teoremasini — bilib olasiz va uni noma'lum tomonni topishda qo'llaysiz."
+      }
+    },
+    {
+      "id": "explanation-parts",
+      "type": "explanation",
+      "title": {
+        "uz": "Katet va gipotenuza"
+      },
+      "text": {
+        "uz": "To'g'ri burchakli uchburchakda to'g'ri burchak qarshisidagi tomon gipotenuza deyiladi, u eng uzun tomon. To'g'ri burchakni hosil qiluvchi ikki tomon esa katetlar deyiladi."
+      }
+    },
+    {
+      "id": "explanation-theorem",
+      "type": "explanation",
+      "title": {
+        "uz": "Teorema nima deydi?"
+      },
+      "text": {
+        "uz": "To'g'ri burchakli uchburchakda katetlar kvadratlarining yig'indisi gipotenuza kvadratiga teng. Katetlarni a va b, gipotenuzani c bilan belgilasak, a² + b² = c². Bu bog'lanish orqali ikki tomon ma'lum bo'lsa, uchinchisini topish mumkin."
+      }
+    },
+    {
+      "id": "explanation-converse",
+      "type": "explanation",
+      "title": {
+        "uz": "Teskari teorema"
+      },
+      "text": {
+        "uz": "Teskarisi ham to'g'ri: agar uchburchakda eng uzun tomon kvadrati qolgan ikki tomon kvadratlari yig'indisiga teng bo'lsa, uchburchak to'g'ri burchakli. Masalan, tomonlari 3, 4, 5 bo'lgan uchburchak shunday: 9 + 16 = 25. Bunday uchta son Pifagor uchligi deyiladi; yana biri — 5, 12, 13."
+      }
+    },
+    {
+      "id": "rule-pythagoras",
+      "type": "rule",
+      "title": {
+        "uz": "Pifagor teoremasi"
+      },
+      "text": {
+        "uz": "a va b — katetlar, c — gipotenuza."
+      },
+      "formula": "a^2 + b^2 = c^2"
+    },
+    {
+      "id": "rule-find-side",
+      "type": "rule",
+      "title": {
+        "uz": "Noma'lum tomonni topish"
+      },
+      "text": {
+        "uz": "Gipotenuza katetlardan topiladi, kateti esa gipotenuza va ikkinchi katetdan."
+      },
+      "formula": "c = \\sqrt{a^2 + b^2},\\quad a = \\sqrt{c^2 - b^2}"
+    },
+    {
+      "id": "widget-points",
+      "type": "widget",
+      "kind": "geometry-points",
+      "props": {
+        "points": [
+          {
+            "label": "A",
+            "x": 1,
+            "y": 1
+          },
+          {
+            "label": "B",
+            "x": 5,
+            "y": 1
+          },
+          {
+            "label": "C",
+            "x": 1,
+            "y": 4
+          }
+        ]
+      }
+    },
+    {
+      "id": "example-hypotenuse",
+      "type": "example",
+      "title": {
+        "uz": "Katetlari 6 va 8 bo'lgan to'g'ri burchakli uchburchakning gipotenuzasini toping"
+      },
+      "steps": [
+        {
+          "text": {
+            "uz": "Teorema bo'yicha c² = a² + b²."
+          },
+          "formula": "c^2 = 6^2 + 8^2 = 36 + 64 = 100"
+        },
+        {
+          "text": {
+            "uz": "Kvadrati 100 bo'lgan musbat son — 10."
+          },
+          "formula": "c = \\sqrt{100} = 10"
+        }
+      ]
+    },
+    {
+      "id": "example-leg",
+      "type": "example",
+      "title": {
+        "uz": "Gipotenuzasi 13, bir kateti 5 bo'lgan to'g'ri burchakli uchburchakning ikkinchi katetini toping"
+      },
+      "steps": [
+        {
+          "text": {
+            "uz": "Ikkinchi katetni b deb olsak, b² = c² − a²."
+          },
+          "formula": "b^2 = 13^2 - 5^2 = 169 - 25 = 144"
+        },
+        {
+          "text": {
+            "uz": "Kvadrati 144 bo'lgan musbat son — 12."
+          },
+          "formula": "b = \\sqrt{144} = 12"
+        }
+      ]
+    },
+    {
+      "id": "exercise-hypotenuse",
+      "type": "exercise",
+      "answerType": "input",
+      "question": {
+        "uz": "Katetlari 9 va 12 bo'lgan to'g'ri burchakli uchburchakning gipotenuzasini toping."
+      },
+      "answer": ["15"],
+      "hint": {
+        "uz": "c² = 9² + 12² ni hisoblang, keyin ildiz oling."
+      },
+      "explanation": {
+        "uz": "c² = 81 + 144 = 225, c = 15."
+      }
+    },
+    {
+      "id": "exercise-triple",
+      "type": "exercise",
+      "answerType": "choice",
+      "question": {
+        "uz": "Qaysi uchta son to'g'ri burchakli uchburchakning tomonlari bo'la oladi?"
+      },
+      "options": [
+        {
+          "uz": "2, 3, 4"
+        },
+        {
+          "uz": "5, 12, 13"
+        },
+        {
+          "uz": "6, 7, 8"
+        },
+        {
+          "uz": "4, 5, 7"
+        }
+      ],
+      "answer": 1,
+      "hint": {
+        "uz": "Eng katta sonning kvadratini qolgan ikkitasi kvadratlari yig'indisi bilan solishtiring."
+      },
+      "explanation": {
+        "uz": "5² + 12² = 25 + 144 = 169 = 13². Boshqa uchliklarda tenglik bajarilmaydi (masalan, 2² + 3² = 13 ≠ 16)."
+      }
+    },
+    {
+      "id": "exercise-longest",
+      "type": "exercise",
+      "answerType": "truefalse",
+      "question": {
+        "uz": "Gipotenuza to'g'ri burchakli uchburchakning eng uzun tomoni."
+      },
+      "answer": true,
+      "hint": {
+        "uz": "c² = a² + b² dan c² har bir kateti kvadratidan katta ekanini ko'ring."
+      },
+      "explanation": {
+        "uz": "c² = a² + b² > a² va c² > b², demak c > a va c > b: gipotenuza eng uzun tomon."
+      }
+    },
+    {
+      "id": "exercise-leg",
+      "type": "exercise",
+      "answerType": "input",
+      "question": {
+        "uz": "Gipotenuzasi 10, bir kateti 6 bo'lgan to'g'ri burchakli uchburchakning ikkinchi katetini toping."
+      },
+      "answer": ["8"],
+      "hint": {
+        "uz": "b² = c² − a² formulasidan foydalaning."
+      },
+      "explanation": {
+        "uz": "b² = 100 − 36 = 64, b = 8."
+      }
+    },
+    {
+      "id": "summary",
+      "type": "summary",
+      "points": [
+        {
+          "uz": "To'g'ri burchakli uchburchakda a² + b² = c² (c — gipotenuza, eng uzun tomon)."
+        },
+        {
+          "uz": "Ikki tomon ma'lum bo'lsa, uchinchisini shu formuladan topamiz."
+        },
+        {
+          "uz": "Eng uzun tomon kvadrati qolganlari kvadratlari yig'indisiga teng bo'lsa, uchburchak to'g'ri burchakli."
+        }
+      ]
+    }
+  ]
+}

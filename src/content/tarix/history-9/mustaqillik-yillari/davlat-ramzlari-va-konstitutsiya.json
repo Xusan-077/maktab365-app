@@ -1,0 +1,277 @@
+{
+  "status": "draft",
+  "order": 2,
+  "title": {
+    "uz": "Davlat ramzlari va Konstitutsiya"
+  },
+  "notes": [
+    "TODO: darslikdan tekshirish — Davlat bayrog'i ranglari va yulduzlar ramziy ma'nolarining darslikdagi talqini (matnga kiritilmagan).",
+    "TODO: darslikdan tekshirish — Davlat gerbi tasviri tafsilotlari (matnda faqat Humo qushi qayd etilgan) va qabul qilingan sessiya.",
+    "TODO: darslikdan tekshirish — Konstitutsiyaning tuzilishi: bo'lim, bob va moddalar soni (matnga kiritilmagan, ishonch yo'q); qabul qilgan sessiya raqami.",
+    "TODO: darslikdan tekshirish — Davlat madhiyasi matni va musiqasi mualliflari (Abdulla Oripov, Mutal Burhonov) — imlo va ism-sharifni darslik bilan solishtirish.",
+    "TODO: darslikdan tekshirish — «Nega?» qismidagi talqin (Sovet davri Konstitutsiyasi yangi sharoitga mos kelmasligi) darslikka moslashtirilsin.",
+    "TODO: darslikdan tekshirish — BMTga a'zo bo'lish sanasi (2-mart 1992) va O'zbekiston bilan birga qabul qilingan davlatlar — tasdiqlash."
+  ],
+  "blocks": [
+    {
+      "id": "goal",
+      "type": "goal",
+      "text": {
+        "uz": "O'zbekiston davlat ramzlari — bayroq, gerb, madhiya — qachon qabul qilinganini, Konstitutsiya nima uchun muhimligini va 1991–1992-yillardagi asosiy sanalar tartibini bilib olasiz."
+      }
+    },
+    {
+      "id": "explanation-symbols",
+      "type": "explanation",
+      "title": {
+        "uz": "Davlat ramzlari nima?"
+      },
+      "text": {
+        "uz": "Davlat ramzlari — mamlakatning rasmiy belgilari: davlat bayrog'i, davlat gerbi va davlat madhiyasi. Ular davlat mustaqilligi va suverenitetini ifodalaydi. O'zbekiston bu ramzlarni mustaqillikning dastlabki yillarida qabul qildi."
+      }
+    },
+    {
+      "id": "explanation-flag-emblem",
+      "type": "explanation",
+      "title": {
+        "uz": "Bayroq va gerb"
+      },
+      "text": {
+        "uz": "Davlat bayrog'i 1991-yil 18-noyabrda qabul qilingan; unda yarim oy va 12 ta yulduz tasvirlangan. Davlat gerbi 1992-yil 2-iyulda qabul qilingan; gerb markazida Humo qushi tasvirlangan."
+      }
+    },
+    {
+      "id": "explanation-constitution",
+      "type": "explanation",
+      "title": {
+        "uz": "Konstitutsiya"
+      },
+      "text": {
+        "uz": "Konstitutsiya — davlatning asosiy qonuni. U davlat tuzilishini, hokimiyat organlarining vakolatlarini va fuqarolarning huquq va burchlarini belgilaydi. O'zbekiston Respublikasi Konstitutsiyasi 1992-yil 8-dekabrda qabul qilingan; bu kun Konstitutsiya kuni sifatida nishonlanadi. Konstitutsiyaga ko'ra O'zbekiston suveren demokratik respublika."
+      }
+    },
+    {
+      "id": "explanation-anthem",
+      "type": "explanation",
+      "title": {
+        "uz": "Madhiya va xalqaro maydon"
+      },
+      "text": {
+        "uz": "Davlat madhiyasi 1992-yil 10-dekabrda qabul qilingan; uning matni Abdulla Oripov qalamiga, musiqasi Mutal Burhonov asariga mansub. 1992-yil 2-martda O'zbekiston Birlashgan Millatlar Tashkilotiga a'zo bo'ldi — bu mustaqil davlat sifatida xalqaro tan olinishning muhim bosqichi edi."
+      }
+    },
+    {
+      "id": "rule-concepts",
+      "type": "rule",
+      "title": {
+        "uz": "Asosiy sanalar va tushunchalar"
+      },
+      "text": {
+        "uz": "Sanalar: 1991-yil 18-noyabr — bayroq; 1992-yil 2-mart — BMTga a'zolik; 1992-yil 2-iyul — gerb; 1992-yil 8-dekabr — Konstitutsiya; 1992-yil 10-dekabr — madhiya. Tushunchalar: suverenitet — davlatning o'z hududida va tashqi aloqalarda mustaqil oliy hokimiyati; Konstitutsiya — davlatning asosiy qonuni; madhiya — davlatning rasmiy qo'shig'i."
+      }
+    },
+    {
+      "id": "widget-timeline",
+      "type": "widget",
+      "kind": "timeline",
+      "props": {
+        "events": [
+          {
+            "id": "bayroq",
+            "sortKey": 19911118,
+            "date": {
+              "uz": "1991-yil 18-noyabr"
+            },
+            "title": {
+              "uz": "Davlat bayrog'i qabul qilindi"
+            },
+            "description": {
+              "uz": "Bayroqda yarim oy va 12 ta yulduz tasvirlangan."
+            }
+          },
+          {
+            "id": "bmt",
+            "sortKey": 19920302,
+            "date": {
+              "uz": "1992-yil 2-mart"
+            },
+            "title": {
+              "uz": "BMTga a'zo bo'lish"
+            },
+            "description": {
+              "uz": "O'zbekiston Birlashgan Millatlar Tashkilotiga a'zo bo'ldi."
+            }
+          },
+          {
+            "id": "gerb",
+            "sortKey": 19920702,
+            "date": {
+              "uz": "1992-yil 2-iyul"
+            },
+            "title": {
+              "uz": "Davlat gerbi qabul qilindi"
+            },
+            "description": {
+              "uz": "Gerb markazida Humo qushi tasvirlangan."
+            }
+          },
+          {
+            "id": "konstitutsiya",
+            "sortKey": 19921208,
+            "date": {
+              "uz": "1992-yil 8-dekabr"
+            },
+            "title": {
+              "uz": "Konstitutsiya qabul qilindi"
+            },
+            "description": {
+              "uz": "O'zbekiston Respublikasining asosiy qonuni qabul qilindi; bu kun Konstitutsiya kuni sifatida nishonlanadi."
+            }
+          },
+          {
+            "id": "madhiya",
+            "sortKey": 19921210,
+            "date": {
+              "uz": "1992-yil 10-dekabr"
+            },
+            "title": {
+              "uz": "Davlat madhiyasi qabul qilindi"
+            },
+            "description": {
+              "uz": "Madhiya matni Abdulla Oripov, musiqasi Mutal Burhonov asari."
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "example-analysis",
+      "type": "example",
+      "title": {
+        "uz": "Manba tahlili: 1992-yil 8-dekabrda Konstitutsiyaning qabul qilinishi"
+      },
+      "steps": [
+        {
+          "text": {
+            "uz": "Kim? Konstitutsiyani O'zbekiston Respublikasi Oliy Kengashi qabul qildi."
+          }
+        },
+        {
+          "text": {
+            "uz": "Qachon? 1992-yil 8-dekabr."
+          }
+        },
+        {
+          "text": {
+            "uz": "Nega? Mustaqil davlatga o'zining asosiy qonuni kerak edi: Sovet davrida qabul qilingan Konstitutsiya yangi sharoitga mos kelmasdi."
+          }
+        },
+        {
+          "text": {
+            "uz": "Natijasi nima? Davlat tuzilishi, hokimiyatning bo'linishi va fuqarolarning huquqlari yagona asosiy qonunda mustahkamlandi; 8-dekabr Konstitutsiya kuniga aylandi."
+          }
+        }
+      ]
+    },
+    {
+      "id": "exercise-sequence",
+      "type": "exercise",
+      "answerType": "order",
+      "question": {
+        "uz": "Voqealarni sanasi bo'yicha eng avvalgisidan boshlab tartibga qo'ying."
+      },
+      "items": [
+        {
+          "uz": "Konstitutsiya qabul qilindi"
+        },
+        {
+          "uz": "Davlat bayrog'i qabul qilindi"
+        },
+        {
+          "uz": "Davlat gerbi qabul qilindi"
+        }
+      ],
+      "answer": [1, 2, 0],
+      "hint": {
+        "uz": "Bayroq 1991-yilda, qolgan ikkitasi 1992-yilda qabul qilingan; 1992-yilda gerb yozda, Konstitutsiya esa dekabrda."
+      },
+      "explanation": {
+        "uz": "To'g'ri tartib: bayroq (1991-yil 18-noyabr), gerb (1992-yil 2-iyul), Konstitutsiya (1992-yil 8-dekabr)."
+      }
+    },
+    {
+      "id": "exercise-constitution-day",
+      "type": "exercise",
+      "answerType": "choice",
+      "question": {
+        "uz": "Konstitutsiya qabul qilingan kun qaysi sana?"
+      },
+      "options": [
+        {
+          "uz": "8-dekabr"
+        },
+        {
+          "uz": "31-avgust"
+        },
+        {
+          "uz": "2-iyul"
+        },
+        {
+          "uz": "18-noyabr"
+        }
+      ],
+      "answer": 0,
+      "hint": {
+        "uz": "Konstitutsiya kuni — yilning oxirgi oyida."
+      },
+      "explanation": {
+        "uz": "Konstitutsiya 1992-yil 8-dekabrda qabul qilingan va shu kuni Konstitutsiya kuni nishonlanadi."
+      }
+    },
+    {
+      "id": "exercise-flag",
+      "type": "exercise",
+      "answerType": "truefalse",
+      "question": {
+        "uz": "Davlat bayrog'i 1991-yil 18-noyabrda qabul qilingan."
+      },
+      "answer": true,
+      "hint": {
+        "uz": "Bayroq mustaqillik e'lon qilingandan keyin, 1991-yilning kuzida qabul qilingan."
+      },
+      "explanation": {
+        "uz": "To'g'ri: bayroq 1991-yil 18-noyabrda qabul qilingan."
+      }
+    },
+    {
+      "id": "exercise-anthem-author",
+      "type": "exercise",
+      "answerType": "input",
+      "question": {
+        "uz": "Davlat madhiyasi matnining muallifi kim? (familiyasini yozing)"
+      },
+      "answer": ["Oripov", "Abdulla Oripov"],
+      "hint": {
+        "uz": "U mashhur o'zbek shoiri, ismi Abdulla."
+      },
+      "explanation": {
+        "uz": "Madhiya matni shoir Abdulla Oripov qalamiga mansub."
+      }
+    },
+    {
+      "id": "summary",
+      "type": "summary",
+      "points": [
+        {
+          "uz": "Davlat ramzlari: bayroq (1991-yil 18-noyabr), gerb (1992-yil 2-iyul), madhiya (1992-yil 10-dekabr)."
+        },
+        {
+          "uz": "Konstitutsiya — asosiy qonun, 1992-yil 8-dekabrda qabul qilingan."
+        },
+        {
+          "uz": "1992-yil 2-martda O'zbekiston BMTga a'zo bo'ldi."
+        }
+      ]
+    }
+  ]
+}

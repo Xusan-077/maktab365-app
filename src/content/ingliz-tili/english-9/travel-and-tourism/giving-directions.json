@@ -1,0 +1,198 @@
+{
+  "status": "draft",
+  "order": 3,
+  "title": {
+    "uz": "Yo'nalish so'rash va ko'rsatish",
+    "ru": "Как спросить дорогу",
+    "en": "Giving directions"
+  },
+  "blocks": [
+    {
+      "id": "goal",
+      "type": "goal",
+      "text": {
+        "uz": "Begona shaharda yo'lni so'rashni va yo'nalish ko'rsatishni, joylashuvni bildiruvchi predloglardan foydalanishni o'rganasiz."
+      }
+    },
+    {
+      "id": "explanation-asking",
+      "type": "explanation",
+      "title": {
+        "uz": "Yo'lni qanday so'raymiz?"
+      },
+      "text": {
+        "uz": "Muloyim so'rash uchun Excuse me bilan boshlaymiz: Excuse me, how do I get to the museum? yoki Could you tell me the way to the station? Bu iboralar «Qanday borsam bo'ladi?» degan ma'noni beradi."
+      }
+    },
+    {
+      "id": "explanation-giving",
+      "type": "explanation",
+      "title": {
+        "uz": "Yo'nalishni qanday ko'rsatamiz?"
+      },
+      "text": {
+        "uz": "Yo'nalishni buyruq gaplar bilan beramiz: fe'l oddiy shaklda keladi. Go straight on (to'g'ri yuring), turn left / turn right (chapga / o'ngga buriling), take the second turning on the left (chapdagi ikkinchi burilishga kiring), cross the bridge (ko'prikdan o'ting)."
+      }
+    },
+    {
+      "id": "explanation-places",
+      "type": "explanation",
+      "title": {
+        "uz": "Joylashuvni aytish"
+      },
+      "text": {
+        "uz": "Manzilni aniqlash uchun predloglardan foydalanamiz: next to (yonida), opposite (qarshisida), between (ikki narsa orasida), behind (orqasida), on the corner (burchakda), at the traffic lights (svetoforda). Masalan: The museum is opposite the bank."
+      }
+    },
+    {
+      "id": "rule-imperative",
+      "type": "rule",
+      "title": {
+        "uz": "Yo'nalish berish: buyruq gap"
+      },
+      "text": {
+        "uz": "Fe'lning oddiy shakli ishlatiladi, ega kerak emas; inkor uchun Don't qo'shiladi."
+      },
+      "formula": "\\text{Go / Turn / Take / Cross} + \\text{place or direction}"
+    },
+    {
+      "id": "rule-prepositions",
+      "type": "rule",
+      "title": {
+        "uz": "Joylashuv predloglari"
+      },
+      "text": {
+        "uz": "between — ikki narsa orasida; next to — yonida; opposite — qarshisida; behind — orqasida; in front of — oldida. Behind bilan of ishlatilmaydi, in front of esa of bilan keladi."
+      }
+    },
+    {
+      "id": "example-route",
+      "type": "example",
+      "title": {
+        "uz": "Bekatdan muzeyga yo'l"
+      },
+      "steps": [
+        {
+          "text": {
+            "uz": "So'rash: «Excuse me, how do I get to the museum?»"
+          }
+        },
+        {
+          "text": {
+            "uz": "Javob: «Go straight on and turn left at the traffic lights.» — to'g'ri yuring va svetoforda chapga buriling."
+          }
+        },
+        {
+          "text": {
+            "uz": "Davomi: «Take the second turning on the right. The museum is opposite the bank.» — o'ngdagi ikkinchi burilishga kiring; muzey bankning qarshisida."
+          }
+        }
+      ]
+    },
+    {
+      "id": "widget-between",
+      "type": "widget",
+      "kind": "choice-explain",
+      "props": {
+        "prompt": "The museum is ___ the bank and the post office.",
+        "options": [
+          {
+            "text": "between",
+            "correct": true,
+            "reason": {
+              "uz": "To'g'ri: ikki bino orasidagi joylashuvni between bildiradi."
+            }
+          },
+          {
+            "text": "among",
+            "correct": false,
+            "reason": {
+              "uz": "Among odatda uch va undan ko'p narsa orasida ishlatiladi. Bu yerda ikkita bino bor."
+            }
+          },
+          {
+            "text": "behind of",
+            "correct": false,
+            "reason": {
+              "uz": "Behind bilan of ishlatilmaydi; bundan tashqari, ma'no ham mos emas: gap «orasida» haqida."
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "exercise-turn",
+      "type": "exercise",
+      "answerType": "choice",
+      "question": {
+        "uz": "Choose the correct direction: ___ left at the traffic lights."
+      },
+      "options": [
+        {
+          "uz": "Turns"
+        },
+        {
+          "uz": "Turn"
+        },
+        {
+          "uz": "Turning"
+        },
+        {
+          "uz": "To turn"
+        }
+      ],
+      "answer": 1,
+      "hint": {
+        "uz": "Yo'nalish buyruq gap bilan beriladi: fe'l qanday shaklda?"
+      },
+      "explanation": {
+        "uz": "Buyruq gapda fe'lning oddiy shakli ishlatiladi: Turn left at the traffic lights."
+      }
+    },
+    {
+      "id": "exercise-preposition",
+      "type": "exercise",
+      "answerType": "input",
+      "question": {
+        "uz": "Write the missing word: The café is ___ the cinema, on the other side of the street. (qarshisida)"
+      },
+      "answer": ["opposite", "opposite to"],
+      "hint": {
+        "uz": "o harfidan boshlanadigan, «qarshisida» ma'nosidagi predlog."
+      },
+      "explanation": {
+        "uz": "Opposite — qarshisida. Opposite the cinema = kinoteatrning qarshisida."
+      }
+    },
+    {
+      "id": "exercise-front-of",
+      "type": "exercise",
+      "answerType": "truefalse",
+      "question": {
+        "uz": "The sentence “The bank is in front the station.” is correct."
+      },
+      "answer": false,
+      "hint": {
+        "uz": "In front predlogi qanday so'z bilan to'liq bo'ladi?"
+      },
+      "explanation": {
+        "uz": "To'g'risi: in front of the station. In front har doim of bilan keladi."
+      }
+    },
+    {
+      "id": "summary",
+      "type": "summary",
+      "points": [
+        {
+          "uz": "Yo'lni so'rash: Excuse me, how do I get to…? / Could you tell me the way to…?"
+        },
+        {
+          "uz": "Yo'nalish buyruq gap bilan beriladi: Go straight on, Turn left, Take the second turning…"
+        },
+        {
+          "uz": "Joylashuv: next to, opposite, between, behind, in front of, on the corner."
+        }
+      ]
+    }
+  ]
+}
