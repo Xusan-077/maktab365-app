@@ -11,6 +11,7 @@ import { HeroSection } from "@/components/home/HeroSection";
 import { HowItWorks } from "@/components/home/HowItWorks";
 import { TopicAnatomy } from "@/components/home/TopicAnatomy";
 import { HydrateQueries } from "@/components/layout/HydrateQueries";
+import { SplashScreen } from "@/components/layout/SplashScreen";
 import { apiQueries } from "@/lib/api/queries";
 import { routing } from "@/lib/i18n/routing";
 import { getAlternates } from "@/lib/i18n/seo";
@@ -29,6 +30,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
 
   return (
     <>
+      <SplashScreen />
       <HeroSection />
       {/* useSearchParams (?grade=) uchun Suspense kerak; katalog server'da prefetch qilinadi */}
       <Suspense fallback={<GradeExplorerSkeleton />}>

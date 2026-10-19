@@ -12,7 +12,7 @@ import type { UserRole } from "@/types/user";
 export function GateSkeleton() {
   const t = useTranslations("auth");
   return (
-    <div role="status" className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-4 py-10">
+    <div role="status" className="mx-auto flex w-full max-w-5xl flex-col gap-4 px-4 py-10 sm:px-6">
       <span className="sr-only">{t("loading")}</span>
       <Skeleton className="h-9 w-2/3" />
       <Skeleton className="h-40 w-full" />

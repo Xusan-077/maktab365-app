@@ -275,7 +275,11 @@
     "selectSubmit": "Validate",
     "selectPlaceholder": "Choose",
     "selectOption": "Option {n}",
-    "selectDisabledOption": "Third option (disabled)"
+    "selectDisabledOption": "Third option (disabled)",
+    "splash": "Splash (intro animation)",
+    "splashReset": "Show splash again",
+    "splashResetDone": "Done. Fully reload the home page.",
+    "splashResetFailed": "Couldn't write to browser storage"
   },
   "catalog": {
     "meta": {

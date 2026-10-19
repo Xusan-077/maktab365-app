@@ -11,7 +11,9 @@ import { Toaster } from "@/components/ui/Toast";
 import { routing } from "@/lib/i18n/routing";
 import { SITE_URL } from "@/lib/i18n/seo";
 import { PREFERENCES_INIT_SCRIPT } from "@/lib/utils/preferences";
+import { SPLASH_INIT_SCRIPT } from "@/lib/utils/splash";
 import "../globals.css";
+import "../splash.css";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -48,6 +50,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[lo
     <html lang={locale} className={`${inter.variable} h-full`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: PREFERENCES_INIT_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: SPLASH_INIT_SCRIPT }} />
       </head>
       <body className="bg-background text-foreground min-h-full font-sans antialiased">
         <NextIntlClientProvider locale={locale}>

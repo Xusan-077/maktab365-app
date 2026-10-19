@@ -13,6 +13,7 @@ import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Tabs } from "@/components/ui/Tabs";
 import { useToast } from "@/hooks/useToast";
+import { SPLASH_STORAGE_KEY } from "@/lib/utils/splash";
 import { SelectDemos } from "./SelectDemos";
 
 const PRIMARY_SHADES = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900] as const;
@@ -110,6 +111,24 @@ export function UiShowcase() {
 
       <Section title={t("selects")}>
         <SelectDemos />
+      </Section>
+
+      <Section title={t("splash")}>
+        <div>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              try {
+                sessionStorage.removeItem(SPLASH_STORAGE_KEY);
+                toast({ variant: "success", title: t("splashResetDone") });
+              } catch {
+                toast({ variant: "error", title: t("splashResetFailed") });
+              }
+            }}
+          >
+            {t("splashReset")}
+          </Button>
+        </div>
       </Section>
 
       <Section title={t("badges")}>

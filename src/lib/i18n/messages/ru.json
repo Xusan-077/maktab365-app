@@ -275,7 +275,11 @@
     "selectSubmit": "Проверить",
     "selectPlaceholder": "Выберите",
     "selectOption": "Вариант {n}",
-    "selectDisabledOption": "Третий вариант (отключён)"
+    "selectDisabledOption": "Третий вариант (отключён)",
+    "splash": "Splash (анимация входа)",
+    "splashReset": "Показать splash снова",
+    "splashResetDone": "Готово. Полностью обновите главную страницу.",
+    "splashResetFailed": "Не удалось записать в хранилище браузера"
   },
   "catalog": {
     "meta": {

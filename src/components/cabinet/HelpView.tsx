@@ -64,64 +64,68 @@ export function HelpView() {
   ];
 
   return (
-    <div className={`${PAGE_STACK} max-w-2xl`}>
+    <div className={PAGE_STACK}>
       <PageHeader title={t("title")} description={t("lead")} />
 
-      <section aria-labelledby="help-tips" className="flex flex-col gap-3">
-        <h2 id="help-tips" className="text-xl font-semibold">
-          {t("tipsTitle")}
-        </h2>
-        <ul className="text-muted flex list-disc flex-col gap-2 pl-5">
-          {tips.map((tip) => (
-            <li key={tip}>{tip}</li>
-          ))}
-        </ul>
-      </section>
+      <div className={`${PAGE_STACK} max-w-2xl`}>
+        <section aria-labelledby="help-tips" className="flex flex-col gap-3">
+          <h2 id="help-tips" className="text-xl font-semibold">
+            {t("tipsTitle")}
+          </h2>
+          <ul className="text-muted flex list-disc flex-col gap-2 pl-5">
+            {tips.map((tip) => (
+              <li key={tip}>{tip}</li>
+            ))}
+          </ul>
+        </section>
 
-      <section aria-labelledby="help-feedback" className="flex flex-col gap-4">
-        <h2 id="help-feedback" className="text-xl font-semibold">
-          {t("formTitle")}
-        </h2>
-        <form
-          noValidate
-          onSubmit={handleSubmit((values) => send.mutate(values))}
-          className="flex flex-col gap-5"
-        >
-          <fieldset className="flex flex-col gap-2">
-            <legend className="mb-1 text-sm font-medium">{t("kindLabel")}</legend>
-            <div className="flex flex-wrap gap-2">
-              {FEEDBACK_KINDS.map((kind) => (
-                <label key={kind} className={pillClasses}>
-                  <input type="radio" value={kind} className="sr-only" {...register("kind")} />
-                  {t(`kinds.${kind}`)}
-                </label>
-              ))}
-            </div>
-          </fieldset>
-
-          <Field
-            id="feedback-message"
-            label={t("messageLabel")}
-            hint={t("messageHint", { min: FEEDBACK_MESSAGE_MIN, max: FEEDBACK_MESSAGE_MAX })}
-            error={fieldError(errors.message?.message)}
+        <section aria-labelledby="help-feedback" className="flex flex-col gap-4">
+          <h2 id="help-feedback" className="text-xl font-semibold">
+            {t("formTitle")}
+          </h2>
+          <form
+            noValidate
+            onSubmit={handleSubmit((values) => send.mutate(values))}
+            className="flex flex-col gap-5"
           >
-            <textarea
-              id="feedback-message"
-              rows={6}
-              aria-invalid={errors.message ? true : undefined}
-              aria-describedby={errors.message ? "feedback-message-error" : "feedback-message-hint"}
-              className={cn(controlClasses, "h-auto min-h-32 py-2")}
-              {...register("message")}
-            />
-          </Field>
+            <fieldset className="flex flex-col gap-2">
+              <legend className="mb-1 text-sm font-medium">{t("kindLabel")}</legend>
+              <div className="flex flex-wrap gap-2">
+                {FEEDBACK_KINDS.map((kind) => (
+                  <label key={kind} className={pillClasses}>
+                    <input type="radio" value={kind} className="sr-only" {...register("kind")} />
+                    {t(`kinds.${kind}`)}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
 
-          <div>
-            <Button type="submit" size="lg" loading={send.isPending}>
-              {t("submit")}
-            </Button>
-          </div>
-        </form>
-      </section>
+            <Field
+              id="feedback-message"
+              label={t("messageLabel")}
+              hint={t("messageHint", { min: FEEDBACK_MESSAGE_MIN, max: FEEDBACK_MESSAGE_MAX })}
+              error={fieldError(errors.message?.message)}
+            >
+              <textarea
+                id="feedback-message"
+                rows={6}
+                aria-invalid={errors.message ? true : undefined}
+                aria-describedby={
+                  errors.message ? "feedback-message-error" : "feedback-message-hint"
+                }
+                className={cn(controlClasses, "h-auto min-h-32 py-2")}
+                {...register("message")}
+              />
+            </Field>
+
+            <div>
+              <Button type="submit" size="lg" loading={send.isPending}>
+                {t("submit")}
+              </Button>
+            </div>
+          </form>
+        </section>
+      </div>
     </div>
   );
 }

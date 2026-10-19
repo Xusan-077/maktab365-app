@@ -29,72 +29,74 @@ export function SettingsView() {
   const setTheme = usePreferencesStore((state) => state.setTheme);
 
   return (
-    <div className={`${PAGE_STACK} max-w-2xl`}>
+    <div className={PAGE_STACK}>
       <PageHeader title={t("title")} />
 
-      <section aria-labelledby="settings-profile" className="flex flex-col gap-4">
-        <h2 id="settings-profile" className="text-xl font-semibold">
-          {t("profile")}
-        </h2>
-        {/* key: rol almashganda forma yangi profil qiymatlari bilan qayta quriladi */}
-        <ProfileForm
-          key={me ? `${me.role}-${me.name}` : "empty"}
-          initial={me}
-          submitLabel={t("save")}
-          onSaved={(user) => {
-            toast({ variant: "success", title: t("saved") });
-            if (me && user.role !== me.role) router.replace(dashboardPath(user.role));
-          }}
-        />
-      </section>
+      <div className={`${PAGE_STACK} max-w-2xl`}>
+        <section aria-labelledby="settings-profile" className="flex flex-col gap-4">
+          <h2 id="settings-profile" className="text-xl font-semibold">
+            {t("profile")}
+          </h2>
+          {/* key: rol almashganda forma yangi profil qiymatlari bilan qayta quriladi */}
+          <ProfileForm
+            key={me ? `${me.role}-${me.name}` : "empty"}
+            initial={me}
+            submitLabel={t("save")}
+            onSaved={(user) => {
+              toast({ variant: "success", title: t("saved") });
+              if (me && user.role !== me.role) router.replace(dashboardPath(user.role));
+            }}
+          />
+        </section>
 
-      <section aria-labelledby="settings-appearance" className="flex flex-col gap-5">
-        <h2 id="settings-appearance" className="text-xl font-semibold">
-          {t("appearance")}
-        </h2>
-        <div className="flex flex-col gap-2">
-          <p className="text-sm font-medium">{t("language")}</p>
-          <LanguageSwitcher className="w-fit" />
-        </div>
-        <div role="group" aria-label={t("theme")} className="flex flex-col gap-2">
-          <p className="text-sm font-medium">{t("theme")}</p>
-          <div className="flex flex-wrap gap-2">
-            {THEMES.map((value) => (
-              <Chip key={value} selected={theme === value} onClick={() => setTheme(value)}>
-                {tt(value)}
-              </Chip>
-            ))}
+        <section aria-labelledby="settings-appearance" className="flex flex-col gap-5">
+          <h2 id="settings-appearance" className="text-xl font-semibold">
+            {t("appearance")}
+          </h2>
+          <div className="flex flex-col gap-2">
+            <p className="text-sm font-medium">{t("language")}</p>
+            <LanguageSwitcher className="w-fit" />
           </div>
-        </div>
-        <div className="flex flex-col gap-2">
-          <p className="text-sm font-medium">{t("textSize")}</p>
-          <TextSizeControl className="w-fit" />
-        </div>
-      </section>
+          <div role="group" aria-label={t("theme")} className="flex flex-col gap-2">
+            <p className="text-sm font-medium">{t("theme")}</p>
+            <div className="flex flex-wrap gap-2">
+              {THEMES.map((value) => (
+                <Chip key={value} selected={theme === value} onClick={() => setTheme(value)}>
+                  {tt(value)}
+                </Chip>
+              ))}
+            </div>
+          </div>
+          <div className="flex flex-col gap-2">
+            <p className="text-sm font-medium">{t("textSize")}</p>
+            <TextSizeControl className="w-fit" />
+          </div>
+        </section>
 
-      <section aria-labelledby="settings-about" className="flex flex-col gap-3">
-        <h2 id="settings-about" className="text-xl font-semibold">
-          {t("about.title")}
-        </h2>
-        <p className="text-muted">{t("about.text")}</p>
-        <ul className="text-muted flex list-disc flex-col gap-1 pl-5">
-          <li>{t("about.free")}</li>
-          <li>{t("about.topics")}</li>
-          <li>{t("about.languages")}</li>
-        </ul>
-      </section>
+        <section aria-labelledby="settings-about" className="flex flex-col gap-3">
+          <h2 id="settings-about" className="text-xl font-semibold">
+            {t("about.title")}
+          </h2>
+          <p className="text-muted">{t("about.text")}</p>
+          <ul className="text-muted flex list-disc flex-col gap-1 pl-5">
+            <li>{t("about.free")}</li>
+            <li>{t("about.topics")}</li>
+            <li>{t("about.languages")}</li>
+          </ul>
+        </section>
 
-      <section aria-labelledby="settings-account" className="flex flex-col gap-3">
-        <h2 id="settings-account" className="text-xl font-semibold">
-          {t("account")}
-        </h2>
-        <div>
-          <Button variant="secondary" onClick={() => void signOut({ redirectTo: `/${locale}` })}>
-            <LogOut className="size-4" aria-hidden />
-            {t("signOut")}
-          </Button>
-        </div>
-      </section>
+        <section aria-labelledby="settings-account" className="flex flex-col gap-3">
+          <h2 id="settings-account" className="text-xl font-semibold">
+            {t("account")}
+          </h2>
+          <div>
+            <Button variant="secondary" onClick={() => void signOut({ redirectTo: `/${locale}` })}>
+              <LogOut className="size-4" aria-hidden />
+              {t("signOut")}
+            </Button>
+          </div>
+        </section>
+      </div>
     </div>
   );
 }
