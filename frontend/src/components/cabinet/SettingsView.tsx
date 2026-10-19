@@ -15,6 +15,7 @@ import { useRouter } from "@/lib/i18n/navigation";
 import { THEMES } from "@/lib/utils/preferences";
 import { dashboardPath } from "@/lib/utils/routes";
 import { usePreferencesStore } from "@/stores/preferences.store";
+import { AccountDataActions } from "./AccountDataActions";
 import { ProfileForm } from "./ProfileForm";
 
 /** Profil (rol, sinf/fanlar) formasi va ko'rinish sozlamalari: til, theme, matn hajmi. */
@@ -95,6 +96,7 @@ export function SettingsView() {
               {t("signOut")}
             </Button>
           </div>
+          <AccountDataActions />
         </section>
       </div>
     </div>

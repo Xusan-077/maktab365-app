@@ -1,3 +1,4 @@
+import type { components } from "@/lib/api/schema";
 import type { Grade } from "./catalog";
 
 export type UserRole = "student" | "teacher";
@@ -27,3 +28,6 @@ export type UpdateProfileInput = {
   subjects?: string[];
   grades?: Grade[];
 };
+
+/** `GET /me/export/` javobi — foydalanuvchi ma'lumotlarining to'liq nusxasi. */
+export type AccountExport = components["schemas"]["Export"];

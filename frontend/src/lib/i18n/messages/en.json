@@ -595,6 +595,18 @@
       "free": "All textbooks and exercises are free.",
       "topics": "Every topic: rule, solved example, exercise and summary.",
       "languages": "In Uzbek (Latin and Cyrillic), Russian and English."
+    },
+    "data": {
+      "export": "Download my data",
+      "exportHint": "A JSON copy of your profile and account data.",
+      "exportFailed": "Couldn't download your data. Please try again.",
+      "delete": "Delete account",
+      "deleteHint": "Your account and personal data will be deleted. This can't be undone.",
+      "deleteFailed": "Couldn't delete your account. Please try again.",
+      "confirmTitle": "Delete your account?",
+      "confirmText": "Your profile and personal data will be deleted and you won't be able to sign in to this account again. You can download your data first.",
+      "cancel": "Cancel",
+      "confirmDelete": "Yes, delete"
     }
   },
   "cabinet": {

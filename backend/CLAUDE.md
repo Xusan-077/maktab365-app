@@ -8,7 +8,7 @@ Bitta Django monolit: Python 3.12 · Django 5.2 · DRF · drf-spectacular · sim
 
 - `config/settings/{base,dev,prod,test}.py` — barcha sozlama env orqali (`django-environ`, `.env`). `dev` default (`manage.py`), `prod` — wsgi/asgi, `test` — pytest.
 - `config/{urls,celery,asgi,wsgi}.py`.
-- `apps/core` — qayta ishlatiladigan poydevor (quyida). `apps/{accounts,content,learning,support,analytics}` — hozircha bo'sh ilovalar; domen mantiqi keyingi bosqichlarda.
+- `apps/core` — qayta ishlatiladigan poydevor (quyida). `apps/accounts` — foydalanuvchi va profil (quyida). `apps/{content,learning,support,analytics}` — hozircha bo'sh ilovalar; domen mantiqi keyingi bosqichlarda.
 
 ## `apps/core` poydevori
 
@@ -18,6 +18,14 @@ Bitta Django monolit: Python 3.12 · Django 5.2 · DRF · drf-spectacular · sim
 - `exceptions.api_exception_handler` — yagona xato formati `{code, message, details?}`. Yangi domen xatolari `APIException` (`default_code`) orqali; `code` barqaror kalit, `message` foydalanuvchiga ko'rsatilmaydi.
 - `pagination.DefaultPagination`, `throttling.*`, `filters.DefaultFilterBackend` (`search_fields`, `ordering_fields`) — DRF default'larida ulangan.
 - `middleware.RequestIdMiddleware` — `X-Request-ID` (kelgan yoki yangi), structlog kontekstiga bog'lanadi. Log'lar uchun `structlog.get_logger()`; `print` yo'q.
+
+## `apps/accounts`
+
+- Modellar: `User` (UUID pk, `AUTH_USER_MODEL`; email nullable va katta-kichik harfsiz unique; parol ixtiyoriy; `SoftDeleteModel`), `Profile` (OneToOne; `onboarded_at=null` — onboarding tugamagan), `Identity` (unique `provider+provider_uid`), `AuthEvent` (audit).
+- Rolni **faqat** `services.change_role` o'zgartiradi: oddiy foydalanuvchi student↔teacher, editor/admin faqat admin tomonidan (`actor=`). Xato kodlari: `role_forbidden` (403), `invalid_role`.
+- `services.py` — onboarding, profil, `delete_account` (soft delete + anonimlashtirish: email/identity/profil tozalanadi, `is_active=False`, IP/UA o'chadi), `export_data`.
+- Endpoint'lar (`/api/v1/me/`): `GET/PATCH/DELETE`, `POST onboarding/`, `PATCH role/`, `GET export/`. Autentifikatsiya (JWT berish) — M3.
+- Parol: Argon2 birinchi hasher, validatorlar (min 8, umumiy, faqat raqam emas) — parol o'rnatadigan oqimlar `validate_password` ni chaqirishi shart.
 
 ## Qoidalar
 

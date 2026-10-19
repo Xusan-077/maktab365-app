@@ -12,7 +12,7 @@ import type {
   ToggleBookmarkResult,
 } from "@/types/progress";
 import type { Topic, TopicSearchFilters, TopicSearchResult } from "@/types/topic";
-import type { ProfileInput, UpdateProfileInput, User } from "@/types/user";
+import type { AccountExport, ProfileInput, UpdateProfileInput, User, UserRole } from "@/types/user";
 
 /** Backend bilan shartnoma. Hozir `MockApi`, keyin DRF uchun `HttpApi` shu interfeysni amalga oshiradi. */
 export interface MaktabApi {
@@ -39,6 +39,12 @@ export interface MaktabApi {
   /** Profilni yaratadi yoki to'liq almashtiradi (rol ham o'zgarishi mumkin). */
   saveProfile(input: ProfileInput): Promise<User>;
   updateProfile(input: UpdateProfileInput): Promise<User>;
+  /** Faqat rolni almashtiradi (o'quvchi ↔ o'qituvchi); profil maydonlari saqlanadi. */
+  setRole(role: UserRole): Promise<User>;
+  /** Akkauntni o'chiradi: shaxsiy ma'lumotlar anonimlashtiriladi. Keyin klient chiqib ketishi kerak. */
+  deleteAccount(): Promise<void>;
+  /** Foydalanuvchining barcha ma'lumotlari (yuklab olish uchun). */
+  exportData(): Promise<AccountExport>;
   /** O'qish rejasi (o'quvchining shaxsiy maqsadlari), eng yangisi birinchi. */
   getGoals(): Promise<StudyGoal[]>;
   createGoal(title: string): Promise<StudyGoal>;

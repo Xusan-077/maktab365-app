@@ -17,7 +17,7 @@ import type {
   ToggleBookmarkResult,
 } from "@/types/progress";
 import type { Topic, TopicSearchFilters, TopicSearchResult } from "@/types/topic";
-import type { ProfileInput, UpdateProfileInput, User } from "@/types/user";
+import type { AccountExport, ProfileInput, UpdateProfileInput, User, UserRole } from "@/types/user";
 import { BOOKS } from "./data/books";
 import { CHAPTERS, TOPICS } from "./data/chapters";
 import { SUBJECTS } from "./data/subjects";
@@ -372,6 +372,61 @@ export class MockApi implements MaktabApi {
         return db.user;
       });
     });
+  }
+
+  setRole(role: UserRole): Promise<User> {
+    return this.respond(() =>
+      this.withAccount((db) => {
+        const user = db.user;
+        if (!user) throw new ApiError("Profil topilmadi", 404);
+        if (user.role === role) return user;
+        db.user =
+          role === "student"
+            ? { id: user.id, role, name: user.name }
+            : { id: user.id, role, name: user.name, subjects: [], grades: [] };
+        return db.user;
+      }),
+    );
+  }
+
+  deleteAccount(): Promise<void> {
+    return this.respond(() => {
+      const session = this.session();
+      const all = this.readAll();
+      delete all[session.id];
+      this.memory = all;
+      this.storage?.setItem(MOCK_DB_STORAGE_KEY, JSON.stringify(all));
+    });
+  }
+
+  exportData(): Promise<AccountExport> {
+    return this.respond(() =>
+      this.withAccount((db, session) => {
+        const user = db.user;
+        return {
+          exported_at: new Date().toISOString(),
+          user: {
+            id: session.id,
+            email: null,
+            email_verified_at: null,
+            role: user?.role ?? "student",
+            date_joined: new Date(0).toISOString(),
+            last_login: null,
+          },
+          profile: {
+            display_name: user?.name ?? "",
+            avatar_url: "",
+            locale: "uz",
+            grade: user?.role === "student" ? (user.grade ?? null) : null,
+            subjects: user?.role === "teacher" ? (user.subjects ?? []) : [],
+            grades: user?.role === "teacher" ? (user.grades ?? []) : [],
+            onboarded_at: user ? new Date(0).toISOString() : null,
+          },
+          identities: [],
+          auth_events: [],
+        };
+      }),
+    );
   }
 
   getGoals(): Promise<StudyGoal[]> {

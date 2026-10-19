@@ -4,6 +4,119 @@ info:
   version: 0.1.0
   description: Maktab365 platformasi API'si.
 paths:
+  /api/v1/me/:
+    get:
+      operationId: me_retrieve
+      tags:
+      - me
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+          description: ''
+    patch:
+      operationId: me_update
+      tags:
+      - me
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+          description: ''
+    delete:
+      operationId: me_delete
+      summary: Akkauntni o'chirish (soft delete + anonimlashtirish)
+      tags:
+      - me
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/me/onboarding/:
+    post:
+      operationId: me_onboarding
+      tags:
+      - me
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OnboardingRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OnboardingRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OnboardingRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+          description: ''
+  /api/v1/me/role/:
+    patch:
+      operationId: me_role_update
+      tags:
+      - me
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedRoleRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedRoleRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedRoleRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+          description: ''
+  /api/v1/me/export/:
+    get:
+      operationId: me_export
+      tags:
+      - me
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Export'
+          description: ''
   /api/v1/health/:
     get:
       operationId: health
@@ -33,6 +146,102 @@ components:
       description: |-
         * `ok` - ok
         * `error` - error
+    Export:
+      type: object
+      properties:
+        exported_at:
+          type: string
+          format: date-time
+        user:
+          $ref: '#/components/schemas/ExportUser'
+        profile:
+          $ref: '#/components/schemas/Profile'
+        identities:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExportIdentity'
+        auth_events:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExportEvent'
+      required:
+      - auth_events
+      - exported_at
+      - identities
+      - profile
+      - user
+    ExportEvent:
+      type: object
+      properties:
+        type:
+          type: string
+        ip:
+          type: string
+          nullable: true
+        user_agent:
+          type: string
+        meta:
+          type: object
+          additionalProperties: {}
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - created_at
+      - ip
+      - meta
+      - type
+      - user_agent
+    ExportIdentity:
+      type: object
+      properties:
+        provider:
+          type: string
+        provider_uid:
+          type: string
+        email:
+          type: string
+        verified:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - created_at
+      - email
+      - provider
+      - provider_uid
+      - verified
+    ExportUser:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+          nullable: true
+        email_verified_at:
+          type: string
+          format: date-time
+          nullable: true
+        role:
+          type: string
+        date_joined:
+          type: string
+          format: date-time
+        last_login:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - date_joined
+      - email
+      - email_verified_at
+      - id
+      - last_login
+      - role
     Health:
       type: object
       properties:
@@ -53,6 +262,185 @@ components:
       required:
       - database
       - redis
+    LocaleEnum:
+      enum:
+      - uz
+      - uz-Cyrl
+      - ru
+      - en
+      type: string
+      description: |-
+        * `uz` - Uzbek (Latin)
+        * `uz-Cyrl` - Uzbek (Cyrillic)
+        * `ru` - Russian
+        * `en` - English
+    Me:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+          nullable: true
+        email_verified:
+          type: boolean
+          readOnly: true
+        role:
+          allOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          readOnly: true
+        date_joined:
+          type: string
+          format: date-time
+          readOnly: true
+        profile:
+          allOf:
+          - $ref: '#/components/schemas/Profile'
+          readOnly: true
+      required:
+      - date_joined
+      - email
+      - email_verified
+      - id
+      - profile
+      - role
+    OnboardingRequest:
+      type: object
+      properties:
+        role:
+          $ref: '#/components/schemas/OnboardingRoleEnum'
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 60
+        locale:
+          $ref: '#/components/schemas/LocaleEnum'
+        grade:
+          type: integer
+          maximum: 11
+          minimum: 1
+        subjects:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 64
+          maxItems: 30
+        grades:
+          type: array
+          items:
+            type: integer
+            maximum: 11
+            minimum: 1
+          maxItems: 11
+      required:
+      - display_name
+      - role
+    OnboardingRoleEnum:
+      enum:
+      - student
+      - teacher
+      type: string
+      description: |-
+        * `student` - student
+        * `teacher` - teacher
+    PatchedProfileUpdateRequest:
+      type: object
+      properties:
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 60
+        avatar_url:
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 500
+          - type: string
+            maxLength: 0
+        locale:
+          $ref: '#/components/schemas/LocaleEnum'
+        grade:
+          type: integer
+          maximum: 11
+          minimum: 1
+          nullable: true
+        subjects:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 64
+          maxItems: 30
+        grades:
+          type: array
+          items:
+            type: integer
+            maximum: 11
+            minimum: 1
+          maxItems: 11
+    PatchedRoleRequest:
+      type: object
+      properties:
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+    Profile:
+      type: object
+      properties:
+        display_name:
+          type: string
+          readOnly: true
+        avatar_url:
+          type: string
+          format: uri
+          readOnly: true
+        locale:
+          allOf:
+          - $ref: '#/components/schemas/LocaleEnum'
+          readOnly: true
+        grade:
+          type: integer
+          readOnly: true
+          nullable: true
+        subjects:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        grades:
+          type: array
+          items:
+            type: integer
+          readOnly: true
+        onboarded_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - avatar_url
+      - display_name
+      - grade
+      - grades
+      - locale
+      - onboarded_at
+      - subjects
+    RoleEnum:
+      enum:
+      - student
+      - teacher
+      - editor
+      - admin
+      type: string
+      description: |-
+        * `student` - Student
+        * `teacher` - Teacher
+        * `editor` - Editor
+        * `admin` - Admin
     StatusEnum:
       enum:
       - ok
@@ -61,3 +449,8 @@ components:
       description: |-
         * `ok` - ok
         * `degraded` - degraded
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

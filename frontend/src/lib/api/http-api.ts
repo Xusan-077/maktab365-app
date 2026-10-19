@@ -1,5 +1,7 @@
 import { createHttpClient, toApiError, unwrap, type HttpClient } from "./http-client";
+import { toOnboardedUser, toOnboardingRequest, toProfileUpdateRequest, toUser } from "./mappers";
 import { ApiError, type HealthStatus, type MaktabApi } from "./types";
+import type { AccountExport, ProfileInput, UpdateProfileInput, User, UserRole } from "@/types/user";
 
 const notImplemented = (method: string) => async (): Promise<never> => {
   throw new ApiError(`HttpApi.${method} keyingi bosqichda yoziladi`, 501, {
@@ -19,6 +21,39 @@ export class HttpApi implements MaktabApi {
     return unwrap(result);
   }
 
+  /** Kirmagan (401) yoki onboarding tugamagan foydalanuvchi uchun `null`. */
+  async getMe(): Promise<User | null> {
+    const result = await this.client.GET("/api/v1/me/");
+    if (result.response.status === 401) return null;
+    return toOnboardedUser(unwrap(result));
+  }
+
+  async saveProfile(input: ProfileInput): Promise<User> {
+    const result = await this.client.POST("/api/v1/me/onboarding/", {
+      body: toOnboardingRequest(input),
+    });
+    return toUser(unwrap(result));
+  }
+
+  async updateProfile(input: UpdateProfileInput): Promise<User> {
+    const result = await this.client.PATCH("/api/v1/me/", { body: toProfileUpdateRequest(input) });
+    return toUser(unwrap(result));
+  }
+
+  async setRole(role: UserRole): Promise<User> {
+    const result = await this.client.PATCH("/api/v1/me/role/", { body: { role } });
+    return toUser(unwrap(result));
+  }
+
+  async deleteAccount(): Promise<void> {
+    const result = await this.client.DELETE("/api/v1/me/");
+    if (result.response.status >= 400) throw toApiError(result.response, result.error);
+  }
+
+  async exportData(): Promise<AccountExport> {
+    return unwrap(await this.client.GET("/api/v1/me/export/"));
+  }
+
   getGrades = notImplemented("getGrades");
   getSubjects = notImplemented("getSubjects");
   getBooks = notImplemented("getBooks");
@@ -33,9 +68,6 @@ export class HttpApi implements MaktabApi {
   setBookmark = notImplemented("setBookmark");
   getBookBookmarks = notImplemented("getBookBookmarks");
   toggleBookBookmark = notImplemented("toggleBookBookmark");
-  getMe = notImplemented("getMe");
-  saveProfile = notImplemented("saveProfile");
-  updateProfile = notImplemented("updateProfile");
   getGoals = notImplemented("getGoals");
   createGoal = notImplemented("createGoal");
   updateGoal = notImplemented("updateGoal");

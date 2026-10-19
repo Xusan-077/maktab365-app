@@ -595,6 +595,18 @@
       "free": "Barcha darsliklar va mashqlar bepul.",
       "topics": "Har bir mavzu: qoida, yechilgan misol, mashq va xulosa.",
       "languages": "O'zbek (lotin va kirill), rus va ingliz tillarida."
+    },
+    "data": {
+      "export": "Ma'lumotlarimni yuklab olish",
+      "exportHint": "Profil va akkaunt ma'lumotlaringizning JSON nusxasi.",
+      "exportFailed": "Ma'lumotni yuklab bo'lmadi. Qayta urinib ko'ring.",
+      "delete": "Akkauntni o'chirish",
+      "deleteHint": "Akkaunt va shaxsiy ma'lumotlaringiz o'chiriladi. Bu amalni qaytarib bo'lmaydi.",
+      "deleteFailed": "Akkauntni o'chirib bo'lmadi. Qayta urinib ko'ring.",
+      "confirmTitle": "Akkauntni o'chirasizmi?",
+      "confirmText": "Profilingiz va shaxsiy ma'lumotlaringiz o'chiriladi, akkauntga qayta kirib bo'lmaydi. Avval ma'lumotlaringizni yuklab olishingiz mumkin.",
+      "cancel": "Bekor qilish",
+      "confirmDelete": "Ha, o'chirish"
     }
   },
   "cabinet": {

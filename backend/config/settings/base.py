@@ -69,6 +69,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 REDIS_URL = env("REDIS_URL", default="redis://localhost:6379/0")
 CACHES = {"default": env.cache_url("CACHE_URL", default=REDIS_URL)}
 
+AUTH_USER_MODEL = "accounts.User"
+
 PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.Argon2PasswordHasher",
     "django.contrib.auth.hashers.PBKDF2PasswordHasher",
@@ -124,7 +126,12 @@ SPECTACULAR_SETTINGS = {
     "SCHEMA_PATH_PREFIX": r"/api/v1",
     "COMPONENT_SPLIT_REQUEST": True,
     "SORT_OPERATIONS": False,
-    "ENUM_NAME_OVERRIDES": {"CheckStatusEnum": "apps.core.views.CHECK_STATUS_CHOICES"},
+    "ENUM_NAME_OVERRIDES": {
+        "CheckStatusEnum": "apps.core.views.CHECK_STATUS_CHOICES",
+        "RoleEnum": "apps.accounts.models.Role.choices",
+        "OnboardingRoleEnum": "apps.accounts.serializers.ONBOARDING_ROLES",
+        "LocaleEnum": "apps.accounts.models.Locale.choices",
+    },
 }
 
 # --- CORS: faqat env'dagi frontend origin'lari ---

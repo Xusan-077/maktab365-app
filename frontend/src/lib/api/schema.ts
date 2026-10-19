@@ -4,6 +4,71 @@
  */
 
 export interface paths {
+    "/api/v1/me/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["me_retrieve"];
+        put?: never;
+        post?: never;
+        /** Akkauntni o'chirish (soft delete + anonimlashtirish) */
+        delete: operations["me_delete"];
+        options?: never;
+        head?: never;
+        patch: operations["me_update"];
+        trace?: never;
+    };
+    "/api/v1/me/onboarding/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["me_onboarding"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/role/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["me_role_update"];
+        trace?: never;
+    };
+    "/api/v1/me/export/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["me_export"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/health/": {
         parameters: {
             query?: never;
@@ -31,6 +96,45 @@ export interface components {
          * @enum {string}
          */
         CheckStatusEnum: "ok" | "error";
+        Export: {
+            /** Format: date-time */
+            exported_at: string;
+            user: components["schemas"]["ExportUser"];
+            profile: components["schemas"]["Profile"];
+            identities: components["schemas"]["ExportIdentity"][];
+            auth_events: components["schemas"]["ExportEvent"][];
+        };
+        ExportEvent: {
+            type: string;
+            ip: string | null;
+            user_agent: string;
+            meta: {
+                [key: string]: unknown;
+            };
+            /** Format: date-time */
+            created_at: string;
+        };
+        ExportIdentity: {
+            provider: string;
+            provider_uid: string;
+            email: string;
+            verified: boolean;
+            /** Format: date-time */
+            created_at: string;
+        };
+        ExportUser: {
+            /** Format: uuid */
+            id: string;
+            /** Format: email */
+            email: string | null;
+            /** Format: date-time */
+            email_verified_at: string | null;
+            role: string;
+            /** Format: date-time */
+            date_joined: string;
+            /** Format: date-time */
+            last_login: string | null;
+        };
         Health: {
             status: components["schemas"]["StatusEnum"];
             checks: components["schemas"]["HealthChecks"];
@@ -39,6 +143,69 @@ export interface components {
             database: components["schemas"]["CheckStatusEnum"];
             redis: components["schemas"]["CheckStatusEnum"];
         };
+        /**
+         * @description * `uz` - Uzbek (Latin)
+         *     * `uz-Cyrl` - Uzbek (Cyrillic)
+         *     * `ru` - Russian
+         *     * `en` - English
+         * @enum {string}
+         */
+        LocaleEnum: "uz" | "uz-Cyrl" | "ru" | "en";
+        Me: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: email */
+            readonly email: string | null;
+            readonly email_verified: boolean;
+            readonly role: components["schemas"]["RoleEnum"];
+            /** Format: date-time */
+            readonly date_joined: string;
+            readonly profile: components["schemas"]["Profile"];
+        };
+        OnboardingRequest: {
+            role: components["schemas"]["OnboardingRoleEnum"];
+            display_name: string;
+            locale?: components["schemas"]["LocaleEnum"];
+            grade?: number;
+            subjects?: string[];
+            grades?: number[];
+        };
+        /**
+         * @description * `student` - student
+         *     * `teacher` - teacher
+         * @enum {string}
+         */
+        OnboardingRoleEnum: "student" | "teacher";
+        PatchedProfileUpdateRequest: {
+            display_name?: string;
+            avatar_url?: string;
+            locale?: components["schemas"]["LocaleEnum"];
+            grade?: number | null;
+            subjects?: string[];
+            grades?: number[];
+        };
+        PatchedRoleRequest: {
+            role?: components["schemas"]["RoleEnum"];
+        };
+        Profile: {
+            readonly display_name: string;
+            /** Format: uri */
+            readonly avatar_url: string;
+            readonly locale: components["schemas"]["LocaleEnum"];
+            readonly grade: number | null;
+            readonly subjects: string[];
+            readonly grades: number[];
+            /** Format: date-time */
+            readonly onboarded_at: string | null;
+        };
+        /**
+         * @description * `student` - Student
+         *     * `teacher` - Teacher
+         *     * `editor` - Editor
+         *     * `admin` - Admin
+         * @enum {string}
+         */
+        RoleEnum: "student" | "teacher" | "editor" | "admin";
         /**
          * @description * `ok` - ok
          *     * `degraded` - degraded
@@ -54,6 +221,137 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    me_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Me"];
+                };
+            };
+        };
+    };
+    me_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    me_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedProfileUpdateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedProfileUpdateRequest"];
+                "multipart/form-data": components["schemas"]["PatchedProfileUpdateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Me"];
+                };
+            };
+        };
+    };
+    me_onboarding: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OnboardingRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["OnboardingRequest"];
+                "multipart/form-data": components["schemas"]["OnboardingRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Me"];
+                };
+            };
+        };
+    };
+    me_role_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedRoleRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedRoleRequest"];
+                "multipart/form-data": components["schemas"]["PatchedRoleRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Me"];
+                };
+            };
+        };
+    };
+    me_export: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Export"];
+                };
+            };
+        };
+    };
     health: {
         parameters: {
             query?: never;

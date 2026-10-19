@@ -1,5 +1,9 @@
 import os
 
+import environ
+
+# backend/.env avval o'qiladi (host portlari mashinaga qarab farq qiladi), keyin default'lar.
+environ.Env.read_env(os.path.join(os.path.dirname(__file__), "..", "..", ".env"))
 os.environ.setdefault("SECRET_KEY", "test-secret-key-not-for-production")
 # Standart: docker-compose dagi postgres (`make test` uni o'zi ko'taradi). SQLite fallback yo'q.
 os.environ.setdefault("DATABASE_URL", "postgres://maktab365:maktab365@localhost:5432/maktab365")
