@@ -1,3 +1,4 @@
+import type { components } from "./schema";
 import type { Feedback, FeedbackInput } from "@/types/feedback";
 import type { StudyGoal, UpdateGoalInput } from "@/types/goal";
 import type { Book, BookFilters, Chapter, Grade, Subject } from "@/types/catalog";
@@ -15,6 +16,8 @@ import type { ProfileInput, UpdateProfileInput, User } from "@/types/user";
 
 /** Backend bilan shartnoma. Hozir `MockApi`, keyin DRF uchun `HttpApi` shu interfeysni amalga oshiradi. */
 export interface MaktabApi {
+  /** Backend holati (DB va Redis). Mock rejimida doim "ok". */
+  health(): Promise<HealthStatus>;
   getGrades(): Promise<Grade[]>;
   getSubjects(): Promise<Subject[]>;
   getBooks(filters?: BookFilters): Promise<Book[]>;
@@ -47,12 +50,36 @@ export interface MaktabApi {
 
 export type ApiMode = "mock" | "http";
 
+/** Backend xato formati: `{ code, message, details? }` (ildiz CLAUDE.md). */
+export type ApiErrorBody = {
+  code: string;
+  message: string;
+  details?: Record<string, string[]>;
+};
+
+export type HealthStatus = components["schemas"]["Health"];
+
+export type ApiErrorOptions = {
+  code?: string;
+  details?: ApiErrorBody["details"];
+  requestId?: string;
+};
+
 export class ApiError extends Error {
+  /** Mashina o'qiydigan barqaror kalit (`validation_error`, `not_found`…); tarmoq xatosida `network_error`/`timeout`. */
+  readonly code: string;
+  readonly details?: ApiErrorBody["details"];
+  readonly requestId?: string;
+
   constructor(
     message: string,
     readonly status: number,
+    options: ApiErrorOptions = {},
   ) {
     super(message);
     this.name = "ApiError";
+    this.code = options.code ?? "unknown";
+    this.details = options.details;
+    this.requestId = options.requestId;
   }
 }

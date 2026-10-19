@@ -12,7 +12,9 @@
     "content:validate": "tsx scripts/validate-content.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "api:types": "openapi-typescript ../backend/openapi.yaml -o src/lib/api/schema.ts",
+    "smoke": "tsx scripts/smoke.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.2",
@@ -24,6 +26,7 @@
     "next": "16.4.2",
     "next-auth": "^5.0.0-beta.32",
     "next-intl": "^4.14.9",
+    "openapi-fetch": "^0.17.0",
     "qrcode.react": "^4.2.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
@@ -41,6 +44,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.4.2",
     "eslint-config-prettier": "^10.1.8",
+    "openapi-typescript": "^7.13.0",
     "prettier": "^3.9.10",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4",

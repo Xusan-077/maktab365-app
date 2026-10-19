@@ -216,6 +216,22 @@
     "contact": "Contact us",
     "note": "All textbooks are free."
   },
+  "devApi": {
+    "title": "API status",
+    "intro": "Visible in development only. Result of the backend /health/ endpoint.",
+    "mode": "Mode",
+    "baseUrl": "Backend URL",
+    "backend": "Backend",
+    "database": "Database",
+    "redis": "Redis",
+    "ok": "ok",
+    "degraded": "degraded",
+    "error": "error",
+    "unreachable": "Backend is unreachable",
+    "mockMode": "The app is in mock mode: pages use mock data (set NEXT_PUBLIC_API_MODE=http to use the backend).",
+    "requestId": "Request ID",
+    "refresh": "Check again"
+  },
   "dev": {
     "title": "UI components",
     "intro": "Visible in development mode only.",

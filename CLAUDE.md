@@ -27,6 +27,10 @@
 - Xato formati (tekis, o'ramsiz): `{ "code": "validation_error", "message": "...", "details": { "field_name": ["xabar", ...] } }` (`details` ixtiyoriy — maydon xatolari uchun). `code` — mashina o'qiydigan barqaror kalit, `message` — foydalanuvchiga ko'rsatilmaydi (UI matni i18n orqali).
 - `LocalizedText` — `{ uz: string; ru?: string; en?: string }` (`frontend/src/types/i18n.ts`); API tilni tanlamaydi, klient `getLocalized` bilan tanlaydi.
 
+## Jarayonlar bilan ishlash
+
+Jarayonlarni hech qachon nomi bilan (`taskkill /IM python.exe` va h.k.) to'xtatma: faqat o'zing ishga tushirgan jarayonni PID bo'yicha to'xtat. Foydalanuvchining boshqa jarayonlariga tegma.
+
 ## Rollar
 
 - `student` (o'quvchi) — frontend `/kabinet`.
@@ -38,5 +42,5 @@
 1. Backend: `ruff` va `pytest` yashil.
 2. `make schema` va `make types` ishga tushirilgan, natija commit qilingan.
 3. Frontend (`frontend/` da): `typecheck`, `lint`, `test`, `build` yashil.
-4. Bosqichning smoke e2e testi o'tgan (`make e2e`).
+4. Bosqichning smoke testi o'tgan (`make smoke`; Playwright e2e — `make e2e` — keyingi bosqichda).
 5. README yangilangan.

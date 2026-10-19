@@ -5,7 +5,7 @@
 ## Struktura
 
 - [`frontend/`](frontend/README.md) — Next.js ilovasi.
-- [`backend/`](backend/README.md) — Django + DRF API (hozircha sozlanmagan).
+- [`backend/`](backend/README.md) — Django + DRF API (poydevor tayyor: `apps/core`, health, OpenAPI).
 - [`brand/`](brand/README.md) — logo to'plami.
 - [`CLAUDE.md`](CLAUDE.md) — monorepo qoidalari va Definition of Done.
 
@@ -18,7 +18,7 @@ npm install
 npm run dev        # http://localhost:3000
 ```
 
-Yoki ildizdan: `make dev`. Boshqa buyruqlar: `make test`, `make lint`, `make schema`, `make types`, `make e2e` (backend sozlanmaguncha tegishlilari "backend hali sozlanmagan" deb xabar beradi).
+Yoki ildizdan: `make dev`. Boshqa buyruqlar: `make test`, `make lint`, `make schema`, `make types`, `make e2e`; `make migrate` — migratsiyalar. `make dev` Docker (postgres, redis, backend, worker) va frontend'ni ko'taradi; tekshiruv: http://localhost:3000/uz/dev/api-status backend "ok" ko'rsatadi, `make smoke` shuni avtomatik tekshiradi; `make e2e` (Playwright) keyingi bosqichda.
 
 ## Deploy
 

@@ -216,6 +216,22 @@
     "contact": "Biz bilan aloqa",
     "note": "Barcha darsliklar bepul."
   },
+  "devApi": {
+    "title": "API holati",
+    "intro": "Faqat development rejimida ko'rinadi. Backend /health/ natijasi.",
+    "mode": "Rejim",
+    "baseUrl": "Backend manzili",
+    "backend": "Backend",
+    "database": "Ma'lumotlar bazasi",
+    "redis": "Redis",
+    "ok": "ok",
+    "degraded": "qisman ishlamayapti",
+    "error": "xato",
+    "unreachable": "Backend javob bermadi",
+    "mockMode": "Ilova mock rejimida: sahifalar mock ma'lumotdan foydalanadi (backend'ga ulash uchun NEXT_PUBLIC_API_MODE=http).",
+    "requestId": "So'rov ID",
+    "refresh": "Qayta tekshirish"
+  },
   "dev": {
     "title": "UI komponentlari",
     "intro": "Faqat development rejimida ko'rinadi.",

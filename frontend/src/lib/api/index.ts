@@ -15,4 +15,4 @@ export function getApi(): MaktabApi {
   return instance;
 }
 
-export { ApiError, type MaktabApi } from "./types";
+export { ApiError, type HealthStatus, type MaktabApi } from "./types";

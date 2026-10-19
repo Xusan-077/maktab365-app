@@ -1,5 +1,5 @@
 import { getApiSession, type ApiSession } from "@/lib/api/session";
-import { ApiError, type MaktabApi } from "@/lib/api/types";
+import { ApiError, type HealthStatus, type MaktabApi } from "@/lib/api/types";
 import { EXERCISE_RANK, maxBy, mergeAttempts, READ_RANK } from "@/lib/progress/status";
 import { latinToCyrillic } from "@/lib/i18n/translit";
 import type { Book, BookFilters, Chapter, Grade, Subject } from "@/types/catalog";
@@ -81,6 +81,10 @@ export class MockApi implements MaktabApi {
   private memory: Record<string, AccountDb> = {};
 
   constructor(private readonly options: MockApiOptions = {}) {}
+
+  async health(): Promise<HealthStatus> {
+    return { status: "ok", checks: { database: "ok", redis: "ok" } };
+  }
 
   private get storage(): MockStorage | undefined {
     return this.options.storage ?? (typeof localStorage === "undefined" ? undefined : localStorage);

@@ -10,52 +10,47 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       frontend: ${{ steps.filter.outputs.frontend }}
-      backend: ${{ steps.filter.outputs.backend }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            root: &root
-              - 'Makefile'
-              - '.github/**'
-              - '.editorconfig'
-              - '.gitignore'
-            frontend:
-              - *root
-              - 'frontend/**'
-            backend:
-              - *root
-              - 'backend/**'
-
-  frontend:
-    needs: changes
-    if: needs.changes.outputs.frontend == 'true'
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
-      - run: npm ci
-      - run: npm run typecheck
-      - run: npm run lint
-      - run: npm test
-      - run: npm run build
-
-  backend:
+      backend:
     needs: changes
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: backend
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: maktab365
+          POSTGRES_PASSWORD: maktab365
+          POSTGRES_DB: maktab365
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U maktab365"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      SECRET_KEY: ci-secret-key
+      DATABASE_URL: postgres://maktab365:maktab365@localhost:5432/maktab365
     steps:
       - uses: actions/checkout@v4
-      - run: echo "backend hali sozlanmagan — ruff, pytest va schema tekshiruvi keyingi bosqichda qo'shiladi."
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - run: uv sync --frozen
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - name: Migratsiyalar modellar bilan mos
+        run: uv run python manage.py makemigrations --check --dry-run
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.test
+      - run: uv run pytest -n auto
+      - name: openapi.yaml commit qilingan nusxa bilan bir xil
+        run: |
+          uv run python manage.py spectacular --file /tmp/openapi.yaml --validate
+          diff -u openapi.yaml /tmp/openapi.yaml || {
+            echo "::error::backend/openapi.yaml eskirgan — 'make schema && make types' ishga tushirib commit qiling."
+            exit 1
+          }

@@ -1,0 +1,63 @@
+openapi: 3.0.3
+info:
+  title: Maktab365 API
+  version: 0.1.0
+  description: Maktab365 platformasi API'si.
+paths:
+  /api/v1/health/:
+    get:
+      operationId: health
+      summary: Servis holati (DB va Redis)
+      tags:
+      - health
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+          description: ''
+components:
+  schemas:
+    CheckStatusEnum:
+      enum:
+      - ok
+      - error
+      type: string
+      description: |-
+        * `ok` - ok
+        * `error` - error
+    Health:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        checks:
+          $ref: '#/components/schemas/HealthChecks'
+      required:
+      - checks
+      - status
+    HealthChecks:
+      type: object
+      properties:
+        database:
+          $ref: '#/components/schemas/CheckStatusEnum'
+        redis:
+          $ref: '#/components/schemas/CheckStatusEnum'
+      required:
+      - database
+      - redis
+    StatusEnum:
+      enum:
+      - ok
+      - degraded
+      type: string
+      description: |-
+        * `ok` - ok
+        * `degraded` - degraded
