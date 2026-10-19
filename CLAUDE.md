@@ -1,58 +1,42 @@
-# Maktab365
+# Maktab365 (monorepo)
 
 1–11-sinf darsliklari mavzular bo'yicha, bepul, o'quvchi va o'qituvchi uchun platforma.
 
-## Stack
+## Xarita
 
-Next.js (App Router) · TypeScript · Tailwind v4 · ESLint + Prettier · `src/` papka, alias `@/*`.
-TanStack Query (server state), Zustand (client state), react-hook-form + yup (+ `@hookform/resolvers`),
-framer-motion, next-intl, clsx + tailwind-merge (`cn()` — `src/lib/utils/cn.ts`), lucide-react, qrcode.react.
+| Papka | Vazifasi |
+| --- | --- |
+| `frontend/` | Next.js (App Router) ilovasi — Vercel'ga deploy (Root Directory = `frontend`). |
+| `backend/` | Django + DRF API (keyingi bosqichda). `backend/openapi.yaml` — API shartnomasi. |
+| `brand/` | Logo to'plami (manba fayllar). Saytda `frontend/public/` nusxalari ishlatiladi. |
+| `.github/workflows/ci.yml` | CI: path filter bilan frontend va backend job'lari. |
+| `Makefile` | Ikkala tomon uchun umumiy buyruqlar (`make dev/test/lint/schema/types/e2e`). |
 
-> Next.js versiyasi yangi — kod yozishdan oldin `node_modules/next/dist/docs/` dagi tegishli qo'llanmani o'qing (qarang: `AGENTS.md`).
+`frontend/` va `backend/` ichida ularning o'z `CLAUDE.md` fayli bor — shu papkada ishlaganda o'sha qoidalar amal qiladi (`frontend/CLAUDE.md`, `backend/CLAUDE.md` — backend'niki Django sozlanganda qo'shiladi).
 
-## Papka qoidalari
+## Shartnoma qoidasi
 
-- `src/app` — faqat routing: `page`, `layout`, `loading`, `error`, route handler. Mantiq va katta JSX bu yerda emas.
-- `src/app/[locale]/` route guruhlari: `(marketing)` (bosh sahifa, darsliklar, fanlar, loyiha haqida, yordam — header+footer), `(auth)` (kirish, onboarding — faqat logo va forma), `(app)` (`kabinet`, `ustoz`, `sozlamalar` — `AppShell`: sidebar+topbar, marketing header/footer yo'q). Katalog/fan/kitob/mavzu sahifalari `CatalogPageContent`, `SubjectPageContent`, `BookPageContent`, `TopicPageContent` ga chiqarilgan va marketing hamda panel sahifalari ularni `base` (`marketing | kabinet | ustoz`) bilan qayta ishlatadi.
-- Ichki havolalar kontekstga qarab: serverda `bookPath(id, base)` kabi yordamchilar (`lib/utils/routes.ts`), klientda `useAppBase()` / `useAppPaths()`. `/ustoz`↔`/kabinet` rol redirect'i `src/proxy.ts` da (`maktab365-role` cookie'si bo'yicha), haqiqiy tekshiruv `AccountGate` da.
-- Logo faqat `components/layout/Logo.tsx` orqali (`/logo-*.svg`, `public/`).
-- `src/components/ui` — umumiy, domenga bog'liq bo'lmagan primitivlar (Button, Input, Modal…).
-- `src/components/layout` — header, footer, navigatsiya, sahifa qobiqlari.
-- `src/components/{home,catalog,topic,cabinet}` — shu sahifa/domen komponentlari.
-- `src/lib/api` — API klient va so'rov funksiyalari. `src/lib/utils` — sof yordamchi funksiyalar. `src/lib/i18n` — next-intl sozlamasi va `messages/*.json`.
-- `src/stores` — Zustand store'lar. `src/hooks` — umumiy hook'lar. `src/types` — umumiy TypeScript tiplar.
-- `src/mocks` — **mock data faqat shu yerda**. Boshqa joyda mock/fake ma'lumot yozilmaydi.
+- `backend/openapi.yaml` — API'ning **yagona manbasi**.
+- Frontend API tiplarini **qo'lda yozmaydi**: ular `frontend/src/lib/api/schema.ts` da generatsiya qilinadi.
+- API o'zgarsa: `make schema && make types`, natijani commit qiling.
 
-## Nomlash qoidalari
+## API konventsiyalari
 
-- Komponent fayllari va komponentlar: `PascalCase` (`TopicCard.tsx`). Hook fayllari: `useXxx.ts`. Qolgan fayllar va papkalar: `kebab-case`.
-- Hook'lar `useXxx`, store'lar `useXxxStore` (`src/stores/auth.store.ts`), tiplar `PascalCase`, konstantalar `UPPER_SNAKE_CASE`.
-- Named export afzal; default export faqat Next.js talab qilganda (`page`, `layout`…).
-- Importlar `@/*` alias orqali, chuqur nisbiy (`../../..`) yo'llar yo'q.
+- Prefiks: `/api/v1`.
+- JSON kalitlari `snake_case`.
+- Xato formati (tekis, o'ramsiz): `{ "code": "validation_error", "message": "...", "details": { "field_name": ["xabar", ...] } }` (`details` ixtiyoriy — maydon xatolari uchun). `code` — mashina o'qiydigan barqaror kalit, `message` — foydalanuvchiga ko'rsatilmaydi (UI matni i18n orqali).
+- `LocalizedText` — `{ uz: string; ru?: string; en?: string }` (`frontend/src/types/i18n.ts`); API tilni tanlamaydi, klient `getLocalized` bilan tanlaydi.
 
-## Asosiy qoidalar
+## Rollar
 
-1. **UI matnlari faqat i18n orqali, hardcode yo'q.** Barcha matn `src/lib/i18n/messages/*.json` da; serverda `getTranslations`, klientda `useTranslations`. JSX ichida, `aria-label`, `placeholder`, `title`, metadata'da ham literal matn yozilmaydi.
-2. **Server komponent default, `'use client'` faqat kerak bo'lganda** (state, effect, brauzer API, event handler, hook'lar). Iloji boricha client chegarasini kichik, barg komponentlarga tushiring.
-3. **Mock data faqat `src/mocks` da.**
-4. Stilda `cn()` dan foydalaning; Tailwind v4 utility'lari, ranglar/tokenlar `globals.css` dagi `@theme` da.
-5. Formalar: react-hook-form + yup sxemasi.
+- `student` (o'quvchi) — frontend `/kabinet`.
+- `teacher` (o'qituvchi) — frontend `/ustoz`.
+- Mehmon (accountsiz) — ommaviy sahifalar.
 
-## Skriptlar
+## Bosqich tayyor mezoni (Definition of Done)
 
-- `npm run dev` — dev server
-- `npm run build` — production build
-- `npm run typecheck` — `tsc --noEmit`
-- `npm run lint` — ESLint
-- `npm run format` / `npm run format:check` — Prettier
-
-Ish tugagach `npm run typecheck`, `npm run lint` va `npm run build` o'tishi kerak.
-
-## Dizayn tizimi
-
-- Tokenlar `src/app/globals.css` da (`@theme`): `primary-50…900` (ko'k), `accent-50…500` (och sariq, muhim fikrlar uchun), semantik `background / surface / subtle / foreground / muted / border / ring / link` + `*-soft` juftliklari. Light/dark qiymatlari CSS o'zgaruvchilarda (`:root` va `:root[data-theme="dark"]`), shuning uchun komponentlarda `dark:` deyarli kerak emas. Ranglarni hex bilan yozmang — token ishlating.
-- Kontrast: to'ldirilgan tugma/belgi foni `primary-600` (500 oq matn bilan AA dan past), matn-havola uchun `text-link`.
-- Theme (`system/light/dark`) va matn hajmi (`s/m/l`) `usePreferencesStore` da (localStorage `maktab365-prefs`). `<html>` da `data-theme`, `data-theme-pref`, `data-text-size`; birinchi paintdan oldin `<head>` dagi inline skript (`PREFERENCES_INIT_SCRIPT`) qo'yadi.
-- UI komponentlar: `src/components/ui` (Button, Input, Select, Card, Badge, Chip, Tabs, Accordion, Dialog, Toast, Skeleton, ProgressBar). Native elementlar (`<dialog>`, `<details>`) afzal; `<select>` esa taqiqlangan (ESLint `no-restricted-syntax`) — o'rniga `Select` / `MultiSelect` (RHF `Controller` bilan; mobilda bottom sheet). Hammasida `focus-visible` global. Toast: `useToast()` hook.
-- Sahifa tuzilishi: `PageHeader` (sarlavha + izoh + bitta asosiy harakat), `EmptyState` (ikonka + bitta gap + bitta tugma), konteynerlar `components/layout/containers.ts` (marketing `max-w-6xl`, panellar to'liq kenglik (`AppShell`), mavzu matni `70ch`), bo'limlar orasi `PAGE_STACK` (`gap-8`). Har ekranda bitta asosiy harakat.
-- `/dev/ui` — barcha komponentlar namunasi, faqat development'da (production'da 404).
+1. Backend: `ruff` va `pytest` yashil.
+2. `make schema` va `make types` ishga tushirilgan, natija commit qilingan.
+3. Frontend (`frontend/` da): `typecheck`, `lint`, `test`, `build` yashil.
+4. Bosqichning smoke e2e testi o'tgan (`make e2e`).
+5. README yangilangan.
