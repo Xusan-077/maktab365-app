@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
+import { pageShellClass } from "@/components/layout/containers";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Card } from "@/components/ui/Card";
 import { getApi } from "@/lib/api";
 import { getLocalized } from "@/lib/i18n/localized";
@@ -34,12 +36,9 @@ export default async function SubjectsPage({ params }: PageProps<"/[locale]/fanl
   const [subjects, books] = await Promise.all([api.getSubjects(), api.getBooks()]);
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6">
+    <div className={`${pageShellClass("marketing")} flex flex-col gap-6`}>
       <Breadcrumbs items={[{ label: tb("home"), href: ROUTES.home }, { label: t("title") }]} />
-      <header>
-        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
-        <p className="text-muted mt-1 text-lg">{t("subtitle")}</p>
-      </header>
+      <PageHeader title={t("title")} description={t("subtitle")} />
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {subjects.map((subject) => (
           <li key={subject.id}>

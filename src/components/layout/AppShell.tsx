@@ -4,7 +4,9 @@ import type { ReactNode } from "react";
 import { AccountGate } from "@/components/cabinet/AccountGate";
 import { useAppBase } from "@/hooks/useAppBase";
 import { usePathname } from "@/lib/i18n/navigation";
+import { cn } from "@/lib/utils/cn";
 import { appBaseOfPath } from "@/lib/utils/routes";
+import { PANEL_CONTAINER } from "./containers";
 import { AppMobileNav } from "./AppMobileNav";
 import { AppSidebar } from "./AppSidebar";
 import { AppTopbar } from "./AppTopbar";
@@ -22,7 +24,10 @@ function ShellFrame({ children }: { children: ReactNode }) {
         <main
           id={MAIN_CONTENT_ID}
           tabIndex={-1}
-          className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-4 py-6 pb-[calc(5.5rem+env(safe-area-inset-bottom))] focus:outline-none sm:px-6 lg:py-8 lg:pb-8 print:max-w-none print:p-0"
+          className={cn(
+            PANEL_CONTAINER,
+            "flex flex-1 flex-col gap-8 px-4 py-6 pb-[calc(5.5rem+env(safe-area-inset-bottom))] focus:outline-none sm:px-6 lg:py-8 lg:pb-8 print:max-w-none print:p-0",
+          )}
         >
           {children}
         </main>

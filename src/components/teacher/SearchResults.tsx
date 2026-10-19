@@ -1,7 +1,9 @@
 "use client";
 
+import { SearchX } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/Badge";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAppPaths } from "@/hooks/useAppPaths";
 import { useBooks } from "@/hooks/useBooks";
@@ -38,7 +40,7 @@ export function SearchResults({ query }: { query: string }) {
   return (
     <div className="flex flex-col gap-8">
       {books.length === 0 && topics.length === 0 && (
-        <p className="text-muted">{t("empty", { query })}</p>
+        <EmptyState icon={SearchX}>{t("empty", { query })}</EmptyState>
       )}
 
       {books.length > 0 && (

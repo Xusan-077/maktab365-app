@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { getRootCrumb, pageShellClass } from "@/components/layout/crumbs";
 import { HydrateQueries } from "@/components/layout/HydrateQueries";
@@ -53,10 +54,7 @@ export async function CatalogPageContent({
   return (
     <div className={cn("flex flex-col gap-6", pageShellClass(base))}>
       {root && <Breadcrumbs items={[root, { label: t("title") }]} />}
-      <header>
-        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
-        <p className="text-muted mt-1 text-lg">{t("subtitle")}</p>
-      </header>
+      <PageHeader title={t("title")} description={t("subtitle")} />
       <Suspense fallback={<CatalogSkeleton />}>
         <CatalogContent searchParams={searchParams} />
       </Suspense>

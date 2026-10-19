@@ -15,7 +15,7 @@ import { dashboardPath, helpPath, ROUTES } from "@/lib/utils/routes";
 import { SignInButton } from "./SignInButton";
 
 const itemClasses =
-  "hover:bg-subtle flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium";
+  "hover:bg-subtle focus-visible:bg-subtle flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-medium";
 
 function initialsOf(name: string) {
   return (
@@ -77,6 +77,39 @@ export function UserMenu({ variant = "site" }: { variant?: "site" | "panel" }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuId = useId();
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const items = () =>
+    Array.from(menuRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? []);
+
+  function openMenu(focus: "first" | "last" | "none" = "first") {
+    setOpen(true);
+    if (focus === "none") return;
+    // Menyu chizilgandan keyin fokus beriladi
+    requestAnimationFrame(() => {
+      const list = items();
+      (focus === "first" ? list[0] : list.at(-1))?.focus();
+    });
+  }
+
+  function closeMenu(restoreFocus = true) {
+    setOpen(false);
+    if (restoreFocus) buttonRef.current?.focus();
+  }
+
+  function onMenuKeyDown(event: React.KeyboardEvent) {
+    const list = items();
+    const index = list.indexOf(document.activeElement as HTMLElement);
+    const move = (next: number) => {
+      event.preventDefault();
+      list[(next + list.length) % list.length]?.focus();
+    };
+    if (event.key === "ArrowDown") move(index + 1);
+    else if (event.key === "ArrowUp") move(index - 1);
+    else if (event.key === "Home") move(0);
+    else if (event.key === "End") move(list.length - 1);
+    else if (event.key === "Tab") closeMenu(false);
+  }
 
   useEffect(() => {
     if (!open) return;
@@ -84,10 +117,7 @@ export function UserMenu({ variant = "site" }: { variant?: "site" | "panel" }) {
       if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
     };
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setOpen(false);
-        buttonRef.current?.focus();
-      }
+      if (event.key === "Escape") closeMenu();
     };
     document.addEventListener("pointerdown", onPointerDown);
     document.addEventListener("keydown", onKeyDown);
@@ -101,7 +131,7 @@ export function UserMenu({ variant = "site" }: { variant?: "site" | "panel" }) {
   if (!sessionUser) return <SignInButton>{tn("login")}</SignInButton>;
 
   const name = me?.name ?? sessionUser.name ?? sessionUser.email ?? "";
-  const close = () => setOpen(false);
+  const close = () => closeMenu(false);
 
   const panel = variant === "panel";
   const goTo = me ? dashboardPath(me.role) : me === null ? ROUTES.onboarding : undefined;
@@ -120,16 +150,25 @@ export function UserMenu({ variant = "site" }: { variant?: "site" | "panel" }) {
         aria-expanded={open}
         aria-controls={menuId}
         aria-label={t("menuLabel", { name })}
-        onClick={() => setOpen((value) => !value)}
+        onClick={() => (open ? closeMenu(false) : openMenu("none"))}
+        onKeyDown={(event) => {
+          if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+            event.preventDefault();
+            openMenu(event.key === "ArrowDown" ? "first" : "last");
+          }
+        }}
         className="hover:bg-subtle inline-flex size-10 items-center justify-center rounded-full"
       >
         <Avatar name={name} image={sessionUser.image} />
       </button>
       {open && (
         <div
+          ref={menuRef}
           id={menuId}
           role="menu"
-          className="border-border bg-surface absolute right-0 z-50 mt-2 w-64 rounded-xl border p-2 shadow-lg"
+          aria-label={t("menuLabel", { name })}
+          onKeyDown={onMenuKeyDown}
+          className="border-border bg-surface absolute top-full right-0 z-50 mt-2 w-64 max-w-[calc(100vw-2rem)] rounded-xl border p-2 shadow-lg"
         >
           <div className="px-3 py-2">
             <p className="truncate text-sm font-semibold">{name}</p>

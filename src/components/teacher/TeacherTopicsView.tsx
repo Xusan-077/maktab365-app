@@ -2,8 +2,12 @@
 
 import { useState } from "react";
 import { useQueries } from "@tanstack/react-query";
+import { Library } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { PAGE_STACK } from "@/components/layout/containers";
 import { Badge } from "@/components/ui/Badge";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAppPaths } from "@/hooks/useAppPaths";
 import { useBooks } from "@/hooks/useBooks";
@@ -83,7 +87,7 @@ function TopicBrowser() {
   if (isPending || chapterQueries.some((query) => query.isPending)) {
     return <Skeleton className="h-48 w-full" />;
   }
-  if (filtered.length === 0) return <p className="text-muted">{t("empty")}</p>;
+  if (filtered.length === 0) return <EmptyState icon={Library}>{t("empty")}</EmptyState>;
 
   return (
     <div className="flex flex-col gap-8">
@@ -105,11 +109,8 @@ export function TeacherTopicsView() {
   const searching = debounced.length >= SEARCH_MIN_LENGTH;
 
   return (
-    <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
-        <p className="text-muted">{t("lead")}</p>
-      </header>
+    <div className={PAGE_STACK}>
+      <PageHeader title={t("title")} description={t("lead")} />
       <MaterialSearch value={query} onChange={setQuery} />
       <FilterBar />
       {searching ? <SearchResults query={debounced} /> : <TopicBrowser />}

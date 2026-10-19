@@ -1,6 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { PAGE_STACK } from "@/components/layout/containers";
 import { buttonVariants } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useBookmarks } from "@/hooks/useBookmarks";
@@ -53,13 +55,8 @@ export function CabinetView() {
   const reviewCount = progress ? groupByMastery(progress).review.length : 0;
 
   return (
-    <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-3xl font-bold tracking-tight">
-          {t("greeting", { name: me?.name ?? "" })}
-        </h1>
-        <p className="text-muted">{t("lead")}</p>
-      </header>
+    <div className={PAGE_STACK}>
+      <PageHeader title={t("greeting", { name: me?.name ?? "" })} description={t("lead")} />
 
       {isPending ? (
         <Skeleton className="h-44 w-full rounded-xl" />
@@ -71,7 +68,7 @@ export function CabinetView() {
         <StartCard finished={hasProgress} />
       )}
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2">
         <Panel
           title={t("subjects.title")}
           footer={

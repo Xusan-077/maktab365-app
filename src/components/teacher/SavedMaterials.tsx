@@ -1,7 +1,9 @@
 "use client";
 
+import { Bookmark, BookOpen } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { TopicRow } from "@/components/cabinet/TopicRow";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAppPaths } from "@/hooks/useAppPaths";
 import { useBook } from "@/hooks/useBook";
@@ -62,7 +64,7 @@ export function SavedMaterials({ limit }: { limit?: number }) {
           {t("books")}
         </h3>
         {!books || books.length === 0 ? (
-          <p className="text-muted text-sm">{t("emptyBooks")}</p>
+          <EmptyState icon={BookOpen}>{t("emptyBooks")}</EmptyState>
         ) : (
           <ul className="flex flex-col gap-4">
             {newest(books, limit).map((item) => (
@@ -78,7 +80,7 @@ export function SavedMaterials({ limit }: { limit?: number }) {
           {t("topics")}
         </h3>
         {!topics || topics.length === 0 ? (
-          <p className="text-muted text-sm">{t("emptyTopics")}</p>
+          <EmptyState icon={Bookmark}>{t("emptyTopics")}</EmptyState>
         ) : (
           <ul className="flex flex-col gap-4">
             {newest(topics, limit).map((item) => (

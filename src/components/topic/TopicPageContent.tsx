@@ -58,7 +58,7 @@ export async function TopicPageContent({
           />
         </aside>
 
-        <article className="present:mx-auto flex max-w-[44rem] min-w-0 flex-col gap-8 text-lg">
+        <article className="present:mx-auto flex max-w-[70ch] min-w-0 flex-col gap-8 text-lg">
           <header className="flex flex-col gap-4">
             <p className="text-muted text-sm">
               {tBook("chapterLabel", { order: chapter.order })}.{" "}

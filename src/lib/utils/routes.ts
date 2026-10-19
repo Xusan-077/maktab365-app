@@ -89,3 +89,11 @@ export function safeCallbackPath(value: string | null | undefined): string | und
     ? value
     : undefined;
 }
+
+/**
+ * Panel yo'lini (`/uz/ustoz/darsliklar/...`) ochiq sayt yo'liga aylantiradi (`/uz/darsliklar/...`):
+ * ulashiladigan havola kirishni talab qilmasin. Panel bo'lmagan yo'l o'zgarmaydi.
+ */
+export function toPublicPath(pathname: string): string {
+  return pathname.replace(/^((?:\/[A-Za-z-]+)?)\/(?:kabinet|ustoz)(?=\/)/, "$1");
+}

@@ -4,6 +4,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation } from "@tanstack/react-query";
 import { useForm, type Resolver } from "react-hook-form";
 import { useTranslations } from "next-intl";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { PAGE_STACK } from "@/components/layout/containers";
 import { Button } from "@/components/ui/Button";
 import { controlClasses, Field } from "@/components/ui/Field";
 import { useAppBase } from "@/hooks/useAppBase";
@@ -62,11 +64,8 @@ export function HelpView() {
   ];
 
   return (
-    <div className="flex max-w-2xl flex-col gap-8">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
-        <p className="text-muted text-lg">{t("lead")}</p>
-      </header>
+    <div className={`${PAGE_STACK} max-w-2xl`}>
+      <PageHeader title={t("title")} description={t("lead")} />
 
       <section aria-labelledby="help-tips" className="flex flex-col gap-3">
         <h2 id="help-tips" className="text-xl font-semibold">

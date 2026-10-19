@@ -152,7 +152,15 @@
   },
   "ui": {
     "close": "Закрыть",
-    "dismiss": "Закрыть уведомление"
+    "dismiss": "Закрыть уведомление",
+    "select": {
+      "search": "Поиск",
+      "noResults": "Ничего не найдено",
+      "done": "Готово",
+      "remove": "Убрать «{label}»",
+      "selectedCount": "Выбрано: {count}"
+    },
+    "loading": "Загрузка…"
   },
   "a11y": {
     "skipToContent": "Перейти к основному содержимому"
@@ -256,7 +264,18 @@
     "disabled": "Отключена",
     "small": "Маленькая",
     "medium": "Средняя",
-    "large": "Большая"
+    "large": "Большая",
+    "selects": "Select и MultiSelect",
+    "selectSingle": "Один вариант",
+    "selectSearchable": "Список с поиском",
+    "selectMulti": "Несколько вариантов",
+    "selectDisabled": "Отключено",
+    "selectError": "С ошибкой",
+    "selectForm": "Форма (React Hook Form + Yup)",
+    "selectSubmit": "Проверить",
+    "selectPlaceholder": "Выберите",
+    "selectOption": "Вариант {n}",
+    "selectDisabledOption": "Третий вариант (отключён)"
   },
   "catalog": {
     "meta": {
@@ -488,9 +507,15 @@
     "title": "Что-то пошло не так",
     "text": "Не удалось загрузить страницу. Попробуйте ещё раз.",
     "retry": "Повторить",
-    "home": "Вернуться на главную",
+    "home": "На главную",
     "notFoundTitle": "Страница не найдена",
-    "notFoundText": "Такой страницы нет или она была перемещена."
+    "notFoundText": "Такой страницы нет, или она переехала. Попробуйте найти нужный учебник ниже.",
+    "backToPanel": "Вернуться на главную",
+    "notFoundCode": "404",
+    "toTextbooks": "К учебникам",
+    "searchLabel": "Поиск учебника или темы",
+    "searchPlaceholder": "Название учебника или темы…",
+    "popularSubjects": "Популярные предметы"
   },
   "auth": {
     "signInGoogle": "Войти через Google",
@@ -529,7 +554,9 @@
       "gradeRequired": "Выберите класс",
       "subjectsRequired": "Выберите хотя бы один предмет",
       "gradesRequired": "Выберите хотя бы один класс"
-    }
+    },
+    "subjectsPlaceholder": "Выберите предметы",
+    "gradesPlaceholder": "Выберите классы"
   },
   "settings": {
     "title": "Настройки",

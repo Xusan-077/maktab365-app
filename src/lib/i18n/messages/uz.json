@@ -152,7 +152,15 @@
   },
   "ui": {
     "close": "Yopish",
-    "dismiss": "Xabarni yopish"
+    "dismiss": "Xabarni yopish",
+    "select": {
+      "search": "Qidirish",
+      "noResults": "Hech narsa topilmadi",
+      "done": "Tayyor",
+      "remove": "“{label}”ni olib tashlash",
+      "selectedCount": "Tanlangan: {count}"
+    },
+    "loading": "Yuklanmoqda…"
   },
   "a11y": {
     "skipToContent": "Asosiy kontentga o'tish"
@@ -256,7 +264,18 @@
     "disabled": "O'chirilgan",
     "small": "Kichik",
     "medium": "O'rta",
-    "large": "Katta"
+    "large": "Katta",
+    "selects": "Select va MultiSelect",
+    "selectSingle": "Bitta tanlov",
+    "selectSearchable": "Qidiruvli ro'yxat",
+    "selectMulti": "Ko'p tanlov",
+    "selectDisabled": "O'chirilgan",
+    "selectError": "Xatoli",
+    "selectForm": "Forma (React Hook Form + Yup)",
+    "selectSubmit": "Tekshirish",
+    "selectPlaceholder": "Tanlang",
+    "selectOption": "Variant {n}",
+    "selectDisabledOption": "Uchinchi variant (o'chirilgan)"
   },
   "catalog": {
     "meta": {
@@ -488,9 +507,15 @@
     "title": "Nimadir xato ketdi",
     "text": "Sahifani yuklab bo'lmadi. Qayta urinib ko'ring.",
     "retry": "Qayta urinish",
-    "home": "Bosh sahifaga qaytish",
+    "home": "Bosh sahifaga",
     "notFoundTitle": "Sahifa topilmadi",
-    "notFoundText": "Bunday sahifa mavjud emas yoki ko'chirilgan."
+    "notFoundText": "Bunday sahifa yo'q yoki boshqa joyga ko'chirilgan. Quyida kerakli darslikni qidirib ko'ring.",
+    "backToPanel": "Bosh sahifaga qaytish",
+    "notFoundCode": "404",
+    "toTextbooks": "Darsliklarga",
+    "searchLabel": "Darslik yoki mavzu qidirish",
+    "searchPlaceholder": "Darslik yoki mavzu nomi…",
+    "popularSubjects": "Mashhur fanlar"
   },
   "auth": {
     "signInGoogle": "Google bilan kirish",
@@ -529,7 +554,9 @@
       "gradeRequired": "Sinfni tanlang",
       "subjectsRequired": "Kamida bitta fanni tanlang",
       "gradesRequired": "Kamida bitta sinfni tanlang"
-    }
+    },
+    "subjectsPlaceholder": "Fanlarni tanlang",
+    "gradesPlaceholder": "Sinflarni tanlang"
   },
   "settings": {
     "title": "Sozlamalar",

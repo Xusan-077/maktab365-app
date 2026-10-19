@@ -1,9 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { Library } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Panel } from "@/components/cabinet/Panel";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { PAGE_STACK } from "@/components/layout/containers";
 import { Button } from "@/components/ui/Button";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { SEARCH_MIN_LENGTH } from "@/lib/api/queries";
 import { useBooks } from "@/hooks/useBooks";
@@ -37,18 +41,22 @@ function FilteredBooks() {
   const filtered = filterBooks(books, selection);
   if (filtered.length === 0) {
     return (
-      <div className="flex flex-col items-start gap-3">
-        <p className="text-muted">{t("empty")}</p>
-        <Button
-          variant="secondary"
-          onClick={() => {
-            setSubjects([]);
-            setGrades([]);
-          }}
-        >
-          {t("clearFilters")}
-        </Button>
-      </div>
+      <EmptyState
+        icon={Library}
+        action={
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setSubjects([]);
+              setGrades([]);
+            }}
+          >
+            {t("clearFilters")}
+          </Button>
+        }
+      >
+        {t("empty")}
+      </EmptyState>
     );
   }
   return <BookGrid books={filtered} />;
@@ -63,13 +71,8 @@ export function TeacherView() {
   const searching = debounced.length >= SEARCH_MIN_LENGTH;
 
   return (
-    <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-3xl font-bold tracking-tight">
-          {t("greeting", { name: me?.name ?? "" })}
-        </h1>
-        <p className="text-muted">{t("lead")}</p>
-      </header>
+    <div className={PAGE_STACK}>
+      <PageHeader title={t("greeting", { name: me?.name ?? "" })} description={t("lead")} />
 
       <MaterialSearch value={query} onChange={setQuery} />
       <FilterBar />

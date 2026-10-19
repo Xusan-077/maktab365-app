@@ -9,6 +9,7 @@ import {
   subjectPath,
   subjectsPath,
   topicBlockPath,
+  toPublicPath,
   topicPath,
 } from "./routes";
 
@@ -59,5 +60,18 @@ describe("baza bo'yicha yo'llar", () => {
     expect(roleBase("teacher")).toBe("ustoz");
     expect(helpPath("kabinet")).toBe("/kabinet/yordam");
     expect(helpPath("ustoz")).toBe("/ustoz/yordam");
+  });
+});
+
+describe("toPublicPath", () => {
+  it("panel yo'lini ochiq sayt yo'liga aylantiradi", () => {
+    expect(toPublicPath("/uz/ustoz/darsliklar/algebra-9/diskriminant")).toBe(
+      "/uz/darsliklar/algebra-9/diskriminant",
+    );
+    expect(toPublicPath("/uz-Cyrl/kabinet/darsliklar/a/b")).toBe("/uz-Cyrl/darsliklar/a/b");
+  });
+
+  it("ochiq yo'lni o'zgartirmaydi", () => {
+    expect(toPublicPath("/ru/darsliklar/a/b")).toBe("/ru/darsliklar/a/b");
   });
 });

@@ -1,20 +1,20 @@
 "use client";
 
+import { useMemo } from "react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useForm, useWatch, type Resolver } from "react-hook-form";
+import { Controller, useForm, useWatch, type Resolver } from "react-hook-form";
 import { GraduationCap, UserRound } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Select } from "@/components/ui/Select";
+import { MultiSelect, Select } from "@/components/ui/Select";
 import { useSubjects } from "@/hooks/useSubjects";
 import { useToast } from "@/hooks/useToast";
 import { getApi } from "@/lib/api";
 import { queryKeys } from "@/lib/api/query-keys";
 import type { Locale } from "@/lib/i18n/config";
 import { getLocalized } from "@/lib/i18n/localized";
-import { cn } from "@/lib/utils/cn";
 import { profileSchema, toProfileInput, type ProfileFormValues } from "@/lib/validation/profile";
 import { GRADES } from "@/types/catalog";
 import type { User } from "@/types/user";
@@ -29,9 +29,6 @@ export interface ProfileFormProps {
   onSaved?: (user: User) => void;
 }
 
-const pillClasses =
-  "border-border bg-surface hover:bg-subtle has-[:checked]:border-primary-600 has-[:checked]:bg-primary-600 has-[:checked]:text-white has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[var(--ring)] inline-flex h-9 cursor-pointer items-center rounded-full border px-4 text-sm font-medium transition-colors select-none";
-
 const cardClasses =
   "border-border bg-surface hover:bg-subtle has-[:checked]:border-primary-600 has-[:checked]:bg-primary-soft has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[var(--ring)] flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-colors";
 
@@ -41,7 +38,6 @@ function defaultsFor(initial: User | null | undefined, defaultName: string): Pro
       role: "teacher",
       name: initial.name,
       subjects: initial.subjects ?? [],
-      // RHF checkbox guruhi qiymatlarni qat'iy tenglik bilan solishtiradi: satr bo'lishi kerak
       grades: (initial.grades ?? []).map(String),
     };
   }
@@ -61,6 +57,18 @@ export function ProfileForm({ initial, defaultName = "", submitLabel, onSaved }:
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: subjects } = useSubjects();
+  const gradeOptions = useMemo(
+    () => GRADES.map((grade) => ({ value: String(grade), label: t("gradeOption", { grade }) })),
+    [t],
+  );
+  const subjectOptions = useMemo(
+    () =>
+      (subjects ?? []).map((subject) => ({
+        value: subject.id,
+        label: getLocalized(subject.name, locale),
+      })),
+    [subjects, locale],
+  );
 
   const {
     register,
@@ -121,62 +129,60 @@ export function ProfileForm({ initial, defaultName = "", submitLabel, onSaved }:
       />
 
       {role === "student" ? (
-        <Select
-          label={t("gradeLabel")}
-          error={fieldError(errors.grade?.message)}
-          {...register("grade")}
-        >
-          <option value="">{t("gradePlaceholder")}</option>
-          {GRADES.map((grade) => (
-            <option key={grade} value={grade}>
-              {t("gradeOption", { grade })}
-            </option>
-          ))}
-        </Select>
+        <Controller
+          control={control}
+          name="grade"
+          render={({ field }) => (
+            <Select
+              ref={field.ref}
+              name={field.name}
+              label={t("gradeLabel")}
+              placeholder={t("gradePlaceholder")}
+              options={gradeOptions}
+              value={field.value === undefined ? "" : String(field.value)}
+              onChange={(next) => field.onChange(next === "" ? undefined : Number(next))}
+              onBlur={field.onBlur}
+              error={fieldError(errors.grade?.message)}
+            />
+          )}
+        />
       ) : (
         <>
-          <fieldset className="flex flex-col gap-3">
-            <legend className="mb-1 text-sm font-medium">{t("subjectsLabel")}</legend>
-            <div className="flex flex-wrap gap-2">
-              {subjects?.map((subject) => (
-                <label key={subject.id} className={pillClasses}>
-                  <input
-                    type="checkbox"
-                    value={subject.id}
-                    className="sr-only"
-                    {...register("subjects")}
-                  />
-                  {getLocalized(subject.name, locale)}
-                </label>
-              ))}
-            </div>
-            {errors.subjects?.message && (
-              <p role="alert" className="text-danger text-sm">
-                {fieldError(errors.subjects.message)}
-              </p>
+          <Controller
+            control={control}
+            name="subjects"
+            render={({ field }) => (
+              <MultiSelect
+                ref={field.ref}
+                name={field.name}
+                label={t("subjectsLabel")}
+                placeholder={t("subjectsPlaceholder")}
+                options={subjectOptions}
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                error={fieldError(errors.subjects?.message)}
+              />
             )}
-          </fieldset>
-          <fieldset className="flex flex-col gap-3">
-            <legend className="mb-1 text-sm font-medium">{t("gradesLabel")}</legend>
-            <div className="flex flex-wrap gap-2">
-              {GRADES.map((grade) => (
-                <label key={grade} className={cn(pillClasses, "px-3")}>
-                  <input
-                    type="checkbox"
-                    value={grade}
-                    className="sr-only"
-                    {...register("grades")}
-                  />
-                  {t("gradeOption", { grade })}
-                </label>
-              ))}
-            </div>
-            {errors.grades?.message && (
-              <p role="alert" className="text-danger text-sm">
-                {fieldError(errors.grades.message)}
-              </p>
+          />
+          <Controller
+            control={control}
+            name="grades"
+            render={({ field }) => (
+              <MultiSelect
+                ref={field.ref}
+                name={field.name}
+                label={t("gradesLabel")}
+                placeholder={t("gradesPlaceholder")}
+                options={gradeOptions}
+                searchable={false}
+                value={field.value.map(String)}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                error={fieldError(errors.grades?.message)}
+              />
             )}
-          </fieldset>
+          />
         </>
       )}
 

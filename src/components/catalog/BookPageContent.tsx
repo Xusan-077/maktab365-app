@@ -73,7 +73,7 @@ export async function BookPageContent({
                 href={book.pdfUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={buttonVariants({ variant: "secondary", size: "lg" })}
+                className={buttonVariants({ variant: "secondary" })}
               >
                 {t("pdfRead")}
               </a>
@@ -82,7 +82,7 @@ export async function BookPageContent({
                 role="link"
                 aria-disabled="true"
                 title={t("pdfMissing")}
-                className={buttonVariants({ variant: "secondary", size: "lg" })}
+                className={buttonVariants({ variant: "secondary" })}
               >
                 {t("pdfRead")}
               </span>

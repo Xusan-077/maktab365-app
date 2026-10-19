@@ -152,7 +152,15 @@
   },
   "ui": {
     "close": "Close",
-    "dismiss": "Dismiss notification"
+    "dismiss": "Dismiss notification",
+    "select": {
+      "search": "Search",
+      "noResults": "Nothing found",
+      "done": "Done",
+      "remove": "Remove “{label}”",
+      "selectedCount": "Selected: {count}"
+    },
+    "loading": "Loading…"
   },
   "a11y": {
     "skipToContent": "Skip to main content"
@@ -256,7 +264,18 @@
     "disabled": "Disabled",
     "small": "Small",
     "medium": "Medium",
-    "large": "Large"
+    "large": "Large",
+    "selects": "Select and MultiSelect",
+    "selectSingle": "Single choice",
+    "selectSearchable": "List with search",
+    "selectMulti": "Multiple choice",
+    "selectDisabled": "Disabled",
+    "selectError": "With error",
+    "selectForm": "Form (React Hook Form + Yup)",
+    "selectSubmit": "Validate",
+    "selectPlaceholder": "Choose",
+    "selectOption": "Option {n}",
+    "selectDisabledOption": "Third option (disabled)"
   },
   "catalog": {
     "meta": {
@@ -488,9 +507,15 @@
     "title": "Something went wrong",
     "text": "The page couldn't be loaded. Please try again.",
     "retry": "Try again",
-    "home": "Back to home",
+    "home": "Go to home page",
     "notFoundTitle": "Page not found",
-    "notFoundText": "This page doesn't exist or has been moved."
+    "notFoundText": "This page doesn't exist or has moved. Try searching for the textbook you need.",
+    "backToPanel": "Back to home",
+    "notFoundCode": "404",
+    "toTextbooks": "Browse textbooks",
+    "searchLabel": "Search for a textbook or topic",
+    "searchPlaceholder": "Textbook or topic name…",
+    "popularSubjects": "Popular subjects"
   },
   "auth": {
     "signInGoogle": "Sign in with Google",
@@ -529,7 +554,9 @@
       "gradeRequired": "Choose a grade",
       "subjectsRequired": "Choose at least one subject",
       "gradesRequired": "Choose at least one grade"
-    }
+    },
+    "subjectsPlaceholder": "Choose subjects",
+    "gradesPlaceholder": "Choose grades"
   },
   "settings": {
     "title": "Settings",

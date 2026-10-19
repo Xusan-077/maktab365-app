@@ -1,7 +1,9 @@
 "use client";
 
+import { BookOpen, Settings } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { buttonVariants } from "@/components/ui/Button";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAppPaths } from "@/hooks/useAppPaths";
@@ -11,10 +13,9 @@ import { useProgress } from "@/hooks/useProgress";
 import type { Locale } from "@/lib/i18n/config";
 import { getLocalized } from "@/lib/i18n/localized";
 import { Link } from "@/lib/i18n/navigation";
-import { ROUTES } from "@/lib/utils/routes";
+import { catalogPath, ROUTES } from "@/lib/utils/routes";
 import type { Book } from "@/types/catalog";
 import type { Progress } from "@/types/progress";
-import { EmptyText } from "./Panel";
 
 function BookRow({
   book,
@@ -64,25 +65,45 @@ function BookRow({
 /** Sinfga mos fanlar (darsliklar) va har birida o'qilgan mavzular soni. */
 export function SubjectsList({ limit }: { limit?: number }) {
   const t = useTranslations("cabinet.subjects");
+  const tc = useTranslations("cabinet");
   const locale = useLocale() as Locale;
   const { grade, books, subjects, isPending } = useMyBooks();
   const { data: progress = [] } = useProgress();
 
   if (grade === undefined) {
     return (
-      <div className="flex flex-col items-start gap-3">
-        <EmptyText>{t("noGrade")}</EmptyText>
-        <Link
-          href={ROUTES.settings}
-          className={buttonVariants({ variant: "secondary", size: "sm" })}
-        >
-          {t("settings")}
-        </Link>
-      </div>
+      <EmptyState
+        icon={Settings}
+        action={
+          <Link href={ROUTES.settings} className={buttonVariants({ variant: "secondary" })}>
+            {t("settings")}
+          </Link>
+        }
+      >
+        {t("noGrade")}
+      </EmptyState>
     );
   }
   if (isPending) return <Skeleton className="h-20 w-full" />;
-  if (books.length === 0) return <EmptyText>{t("empty")}</EmptyText>;
+  if (books.length === 0) {
+    return (
+      <EmptyState
+        icon={BookOpen}
+        action={
+          limit === undefined ? (
+            <Link
+              href={catalogPath("kabinet")}
+              className={buttonVariants({ variant: "secondary" })}
+            >
+              {tc("browse")}
+            </Link>
+          ) : undefined
+        }
+      >
+        {t("empty")}
+      </EmptyState>
+    );
+  }
 
   return (
     <ul className="flex flex-col gap-4">

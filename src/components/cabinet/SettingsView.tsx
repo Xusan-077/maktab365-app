@@ -4,6 +4,8 @@ import { signOut } from "next-auth/react";
 import { LogOut } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { PAGE_STACK } from "@/components/layout/containers";
 import { TextSizeControl } from "@/components/layout/TextSizeControl";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
@@ -27,8 +29,8 @@ export function SettingsView() {
   const setTheme = usePreferencesStore((state) => state.setTheme);
 
   return (
-    <div className="flex w-full max-w-2xl flex-col gap-10">
-      <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
+    <div className={`${PAGE_STACK} max-w-2xl`}>
+      <PageHeader title={t("title")} />
 
       <section aria-labelledby="settings-profile" className="flex flex-col gap-4">
         <h2 id="settings-profile" className="text-xl font-semibold">

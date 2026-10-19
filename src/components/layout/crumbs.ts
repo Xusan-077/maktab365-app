@@ -2,9 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { catalogPath, ROUTES, subjectsPath, type AppBase } from "@/lib/utils/routes";
 import type { BreadcrumbItem } from "./Breadcrumbs";
 
-/** Sahifa konteyneri: marketingda o'zining kengligi va chetlari, panelda esa `AppShell` `<main>`i beradi. */
-export const pageShellClass = (base: AppBase) =>
-  base === "marketing" ? "mx-auto w-full max-w-6xl px-4 py-8 sm:px-6" : "w-full";
+export { pageShellClass } from "./containers";
 
 /** Katalogning o'zi (panelda bosh sahifa) — zanjirning boshi: marketingda "Bosh sahifa", panelda "Darsliklar". */
 export async function getRootCrumb(base: AppBase): Promise<BreadcrumbItem> {

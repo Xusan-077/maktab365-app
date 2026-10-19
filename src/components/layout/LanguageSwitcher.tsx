@@ -1,8 +1,9 @@
 "use client";
 
-import { useTransition, type ChangeEvent } from "react";
+import { useTransition } from "react";
 import { Globe } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import { Select } from "@/components/ui/Select";
 import { isLocale, LOCALE_COOKIE_MAX_AGE, LOCALE_COOKIE_NAME, locales } from "@/lib/i18n/config";
 import { usePathname, useRouter } from "@/lib/i18n/navigation";
 import { cn } from "@/lib/utils/cn";
@@ -14,8 +15,7 @@ export function LanguageSwitcher({ className }: { className?: string }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
 
-  function onChange(event: ChangeEvent<HTMLSelectElement>) {
-    const next = event.target.value;
+  function onChange(next: string) {
     if (!isLocale(next)) return;
     // Tanlov cookie'da saqlanadi: keyingi tashrifda `/` shu tilga yo'naltiradi
     document.cookie = `${LOCALE_COOKIE_NAME}=${next}; path=/; max-age=${LOCALE_COOKIE_MAX_AGE}; samesite=lax`;
@@ -25,21 +25,17 @@ export function LanguageSwitcher({ className }: { className?: string }) {
   }
 
   return (
-    <div className={cn("relative inline-flex items-center", className)}>
-      <Globe className="text-muted pointer-events-none absolute left-3 size-4" aria-hidden />
-      <select
+    <div className={cn("inline-flex", className)}>
+      <Select
         aria-label={t("label")}
+        icon={<Globe className="size-4" />}
         value={locale}
+        options={locales.map((value) => ({ value, label: t(`names.${value}`) }))}
+        searchable={false}
         disabled={pending}
         onChange={onChange}
-        className="border-border bg-surface text-foreground hover:border-primary-300 h-10 cursor-pointer appearance-none rounded-lg border pr-3 pl-9 text-sm shadow-xs transition-colors disabled:cursor-wait disabled:opacity-70"
-      >
-        {locales.map((value) => (
-          <option key={value} value={value}>
-            {t(`names.${value}`)}
-          </option>
-        ))}
-      </select>
+        className="w-auto min-w-40"
+      />
     </div>
   );
 }

@@ -10,10 +10,10 @@ import { Chip } from "@/components/ui/Chip";
 import { Dialog } from "@/components/ui/Dialog";
 import { Input } from "@/components/ui/Input";
 import { ProgressBar } from "@/components/ui/ProgressBar";
-import { Select } from "@/components/ui/Select";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Tabs } from "@/components/ui/Tabs";
 import { useToast } from "@/hooks/useToast";
+import { SelectDemos } from "./SelectDemos";
 
 const PRIMARY_SHADES = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900] as const;
 const ACCENT_SHADES = [50, 100, 200, 300, 400, 500] as const;
@@ -104,12 +104,12 @@ export function UiShowcase() {
             hint={t("sampleHint")}
           />
           <Input label={t("sampleLabel")} defaultValue="…" error={t("sampleError")} />
-          <Select label={t("sampleLabel")} hint={t("sampleHint")}>
-            <option>{t("selectOne")}</option>
-            <option>{t("selectTwo")}</option>
-          </Select>
           <Input label={t("sampleLabel")} disabled placeholder={t("samplePlaceholder")} />
         </div>
+      </Section>
+
+      <Section title={t("selects")}>
+        <SelectDemos />
       </Section>
 
       <Section title={t("badges")}>

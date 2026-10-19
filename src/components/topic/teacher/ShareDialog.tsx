@@ -9,6 +9,7 @@ import { Dialog } from "@/components/ui/Dialog";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useToast } from "@/hooks/useToast";
 import { cn } from "@/lib/utils/cn";
+import { toPublicPath } from "@/lib/utils/routes";
 
 // qrcode.react faqat dialog ochilganda yuklanadi: mavzu sahifasi yengil qoladi.
 const QrImage = dynamic(() => import("./QrImage"), {
@@ -29,7 +30,8 @@ export function ShareDialog({ open, onOpenChange }: ShareDialogProps) {
   const input = useRef<HTMLInputElement>(null);
 
   // Dialog yopiq paytda `window` ga tegmaymiz; ochiq paytda manzil o'qiladi (hash va query'siz).
-  const url = open ? `${window.location.origin}${window.location.pathname}` : "";
+  // Panel manzili emas, ochiq sayt manzili beriladi: o'quvchi kirmasdan ocha oladi.
+  const url = open ? `${window.location.origin}${toPublicPath(window.location.pathname)}` : "";
 
   const copy = async () => {
     try {

@@ -87,6 +87,17 @@ export function CatalogView({ initial }: { initial: CatalogFilters }) {
     [broader.data, grade],
   );
 
+  const subjectOptions = useMemo(
+    () => [
+      { value: "", label: t("allSubjects") },
+      ...(subjects.data ?? []).map((item) => ({
+        value: item.id,
+        label: getLocalized(item.name, locale),
+      })),
+    ],
+    [subjects.data, locale, t],
+  );
+
   const subjectLabel = subject
     ? getLocalized(subjectNames.get(subject) ?? { uz: subject }, locale)
     : "";
@@ -164,15 +175,9 @@ export function CatalogView({ initial }: { initial: CatalogFilters }) {
           <Select
             label={t("subjectLabel")}
             value={subject ?? ""}
-            onChange={(event) => setSubject(event.target.value || undefined)}
-          >
-            <option value="">{t("allSubjects")}</option>
-            {(subjects.data ?? []).map((item) => (
-              <option key={item.id} value={item.id}>
-                {getLocalized(item.name, locale)}
-              </option>
-            ))}
-          </Select>
+            options={subjectOptions}
+            onChange={(next) => setSubject(next || undefined)}
+          />
         </div>
 
         {active && (

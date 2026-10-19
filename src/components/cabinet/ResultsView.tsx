@@ -1,7 +1,12 @@
 "use client";
 
+import { ChartNoAxesColumn } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { PAGE_STACK } from "@/components/layout/containers";
 import { buttonVariants } from "@/components/ui/Button";
+import { EmptyState } from "@/components/ui/EmptyState";
+
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useProgress } from "@/hooks/useProgress";
 import { Link } from "@/lib/i18n/navigation";
@@ -60,24 +65,24 @@ export function ResultsView() {
   const total = groups.mastered.length + groups.review.length + groups.inProgress.length;
 
   return (
-    <div className="flex max-w-3xl flex-col gap-8">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
-        <p className="text-muted">{t("lead")}</p>
-      </header>
+    <div className={PAGE_STACK}>
+      <PageHeader title={t("title")} description={t("lead")} />
 
       {isPending ? (
         <Skeleton className="h-40 w-full rounded-xl" />
       ) : isError ? (
         <EmptyText>{tc("loadFailed")}</EmptyText>
       ) : total === 0 ? (
-        <section className="border-border bg-surface flex flex-col items-start gap-3 rounded-xl border p-6">
-          <h2 className="text-2xl font-semibold tracking-tight">{t("emptyTitle")}</h2>
-          <EmptyText>{t("emptyText")}</EmptyText>
-          <Link href={CABINET_CATALOG} className={buttonVariants({ size: "lg" })}>
-            {tc("browse")}
-          </Link>
-        </section>
+        <EmptyState
+          icon={ChartNoAxesColumn}
+          action={
+            <Link href={CABINET_CATALOG} className={buttonVariants()}>
+              {tc("browse")}
+            </Link>
+          }
+        >
+          {t("emptyText")}
+        </EmptyState>
       ) : (
         <>
           <div className="flex flex-col gap-1">
