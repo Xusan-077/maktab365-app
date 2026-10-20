@@ -619,7 +619,33 @@
       "changedHint": "Boshqa qurilmalardagi sessiyalar yopildi.",
       "logoutAll": "Barcha qurilmalardan chiqish",
       "logoutAllHint": "Boshqa telefon va kompyuterlardagi sessiyalar ham yopiladi.",
-      "logoutAllFailed": "Chiqib bo'lmadi. Qayta urinib ko'ring."
+      "logoutAllFailed": "Chiqib bo'lmadi. Qayta urinib ko'ring.",
+      "methods": {
+        "title": "Kirish usullari",
+        "text": "Akkauntingizga qaysi usullar bilan kirish mumkinligi.",
+        "providers": {
+          "password": "Email va parol",
+          "google": "Google",
+          "telegram": "Telegram",
+          "email_otp": "Email kodi"
+        },
+        "remove": "O'chirish",
+        "lastHint": "Oxirgi kirish usulini o'chirib bo'lmaydi.",
+        "add": "Kirish usulini qo'shish",
+        "addTelegram": "Telegram'ni ulash",
+        "addEmailCode": "Email kodini ulash",
+        "linked": "Kirish usuli ulandi",
+        "removed": "Kirish usuli o'chirildi",
+        "loadFailed": "Kirish usullarini yuklab bo'lmadi. Sahifani yangilang."
+      },
+      "setPassword": {
+        "title": "Parol o'rnatish",
+        "text": "Akkauntda hali parol yo'q. Parol qo'ysangiz, email va parol bilan ham kira olasiz.",
+        "newPassword": "Yangi parol",
+        "passwordConfirm": "Parolni takrorlang",
+        "submit": "Parolni o'rnatish",
+        "done": "Parol o'rnatildi"
+      }
     }
   },
   "cabinet": {
@@ -923,7 +949,23 @@
       "network_error": "Server bilan aloqa yo'q. Internetni tekshirib, qayta urinib ko'ring.",
       "timeout": "Server javob bermadi. Qayta urinib ko'ring.",
       "validation_error": "Ma'lumotlarni tekshirib, qayta urinib ko'ring.",
-      "unknown": "Nimadir xato ketdi. Qayta urinib ko'ring."
+      "unknown": "Nimadir xato ketdi. Qayta urinib ko'ring.",
+      "email_unverified_account": "Bu email bilan tasdiqlanmagan akkaunt bor. Avval email'ga kod yuborib kiring yoki akkaunt egasi emailni tasdiqlasin.",
+      "identity_taken": "Bu kirish usuli boshqa akkauntga ulangan.",
+      "provider_already_linked": "Bu turdagi boshqa hisob allaqachon ulangan. Avval uni o'chiring.",
+      "email_in_use": "Bu email boshqa akkauntda ishlatilgan.",
+      "last_identity": "Oxirgi kirish usulini o'chirib bo'lmaydi.",
+      "password_already_set": "Akkauntda parol allaqachon bor. Uni \"Parolni almashtirish\" orqali o'zgartiring.",
+      "no_email": "Parol qo'yish uchun akkauntda email bo'lishi kerak. Avval Google yoki email kodini ulang.",
+      "invalid_code": "Kod noto'g'ri. Tekshirib, qayta kiriting.",
+      "code_expired": "Kodning muddati tugagan. Yangi kod so'rang.",
+      "otp_locked": "Juda ko'p noto'g'ri urinish. Yangi kod so'rang.",
+      "otp_cooldown": "Kod yaqinda yuborildi. Bir daqiqadan keyin qayta so'rang.",
+      "provider_auth_invalid": "Kirishni tasdiqlab bo'lmadi. Qayta urinib ko'ring.",
+      "provider_auth_expired": "Kirish so'rovining muddati tugagan. Qayta urinib ko'ring.",
+      "provider_auth_replayed": "Bu kirish so'rovi allaqachon ishlatilgan. Qayta urinib ko'ring.",
+      "provider_email_unverified": "Google emailingizni tasdiqlamagan. Boshqa usulni tanlang.",
+      "provider_not_configured": "Bu kirish usuli hozircha mavjud emas."
     },
     "forgot": {
       "title": "Parolni tiklash",
@@ -959,6 +1001,20 @@
       "text": "Emailingiz hali tasdiqlanmagan. Xatdagi havolani bosing.",
       "resend": "Qayta yuborish",
       "sent": "Tasdiqlash xati qayta yuborildi"
+    },
+    "telegram": "Telegram bilan davom etish",
+    "emailCode": "Email'ga kod yuborish",
+    "emailCodeSubmit": "Kod yuborish",
+    "otp": {
+      "title": "Kodni kiriting",
+      "text": "{email} manziliga 6 xonali kod yubordik. Kod 10 daqiqa amal qiladi.",
+      "codeLabel": "Tasdiqlash kodi",
+      "digit": "{n}-raqam",
+      "resend": "Kodni qayta yuborish",
+      "resendIn": "Qayta yuborish: {seconds} soniya",
+      "sent": "Yangi kod yuborildi.",
+      "changeEmail": "Boshqa usulni tanlash",
+      "missingEmail": "Email ko'rsatilmagan. Kirish sahifasidan kod so'rang."
     }
   }
 }

@@ -1,5 +1,4 @@
 import { MockApi } from "@/mocks/mock-api";
-import { BACKEND_AUTH } from "@/lib/auth/config";
 import { HttpApi } from "./http-api";
 import type { ApiMode, MaktabApi } from "./types";
 
@@ -32,8 +31,8 @@ let instance: MaktabApi | undefined;
 
 /**
  * `NEXT_PUBLIC_API_MODE=mock|http` bo'yicha tanlangan klient (default: mock).
- * `NEXT_PUBLIC_BACKEND_AUTH=true` bo'lsa akkaunt metodlari mock rejimida ham haqiqiy backend'ga
- * boradi (sessiya backend tokenlari bilan); katalog backend'i tayyor bo'lguncha mock'da qoladi.
+ * Akkaunt metodlari mock rejimida ham haqiqiy backend'ga boradi (sessiya backend tokenlari
+ * bilan); katalog backend'i tayyor bo'lguncha mock'da qoladi.
  */
 export function getApi(): MaktabApi {
   if (instance) return instance;
@@ -41,7 +40,7 @@ export function getApi(): MaktabApi {
     instance = new HttpApi();
   } else {
     const mock = new MockApi({ latencyMs: process.env.NODE_ENV === "development" ? 200 : 0 });
-    instance = BACKEND_AUTH ? withAccountApi(mock, new HttpApi()) : mock;
+    instance = withAccountApi(mock, new HttpApi());
   }
   return instance;
 }

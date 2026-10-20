@@ -84,6 +84,37 @@ export async function registerWithPassword(input: RegisterInput, info?: ClientIn
   return unwrap(result) satisfies AuthSession;
 }
 
+type GoogleAuth = components["schemas"]["GoogleAuthRequest"];
+type TelegramAuth = components["schemas"]["TelegramAuthRequest"];
+type OtpVerify = components["schemas"]["OtpVerifyRequest"];
+
+/** Google `id_token` → backend sessiyasi (backend imzo, aud, iss, exp va email_verified'ni tekshiradi). */
+export async function loginWithGoogle(input: GoogleAuth, info?: ClientInfo) {
+  const result = await backend().POST("/api/v1/auth/google/", {
+    body: input,
+    headers: forwardHeaders(info),
+  });
+  return unwrap(result) satisfies AuthSession;
+}
+
+/** Telegram Login Widget maydonlari (imzo backend'da tekshiriladi) → backend sessiyasi. */
+export async function loginWithTelegram(input: TelegramAuth, info?: ClientInfo) {
+  const result = await backend().POST("/api/v1/auth/telegram/", {
+    body: input,
+    headers: forwardHeaders(info),
+  });
+  return unwrap(result) satisfies AuthSession;
+}
+
+/** Email kodi bilan kirish (kod `/auth/otp/request/` bilan so'raladi). */
+export async function loginWithOtp(input: OtpVerify, info?: ClientInfo) {
+  const result = await backend().POST("/api/v1/auth/otp/verify/", {
+    body: input,
+    headers: forwardHeaders(info),
+  });
+  return unwrap(result) satisfies AuthSession;
+}
+
 /**
  * `invalid` — refresh yaroqsiz/bekor qilingan (sessiya tugashi kerak);
  * `unavailable` — backend javob bermadi (sessiya saqlanadi, keyinroq qayta urinadi).

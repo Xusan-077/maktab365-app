@@ -20,7 +20,7 @@ import { ProfileForm } from "./ProfileForm";
 import { SecuritySettings } from "./SecuritySettings";
 
 /** Profil (rol, sinf/fanlar) formasi va ko'rinish sozlamalari: til, theme, matn hajmi. */
-export function SettingsView() {
+export function SettingsView({ googleClientId }: { googleClientId?: string }) {
   const t = useTranslations("settings");
   const tt = useTranslations("theme");
   const locale = useLocale();
@@ -75,7 +75,7 @@ export function SettingsView() {
           </div>
         </section>
 
-        <SecuritySettings />
+        <SecuritySettings googleClientId={googleClientId} />
 
         <section aria-labelledby="settings-about" className="flex flex-col gap-3">
           <h2 id="settings-about" className="text-xl font-semibold">

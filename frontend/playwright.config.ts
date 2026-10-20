@@ -1,8 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
 /**
- * E2E: haqiqiy backend (docker compose: `docker compose up -d`) + frontend production build
- * yangi auth oqimi bilan (`NEXT_PUBLIC_BACKEND_AUTH=true`).
+ * E2E: haqiqiy backend (docker compose: `docker compose up -d`; dev sozlamasi email kodini
+ * `/api/v1/dev/otp/` orqali ko'rsatadi) + frontend production build.
  * `make e2e` yoki `npx playwright test`.
  */
 const PORT = Number(process.env.E2E_PORT ?? 3100);
@@ -29,7 +29,8 @@ export default defineConfig({
     env: {
       // Katalog hali mock; akkaunt (auth, profil, onboarding) — haqiqiy backend.
       NEXT_PUBLIC_API_MODE: "mock",
-      NEXT_PUBLIC_BACKEND_AUTH: "true",
+      // Telegram widget konteyneri (skript tashqi tarmoqdan yuklanadi, testlar unga tayanmaydi).
+      NEXT_PUBLIC_TELEGRAM_BOT_USERNAME: "maktab365_e2e_bot",
       NEXT_PUBLIC_SITE_URL: BASE_URL,
       API_URL: process.env.E2E_API_URL ?? "http://localhost:8000",
       AUTH_SECRET: process.env.AUTH_SECRET ?? "e2e-only-auth-secret-0123456789abcdef",

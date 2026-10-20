@@ -4,6 +4,7 @@ export const ROUTES = {
   subjects: "/fanlar",
   about: "/loyiha-haqida",
   login: "/kirish",
+  otp: "/kod",
   forgotPassword: "/parolni-unutdim",
   resetPassword: "/parolni-tiklash",
   verifyEmail: "/email-tasdiqlash",

@@ -1,10 +1,18 @@
+import { cookies, headers } from "next/headers";
 import type { NextAuthConfig, Session } from "next-auth";
 import Google from "next-auth/providers/google";
-import { fetchMe, logoutBackend, refreshBackendTokens } from "@/lib/auth/backend";
-import { BACKEND_AUTH } from "@/lib/auth/config";
+import {
+  clientInfoFrom,
+  fetchMe,
+  loginWithGoogle,
+  logoutBackend,
+  refreshBackendTokens,
+} from "@/lib/auth/backend";
 import { backendJwt, type JwtDeps } from "@/lib/auth/jwt-callback";
 import { passwordProvider } from "@/lib/auth/password-provider";
+import { LOCALE_COOKIE_NAME } from "@/lib/i18n/config";
 import { refreshOnce } from "@/lib/auth/refresh";
+import { googleSignIn, localeOf, otpProvider, telegramProvider } from "@/lib/auth/social-providers";
 
 const jwtDeps: JwtDeps = {
   now: Date.now,
@@ -15,21 +23,35 @@ const jwtDeps: JwtDeps = {
 /**
  * Auth.js sozlamasi, sessiya JWT cookie'da (DB yo'q). Login ixtiyoriy — faqat `src/proxy.ts` dagi
  * himoyalangan yo'llar sessiya talab qiladi.
- * - Google — eski oqim (M4 da backend bilan ulanadi): rol va profil `MaktabApi` da.
- * - `password` (Credentials, `NEXT_PUBLIC_BACKEND_AUTH=true`) — backend JWT'lari cookie ichida,
- *   sessiyada rol/onboarding/email tasdig'i; tokenlar brauzerga chiqmaydi.
+ * Hamma kirish usuli backend JWT juftligiga olib keladi (u faqat shifrlangan cookie'da, brauzerga
+ * chiqmaydi); sessiyada rol/onboarding/email tasdig'i:
+ * - `password`, `telegram`, `otp` — Credentials (backend `/auth/*` ga `authorize` ichida boradi);
+ * - Google — OAuth, lekin `signIn` callback'ida `id_token` backend'ga almashtiriladi: Google'ning
+ *   o'z sessiyasi/profili ishlatilmaydi.
  */
 export const authConfig = {
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      authorization: { params: { prompt: "select_account" } },
     }),
-    ...(BACKEND_AUTH ? [passwordProvider] : []),
+    passwordProvider,
+    telegramProvider,
+    otpProvider,
   ],
   session: { strategy: "jwt" },
   trustHost: true,
   callbacks: {
+    signIn: ({ user, account }) =>
+      googleSignIn(
+        { user, account },
+        {
+          login: loginWithGoogle,
+          info: async () => clientInfoFrom(await headers()),
+          locale: async () => localeOf((await cookies()).get(LOCALE_COOKIE_NAME)?.value),
+        },
+      ),
     jwt: (params) => backendJwt(params, jwtDeps),
     session({ session, token }): Session {
       const { name, email, image } = session.user;
@@ -40,7 +62,6 @@ export const authConfig = {
           name,
           email,
           image,
-          // Faqat email+parol sessiyasida (Google'da `account` yo'q).
           ...(token.account && {
             role: token.account.role,
             onboarded: token.account.onboarded,

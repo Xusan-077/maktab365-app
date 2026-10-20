@@ -4,7 +4,6 @@ import { auth } from "@/auth";
 import { resolveAuthRedirect } from "@/lib/auth/redirects";
 import { defaultLocale, isLocale, locales } from "@/lib/i18n/config";
 import { routing } from "@/lib/i18n/routing";
-import { ROLE_COOKIE_NAME } from "@/lib/utils/role-cookie";
 
 const intlMiddleware = createMiddleware(routing);
 
@@ -13,7 +12,7 @@ const LOCALE_PREFIX = new RegExp(`^/(?:${locales.join("|")})(?=/|$)`);
 /**
  * Sessiyaga qarab yo'naltirish (`resolveAuthRedirect`), qolgani — faqat til yo'naltirishi.
  * `auth()` o'rami access muddati yaqinlashganda backend tokenlarini yangilaydi va cookie'ni yozadi.
- * Rol cookie'si faqat eski (Google) oqim uchun ishora; haqiqiy tekshiruv `AccountGate` da.
+ * Haqiqiy tekshiruv `AccountGate` da.
  */
 export default auth((request) => {
   const { pathname, search, origin } = request.nextUrl;
@@ -23,7 +22,6 @@ export default auth((request) => {
     path: pathname.replace(LOCALE_PREFIX, "") || "/",
     returnTo: `${pathname}${search}`,
     session: request.auth,
-    roleHint: request.cookies.get(ROLE_COOKIE_NAME)?.value,
   });
   if (target) return NextResponse.redirect(new URL(`/${locale}${target}`, origin));
   return intlMiddleware(request);

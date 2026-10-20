@@ -13,7 +13,6 @@ import { MultiSelect, Select } from "@/components/ui/Select";
 import { useSubjects } from "@/hooks/useSubjects";
 import { useToast } from "@/hooks/useToast";
 import { getApi } from "@/lib/api";
-import { BACKEND_AUTH } from "@/lib/auth/config";
 import { queryKeys } from "@/lib/api/query-keys";
 import type { Locale } from "@/lib/i18n/config";
 import { getLocalized } from "@/lib/i18n/localized";
@@ -89,7 +88,7 @@ export function ProfileForm({ initial, defaultName = "", submitLabel, onSaved }:
       const user = await getApi().saveProfile(toProfileInput(values));
       // Proxy sessiyadagi rol/onboarding'ga tayanadi: navigatsiyadan oldin sessiya yangilansin.
       // `update()` argumentsiz GET qiladi (trigger yo'q) — shuning uchun ma'lumot beriladi.
-      if (BACKEND_AUTH) await updateSession({ refresh: "account" });
+      await updateSession({ refresh: "account" });
       return user;
     },
     onSuccess: (user) => {

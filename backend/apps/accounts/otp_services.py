@@ -57,6 +57,10 @@ def _cooldown_key(email: str) -> str:
     return f"auth:otp:{hashlib.sha256(email.encode()).hexdigest()}"
 
 
+def dev_inbox_key(email: str) -> str:
+    return f"dev:otp:{email}"
+
+
 def request_code(email: str, locale: str | None = None, request=None) -> None:
     """Doim bir xil ishlaydi (akkaunt bor-yo'qligi oshkor bo'lmaydi); xat Celery task'ida."""
     from .tasks import send_otp_email_task
@@ -85,6 +89,8 @@ def send_code(email: str, locale: str | None = None, meta: dict | None = None) -
         OtpChallenge.objects.create(
             email=email, code_hash=hash_code(email, code), expires_at=now + settings.OTP_TTL
         )
+    if settings.OTP_DEV_INBOX:
+        cache.set(dev_inbox_key(email), code, timeout=15 * 60)
     send_otp_email(to=email, code=code, locale=profile.locale if profile else locale or Locale.UZ)
     AuthEvent.objects.create(user=user, type=AuthEventType.OTP_SENT, **(meta or client_meta(None)))
 

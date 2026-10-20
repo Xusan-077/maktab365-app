@@ -636,3 +636,21 @@ class TestSessionShape:
         dump = " ".join(str(e.meta) + e.user_agent for e in AuthEvent.objects.all())
         assert payload["hash"] not in dump
         assert code not in dump
+
+
+class TestDevInbox:
+    def test_disabled_by_default(self, client):
+        request_otp(client)
+        assert cache.get("dev:otp:ali@example.com") is None
+        assert client.api.get("/api/v1/dev/otp/?email=ali@example.com").status_code == 404
+
+    def test_enabled_stores_the_code_for_e2e(self, client, settings, rf):
+        from apps.accounts.dev_views import DevOtpInboxView
+
+        settings.OTP_DEV_INBOX = True
+        request_otp(client)
+        view = DevOtpInboxView.as_view()
+        found = view(rf.get("/api/v1/dev/otp/", {"email": "Ali@Example.com"}))
+        assert found.status_code == 200
+        assert found.data == {"code": otp_code()}
+        assert view(rf.get("/api/v1/dev/otp/", {"email": "boshqa@example.com"})).status_code == 404

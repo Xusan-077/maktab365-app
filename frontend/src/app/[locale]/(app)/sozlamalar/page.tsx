@@ -22,7 +22,7 @@ export default async function SettingsPage({ params }: Props) {
   setRequestLocale(locale);
   return (
     <AccountGate>
-      <SettingsView />
+      <SettingsView googleClientId={process.env.GOOGLE_CLIENT_ID || undefined} />
     </AccountGate>
   );
 }

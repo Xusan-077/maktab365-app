@@ -619,7 +619,33 @@
       "changedHint": "Sessions on other devices were signed out.",
       "logoutAll": "Sign out of all devices",
       "logoutAllHint": "Sessions on other phones and computers will be closed too.",
-      "logoutAllFailed": "Couldn't sign out. Try again."
+      "logoutAllFailed": "Couldn't sign out. Try again.",
+      "methods": {
+        "title": "Sign-in methods",
+        "text": "Ways you can sign in to your account.",
+        "providers": {
+          "password": "Email and password",
+          "google": "Google",
+          "telegram": "Telegram",
+          "email_otp": "Email code"
+        },
+        "remove": "Remove",
+        "lastHint": "You can't remove the last sign-in method.",
+        "add": "Add a sign-in method",
+        "addTelegram": "Link Telegram",
+        "addEmailCode": "Link an email code",
+        "linked": "Sign-in method linked",
+        "removed": "Sign-in method removed",
+        "loadFailed": "Couldn't load sign-in methods. Refresh the page."
+      },
+      "setPassword": {
+        "title": "Set a password",
+        "text": "This account has no password yet. Set one to also sign in with email and password.",
+        "newPassword": "New password",
+        "passwordConfirm": "Repeat the password",
+        "submit": "Set password",
+        "done": "Password set"
+      }
     }
   },
   "cabinet": {
@@ -923,7 +949,23 @@
       "network_error": "Can't reach the server. Check your connection and try again.",
       "timeout": "The server didn't respond. Try again.",
       "validation_error": "Check your details and try again.",
-      "unknown": "Something went wrong. Try again."
+      "unknown": "Something went wrong. Try again.",
+      "email_unverified_account": "An unverified account already uses this email. Sign in with an email code first, or ask the owner to verify the email.",
+      "identity_taken": "This sign-in method is linked to another account.",
+      "provider_already_linked": "Another account of this type is already linked. Remove it first.",
+      "email_in_use": "This email is used by another account.",
+      "last_identity": "You can't remove the last sign-in method.",
+      "password_already_set": "This account already has a password. Change it with \"Change password\".",
+      "no_email": "The account needs an email to set a password. Link Google or an email code first.",
+      "invalid_code": "The code is incorrect. Check it and try again.",
+      "code_expired": "The code has expired. Request a new one.",
+      "otp_locked": "Too many wrong attempts. Request a new code.",
+      "otp_cooldown": "A code was sent recently. Request another in a minute.",
+      "provider_auth_invalid": "We couldn't confirm the sign-in. Please try again.",
+      "provider_auth_expired": "The sign-in request has expired. Please try again.",
+      "provider_auth_replayed": "This sign-in request was already used. Please try again.",
+      "provider_email_unverified": "Google hasn't verified your email. Choose another method.",
+      "provider_not_configured": "This sign-in method isn't available yet."
     },
     "forgot": {
       "title": "Reset password",
@@ -959,6 +1001,20 @@
       "text": "Your email isn't confirmed yet. Click the link in the email we sent.",
       "resend": "Resend",
       "sent": "Confirmation email sent again"
+    },
+    "telegram": "Continue with Telegram",
+    "emailCode": "Email me a code",
+    "emailCodeSubmit": "Send code",
+    "otp": {
+      "title": "Enter the code",
+      "text": "We sent a 6-digit code to {email}. It is valid for 10 minutes.",
+      "codeLabel": "Verification code",
+      "digit": "Digit {n}",
+      "resend": "Resend code",
+      "resendIn": "Resend in {seconds}s",
+      "sent": "A new code has been sent.",
+      "changeEmail": "Choose another method",
+      "missingEmail": "No email provided. Request a code from the sign-in page."
     }
   }
 }

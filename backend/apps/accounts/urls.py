@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.urls import path
 
 from . import auth_views, social_views
@@ -45,3 +46,8 @@ urlpatterns = [
         name="auth-password-change",
     ),
 ]
+
+if settings.OTP_DEV_INBOX:
+    from .dev_views import DevOtpInboxView
+
+    urlpatterns += [path("dev/otp/", DevOtpInboxView.as_view(), name="dev-otp-inbox")]

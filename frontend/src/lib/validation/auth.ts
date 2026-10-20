@@ -41,6 +41,11 @@ export const resetPasswordSchema = object({
   passwordConfirm: confirm("password"),
 });
 
+export const setPasswordSchema = object({
+  newPassword: newPassword(),
+  passwordConfirm: confirm("newPassword"),
+});
+
 export const changePasswordSchema = object({
   currentPassword: string().required("currentPasswordRequired"),
   newPassword: newPassword(),
@@ -51,6 +56,7 @@ export type LoginValues = { email: string; password: string };
 export type RegisterValues = { email: string; password: string; passwordConfirm: string };
 export type ForgotPasswordValues = { email: string };
 export type ResetPasswordValues = { password: string; passwordConfirm: string };
+export type SetPasswordValues = { newPassword: string; passwordConfirm: string };
 export type ChangePasswordValues = {
   currentPassword: string;
   newPassword: string;

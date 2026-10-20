@@ -1,9 +1,10 @@
 import { createHttpClient, toApiError, unwrap } from "@/lib/api/http-client";
+import type { components } from "@/lib/api/schema";
 import { ApiError } from "@/lib/api/types";
 
 /**
  * Brauzerdan auth amallari (BFF orqali). Kirish/ro'yxatdan o'tish bu yerda emas —
- * ular Auth.js `signIn("password")` orqali (tokenlar serverda qoladi).
+ * ular Auth.js `signIn("password" | "otp" | "telegram" | "google")` orqali (tokenlar serverda qoladi).
  */
 
 let client: ReturnType<typeof createHttpClient> | undefined;
@@ -12,6 +13,11 @@ const api = () => (client ??= createHttpClient());
 async function noContent(result: { error?: unknown; response: Response }) {
   if (result.response.status >= 400) throw toApiError(result.response, result.error);
 }
+
+export type IdentityList = components["schemas"]["IdentityList"];
+export type LinkRequest = components["schemas"]["LinkIdentityRequestRequest"];
+/** Ulash mumkin bo'lgan kirish usullari (`/me/identities/{provider}/`). */
+export type LinkProvider = "google" | "telegram" | "email_otp";
 
 export const authClient = {
   async forgotPassword(email: string) {
@@ -32,6 +38,43 @@ export const authClient = {
 
   async logoutAll() {
     await noContent(await api().POST("/api/v1/auth/logout-all/"));
+  },
+
+  /** Emailga 6 xonali kirish kodini yuboradi (60 soniyada bir marta). */
+  async requestOtp(email: string, locale?: components["schemas"]["LocaleEnum"]) {
+    return unwrap(
+      await api().POST("/api/v1/auth/otp/request/", {
+        body: { email, ...(locale && { locale }) },
+      }),
+    );
+  },
+
+  async listIdentities() {
+    return unwrap(await api().GET("/api/v1/me/identities/"));
+  },
+
+  async linkIdentity(provider: LinkProvider, body: LinkRequest) {
+    return unwrap(
+      await api().POST("/api/v1/me/identities/{provider}/", {
+        params: { path: { provider } },
+        body,
+      }),
+    );
+  },
+
+  async unlinkIdentity(identityId: string) {
+    await noContent(
+      await api().DELETE("/api/v1/me/identities/{identity_id}/", {
+        params: { path: { identity_id: identityId } },
+      }),
+    );
+  },
+
+  /** Parolsiz akkaunt (Google/Telegram/kod) uchun birinchi parol. */
+  async setPassword(newPassword: string) {
+    return unwrap(
+      await api().POST("/api/v1/me/password/set/", { body: { new_password: newPassword } }),
+    );
   },
 
   /** Joriy sessiyani saqlab parolni almashtiradi (`/api/account/password` server route'i). */

@@ -3,6 +3,7 @@ from .base import env
 
 DEBUG = False
 ENABLE_API_DOCS = False
+OTP_DEV_INBOX = False
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=True)

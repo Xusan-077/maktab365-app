@@ -8,7 +8,6 @@ import { getApi } from "@/lib/api";
 import { apiQueries } from "@/lib/api/queries";
 import { queryKeys } from "@/lib/api/query-keys";
 import { setApiSession } from "@/lib/api/session";
-import { RoleCookieSync } from "./RoleCookieSync";
 import { useToast } from "@/hooks/useToast";
 import { getSyncQueue, stopSync } from "@/lib/progress/engine";
 import { collectGuestData, hasGuestData, mergeGuestData } from "@/lib/merge-guest-data";
@@ -106,10 +105,7 @@ function AuthBridge({ children }: { children: ReactNode }) {
 export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <SessionProvider>
-      <AuthBridge>
-        <RoleCookieSync />
-        {children}
-      </AuthBridge>
+      <AuthBridge>{children}</AuthBridge>
     </SessionProvider>
   );
 }

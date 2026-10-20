@@ -3,10 +3,8 @@ import { resolveAuthRedirect, type RedirectSession } from "./redirects";
 
 const student = (onboarded = true): RedirectSession => ({ user: { role: "student", onboarded } });
 const teacher: RedirectSession = { user: { role: "teacher", onboarded: true } };
-const google: RedirectSession = { user: {} };
-
-const go = (path: string, session: RedirectSession | null, roleHint?: string) =>
-  resolveAuthRedirect({ path, returnTo: `/uz${path}`, session, roleHint });
+const go = (path: string, session: RedirectSession | null) =>
+  resolveAuthRedirect({ path, returnTo: `/uz${path}`, session });
 
 describe("resolveAuthRedirect", () => {
   it("kirmagan: himoyalangan sahifa va onboarding → kirish (callbackUrl bilan)", () => {
@@ -17,7 +15,7 @@ describe("resolveAuthRedirect", () => {
   });
 
   it("kirmagan: ochiq sahifalarga tegmaydi", () => {
-    for (const path of ["/", "/darsliklar", "/kirish", "/parolni-unutdim", "/kabinetlar"]) {
+    for (const path of ["/", "/darsliklar", "/kirish", "/kod", "/parolni-unutdim", "/kabinetlar"]) {
       expect(go(path, null)).toBeNull();
     }
   });
@@ -27,6 +25,7 @@ describe("resolveAuthRedirect", () => {
     expect(go("/ustoz/mavzular", student(false))).toBe("/onboarding");
     expect(go("/sozlamalar", student(false))).toBe("/onboarding");
     expect(go("/kirish", student(false))).toBe("/onboarding");
+    expect(go("/kod", student(false))).toBe("/onboarding");
     expect(go("/onboarding", student(false))).toBeNull();
     expect(go("/darsliklar", student(false))).toBeNull();
   });
@@ -34,6 +33,7 @@ describe("resolveAuthRedirect", () => {
   it("onboarding tugagan: onboarding va kirishdan rol paneliga", () => {
     expect(go("/onboarding", student())).toBe("/kabinet");
     expect(go("/kirish", teacher)).toBe("/ustoz");
+    expect(go("/kod", student())).toBe("/kabinet");
   });
 
   it("rolga qarab: o'quvchi /ustoz dan /kabinet ga, o'qituvchi aksincha", () => {
@@ -44,14 +44,7 @@ describe("resolveAuthRedirect", () => {
     expect(go("/sozlamalar", teacher)).toBeNull();
   });
 
-  it("sessiya maydonlari rol cookie'sidan ustun", () => {
-    expect(go("/kabinet", teacher, "student")).toBe("/ustoz");
-  });
-
-  it("Google (eski oqim): faqat rol cookie'si bo'yicha", () => {
-    expect(go("/kabinet", google, "teacher")).toBe("/ustoz");
-    expect(go("/kabinet", google)).toBeNull();
-    expect(go("/kirish", google, "teacher")).toBeNull();
-    expect(go("/kabinet", google, "hacker")).toBeNull();
+  it("rol/onboarding maydonlari yo'q sessiya: yo'naltirilmaydi", () => {
+    expect(go("/kabinet", { user: {} })).toBeNull();
   });
 });

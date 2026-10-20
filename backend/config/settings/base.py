@@ -146,6 +146,8 @@ TELEGRAM_AUTH_MAX_AGE_SECONDS = env.int("TELEGRAM_AUTH_MAX_AGE_SECONDS", default
 OTP_TTL = timedelta(minutes=env.int("OTP_TTL_MINUTES", default=10))
 OTP_MAX_ATTEMPTS = env.int("OTP_MAX_ATTEMPTS", default=5)
 OTP_RESEND_COOLDOWN_SECONDS = env.int("OTP_RESEND_COOLDOWN_SECONDS", default=60)
+# Faqat dev (e2e): yuborilgan kodni `GET /api/v1/dev/otp/?email=` qaytaradi. dev.py yoqadi.
+OTP_DEV_INBOX = False
 
 # --- Email: dev — konsol, prod — SMTP (Resend ham SMTP orqali), EMAIL_URL bilan ---
 # Masalan: EMAIL_URL=smtp+tls://resend:re_xxx@smtp.resend.com:587
@@ -183,7 +185,8 @@ CORS_EXPOSE_HEADERS = ["X-Request-ID"]
 # --- Celery ---
 CELERY_BROKER_URL = env("CELERY_BROKER_URL", default=REDIS_URL)
 CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default=REDIS_URL)
-CELERY_TASK_ALWAYS_EAGER = False
+# Worker'siz lokal ishga tushirish (va e2e) uchun: CELERY_TASK_ALWAYS_EAGER=true
+CELERY_TASK_ALWAYS_EAGER = env.bool("CELERY_TASK_ALWAYS_EAGER", default=False)
 CELERY_TASK_TIME_LIMIT = 60 * 5
 
 # --- Sentry ---
