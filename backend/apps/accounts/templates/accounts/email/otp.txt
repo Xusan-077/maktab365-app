@@ -1,0 +1,12 @@
+{% autoescape off %}{{ greeting }}
+
+{{ text }}
+
+{{ code }}
+
+{{ expires }}
+
+{{ ignore }}
+
+— maktab365
+{% endautoescape %}

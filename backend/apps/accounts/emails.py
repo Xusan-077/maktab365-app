@@ -72,6 +72,30 @@ COPY = {
     },
 }
 
+OTP_COPY = {
+    "uz": {
+        "subject": "maktab365: kirish kodi",
+        "greeting": "Assalomu alaykum!",
+        "text": "maktab365 ga kirish uchun quyidagi koddan foydalaning.",
+        "expires": "Kod 10 daqiqa amal qiladi va faqat bir marta ishlaydi.",
+        "ignore": "Kod so'ramagan bo'lsangiz, xatga e'tibor bermang. Kodni hech kimga bermang.",
+    },
+    "ru": {
+        "subject": "maktab365: код для входа",
+        "greeting": "Здравствуйте!",
+        "text": "Используйте этот код, чтобы войти в maktab365.",
+        "expires": "Код действует 10 минут и срабатывает только один раз.",
+        "ignore": "Если вы не запрашивали код, проигнорируйте письмо. Никому не сообщайте код.",
+    },
+    "en": {
+        "subject": "maktab365: your sign-in code",
+        "greeting": "Hello!",
+        "text": "Use this code to sign in to maktab365.",
+        "expires": "The code is valid for 10 minutes and works only once.",
+        "ignore": "If you didn't request a code, ignore this email. Never share the code.",
+    },
+}
+
 # Frontend yo'llari (`frontend/src/lib/utils/routes.ts` bilan bir xil).
 FRONTEND_PATHS = {
     TokenPurpose.EMAIL_VERIFY: "/email-tasdiqlash",
@@ -102,4 +126,17 @@ def send_token_email(*, to: str, purpose: str, token: str, locale: str | None) -
         to=[to],
     )
     message.attach_alternative(render_to_string("accounts/email/action.html", context), "text/html")
+    message.send()
+
+
+def send_otp_email(*, to: str, code: str, locale: str | None) -> None:
+    language = email_language(locale)
+    context = {**OTP_COPY[language], "code": code, "lang": language}
+    message = EmailMultiAlternatives(
+        subject=context["subject"],
+        body=render_to_string("accounts/email/otp.txt", context),
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[to],
+    )
+    message.attach_alternative(render_to_string("accounts/email/otp.html", context), "text/html")
     message.send()

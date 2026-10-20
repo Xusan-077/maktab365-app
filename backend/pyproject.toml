@@ -13,8 +13,10 @@ dependencies = [
     "djangorestframework>=3.18.3",
     "djangorestframework-simplejwt>=5.5.1",
     "drf-spectacular>=0.30.0",
+    "google-auth>=2.62.0",
     "psycopg[binary]>=3.3.6",
     "redis>=8.1.0",
+    "requests>=2.34.2",
     "sentry-sdk>=2.72.0",
     "structlog>=26.1.0",
 ]

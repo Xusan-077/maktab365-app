@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import auth_views
+from . import auth_views, social_views
 from .views import ExportView, MeView, OnboardingView, RoleView
 
 urlpatterns = [
@@ -8,6 +8,22 @@ urlpatterns = [
     path("me/onboarding/", OnboardingView.as_view(), name="me-onboarding"),
     path("me/role/", RoleView.as_view(), name="me-role"),
     path("me/export/", ExportView.as_view(), name="me-export"),
+    path("me/identities/", social_views.IdentityListView.as_view(), name="me-identities"),
+    path(
+        "me/identities/<uuid:identity_id>/",
+        social_views.IdentityDetailView.as_view(),
+        name="me-identity",
+    ),
+    path(
+        "me/identities/<str:provider>/",
+        social_views.IdentityLinkView.as_view(),
+        name="me-identity-link",
+    ),
+    path("me/password/set/", social_views.PasswordSetView.as_view(), name="me-password-set"),
+    path("auth/google/", social_views.GoogleLoginView.as_view(), name="auth-google"),
+    path("auth/telegram/", social_views.TelegramLoginView.as_view(), name="auth-telegram"),
+    path("auth/otp/request/", social_views.OtpRequestView.as_view(), name="auth-otp-request"),
+    path("auth/otp/verify/", social_views.OtpVerifyView.as_view(), name="auth-otp-verify"),
     path("auth/register/", auth_views.RegisterView.as_view(), name="auth-register"),
     path("auth/login/", auth_views.LoginView.as_view(), name="auth-login"),
     path("auth/refresh/", auth_views.RefreshView.as_view(), name="auth-refresh"),

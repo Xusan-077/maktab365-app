@@ -157,6 +157,10 @@ class AuthEventType(models.TextChoices):
     PASSWORD_RESET_REQUESTED = "password_reset_requested", "Password reset requested"
     PASSWORD_RESET = "password_reset", "Password reset"
     PASSWORD_CHANGED = "password_changed", "Password changed"
+    PASSWORD_SET = "password_set", "Password set"
+    OTP_SENT = "otp_sent", "Sign-in code sent"
+    IDENTITY_LINKED = "identity_linked", "Sign-in method linked"
+    IDENTITY_UNLINKED = "identity_unlinked", "Sign-in method removed"
     ONBOARDED = "onboarded", "Onboarded"
     PROFILE_UPDATED = "profile_updated", "Profile updated"
     ROLE_CHANGED = "role_changed", "Role changed"
@@ -221,3 +225,20 @@ class RotatedRefreshToken(models.Model):
 
     def __str__(self) -> str:
         return f"rotated {self.token_id}"
+
+
+class OtpChallenge(UUIDModel):
+    """Email bir martalik kodi. Kodning o'zi emas, faqat HMAC xeshi saqlanadi."""
+
+    email = models.EmailField()
+    code_hash = models.CharField(max_length=64)
+    expires_at = models.DateTimeField()
+    attempts = models.PositiveSmallIntegerField(default=0)
+    consumed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [models.Index(fields=["email", "-created_at"])]
+
+    def __str__(self) -> str:
+        return f"otp {self.created_at:%Y-%m-%d %H:%M}"

@@ -69,6 +69,153 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/identities/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["me_identities_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/identities/{identity_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Kirish usulini o'chirish (oxirgisini o'chirib bo'lmaydi) */
+        delete: operations["me_identities_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/identities/{provider}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Kirish usulini ulash (google | telegram | email_otp) */
+        post: operations["me_identities_link"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/password/set/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Parolsiz akkaunt uchun parol o'rnatish */
+        post: operations["me_password_set"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/google/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Google id_token orqali kirish/ro'yxatdan o'tish
+         * @description Kirmagan foydalanuvchi uchun: eskirgan `Authorization` sarlavhasi so'rovni buzmasin.
+         */
+        post: operations["auth_google"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/telegram/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Telegram Login Widget orqali kirish/ro'yxatdan o'tish
+         * @description Kirmagan foydalanuvchi uchun: eskirgan `Authorization` sarlavhasi so'rovni buzmasin.
+         */
+        post: operations["auth_telegram"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/otp/request/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Emailga 6 xonali kod yuborish (60 soniyada bir marta)
+         * @description Kirmagan foydalanuvchi uchun: eskirgan `Authorization` sarlavhasi so'rovni buzmasin.
+         */
+        post: operations["auth_otp_request"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/otp/verify/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Email kodi orqali kirish/ro'yxatdan o'tish
+         * @description Kirmagan foydalanuvchi uchun: eskirgan `Authorization` sarlavhasi so'rovni buzmasin.
+         */
+        post: operations["auth_otp_verify"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/register/": {
         parameters: {
             query?: never;
@@ -325,6 +472,10 @@ export interface components {
             /** Format: date-time */
             last_login: string | null;
         };
+        GoogleAuthRequest: {
+            locale?: components["schemas"]["LocaleEnum"];
+            id_token: string;
+        };
         Health: {
             status: components["schemas"]["StatusEnum"];
             checks: components["schemas"]["HealthChecks"];
@@ -333,6 +484,21 @@ export interface components {
             database: components["schemas"]["CheckStatusEnum"];
             redis: components["schemas"]["CheckStatusEnum"];
         };
+        Identity: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly provider: components["schemas"]["ProviderEnum"];
+            /** Format: email */
+            readonly email: string;
+            readonly verified: boolean;
+            /** Format: date-time */
+            readonly created_at: string;
+        };
+        IdentityList: {
+            identities: components["schemas"]["Identity"][];
+            has_password: boolean;
+        };
+        LinkIdentityRequestRequest: components["schemas"]["GoogleAuthRequest"] | components["schemas"]["TelegramAuthRequest"] | components["schemas"]["OtpVerifyRequest"];
         /**
          * @description * `uz` - Uzbek (Latin)
          *     * `uz-Cyrl` - Uzbek (Cyrillic)
@@ -374,6 +540,17 @@ export interface components {
          * @enum {string}
          */
         OnboardingRoleEnum: "student" | "teacher";
+        OtpRequestRequest: {
+            locale?: components["schemas"]["LocaleEnum"];
+            /** Format: email */
+            email: string;
+        };
+        OtpVerifyRequest: {
+            locale?: components["schemas"]["LocaleEnum"];
+            /** Format: email */
+            email: string;
+            code: string;
+        };
         PasswordChangeRequest: {
             current_password?: string;
             new_password: string;
@@ -382,6 +559,9 @@ export interface components {
         PasswordResetRequest: {
             token: string;
             password: string;
+        };
+        PasswordSetRequest: {
+            new_password: string;
         };
         PatchedProfileUpdateRequest: {
             display_name?: string;
@@ -405,6 +585,14 @@ export interface components {
             /** Format: date-time */
             readonly onboarded_at: string | null;
         };
+        /**
+         * @description * `password` - Password
+         *     * `google` - Google
+         *     * `telegram` - Telegram
+         *     * `email_otp` - Email OTP
+         * @enum {string}
+         */
+        ProviderEnum: "password" | "google" | "telegram" | "email_otp";
         RefreshRequest: {
             refresh: string;
         };
@@ -429,6 +617,17 @@ export interface components {
          * @enum {string}
          */
         StatusEnum: "ok" | "degraded";
+        /** @description Telegram Login Widget qaytargan maydonlar (imzo tekshiruvi providers/telegram.py da). */
+        TelegramAuthRequest: {
+            locale?: components["schemas"]["LocaleEnum"];
+            id: number;
+            first_name: string;
+            last_name?: string;
+            username?: string;
+            photo_url?: string;
+            auth_date: number;
+            hash: string;
+        };
         TokenRequest: {
             token: string;
         };
@@ -568,6 +767,197 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Export"];
+                };
+            };
+        };
+    };
+    me_identities_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IdentityList"];
+                };
+            };
+        };
+    };
+    me_identities_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                identity_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    me_identities_link: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                provider: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["LinkIdentityRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["LinkIdentityRequestRequest"];
+                "multipart/form-data": components["schemas"]["LinkIdentityRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Identity"];
+                };
+            };
+        };
+    };
+    me_password_set: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PasswordSetRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PasswordSetRequest"];
+                "multipart/form-data": components["schemas"]["PasswordSetRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Ok"];
+                };
+            };
+        };
+    };
+    auth_google: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GoogleAuthRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["GoogleAuthRequest"];
+                "multipart/form-data": components["schemas"]["GoogleAuthRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthSession"];
+                };
+            };
+        };
+    };
+    auth_telegram: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TelegramAuthRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["TelegramAuthRequest"];
+                "multipart/form-data": components["schemas"]["TelegramAuthRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthSession"];
+                };
+            };
+        };
+    };
+    auth_otp_request: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OtpRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["OtpRequestRequest"];
+                "multipart/form-data": components["schemas"]["OtpRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Ok"];
+                };
+            };
+        };
+    };
+    auth_otp_verify: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OtpVerifyRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["OtpVerifyRequest"];
+                "multipart/form-data": components["schemas"]["OtpVerifyRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthSession"];
                 };
             };
         };

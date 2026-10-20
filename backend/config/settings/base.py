@@ -137,6 +137,16 @@ AUTH_RESEND_COOLDOWN_SECONDS = env.int("AUTH_RESEND_COOLDOWN_SECONDS", default=6
 AUTH_LOCKOUT_THRESHOLD = env.int("AUTH_LOCKOUT_THRESHOLD", default=5)
 AUTH_LOCKOUT_SECONDS = env.int("AUTH_LOCKOUT_SECONDS", default=15 * 60)
 
+# --- Kirish usullari: Google, Telegram, email OTP ---
+# Google OAuth client ID (id_token `aud`); frontend GOOGLE_CLIENT_ID bilan bir xil. Bo'sh — o'chiq.
+GOOGLE_CLIENT_ID = env("GOOGLE_CLIENT_ID", default="")
+# @BotFather bergan token; Telegram Login Widget imzosi shu bilan tekshiriladi. Bo'sh — o'chiq.
+TELEGRAM_BOT_TOKEN = env("TELEGRAM_BOT_TOKEN", default="")
+TELEGRAM_AUTH_MAX_AGE_SECONDS = env.int("TELEGRAM_AUTH_MAX_AGE_SECONDS", default=5 * 60)
+OTP_TTL = timedelta(minutes=env.int("OTP_TTL_MINUTES", default=10))
+OTP_MAX_ATTEMPTS = env.int("OTP_MAX_ATTEMPTS", default=5)
+OTP_RESEND_COOLDOWN_SECONDS = env.int("OTP_RESEND_COOLDOWN_SECONDS", default=60)
+
 # --- Email: dev — konsol, prod — SMTP (Resend ham SMTP orqali), EMAIL_URL bilan ---
 # Masalan: EMAIL_URL=smtp+tls://resend:re_xxx@smtp.resend.com:587
 vars().update(env.email_url("EMAIL_URL", default="consolemail://"))

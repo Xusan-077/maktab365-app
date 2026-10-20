@@ -117,6 +117,213 @@ paths:
               schema:
                 $ref: '#/components/schemas/Export'
           description: ''
+  /api/v1/me/identities/:
+    get:
+      operationId: me_identities_list
+      tags:
+      - me
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentityList'
+          description: ''
+  /api/v1/me/identities/{identity_id}/:
+    delete:
+      operationId: me_identities_delete
+      summary: Kirish usulini o'chirish (oxirgisini o'chirib bo'lmaydi)
+      parameters:
+      - in: path
+        name: identity_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - me
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/me/identities/{provider}/:
+    post:
+      operationId: me_identities_link
+      summary: Kirish usulini ulash (google | telegram | email_otp)
+      parameters:
+      - in: path
+        name: provider
+        schema:
+          type: string
+        required: true
+      tags:
+      - me
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LinkIdentityRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LinkIdentityRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LinkIdentityRequestRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Identity'
+          description: ''
+  /api/v1/me/password/set/:
+    post:
+      operationId: me_password_set
+      summary: Parolsiz akkaunt uchun parol o'rnatish
+      tags:
+      - me
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordSetRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordSetRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordSetRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ok'
+          description: ''
+  /api/v1/auth/google/:
+    post:
+      operationId: auth_google
+      description: 'Kirmagan foydalanuvchi uchun: eskirgan `Authorization` sarlavhasi
+        so''rovni buzmasin.'
+      summary: Google id_token orqali kirish/ro'yxatdan o'tish
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GoogleAuthRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GoogleAuthRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GoogleAuthRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSession'
+          description: ''
+  /api/v1/auth/telegram/:
+    post:
+      operationId: auth_telegram
+      description: 'Kirmagan foydalanuvchi uchun: eskirgan `Authorization` sarlavhasi
+        so''rovni buzmasin.'
+      summary: Telegram Login Widget orqali kirish/ro'yxatdan o'tish
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TelegramAuthRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TelegramAuthRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TelegramAuthRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSession'
+          description: ''
+  /api/v1/auth/otp/request/:
+    post:
+      operationId: auth_otp_request
+      description: 'Kirmagan foydalanuvchi uchun: eskirgan `Authorization` sarlavhasi
+        so''rovni buzmasin.'
+      summary: Emailga 6 xonali kod yuborish (60 soniyada bir marta)
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OtpRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OtpRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OtpRequestRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ok'
+          description: ''
+  /api/v1/auth/otp/verify/:
+    post:
+      operationId: auth_otp_verify
+      description: 'Kirmagan foydalanuvchi uchun: eskirgan `Authorization` sarlavhasi
+        so''rovni buzmasin.'
+      summary: Email kodi orqali kirish/ro'yxatdan o'tish
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OtpVerifyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OtpVerifyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OtpVerifyRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSession'
+          description: ''
   /api/v1/auth/register/:
     post:
       operationId: auth_register
@@ -526,6 +733,17 @@ components:
       - id
       - last_login
       - role
+    GoogleAuthRequest:
+      type: object
+      properties:
+        locale:
+          $ref: '#/components/schemas/LocaleEnum'
+        id_token:
+          type: string
+          minLength: 1
+          maxLength: 4096
+      required:
+      - id_token
     Health:
       type: object
       properties:
@@ -546,6 +764,51 @@ components:
       required:
       - database
       - redis
+    Identity:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        provider:
+          allOf:
+          - $ref: '#/components/schemas/ProviderEnum'
+          readOnly: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+        verified:
+          type: boolean
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - email
+      - id
+      - provider
+      - verified
+    IdentityList:
+      type: object
+      properties:
+        identities:
+          type: array
+          items:
+            $ref: '#/components/schemas/Identity'
+        has_password:
+          type: boolean
+      required:
+      - has_password
+      - identities
+    LinkIdentityRequestRequest:
+      oneOf:
+      - $ref: '#/components/schemas/GoogleAuthRequest'
+      - $ref: '#/components/schemas/TelegramAuthRequest'
+      - $ref: '#/components/schemas/OtpVerifyRequest'
     LocaleEnum:
       enum:
       - uz
@@ -655,6 +918,36 @@ components:
       description: |-
         * `student` - student
         * `teacher` - teacher
+    OtpRequestRequest:
+      type: object
+      properties:
+        locale:
+          $ref: '#/components/schemas/LocaleEnum'
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+      required:
+      - email
+    OtpVerifyRequest:
+      type: object
+      properties:
+        locale:
+          $ref: '#/components/schemas/LocaleEnum'
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        code:
+          type: string
+          minLength: 1
+          maxLength: 6
+          pattern: ^\d{6}$
+      required:
+      - code
+      - email
     PasswordChangeRequest:
       type: object
       properties:
@@ -686,6 +979,16 @@ components:
       required:
       - password
       - token
+    PasswordSetRequest:
+      type: object
+      properties:
+        new_password:
+          type: string
+          writeOnly: true
+          minLength: 1
+          maxLength: 128
+      required:
+      - new_password
     PatchedProfileUpdateRequest:
       type: object
       properties:
@@ -767,6 +1070,18 @@ components:
       - locale
       - onboarded_at
       - subjects
+    ProviderEnum:
+      enum:
+      - password
+      - google
+      - telegram
+      - email_otp
+      type: string
+      description: |-
+        * `password` - Password
+        * `google` - Google
+        * `telegram` - Telegram
+        * `email_otp` - Email OTP
     RefreshRequest:
       type: object
       properties:
@@ -816,6 +1131,44 @@ components:
       description: |-
         * `ok` - ok
         * `degraded` - degraded
+    TelegramAuthRequest:
+      type: object
+      description: Telegram Login Widget qaytargan maydonlar (imzo tekshiruvi providers/telegram.py
+        da).
+      properties:
+        locale:
+          $ref: '#/components/schemas/LocaleEnum'
+        id:
+          type: integer
+          minimum: 1
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        last_name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        username:
+          type: string
+          minLength: 1
+          maxLength: 255
+        photo_url:
+          type: string
+          minLength: 1
+          maxLength: 500
+        auth_date:
+          type: integer
+          minimum: 1
+        hash:
+          type: string
+          minLength: 1
+          pattern: ^[0-9a-fA-F]{64}$
+      required:
+      - auth_date
+      - first_name
+      - hash
+      - id
     TokenRequest:
       type: object
       properties:
