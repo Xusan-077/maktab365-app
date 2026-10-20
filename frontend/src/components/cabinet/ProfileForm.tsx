@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
 import { Controller, useForm, useWatch, type Resolver } from "react-hook-form";
 import { GraduationCap, UserRound } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -12,6 +13,7 @@ import { MultiSelect, Select } from "@/components/ui/Select";
 import { useSubjects } from "@/hooks/useSubjects";
 import { useToast } from "@/hooks/useToast";
 import { getApi } from "@/lib/api";
+import { BACKEND_AUTH } from "@/lib/auth/config";
 import { queryKeys } from "@/lib/api/query-keys";
 import type { Locale } from "@/lib/i18n/config";
 import { getLocalized } from "@/lib/i18n/localized";
@@ -56,6 +58,7 @@ export function ProfileForm({ initial, defaultName = "", submitLabel, onSaved }:
   const locale = useLocale() as Locale;
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { update: updateSession } = useSession();
   const { data: subjects } = useSubjects();
   const gradeOptions = useMemo(
     () => GRADES.map((grade) => ({ value: String(grade), label: t("gradeOption", { grade }) })),
@@ -82,7 +85,13 @@ export function ProfileForm({ initial, defaultName = "", submitLabel, onSaved }:
   const role = useWatch({ control, name: "role" });
 
   const save = useMutation({
-    mutationFn: (values: ProfileFormValues) => getApi().saveProfile(toProfileInput(values)),
+    mutationFn: async (values: ProfileFormValues) => {
+      const user = await getApi().saveProfile(toProfileInput(values));
+      // Proxy sessiyadagi rol/onboarding'ga tayanadi: navigatsiyadan oldin sessiya yangilansin.
+      // `update()` argumentsiz GET qiladi (trigger yo'q) — shuning uchun ma'lumot beriladi.
+      if (BACKEND_AUTH) await updateSession({ refresh: "account" });
+      return user;
+    },
     onSuccess: (user) => {
       queryClient.setQueryData(queryKeys.me(), user);
       onSaved?.(user);

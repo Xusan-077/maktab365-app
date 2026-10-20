@@ -17,6 +17,7 @@ import { dashboardPath } from "@/lib/utils/routes";
 import { usePreferencesStore } from "@/stores/preferences.store";
 import { AccountDataActions } from "./AccountDataActions";
 import { ProfileForm } from "./ProfileForm";
+import { SecuritySettings } from "./SecuritySettings";
 
 /** Profil (rol, sinf/fanlar) formasi va ko'rinish sozlamalari: til, theme, matn hajmi. */
 export function SettingsView() {
@@ -73,6 +74,8 @@ export function SettingsView() {
             <TextSizeControl className="w-fit" />
           </div>
         </section>
+
+        <SecuritySettings />
 
         <section aria-labelledby="settings-about" className="flex flex-col gap-3">
           <h2 id="settings-about" className="text-xl font-semibold">

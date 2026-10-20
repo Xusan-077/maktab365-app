@@ -1,44 +1,31 @@
 import { NextResponse } from "next/server";
-import NextAuth from "next-auth";
 import createMiddleware from "next-intl/middleware";
-import { authConfig } from "@/auth.config";
+import { auth } from "@/auth";
+import { resolveAuthRedirect } from "@/lib/auth/redirects";
 import { defaultLocale, isLocale, locales } from "@/lib/i18n/config";
 import { routing } from "@/lib/i18n/routing";
-import { isUserRole, ROLE_COOKIE_NAME } from "@/lib/utils/role-cookie";
-import { appBaseOfPath, dashboardPath, PROTECTED_ROUTES, ROUTES } from "@/lib/utils/routes";
+import { ROLE_COOKIE_NAME } from "@/lib/utils/role-cookie";
 
 const intlMiddleware = createMiddleware(routing);
-const { auth } = NextAuth(authConfig);
-
-const PROTECTED_PATH = new RegExp(
-  `^(?:/(?:${locales.join("|")}))?(?:${PROTECTED_ROUTES.join("|")})(?:/|$)`,
-);
 
 const LOCALE_PREFIX = new RegExp(`^/(?:${locales.join("|")})(?=/|$)`);
 
-// Faqat himoyalangan yo'llar sessiya talab qiladi; qolgan hamma narsa faqat til yo'naltirishidan o'tadi.
+/**
+ * Sessiyaga qarab yo'naltirish (`resolveAuthRedirect`), qolgani — faqat til yo'naltirishi.
+ * `auth()` o'rami access muddati yaqinlashganda backend tokenlarini yangilaydi va cookie'ni yozadi.
+ * Rol cookie'si faqat eski (Google) oqim uchun ishora; haqiqiy tekshiruv `AccountGate` da.
+ */
 export default auth((request) => {
   const { pathname, search, origin } = request.nextUrl;
-  if (PROTECTED_PATH.test(pathname) && !request.auth) {
-    const first = pathname.split("/")[1];
-    const locale = isLocale(first) ? first : defaultLocale;
-    const loginUrl = new URL(`/${locale}${ROUTES.login}`, origin);
-    loginUrl.searchParams.set("callbackUrl", `${pathname}${search}`);
-    return NextResponse.redirect(loginUrl);
-  }
-
-  // O'quvchi /ustoz ga kirsa /kabinet ga, o'qituvchi /kabinet ga kirsa /ustoz ga qaytariladi. Rol cookie'si
-  // ishora xolos (RoleCookieSync yozadi); haqiqiy tekshiruvni AccountGate profil bo'yicha qiladi.
-  const role = request.cookies.get(ROLE_COOKIE_NAME)?.value;
-  if (request.auth && isUserRole(role)) {
-    const panel = appBaseOfPath(pathname.replace(LOCALE_PREFIX, "") || "/");
-    const home = dashboardPath(role);
-    if (panel && appBaseOfPath(home) !== panel) {
-      const first = pathname.split("/")[1];
-      const locale = isLocale(first) ? first : defaultLocale;
-      return NextResponse.redirect(new URL(`/${locale}${home}`, origin));
-    }
-  }
+  const first = pathname.split("/")[1];
+  const locale = isLocale(first) ? first : defaultLocale;
+  const target = resolveAuthRedirect({
+    path: pathname.replace(LOCALE_PREFIX, "") || "/",
+    returnTo: `${pathname}${search}`,
+    session: request.auth,
+    roleHint: request.cookies.get(ROLE_COOKIE_NAME)?.value,
+  });
+  if (target) return NextResponse.redirect(new URL(`/${locale}${target}`, origin));
   return intlMiddleware(request);
 });
 

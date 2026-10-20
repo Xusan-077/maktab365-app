@@ -130,7 +130,7 @@ export function UserMenu({ variant = "site" }: { variant?: "site" | "panel" }) {
   if (status === "loading") return <Skeleton className="h-10 w-24" />;
   if (!sessionUser) return <SignInButton>{tn("login")}</SignInButton>;
 
-  const name = me?.name ?? sessionUser.name ?? sessionUser.email ?? "";
+  const name = me?.name || sessionUser.name || sessionUser.email || "";
   const close = () => closeMenu(false);
 
   const panel = variant === "panel";

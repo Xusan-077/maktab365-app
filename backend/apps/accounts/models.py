@@ -144,6 +144,17 @@ class Identity(UUIDModel):
 
 
 class AuthEventType(models.TextChoices):
+    REGISTERED = "registered", "Registered"
+    LOGIN = "login", "Login"
+    LOGIN_FAILED = "login_failed", "Login failed"
+    LOGIN_LOCKED = "login_locked", "Login locked"
+    LOGOUT = "logout", "Logout"
+    LOGOUT_ALL = "logout_all", "Logout from all devices"
+    EMAIL_VERIFICATION_SENT = "email_verification_sent", "Email verification sent"
+    EMAIL_VERIFIED = "email_verified", "Email verified"
+    PASSWORD_RESET_REQUESTED = "password_reset_requested", "Password reset requested"
+    PASSWORD_RESET = "password_reset", "Password reset"
+    PASSWORD_CHANGED = "password_changed", "Password changed"
     ONBOARDED = "onboarded", "Onboarded"
     PROFILE_UPDATED = "profile_updated", "Profile updated"
     ROLE_CHANGED = "role_changed", "Role changed"
@@ -152,7 +163,7 @@ class AuthEventType(models.TextChoices):
 
 
 class AuthEvent(UUIDModel):
-    """Audit jurnali. `type` — erkin matn (keyingi bosqichlarda login/logout… qo'shiladi)."""
+    """Audit jurnali (kirish, chiqish, parol, profil… hodisalari)."""
 
     user = models.ForeignKey(
         User, null=True, blank=True, on_delete=models.SET_NULL, related_name="auth_events"
@@ -168,3 +179,27 @@ class AuthEvent(UUIDModel):
 
     def __str__(self) -> str:
         return f"{self.type} {self.created_at:%Y-%m-%d %H:%M}"
+
+
+class TokenPurpose(models.TextChoices):
+    EMAIL_VERIFY = "email_verify", "Email verification"
+    PASSWORD_RESET = "password_reset", "Password reset"
+
+
+class VerificationToken(UUIDModel):
+    """Bir martalik email tokeni. Tokenning o'zi emas, faqat SHA-256 xeshi saqlanadi."""
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="verification_tokens")
+    purpose = models.CharField(max_length=16, choices=TokenPurpose.choices)
+    token_hash = models.CharField(max_length=64, unique=True)
+    # Token berilgan paytdagi email: email o'zgarsa eski havola ishlamaydi.
+    email = models.EmailField()
+    expires_at = models.DateTimeField()
+    used_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [models.Index(fields=["user", "purpose"])]
+
+    def __str__(self) -> str:
+        return f"{self.purpose} {self.user_id}"

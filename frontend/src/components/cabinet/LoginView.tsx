@@ -2,30 +2,52 @@
 
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { AuthCard } from "@/components/auth/AuthCard";
+import { AuthPanel } from "@/components/auth/AuthPanel";
 import { SignInButton } from "@/components/layout/SignInButton";
 import { buttonVariants } from "@/components/ui/Button";
+import { BACKEND_AUTH } from "@/lib/auth/config";
 import { Link } from "@/lib/i18n/navigation";
 import { ROUTES, safeCallbackPath } from "@/lib/utils/routes";
 
-/** Google bilan kirish sahifasi. Login ixtiyoriy, shuning uchun "kirmasdan davom etish" doim ko'rinadi. */
+/**
+ * Kirish sahifasi. `NEXT_PUBLIC_BACKEND_AUTH=true` — email+parol tablari, ostida Google (eski oqim);
+ * aks holda faqat Google. Login ixtiyoriy, shuning uchun "kirmasdan davom etish" doim ko'rinadi.
+ */
 export function LoginView() {
   const t = useTranslations("auth");
-  const callbackUrl = safeCallbackPath(useSearchParams().get("callbackUrl"));
+  const tf = useTranslations("authForm");
+  const searchParams = useSearchParams();
+  const callbackUrl = safeCallbackPath(searchParams.get("callbackUrl"));
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-col gap-6 px-4 py-14 sm:px-6">
-      <header className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight text-balance">{t("loginTitle")}</h1>
-        <p className="text-muted">{t("loginText")}</p>
-      </header>
+    <AuthCard title={t("loginTitle")} text={t("loginText")}>
+      {BACKEND_AUTH && (
+        <>
+          <AuthPanel
+            callbackUrl={callbackUrl}
+            initialMode={searchParams.get("mode") === "register" ? "register" : "login"}
+          />
+          <div className="text-muted flex items-center gap-3 text-sm" aria-hidden>
+            <span className="bg-border h-px flex-1" />
+            {tf("or")}
+            <span className="bg-border h-px flex-1" />
+          </div>
+        </>
+      )}
       <div className="flex flex-col gap-3">
-        <SignInButton size="lg" redirectPath={callbackUrl}>
-          {t("signInGoogle")}
+        <SignInButton
+          provider="google"
+          size="lg"
+          variant={BACKEND_AUTH ? "secondary" : "primary"}
+          redirectPath={callbackUrl}
+        >
+          {BACKEND_AUTH ? tf("google") : t("signInGoogle")}
         </SignInButton>
         <Link href={ROUTES.textbooks} className={buttonVariants({ variant: "ghost", size: "lg" })}>
           {t("continueAsGuest")}
         </Link>
       </div>
-    </div>
+    </AuthCard>
   );
 }

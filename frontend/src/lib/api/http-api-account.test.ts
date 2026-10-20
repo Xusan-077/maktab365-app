@@ -28,9 +28,12 @@ const meBody = (role: string, profile: Record<string, unknown> = {}) => ({
 });
 
 function setup(respond: (request: Request) => Response | Promise<Response>) {
+  // Klient `fetch(url, init)` chaqiradi; testlar uchun `Request` qilib yig'iladi.
   const fetchMock = vi.fn(async (request: Request) => respond(request));
+  const fetchImpl = (input: RequestInfo | URL, init?: RequestInit) =>
+    fetchMock(new Request(input, init));
   const api = new HttpApi(
-    createHttpClient({ baseUrl: "http://api.test", fetch: fetchMock as unknown as typeof fetch }),
+    createHttpClient({ baseUrl: "http://api.test", fetch: fetchImpl as typeof fetch }),
   );
   return { api, fetchMock };
 }

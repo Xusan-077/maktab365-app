@@ -52,13 +52,10 @@ else
 	@echo "backend/openapi.yaml hali yo'q — tiplar generatsiya qilinmadi."
 endif
 
-# Playwright o'rnatilgach haqiqiy e2e; hozircha faqat yengil smoke (`make smoke`).
+# Playwright e2e: compose backend + frontend production build (yangi auth oqimi bilan).
 e2e:
-ifneq ($(wildcard frontend/node_modules/@playwright),)
+	docker compose up -d --wait
 	cd frontend && npx playwright test
-else
-	@echo "e2e (Playwright) keyingi bosqichda qo'shiladi — hozircha o'tkazib yuborildi. Yengil smoke: make smoke."
-endif
 
 # Ishlab turgan stack (make dev) ni tekshiradi: backend /health/ va /dev/api-status.
 smoke:

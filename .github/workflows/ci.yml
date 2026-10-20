@@ -10,7 +10,47 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       frontend: ${{ steps.filter.outputs.frontend }}
-      backend:
+      backend: ${{ steps.filter.outputs.backend }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            root: &root
+              - 'Makefile'
+              - '.github/**'
+              - '.editorconfig'
+              - '.gitignore'
+              - 'docker-compose.yml'
+            frontend:
+              - *root
+              - 'frontend/**'
+            backend:
+              - *root
+              - 'backend/**'
+
+  frontend:
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+
+  backend:
     needs: changes
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
@@ -54,3 +94,34 @@ jobs:
             echo "::error::backend/openapi.yaml eskirgan — 'make schema && make types' ishga tushirib commit qiling."
             exit 1
           }
+
+  # Playwright: docker compose (postgres, redis, backend, worker) + frontend production build.
+  e2e:
+    needs: [changes, frontend, backend]
+    if: >-
+      always() && !cancelled() && !contains(needs.*.result, 'failure') &&
+      (needs.changes.outputs.frontend == 'true' || needs.changes.outputs.backend == 'true')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Backend stack
+        run: docker compose up -d --build --wait
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+        working-directory: frontend
+      - run: npx playwright install --with-deps chromium
+        working-directory: frontend
+      - run: npx playwright test
+        working-directory: frontend
+      - name: Backend loglari (xato bo'lsa)
+        if: failure()
+        run: docker compose logs backend worker
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-traces
+          path: frontend/test-results/

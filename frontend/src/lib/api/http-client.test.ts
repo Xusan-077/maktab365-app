@@ -15,7 +15,8 @@ function apiWith(fetchImpl: typeof fetch, timeoutMs?: number) {
 
 describe("HttpApi.health", () => {
   it("ok javobni qaytaradi va so'rov id yuboradi", async () => {
-    const fetchMock = vi.fn(async (request: Request) => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const request = new Request(input, init);
       expect(request.url).toBe("http://api.test/api/v1/health/");
       expect(request.headers.get(REQUEST_ID_HEADER)).toMatch(/^[a-f0-9]{32}$/);
       return json({ status: "ok", checks: { database: "ok", redis: "ok" } });
@@ -64,9 +65,9 @@ describe("xatolar", () => {
   });
 
   it("timeout dan keyin timeout xatosi", async () => {
-    const hang = ((request: Request) =>
+    const hang = ((_input: string, init: RequestInit) =>
       new Promise((_, reject) => {
-        request.signal.addEventListener("abort", () => reject(new DOMException("a", "AbortError")));
+        init.signal?.addEventListener("abort", () => reject(new DOMException("a", "AbortError")));
       })) as unknown as typeof fetch;
     await expect(apiWith(hang, 20).health()).rejects.toMatchObject({ code: "timeout" });
   });
@@ -76,5 +77,22 @@ describe("qolgan metodlar", () => {
   it("keyingi bosqichda xatosi (501)", async () => {
     const api = apiWith(fetch);
     await expect(api.getGrades()).rejects.toMatchObject({ status: 501, code: "not_implemented" });
+  });
+});
+
+describe("so'rov tanasi va token", () => {
+  it("POST tanasini va server tokenini uzatadi", async () => {
+    let seen: { body: string; auth: string | null } | undefined;
+    const client = createHttpClient({
+      baseUrl: "http://api.test",
+      getAccessToken: async () => "tok",
+      fetch: (async (input: RequestInfo | URL, init?: RequestInit) => {
+        const request = new Request(input, init);
+        seen = { body: await request.text(), auth: request.headers.get("Authorization") };
+        return json({ ok: true });
+      }) as typeof fetch,
+    });
+    await client.POST("/api/v1/auth/password/forgot/", { body: { email: "a@b.uz" } });
+    expect(seen).toEqual({ body: JSON.stringify({ email: "a@b.uz" }), auth: "Bearer tok" });
   });
 });

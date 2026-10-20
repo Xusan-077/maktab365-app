@@ -6,7 +6,16 @@ from django.db import transaction
 from django.utils import timezone
 from rest_framework.exceptions import APIException, PermissionDenied
 
-from .models import AuthEvent, AuthEventType, Identity, Locale, Profile, Role, User
+from .models import (
+    AuthEvent,
+    AuthEventType,
+    Identity,
+    Locale,
+    Profile,
+    Role,
+    User,
+    VerificationToken,
+)
 
 SELF_SERVICE_ROLES = frozenset({Role.STUDENT, Role.TEACHER})
 
@@ -96,6 +105,10 @@ def complete_onboarding(user: User, *, role: str, data: dict, request=None) -> P
 @transaction.atomic
 def delete_account(user: User, request=None) -> None:
     """Soft delete + anonimlashtirish: shaxsiy ma'lumot o'chadi, id va audit izi qoladi."""
+    from .auth_services import blacklist_all
+
+    blacklist_all(user)
+    VerificationToken.objects.filter(user=user).delete()
     Identity.objects.filter(user=user).delete()
     Profile.objects.filter(user=user).update(
         display_name="",

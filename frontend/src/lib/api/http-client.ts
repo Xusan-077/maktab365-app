@@ -1,4 +1,6 @@
 import createClient from "openapi-fetch";
+import { BFF_PREFIX } from "@/lib/auth/config";
+import { toBffUrl } from "@/lib/auth/request-guards";
 import type { paths } from "./schema";
 import { ApiError, type ApiErrorBody } from "./types";
 
@@ -6,10 +8,14 @@ export const DEFAULT_API_URL = "http://localhost:8000";
 export const DEFAULT_TIMEOUT_MS = 10_000;
 export const REQUEST_ID_HEADER = "X-Request-ID";
 
-/** Brauzerda `NEXT_PUBLIC_API_URL`, serverda `API_URL` (bo'lmasa `NEXT_PUBLIC_API_URL`). */
+/**
+ * Serverda `API_URL` (bo'lmasa `NEXT_PUBLIC_API_URL`) — backend'ning o'zi.
+ * Brauzerda — shu saytdagi BFF (`/api/backend`): u sessiya cookie'sidan Bearer qo'shib backend'ga
+ * uzatadi, shuning uchun backend tokenlari brauzer JS'iga chiqmaydi.
+ */
 export function resolveBaseUrl(): string {
-  const publicUrl = process.env.NEXT_PUBLIC_API_URL;
-  const url = typeof window === "undefined" ? (process.env.API_URL ?? publicUrl) : publicUrl;
+  if (typeof window !== "undefined") return `${window.location.origin}${BFF_PREFIX}`;
+  const url = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL;
   return (url || DEFAULT_API_URL).replace(/\/+$/, "");
 }
 
@@ -22,6 +28,8 @@ export type HttpClientOptions = {
   baseUrl?: string;
   timeoutMs?: number;
   fetch?: typeof fetch;
+  /** Server so'rovlari uchun Bearer token (`getServerAccessToken`); `null` — tokensiz. */
+  getAccessToken?: () => Promise<string | null>;
 };
 
 function isErrorBody(value: unknown): value is ApiErrorBody {
@@ -42,11 +50,22 @@ function createFetch(options: HttpClientOptions): typeof fetch {
     const request = input instanceof Request ? input : new Request(input, init);
     const requestId = newRequestId();
     request.headers.set(REQUEST_ID_HEADER, requestId);
+    const accessToken = await options.getAccessToken?.();
+    if (accessToken) request.headers.set("Authorization", `Bearer ${accessToken}`);
 
     const timeout = AbortSignal.timeout(timeoutMs);
     const signal = request.signal ? AbortSignal.any([request.signal, timeout]) : timeout;
+    // Tana buferga olinib `fetch(url, init)` bilan yuboriladi: `Request` obyekti berilsa Next serveri
+    // tanani oqim (chunked) qilib yuboradi, WSGI (Django) esa uni bo'sh o'qiydi.
+    const body = request.body ? await request.arrayBuffer() : undefined;
     try {
-      return await baseFetch(new Request(request, { signal }));
+      const url = typeof window === "undefined" ? request.url : toBffUrl(request.url);
+      return await baseFetch(url, {
+        method: request.method,
+        headers: request.headers,
+        body,
+        signal,
+      });
     } catch (error) {
       if (timeout.aborted) {
         throw new ApiError("So'rov vaqti tugadi", 0, { code: "timeout", requestId });

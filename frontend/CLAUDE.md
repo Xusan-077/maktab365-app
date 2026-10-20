@@ -22,6 +22,14 @@ framer-motion, next-intl, clsx + tailwind-merge (`cn()` — `src/lib/utils/cn.ts
 - `src/components/layout` — header, footer, navigatsiya, sahifa qobiqlari.
 - `src/components/{home,catalog,topic,cabinet}` — shu sahifa/domen komponentlari.
 - `src/lib/api` — API klient va so'rov funksiyalari. `schema.ts` — `backend/openapi.yaml` dan **generatsiya** (qo'lda tahrirlanmaydi; `npm run api:types` / `make types`). `http-client.ts` — typed `openapi-fetch` klienti (timeout, `X-Request-ID`, xatolar → `ApiError{status,code,details,requestId}`); `HttpApi` undan foydalanadi, `NEXT_PUBLIC_API_MODE=mock|http` tanlaydi. `src/lib/utils` — sof yordamchi funksiyalar. `src/lib/i18n` — next-intl sozlamasi va `messages/*.json`.
+- `src/lib/auth` — auth (M3). `NEXT_PUBLIC_BACKEND_AUTH=true` — email+parol oqimi (Credentials `password`, `auth.config.ts`), aks holda eski Google oqimi. Backend JWT'lari faqat shifrlangan Auth.js cookie'sida; sessiyada `user.{role,onboarded,emailVerified}` (Google sessiyasida yo'q). Qoidalar:
+  - Brauzer backend'ga faqat BFF orqali: `/api/backend/<api yo'li>` (`app/api/backend/[...path]`, `auth()` o'ralgan) — Bearer serverda qo'shiladi, CSRF tekshiruvi bor. Brauzer slash'siz yuboradi (Next 308 qilmasin), BFF qaytaradi.
+  - Refresh faqat `jwt` callback'ida (`jwt-callback.ts`), cookie saqlanadigan joylarda: proxy, `/api/auth/session`, `auth()` o'ralgan route'lar. **RSC'da `auth()` chaqirmang** — u refresh qilib yangi cookie'ni yo'qotadi (rotation eski refresh'ni bekor qilgan bo'ladi). Server so'rovlari uchun `getServerAccessToken()` / `getServerApi()` (faqat dekodlaydi).
+  - `refresh.ts` — bir jarayonda single-flight + 60s eslab qolish (`globalThis`).
+  - Proxy yo'naltirishlari sof funksiyada: `lib/auth/redirects.ts` (testlari bor).
+  - Sessiyani yangilash: `update({ ... })` — **argument bilan** (argumentsiz GET, `trigger: "update"` bo'lmaydi). Onboarding tugamaguncha `jwt` har o'qishda `/me/` ni o'qiydi.
+  - `BACKEND_AUTH` da akkaunt metodlari (`ACCOUNT_METHODS`) mock rejimida ham `HttpApi` ga boradi (`withAccountApi`).
+  - Xato kodlari → `authForm.errors.*` (`useAuthErrorText`).
 - `src/stores` — Zustand store'lar. `src/hooks` — umumiy hook'lar. `src/types` — umumiy TypeScript tiplar.
 - `src/mocks` — **mock data faqat shu yerda**. Boshqa joyda mock/fake ma'lumot yozilmaydi.
 
@@ -47,6 +55,7 @@ framer-motion, next-intl, clsx + tailwind-merge (`cn()` — `src/lib/utils/cn.ts
 - `npm run typecheck` — `tsc --noEmit`
 - `npm run lint` — ESLint
 - `npm run api:types` — `src/lib/api/schema.ts` ni `../backend/openapi.yaml` dan generatsiya qiladi
+- `npx playwright test` (`make e2e`) — e2e: compose backend kerak (`docker compose up -d`); konfiguratsiya o'zi `NEXT_PUBLIC_BACKEND_AUTH=true` bilan build qilib 3100-portda ishga tushiradi (`e2e/`).
 - `npm run smoke` — smoke: backend `/health/` va `/dev/api-status` (stack ishlab turishi kerak)
 - `npm run format` / `npm run format:check` — Prettier
 

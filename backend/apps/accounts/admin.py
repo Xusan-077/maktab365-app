@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .models import AuthEvent, Identity, Profile, User
+from .models import AuthEvent, Identity, Profile, User, VerificationToken
 
 
 class ProfileInline(admin.StackedInline):
@@ -64,6 +64,23 @@ class AuthEventAdmin(admin.ModelAdmin):
     search_fields = ["user__email", "ip"]
     raw_id_fields = ["user"]
     readonly_fields = ["created_at"]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(VerificationToken)
+class VerificationTokenAdmin(admin.ModelAdmin):
+    """Faqat ko'rish: token xeshi ko'rsatilmaydi va qo'lda yaratilmaydi."""
+
+    list_display = ["purpose", "user", "email", "created_at", "expires_at", "used_at"]
+    list_filter = ["purpose"]
+    search_fields = ["email", "user__email"]
+    raw_id_fields = ["user"]
+    exclude = ["token_hash"]
 
     def has_add_permission(self, request):
         return False

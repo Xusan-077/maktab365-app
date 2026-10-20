@@ -24,7 +24,13 @@ Bitta Django monolit: Python 3.12 · Django 5.2 · DRF · drf-spectacular · sim
 - Modellar: `User` (UUID pk, `AUTH_USER_MODEL`; email nullable va katta-kichik harfsiz unique; parol ixtiyoriy; `SoftDeleteModel`), `Profile` (OneToOne; `onboarded_at=null` — onboarding tugamagan), `Identity` (unique `provider+provider_uid`), `AuthEvent` (audit).
 - Rolni **faqat** `services.change_role` o'zgartiradi: oddiy foydalanuvchi student↔teacher, editor/admin faqat admin tomonidan (`actor=`). Xato kodlari: `role_forbidden` (403), `invalid_role`.
 - `services.py` — onboarding, profil, `delete_account` (soft delete + anonimlashtirish: email/identity/profil tozalanadi, `is_active=False`, IP/UA o'chadi), `export_data`.
-- Endpoint'lar (`/api/v1/me/`): `GET/PATCH/DELETE`, `POST onboarding/`, `PATCH role/`, `GET export/`. Autentifikatsiya (JWT berish) — M3.
+- Endpoint'lar (`/api/v1/me/`): `GET/PATCH/DELETE`, `POST onboarding/`, `PATCH role/`, `GET export/`.
+- Auth (`/api/v1/auth/`, M3): `register/`, `login/` → `{access, refresh, user, is_new}`; `refresh/` (rotation + blacklist, bir martalik), `logout/` (idempotent), `logout-all/`, `email/verify/`, `email/resend/` (60s cooldown), `password/forgot/` (doim 200), `password/reset/`, `password/change/` (`refresh` berilsa shu sessiya qoladi, qolganlari blacklist). Mantiq `auth_services.py` da, view'lar `auth_views.py`.
+- `VerificationToken`: faqat SHA-256 xeshi saqlanadi, bir martalik (`select_for_update`), tasdiqlash 24 soat, tiklash 1 soat; email o'zgarsa eski havola o'ladi. Yangi token shu maqsaddagi eskilarini bekor qiladi.
+- Xavfsizlik: `AuthRateThrottle` (IP) + `AuthEmailThrottle` (email xeshi), ketma-ket `AUTH_LOCKOUT_THRESHOLD` xatodan keyin email `AUTH_LOCKOUT_SECONDS` ga bloklanadi (cache/Redis, `login_locked` 429). Kirishda akkaunt yo'q/parolsiz bo'lsa ham xesh hisoblanadi (timing); xato bir xil `invalid_credentials`. `forgot` qidiruvni Celery task'ida qiladi. Ro'yxatdan o'tishdagi `email_taken` — ongli ravishda qoldirilgan oshkorlik (throttle bilan cheklangan).
+- Maydon xatolari `details` da **kod** sifatida: `email_taken`, `password_too_short|too_common|entirely_numeric|too_similar`, `invalid_password` — matnni frontend i18n tanlaydi. Autentifikatorsiz view'da 401 kerak bo'lsa `AuthenticationFailed` emas, o'z `APIException` (status 401) — DRF aks holda 403 qiladi.
+- Xatlar: `tasks.py` (Celery, `transaction.on_commit`), `emails.py` (uz/ru/en matnlari; uz-Cyrl → uz matn, lekin havola `/uz-Cyrl/`), shablon `templates/accounts/email/action.{html,txt}`. `EMAIL_URL` (default konsol; prod SMTP/Resend SMTP), `DEFAULT_FROM_EMAIL`, `FRONTEND_URL`.
+- Har auth hodisasi `AuthEvent` ga (`registered`, `login`, `login_failed`, `login_locked`, `logout`, `logout_all`, `email_*`, `password_*`). Refresh — yozilmaydi (har 15 daqiqada, shovqin).
 - Parol: Argon2 birinchi hasher, validatorlar (min 8, umumiy, faqat raqam emas) — parol o'rnatadigan oqimlar `validate_password` ni chaqirishi shart.
 
 ## Qoidalar
@@ -38,6 +44,7 @@ Bitta Django monolit: Python 3.12 · Django 5.2 · DRF · drf-spectacular · sim
 
 ## Buyruqlar
 
+- Testlarda Celery eager; `on_commit` task'lari uchun `django_capture_on_commit_callbacks(execute=True)` (qarang `tests/test_auth.py`).
 - `uv run pytest` (PostgreSQL kerak: default `DATABASE_URL` — compose'dagi postgres, `make test` uni o'zi ko'taradi)
 - `uv run ruff check .` · `uv run ruff format .`
 - `uv run python manage.py makemigrations --check --dry-run`

@@ -1,0 +1,12 @@
+{% autoescape off %}{{ greeting }}
+
+{{ text }}
+
+{{ button }}: {{ url }}
+
+{{ expires }}
+
+{{ ignore }}
+
+— maktab365
+{% endautoescape %}

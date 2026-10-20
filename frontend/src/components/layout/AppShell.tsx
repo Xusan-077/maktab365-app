@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { EmailVerifyBanner } from "@/components/auth/EmailVerifyBanner";
 import { AccountGate } from "@/components/cabinet/AccountGate";
 import { useAppBase } from "@/hooks/useAppBase";
 import { usePathname } from "@/lib/i18n/navigation";
@@ -28,6 +29,7 @@ function ShellFrame({ children }: { children: ReactNode }) {
             "flex flex-1 flex-col gap-8 px-4 py-6 pb-[calc(5.5rem+env(safe-area-inset-bottom))] focus:outline-none sm:px-6 lg:py-8 lg:pb-8 print:max-w-none print:p-0",
           )}
         >
+          <EmailVerifyBanner />
           {children}
         </main>
       </div>

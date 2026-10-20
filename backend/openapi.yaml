@@ -117,6 +117,254 @@ paths:
               schema:
                 $ref: '#/components/schemas/Export'
           description: ''
+  /api/v1/auth/register/:
+    post:
+      operationId: auth_register
+      description: 'Kirmagan foydalanuvchi uchun: eskirgan `Authorization` sarlavhasi
+        so''rovni buzmasin.'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSession'
+          description: ''
+  /api/v1/auth/login/:
+    post:
+      operationId: auth_login
+      description: 'Kirmagan foydalanuvchi uchun: eskirgan `Authorization` sarlavhasi
+        so''rovni buzmasin.'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSession'
+          description: ''
+  /api/v1/auth/refresh/:
+    post:
+      operationId: auth_refresh
+      description: 'Kirmagan foydalanuvchi uchun: eskirgan `Authorization` sarlavhasi
+        so''rovni buzmasin.'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokens'
+          description: ''
+  /api/v1/auth/logout/:
+    post:
+      operationId: auth_logout
+      description: 'Kirmagan foydalanuvchi uchun: eskirgan `Authorization` sarlavhasi
+        so''rovni buzmasin.'
+      summary: Refresh tokenni bekor qilish (idempotent)
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/v1/auth/logout-all/:
+    post:
+      operationId: auth_logout_all
+      summary: Barcha qurilmalardagi sessiyalarni bekor qilish
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/auth/email/verify/:
+    post:
+      operationId: auth_email_verify
+      description: 'Kirmagan foydalanuvchi uchun: eskirgan `Authorization` sarlavhasi
+        so''rovni buzmasin.'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ok'
+          description: ''
+  /api/v1/auth/email/resend/:
+    post:
+      operationId: auth_email_resend
+      summary: Tasdiqlash xatini qayta yuborish (60 soniyada bir marta)
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ok'
+          description: ''
+  /api/v1/auth/password/forgot/:
+    post:
+      operationId: auth_password_forgot
+      description: 'Kirmagan foydalanuvchi uchun: eskirgan `Authorization` sarlavhasi
+        so''rovni buzmasin.'
+      summary: Parol tiklash xati (akkaunt bor-yo'qligidan qat'i nazar doim 200)
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EmailRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EmailRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ok'
+          description: ''
+  /api/v1/auth/password/reset/:
+    post:
+      operationId: auth_password_reset
+      description: 'Kirmagan foydalanuvchi uchun: eskirgan `Authorization` sarlavhasi
+        so''rovni buzmasin.'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ok'
+          description: ''
+  /api/v1/auth/password/change/:
+    post:
+      operationId: auth_password_change
+      summary: Parolni almashtirish; joriy sessiyadan boshqa refresh tokenlar bekor
+        qilinadi
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordChangeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordChangeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordChangeRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ok'
+          description: ''
   /api/v1/health/:
     get:
       operationId: health
@@ -138,6 +386,32 @@ paths:
           description: ''
 components:
   schemas:
+    AuthSession:
+      type: object
+      properties:
+        access:
+          type: string
+        refresh:
+          type: string
+        user:
+          $ref: '#/components/schemas/Me'
+        is_new:
+          type: boolean
+      required:
+      - access
+      - is_new
+      - refresh
+      - user
+    AuthTokens:
+      type: object
+      properties:
+        access:
+          type: string
+        refresh:
+          type: string
+      required:
+      - access
+      - refresh
     CheckStatusEnum:
       enum:
       - ok
@@ -146,6 +420,16 @@ components:
       description: |-
         * `ok` - ok
         * `error` - error
+    EmailRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+      required:
+      - email
     Export:
       type: object
       properties:
@@ -274,6 +558,22 @@ components:
         * `uz-Cyrl` - Uzbek (Cyrillic)
         * `ru` - Russian
         * `en` - English
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+          maxLength: 128
+      required:
+      - email
+      - password
     Me:
       type: object
       properties:
@@ -308,6 +608,13 @@ components:
       - id
       - profile
       - role
+    Ok:
+      type: object
+      properties:
+        ok:
+          type: boolean
+      required:
+      - ok
     OnboardingRequest:
       type: object
       properties:
@@ -348,6 +655,37 @@ components:
       description: |-
         * `student` - student
         * `teacher` - teacher
+    PasswordChangeRequest:
+      type: object
+      properties:
+        current_password:
+          type: string
+          writeOnly: true
+          maxLength: 128
+        new_password:
+          type: string
+          writeOnly: true
+          minLength: 1
+          maxLength: 128
+        refresh:
+          type: string
+      required:
+      - new_password
+    PasswordResetRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          minLength: 1
+          maxLength: 200
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+          maxLength: 128
+      required:
+      - password
+      - token
     PatchedProfileUpdateRequest:
       type: object
       properties:
@@ -429,6 +767,35 @@ components:
       - locale
       - onboarded_at
       - subjects
+    RefreshRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          minLength: 1
+      required:
+      - refresh
+    RegisterRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+          maxLength: 128
+        display_name:
+          type: string
+          maxLength: 60
+        locale:
+          $ref: '#/components/schemas/LocaleEnum'
+      required:
+      - email
+      - password
     RoleEnum:
       enum:
       - student
@@ -449,6 +816,15 @@ components:
       description: |-
         * `ok` - ok
         * `degraded` - degraded
+    TokenRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          minLength: 1
+          maxLength: 200
+      required:
+      - token
   securitySchemes:
     jwtAuth:
       type: http

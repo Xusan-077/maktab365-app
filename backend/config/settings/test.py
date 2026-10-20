@@ -21,5 +21,12 @@ CELERY_TASK_ALWAYS_EAGER = True
 SENTRY_DSN = ""
 REST_FRAMEWORK = {  # noqa: F405
     **REST_FRAMEWORK,  # noqa: F405
-    "DEFAULT_THROTTLE_RATES": {"anon": "1000/min", "user": "1000/min", "auth": "1000/min"},
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "1000/min",
+        "user": "1000/min",
+        "auth": "1000/min",
+        "auth_email": "1000/min",
+    },
 }
+EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
+FRONTEND_URL = "http://frontend.test"

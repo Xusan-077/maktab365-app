@@ -69,6 +69,182 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/register/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Kirmagan foydalanuvchi uchun: eskirgan `Authorization` sarlavhasi so'rovni buzmasin. */
+        post: operations["auth_register"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/login/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Kirmagan foydalanuvchi uchun: eskirgan `Authorization` sarlavhasi so'rovni buzmasin. */
+        post: operations["auth_login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/refresh/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Kirmagan foydalanuvchi uchun: eskirgan `Authorization` sarlavhasi so'rovni buzmasin. */
+        post: operations["auth_refresh"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/logout/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Refresh tokenni bekor qilish (idempotent)
+         * @description Kirmagan foydalanuvchi uchun: eskirgan `Authorization` sarlavhasi so'rovni buzmasin.
+         */
+        post: operations["auth_logout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/logout-all/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Barcha qurilmalardagi sessiyalarni bekor qilish */
+        post: operations["auth_logout_all"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/email/verify/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Kirmagan foydalanuvchi uchun: eskirgan `Authorization` sarlavhasi so'rovni buzmasin. */
+        post: operations["auth_email_verify"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/email/resend/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Tasdiqlash xatini qayta yuborish (60 soniyada bir marta) */
+        post: operations["auth_email_resend"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/password/forgot/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Parol tiklash xati (akkaunt bor-yo'qligidan qat'i nazar doim 200)
+         * @description Kirmagan foydalanuvchi uchun: eskirgan `Authorization` sarlavhasi so'rovni buzmasin.
+         */
+        post: operations["auth_password_forgot"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/password/reset/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Kirmagan foydalanuvchi uchun: eskirgan `Authorization` sarlavhasi so'rovni buzmasin. */
+        post: operations["auth_password_reset"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/password/change/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Parolni almashtirish; joriy sessiyadan boshqa refresh tokenlar bekor qilinadi */
+        post: operations["auth_password_change"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/health/": {
         parameters: {
             query?: never;
@@ -90,12 +266,26 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AuthSession: {
+            access: string;
+            refresh: string;
+            user: components["schemas"]["Me"];
+            is_new: boolean;
+        };
+        AuthTokens: {
+            access: string;
+            refresh: string;
+        };
         /**
          * @description * `ok` - ok
          *     * `error` - error
          * @enum {string}
          */
         CheckStatusEnum: "ok" | "error";
+        EmailRequest: {
+            /** Format: email */
+            email: string;
+        };
         Export: {
             /** Format: date-time */
             exported_at: string;
@@ -151,6 +341,11 @@ export interface components {
          * @enum {string}
          */
         LocaleEnum: "uz" | "uz-Cyrl" | "ru" | "en";
+        LoginRequest: {
+            /** Format: email */
+            email: string;
+            password: string;
+        };
         Me: {
             /** Format: uuid */
             readonly id: string;
@@ -161,6 +356,9 @@ export interface components {
             /** Format: date-time */
             readonly date_joined: string;
             readonly profile: components["schemas"]["Profile"];
+        };
+        Ok: {
+            ok: boolean;
         };
         OnboardingRequest: {
             role: components["schemas"]["OnboardingRoleEnum"];
@@ -176,6 +374,15 @@ export interface components {
          * @enum {string}
          */
         OnboardingRoleEnum: "student" | "teacher";
+        PasswordChangeRequest: {
+            current_password?: string;
+            new_password: string;
+            refresh?: string;
+        };
+        PasswordResetRequest: {
+            token: string;
+            password: string;
+        };
         PatchedProfileUpdateRequest: {
             display_name?: string;
             avatar_url?: string;
@@ -198,6 +405,16 @@ export interface components {
             /** Format: date-time */
             readonly onboarded_at: string | null;
         };
+        RefreshRequest: {
+            refresh: string;
+        };
+        RegisterRequest: {
+            /** Format: email */
+            email: string;
+            password: string;
+            display_name?: string;
+            locale?: components["schemas"]["LocaleEnum"];
+        };
         /**
          * @description * `student` - Student
          *     * `teacher` - Teacher
@@ -212,6 +429,9 @@ export interface components {
          * @enum {string}
          */
         StatusEnum: "ok" | "degraded";
+        TokenRequest: {
+            token: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -348,6 +568,242 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Export"];
+                };
+            };
+        };
+    };
+    auth_register: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["RegisterRequest"];
+                "multipart/form-data": components["schemas"]["RegisterRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthSession"];
+                };
+            };
+        };
+    };
+    auth_login: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["LoginRequest"];
+                "multipart/form-data": components["schemas"]["LoginRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthSession"];
+                };
+            };
+        };
+    };
+    auth_refresh: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefreshRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["RefreshRequest"];
+                "multipart/form-data": components["schemas"]["RefreshRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthTokens"];
+                };
+            };
+        };
+    };
+    auth_logout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefreshRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["RefreshRequest"];
+                "multipart/form-data": components["schemas"]["RefreshRequest"];
+            };
+        };
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    auth_logout_all: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    auth_email_verify: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TokenRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["TokenRequest"];
+                "multipart/form-data": components["schemas"]["TokenRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Ok"];
+                };
+            };
+        };
+    };
+    auth_email_resend: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Ok"];
+                };
+            };
+        };
+    };
+    auth_password_forgot: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmailRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["EmailRequest"];
+                "multipart/form-data": components["schemas"]["EmailRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Ok"];
+                };
+            };
+        };
+    };
+    auth_password_reset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PasswordResetRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PasswordResetRequest"];
+                "multipart/form-data": components["schemas"]["PasswordResetRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Ok"];
+                };
+            };
+        };
+    };
+    auth_password_change: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PasswordChangeRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PasswordChangeRequest"];
+                "multipart/form-data": components["schemas"]["PasswordChangeRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Ok"];
                 };
             };
         };

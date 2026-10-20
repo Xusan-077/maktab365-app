@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
     "drf_spectacular",
     "corsheaders",
     "apps.core",
@@ -105,7 +106,9 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         "anon": "60/min",
         "user": "240/min",
+        # Kirish/ro'yxatdan o'tish/parol tiklash: IP va email bo'yicha alohida.
         "auth": "10/min",
+        "auth_email": "5/min",
     },
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "EXCEPTION_HANDLER": "apps.core.exceptions.api_exception_handler",
@@ -116,7 +119,26 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=env.int("JWT_ACCESS_MINUTES", default=15)),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=env.int("JWT_REFRESH_DAYS", default=30)),
+    # Har refresh yangi refresh beradi, eskisi blacklist'ga tushadi (bir martalik).
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "UPDATE_LAST_LOGIN": False,
 }
+
+# --- Auth (email + parol) ---
+# Email havolalari shu manzilga olib boradi: {FRONTEND_URL}/{locale}/email-tasdiqlash?token=...
+FRONTEND_URL = env("FRONTEND_URL", default="http://localhost:3000").rstrip("/")
+AUTH_EMAIL_VERIFY_TTL = timedelta(hours=env.int("AUTH_EMAIL_VERIFY_HOURS", default=24))
+AUTH_PASSWORD_RESET_TTL = timedelta(hours=env.int("AUTH_PASSWORD_RESET_HOURS", default=1))
+AUTH_RESEND_COOLDOWN_SECONDS = env.int("AUTH_RESEND_COOLDOWN_SECONDS", default=60)
+# Ketma-ket shuncha noto'g'ri parol (email bo'yicha) — vaqtinchalik bloklash (cache/Redis).
+AUTH_LOCKOUT_THRESHOLD = env.int("AUTH_LOCKOUT_THRESHOLD", default=5)
+AUTH_LOCKOUT_SECONDS = env.int("AUTH_LOCKOUT_SECONDS", default=15 * 60)
+
+# --- Email: dev — konsol, prod — SMTP (Resend ham SMTP orqali), EMAIL_URL bilan ---
+# Masalan: EMAIL_URL=smtp+tls://resend:re_xxx@smtp.resend.com:587
+vars().update(env.email_url("EMAIL_URL", default="consolemail://"))
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="maktab365 <no-reply@maktab365.uz>")
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "Maktab365 API",

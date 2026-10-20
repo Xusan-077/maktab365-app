@@ -607,6 +607,19 @@
       "confirmText": "Profilingiz va shaxsiy ma'lumotlaringiz o'chiriladi, akkauntga qayta kirib bo'lmaydi. Avval ma'lumotlaringizni yuklab olishingiz mumkin.",
       "cancel": "Bekor qilish",
       "confirmDelete": "Ha, o'chirish"
+    },
+    "security": {
+      "title": "Xavfsizlik",
+      "changePassword": "Parolni almashtirish",
+      "currentPassword": "Hozirgi parol",
+      "newPassword": "Yangi parol",
+      "passwordConfirm": "Yangi parolni takrorlang",
+      "submit": "Parolni almashtirish",
+      "changed": "Parol almashtirildi",
+      "changedHint": "Boshqa qurilmalardagi sessiyalar yopildi.",
+      "logoutAll": "Barcha qurilmalardan chiqish",
+      "logoutAllHint": "Boshqa telefon va kompyuterlardagi sessiyalar ham yopiladi.",
+      "logoutAllFailed": "Chiqib bo'lmadi. Qayta urinib ko'ring."
     }
   },
   "cabinet": {
@@ -868,5 +881,84 @@
     "title": "Yordam markazi",
     "lead": "Eng ko'p beriladigan savollarga javoblar.",
     "signedInHint": "Savolingizga javob topmadingizmi? Kirgandan keyin kabinetdagi «Yordam» bo'limidan bizga yozing."
+  },
+  "authForm": {
+    "tabsLabel": "Kirish usuli",
+    "loginTab": "Kirish",
+    "registerTab": "Ro'yxatdan o'tish",
+    "email": "Email",
+    "emailPlaceholder": "siz@misol.uz",
+    "password": "Parol",
+    "passwordConfirm": "Parolni takrorlang",
+    "passwordHint": "Kamida 8 ta belgi; faqat raqamlardan iborat bo'lmasin.",
+    "showPassword": "Parolni ko'rsatish",
+    "hidePassword": "Parolni yashirish",
+    "loginSubmit": "Kirish",
+    "registerSubmit": "Ro'yxatdan o'tish",
+    "forgotLink": "Parolni unutdingizmi?",
+    "or": "yoki",
+    "google": "Google bilan davom etish",
+    "registered": "Emailingizga tasdiqlash havolasini yubordik",
+    "errors": {
+      "emailRequired": "Email manzilingizni kiriting.",
+      "emailInvalid": "Email manzili noto'g'ri. Masalan: ism@misol.uz",
+      "passwordRequired": "Parolni kiriting.",
+      "passwordTooShort": "Parol kamida 8 ta belgidan iborat bo'lsin.",
+      "passwordTooLong": "Parol juda uzun (ko'pi bilan 128 ta belgi).",
+      "passwordNumeric": "Parol faqat raqamlardan iborat bo'lmasin — harf ham qo'shing.",
+      "passwordsMismatch": "Parollar bir xil emas.",
+      "currentPasswordRequired": "Hozirgi parolingizni kiriting.",
+      "invalid_credentials": "Email yoki parol noto'g'ri.",
+      "login_locked": "Juda ko'p noto'g'ri urinish. 15 daqiqadan keyin qayta urinib ko'ring yoki parolni tiklang.",
+      "throttled": "So'rovlar juda ko'p. Bir daqiqadan keyin qayta urinib ko'ring.",
+      "email_taken": "Bu email bilan akkaunt allaqachon bor. Kirib ko'ring yoki parolni tiklang.",
+      "password_too_short": "Parol kamida 8 ta belgidan iborat bo'lsin.",
+      "password_too_common": "Bu parol juda oddiy va oson topiladi. Boshqasini tanlang.",
+      "password_entirely_numeric": "Parol faqat raqamlardan iborat bo'lmasin — harf ham qo'shing.",
+      "password_too_similar": "Parol emailingizga juda o'xshash. Boshqasini tanlang.",
+      "invalid_password": "Hozirgi parol noto'g'ri.",
+      "invalid_token": "Havola yaroqsiz yoki allaqachon ishlatilgan.",
+      "token_expired": "Havolaning muddati tugagan.",
+      "resend_cooldown": "Xat yaqinda yuborildi. Bir daqiqadan keyin qayta urinib ko'ring.",
+      "network_error": "Server bilan aloqa yo'q. Internetni tekshirib, qayta urinib ko'ring.",
+      "timeout": "Server javob bermadi. Qayta urinib ko'ring.",
+      "validation_error": "Ma'lumotlarni tekshirib, qayta urinib ko'ring.",
+      "unknown": "Nimadir xato ketdi. Qayta urinib ko'ring."
+    },
+    "forgot": {
+      "title": "Parolni tiklash",
+      "text": "Akkauntingiz emailini kiriting — parolni tiklash havolasini yuboramiz.",
+      "submit": "Havola yuborish",
+      "sentTitle": "Xatni tekshiring",
+      "sentText": "Agar {email} bilan akkaunt bo'lsa, unga parolni tiklash havolasi yuborildi. Havola 1 soat amal qiladi.",
+      "backToLogin": "Kirish sahifasiga qaytish"
+    },
+    "reset": {
+      "title": "Yangi parol",
+      "text": "Akkauntingiz uchun yangi parol o'ylab toping.",
+      "newPassword": "Yangi parol",
+      "submit": "Parolni saqlash",
+      "successTitle": "Parol yangilandi",
+      "successText": "Endi yangi parol bilan kirishingiz mumkin. Boshqa qurilmalardagi sessiyalar yopildi.",
+      "goToLogin": "Kirish",
+      "failedTitle": "Havola ishlamadi",
+      "requestNew": "Yangi havola so'rash",
+      "missingToken": "Havolada token yo'q. Xatdagi havolani to'liq oching yoki yangisini so'rang."
+    },
+    "verify": {
+      "title": "Emailni tasdiqlash",
+      "verifying": "Email tasdiqlanmoqda…",
+      "successTitle": "Email tasdiqlandi",
+      "successText": "Rahmat! Emailingiz tasdiqlandi.",
+      "continue": "Davom etish",
+      "goToLogin": "Kirish",
+      "failedTitle": "Emailni tasdiqlab bo'lmadi",
+      "failedHint": "Kirganingizdan keyin paneldagi bannerdan yangi havola so'rashingiz mumkin."
+    },
+    "banner": {
+      "text": "Emailingiz hali tasdiqlanmagan. Xatdagi havolani bosing.",
+      "resend": "Qayta yuborish",
+      "sent": "Tasdiqlash xati qayta yuborildi"
+    }
   }
 }
