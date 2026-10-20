@@ -30,6 +30,7 @@ framer-motion, next-intl, clsx + tailwind-merge (`cn()` — `src/lib/utils/cn.ts
   - Sessiyani yangilash: `update({ ... })` — **argument bilan** (argumentsiz GET, `trigger: "update"` bo'lmaydi). Onboarding tugamaguncha `jwt` har o'qishda `/me/` ni o'qiydi.
   - `BACKEND_AUTH` da akkaunt metodlari (`ACCOUNT_METHODS`) mock rejimida ham `HttpApi` ga boradi (`withAccountApi`).
   - Xato kodlari → `authForm.errors.*` (`useAuthErrorText`).
+- `src/components/support` + `lib/support` + `lib/validation/support.ts` — "Yordam va aloqa" (M9): `SupportForm` (RHF+Yup, mehmonda email majburiy, honeypot `website` — to'ldirilsa `buildSupportInput` `null` qaytaradi va so'rov yuborilmaydi), `MySupportList`, `ReportErrorLink` (mavzudagi "Xato topdingizmi?" dialogi). `sendSupport`/`getMySupport` `ACCOUNT_METHODS` da.
 - `src/stores` — Zustand store'lar. `src/hooks` — umumiy hook'lar. `src/types` — umumiy TypeScript tiplar.
 - `src/mocks` — **mock data faqat shu yerda**. Boshqa joyda mock/fake ma'lumot yozilmaydi.
 

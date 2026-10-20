@@ -119,3 +119,67 @@ describe("HttpApi: profil", () => {
     expect(await api.exportData()).toEqual(body);
   });
 });
+
+describe("HttpApi: yordam murojaatlari", () => {
+  it("sendSupport snake_case tana bilan POST qiladi (mehmon ham)", async () => {
+    const { api, fetchMock } = setup(() => json({ ok: true }, { status: 201 }));
+    await api.sendSupport({
+      kind: "content_error",
+      message: "Formulada xato bor",
+      email: "ali@example.com",
+      topic: "algebra-1",
+      pageUrl: "https://x.uz/uz/a",
+    });
+    const request = fetchMock.mock.calls[0]![0];
+    expect(request.method).toBe("POST");
+    expect(new URL(request.url).pathname).toBe("/api/v1/support/");
+    expect(await request.json()).toEqual({
+      kind: "content_error",
+      message: "Formulada xato bor",
+      email: "ali@example.com",
+      name: "",
+      topic: "algebra-1",
+      website: "",
+      page_url: "https://x.uz/uz/a",
+    });
+  });
+
+  it("sendSupport throttle xatosini ApiError qilib ko'taradi", async () => {
+    const { api } = setup(() => json({ code: "throttled", message: "Too many" }, { status: 429 }));
+    await expect(
+      api.sendSupport({ kind: "bug", message: "Uzun xabar matni" }),
+    ).rejects.toMatchObject({ status: 429, code: "throttled" });
+  });
+
+  it("getMySupport sahifadan murojaatlarni oladi va camelCase ga aylantiradi", async () => {
+    const { api } = setup(() =>
+      json({
+        count: 1,
+        next: null,
+        previous: null,
+        results: [
+          {
+            id: "22222222-2222-2222-2222-222222222222",
+            kind: "bug",
+            message: "Rasm ochilmayapti",
+            topic: "",
+            page_url: "",
+            status: "in_progress",
+            created_at: "2026-10-20T10:00:00Z",
+          },
+        ],
+      }),
+    );
+    expect(await api.getMySupport()).toEqual([
+      {
+        id: "22222222-2222-2222-2222-222222222222",
+        kind: "bug",
+        message: "Rasm ochilmayapti",
+        topic: "",
+        pageUrl: "",
+        status: "in_progress",
+        createdAt: "2026-10-20T10:00:00Z",
+      },
+    ]);
+  });
+});

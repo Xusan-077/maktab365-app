@@ -23,6 +23,8 @@ describe("withAccountApi", () => {
     }
     const api = withAccountApi({} as MaktabApi, new Account() as unknown as MaktabApi);
     expect(await api.getMe()).toBe("acc");
-    expect(ACCOUNT_METHODS).toContain("saveProfile");
+    expect(ACCOUNT_METHODS).toEqual(
+      expect.arrayContaining(["saveProfile", "sendSupport", "getMySupport"]),
+    );
   });
 });

@@ -5,7 +5,7 @@ import type { ApiMode, MaktabApi } from "./types";
 
 export const API_MODE: ApiMode = process.env.NEXT_PUBLIC_API_MODE === "http" ? "http" : "mock";
 
-/** Akkaunt (profil, onboarding, rol, o'chirish, eksport) metodlari. */
+/** Akkaunt (profil, onboarding, rol, o'chirish, eksport) va murojaat (support) metodlari. */
 export const ACCOUNT_METHODS = [
   "getMe",
   "saveProfile",
@@ -13,6 +13,8 @@ export const ACCOUNT_METHODS = [
   "setRole",
   "deleteAccount",
   "exportData",
+  "sendSupport",
+  "getMySupport",
 ] as const satisfies readonly (keyof MaktabApi)[];
 
 const ACCOUNT_METHOD_SET = new Set<PropertyKey>(ACCOUNT_METHODS);

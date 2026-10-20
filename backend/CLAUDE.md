@@ -34,6 +34,13 @@ Bitta Django monolit: Python 3.12 · Django 5.2 · DRF · drf-spectacular · sim
 - Har auth hodisasi `AuthEvent` ga (`registered`, `login`, `login_failed`, `login_locked`, `logout`, `logout_all`, `email_*`, `password_*`). Refresh — yozilmaydi (har 15 daqiqada, shovqin).
 - Parol: Argon2 birinchi hasher, validatorlar (min 8, umumiy, faqat raqam emas) — parol o'rnatadigan oqimlar `validate_password` ni chaqirishi shart.
 
+## `apps/support`
+
+- `SupportMessage` (UUID pk): `user?` (SET_NULL), `name`, `email`, `kind` (`question|suggestion|bug|content_error`), `message` (10–2000), `page_url`, `topic`, `user_agent`, `status` (`new|in_progress|resolved|spam`), `staff_note` (faqat admin, API'da yo'q).
+- `POST /api/v1/support/` (`AllowAny`, `SupportRateThrottle` — IP bo'yicha, `SUPPORT_THROTTLE_RATE`): kirgan foydalanuvchida `user` va (email berilmasa) email akkauntdan; mehmonda email majburiy. Honeypot (`website` to'ldirilgan) — 201 qaytadi, lekin saqlanmaydi. `spam.is_spam` (ko'p havola, tipik iboralar, takror) — `status=spam` bilan saqlanadi, staff'ga xat ketmaydi. Javob doim `{ok: true}`.
+- Yangi (spam bo'lmagan) xabarda `tasks.notify_staff` (Celery, `on_commit`) `SUPPORT_NOTIFY_EMAILS` ga yuboradi; bo'sh bo'lsa hech narsa.
+- `GET /api/v1/me/support/` — o'z murojaatlari (paginatsiyalangan, spam ko'rsatilmaydi).
+
 ## Qoidalar
 
 1. API prefiksi `/api/v1`, JSON kalitlari `snake_case`. Yangi view'ga `@extend_schema` bilan operation_id va javob tiplarini bering.
