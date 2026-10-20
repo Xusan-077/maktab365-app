@@ -33,4 +33,13 @@ Yoki ildizdan: `make dev`. Boshqa buyruqlar: `make test`, `make lint`, `make sch
 - E2E: `make e2e` (yoki `cd frontend && npx playwright test`; birinchi marta `npx playwright install chromium`).
 - Ma'lum cheklovlar: parol almashtirilgach boshqa qurilmalardagi access token o'z muddatigacha (≤15 daq) ishlaydi; refresh single-flight bitta jarayon ichida — bir nechta server instansiyasida bir vaqtdagi refresh'da sessiya kamdan-kam yo'qolishi mumkin. Mijoz IP (throttle/audit): backend `X-Forwarded-For` ga faqat Next serveridan umumiy sir bilan kelganda ishonadi (`FORWARDED_IP_SECRET` = frontend `BACKEND_FORWARD_SECRET`); prod'da ikkalasiga kuchli qiymat bering, proxy ortida bo'lsa `TRUSTED_PROXY_HOPS` ni sozlang.
 
+**M6 (kontent modellari + import):** backend `apps/content` — `Subject → Book → Chapter → Topic` (+ `TopicRevision`, oxirgi 50 ta), mavzu bloklari pydantic sxemasi (`apps/content/schemas.py`) bilan tekshiriladi va frontend yup sxemasi bilan 1:1 mos. Ikki tomon ham ildizdagi [`contracts/fixtures/`](contracts/fixtures) namunalari (`topic-valid.json`, `topic-invalid-*.json`, kutilgan xato yo'llari — `expected.json`) bilan test qilinadi: yangi qoida qo'shilsa, avval fixture, keyin ikkala sxema. Frontend kontentini bazaga yuklash:
+
+```bash
+cd backend && uv run python manage.py import_content ../frontend/src/content [--dry-run]
+# yoki frontend/ dan: npm run content:import
+```
+
+Import idempotent (slug bo'yicha upsert, hammasi bitta tranzaksiyada), bazadagi status faylnikidan yuqori bo'lsa pasaymaydi. Fayllar (muqova, PDF) dev'da `backend/media/`, prod'da S3-mos saqlash (`AWS_STORAGE_BUCKET_NAME`, qarang `backend/.env.example`). Frontend hali mock kontentda — ko'rinadigan o'zgarish yo'q.
+
 **Docker portlari:** host'da 5432/6379 band bo'lsa (masalan, lokal Postgres), ildizdagi `.env` ga `POSTGRES_PORT=55432` (yoki `REDIS_PORT`) yozing va `backend/.env` dagi `DATABASE_URL` portini mos qiling. Konteynerlar ichida portlar o'zgarmaydi.

@@ -8,7 +8,7 @@ Bitta Django monolit: Python 3.12 · Django 5.2 · DRF · drf-spectacular · sim
 
 - `config/settings/{base,dev,prod,test}.py` — barcha sozlama env orqali (`django-environ`, `.env`). `dev` default (`manage.py`), `prod` — wsgi/asgi, `test` — pytest.
 - `config/{urls,celery,asgi,wsgi}.py`.
-- `apps/core` — qayta ishlatiladigan poydevor (quyida). `apps/accounts` — foydalanuvchi va profil (quyida). `apps/{content,learning,support,analytics}` — hozircha bo'sh ilovalar; domen mantiqi keyingi bosqichlarda.
+- `apps/core` — qayta ishlatiladigan poydevor (quyida). `apps/accounts` — foydalanuvchi va profil (quyida). `apps/content` — kontent (quyida). `apps/{learning,support,analytics}` — hozircha bo'sh ilovalar; domen mantiqi keyingi bosqichlarda.
 
 ## `apps/core` poydevori
 
@@ -33,6 +33,13 @@ Bitta Django monolit: Python 3.12 · Django 5.2 · DRF · drf-spectacular · sim
 - Xatlar: `tasks.py` (Celery, `transaction.on_commit`), `emails.py` (uz/ru/en matnlari; uz-Cyrl → uz matn, lekin havola `/uz-Cyrl/`), shablon `templates/accounts/email/action.{html,txt}`. `EMAIL_URL` (default konsol; prod SMTP/Resend SMTP), `DEFAULT_FROM_EMAIL`, `FRONTEND_URL`.
 - Har auth hodisasi `AuthEvent` ga (`registered`, `login`, `login_failed`, `login_locked`, `logout`, `logout_all`, `email_*`, `password_*`). Refresh — yozilmaydi (har 15 daqiqada, shovqin).
 - Parol: Argon2 birinchi hasher, validatorlar (min 8, umumiy, faqat raqam emas) — parol o'rnatadigan oqimlar `validate_password` ni chaqirishi shart.
+
+## `apps/content`
+
+- Modellar: `Subject`, `Book` (slug butun katalogda unique, frontend kitob id'si: `algebra-9`), `Chapter` (slug = papka nomi), `Topic` (slug kitob ichida unique — shuning uchun `book` `chapter.book` nusxasi, `save()` moslaydi; `status` draft|reviewed|published), `TopicRevision`. Mavzu `save()` da sarlavha/bloklar o'zgargan bo'lsagina revision yaratadi (oxirgi 50 ta); muallif: `topic.revision_author` / `revision_comment`.
+- Bloklar sxemasi: `schemas.py` (pydantic) — frontend `src/lib/api/schemas.ts` + `src/lib/content/validate.ts` bilan **1:1**. Blok JSON'i frontend fayllaridagi kabi (camelCase: `answerType`, `sortKey`; widget kind'lari kebab-case: `quadratic-graph`…). `validate_blocks` / `validate_topic_file` `Issue(path, message, code)` qaytaradi (`blocks[3].hint`). Qoida o'zgarsa: avval `contracts/fixtures/` (+ `expected.json`), so'ng ikkala sxema; testlar: `tests/test_schemas.py` va frontend `contract.test.ts`.
+- `import_content <papka> [--dry-run]` (`importer.py`): `frontend/src/content` → baza, idempotent, bitta tranzaksiya; fan/kitob metama'lumoti `catalog_seed.py` da (yangi kitob qo'shilsa shu yerga ham). Status faqat ko'tariladi.
+- Fayllar: `Book.cover/pdf` — `FileField`; `STORAGES` env bilan (`AWS_STORAGE_BUCKET_NAME` bo'lsa S3-mos, aks holda `media/`).
 
 ## Qoidalar
 

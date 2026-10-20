@@ -1,0 +1,13 @@
+{
+  "status": "draft",
+  "order": 1,
+  "title": {
+    "uz": "Namuna mavzu",
+    "ru": "Образец",
+    "en": "Sample"
+  },
+  "notes": [
+    "TODO: darslikdan tekshirish"
+  ],
+  "blocks": []
+}

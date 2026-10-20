@@ -1,0 +1,51 @@
+{
+  "_comment": "Har bir topic-invalid-*.json uchun kutilgan xato yo'llari (yo'llar to'plami teng bo'lishi shart). Widget props xatolari frontend'da bitta blok darajasida (blocks[i]) chiqadi.",
+  "topic-invalid-status.json": [
+    "status"
+  ],
+  "topic-invalid-no-blocks.json": [
+    "blocks"
+  ],
+  "topic-invalid-missing-field.json": [
+    "blocks[8].question"
+  ],
+  "topic-invalid-unknown-key.json": [
+    "blocks[0]"
+  ],
+  "topic-invalid-unknown-block-type.json": [
+    "blocks[0]"
+  ],
+  "topic-invalid-answer-index.json": [
+    "blocks[7]"
+  ],
+  "topic-invalid-order-answer.json": [
+    "blocks[10]"
+  ],
+  "topic-invalid-widget-props.json": [
+    "blocks[3]"
+  ],
+  "topic-invalid-blank-uz.json": [
+    "blocks[0].text.uz"
+  ],
+  "topic-invalid-no-hint.json": [
+    "blocks[9].hint"
+  ],
+  "topic-invalid-section-order.json": [
+    "blocks[1]"
+  ],
+  "topic-invalid-duplicate-id.json": [
+    "blocks[8].id"
+  ],
+  "topic-invalid-few-exercises.json": [
+    "blocks"
+  ],
+  "topic-invalid-sorted-order.json": [
+    "blocks[10].items"
+  ],
+  "topic-invalid-timeline-order.json": [
+    "blocks[5].props.events[1].sortKey"
+  ],
+  "topic-invalid-reviewed-with-notes.json": [
+    "notes"
+  ]
+}

@@ -5,6 +5,7 @@ description = "Maktab365 API (Django + DRF)"
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "argon2-cffi>=25.1.0",
+    "boto3>=1.43.115",
     "celery>=5.6.3",
     "django>=5.2,<6",
     "django-cors-headers>=4.9.0",
@@ -14,6 +15,7 @@ dependencies = [
     "djangorestframework-simplejwt>=5.5.1",
     "drf-spectacular>=0.30.0",
     "psycopg[binary]>=3.3.6",
+    "pydantic>=2.14.1",
     "redis>=8.1.0",
     "sentry-sdk>=2.72.0",
     "structlog>=26.1.0",
