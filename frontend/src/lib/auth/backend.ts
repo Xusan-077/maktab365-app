@@ -17,14 +17,33 @@ export interface ClientInfo {
   userAgent?: string;
 }
 
-export function clientInfoFrom(headers: Headers): ClientInfo {
-  const ip = headers.get("x-forwarded-for")?.split(",")[0]?.trim() || headers.get("x-real-ip");
+/**
+ * Mijoz IP: `X-Forwarded-For` ning chap qismi mijoz qo'lida (soxtalashtirsa bo'ladi), shuning uchun
+ * o'ngdan `TRUSTED_PROXY_HOPS`-chi yozuv — ishonchli proxy (Vercel, nginx) qo'shgani olinadi.
+ * Sarlavha bo'lmasa — `x-real-ip` (proxy o'zi yozadi).
+ */
+export function clientInfoFrom(
+  headers: Headers,
+  hops: number = Number(process.env.TRUSTED_PROXY_HOPS ?? 1),
+): ClientInfo {
+  const chain = (headers.get("x-forwarded-for") ?? "")
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean);
+  const ip = (hops > 0 ? chain[chain.length - hops] : undefined) ?? headers.get("x-real-ip");
   return { ip: ip || undefined, userAgent: headers.get("user-agent") ?? undefined };
 }
 
-function forwardHeaders(info: ClientInfo = {}): Record<string, string> {
+/**
+ * Backend uzatilgan IP'ga faqat umumiy sir bilan ishonadi (`FORWARDED_IP_SECRET`);
+ * sir sozlanmagan bo'lsa IP yuborilmaydi (backend Next serverining manzilini ko'radi).
+ */
+export function forwardHeaders(
+  info: ClientInfo = {},
+  secret: string | undefined = process.env.BACKEND_FORWARD_SECRET,
+): Record<string, string> {
   return {
-    ...(info.ip && { "X-Forwarded-For": info.ip }),
+    ...(info.ip && secret && { "X-Forwarded-For": info.ip, "X-Forwarded-Secret": secret }),
     ...(info.userAgent && { "User-Agent": info.userAgent }),
   };
 }

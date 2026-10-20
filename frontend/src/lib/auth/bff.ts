@@ -1,5 +1,5 @@
 import { newRequestId, REQUEST_ID_HEADER, resolveBaseUrl } from "@/lib/api/http-client";
-import { clientInfoFrom } from "./backend";
+import { clientInfoFrom, forwardHeaders } from "./backend";
 import { errorResponse, isSameOrigin, SAFE_METHODS, upstreamPath } from "./request-guards";
 import { effectiveTokens, readSessionToken } from "./server-token";
 
@@ -24,9 +24,9 @@ export async function proxyToBackend(request: Request): Promise<Response> {
     if (value) headers.set(name, value);
   }
   if (!headers.has(REQUEST_ID_HEADER)) headers.set(REQUEST_ID_HEADER, newRequestId());
-  const info = clientInfoFrom(request.headers);
-  if (info.ip) headers.set("X-Forwarded-For", info.ip);
-  if (info.userAgent) headers.set("User-Agent", info.userAgent);
+  for (const [name, value] of Object.entries(forwardHeaders(clientInfoFrom(request.headers)))) {
+    headers.set(name, value);
+  }
 
   const tokens = effectiveTokens(await readSessionToken(request.headers));
   if (tokens) headers.set("Authorization", `Bearer ${tokens.access}`);

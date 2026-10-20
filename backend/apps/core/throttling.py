@@ -3,12 +3,21 @@ import hashlib
 from rest_framework.settings import api_settings
 from rest_framework.throttling import AnonRateThrottle, SimpleRateThrottle, UserRateThrottle
 
+from .net import client_ip
 
-class AnonBurstThrottle(AnonRateThrottle):
+
+class _ClientIpMixin:
+    """DRF `get_ident` xom `X-Forwarded-For` ni oladi; o'rniga `net.client_ip`."""
+
+    def get_ident(self, request):
+        return client_ip(request) or "unknown"
+
+
+class AnonBurstThrottle(_ClientIpMixin, AnonRateThrottle):
     scope = "anon"
 
 
-class UserBurstThrottle(UserRateThrottle):
+class UserBurstThrottle(_ClientIpMixin, UserRateThrottle):
     scope = "user"
 
 
@@ -19,7 +28,7 @@ class _LiveRateMixin:
         return api_settings.DEFAULT_THROTTLE_RATES.get(self.scope)
 
 
-class AuthRateThrottle(_LiveRateMixin, AnonRateThrottle):
+class AuthRateThrottle(_ClientIpMixin, _LiveRateMixin, AnonRateThrottle):
     """Kirish/ro'yxatdan o'tish kabi sezgir endpoint'lar uchun (IP bo'yicha qattiqroq)."""
 
     scope = "auth"

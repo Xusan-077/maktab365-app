@@ -156,6 +156,12 @@ SPECTACULAR_SETTINGS = {
     },
 }
 
+# --- Mijoz IP (throttle, audit): qarang apps/core/net.py ---
+# Next serveri (BFF, Auth.js) bilan umumiy sir: faqat u yuborgan X-Forwarded-For'ga ishoniladi.
+FORWARDED_IP_SECRET = env("FORWARDED_IP_SECRET", default="")
+# Backend oldidagi ishonchli proxy'lar soni (0 — to'g'ridan-to'g'ri, REMOTE_ADDR).
+TRUSTED_PROXY_HOPS = env.int("TRUSTED_PROXY_HOPS", default=0)
+
 # --- CORS: faqat env'dagi frontend origin'lari ---
 CORS_ALLOWED_ORIGINS = env.list("FRONTEND_ORIGINS", default=["http://localhost:3000"])
 CORS_ALLOW_CREDENTIALS = False

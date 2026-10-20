@@ -6,6 +6,8 @@ from django.db import transaction
 from django.utils import timezone
 from rest_framework.exceptions import APIException, PermissionDenied
 
+from apps.core.net import client_ip
+
 from .models import (
     AuthEvent,
     AuthEventType,
@@ -35,9 +37,7 @@ def client_meta(request) -> dict:
     """Audit uchun so'rovdan IP va User-Agent."""
     if request is None:
         return {"ip": None, "user_agent": ""}
-    forwarded = request.META.get("HTTP_X_FORWARDED_FOR", "")
-    ip = forwarded.split(",")[0].strip() or request.META.get("REMOTE_ADDR")
-    return {"ip": ip or None, "user_agent": request.META.get("HTTP_USER_AGENT", "")[:300]}
+    return {"ip": client_ip(request), "user_agent": request.META.get("HTTP_USER_AGENT", "")[:300]}
 
 
 def log_event(user, type_: str, request=None, **meta) -> AuthEvent:

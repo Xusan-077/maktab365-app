@@ -34,6 +34,7 @@ export default defineConfig({
       API_URL: process.env.E2E_API_URL ?? "http://localhost:8000",
       AUTH_SECRET: process.env.AUTH_SECRET ?? "e2e-only-auth-secret-0123456789abcdef",
       AUTH_URL: BASE_URL,
+      BACKEND_FORWARD_SECRET: process.env.BACKEND_FORWARD_SECRET ?? "dev-forward-secret",
     },
   },
 });

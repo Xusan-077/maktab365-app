@@ -17,6 +17,7 @@ Bitta Django monolit: Python 3.12 · Django 5.2 · DRF · drf-spectacular · sim
 - Permission'lar: `IsRole("teacher")` (sinf qaytaradi), `IsOwner` (`view.owner_field`, default `user`), `ReadOnlyOrStaff`.
 - `exceptions.api_exception_handler` — yagona xato formati `{code, message, details?}`. Yangi domen xatolari `APIException` (`default_code`) orqali; `code` barqaror kalit, `message` foydalanuvchiga ko'rsatilmaydi.
 - `pagination.DefaultPagination`, `throttling.*`, `filters.DefaultFilterBackend` (`search_fields`, `ordering_fields`) — DRF default'larida ulangan.
+- `net.client_ip(request)` — mijoz IP (throttle va audit uchun yagona manba): `X-Forwarded-For` faqat `X-Forwarded-Secret == FORWARDED_IP_SECRET` (Next serveri) bo'lsa, aks holda `TRUSTED_PROXY_HOPS` bo'yicha o'ngdan yoki `REMOTE_ADDR`. Xom XFF'ni o'qimang.
 - `middleware.RequestIdMiddleware` — `X-Request-ID` (kelgan yoki yangi), structlog kontekstiga bog'lanadi. Log'lar uchun `structlog.get_logger()`; `print` yo'q.
 
 ## `apps/accounts`
