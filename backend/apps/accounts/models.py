@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.db import models
 from django.db.models.functions import Lower
 from django.utils import timezone
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 
 from apps.core.models import SoftDeleteModel, UUIDModel
 
@@ -204,3 +205,19 @@ class VerificationToken(UUIDModel):
 
     def __str__(self) -> str:
         return f"{self.purpose} {self.user_id}"
+
+
+class RotatedRefreshToken(models.Model):
+    """Refresh aylantirish (rotation) natijasida bekor qilinganini belgilaydi.
+
+    Logout, parol almashtirish kabi qo'lda bekor qilingan tokenlarda yozuv yo'q — ularning
+    qayta kelishi reuse hisoblanmaydi.
+    """
+
+    token = models.OneToOneField(
+        OutstandingToken, on_delete=models.CASCADE, related_name="rotation"
+    )
+    rotated_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return f"rotated {self.token_id}"

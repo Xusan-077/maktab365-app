@@ -1,3 +1,4 @@
+import logging
 import re
 from datetime import timedelta
 from unittest import mock
@@ -10,7 +11,14 @@ from rest_framework.test import APIClient
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken
 
 from apps.accounts import auth_services
-from apps.accounts.models import AuthEvent, Identity, Profile, User, VerificationToken
+from apps.accounts.models import (
+    AuthEvent,
+    Identity,
+    Profile,
+    RotatedRefreshToken,
+    User,
+    VerificationToken,
+)
 
 pytestmark = pytest.mark.django_db
 
@@ -347,6 +355,32 @@ class TestThrottleEndpoints:
         assert statuses[2:] == [429, 429]
 
 
+class TestNoSecretLeaks:
+    def test_responses_logs_and_events_hide_secrets(self, client, caplog):
+        caplog.set_level(logging.DEBUG)
+        wrong = "noto'g'ri-parol-123"
+        email = "yangi@example.com"
+        responses = [register(client, email=email)]
+        responses.append(login(client, email=email, password=wrong))
+        client.post("password/forgot/", {"email": email})
+        raw = token_from_mail(mail.outbox[-1])
+        responses.append(client.post("password/reset/", {"token": raw, "password": NEW_PASSWORD}))
+        responses.append(login(client, email=email, password=NEW_PASSWORD))
+
+        user = User.objects.get(email=email)
+        hashes = list(VerificationToken.objects.values_list("token_hash", flat=True))
+        secrets_ = [PASSWORD, NEW_PASSWORD, wrong, raw, user.password, *hashes]
+        assert user.password and hashes
+
+        # Javoblar: faqat sessiya tokenlari (access/refresh) bo'lishi mumkin.
+        bodies = " ".join(r.content.decode() for r in responses)
+        events = " ".join(f"{e.meta} {e.user_agent}" for e in AuthEvent.objects.all())
+        for name, haystack in {"responses": bodies, "logs": caplog.text, "events": events}.items():
+            for secret in secrets_:
+                assert secret not in haystack, f"{name} leaks a secret"
+        assert "password" not in responses[0].json()["user"]
+
+
 # --- refresh / logout ---
 
 
@@ -403,7 +437,7 @@ class TestRefreshReuse:
 
     @staticmethod
     def age_blacklist(seconds):
-        BlacklistedToken.objects.update(blacklisted_at=timezone.now() - timedelta(seconds=seconds))
+        RotatedRefreshToken.objects.update(rotated_at=timezone.now() - timedelta(seconds=seconds))
 
     def refresh_status(self, client, token):
         return client.post("refresh/", {"refresh": token}).status_code
@@ -434,6 +468,53 @@ class TestRefreshReuse:
         assert event.meta == {"revoked_sessions": 2}
         dump = str(event.meta) + event.user_agent
         assert all(token not in dump for token in (root, child, other))
+
+    def test_rotation_reuse_still_revokes_family(self, client, user, settings):
+        root, child, other = self.sessions(client)
+        self.age_blacklist(settings.REFRESH_REUSE_GRACE_SECONDS + 1)
+        assert self.refresh_status(client, root) == 401
+        assert self.refresh_status(client, child) == 401
+        assert self.refresh_status(client, other) == 401
+        assert "refresh_reuse_detected" in event_types(user)
+
+    def test_password_change_revokes_without_reuse_alarm(self, client, make_client, user):
+        current = login(client).json()
+        stale = login(client).json()  # boshqa qurilma
+        changed = (
+            make_client()
+            .bearer(current["access"])
+            .post(
+                "password/change/",
+                {
+                    "current_password": PASSWORD,
+                    "new_password": NEW_PASSWORD,
+                    "refresh": current["refresh"],
+                },
+            )
+        )
+        assert changed.status_code == 200
+        assert self.refresh_status(client, stale["refresh"]) == 401
+        assert "refresh_reuse_detected" not in event_types(user)
+        assert self.refresh_status(client, current["refresh"]) == 200
+
+    def test_logout_then_reuse_is_plain_401(self, client, user):
+        first = login(client).json()["refresh"]
+        other = login(client).json()["refresh"]
+        assert client.post("logout/", {"refresh": first}).status_code == 204
+        assert self.refresh_status(client, first) == 401
+        assert "refresh_reuse_detected" not in event_types(user)
+        assert self.refresh_status(client, other) == 200
+
+    def test_logout_then_reuse_after_grace_is_still_plain_401(self, client, user, settings):
+        first = login(client).json()["refresh"]
+        other = login(client).json()["refresh"]
+        client.post("logout/", {"refresh": first})
+        BlacklistedToken.objects.update(
+            blacklisted_at=timezone.now()
+            - timedelta(seconds=settings.REFRESH_REUSE_GRACE_SECONDS + 1)
+        )
+        assert self.refresh_status(client, first) == 401
+        assert self.refresh_status(client, other) == 200
 
     def test_reuse_does_not_touch_other_users(self, client, user, settings):
         bystander = User.objects.create_user(email="vali@example.com", password=PASSWORD)

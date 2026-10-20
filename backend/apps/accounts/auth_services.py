@@ -33,6 +33,7 @@ from .models import (
     Locale,
     Profile,
     Provider,
+    RotatedRefreshToken,
     TokenPurpose,
     User,
     VerificationToken,
@@ -141,13 +142,14 @@ def _parse_refresh(raw: str) -> RefreshToken:
         raise InvalidToken(str(exc)) from exc
 
 
-def _handle_reuse(user: User, blacklisted_at, request) -> None:
-    """Bekor qilingan refresh qayta keldi: o'g'irlangan bo'lishi mumkin — barcha sessiyalar bekor.
+def _handle_reuse(user: User, rotated_at, request) -> None:
+    """Aylantirilgan refresh qayta keldi: o'g'irlangan bo'lishi mumkin — barcha sessiyalar bekor.
 
+    Faqat rotation natijasida bekor bo'lgan tokenlar uchun; logout/parol almashtirish — oddiy 401.
     Aylantirilgandan keyin `REFRESH_REUSE_GRACE_SECONDS` ichida kelgan urinish (ikki tab, poyga)
     oddiy 401 bo'lib qoladi: foydalanuvchi tasodifan chiqib ketmasin.
     """
-    age = (timezone.now() - blacklisted_at).total_seconds()
+    age = (timezone.now() - rotated_at).total_seconds()
     if age <= settings.REFRESH_REUSE_GRACE_SECONDS:
         return
     revoked = blacklist_all(user)
@@ -172,11 +174,15 @@ def rotate_refresh(raw: str, request=None) -> dict:
         if outstanding is None:
             raise InvalidToken("Unknown token.")
         # Bir vaqtda ikki marta ishlatilsa, faqat bittasi o'tadi.
-        blacklisted, created = BlacklistedToken.objects.get_or_create(token=outstanding)
-        if not created:
-            reused_at = blacklisted.blacklisted_at
-    if reused_at is not None:
-        _handle_reuse(user, reused_at, request)
+        _, created = BlacklistedToken.objects.get_or_create(token=outstanding)
+        if created:
+            RotatedRefreshToken.objects.create(token=outstanding)
+        else:
+            rotation = RotatedRefreshToken.objects.filter(token=outstanding).first()
+            reused_at = rotation.rotated_at if rotation else None
+    if not created:
+        if reused_at is not None:
+            _handle_reuse(user, reused_at, request)
         raise InvalidToken("Token is blacklisted.")
     return issue_tokens(user)
 

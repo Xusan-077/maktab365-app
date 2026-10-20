@@ -41,7 +41,7 @@ make types      # frontend/src/lib/api/schema.ts ni yangilaydi
 
 ## Xavfsizlik qarorlari
 
-- **Refresh reuse.** Aylantirilgan (blacklist'langan) refresh qayta kelsa, `REFRESH_REUSE_GRACE_SECONDS` (default 10) dan keyin foydalanuvchining barcha refresh tokenlari bekor qilinadi va `refresh_reuse_detected` hodisasi yoziladi (IP, user agent; token yoki xesh yo'q). Grace ichida (ikki tab, poyga) faqat 401 qaytadi.
+- **Refresh reuse.** Faqat aylantirish (rotation) natijasida bekor bo'lgan refresh (`RotatedRefreshToken`) qayta kelsa, `REFRESH_REUSE_GRACE_SECONDS` (default 10) dan keyin foydalanuvchining barcha refresh tokenlari bekor qilinadi va `refresh_reuse_detected` hodisasi yoziladi (IP, user agent; token yoki xesh yo'q). Grace ichida (ikki tab, poyga) faqat 401 qaytadi. Logout, parol almashtirish va boshqa qo'lda bekor qilingan tokenlar qayta kelsa ham oddiy 401: oila bekor qilinmaydi, hodisa yozilmaydi.
 - **`refresh/` va `logout/` throttle'siz.** Ongli qaror: so'rovlar Next serveridan keladi (bitta IP), IP bo'yicha cheklov oddiy foydalanuvchilarni bloklardi. Token o'zi kalit (imzolangan, taxmin qilib bo'lmaydi); `logout` idempotent, `refresh` bir martalik.
 - **Dev'da konsol email.** `EMAIL_URL` berilmasa xatlar (tasdiqlash/tiklash havolasi tokeni bilan) konsolga chiqadi. Faqat dev uchun; prod'da `EMAIL_URL` SMTP'ga o'rnatiladi.
 
