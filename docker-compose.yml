@@ -37,12 +37,16 @@ services:
       FRONTEND_ORIGINS: http://localhost:3000
       # Dev/e2e: frontend `BACKEND_FORWARD_SECRET` bilan bir xil (prod'da env orqali, kuchli qiymat).
       FORWARDED_IP_SECRET: ${FORWARDED_IP_SECRET:-dev-forward-secret}
+      # Dev/e2e: import qilingan draft kontent ochiq API'da "unverified" belgisi bilan ko'rinadi.
+      SHOW_DRAFTS_PUBLICLY: ${SHOW_DRAFTS_PUBLICLY:-true}
     ports:
       - "8000:8000"
     volumes:
       # Hot reload: manba kod konteynerga ulanadi, .venv esa image ichida qoladi.
       - ./backend:/app
       - /app/.venv
+      # Kontent importi: `python manage.py import_content /content` (e2e global-setup shuni chaqiradi).
+      - ./frontend/src/content:/content:ro
     depends_on:
       postgres:
         condition: service_healthy

@@ -1,6 +1,23 @@
 import { createHttpClient, toApiError, unwrap, type HttpClient } from "./http-client";
+import {
+  toBook,
+  toChapters,
+  toSearchResult,
+  toSubject,
+  toTopic,
+  topicSlugOf,
+} from "./catalog-mappers";
 import { toOnboardedUser, toOnboardingRequest, toProfileUpdateRequest, toUser } from "./mappers";
 import { ApiError, type HealthStatus, type MaktabApi } from "./types";
+import {
+  GRADES,
+  type Book,
+  type BookFilters,
+  type Chapter,
+  type Grade,
+  type Subject,
+} from "@/types/catalog";
+import type { Topic, TopicSearchFilters, TopicSearchResult } from "@/types/topic";
 import type { AccountExport, ProfileInput, UpdateProfileInput, User, UserRole } from "@/types/user";
 
 const notImplemented = (method: string) => async (): Promise<never> => {
@@ -9,8 +26,14 @@ const notImplemented = (method: string) => async (): Promise<never> => {
   });
 };
 
+const BOOKS_PAGE_SIZE = 100;
+const MAX_BOOK_PAGES = 20;
+const BOOK_IDS_TTL_MS = 30_000;
+
 /** DRF klienti. Endpoint'lar tayyor bo'lganda har bir metod haqiqiy so'rovga almashtiriladi. */
 export class HttpApi implements MaktabApi {
+  private bookIdsMemo?: { at: number; request: Promise<string[]> };
+
   constructor(private readonly client: HttpClient = createHttpClient()) {}
 
   async health(): Promise<HealthStatus> {
@@ -54,13 +77,95 @@ export class HttpApi implements MaktabApi {
     return unwrap(await this.client.GET("/api/v1/me/export/"));
   }
 
-  getGrades = notImplemented("getGrades");
-  getSubjects = notImplemented("getSubjects");
-  getBooks = notImplemented("getBooks");
-  getBook = notImplemented("getBook");
-  getChapters = notImplemented("getChapters");
-  getTopic = notImplemented("getTopic");
-  searchTopics = notImplemented("searchTopics");
+  /** Sinflar 1–11 (kitobsiz sinflar ham ro'yxatda: filtr chiplari doim to'liq). */
+  async getGrades(): Promise<Grade[]> {
+    const grades = unwrap(await this.client.GET("/api/v1/grades/")).map((item) => item.grade);
+    return GRADES.filter((grade) => grades.includes(grade));
+  }
+
+  async getSubjects(): Promise<Subject[]> {
+    return unwrap(await this.client.GET("/api/v1/subjects/")).map(toSubject);
+  }
+
+  /** Barcha sahifalarni yig'adi (katalog kichik: bitta so'rovda 100 tagacha). */
+  async getBooks(filters: BookFilters = {}): Promise<Book[]> {
+    const books: Book[] = [];
+    for (let page = 1; page <= MAX_BOOK_PAGES; page += 1) {
+      const data = unwrap(
+        await this.client.GET("/api/v1/books/", {
+          params: {
+            query: {
+              grade: filters.grade,
+              subject: filters.subjectId,
+              q: filters.q?.trim() || undefined,
+              page,
+              page_size: BOOKS_PAGE_SIZE,
+            },
+          },
+        }),
+      );
+      books.push(...data.results.map(toBook));
+      if (!data.next) break;
+    }
+    return books;
+  }
+
+  async getBook(bookId: string): Promise<Book> {
+    return toBook(await this.fetchBook(bookId));
+  }
+
+  async getChapters(bookId: string): Promise<Chapter[]> {
+    return toChapters(await this.fetchBook(bookId));
+  }
+
+  /** Mavzu id'si `{kitob}-{mavzu}`: kitob slug'i kitoblar ro'yxatidan (eng uzun mos prefiks) aniqlanadi. */
+  async getTopic(topicId: string): Promise<Topic> {
+    const books = await this.bookIds();
+    const bookId = books
+      .filter((id) => topicSlugOf(id, topicId))
+      .sort((a, b) => b.length - a.length)[0];
+    const slug = bookId ? topicSlugOf(bookId, topicId) : null;
+    if (!bookId || !slug) {
+      throw new ApiError(`Mavzu topilmadi: ${topicId}`, 404, { code: "not_found" });
+    }
+    const result = await this.client.GET("/api/v1/books/{book}/topics/{topic}/", {
+      params: { path: { book: bookId, topic: slug } },
+    });
+    return toTopic(unwrap(result));
+  }
+
+  async searchTopics(
+    query: string,
+    filters: TopicSearchFilters = {},
+  ): Promise<TopicSearchResult[]> {
+    const q = query.trim();
+    if (!q) return [];
+    const result = await this.client.GET("/api/v1/search/", {
+      params: { query: { q, book: filters.bookId } },
+    });
+    return unwrap(result).results.map(toSearchResult);
+  }
+
+  private async fetchBook(bookId: string) {
+    return unwrap(
+      await this.client.GET("/api/v1/books/{slug}/", { params: { path: { slug: bookId } } }),
+    );
+  }
+
+  /** Kitob id'lari; mavzu id'sini ajratish uchun qisqa muddat eslab qolinadi. */
+  private bookIds(): Promise<string[]> {
+    // `performance.now()`: Cache Components prerender'da `Date.now()` ni qabul qilmaydi.
+    const now = performance.now();
+    if (!this.bookIdsMemo || now - this.bookIdsMemo.at > BOOK_IDS_TTL_MS) {
+      const request = this.getBooks().then((books) => books.map((book) => book.id));
+      request.catch(() => {
+        this.bookIdsMemo = undefined;
+      });
+      this.bookIdsMemo = { at: now, request };
+    }
+    return this.bookIdsMemo.request;
+  }
+
   getProgress = notImplemented("getProgress");
   saveProgress = notImplemented("saveProgress");
   getBookmarks = notImplemented("getBookmarks");

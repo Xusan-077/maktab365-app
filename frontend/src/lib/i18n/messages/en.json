@@ -298,6 +298,7 @@
     "splashResetFailed": "Couldn't write to browser storage"
   },
   "catalog": {
+    "topicsTitle": "Matching topics",
     "meta": {
       "title": "Textbooks",
       "description": "Textbooks for grades 1–11: browse by grade and subject, or search by book or topic name."
@@ -525,6 +526,7 @@
   },
   "errors": {
     "title": "Something went wrong",
+    "backendDown": "Couldn't reach the server. Check your connection and try again.",
     "text": "The page couldn't be loaded. Please try again.",
     "retry": "Try again",
     "home": "Go to home page",

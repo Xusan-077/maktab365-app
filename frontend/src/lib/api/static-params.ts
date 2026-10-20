@@ -1,7 +1,11 @@
 import { routing } from "@/lib/i18n/routing";
 import { getApi } from "./index";
 
-/** `generateStaticParams` uchun umumiy ro'yxatlar: marketing va panel sahifalari bir xil yo'llarni oldindan quradi. */
+/**
+ * `generateStaticParams` uchun umumiy ro'yxatlar: marketing va panel sahifalari bir xil yo'llarni oldindan
+ * quradi. Cache Components bo'sh ro'yxatni qabul qilmaydi, shuning uchun `http` rejimida build vaqtida
+ * backend ishlab turishi kerak (xato bo'lsa build to'xtaydi).
+ */
 export async function bookStaticParams() {
   const books = await getApi().getBooks();
   return routing.locales.flatMap((locale) => books.map((book) => ({ locale, bookId: book.id })));

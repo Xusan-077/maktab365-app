@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 import { Card } from "@/components/ui/Card";
-import { getApi } from "@/lib/api";
+import { getTopicById } from "@/lib/api/server";
 import type { Locale } from "@/lib/i18n/config";
 import { getLocalized } from "@/lib/i18n/localized";
 import type { Topic, TopicBlock, TopicBlockType } from "@/types/topic";
@@ -30,7 +30,9 @@ const firstSentence = (text: string) => text.split(/(?<=[.!?])\s/)[0] ?? text;
 /** Haqiqiy mavzu (API'dan) 7 ta blok tuzilmasi ko'rinishida. */
 export async function TopicAnatomy({ locale }: { locale: Locale }) {
   const t = await getTranslations({ locale, namespace: "home.anatomy" });
-  const topic = await getApi().getTopic(SHOWCASE_TOPIC_ID);
+  // Namuna mavzu bosh sahifaning ixtiyoriy qismi: backend o'chiq/mavzu yo'q bo'lsa bo'lim chizilmaydi.
+  const topic = await getTopicById(SHOWCASE_TOPIC_ID).catch(() => null);
+  if (!topic) return null;
   const text = (value: Parameters<typeof getLocalized>[0]) => getLocalized(value, locale);
 
   const goal = findBlock(topic, "goal");

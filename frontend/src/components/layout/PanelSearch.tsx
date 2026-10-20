@@ -4,7 +4,9 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import { SearchSnippet } from "@/components/catalog/SearchSnippet";
 import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
 import { Dialog } from "@/components/ui/Dialog";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAppPaths } from "@/hooks/useAppPaths";
@@ -29,6 +31,7 @@ const isEditable = (target: EventTarget | null) =>
  */
 export function PanelSearch({ className }: { className?: string }) {
   const t = useTranslations("panel.search");
+  const tErrors = useTranslations("errors");
   const locale = useLocale() as Locale;
   const paths = useAppPaths();
   const router = useRouter();
@@ -73,7 +76,8 @@ export function PanelSearch({ className }: { className?: string }) {
 
   const bookHits = (books.data ?? []).slice(0, MAX_RESULTS);
   const topicHits = (topics.data ?? []).slice(0, MAX_RESULTS);
-  const pending = enabled && (books.isPending || topics.isPending);
+  const failed = enabled && (books.isError || topics.isError);
+  const pending = enabled && !failed && (books.isPending || topics.isPending);
   const firstTopic = topicHits.find((hit) => hit.topic.ready);
   const firstHref = bookHits[0]
     ? paths.book(bookHits[0].id)
@@ -126,7 +130,19 @@ export function PanelSearch({ className }: { className?: string }) {
         <div aria-live="polite" className="flex min-h-24 flex-col gap-4">
           {!enabled && <p className="text-muted text-sm">{t("hint")}</p>}
           {pending && <Skeleton className="h-24 w-full" />}
-          {enabled && !pending && bookHits.length === 0 && topicHits.length === 0 && (
+          {failed && (
+            <div role="alert" className="flex flex-col items-start gap-2">
+              <p className="text-danger text-sm">{tErrors("backendDown")}</p>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => void Promise.all([books.refetch(), topics.refetch()])}
+              >
+                {tErrors("retry")}
+              </Button>
+            </div>
+          )}
+          {enabled && !pending && !failed && bookHits.length === 0 && topicHits.length === 0 && (
             <p className="text-muted text-sm">{t("empty", { query: q })}</p>
           )}
 
@@ -154,7 +170,7 @@ export function PanelSearch({ className }: { className?: string }) {
                 {t("topics")}
               </h3>
               <ul>
-                {topicHits.map(({ topic, bookTitle, chapterTitle }) => (
+                {topicHits.map(({ topic, bookTitle, chapterTitle, snippet }) => (
                   <li key={topic.id}>
                     {topic.ready ? (
                       <Link href={paths.topic(topic.bookId, topic.id)} className={itemClasses}>
@@ -162,6 +178,7 @@ export function PanelSearch({ className }: { className?: string }) {
                         <span className="text-muted text-sm">
                           {getLocalized(bookTitle, locale)} · {getLocalized(chapterTitle, locale)}
                         </span>
+                        <SearchSnippet snippet={snippet} className="text-muted text-sm" />
                       </Link>
                     ) : (
                       <span className={cn(itemClasses, "text-muted hover:bg-transparent")}>

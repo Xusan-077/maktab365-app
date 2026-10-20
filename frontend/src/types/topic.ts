@@ -135,4 +135,6 @@ export type TopicSearchResult = {
   topic: TopicSummary;
   bookTitle: LocalizedText;
   chapterTitle: LocalizedText;
+  /** Mos so'zlar `⟦…⟧` bilan belgilangan matn parchasi (faqat backend qidiruvida); `splitSnippet` bilan ajratiladi. */
+  snippet?: string;
 };

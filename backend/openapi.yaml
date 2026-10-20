@@ -384,6 +384,210 @@ paths:
               schema:
                 $ref: '#/components/schemas/Health'
           description: ''
+  /api/v1/grades/:
+    get:
+      operationId: grades_list
+      description: Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi
+        o'rniga kesh ishlaydi.
+      summary: Sinflar (1–11) va ulardagi kitoblar soni
+      tags:
+      - content
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Grade'
+          description: ''
+  /api/v1/subjects/:
+    get:
+      operationId: subjects_list
+      description: Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi
+        o'rniga kesh ishlaydi.
+      summary: 'Kitobi bor fanlar (ixtiyoriy: sinf bo''yicha)'
+      parameters:
+      - in: query
+        name: grade
+        schema:
+          type: integer
+        description: Sinf (1–11)
+      tags:
+      - content
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Subject'
+          description: ''
+  /api/v1/books/:
+    get:
+      operationId: books_list
+      description: Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi
+        o'rniga kesh ishlaydi.
+      summary: Kitoblar (sahifalangan)
+      parameters:
+      - in: query
+        name: grade
+        schema:
+          type: integer
+        description: Sinf (1–11)
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Kitob nomi/muallifi bo'yicha
+      - in: query
+        name: subject
+        schema:
+          type: string
+        description: Fan slug'i
+      - in: query
+        name: topics_ready
+        schema:
+          type: boolean
+        description: Mavzulari bor/yo'q kitoblar
+      tags:
+      - content
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBookList'
+          description: ''
+  /api/v1/books/{slug}/:
+    get:
+      operationId: books_retrieve
+      description: Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi
+        o'rniga kesh ishlaydi.
+      summary: 'Kitob: boblar va mavzular ro''yxati (bloklarsiz)'
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - content
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookDetail'
+          description: ''
+  /api/v1/books/{book}/topics/{topic}/:
+    get:
+      operationId: topics_retrieve
+      description: Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi
+        o'rniga kesh ishlaydi.
+      summary: 'Mavzu: to''liq bloklar, oldingi/keyingi mavzu, breadcrumb'
+      parameters:
+      - in: path
+        name: book
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: topic
+        schema:
+          type: string
+        required: true
+      tags:
+      - content
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopicDetail'
+          description: ''
+  /api/v1/search/:
+    get:
+      operationId: search_topics
+      description: Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi
+        o'rniga kesh ishlaydi.
+      summary: Mavzular bo'yicha qidiruv (lotin va kirill)
+      parameters:
+      - in: query
+        name: book
+        schema:
+          type: string
+        description: Kitob slug'i
+      - in: query
+        name: grade
+        schema:
+          type: integer
+        description: Sinf (1–11)
+      - in: query
+        name: limit
+        schema:
+          type: integer
+        description: Eng ko'pi 50 ta
+      - in: query
+        name: locale
+        schema:
+          type: string
+          enum:
+          - en
+          - ru
+          - uz
+        description: Til (yoki Accept-Language); hozir faqat qidiruv snippetini tanlaydi.
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Qidiruv so'rovi
+        required: true
+      - in: query
+        name: subject
+        schema:
+          type: string
+        description: Fan slug'i
+      tags:
+      - content
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+          description: ''
 components:
   schemas:
     AuthSession:
@@ -412,6 +616,176 @@ components:
       required:
       - access
       - refresh
+    Book:
+      type: object
+      properties:
+        slug:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        subject:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        grade:
+          type: integer
+        title:
+          $ref: '#/components/schemas/LocalizedText'
+        author:
+          $ref: '#/components/schemas/LocalizedText'
+        publisher:
+          type: string
+        edition:
+          $ref: '#/components/schemas/LocalizedText'
+        year:
+          type: integer
+        cover:
+          type: string
+          format: uri
+          nullable: true
+        pdf:
+          type: string
+          format: uri
+          nullable: true
+        topics_ready:
+          type: boolean
+          readOnly: true
+        topics_count:
+          type: integer
+      required:
+      - author
+      - cover
+      - edition
+      - grade
+      - pdf
+      - publisher
+      - slug
+      - subject
+      - title
+      - topics_count
+      - topics_ready
+      - year
+    BookDetail:
+      type: object
+      properties:
+        slug:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        subject:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        grade:
+          type: integer
+        title:
+          $ref: '#/components/schemas/LocalizedText'
+        author:
+          $ref: '#/components/schemas/LocalizedText'
+        publisher:
+          type: string
+        edition:
+          $ref: '#/components/schemas/LocalizedText'
+        year:
+          type: integer
+        cover:
+          type: string
+          format: uri
+          nullable: true
+        pdf:
+          type: string
+          format: uri
+          nullable: true
+        topics_ready:
+          type: boolean
+          readOnly: true
+        topics_count:
+          type: integer
+        chapters:
+          type: array
+          items:
+            $ref: '#/components/schemas/Chapter'
+      required:
+      - author
+      - chapters
+      - cover
+      - edition
+      - grade
+      - pdf
+      - publisher
+      - slug
+      - subject
+      - title
+      - topics_count
+      - topics_ready
+      - year
+    Breadcrumb:
+      type: object
+      properties:
+        subject:
+          $ref: '#/components/schemas/BreadcrumbSubject'
+        book:
+          $ref: '#/components/schemas/BreadcrumbBook'
+        chapter:
+          $ref: '#/components/schemas/BreadcrumbChapter'
+      required:
+      - book
+      - chapter
+      - subject
+    BreadcrumbBook:
+      type: object
+      properties:
+        slug:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          $ref: '#/components/schemas/LocalizedText'
+        grade:
+          type: integer
+      required:
+      - grade
+      - slug
+      - title
+    BreadcrumbChapter:
+      type: object
+      properties:
+        slug:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        order:
+          type: integer
+        title:
+          $ref: '#/components/schemas/LocalizedText'
+      required:
+      - order
+      - slug
+      - title
+    BreadcrumbSubject:
+      type: object
+      properties:
+        slug:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          $ref: '#/components/schemas/LocalizedText'
+      required:
+      - slug
+      - title
+    Chapter:
+      type: object
+      properties:
+        slug:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        order:
+          type: integer
+        title:
+          $ref: '#/components/schemas/LocalizedText'
+        topics:
+          type: array
+          items:
+            $ref: '#/components/schemas/TopicSummary'
+      required:
+      - order
+      - slug
+      - title
+      - topics
     CheckStatusEnum:
       enum:
       - ok
@@ -526,6 +900,18 @@ components:
       - id
       - last_login
       - role
+    Grade:
+      type: object
+      properties:
+        grade:
+          type: integer
+          maximum: 11
+          minimum: 1
+        books_count:
+          type: integer
+      required:
+      - books_count
+      - grade
     Health:
       type: object
       properties:
@@ -558,6 +944,19 @@ components:
         * `uz-Cyrl` - Uzbek (Cyrillic)
         * `ru` - Russian
         * `en` - English
+    LocalizedText:
+      type: object
+      description: 'Ko''p tilli matn: API tilni tanlamaydi, klient `getLocalized`
+        bilan tanlaydi.'
+      properties:
+        uz:
+          type: string
+        ru:
+          type: string
+        en:
+          type: string
+      required:
+      - uz
     LoginRequest:
       type: object
       properties:
@@ -655,6 +1054,29 @@ components:
       description: |-
         * `student` - student
         * `teacher` - teacher
+    PaginatedBookList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Book'
     PasswordChangeRequest:
       type: object
       properties:
@@ -808,6 +1230,60 @@ components:
         * `teacher` - Teacher
         * `editor` - Editor
         * `admin` - Admin
+    SearchBook:
+      type: object
+      properties:
+        slug:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          $ref: '#/components/schemas/LocalizedText'
+        grade:
+          type: integer
+        subject:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+      required:
+      - grade
+      - slug
+      - subject
+      - title
+    SearchResponse:
+      type: object
+      properties:
+        count:
+          type: integer
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchResult'
+      required:
+      - count
+      - results
+    SearchResult:
+      type: object
+      properties:
+        topic:
+          $ref: '#/components/schemas/TopicSummary'
+        book:
+          $ref: '#/components/schemas/SearchBook'
+        chapter_order:
+          type: integer
+        chapter_title:
+          $ref: '#/components/schemas/LocalizedText'
+        snippet:
+          type: string
+          description: Mos so'zlar ⟦…⟧ ichida belgilangan parcha (asl matndan).
+        rank:
+          type: number
+          format: double
+      required:
+      - book
+      - chapter_order
+      - chapter_title
+      - rank
+      - snippet
+      - topic
     StatusEnum:
       enum:
       - ok
@@ -816,6 +1292,26 @@ components:
       description: |-
         * `ok` - ok
         * `degraded` - degraded
+    Subject:
+      type: object
+      properties:
+        slug:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          $ref: '#/components/schemas/LocalizedText'
+        icon:
+          type: string
+        order:
+          type: integer
+        books_count:
+          type: integer
+      required:
+      - books_count
+      - icon
+      - order
+      - slug
+      - title
     TokenRequest:
       type: object
       properties:
@@ -825,6 +1321,91 @@ components:
           maxLength: 200
       required:
       - token
+    TopicDetail:
+      type: object
+      properties:
+        slug:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        order:
+          type: integer
+        title:
+          $ref: '#/components/schemas/LocalizedText'
+        summary:
+          $ref: '#/components/schemas/LocalizedText'
+        unverified:
+          type: boolean
+          readOnly: true
+        book:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        chapter:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        status:
+          type: string
+        blocks:
+          type: array
+          description: 'Mavzu bloklari; sxema: `apps/content/schemas.py` (frontend
+            `TopicBlock`).'
+          items:
+            type: object
+            additionalProperties: true
+        previous:
+          allOf:
+          - $ref: '#/components/schemas/TopicLink'
+          nullable: true
+        next:
+          allOf:
+          - $ref: '#/components/schemas/TopicLink'
+          nullable: true
+        breadcrumb:
+          $ref: '#/components/schemas/Breadcrumb'
+      required:
+      - blocks
+      - book
+      - breadcrumb
+      - chapter
+      - next
+      - order
+      - previous
+      - slug
+      - status
+      - summary
+      - title
+      - unverified
+    TopicLink:
+      type: object
+      properties:
+        slug:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          $ref: '#/components/schemas/LocalizedText'
+      required:
+      - slug
+      - title
+    TopicSummary:
+      type: object
+      properties:
+        slug:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        order:
+          type: integer
+        title:
+          $ref: '#/components/schemas/LocalizedText'
+        summary:
+          $ref: '#/components/schemas/LocalizedText'
+        unverified:
+          type: boolean
+          readOnly: true
+      required:
+      - order
+      - slug
+      - summary
+      - title
+      - unverified
   securitySchemes:
     jwtAuth:
       type: http

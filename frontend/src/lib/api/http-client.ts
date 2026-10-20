@@ -6,6 +6,8 @@ import { ApiError, type ApiErrorBody } from "./types";
 
 export const DEFAULT_API_URL = "http://localhost:8000";
 export const DEFAULT_TIMEOUT_MS = 10_000;
+const NETWORK_RETRIES = 2;
+const RETRY_DELAY_MS = 150;
 export const REQUEST_ID_HEADER = "X-Request-ID";
 
 /**
@@ -58,20 +60,28 @@ function createFetch(options: HttpClientOptions): typeof fetch {
     // Tana buferga olinib `fetch(url, init)` bilan yuboriladi: `Request` obyekti berilsa Next serveri
     // tanani oqim (chunked) qilib yuboradi, WSGI (Django) esa uni bo'sh o'qiydi.
     const body = request.body ? await request.arrayBuffer() : undefined;
-    try {
-      const url = typeof window === "undefined" ? request.url : toBffUrl(request.url);
-      return await baseFetch(url, {
-        method: request.method,
-        headers: request.headers,
-        body,
-        signal,
-      });
-    } catch (error) {
-      if (timeout.aborted) {
-        throw new ApiError("So'rov vaqti tugadi", 0, { code: "timeout", requestId });
+    const url = typeof window === "undefined" ? request.url : toBffUrl(request.url);
+    // Faqat o'qish so'rovlari tarmoq uzilishida qayta uriniladi (backend qayta ishga tushayotgan bo'lishi mumkin).
+    const attempts =
+      request.method === "GET" || request.method === "HEAD" ? 1 + NETWORK_RETRIES : 1;
+    for (let attempt = 1; ; attempt += 1) {
+      try {
+        return await baseFetch(url, {
+          method: request.method,
+          headers: request.headers,
+          body,
+          signal,
+        });
+      } catch (error) {
+        if (timeout.aborted) {
+          throw new ApiError("So'rov vaqti tugadi", 0, { code: "timeout", requestId });
+        }
+        if (request.signal.aborted) throw error;
+        if (attempt >= attempts) {
+          throw new ApiError("Backend bilan aloqa yo'q", 0, { code: "network_error", requestId });
+        }
+        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS * attempt));
       }
-      if (request.signal.aborted) throw error;
-      throw new ApiError("Backend bilan aloqa yo'q", 0, { code: "network_error", requestId });
     }
   };
 }

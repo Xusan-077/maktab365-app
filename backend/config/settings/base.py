@@ -108,6 +108,12 @@ if env("AWS_STORAGE_BUCKET_NAME", default=""):
     AWS_QUERYSTRING_AUTH = False
     AWS_DEFAULT_ACL = None
 
+# --- Ochiq kontent API ---
+# true bo'lsa draft/reviewed mavzular ochiq API'da `unverified: true` bilan chiqadi (dev/staging);
+# prod'da false: faqat published.
+SHOW_DRAFTS_PUBLICLY = env.bool("SHOW_DRAFTS_PUBLICLY", default=False)
+CONTENT_CACHE_MAX_AGE = env.int("CONTENT_CACHE_MAX_AGE", default=60)
+
 # --- DRF ---
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [

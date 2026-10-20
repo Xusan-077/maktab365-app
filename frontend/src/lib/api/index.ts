@@ -15,32 +15,51 @@ export const ACCOUNT_METHODS = [
   "exportData",
 ] as const satisfies readonly (keyof MaktabApi)[];
 
-const ACCOUNT_METHOD_SET = new Set<PropertyKey>(ACCOUNT_METHODS);
+/** Katalog (fan, kitob, bob, mavzu, qidiruv) metodlari: backend `/api/v1` ochiq kontent API'si. */
+export const CATALOG_METHODS = [
+  "getGrades",
+  "getSubjects",
+  "getBooks",
+  "getBook",
+  "getChapters",
+  "getTopic",
+  "searchTopics",
+] as const satisfies readonly (keyof MaktabApi)[];
 
-/** Akkaunt metodlari `account` dan, qolganlari (katalog, progress…) `base` dan. */
-export function withAccountApi(base: MaktabApi, account: MaktabApi): MaktabApi {
+/** `methods` ro'yxatidagi metodlar `overlay` dan, qolganlari `base` dan olinadi. */
+export function withMethods(
+  base: MaktabApi,
+  overlay: MaktabApi,
+  methods: readonly PropertyKey[],
+): MaktabApi {
+  const overlaid = new Set<PropertyKey>(methods);
   return new Proxy(base, {
     get(target, prop) {
-      const source = ACCOUNT_METHOD_SET.has(prop) ? account : target;
+      const source = overlaid.has(prop) ? overlay : target;
       const value: unknown = Reflect.get(source, prop);
       return typeof value === "function" ? value.bind(source) : value;
     },
   });
 }
 
+/** Akkaunt metodlari `account` dan, qolganlari (katalog, progress…) `base` dan. */
+export const withAccountApi = (base: MaktabApi, account: MaktabApi): MaktabApi =>
+  withMethods(base, account, ACCOUNT_METHODS);
+
 let instance: MaktabApi | undefined;
 
 /**
  * `NEXT_PUBLIC_API_MODE=mock|http` bo'yicha tanlangan klient (default: mock).
- * `NEXT_PUBLIC_BACKEND_AUTH=true` bo'lsa akkaunt metodlari mock rejimida ham haqiqiy backend'ga
- * boradi (sessiya backend tokenlari bilan); katalog backend'i tayyor bo'lguncha mock'da qoladi.
+ * - `mock`: hammasi mock; `NEXT_PUBLIC_BACKEND_AUTH=true` bo'lsa akkaunt metodlari haqiqiy backend'ga boradi.
+ * - `http`: katalog (`CATALOG_METHODS`), akkaunt va health — backend; backend'da hali yo'q
+ *   metodlar (progress, xatcho'p, maqsad, fikr) vaqtincha mock'da (`MockApi`) qoladi.
  */
 export function getApi(): MaktabApi {
   if (instance) return instance;
+  const mock = new MockApi({ latencyMs: process.env.NODE_ENV === "development" ? 200 : 0 });
   if (API_MODE === "http") {
-    instance = new HttpApi();
+    instance = withMethods(mock, new HttpApi(), ["health", ...CATALOG_METHODS, ...ACCOUNT_METHODS]);
   } else {
-    const mock = new MockApi({ latencyMs: process.env.NODE_ENV === "development" ? 200 : 0 });
     instance = BACKEND_AUTH ? withAccountApi(mock, new HttpApi()) : mock;
   }
   return instance;

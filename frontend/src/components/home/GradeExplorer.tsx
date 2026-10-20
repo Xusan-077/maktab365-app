@@ -34,17 +34,27 @@ const GRADE_PARAM = "grade";
 
 type IconComponent = ComponentType<{ className?: string; "aria-hidden"?: boolean }>;
 
+/** Kalit — fan id'si (mock) yoki slug'i (http: id = slug). */
 const SUBJECT_ICONS: Record<string, IconComponent> = {
   math: Calculator,
+  matematika: Calculator,
   algebra: Sigma,
   geometry: Shapes,
+  geometriya: Shapes,
   english: Languages,
+  "ingliz-tili": Languages,
   "mother-tongue": BookOpen,
+  "ona-tili": BookOpen,
   history: Globe2,
+  tarix: Globe2,
   physics: Atom,
+  fizika: Atom,
   chemistry: FlaskConical,
+  kimyo: FlaskConical,
   biology: Leaf,
+  biologiya: Leaf,
   informatics: Monitor,
+  informatika: Monitor,
 };
 
 function parseGrade(value: string | null): Grade | null {

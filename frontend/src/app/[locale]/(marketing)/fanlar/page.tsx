@@ -6,7 +6,7 @@ import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { pageShellClass } from "@/components/layout/containers";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card } from "@/components/ui/Card";
-import { getApi } from "@/lib/api";
+import { getSubjectsPageData } from "@/lib/api/server";
 import { getLocalized } from "@/lib/i18n/localized";
 import { Link } from "@/lib/i18n/navigation";
 import { routing } from "@/lib/i18n/routing";
@@ -32,8 +32,7 @@ export default async function SubjectsPage({ params }: PageProps<"/[locale]/fanl
   setRequestLocale(locale);
   const t = await getTranslations("subjectsPage");
   const tb = await getTranslations("breadcrumb");
-  const api = getApi();
-  const [subjects, books] = await Promise.all([api.getSubjects(), api.getBooks()]);
+  const { subjects, books } = await getSubjectsPageData();
 
   return (
     <div className={`${pageShellClass("marketing")} flex flex-col gap-6`}>

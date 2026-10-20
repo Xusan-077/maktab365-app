@@ -1,0 +1,114 @@
+{
+  "cyrillicToLatin": [
+    [
+      "салом",
+      "salom"
+    ],
+    [
+      "Ўзбекистон",
+      "O'zbekiston"
+    ],
+    [
+      "ғалаба",
+      "g'alaba"
+    ],
+    [
+      "шаҳар",
+      "shahar"
+    ],
+    [
+      "Чоршанба",
+      "Chorshanba"
+    ],
+    [
+      "Европа",
+      "Yevropa"
+    ],
+    [
+      "эшик",
+      "eshik"
+    ],
+    [
+      "йўл",
+      "yo'l"
+    ],
+    [
+      "ёш",
+      "yosh"
+    ],
+    [
+      "маъно",
+      "ma'no"
+    ],
+    [
+      "съезд",
+      "s'ezd"
+    ],
+    [
+      "щи",
+      "shchi"
+    ],
+    [
+      "мягкий",
+      "myagkiy"
+    ],
+    [
+      "Привет",
+      "Privet"
+    ],
+    [
+      "Қалам",
+      "Qalam"
+    ],
+    [
+      "Москва 2025!",
+      "Moskva 2025!"
+    ],
+    [
+      "x² + 1 = 0",
+      "x² + 1 = 0"
+    ],
+    [
+      "Salom",
+      "Salom"
+    ]
+  ],
+  "searchNormalize": [
+    [
+      "O'zbekiston",
+      "ozbekiston"
+    ],
+    [
+      "Oʻzbekiston",
+      "ozbekiston"
+    ],
+    [
+      "Ўзбекистон",
+      "ozbekiston"
+    ],
+    [
+      "Квадрат тенглама",
+      "kvadrat tenglama"
+    ],
+    [
+      "Ma'no",
+      "mano"
+    ],
+    [
+      "Ғалаба",
+      "galaba"
+    ],
+    [
+      "ТЕНГЛАМА",
+      "tenglama"
+    ],
+    [
+      "Ҳаёт",
+      "hayot"
+    ],
+    [
+      "  Salom,  Dunyo! ",
+      "  salom,  dunyo! "
+    ]
+  ]
+}

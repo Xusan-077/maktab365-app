@@ -1,4 +1,6 @@
 from django.conf import settings
+from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.search import SearchVectorField
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -8,6 +10,7 @@ from apps.core.fields import LocalizedTextField
 from apps.core.models import TimeStampedModel, UUIDModel
 
 from .schemas import format_issues, validate_blocks
+from .search import reindex_topic
 
 REVISION_LIMIT = 50
 
@@ -106,6 +109,10 @@ class Topic(UUIDModel, TimeStampedModel):
     notes = models.TextField(blank=True)
     order = models.PositiveIntegerField()
     published_at = models.DateTimeField(null=True, blank=True)
+    # Qidiruv (`search.reindex_topic` to'ldiradi): 'simple' vektor + normallashtirilgan matn
+    # (kirill→lotin, tutuqsiz); `search_body` — til bo'yicha asl matn (snippet uchun).
+    search_vector = SearchVectorField(null=True, editable=False)
+    search_body = models.JSONField(default=dict, editable=False)
 
     class Meta:
         ordering = ["chapter__order", "order"]
@@ -117,7 +124,10 @@ class Topic(UUIDModel, TimeStampedModel):
                 deferrable=models.Deferrable.DEFERRED,
             ),
         ]
-        indexes = [models.Index(fields=["book", "status"])]
+        indexes = [
+            models.Index(fields=["book", "status"]),
+            GinIndex(fields=["search_vector"], name="topic_search_vector_gin"),
+        ]
 
     def __str__(self):
         return f"{self.book_id}/{self.slug}"
@@ -134,6 +144,7 @@ class Topic(UUIDModel, TimeStampedModel):
             kwargs["update_fields"] = {*update_fields, "book", "published_at", "reviewed_at"}
         super().save(*args, **kwargs)
         self._snapshot()
+        reindex_topic(self)
 
     def _snapshot(self):
         """Mazmun (sarlavha/bloklar) o'zgargan bo'lsagina yangi revision; oxirgi 50 ta saqlanadi."""

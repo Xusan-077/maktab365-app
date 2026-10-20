@@ -262,6 +262,126 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/grades/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Sinflar (1–11) va ulardagi kitoblar soni
+         * @description Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi o'rniga kesh ishlaydi.
+         */
+        get: operations["grades_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/subjects/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Kitobi bor fanlar (ixtiyoriy: sinf bo'yicha)
+         * @description Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi o'rniga kesh ishlaydi.
+         */
+        get: operations["subjects_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/books/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Kitoblar (sahifalangan)
+         * @description Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi o'rniga kesh ishlaydi.
+         */
+        get: operations["books_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/books/{slug}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Kitob: boblar va mavzular ro'yxati (bloklarsiz)
+         * @description Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi o'rniga kesh ishlaydi.
+         */
+        get: operations["books_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/books/{book}/topics/{topic}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Mavzu: to'liq bloklar, oldingi/keyingi mavzu, breadcrumb
+         * @description Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi o'rniga kesh ishlaydi.
+         */
+        get: operations["topics_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/search/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Mavzular bo'yicha qidiruv (lotin va kirill)
+         * @description Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi o'rniga kesh ishlaydi.
+         */
+        get: operations["search_topics"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -275,6 +395,64 @@ export interface components {
         AuthTokens: {
             access: string;
             refresh: string;
+        };
+        Book: {
+            slug: string;
+            subject: string;
+            grade: number;
+            title: components["schemas"]["LocalizedText"];
+            author: components["schemas"]["LocalizedText"];
+            publisher: string;
+            edition: components["schemas"]["LocalizedText"];
+            year: number;
+            /** Format: uri */
+            cover: string | null;
+            /** Format: uri */
+            pdf: string | null;
+            readonly topics_ready: boolean;
+            topics_count: number;
+        };
+        BookDetail: {
+            slug: string;
+            subject: string;
+            grade: number;
+            title: components["schemas"]["LocalizedText"];
+            author: components["schemas"]["LocalizedText"];
+            publisher: string;
+            edition: components["schemas"]["LocalizedText"];
+            year: number;
+            /** Format: uri */
+            cover: string | null;
+            /** Format: uri */
+            pdf: string | null;
+            readonly topics_ready: boolean;
+            topics_count: number;
+            chapters: components["schemas"]["Chapter"][];
+        };
+        Breadcrumb: {
+            subject: components["schemas"]["BreadcrumbSubject"];
+            book: components["schemas"]["BreadcrumbBook"];
+            chapter: components["schemas"]["BreadcrumbChapter"];
+        };
+        BreadcrumbBook: {
+            slug: string;
+            title: components["schemas"]["LocalizedText"];
+            grade: number;
+        };
+        BreadcrumbChapter: {
+            slug: string;
+            order: number;
+            title: components["schemas"]["LocalizedText"];
+        };
+        BreadcrumbSubject: {
+            slug: string;
+            title: components["schemas"]["LocalizedText"];
+        };
+        Chapter: {
+            slug: string;
+            order: number;
+            title: components["schemas"]["LocalizedText"];
+            topics: components["schemas"]["TopicSummary"][];
         };
         /**
          * @description * `ok` - ok
@@ -325,6 +503,10 @@ export interface components {
             /** Format: date-time */
             last_login: string | null;
         };
+        Grade: {
+            grade: number;
+            books_count: number;
+        };
         Health: {
             status: components["schemas"]["StatusEnum"];
             checks: components["schemas"]["HealthChecks"];
@@ -341,6 +523,12 @@ export interface components {
          * @enum {string}
          */
         LocaleEnum: "uz" | "uz-Cyrl" | "ru" | "en";
+        /** @description Ko'p tilli matn: API tilni tanlamaydi, klient `getLocalized` bilan tanlaydi. */
+        LocalizedText: {
+            uz: string;
+            ru?: string;
+            en?: string;
+        };
         LoginRequest: {
             /** Format: email */
             email: string;
@@ -374,6 +562,21 @@ export interface components {
          * @enum {string}
          */
         OnboardingRoleEnum: "student" | "teacher";
+        PaginatedBookList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["Book"][];
+        };
         PasswordChangeRequest: {
             current_password?: string;
             new_password: string;
@@ -423,14 +626,69 @@ export interface components {
          * @enum {string}
          */
         RoleEnum: "student" | "teacher" | "editor" | "admin";
+        SearchBook: {
+            slug: string;
+            title: components["schemas"]["LocalizedText"];
+            grade: number;
+            subject: string;
+        };
+        SearchResponse: {
+            count: number;
+            results: components["schemas"]["SearchResult"][];
+        };
+        SearchResult: {
+            topic: components["schemas"]["TopicSummary"];
+            book: components["schemas"]["SearchBook"];
+            chapter_order: number;
+            chapter_title: components["schemas"]["LocalizedText"];
+            /** @description Mos so'zlar ⟦…⟧ ichida belgilangan parcha (asl matndan). */
+            snippet: string;
+            /** Format: double */
+            rank: number;
+        };
         /**
          * @description * `ok` - ok
          *     * `degraded` - degraded
          * @enum {string}
          */
         StatusEnum: "ok" | "degraded";
+        Subject: {
+            slug: string;
+            title: components["schemas"]["LocalizedText"];
+            icon: string;
+            order: number;
+            books_count: number;
+        };
         TokenRequest: {
             token: string;
+        };
+        TopicDetail: {
+            slug: string;
+            order: number;
+            title: components["schemas"]["LocalizedText"];
+            summary: components["schemas"]["LocalizedText"];
+            readonly unverified: boolean;
+            book: string;
+            chapter: string;
+            status: string;
+            /** @description Mavzu bloklari; sxema: `apps/content/schemas.py` (frontend `TopicBlock`). */
+            blocks: {
+                [key: string]: unknown;
+            }[];
+            previous: components["schemas"]["TopicLink"] | null;
+            next: components["schemas"]["TopicLink"] | null;
+            breadcrumb: components["schemas"]["Breadcrumb"];
+        };
+        TopicLink: {
+            slug: string;
+            title: components["schemas"]["LocalizedText"];
+        };
+        TopicSummary: {
+            slug: string;
+            order: number;
+            title: components["schemas"]["LocalizedText"];
+            summary: components["schemas"]["LocalizedText"];
+            readonly unverified: boolean;
         };
     };
     responses: never;
@@ -831,6 +1089,154 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Health"];
+                };
+            };
+        };
+    };
+    grades_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Grade"][];
+                };
+            };
+        };
+    };
+    subjects_list: {
+        parameters: {
+            query?: {
+                /** @description Sinf (1–11) */
+                grade?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Subject"][];
+                };
+            };
+        };
+    };
+    books_list: {
+        parameters: {
+            query?: {
+                /** @description Sinf (1–11) */
+                grade?: number;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /** @description Kitob nomi/muallifi bo'yicha */
+                q?: string;
+                /** @description Fan slug'i */
+                subject?: string;
+                /** @description Mavzulari bor/yo'q kitoblar */
+                topics_ready?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedBookList"];
+                };
+            };
+        };
+    };
+    books_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookDetail"];
+                };
+            };
+        };
+    };
+    topics_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                book: string;
+                topic: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TopicDetail"];
+                };
+            };
+        };
+    };
+    search_topics: {
+        parameters: {
+            query: {
+                /** @description Kitob slug'i */
+                book?: string;
+                /** @description Sinf (1–11) */
+                grade?: number;
+                /** @description Eng ko'pi 50 ta */
+                limit?: number;
+                /** @description Til (yoki Accept-Language); hozir faqat qidiruv snippetini tanlaydi. */
+                locale?: "en" | "ru" | "uz";
+                /** @description Qidiruv so'rovi */
+                q: string;
+                /** @description Fan slug'i */
+                subject?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SearchResponse"];
                 };
             };
         };

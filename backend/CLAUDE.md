@@ -41,6 +41,13 @@ Bitta Django monolit: Python 3.12 · Django 5.2 · DRF · drf-spectacular · sim
 - `import_content <papka> [--dry-run]` (`importer.py`): `frontend/src/content` → baza, idempotent, bitta tranzaksiya; fan/kitob metama'lumoti `catalog_seed.py` da (yangi kitob qo'shilsa shu yerga ham). Status faqat ko'tariladi.
 - Fayllar: `Book.cover/pdf` — `FileField`; `STORAGES` env bilan (`AWS_STORAGE_BUCKET_NAME` bo'lsa S3-mos, aks holda `media/`).
 
+### Ochiq kontent API (M7)
+
+- `urls.py`/`views.py`: `grades/`, `subjects/`, `books/`, `books/<slug>/`, `books/<book>/topics/<topic>/`, `search/` — `AllowAny`, throttle yo'q (kesh ishlaydi; faqat `search/` umumiy throttle'da). Har `get` `@public_cached` (`cache.py`): Redis'da `content:v<versiya>:<hash>`, `ETag`/304, `Cache-Control: public, max-age=CONTENT_CACHE_MAX_AGE`. Subject/Book/Chapter/Topic saqlanganda/o'chirilganda `signals.py` versiyani almashtiradi (commit'dan keyin); `.update()` bilan yozsangiz `bump_content_version()` ni o'zingiz chaqiring.
+- Ko'rinish: `is_staff(user)` (editor/admin/is_staff) hamma statusni ko'radi, javob `private, no-store`. Boshqalar — `published`; `SHOW_DRAFTS_PUBLICLY=true` bo'lsa draft/reviewed ham, `unverified: true` bilan. `topics_ready`/`topics_count` — ko'rinadigan mavzular bo'yicha.
+- Qidiruv (`search.py`): `Topic.search_vector` ('simple', A sarlavha / B mazmun / C bloklar) `Topic.save()` da `reindex_topic` bilan yangilanadi (`.update()` ishlatsangiz o'zingiz chaqiring); matn `apps.core.translit.normalize_search_text` (kirill→lotin, tutuqsiz) bilan normallashadi, so'rov atamalari prefiks (`atama:*`) va hammasi kerak. Snippet Python'da, asl matndan, mos so'zlar `⟦…⟧` ichida. Frontend umumiy vektorlar: `contracts/fixtures/translit.json`.
+- N+1 yo'q: testlar `django_assert_max_num_queries` bilan (`tests/test_api.py`).
+
 ## Qoidalar
 
 1. API prefiksi `/api/v1`, JSON kalitlari `snake_case`. Yangi view'ga `@extend_schema` bilan operation_id va javob tiplarini bering.
