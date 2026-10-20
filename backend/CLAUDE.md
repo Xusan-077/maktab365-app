@@ -48,6 +48,13 @@ Bitta Django monolit: Python 3.12 · Django 5.2 · DRF · drf-spectacular · sim
 - Qidiruv (`search.py`): `Topic.search_vector` ('simple', A sarlavha / B mazmun / C bloklar) `Topic.save()` da `reindex_topic` bilan yangilanadi (`.update()` ishlatsangiz o'zingiz chaqiring); matn `apps.core.translit.normalize_search_text` (kirill→lotin, tutuqsiz) bilan normallashadi, so'rov atamalari prefiks (`atama:*`) va hammasi kerak. Snippet Python'da, asl matndan, mos so'zlar `⟦…⟧` ichida. Frontend umumiy vektorlar: `contracts/fixtures/translit.json`.
 - N+1 yo'q: testlar `django_assert_max_num_queries` bilan (`tests/test_api.py`).
 
+## `apps/support`
+
+- `SupportMessage` (UUID pk): `user?` (SET_NULL), `name`, `email`, `kind` (`question|suggestion|bug|content_error`), `message` (10–2000), `page_url`, `topic`, `user_agent`, `status` (`new|in_progress|resolved|spam`), `staff_note` (faqat admin, API'da yo'q).
+- `POST /api/v1/support/` (`AllowAny`, `SupportRateThrottle` — IP bo'yicha, `SUPPORT_THROTTLE_RATE`): kirgan foydalanuvchida `user` va (email berilmasa) email akkauntdan; mehmonda email majburiy. Honeypot (`website` to'ldirilgan) — 201 qaytadi, lekin saqlanmaydi. `spam.is_spam` (ko'p havola, tipik iboralar, takror) — `status=spam` bilan saqlanadi, staff'ga xat ketmaydi. Javob doim `{ok: true}`.
+- Yangi (spam bo'lmagan) xabarda `tasks.notify_staff` (Celery, `on_commit`) `SUPPORT_NOTIFY_EMAILS` ga yuboradi; bo'sh bo'lsa hech narsa.
+- `GET /api/v1/me/support/` — o'z murojaatlari (paginatsiyalangan, spam ko'rsatilmaydi).
+
 ## Qoidalar
 
 1. API prefiksi `/api/v1`, JSON kalitlari `snake_case`. Yangi view'ga `@extend_schema` bilan operation_id va javob tiplarini bering.

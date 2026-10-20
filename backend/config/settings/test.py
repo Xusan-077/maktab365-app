@@ -26,7 +26,9 @@ REST_FRAMEWORK = {  # noqa: F405
         "user": "1000/min",
         "auth": "1000/min",
         "auth_email": "1000/min",
+        "support": "1000/hour",
     },
 }
 EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
 FRONTEND_URL = "http://frontend.test"
+SUPPORT_NOTIFY_EMAILS = ["staff@example.com"]

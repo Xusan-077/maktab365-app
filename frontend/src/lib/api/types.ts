@@ -1,5 +1,4 @@
 import type { components } from "./schema";
-import type { Feedback, FeedbackInput } from "@/types/feedback";
 import type { StudyGoal, UpdateGoalInput } from "@/types/goal";
 import type { Book, BookFilters, Chapter, Grade, Subject } from "@/types/catalog";
 import type {
@@ -11,6 +10,7 @@ import type {
   ToggleBookBookmarkResult,
   ToggleBookmarkResult,
 } from "@/types/progress";
+import type { SupportInput, SupportMessage } from "@/types/support";
 import type { Topic, TopicSearchFilters, TopicSearchResult } from "@/types/topic";
 import type { AccountExport, ProfileInput, UpdateProfileInput, User, UserRole } from "@/types/user";
 
@@ -50,8 +50,10 @@ export interface MaktabApi {
   createGoal(title: string): Promise<StudyGoal>;
   updateGoal(goalId: string, input: UpdateGoalInput): Promise<StudyGoal>;
   deleteGoal(goalId: string): Promise<void>;
-  /** Panelning "Yordam" sahifasidan savol, taklif yoki xatolik haqida xabar yuboradi. */
-  submitFeedback(input: FeedbackInput): Promise<Feedback>;
+  /** "Yordam va aloqa": savol, taklif yoki xatolik haqida murojaat (mehmon ham yubora oladi). */
+  sendSupport(input: SupportInput): Promise<void>;
+  /** Kirgan foydalanuvchining o'z murojaatlari va ularning holati, eng yangisi birinchi. */
+  getMySupport(): Promise<SupportMessage[]>;
 }
 
 export type ApiMode = "mock" | "http";

@@ -835,25 +835,7 @@
         "present": "On a topic page, F turns on “Present in class” mode and Esc leaves it.",
         "progress": "Read a topic and solve the exercises — results show up under “Results”."
       },
-      "formTitle": "Send a message",
-      "kindLabel": "Message type",
-      "kinds": {
-        "question": "Question",
-        "idea": "Suggestion",
-        "bug": "Report a bug"
-      },
-      "messageLabel": "Your message",
-      "messageHint": "{min} to {max} characters.",
-      "submit": "Send",
-      "sent": "Message sent",
-      "sentHint": "Thank you! We will look at it soon.",
-      "sendFailed": "Could not send. Please try again later.",
-      "errors": {
-        "kindRequired": "Choose a message type",
-        "messageRequired": "Write a message",
-        "messageTooShort": "The message must be at least {min} characters",
-        "messageTooLong": "The message must not exceed {max} characters"
-      }
+      "formTitle": "Send a message"
     }
   },
   "aboutPage": {
@@ -880,9 +862,10 @@
     "cta": "Browse textbooks"
   },
   "helpPage": {
-    "title": "Help center",
-    "lead": "Answers to the most common questions.",
-    "signedInHint": "Did not find an answer? After signing in, write to us from the dashboard's “Help” section."
+    "title": "Help and contact",
+    "lead": "Frequently asked questions and a form to write to us.",
+    "contactTitle": "Write to us",
+    "contactLead": "A question, idea or a mistake — write it here. We will reply to your email."
   },
   "authForm": {
     "tabsLabel": "Sign-in method",
@@ -961,6 +944,50 @@
       "text": "Your email isn't confirmed yet. Click the link in the email we sent.",
       "resend": "Resend",
       "sent": "Confirmation email sent again"
+    }
+  },
+  "support": {
+    "kindLabel": "Message type",
+    "kinds": {
+      "question": "Question",
+      "suggestion": "Suggestion",
+      "bug": "Site bug",
+      "content_error": "Mistake in a textbook"
+    },
+    "emailLabel": "Email",
+    "emailHint": "We will reply to this address.",
+    "messageLabel": "Your message",
+    "messageHint": "{min} to {max} characters.",
+    "honeypotLabel": "Leave this field empty",
+    "submit": "Send",
+    "sentTitle": "Message sent",
+    "sentHint": "Thank you! We will look at it soon.",
+    "sendAnother": "Send another",
+    "errors": {
+      "kindRequired": "Choose a message type",
+      "emailRequired": "Enter your email",
+      "emailInvalid": "The email looks invalid",
+      "messageRequired": "Write a message",
+      "messageTooShort": "The message must be at least {min} characters",
+      "messageTooLong": "The message must not exceed {max} characters",
+      "throttled": "Too many messages sent. Please try again a little later.",
+      "sendFailed": "Could not send. Please try again later."
+    },
+    "statuses": {
+      "new": "New",
+      "in_progress": "In progress",
+      "resolved": "Resolved"
+    },
+    "mine": {
+      "title": "My messages",
+      "empty": "You have not sent any messages yet.",
+      "loadFailed": "Could not load messages."
+    },
+    "reportError": {
+      "link": "Found a mistake?",
+      "title": "Report a mistake",
+      "description": "Describe the mistake in this topic — the page address is added automatically.",
+      "close": "Done"
     }
   }
 }

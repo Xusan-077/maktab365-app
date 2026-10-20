@@ -835,25 +835,7 @@
         "present": "Mavzu sahifasida F tugmasi «Darsda ko'rsatish» rejimini yoqadi, Esc esa undan chiqaradi.",
         "progress": "Mavzuni o'qib, mashqlarni yechsangiz, natijalar «Natijalar» bo'limida ko'rinadi."
       },
-      "formTitle": "Xabar yuborish",
-      "kindLabel": "Xabar turi",
-      "kinds": {
-        "question": "Savol",
-        "idea": "Taklif",
-        "bug": "Xatolik haqida"
-      },
-      "messageLabel": "Xabaringiz",
-      "messageHint": "{min} dan {max} gacha belgi.",
-      "submit": "Yuborish",
-      "sent": "Xabaringiz yuborildi",
-      "sentHint": "Rahmat! Tez orada ko'rib chiqamiz.",
-      "sendFailed": "Yuborib bo'lmadi. Keyinroq qayta urinib ko'ring.",
-      "errors": {
-        "kindRequired": "Xabar turini tanlang",
-        "messageRequired": "Xabarni yozing",
-        "messageTooShort": "Xabar kamida {min} ta belgidan iborat bo'lsin",
-        "messageTooLong": "Xabar {max} ta belgidan oshmasin"
-      }
+      "formTitle": "Xabar yuborish"
     }
   },
   "aboutPage": {
@@ -880,9 +862,10 @@
     "cta": "Darsliklarni ko'rish"
   },
   "helpPage": {
-    "title": "Yordam markazi",
-    "lead": "Eng ko'p beriladigan savollarga javoblar.",
-    "signedInHint": "Savolingizga javob topmadingizmi? Kirgandan keyin kabinetdagi «Yordam» bo'limidan bizga yozing."
+    "title": "Yordam va aloqa",
+    "lead": "Tez-tez beriladigan savollar va bizga yozish uchun forma.",
+    "contactTitle": "Bizga yozing",
+    "contactLead": "Savol, taklif yoki xatolik — barchasini shu yerda yozing. Javobni emailingizga yuboramiz."
   },
   "authForm": {
     "tabsLabel": "Kirish usuli",
@@ -961,6 +944,50 @@
       "text": "Emailingiz hali tasdiqlanmagan. Xatdagi havolani bosing.",
       "resend": "Qayta yuborish",
       "sent": "Tasdiqlash xati qayta yuborildi"
+    }
+  },
+  "support": {
+    "kindLabel": "Xabar turi",
+    "kinds": {
+      "question": "Savol",
+      "suggestion": "Taklif",
+      "bug": "Saytdagi xatolik",
+      "content_error": "Darslikdagi xato"
+    },
+    "emailLabel": "Email",
+    "emailHint": "Javobni shu manzilga yuboramiz.",
+    "messageLabel": "Xabaringiz",
+    "messageHint": "{min} dan {max} gacha belgi.",
+    "honeypotLabel": "Bu maydonni bo'sh qoldiring",
+    "submit": "Yuborish",
+    "sentTitle": "Xabaringiz yuborildi",
+    "sentHint": "Rahmat! Tez orada ko'rib chiqamiz.",
+    "sendAnother": "Yana xabar yuborish",
+    "errors": {
+      "kindRequired": "Xabar turini tanlang",
+      "emailRequired": "Emailingizni kiriting",
+      "emailInvalid": "Email noto'g'ri ko'rinadi",
+      "messageRequired": "Xabarni yozing",
+      "messageTooShort": "Xabar kamida {min} ta belgidan iborat bo'lsin",
+      "messageTooLong": "Xabar {max} ta belgidan oshmasin",
+      "throttled": "Juda ko'p xabar yuborildi. Birozdan keyin qayta urinib ko'ring.",
+      "sendFailed": "Yuborib bo'lmadi. Keyinroq qayta urinib ko'ring."
+    },
+    "statuses": {
+      "new": "Yangi",
+      "in_progress": "Ko'rib chiqilmoqda",
+      "resolved": "Hal qilindi"
+    },
+    "mine": {
+      "title": "Mening xabarlarim",
+      "empty": "Hali xabar yubormagansiz.",
+      "loadFailed": "Xabarlarni yuklab bo'lmadi."
+    },
+    "reportError": {
+      "link": "Xato topdingizmi?",
+      "title": "Xato haqida xabar",
+      "description": "Mavzudagi xatoni yozing — sahifa manzili o'zi qo'shiladi.",
+      "close": "Tayyor"
     }
   }
 }

@@ -5,7 +5,7 @@ import type { ApiMode, MaktabApi } from "./types";
 
 export const API_MODE: ApiMode = process.env.NEXT_PUBLIC_API_MODE === "http" ? "http" : "mock";
 
-/** Akkaunt (profil, onboarding, rol, o'chirish, eksport) metodlari. */
+/** Akkaunt (profil, onboarding, rol, o'chirish, eksport) va murojaat (support) metodlari. */
 export const ACCOUNT_METHODS = [
   "getMe",
   "saveProfile",
@@ -13,6 +13,8 @@ export const ACCOUNT_METHODS = [
   "setRole",
   "deleteAccount",
   "exportData",
+  "sendSupport",
+  "getMySupport",
 ] as const satisfies readonly (keyof MaktabApi)[];
 
 /** Katalog (fan, kitob, bob, mavzu, qidiruv) metodlari: backend `/api/v1` ochiq kontent API'si. */
@@ -52,7 +54,7 @@ let instance: MaktabApi | undefined;
  * `NEXT_PUBLIC_API_MODE=mock|http` bo'yicha tanlangan klient (default: mock).
  * - `mock`: hammasi mock; `NEXT_PUBLIC_BACKEND_AUTH=true` bo'lsa akkaunt metodlari haqiqiy backend'ga boradi.
  * - `http`: katalog (`CATALOG_METHODS`), akkaunt va health — backend; backend'da hali yo'q
- *   metodlar (progress, xatcho'p, maqsad, fikr) vaqtincha mock'da (`MockApi`) qoladi.
+ *   metodlar (progress, xatcho'p, maqsad) vaqtincha mock'da (`MockApi`) qoladi.
  */
 export function getApi(): MaktabApi {
   if (instance) return instance;

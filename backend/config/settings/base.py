@@ -132,6 +132,8 @@ REST_FRAMEWORK = {
         # Kirish/ro'yxatdan o'tish/parol tiklash: IP va email bo'yicha alohida.
         "auth": "10/min",
         "auth_email": "5/min",
+        # Yordam murojaatlari: IP bo'yicha soatiga 5 ta (e2e uchun env bilan oshiriladi).
+        "support": env("SUPPORT_THROTTLE_RATE", default="5/hour"),
     },
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "EXCEPTION_HANDLER": "apps.core.exceptions.api_exception_handler",
@@ -163,6 +165,9 @@ AUTH_LOCKOUT_SECONDS = env.int("AUTH_LOCKOUT_SECONDS", default=15 * 60)
 vars().update(env.email_url("EMAIL_URL", default="consolemail://"))
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="maktab365 <no-reply@maktab365.uz>")
 
+# Yangi murojaatlar haqida xabar oladigan staff email'lari (vergul bilan); bo'sh — xat yo'q.
+SUPPORT_NOTIFY_EMAILS = env.list("SUPPORT_NOTIFY_EMAILS", default=[])
+
 SPECTACULAR_SETTINGS = {
     "TITLE": "Maktab365 API",
     "DESCRIPTION": "Maktab365 platformasi API'si.",
@@ -176,6 +181,8 @@ SPECTACULAR_SETTINGS = {
         "RoleEnum": "apps.accounts.models.Role.choices",
         "OnboardingRoleEnum": "apps.accounts.serializers.ONBOARDING_ROLES",
         "LocaleEnum": "apps.accounts.models.Locale.choices",
+        "SupportKindEnum": "apps.support.models.Kind.choices",
+        "SupportStatusEnum": "apps.support.models.Status.choices",
     },
 }
 

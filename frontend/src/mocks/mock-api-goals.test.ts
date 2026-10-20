@@ -57,20 +57,28 @@ describe("MockApi: o'qish rejasi", () => {
   });
 });
 
-describe("MockApi: fikr-mulohaza", () => {
-  it("xabarni qirqib saqlaydi, bo'sh xabarni rad etadi", async () => {
+describe("MockApi: yordam murojaatlari", () => {
+  it("murojaatni qirqib saqlaydi, eng yangisi birinchi, akkauntlar aralashmaydi", async () => {
     const api = as("u1");
-    const sent = await api.submitFeedback({ kind: "bug", message: "  Tugma ishlamayapti  " });
-    expect(sent).toMatchObject({ kind: "bug", message: "Tugma ishlamayapti", userId: "u1" });
-    await expect(api.submitFeedback({ kind: "idea", message: "   " })).rejects.toMatchObject({
+    await api.sendSupport({ kind: "bug", message: "  Tugma ishlamayapti  " });
+    await api.sendSupport({ kind: "content_error", message: "Mavzuda xato", topic: "t1" });
+    const mine = await api.getMySupport();
+    expect(mine.map((item) => item.message)).toEqual(["Mavzuda xato", "Tugma ishlamayapti"]);
+    expect(mine[0]).toMatchObject({ kind: "content_error", topic: "t1", status: "new" });
+    expect(await as("u2").getMySupport()).toEqual([]);
+  });
+
+  it("bo'sh xabarni rad etadi", async () => {
+    await expect(as("u1").sendSupport({ kind: "question", message: "   " })).rejects.toMatchObject({
       status: 400,
     });
   });
 
-  it("kirmagan foydalanuvchi uchun 401", async () => {
+  it("mehmon yubora oladi, lekin o'z xabarlarini ko'ra olmaydi", async () => {
     const api = new MockApi({ session: () => null });
-    await expect(api.submitFeedback({ kind: "question", message: "Salom" })).rejects.toMatchObject({
-      status: 401,
-    });
+    await expect(
+      api.sendSupport({ kind: "question", message: "Salom, savolim bor", email: "a@b.uz" }),
+    ).resolves.toBeUndefined();
+    await expect(api.getMySupport()).rejects.toMatchObject({ status: 401 });
   });
 });
