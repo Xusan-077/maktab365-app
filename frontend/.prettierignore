@@ -4,3 +4,6 @@ package-lock.json
 next-env.d.ts
 public
 src/lib/api/schema.ts
+test-results
+playwright-report
+blob-report
