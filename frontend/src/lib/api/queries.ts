@@ -39,4 +39,6 @@ export const apiQueries = {
     }),
   me: () => queryOptions({ queryKey: queryKeys.me(), queryFn: () => getApi().getMe() }),
   goals: () => queryOptions({ queryKey: queryKeys.goals(), queryFn: () => getApi().getGoals() }),
+  mySupport: () =>
+    queryOptions({ queryKey: queryKeys.mySupport(), queryFn: () => getApi().getMySupport() }),
 };

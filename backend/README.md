@@ -37,7 +37,7 @@ make types      # frontend/src/lib/api/schema.ts ni yangilaydi
 
 ## Muhit o'zgaruvchilari
 
-`.env.example` ga qarang. Muhimlari: `SECRET_KEY`, `DATABASE_URL`, `REDIS_URL`, `FRONTEND_ORIGINS` (CORS faqat shu origin'lar), `SENTRY_DSN` (ixtiyoriy). Production: `DJANGO_SETTINGS_MODULE=config.settings.prod`, `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`.
+`.env.example` ga qarang. Muhimlari: `SECRET_KEY`, `DATABASE_URL`, `REDIS_URL`, `FRONTEND_ORIGINS` (CORS faqat shu origin'lar), `SENTRY_DSN` (ixtiyoriy), `SUPPORT_NOTIFY_EMAILS` (yordam murojaatlari haqida xabar oladigan staff email'lari, vergul bilan; bo'sh bo'lsa xat yuborilmaydi), `SUPPORT_THROTTLE_RATE` (default `5/hour`, IP bo'yicha). Production: `DJANGO_SETTINGS_MODULE=config.settings.prod`, `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`.
 
 ## Xavfsizlik qarorlari
 
@@ -48,4 +48,5 @@ make types      # frontend/src/lib/api/schema.ts ni yangilaydi
 - **Telegram.** Imzo HMAC-SHA256 (kalit = SHA256(`TELEGRAM_BOT_TOKEN`)), `auth_date` 5 daqiqadan eski (yoki 30 soniyadan ortiq kelajakdagi) bo'lsa rad etiladi, bir xil imzo ikkinchi marta qabul qilinmaydi (cache/Redis, `provider_auth_replayed`).
 - **Email OTP.** 6 xonali kod, 10 daqiqa, bazada faqat HMAC xeshi (`SECRET_KEY` bilan), 5 xato urinishdan keyin bloklanadi (`otp_locked`), qayta so'rash 60 soniyada bir marta, throttle IP va email bo'yicha. Yangi so'rov eski kodni bekor qiladi. SMS OTP (Eskiz.uz) uchun `providers/sms.py` da interfeys bor, implementatsiya keyin.
 - **Oxirgi kirish usulini o'chirib bo'lmaydi** (`last_identity`, 409). Parolsiz akkaunt `POST /me/password/set/` bilan parol qo'yadi.
+- **Dev qulayliklari prod'da yopiq.** `prod.py` `OTP_DEV_INBOX` va `CELERY_TASK_ALWAYS_EAGER` ni env'dan qat'i nazar `False` qiladi; `/api/v1/dev/otp/` prod'da 404 (`apps/core/tests/test_prod_settings.py`).
 

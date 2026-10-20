@@ -1,6 +1,14 @@
 import { createHttpClient, toApiError, unwrap, type HttpClient } from "./http-client";
-import { toOnboardedUser, toOnboardingRequest, toProfileUpdateRequest, toUser } from "./mappers";
+import {
+  toOnboardedUser,
+  toOnboardingRequest,
+  toProfileUpdateRequest,
+  toSupportMessage,
+  toSupportRequest,
+  toUser,
+} from "./mappers";
 import { ApiError, type HealthStatus, type MaktabApi } from "./types";
+import type { SupportInput, SupportMessage } from "@/types/support";
 import type { AccountExport, ProfileInput, UpdateProfileInput, User, UserRole } from "@/types/user";
 
 const notImplemented = (method: string) => async (): Promise<never> => {
@@ -54,6 +62,17 @@ export class HttpApi implements MaktabApi {
     return unwrap(await this.client.GET("/api/v1/me/export/"));
   }
 
+  async sendSupport(input: SupportInput): Promise<void> {
+    unwrap(await this.client.POST("/api/v1/support/", { body: toSupportRequest(input) }));
+  }
+
+  async getMySupport(): Promise<SupportMessage[]> {
+    const page = unwrap(
+      await this.client.GET("/api/v1/me/support/", { params: { query: { page_size: 50 } } }),
+    );
+    return page.results.map(toSupportMessage);
+  }
+
   getGrades = notImplemented("getGrades");
   getSubjects = notImplemented("getSubjects");
   getBooks = notImplemented("getBooks");
@@ -72,7 +91,6 @@ export class HttpApi implements MaktabApi {
   createGoal = notImplemented("createGoal");
   updateGoal = notImplemented("updateGoal");
   deleteGoal = notImplemented("deleteGoal");
-  submitFeedback = notImplemented("submitFeedback");
 }
 
 function isHealth(value: unknown): value is HealthStatus {

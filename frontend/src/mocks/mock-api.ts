@@ -4,7 +4,7 @@ import { EXERCISE_RANK, maxBy, mergeAttempts, READ_RANK } from "@/lib/progress/s
 import { latinToCyrillic } from "@/lib/i18n/translit";
 import type { Book, BookFilters, Chapter, Grade, Subject } from "@/types/catalog";
 import { GRADES } from "@/types/catalog";
-import type { Feedback, FeedbackInput } from "@/types/feedback";
+import type { SupportInput, SupportMessage } from "@/types/support";
 import type { StudyGoal, UpdateGoalInput } from "@/types/goal";
 import type { LocalizedText } from "@/types/i18n";
 import type {
@@ -63,7 +63,7 @@ interface AccountDb {
   bookBookmarks: Record<string, BookBookmark>;
   goals: Record<string, StudyGoal>;
   goalSeq: number;
-  feedback: Feedback[];
+  support: SupportMessage[];
 }
 
 type MockStorage = Pick<Storage, "getItem" | "setItem">;
@@ -121,7 +121,7 @@ export class MockApi implements MaktabApi {
       bookBookmarks: {},
       goals: {},
       goalSeq: 0,
-      feedback: [],
+      support: [],
     };
     const db: AccountDb = { ...empty, ...all[session.id] };
     const result = change(db, session);
@@ -484,21 +484,27 @@ export class MockApi implements MaktabApi {
     );
   }
 
-  submitFeedback(input: FeedbackInput): Promise<Feedback> {
+  sendSupport(input: SupportInput): Promise<void> {
     return this.respond(() => {
       const message = input.message.trim();
       if (!message) throw new ApiError("Xabar bo'sh bo'lmasligi kerak", 400);
-      return this.withAccount((db, session) => {
-        const feedback: Feedback = {
-          id: `feedback-${db.feedback.length + 1}`,
-          userId: session.id,
+      // Mehmon ham yubora oladi (backend kabi); mock'da u saqlanmaydi.
+      if (!(this.options.session ?? getApiSession)()) return;
+      this.withAccount((db) => {
+        db.support.unshift({
+          id: `support-${db.support.length + 1}`,
           kind: input.kind,
           message,
+          topic: input.topic ?? "",
+          pageUrl: input.pageUrl ?? "",
+          status: "new",
           createdAt: new Date().toISOString(),
-        };
-        db.feedback.push(feedback);
-        return feedback;
+        });
       });
     });
+  }
+
+  getMySupport(): Promise<SupportMessage[]> {
+    return this.respond(() => this.withAccount((db) => db.support));
   }
 }

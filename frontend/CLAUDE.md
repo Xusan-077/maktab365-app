@@ -30,6 +30,7 @@ framer-motion, next-intl, clsx + tailwind-merge (`cn()` — `src/lib/utils/cn.ts
   - Sessiyani yangilash: `update({ ... })` — **argument bilan** (argumentsiz GET, `trigger: "update"` bo'lmaydi). Onboarding tugamaguncha `jwt` har o'qishda `/me/` ni o'qiydi.
   - Akkaunt metodlari (`ACCOUNT_METHODS`) mock rejimida ham `HttpApi` ga boradi (`withAccountApi`).
   - Xato kodlari → `authForm.errors.*` (`useAuthErrorText`).
+- `src/components/support` + `lib/support` + `lib/validation/support.ts` — "Yordam va aloqa" (M9): `SupportForm` (RHF+Yup, mehmonda email majburiy, honeypot `website` — to'ldirilsa `buildSupportInput` `null` qaytaradi va so'rov yuborilmaydi), `MySupportList`, `ReportErrorLink` (mavzudagi "Xato topdingizmi?" dialogi). `sendSupport`/`getMySupport` `ACCOUNT_METHODS` da.
 - `src/stores` — Zustand store'lar. `src/hooks` — umumiy hook'lar. `src/types` — umumiy TypeScript tiplar.
 - `src/mocks` — **mock data faqat shu yerda**. Boshqa joyda mock/fake ma'lumot yozilmaydi.
 
@@ -56,7 +57,7 @@ framer-motion, next-intl, clsx + tailwind-merge (`cn()` — `src/lib/utils/cn.ts
 - `npm run lint` — ESLint
 - `npm test` — vitest (`*.test.ts` node'da, `*.test.tsx` komponent testlari faylning o'zida `// @vitest-environment jsdom` bilan)
 - `npm run api:types` — `src/lib/api/schema.ts` ni `../backend/openapi.yaml` dan generatsiya qiladi
-- `npx playwright test` (`make e2e`) — e2e: compose backend kerak (`docker compose up -d`, dev sozlamasi email kodini `/api/v1/dev/otp/` orqali beradi); konfiguratsiya o'zi build qilib 3100-portda ishga tushiradi (`e2e/`).
+- `npx playwright test` (`make e2e`) — e2e: compose backend kerak (`docker compose up -d`, dev sozlamasi email kodini `/api/v1/dev/otp/` orqali beradi; ketma-ket kirishlar uchun backend'ni `AUTH_THROTTLE_RATE=1000/min SUPPORT_THROTTLE_RATE=1000/hour CELERY_TASK_ALWAYS_EAGER=true` bilan ishga tushiring); konfiguratsiya o'zi build qilib 3100-portda ishga tushiradi (`e2e/`).
 - `npm run smoke` — smoke: backend `/health/` va `/dev/api-status` (stack ishlab turishi kerak)
 - `npm run format` / `npm run format:check` — Prettier
 

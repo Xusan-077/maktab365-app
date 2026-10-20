@@ -32,7 +32,7 @@ def probe_prod(**env_overrides) -> dict:
         "ALLOWED_HOSTS": "testserver",
         **env_overrides,
     }
-    result = subprocess.run(
+    result = subprocess.run(  # noqa: S603
         [sys.executable, "-c", PROBE],
         cwd=BACKEND_DIR,
         env=env,

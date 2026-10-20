@@ -4,6 +4,7 @@ import { hasLocale, useTranslations } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { FaqSection } from "@/components/home/FaqSection";
 import { pageShellClass } from "@/components/layout/containers";
+import { SupportForm } from "@/components/support/SupportForm";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { routing } from "@/lib/i18n/routing";
@@ -32,7 +33,15 @@ function HelpContent() {
       <PageHeader title={t("title")} description={t("lead")} />
       <div className="flex max-w-3xl flex-col gap-6">
         <FaqSection />
-        <p className="text-muted">{t("signedInHint")}</p>
+        <section aria-labelledby="contact-title" className="flex flex-col gap-4">
+          <div>
+            <h2 id="contact-title" className="text-2xl font-semibold">
+              {t("contactTitle")}
+            </h2>
+            <p className="text-muted mt-1">{t("contactLead")}</p>
+          </div>
+          <SupportForm idPrefix="contact" />
+        </section>
       </div>
     </div>
   );

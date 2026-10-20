@@ -15,4 +15,5 @@ export const queryKeys = {
   bookBookmarks: () => ["book-bookmarks"] as const,
   me: () => ["me"] as const,
   goals: () => ["goals"] as const,
+  mySupport: () => ["my-support"] as const,
 };

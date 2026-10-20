@@ -9,6 +9,7 @@ handler500 = "apps.core.views.server_error"
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/v1/", include("apps.core.urls")),
+    path("api/v1/", include("apps.support.urls")),
 ]
 
 # Sxema va Swagger faqat dev'da (prod'da API tuzilmasi ochilmaydi).

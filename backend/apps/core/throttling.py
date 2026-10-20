@@ -49,3 +49,12 @@ class AuthEmailThrottle(_LiveRateMixin, SimpleRateThrottle):
             return None
         ident = hashlib.sha256(email.strip().lower().encode()).hexdigest()
         return self.cache_format % {"scope": self.scope, "ident": ident}
+
+
+class SupportRateThrottle(_ClientIpMixin, _LiveRateMixin, AnonRateThrottle):
+    """Yordam murojaatlari: IP bo'yicha (kirgan foydalanuvchi ham)."""
+
+    scope = "support"
+
+    def get_cache_key(self, request, view):
+        return self.cache_format % {"scope": self.scope, "ident": self.get_ident(request)}

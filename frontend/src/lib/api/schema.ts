@@ -409,6 +409,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/support/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["support_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/support/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["me_support_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -477,13 +509,19 @@ export interface components {
             id_token: string;
         };
         Health: {
-            status: components["schemas"]["StatusEnum"];
+            status: components["schemas"]["HealthStatusEnum"];
             checks: components["schemas"]["HealthChecks"];
         };
         HealthChecks: {
             database: components["schemas"]["CheckStatusEnum"];
             redis: components["schemas"]["CheckStatusEnum"];
         };
+        /**
+         * @description * `ok` - ok
+         *     * `degraded` - degraded
+         * @enum {string}
+         */
+        HealthStatusEnum: "ok" | "degraded";
         Identity: {
             /** Format: uuid */
             readonly id: string;
@@ -551,6 +589,21 @@ export interface components {
             email: string;
             code: string;
         };
+        PaginatedSupportMessageList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["SupportMessage"][];
+        };
         PasswordChangeRequest: {
             current_password?: string;
             new_password: string;
@@ -611,12 +664,50 @@ export interface components {
          * @enum {string}
          */
         RoleEnum: "student" | "teacher" | "editor" | "admin";
+        SupportCreateRequest: {
+            /** @default  */
+            name: string;
+            email?: string;
+            /** @default question */
+            kind: components["schemas"]["SupportKindEnum"];
+            message: string;
+            page_url?: string;
+            /** @default  */
+            topic: string;
+            /** @default  */
+            website: string;
+        };
         /**
-         * @description * `ok` - ok
-         *     * `degraded` - degraded
+         * @description * `question` - Question
+         *     * `suggestion` - Suggestion
+         *     * `bug` - Bug
+         *     * `content_error` - Content error
          * @enum {string}
          */
-        StatusEnum: "ok" | "degraded";
+        SupportKindEnum: "question" | "suggestion" | "bug" | "content_error";
+        SupportMessage: {
+            /** Format: uuid */
+            readonly id: string;
+            kind: components["schemas"]["SupportKindEnum"];
+            readonly message: string;
+            readonly topic: string;
+            /** Format: uri */
+            readonly page_url: string;
+            status: components["schemas"]["SupportStatusEnum"];
+            /** Format: date-time */
+            readonly created_at: string;
+        };
+        SupportReceived: {
+            ok: boolean;
+        };
+        /**
+         * @description * `new` - New
+         *     * `in_progress` - In progress
+         *     * `resolved` - Resolved
+         *     * `spam` - Spam
+         * @enum {string}
+         */
+        SupportStatusEnum: "new" | "in_progress" | "resolved" | "spam";
         /** @description Telegram Login Widget qaytargan maydonlar (imzo tekshiruvi providers/telegram.py da). */
         TelegramAuthRequest: {
             locale?: components["schemas"]["LocaleEnum"];
@@ -1221,6 +1312,55 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Health"];
+                };
+            };
+        };
+    };
+    support_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SupportCreateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["SupportCreateRequest"];
+                "multipart/form-data": components["schemas"]["SupportCreateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SupportReceived"];
+                };
+            };
+        };
+    };
+    me_support_list: {
+        parameters: {
+            query?: {
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedSupportMessageList"];
                 };
             };
         };

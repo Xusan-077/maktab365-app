@@ -1,10 +1,13 @@
 import type { components } from "./schema";
 import { GRADES, type Grade } from "@/types/catalog";
+import type { SupportInput, SupportMessage } from "@/types/support";
 import type { ProfileInput, UpdateProfileInput, User } from "@/types/user";
 
 type Me = components["schemas"]["Me"];
 type OnboardingRequest = components["schemas"]["OnboardingRequest"];
 type ProfileUpdateRequest = components["schemas"]["PatchedProfileUpdateRequest"];
+type SupportCreateRequest = components["schemas"]["SupportCreateRequest"];
+type SupportMessageDto = components["schemas"]["SupportMessage"];
 
 const isGrade = (value: number): value is Grade => (GRADES as readonly number[]).includes(value);
 
@@ -55,3 +58,25 @@ export function toProfileUpdateRequest(input: UpdateProfileInput): ProfileUpdate
     ...(input.grades !== undefined && { grades: input.grades }),
   };
 }
+
+export function toSupportRequest(input: SupportInput): SupportCreateRequest {
+  return {
+    kind: input.kind,
+    message: input.message,
+    name: input.name ?? "",
+    topic: input.topic ?? "",
+    website: input.website ?? "",
+    ...(input.email && { email: input.email }),
+    ...(input.pageUrl && { page_url: input.pageUrl }),
+  };
+}
+
+export const toSupportMessage = (dto: SupportMessageDto): SupportMessage => ({
+  id: dto.id,
+  kind: dto.kind,
+  message: dto.message,
+  topic: dto.topic,
+  pageUrl: dto.page_url,
+  status: dto.status,
+  createdAt: dto.created_at,
+});

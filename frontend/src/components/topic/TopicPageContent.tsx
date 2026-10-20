@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { getGradeCrumb, getRootCrumb, pageShellClass } from "@/components/layout/crumbs";
+import { ReportErrorLink } from "@/components/support/ReportErrorLink";
 import { Badge } from "@/components/ui/Badge";
 import { getTopicPageData } from "@/lib/api/server";
 import type { Locale } from "@/lib/i18n/config";
@@ -89,6 +90,7 @@ export async function TopicPageContent({
             next={next}
             beforeNext={<MarkReadButton topicId={topic.id} />}
           />
+          <ReportErrorLink topicId={topic.id} />
         </article>
       </div>
     </div>
