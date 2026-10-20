@@ -109,8 +109,8 @@ if env("AWS_STORAGE_BUCKET_NAME", default=""):
     AWS_DEFAULT_ACL = None
 
 # --- Ochiq kontent API ---
-# true bo'lsa draft/reviewed mavzular ochiq API'da `unverified: true` bilan chiqadi (dev/staging);
-# prod'da false: faqat published.
+# true bo'lsa draft/reviewed mavzular ochiq API'da `unverified: true` bilan chiqadi. Default false
+# (faqat published); dev'da `dev.py` uni yoqadi, prod'da faqat env bilan ongli ravishda.
 SHOW_DRAFTS_PUBLICLY = env.bool("SHOW_DRAFTS_PUBLICLY", default=False)
 CONTENT_CACHE_MAX_AGE = env.int("CONTENT_CACHE_MAX_AGE", default=60)
 

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { TopicPageContent } from "@/components/topic/TopicPageContent";
-import { getTopicPageData } from "@/lib/api/server";
+import { getTopicMeta } from "@/lib/api/server";
 import { topicStaticParams } from "@/lib/api/static-params";
 import { getLocalized } from "@/lib/i18n/localized";
 import { routing } from "@/lib/i18n/routing";
@@ -19,8 +19,10 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: TopicPageProps): Promise<Metadata> {
   const { locale, bookId, topicId } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
-  const data = await getTopicPageData(bookId, topicId);
-  if (!data) notFound();
+  const data = await getTopicMeta(bookId, topicId);
+  if (data === null) notFound();
+  // Backend ishlamasa (build) umumiy metadata; sahifa o'zi so'rov vaqtida to'ldiriladi.
+  if (!data) return { alternates: getAlternates(locale, topicPath(bookId, topicId)) };
   const t = await getTranslations({ locale, namespace: "topic.meta" });
   const title = getLocalized(data.topic.title, locale);
   const description = t("description", {

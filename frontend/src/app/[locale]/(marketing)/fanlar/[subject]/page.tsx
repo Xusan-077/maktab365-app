@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { SubjectPageContent } from "@/components/catalog/SubjectPageContent";
-import { getSubjectPageData } from "@/lib/api/server";
+import { getSubjectMeta } from "@/lib/api/server";
 import { subjectStaticParams } from "@/lib/api/static-params";
 import { getLocalized } from "@/lib/i18n/localized";
 import { routing } from "@/lib/i18n/routing";
@@ -19,8 +19,10 @@ export async function generateMetadata({
 }: PageProps<"/[locale]/fanlar/[subject]">): Promise<Metadata> {
   const { locale, subject: slug } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
-  const data = await getSubjectPageData(slug);
-  if (!data) notFound();
+  const data = await getSubjectMeta(slug);
+  if (data === null) notFound();
+  // Backend ishlamasa (build) umumiy metadata; sahifa o'zi so'rov vaqtida to'ldiriladi.
+  if (!data) return { alternates: getAlternates(locale, subjectPath(slug)) };
   const t = await getTranslations({ locale, namespace: "subjectsPage" });
   const name = getLocalized(data.subject.name, locale);
   return {
