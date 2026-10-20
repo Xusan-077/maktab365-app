@@ -81,7 +81,7 @@ class RefreshView(PublicAuthView):
     )
     def post(self, request):
         data = validated(RefreshSerializer, request)
-        return Response(auth_services.rotate_refresh(data["refresh"]))
+        return Response(auth_services.rotate_refresh(data["refresh"], request))
 
 
 class LogoutView(PublicAuthView):

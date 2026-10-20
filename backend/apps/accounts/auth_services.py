@@ -127,14 +127,34 @@ def issue_tokens(user: User) -> dict:
     return {"access": str(refresh.access_token), "refresh": str(refresh)}
 
 
+class _RotatingRefreshToken(RefreshToken):
+    """Imzo va muddat tekshiriladi, blacklist esa `rotate_refresh` ichida (reuse aniqlash uchun)."""
+
+    def check_blacklist(self) -> None:
+        pass
+
+
 def _parse_refresh(raw: str) -> RefreshToken:
     try:
-        return RefreshToken(raw)
+        return _RotatingRefreshToken(raw)
     except TokenError as exc:
         raise InvalidToken(str(exc)) from exc
 
 
-def rotate_refresh(raw: str) -> dict:
+def _handle_reuse(user: User, blacklisted_at, request) -> None:
+    """Bekor qilingan refresh qayta keldi: o'g'irlangan bo'lishi mumkin — barcha sessiyalar bekor.
+
+    Aylantirilgandan keyin `REFRESH_REUSE_GRACE_SECONDS` ichida kelgan urinish (ikki tab, poyga)
+    oddiy 401 bo'lib qoladi: foydalanuvchi tasodifan chiqib ketmasin.
+    """
+    age = (timezone.now() - blacklisted_at).total_seconds()
+    if age <= settings.REFRESH_REUSE_GRACE_SECONDS:
+        return
+    revoked = blacklist_all(user)
+    log_event(user, AuthEventType.REFRESH_REUSE_DETECTED, request, revoked_sessions=revoked)
+
+
+def rotate_refresh(raw: str, request=None) -> dict:
     """Refresh'ni bir martalik almashtiradi: eskisi blacklist'ga, yangi juftlik qaytadi."""
     refresh = _parse_refresh(raw)
     user = User.objects.filter(
@@ -142,6 +162,7 @@ def rotate_refresh(raw: str) -> dict:
     ).first()
     if user is None:
         raise InvalidToken("No active account for this token.")
+    reused_at = None
     with transaction.atomic():
         outstanding = (
             OutstandingToken.objects.select_for_update()
@@ -151,9 +172,12 @@ def rotate_refresh(raw: str) -> dict:
         if outstanding is None:
             raise InvalidToken("Unknown token.")
         # Bir vaqtda ikki marta ishlatilsa, faqat bittasi o'tadi.
-        _, created = BlacklistedToken.objects.get_or_create(token=outstanding)
+        blacklisted, created = BlacklistedToken.objects.get_or_create(token=outstanding)
         if not created:
-            raise InvalidToken("Token is blacklisted.")
+            reused_at = blacklisted.blacklisted_at
+    if reused_at is not None:
+        _handle_reuse(user, reused_at, request)
+        raise InvalidToken("Token is blacklisted.")
     return issue_tokens(user)
 
 

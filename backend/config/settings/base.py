@@ -126,6 +126,8 @@ SIMPLE_JWT = {
 }
 
 # --- Auth (email + parol) ---
+# Aylantirilgan refresh shuncha soniya ichida qayta kelsa oila bekor qilinmaydi (ikki tab, poyga).
+REFRESH_REUSE_GRACE_SECONDS = env.int("REFRESH_REUSE_GRACE_SECONDS", default=10)
 # Email havolalari shu manzilga olib boradi: {FRONTEND_URL}/{locale}/email-tasdiqlash?token=...
 FRONTEND_URL = env("FRONTEND_URL", default="http://localhost:3000").rstrip("/")
 AUTH_EMAIL_VERIFY_TTL = timedelta(hours=env.int("AUTH_EMAIL_VERIFY_HOURS", default=24))

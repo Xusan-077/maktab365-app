@@ -7,6 +7,7 @@ from django.core import mail
 from django.core.cache import cache
 from django.utils import timezone
 from rest_framework.test import APIClient
+from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken
 
 from apps.accounts import auth_services
 from apps.accounts.models import AuthEvent, Identity, Profile, User, VerificationToken
@@ -302,6 +303,50 @@ class TestThrottle:
         assert other.status_code == 200
 
 
+def throttle_rates(settings, **rates):
+    settings.REST_FRAMEWORK = {
+        **settings.REST_FRAMEWORK,
+        "DEFAULT_THROTTLE_RATES": {**settings.REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"], **rates},
+    }
+
+
+class TestThrottleEndpoints:
+    @pytest.mark.parametrize(
+        ("path", "payload"),
+        [
+            ("register/", {"email": "n{i}@example.com", "password": PASSWORD}),
+            ("login/", {"email": "n{i}@example.com", "password": PASSWORD}),
+            ("email/verify/", {"token": "t{i}"}),
+            ("password/forgot/", {"email": "n{i}@example.com"}),
+            ("password/reset/", {"token": "t{i}", "password": PASSWORD}),
+        ],
+    )
+    def test_ip_throttle(self, client, settings, path, payload):
+        throttle_rates(settings, auth="3/min")
+        statuses = [
+            client.post(path, {k: v.format(i=i) for k, v in payload.items()}).status_code
+            for i in range(5)
+        ]
+        assert 429 not in statuses[:3]
+        assert statuses[3:] == [429, 429]
+
+    @pytest.mark.parametrize(
+        ("path", "payload"),
+        [
+            ("register/", {"email": "same@example.com", "password": PASSWORD}),
+            ("login/", {"email": "same@example.com", "password": PASSWORD}),
+            ("password/forgot/", {"email": "same@example.com"}),
+        ],
+    )
+    def test_email_throttle_across_ips(self, client, settings, path, payload):
+        throttle_rates(settings, auth_email="2/min")
+        statuses = [
+            client.post(path, payload, REMOTE_ADDR=f"10.1.0.{i}").status_code for i in range(4)
+        ]
+        assert 429 not in statuses[:2]
+        assert statuses[2:] == [429, 429]
+
+
 # --- refresh / logout ---
 
 
@@ -345,6 +390,58 @@ class TestTokens:
 
     def test_logout_all_requires_auth(self, client):
         assert client.post("logout-all/").status_code == 401
+
+
+class TestRefreshReuse:
+    @staticmethod
+    def sessions(client):
+        """Ildiz (aylantirilgan), uning bolasi va boshqa qurilma sessiyasi."""
+        root = login(client).json()["refresh"]
+        other = login(client).json()["refresh"]
+        child = client.post("refresh/", {"refresh": root}).json()["refresh"]
+        return root, child, other
+
+    @staticmethod
+    def age_blacklist(seconds):
+        BlacklistedToken.objects.update(blacklisted_at=timezone.now() - timedelta(seconds=seconds))
+
+    def refresh_status(self, client, token):
+        return client.post("refresh/", {"refresh": token}).status_code
+
+    def test_reuse_after_grace_revokes_family(self, client, user, settings):
+        root, child, other = self.sessions(client)
+        self.age_blacklist(settings.REFRESH_REUSE_GRACE_SECONDS + 1)
+        assert self.refresh_status(client, root) == 401
+        assert self.refresh_status(client, child) == 401
+        assert self.refresh_status(client, other) == 401
+
+    def test_reuse_within_grace_keeps_family(self, client, user):
+        root, child, other = self.sessions(client)
+        assert self.refresh_status(client, root) == 401
+        assert "refresh_reuse_detected" not in event_types(user)
+        assert self.refresh_status(client, child) == 200
+        assert self.refresh_status(client, other) == 200
+
+    def test_reuse_is_audited_without_secrets(self, client, user, settings):
+        root, child, other = self.sessions(client)
+        self.age_blacklist(settings.REFRESH_REUSE_GRACE_SECONDS + 1)
+        client.post(
+            "refresh/", {"refresh": root}, REMOTE_ADDR="203.0.113.7", HTTP_USER_AGENT="probe/1.0"
+        )
+        event = AuthEvent.objects.get(user=user, type="refresh_reuse_detected")
+        assert event.ip == "203.0.113.7"
+        assert event.user_agent == "probe/1.0"
+        assert event.meta == {"revoked_sessions": 2}
+        dump = str(event.meta) + event.user_agent
+        assert all(token not in dump for token in (root, child, other))
+
+    def test_reuse_does_not_touch_other_users(self, client, user, settings):
+        bystander = User.objects.create_user(email="vali@example.com", password=PASSWORD)
+        theirs = login(client, email=bystander.email).json()["refresh"]
+        root, *_ = self.sessions(client)
+        self.age_blacklist(settings.REFRESH_REUSE_GRACE_SECONDS + 1)
+        client.post("refresh/", {"refresh": root})
+        assert self.refresh_status(client, theirs) == 200
 
 
 # --- email tasdiqlash tokenlari ---

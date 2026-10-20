@@ -148,6 +148,7 @@ class AuthEventType(models.TextChoices):
     LOGIN = "login", "Login"
     LOGIN_FAILED = "login_failed", "Login failed"
     LOGIN_LOCKED = "login_locked", "Login locked"
+    REFRESH_REUSE_DETECTED = "refresh_reuse_detected", "Refresh token reuse detected"
     LOGOUT = "logout", "Logout"
     LOGOUT_ALL = "logout_all", "Logout from all devices"
     EMAIL_VERIFICATION_SENT = "email_verification_sent", "Email verification sent"
