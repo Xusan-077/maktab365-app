@@ -3,7 +3,7 @@ from .base import env
 
 DEBUG = False
 ENABLE_API_DOCS = False
-# Draft/reviewed kontentni ochiq ko'rsatish — ongli qaror: faqat env (`SHOW_DRAFTS_PUBLICLY=true`) bilan.
+# Draft kontentni ochiq ko'rsatish — ongli qaror: faqat env (`SHOW_DRAFTS_PUBLICLY=true`) bilan.
 SHOW_DRAFTS_PUBLICLY = env.bool("SHOW_DRAFTS_PUBLICLY", default=False)
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
