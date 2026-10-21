@@ -28,7 +28,7 @@ services:
 
   backend: &backend
     build: ./backend
-    command: sh -c "python manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8000"
+    command: sh -c "python manage.py migrate --noinput && python manage.py ensure_admin && python manage.py runserver 0.0.0.0:8000"
     environment: &backend-env
       DJANGO_SETTINGS_MODULE: config.settings.dev
       SECRET_KEY: dev-only-secret-key
@@ -39,6 +39,9 @@ services:
       FORWARDED_IP_SECRET: ${FORWARDED_IP_SECRET:-dev-forward-secret}
       # Dev/e2e: import qilingan draft kontent ochiq API'da "unverified" belgisi bilan ko'rinadi.
       SHOW_DRAFTS_PUBLICLY: ${SHOW_DRAFTS_PUBLICLY:-true}
+      # Bo'sh bo'lsa ensure_admin hech narsa qilmaydi.
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
     ports:
       - "8000:8000"
     volumes:
