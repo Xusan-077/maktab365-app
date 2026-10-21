@@ -12,7 +12,6 @@ import { bookPath, subjectPath, type AppBase } from "@/lib/utils/routes";
 import { groupBlocks, sectionDomId } from "@/lib/utils/topic-sections";
 import { MarkReadButton } from "./MarkReadButton";
 import { ReadingTracker } from "./ReadingTracker";
-import { RecentVisit } from "./RecentVisit";
 import { TeacherPanel } from "./teacher/TeacherPanel";
 import { TopicRenderer } from "./TopicRenderer";
 import { TopicToc } from "./TopicToc";
@@ -81,7 +80,6 @@ export async function TopicPageContent({
             />
           </header>
           <ReadingTracker topicId={topic.id} />
-          <RecentVisit topicId={topic.id} />
           <TopicRenderer
             topicId={topic.id}
             bookId={book.id}

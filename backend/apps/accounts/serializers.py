@@ -1,6 +1,12 @@
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
+from apps.learning.serializers import (
+    BookmarkSerializer,
+    StudyGoalSerializer,
+    TopicProgressSerializer,
+)
+
 from . import services
 from .models import Locale, Profile, Role, User
 
@@ -123,9 +129,16 @@ class ExportUserSerializer(serializers.Serializer):
     last_login = serializers.DateTimeField(allow_null=True)
 
 
+class ExportLearningSerializer(serializers.Serializer):
+    progress = TopicProgressSerializer(many=True)
+    bookmarks = BookmarkSerializer(many=True)
+    goals = StudyGoalSerializer(many=True)
+
+
 class ExportSerializer(serializers.Serializer):
     exported_at = serializers.DateTimeField()
     user = ExportUserSerializer()
     profile = ProfileSerializer()
     identities = ExportIdentitySerializer(many=True)
     auth_events = ExportEventSerializer(many=True)
+    learning = ExportLearningSerializer()

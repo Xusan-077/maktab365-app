@@ -795,6 +795,404 @@ paths:
               schema:
                 $ref: '#/components/schemas/SearchResponse'
           description: ''
+  /api/v1/me/progress/:
+    get:
+      operationId: me_progress_list
+      parameters:
+      - in: query
+        name: book
+        schema:
+          type: string
+        description: Kitob slug'i
+      - in: query
+        name: exercise_status
+        schema:
+          type: string
+      - in: query
+        name: needs_review
+        schema:
+          type: boolean
+        description: Faqat xatosi borlar
+      - in: query
+        name: read_status
+        schema:
+          type: string
+      - in: query
+        name: topic
+        schema:
+          type: string
+        description: Mavzu kaliti
+      tags:
+      - learning
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TopicProgress'
+          description: ''
+  /api/v1/me/progress/{topic_id}/:
+    get:
+      operationId: me_progress_retrieve
+      parameters:
+      - in: path
+        name: topic_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - learning
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopicProgress'
+          description: ''
+    put:
+      operationId: me_progress_update
+      summary: Mavzu progressini yozish (idempotent, monoton)
+      parameters:
+      - in: path
+        name: topic_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - learning
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProgressWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProgressWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProgressWriteRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopicProgress'
+          description: ''
+  /api/v1/me/events/:
+    post:
+      operationId: me_events_create
+      summary: 'O''qish voqeasi: topic_opened | topic_read | exercise_answered'
+      tags:
+      - learning
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EventRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EventRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopicProgress'
+          description: ''
+  /api/v1/me/bookmarks/:
+    get:
+      operationId: me_bookmarks_list
+      parameters:
+      - in: query
+        name: kind
+        schema:
+          type: string
+          enum:
+          - book
+          - topic
+      tags:
+      - learning
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Bookmark'
+          description: ''
+    post:
+      operationId: me_bookmarks_create
+      summary: Xatcho'p qo'yish (takror yuborilsa 200)
+      tags:
+      - learning
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookmarkWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BookmarkWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BookmarkWriteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bookmark'
+          description: ''
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bookmark'
+          description: ''
+    delete:
+      operationId: me_bookmarks_delete
+      summary: Xatcho'pni olib tashlash (yo'q bo'lsa ham 204)
+      parameters:
+      - in: query
+        name: book_id
+        schema:
+          type: string
+      - in: query
+        name: kind
+        schema:
+          type: string
+          enum:
+          - book
+          - topic
+        required: true
+      - in: query
+        name: topic_id
+        schema:
+          type: string
+      tags:
+      - learning
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/me/recent/:
+    get:
+      operationId: me_recent_list
+      tags:
+      - learning
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RecentView'
+          description: ''
+  /api/v1/me/goals/:
+    get:
+      operationId: me_goals_list
+      tags:
+      - learning
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StudyGoal'
+          description: ''
+    post:
+      operationId: me_goals_create
+      tags:
+      - learning
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudyGoalWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StudyGoalWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StudyGoalWriteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudyGoal'
+          description: ''
+  /api/v1/me/goals/{goal_id}/:
+    get:
+      operationId: me_goals_retrieve
+      parameters:
+      - in: path
+        name: goal_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - learning
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudyGoal'
+          description: ''
+    patch:
+      operationId: me_goals_update
+      parameters:
+      - in: path
+        name: goal_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - learning
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedStudyGoalPatchRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedStudyGoalPatchRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedStudyGoalPatchRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudyGoal'
+          description: ''
+    delete:
+      operationId: me_goals_delete
+      parameters:
+      - in: path
+        name: goal_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - learning
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/me/dashboard/:
+    get:
+      operationId: me_dashboard
+      summary: 'Kabinet bosh sahifasi: davom ettirish, fanlar, takrorlash, haftalik
+        natija'
+      tags:
+      - learning
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dashboard'
+          description: ''
+  /api/v1/me/results/:
+    get:
+      operationId: me_results
+      summary: 'Natijalar mavzu kesimida: o''zlashtirilgan, takrorlash kerak, jarayonda'
+      tags:
+      - learning
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Results'
+          description: ''
+  /api/v1/me/teacher/dashboard/:
+    get:
+      operationId: me_teacher_dashboard
+      tags:
+      - learning
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeacherDashboard'
+          description: ''
+  /api/v1/me/merge-guest-data/:
+    post:
+      operationId: me_merge_guest_data
+      summary: Mehmon ma'lumotini akkauntga qo'shish (idempotent, har ro'yxat 500
+        tagacha)
+      tags:
+      - learning
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MergeRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MergeRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MergeRequestRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MergeResult'
+          description: ''
   /api/v1/support/:
     post:
       operationId: support_create
@@ -976,6 +1374,56 @@ components:
       - topics_count
       - topics_ready
       - year
+    Bookmark:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        kind:
+          $ref: '#/components/schemas/BookmarkKindEnum'
+        topic_id:
+          type: string
+          nullable: true
+          readOnly: true
+        book_id:
+          type: string
+          nullable: true
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - book_id
+      - created_at
+      - id
+      - kind
+      - topic_id
+    BookmarkKindEnum:
+      enum:
+      - book
+      - topic
+      type: string
+      description: |-
+        * `book` - Book
+        * `topic` - Topic
+    BookmarkWriteRequest:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/BookmarkKindEnum'
+        topic_id:
+          type: string
+          minLength: 1
+          maxLength: 200
+        book_id:
+          type: string
+          minLength: 1
+          maxLength: 200
+      required:
+      - kind
     Breadcrumb:
       type: object
       properties:
@@ -1055,6 +1503,54 @@ components:
       description: |-
         * `ok` - ok
         * `error` - error
+    Dashboard:
+      type: object
+      properties:
+        continue:
+          allOf:
+          - $ref: '#/components/schemas/TopicProgress'
+          nullable: true
+        has_progress:
+          type: boolean
+        subjects:
+          type: array
+          items:
+            $ref: '#/components/schemas/DashboardBook'
+        review:
+          $ref: '#/components/schemas/ReviewSummary'
+        weekly:
+          $ref: '#/components/schemas/Weekly'
+        saved_count:
+          type: integer
+      required:
+      - continue
+      - has_progress
+      - review
+      - saved_count
+      - subjects
+      - weekly
+    DashboardBook:
+      type: object
+      properties:
+        book_id:
+          type: string
+        subject_id:
+          type: string
+        grade:
+          type: integer
+        topics_total:
+          type: integer
+        topics_read:
+          type: integer
+        topics_passed:
+          type: integer
+      required:
+      - book_id
+      - grade
+      - subject_id
+      - topics_passed
+      - topics_read
+      - topics_total
     EmailRequest:
       type: object
       properties:
@@ -1065,6 +1561,74 @@ components:
           maxLength: 254
       required:
       - email
+    EventRequest:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/TypeEnum'
+        topic_id:
+          type: string
+          minLength: 1
+          maxLength: 200
+        exercise_id:
+          type: string
+          minLength: 1
+          maxLength: 64
+        correct:
+          type: boolean
+        attempt:
+          type: integer
+          maximum: 1000
+          minimum: 1
+          default: 1
+        last_block_id:
+          type: string
+          minLength: 1
+          maxLength: 64
+      required:
+      - topic_id
+      - type
+    ExerciseStats:
+      type: object
+      properties:
+        solved:
+          type: array
+          items:
+            type: string
+            maxLength: 64
+          maxItems: 500
+        attempts:
+          type: object
+          additionalProperties:
+            type: integer
+            maximum: 10000
+            minimum: 0
+    ExerciseStatsRequest:
+      type: object
+      properties:
+        solved:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 64
+          maxItems: 500
+        attempts:
+          type: object
+          additionalProperties:
+            type: integer
+            maximum: 10000
+            minimum: 0
+    ExerciseStatusEnum:
+      enum:
+      - not_started
+      - in_progress
+      - passed
+      type: string
+      description: |-
+        * `not_started` - Not started
+        * `in_progress` - In progress
+        * `passed` - Passed
     Export:
       type: object
       properties:
@@ -1083,10 +1647,13 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ExportEvent'
+        learning:
+          $ref: '#/components/schemas/ExportLearning'
       required:
       - auth_events
       - exported_at
       - identities
+      - learning
       - profile
       - user
     ExportEvent:
@@ -1131,6 +1698,25 @@ components:
       - provider
       - provider_uid
       - verified
+    ExportLearning:
+      type: object
+      properties:
+        progress:
+          type: array
+          items:
+            $ref: '#/components/schemas/TopicProgress'
+        bookmarks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Bookmark'
+        goals:
+          type: array
+          items:
+            $ref: '#/components/schemas/StudyGoal'
+      required:
+      - bookmarks
+      - goals
+      - progress
     ExportUser:
       type: object
       properties:
@@ -1184,6 +1770,38 @@ components:
       required:
       - books_count
       - grade
+    GuestProgressRequest:
+      type: object
+      description: 'PUT: to''liq holat. Yuborilmagan maydonga tegilmaydi.'
+      properties:
+        read_status:
+          $ref: '#/components/schemas/ReadStatusEnum'
+        exercise_status:
+          $ref: '#/components/schemas/ExerciseStatusEnum'
+        last_block_id:
+          type: string
+          maxLength: 64
+        scroll_position:
+          type: number
+          format: double
+          maximum: 1
+          minimum: 0
+          nullable: true
+        mistakes:
+          type: array
+          items:
+            $ref: '#/components/schemas/MistakeRequest'
+        exercise_stats:
+          $ref: '#/components/schemas/ExerciseStatsRequest'
+        updated_at:
+          type: string
+          format: date-time
+        topic_id:
+          type: string
+          minLength: 1
+          maxLength: 200
+      required:
+      - topic_id
     Health:
       type: object
       properties:
@@ -1332,6 +1950,65 @@ components:
       - id
       - profile
       - role
+    MergeRequestRequest:
+      type: object
+      properties:
+        progress:
+          type: array
+          items:
+            $ref: '#/components/schemas/GuestProgressRequest'
+        bookmarks:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookmarkWriteRequest'
+    MergeResult:
+      type: object
+      properties:
+        progress:
+          type: integer
+        bookmarks:
+          type: integer
+        failed:
+          type: array
+          items:
+            type: string
+      required:
+      - bookmarks
+      - failed
+      - progress
+    MistakeOut:
+      type: object
+      properties:
+        exercise_id:
+          type: string
+        attempts:
+          type: integer
+        last_wrong_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - attempts
+      - exercise_id
+      - last_wrong_at
+    MistakeRequest:
+      type: object
+      properties:
+        exercise_id:
+          type: string
+          minLength: 1
+          maxLength: 64
+        attempts:
+          type: integer
+          maximum: 1000
+          minimum: 1
+          default: 1
+        last_wrong_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - exercise_id
     Ok:
       type: object
       properties:
@@ -1536,6 +2213,24 @@ components:
       properties:
         role:
           $ref: '#/components/schemas/RoleEnum'
+    PatchedStudyGoalPatchRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        topic_id:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 200
+        due_date:
+          type: string
+          format: date
+          nullable: true
+        done:
+          type: boolean
     Profile:
       type: object
       properties:
@@ -1577,6 +2272,32 @@ components:
       - locale
       - onboarded_at
       - subjects
+    ProgressWriteRequest:
+      type: object
+      description: 'PUT: to''liq holat. Yuborilmagan maydonga tegilmaydi.'
+      properties:
+        read_status:
+          $ref: '#/components/schemas/ReadStatusEnum'
+        exercise_status:
+          $ref: '#/components/schemas/ExerciseStatusEnum'
+        last_block_id:
+          type: string
+          maxLength: 64
+        scroll_position:
+          type: number
+          format: double
+          maximum: 1
+          minimum: 0
+          nullable: true
+        mistakes:
+          type: array
+          items:
+            $ref: '#/components/schemas/MistakeRequest'
+        exercise_stats:
+          $ref: '#/components/schemas/ExerciseStatsRequest'
+        updated_at:
+          type: string
+          format: date-time
     ProviderEnum:
       enum:
       - password
@@ -1589,6 +2310,32 @@ components:
         * `google` - Google
         * `telegram` - Telegram
         * `email_otp` - Email OTP
+    ReadStatusEnum:
+      enum:
+      - not_started
+      - in_progress
+      - read
+      type: string
+      description: |-
+        * `not_started` - Not started
+        * `in_progress` - In progress
+        * `read` - Read
+    RecentView:
+      type: object
+      properties:
+        topic_id:
+          type: string
+          readOnly: true
+        book_id:
+          type: string
+          readOnly: true
+        viewed_at:
+          type: string
+          format: date-time
+      required:
+      - book_id
+      - topic_id
+      - viewed_at
     RefreshRequest:
       type: object
       properties:
@@ -1618,6 +2365,53 @@ components:
       required:
       - email
       - password
+    ResultCounts:
+      type: object
+      properties:
+        mastered:
+          type: integer
+        review:
+          type: integer
+        in_progress:
+          type: integer
+      required:
+      - in_progress
+      - mastered
+      - review
+    Results:
+      type: object
+      properties:
+        counts:
+          $ref: '#/components/schemas/ResultCounts'
+        mastered:
+          type: array
+          items:
+            $ref: '#/components/schemas/TopicProgress'
+        review:
+          type: array
+          items:
+            $ref: '#/components/schemas/TopicProgress'
+        in_progress:
+          type: array
+          items:
+            $ref: '#/components/schemas/TopicProgress'
+      required:
+      - counts
+      - in_progress
+      - mastered
+      - review
+    ReviewSummary:
+      type: object
+      properties:
+        count:
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TopicProgress'
+      required:
+      - count
+      - items
     RoleEnum:
       enum:
       - student
@@ -1684,6 +2478,61 @@ components:
       - rank
       - snippet
       - topic
+    StudyGoal:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        topic_id:
+          type: string
+          nullable: true
+          readOnly: true
+        due_date:
+          type: string
+          format: date
+          nullable: true
+        done:
+          type: boolean
+          readOnly: true
+        done_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - done
+      - id
+      - title
+      - topic_id
+    StudyGoalWriteRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        topic_id:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 200
+        due_date:
+          type: string
+          format: date
+          nullable: true
+        done:
+          type: boolean
+      required:
+      - title
     Subject:
       type: object
       properties:
@@ -1809,6 +2658,31 @@ components:
         * `in_progress` - In progress
         * `resolved` - Resolved
         * `spam` - Spam
+    TeacherDashboard:
+      type: object
+      properties:
+        recent:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecentView'
+        saved_topics:
+          type: array
+          items:
+            $ref: '#/components/schemas/Bookmark'
+        saved_books:
+          type: array
+          items:
+            $ref: '#/components/schemas/Bookmark'
+        saved_topics_count:
+          type: integer
+        saved_books_count:
+          type: integer
+      required:
+      - recent
+      - saved_books
+      - saved_books_count
+      - saved_topics
+      - saved_topics_count
     TelegramAuthRequest:
       type: object
       description: Telegram Login Widget qaytargan maydonlar (imzo tekshiruvi providers/telegram.py
@@ -1920,6 +2794,56 @@ components:
       required:
       - slug
       - title
+    TopicProgress:
+      type: object
+      properties:
+        topic_id:
+          type: string
+          readOnly: true
+        book_id:
+          type: string
+          readOnly: true
+        read_status:
+          $ref: '#/components/schemas/ReadStatusEnum'
+        exercise_status:
+          $ref: '#/components/schemas/ExerciseStatusEnum'
+        last_block_id:
+          type: string
+          maxLength: 64
+        scroll_position:
+          type: number
+          format: double
+          nullable: true
+        mistakes:
+          type: array
+          items:
+            $ref: '#/components/schemas/MistakeOut'
+        exercise_stats:
+          allOf:
+          - $ref: '#/components/schemas/ExerciseStats'
+          readOnly: true
+        first_opened_at:
+          type: string
+          format: date-time
+          nullable: true
+        read_at:
+          type: string
+          format: date-time
+          nullable: true
+        passed_at:
+          type: string
+          format: date-time
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - book_id
+      - exercise_stats
+      - mistakes
+      - topic_id
+      - updated_at
     TopicSummary:
       type: object
       properties:
@@ -1941,6 +2865,39 @@ components:
       - summary
       - title
       - unverified
+    TypeEnum:
+      enum:
+      - topic_opened
+      - topic_read
+      - exercise_answered
+      type: string
+      description: |-
+        * `topic_opened` - topic_opened
+        * `topic_read` - topic_read
+        * `exercise_answered` - exercise_answered
+    Weekly:
+      type: object
+      properties:
+        since:
+          type: string
+          format: date-time
+        finished:
+          type: integer
+        read:
+          type: integer
+        exercises_passed:
+          type: integer
+        mistakes:
+          type: integer
+        active:
+          type: integer
+      required:
+      - active
+      - exercises_passed
+      - finished
+      - mistakes
+      - read
+      - since
   securitySchemes:
     jwtAuth:
       type: http

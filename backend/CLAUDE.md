@@ -8,7 +8,7 @@ Bitta Django monolit: Python 3.12 · Django 5.2 · DRF · drf-spectacular · sim
 
 - `config/settings/{base,dev,prod,test}.py` — barcha sozlama env orqali (`django-environ`, `.env`). `dev` default (`manage.py`), `prod` — wsgi/asgi, `test` — pytest.
 - `config/{urls,celery,asgi,wsgi}.py`.
-- `apps/core` — qayta ishlatiladigan poydevor (quyida). `apps/accounts` — foydalanuvchi va profil (quyida). `apps/content` — kontent (quyida). `apps/{learning,support,analytics}` — hozircha bo'sh ilovalar; domen mantiqi keyingi bosqichlarda.
+- `apps/core` — qayta ishlatiladigan poydevor (quyida). `apps/accounts` — foydalanuvchi va profil (quyida). `apps/content` — kontent (quyida). `apps/learning` — o'qish jarayoni (quyida). `apps/support` — murojaatlar. `apps/analytics` — hozircha bo'sh.
 
 ## `apps/core` poydevori
 
@@ -48,6 +48,16 @@ Bitta Django monolit: Python 3.12 · Django 5.2 · DRF · drf-spectacular · sim
 - Ko'rinish: `is_staff(user)` (editor/admin/is_staff) hamma statusni ko'radi, javob `private, no-store`. Boshqalar — `published`; `SHOW_DRAFTS_PUBLICLY=true` bo'lsa draft/reviewed ham, `unverified: true` bilan. `topics_ready`/`topics_count` — ko'rinadigan mavzular bo'yicha.
 - Qidiruv (`search.py`): `Topic.search_vector` ('simple', A sarlavha / B mazmun / C bloklar) `Topic.save()` da `reindex_topic` bilan yangilanadi (`.update()` ishlatsangiz o'zingiz chaqiring); matn `apps.core.translit.normalize_search_text` (kirill→lotin, tutuqsiz) bilan normallashadi, so'rov atamalari prefiks (`atama:*`) va hammasi kerak. Snippet Python'da, asl matndan, mos so'zlar `⟦…⟧` ichida. Frontend umumiy vektorlar: `contracts/fixtures/translit.json`.
 - N+1 yo'q: testlar `django_assert_max_num_queries` bilan (`tests/test_api.py`).
+
+## `apps/learning` (M8)
+
+- Modellar: `TopicProgress` (unique `user+topic`; `read_status` not_started|in_progress|read va `exercise_status` not_started|in_progress|passed — alohida; `last_block_id`, `scroll_position`, `mistakes` `[{exercise_id, attempts, last_wrong_at}]`, `exercise_stats` `{solved, attempts}`, `first_opened_at/read_at/passed_at`, `client_updated_at`), `Bookmark` (`kind` book|topic, `CheckConstraint` + shartli unique), `StudyGoal`, `RecentView` (har foydalanuvchida oxirgi `RECENT_LIMIT=20`).
+- Mavzu kaliti: API'da `topic_id` = `{book.slug}-{topic.slug}` (frontend mavzu id'si; `services/topics.py`: `topic_key`, `resolve_topic` — ko'rinish qoidasi ochiq kontent API'si bilan bir xil, ko'rinmaydigan mavzu 404). Yangi so'rovda `Concat` ga `output_field=CharField()` kerak (`key_expr`).
+- `services/progress.py`: `apply_update` (PUT) — holatlar `max`, `exercise_stats` birlashma/eng katta, `last_block_id`/`scroll_position`/`mistakes` faqat `updated_at >= client_updated_at` bo'lsa almashadi (kelajak vaqti `now` ga qisqartiriladi); o'zgarish bo'lmasa saqlanmaydi (`updated_at` siljimaydi), bo'sh yozuv qator yaratmaydi. `apply_event`: `exercise_answered` mashq id'sini mavzu bloklaridan tekshiradi (`unknown_exercise` 400), xato — `mistakes` ga, birinchi urinishdagi (`attempt=1`) to'g'ri javob — `mistakes` dan o'chiradi, barcha mashq yechilsa `passed`. Voqealar idempotent emas (urinishlar o'sadi) — oflayn navbat PUT ishlatadi, `events/` faqat `topic_opened` uchun (RecentView).
+- `services/review.py` — "Takrorlash kerak" (xatosi bor mavzu; eng ko'p xato, teng bo'lsa eng yangi), o'zlashtirish guruhlari (review/mastered/in_progress), `pick_continue`, haftalik hisob (`jsonb_array_length`). `services/dashboard.py` — kabinet/ustoz yig'ma javoblari (so'rovlar soni ma'lumotga bog'liq emas, testda 14 tagacha).
+- `services/merge.py` + `progress.merge_progress`: holatlar eng yuqorisi, xatolar birlashmasi, `last_block_id` — qat'iy yangiroq yozuvniki; takror chaqirish `0` o'zgarish. Ko'rinmaydigan/yo'q mavzu `failed` ro'yxatiga tushadi (butun so'rov muvaffaqiyatsiz bo'lmaydi). Qoida o'zgarsa: avval `contracts/fixtures/merge-*.json`, so'ng backend va `frontend/src/lib/merge-guest-data.ts`.
+- Egalik: barcha queryset'lar `user=request.user` bilan; begonaning maqsadi 404. `delete_account` o'qish ma'lumotlarini o'chiradi, `export_data` `learning` beradi.
+- Testlar: `apps/learning/tests/` (`conftest.py` — `library`, `api`, `other_api`).
 
 ## `apps/support`
 

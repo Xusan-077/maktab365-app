@@ -1,6 +1,10 @@
 import { getApiSession, type ApiSession } from "@/lib/api/session";
 import { ApiError, type HealthStatus, type MaktabApi } from "@/lib/api/types";
+import { EXERCISE_TO_API, READ_TO_API } from "@/lib/api/learning-mappers";
+import { mergeBookmarks, mergeProgress } from "@/lib/merge-guest-data";
+import { groupByMastery, hasActivity, pickContinue, reviewTopics } from "@/lib/progress/review";
 import { EXERCISE_RANK, maxBy, mergeAttempts, READ_RANK } from "@/lib/progress/status";
+import { weeklySummary } from "@/lib/progress/summary";
 import { latinToCyrillic } from "@/lib/i18n/translit";
 import type { Book, BookFilters, Chapter, Grade, Subject } from "@/types/catalog";
 import { GRADES } from "@/types/catalog";
@@ -10,9 +14,15 @@ import type { LocalizedText } from "@/types/i18n";
 import type {
   BookBookmark,
   Bookmark,
+  Dashboard,
+  GuestData,
+  MergeResult,
   Progress,
   ProgressFilters,
+  RecentTopic,
+  Results,
   SaveProgressInput,
+  TeacherDashboard,
   ToggleBookBookmarkResult,
   ToggleBookmarkResult,
 } from "@/types/progress";
@@ -23,6 +33,9 @@ import { CHAPTERS, TOPICS } from "./data/chapters";
 import { SUBJECTS } from "./data/subjects";
 
 const SEARCH_LIMIT = 20;
+const RECENT_LIMIT = 20;
+const DASHBOARD_REVIEW_LIMIT = 4;
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 /** Kichik harf, bir xil tutuq belgisi — lotin va kirill so'rovlarini solishtirish uchun. */
 function normalize(value: string): string {
@@ -64,6 +77,8 @@ interface AccountDb {
   goals: Record<string, StudyGoal>;
   goalSeq: number;
   support: SupportMessage[];
+  /** Oxirgi ochilgan mavzular, eng yangisi birinchi. */
+  recent: RecentTopic[];
 }
 
 type MockStorage = Pick<Storage, "getItem" | "setItem">;
@@ -122,6 +137,7 @@ export class MockApi implements MaktabApi {
       goals: {},
       goalSeq: 0,
       support: [],
+      recent: [],
     };
     const db: AccountDb = { ...empty, ...all[session.id] };
     const result = change(db, session);
@@ -247,6 +263,147 @@ export class MockApi implements MaktabApi {
         return next;
       });
     });
+  }
+
+  recordTopicOpened(topicId: string): Promise<void> {
+    return this.respond(() => {
+      const topic = this.findTopic(topicId);
+      this.withAccount((db) => {
+        const rest = db.recent.filter((item) => item.topicId !== topicId);
+        db.recent = [
+          { topicId, bookId: topic.bookId, viewedAt: new Date().toISOString() },
+          ...rest,
+        ].slice(0, RECENT_LIMIT);
+      });
+    });
+  }
+
+  getRecent(): Promise<RecentTopic[]> {
+    return this.respond(() => this.withAccount((db) => db.recent));
+  }
+
+  getDashboard(): Promise<Dashboard> {
+    return this.respond(() =>
+      this.withAccount((db) => {
+        const progress = Object.values(db.progress);
+        const review = reviewTopics(progress);
+        const weekly = weeklySummary(progress, new Date());
+        const grade = db.user?.role === "student" ? db.user.grade : undefined;
+        const subjects =
+          grade === undefined
+            ? []
+            : BOOKS.filter((book) => book.grade === grade).flatMap((book) => {
+                const topics = TOPICS.filter((topic) => topic.bookId === book.id && topic.ready);
+                const own = progress.filter((item) =>
+                  topics.some((topic) => topic.id === item.topicId),
+                );
+                return topics.length === 0
+                  ? []
+                  : [
+                      {
+                        bookId: book.id,
+                        subjectId: book.subjectId,
+                        grade: book.grade,
+                        topicsTotal: topics.length,
+                        topicsRead: own.filter((item) => item.readStatus === "completed").length,
+                        topicsPassed: own.filter((item) => item.exerciseStatus === "completed")
+                          .length,
+                      },
+                    ];
+              });
+        return {
+          continue: pickContinue(progress) ?? null,
+          hasProgress: progress.some(hasActivity),
+          subjects,
+          review: { count: review.length, items: review.slice(0, DASHBOARD_REVIEW_LIMIT) },
+          weekly: {
+            since: new Date(Date.now() - WEEK_MS).toISOString(),
+            finished: weekly.finished,
+            read: weekly.read,
+            exercisesPassed: weekly.exercisesPassed,
+            mistakes: weekly.mistakes,
+            active: weekly.active,
+          },
+          savedCount: Object.keys(db.bookmarks).length,
+        };
+      }),
+    );
+  }
+
+  getResults(): Promise<Results> {
+    return this.respond(() =>
+      this.withAccount((db) => {
+        const groups = groupByMastery(Object.values(db.progress));
+        return {
+          ...groups,
+          counts: {
+            mastered: groups.mastered.length,
+            review: groups.review.length,
+            inProgress: groups.inProgress.length,
+          },
+        };
+      }),
+    );
+  }
+
+  getTeacherDashboard(): Promise<TeacherDashboard> {
+    return this.respond(() =>
+      this.withAccount((db) => {
+        const newest = <T extends { createdAt: string }>(items: T[]) =>
+          [...items].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, RECENT_LIMIT);
+        return {
+          recent: db.recent,
+          savedTopics: newest(Object.values(db.bookmarks)),
+          savedBooks: newest(Object.values(db.bookBookmarks)),
+          savedTopicsCount: Object.keys(db.bookmarks).length,
+          savedBooksCount: Object.keys(db.bookBookmarks).length,
+        };
+      }),
+    );
+  }
+
+  mergeGuestData(data: GuestData): Promise<MergeResult> {
+    return this.respond(() =>
+      this.withAccount((db, session) => {
+        const result: MergeResult = { progress: 0, bookmarks: 0, failed: [] };
+        const known = (topicId: string) => TOPICS.some((topic) => topic.id === topicId);
+        for (const [topicId, guest] of Object.entries(data.progress)) {
+          if (!known(topicId)) {
+            result.failed.push(topicId);
+            continue;
+          }
+          const input = mergeProgress(topicId, db.progress[topicId], guest);
+          if (!input) continue;
+          const current = db.progress[topicId];
+          db.progress[topicId] = {
+            userId: session.id,
+            topicId,
+            readStatus: input.readStatus ?? current?.readStatus ?? "none",
+            exerciseStatus: input.exerciseStatus ?? current?.exerciseStatus ?? "none",
+            lastBlockId: input.lastBlockId ?? current?.lastBlockId,
+            mistakes: input.mistakes ?? current?.mistakes ?? [],
+            solved: input.solved ?? current?.solved,
+            attempts: input.attempts ?? current?.attempts,
+            updatedAt: new Date().toISOString(),
+          };
+          result.progress++;
+        }
+        for (const topicId of mergeBookmarks(Object.keys(db.bookmarks), data.bookmarks)) {
+          if (!known(topicId)) {
+            result.failed.push(topicId);
+            continue;
+          }
+          db.bookmarks[topicId] = {
+            id: `bookmark-${++db.bookmarkSeq}`,
+            userId: session.id,
+            topicId,
+            createdAt: new Date().toISOString(),
+          };
+          result.bookmarks++;
+        }
+        return result;
+      }),
+    );
   }
 
   getBookmarks(): Promise<Bookmark[]> {
@@ -424,6 +581,36 @@ export class MockApi implements MaktabApi {
           },
           identities: [],
           auth_events: [],
+          learning: {
+            progress: Object.values(db.progress).map((item) => ({
+              topic_id: item.topicId,
+              book_id: this.findTopic(item.topicId).bookId,
+              read_status: READ_TO_API[item.readStatus],
+              exercise_status: EXERCISE_TO_API[item.exerciseStatus],
+              last_block_id: item.lastBlockId ?? "",
+              mistakes: item.mistakes.map((id) => ({
+                exercise_id: id,
+                attempts: item.attempts?.[id] ?? 1,
+                last_wrong_at: null,
+              })),
+              exercise_stats: { solved: item.solved ?? [], attempts: item.attempts ?? {} },
+              updated_at: item.updatedAt,
+            })),
+            bookmarks: Object.values(db.bookmarks).map((item) => ({
+              id: item.id,
+              kind: "topic" as const,
+              topic_id: item.topicId,
+              book_id: null,
+              created_at: item.createdAt,
+            })),
+            goals: Object.values(db.goals).map((goal) => ({
+              id: goal.id,
+              title: goal.title,
+              topic_id: null,
+              done: goal.done,
+              created_at: goal.createdAt,
+            })),
+          },
         };
       }),
     );

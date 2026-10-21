@@ -54,6 +54,9 @@ async function apply(queryClient: QueryClient, userId: string, event: ProgressEv
     return;
   }
 
+  // Server "yaqinda ochilganlar" ro'yxatini shu hodisadan yuritadi (progress o'zgarmasa ham).
+  if (event.type === "topic_opened") queue.enqueue({ kind: "opened", topicId: event.topicId });
+
   // Mavjud holat: kesh (kerak bo'lsa yuklanadi) + hali yuborilmagan yozuvlar. Yuklab bo'lmasa
   // (oflayn) bo'sh holatdan boshlanadi; server holatlarni pastga tushirmaydi.
   const cached = await queryClient

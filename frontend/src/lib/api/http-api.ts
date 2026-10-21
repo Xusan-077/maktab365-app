@@ -15,6 +15,21 @@ import {
   toSupportRequest,
   toUser,
 } from "./mappers";
+import {
+  toBookBookmark,
+  toBookmark,
+  toDashboard,
+  toGoal,
+  toGoalPatch,
+  toMergeRequest,
+  toMergeResult,
+  toProgress,
+  toProgressRequest,
+  toRecentTopic,
+  toResults,
+  toTeacherDashboard,
+} from "./learning-mappers";
+import { getApiSession } from "./session";
 import { ApiError, type HealthStatus, type MaktabApi } from "./types";
 import {
   GRADES,
@@ -24,15 +39,25 @@ import {
   type Grade,
   type Subject,
 } from "@/types/catalog";
+import type { StudyGoal, UpdateGoalInput } from "@/types/goal";
+import type {
+  BookBookmark,
+  Bookmark,
+  Dashboard,
+  GuestData,
+  MergeResult,
+  Progress,
+  ProgressFilters,
+  RecentTopic,
+  Results,
+  SaveProgressInput,
+  TeacherDashboard,
+  ToggleBookBookmarkResult,
+  ToggleBookmarkResult,
+} from "@/types/progress";
 import type { SupportInput, SupportMessage } from "@/types/support";
 import type { Topic, TopicSearchFilters, TopicSearchResult } from "@/types/topic";
 import type { AccountExport, ProfileInput, UpdateProfileInput, User, UserRole } from "@/types/user";
-
-const notImplemented = (method: string) => async (): Promise<never> => {
-  throw new ApiError(`HttpApi.${method} keyingi bosqichda yoziladi`, 501, {
-    code: "not_implemented",
-  });
-};
 
 const BOOKS_PAGE_SIZE = 100;
 const MAX_BOOK_PAGES = 20;
@@ -43,6 +68,11 @@ export class HttpApi implements MaktabApi {
   private bookIdsMemo?: { at: number; request: Promise<string[]> };
 
   constructor(private readonly client: HttpClient = createHttpClient()) {}
+
+  /** Joriy akkaunt id'si (faqat UI modelida kerak; backend tokendan aniqlaydi). */
+  private userId(): string {
+    return getApiSession()?.id ?? "";
+  }
 
   async health(): Promise<HealthStatus> {
     const result = await this.client.GET("/api/v1/health/");
@@ -185,17 +215,138 @@ export class HttpApi implements MaktabApi {
     return page.results.map(toSupportMessage);
   }
 
-  getProgress = notImplemented("getProgress");
-  saveProgress = notImplemented("saveProgress");
-  getBookmarks = notImplemented("getBookmarks");
-  toggleBookmark = notImplemented("toggleBookmark");
-  setBookmark = notImplemented("setBookmark");
-  getBookBookmarks = notImplemented("getBookBookmarks");
-  toggleBookBookmark = notImplemented("toggleBookBookmark");
-  getGoals = notImplemented("getGoals");
-  createGoal = notImplemented("createGoal");
-  updateGoal = notImplemented("updateGoal");
-  deleteGoal = notImplemented("deleteGoal");
+  async getProgress(filters: ProgressFilters = {}): Promise<Progress[]> {
+    const result = await this.client.GET("/api/v1/me/progress/", {
+      params: { query: { topic: filters.topicId, book: filters.bookId } },
+    });
+    return unwrap(result).map((item) => toProgress(item, this.userId()));
+  }
+
+  async saveProgress(input: SaveProgressInput): Promise<Progress> {
+    const result = await this.client.PUT("/api/v1/me/progress/{topic_id}/", {
+      params: { path: { topic_id: input.topicId } },
+      body: toProgressRequest(input),
+    });
+    return toProgress(unwrap(result), this.userId());
+  }
+
+  async recordTopicOpened(topicId: string): Promise<void> {
+    unwrap(
+      await this.client.POST("/api/v1/me/events/", {
+        body: { type: "topic_opened", topic_id: topicId, attempt: 1 },
+      }),
+    );
+  }
+
+  async getRecent(): Promise<RecentTopic[]> {
+    return unwrap(await this.client.GET("/api/v1/me/recent/")).map(toRecentTopic);
+  }
+
+  async getDashboard(): Promise<Dashboard> {
+    return toDashboard(unwrap(await this.client.GET("/api/v1/me/dashboard/")), this.userId());
+  }
+
+  async getResults(): Promise<Results> {
+    return toResults(unwrap(await this.client.GET("/api/v1/me/results/")), this.userId());
+  }
+
+  async getTeacherDashboard(): Promise<TeacherDashboard> {
+    return toTeacherDashboard(
+      unwrap(await this.client.GET("/api/v1/me/teacher/dashboard/")),
+      this.userId(),
+    );
+  }
+
+  async mergeGuestData(data: GuestData): Promise<MergeResult> {
+    const result = await this.client.POST("/api/v1/me/merge-guest-data/", {
+      body: toMergeRequest(data),
+    });
+    return toMergeResult(unwrap(result));
+  }
+
+  async getBookmarks(): Promise<Bookmark[]> {
+    const result = await this.client.GET("/api/v1/me/bookmarks/", {
+      params: { query: { kind: "topic" } },
+    });
+    return unwrap(result).map((item) => toBookmark(item, this.userId()));
+  }
+
+  async setBookmark(topicId: string, bookmarked: boolean): Promise<ToggleBookmarkResult> {
+    if (!bookmarked) {
+      await this.removeBookmark({ kind: "topic", topic_id: topicId });
+      return { bookmarked: false, bookmark: null };
+    }
+    const result = await this.client.POST("/api/v1/me/bookmarks/", {
+      body: { kind: "topic", topic_id: topicId },
+    });
+    return { bookmarked: true, bookmark: toBookmark(unwrap(result), this.userId()) };
+  }
+
+  async toggleBookmark(topicId: string): Promise<ToggleBookmarkResult> {
+    // Takror POST 200 qaytaradi (xatcho'p allaqachon bor) — shunda olib tashlanadi.
+    const result = await this.client.POST("/api/v1/me/bookmarks/", {
+      body: { kind: "topic", topic_id: topicId },
+    });
+    const bookmark = unwrap(result);
+    if (result.response.status === 201) {
+      return { bookmarked: true, bookmark: toBookmark(bookmark, this.userId()) };
+    }
+    await this.removeBookmark({ kind: "topic", topic_id: topicId });
+    return { bookmarked: false, bookmark: null };
+  }
+
+  async getBookBookmarks(): Promise<BookBookmark[]> {
+    const result = await this.client.GET("/api/v1/me/bookmarks/", {
+      params: { query: { kind: "book" } },
+    });
+    return unwrap(result).map((item) => toBookBookmark(item, this.userId()));
+  }
+
+  async toggleBookBookmark(bookId: string): Promise<ToggleBookBookmarkResult> {
+    const result = await this.client.POST("/api/v1/me/bookmarks/", {
+      body: { kind: "book", book_id: bookId },
+    });
+    const bookmark = unwrap(result);
+    if (result.response.status === 201) {
+      return { bookmarked: true, bookmark: toBookBookmark(bookmark, this.userId()) };
+    }
+    await this.removeBookmark({ kind: "book", book_id: bookId });
+    return { bookmarked: false, bookmark: null };
+  }
+
+  private async removeBookmark(query: {
+    kind: "topic" | "book";
+    topic_id?: string;
+    book_id?: string;
+  }) {
+    const result = await this.client.DELETE("/api/v1/me/bookmarks/", { params: { query } });
+    if (result.response.status >= 400) throw toApiError(result.response, result.error);
+  }
+
+  async getGoals(): Promise<StudyGoal[]> {
+    const result = await this.client.GET("/api/v1/me/goals/");
+    return unwrap(result).map((item) => toGoal(item, this.userId()));
+  }
+
+  async createGoal(title: string): Promise<StudyGoal> {
+    const result = await this.client.POST("/api/v1/me/goals/", { body: { title: title.trim() } });
+    return toGoal(unwrap(result), this.userId());
+  }
+
+  async updateGoal(goalId: string, input: UpdateGoalInput): Promise<StudyGoal> {
+    const result = await this.client.PATCH("/api/v1/me/goals/{goal_id}/", {
+      params: { path: { goal_id: goalId } },
+      body: toGoalPatch(input),
+    });
+    return toGoal(unwrap(result), this.userId());
+  }
+
+  async deleteGoal(goalId: string): Promise<void> {
+    const result = await this.client.DELETE("/api/v1/me/goals/{goal_id}/", {
+      params: { path: { goal_id: goalId } },
+    });
+    if (result.response.status >= 400) throw toApiError(result.response, result.error);
+  }
 }
 
 function isHealth(value: unknown): value is HealthStatus {

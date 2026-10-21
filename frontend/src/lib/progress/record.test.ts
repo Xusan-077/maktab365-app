@@ -1,8 +1,10 @@
 import { QueryClient } from "@tanstack/react-query";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getApi } from "@/lib/api";
 import { queryKeys } from "@/lib/api/query-keys";
 import { setApiSession } from "@/lib/api/session";
+import { ApiError } from "@/lib/api/types";
+import { MockApi } from "@/mocks/mock-api";
 import { useGuestStore } from "@/stores/guest.store";
 import type { Bookmark, Progress } from "@/types/progress";
 import { getSyncQueue, stopSync } from "./engine";
@@ -61,14 +63,48 @@ describe("recordForAccount", () => {
     });
   });
 
-  it("o'zgarishsiz hodisa navbatga tushmaydi", async () => {
+  it("o'zgarishsiz hodisa progress yozuvini navbatga qo'shmaydi", async () => {
     await recordForAccount(queryClient, "acc-1", { type: "topic_opened", topicId: TOPIC });
     const queue = getSyncQueue("acc-1", queryClient);
     await queue.flush();
     await recordForAccount(queryClient, "acc-1", { type: "topic_opened", topicId: TOPIC });
-    expect(queue.pending).toEqual([]);
+    expect(queue.pending.filter((item) => item.kind === "progress")).toEqual([]);
   });
 
+  it("mavzu ochilishi 'yaqinda ochilganlar' uchun serverga yuboriladi", async () => {
+    await recordForAccount(queryClient, "acc-1", { type: "topic_opened", topicId: TOPIC });
+    await getSyncQueue("acc-1", queryClient).flush();
+    await settle();
+    expect((await getApi().getRecent()).map((item) => item.topicId)).toEqual([TOPIC]);
+  });
+
+  it("server yozuvni rad etsa, optimistic holat serverdagiga qaytadi (rollback)", async () => {
+    let rejectSave: (error: unknown) => void = () => {};
+    const save = vi.spyOn(MockApi.prototype, "saveProgress").mockImplementation(
+      () =>
+        new Promise((_, reject) => {
+          rejectSave = reject;
+        }),
+    );
+    setApiSession({ id: "acc-rollback", name: "Vali" });
+    try {
+      await recordForAccount(queryClient, "acc-rollback", { type: "topic_opened", topicId: TOPIC });
+      // Server javobini kutayotganda foydalanuvchi o'z o'zgarishini darhol ko'radi
+      await vi.waitFor(() => expect(save).toHaveBeenCalledTimes(1));
+      expect(queryClient.getQueryData<Progress[]>(queryKeys.progress())?.[0]).toMatchObject({
+        topicId: TOPIC,
+        readStatus: "started",
+      });
+
+      rejectSave(new ApiError("noto'g'ri", 400, { code: "validation_error" }));
+      await vi.waitFor(() => {
+        expect(queryClient.getQueryData<Progress[]>(queryKeys.progress())).toEqual([]);
+      });
+      expect(getSyncQueue("acc-rollback", queryClient).pending).toEqual([]);
+    } finally {
+      save.mockRestore();
+    }
+  });
   it("xatcho'p holat sifatida yoziladi va takror yuborilsa o'zgarmaydi", async () => {
     await recordForAccount(queryClient, "acc-1", {
       type: "bookmark_toggled",

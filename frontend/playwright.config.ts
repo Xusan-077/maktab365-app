@@ -29,7 +29,7 @@ export default defineConfig({
     timeout: 600_000,
     reuseExistingServer: !process.env.CI,
     env: {
-      // Katalog va akkaunt — haqiqiy backend; progress/xatcho'p hali mock.
+      // Katalog, akkaunt va o'qish jarayoni (progress, xatcho'p, reja) — haqiqiy backend.
       NEXT_PUBLIC_API_MODE: "http",
       // Telegram widget konteyneri (skript tashqi tarmoqdan yuklanadi, testlar unga tayanmaydi).
       NEXT_PUBLIC_TELEGRAM_BOT_USERNAME: "maktab365_e2e_bot",

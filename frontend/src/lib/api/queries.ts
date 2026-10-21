@@ -39,6 +39,16 @@ export const apiQueries = {
     }),
   me: () => queryOptions({ queryKey: queryKeys.me(), queryFn: () => getApi().getMe() }),
   goals: () => queryOptions({ queryKey: queryKeys.goals(), queryFn: () => getApi().getGoals() }),
+  dashboard: () =>
+    queryOptions({ queryKey: queryKeys.dashboard(), queryFn: () => getApi().getDashboard() }),
+  results: () =>
+    queryOptions({ queryKey: queryKeys.results(), queryFn: () => getApi().getResults() }),
+  recent: () => queryOptions({ queryKey: queryKeys.recent(), queryFn: () => getApi().getRecent() }),
+  teacherDashboard: () =>
+    queryOptions({
+      queryKey: queryKeys.teacherDashboard(),
+      queryFn: () => getApi().getTeacherDashboard(),
+    }),
   mySupport: () =>
     queryOptions({ queryKey: queryKeys.mySupport(), queryFn: () => getApi().getMySupport() }),
 };

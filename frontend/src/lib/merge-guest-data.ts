@@ -1,4 +1,3 @@
-import type { MaktabApi } from "@/lib/api/types";
 import {
   EXERCISE_RANK,
   maxBy,
@@ -6,37 +5,20 @@ import {
   READ_COMPLETED_SCROLL,
   READ_RANK,
 } from "@/lib/progress/status";
-import type { ExerciseStatus, Progress, ReadStatus, SaveProgressInput } from "@/types/progress";
+import type {
+  GuestData,
+  GuestProgress,
+  MergeResult,
+  Progress,
+  SaveProgressInput,
+} from "@/types/progress";
 
-/** Mehmon rejimida saqlangan bitta mavzu progressi. */
-export interface GuestProgress {
-  readStatus?: ReadStatus;
-  exerciseStatus?: ExerciseStatus;
-  lastBlockId?: string;
-  mistakes: string[];
-  solved?: string[];
-  attempts?: Record<string, number>;
-  /** ISO sana. */
-  updatedAt: string;
-}
-
-export interface GuestData {
-  progress: Record<string, GuestProgress>;
-  /** Mavzu id'lari. */
-  bookmarks: string[];
-}
+export type { GuestData, GuestProgress, MergeResult };
 
 export interface GuestReadingPosition {
   scroll: number;
   lastBlockId?: string;
   updatedAt: string;
-}
-
-export interface MergeResult {
-  progress: number;
-  bookmarks: number;
-  /** Qo'shib bo'lmagan mavzu id'lari (masalan, mavzu endi yo'q). */
-  failed: string[];
 }
 
 /** Mehmonning o'qish pozitsiyalarini (reading store) progress sifatida guest ma'lumotiga qo'shadi. */
@@ -107,40 +89,11 @@ export function mergeProgress(
   return Object.keys(input).length > 1 ? input : null;
 }
 
-type MergeApi = Pick<MaktabApi, "getProgress" | "saveProgress" | "getBookmarks" | "toggleBookmark">;
-
 /**
- * Mehmon ma'lumotini akkauntga qo'shadi. Takror chaqirilsa ham xavfsiz (idempotent): akkauntda
- * allaqachon bor narsa o'zgarmaydi, xatcho'plar qayta toggle qilinmaydi.
+ * Akkauntda yo'q xatcho'plar (mavzu id'lari): birlashma, o'chirish yo'q. Server ham shunday
+ * qo'shadi (`merge-guest-data/`); xatcho'p qayta toggle qilinmaydi.
  */
-export async function mergeGuestData(api: MergeApi, data: GuestData): Promise<MergeResult> {
-  const result: MergeResult = { progress: 0, bookmarks: 0, failed: [] };
-
-  const accountProgress = new Map(
-    (await api.getProgress()).map((item) => [item.topicId, item] as const),
-  );
-  for (const [topicId, guest] of Object.entries(data.progress)) {
-    const input = mergeProgress(topicId, accountProgress.get(topicId), guest);
-    if (!input) continue;
-    try {
-      await api.saveProgress(input);
-      result.progress++;
-    } catch {
-      result.failed.push(topicId);
-    }
-  }
-
-  const bookmarked = new Set((await api.getBookmarks()).map((item) => item.topicId));
-  for (const topicId of data.bookmarks) {
-    if (bookmarked.has(topicId)) continue;
-    try {
-      await api.toggleBookmark(topicId);
-      bookmarked.add(topicId);
-      result.bookmarks++;
-    } catch {
-      result.failed.push(topicId);
-    }
-  }
-
-  return result;
+export function mergeBookmarks(account: readonly string[], guest: readonly string[]): string[] {
+  const have = new Set(account);
+  return [...new Set(guest)].filter((topicId) => !have.has(topicId));
 }

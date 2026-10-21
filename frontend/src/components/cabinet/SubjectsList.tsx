@@ -7,35 +7,28 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAppPaths } from "@/hooks/useAppPaths";
-import { useChapters } from "@/hooks/useChapters";
+import { useDashboard } from "@/hooks/useDashboard";
 import { useMyBooks } from "@/hooks/useMyBooks";
-import { useProgress } from "@/hooks/useProgress";
 import type { Locale } from "@/lib/i18n/config";
 import { getLocalized } from "@/lib/i18n/localized";
 import { Link } from "@/lib/i18n/navigation";
 import { catalogPath, ROUTES } from "@/lib/utils/routes";
 import type { Book } from "@/types/catalog";
-import type { Progress } from "@/types/progress";
+import type { DashboardBook } from "@/types/progress";
 
 function BookRow({
   book,
   subjectName,
-  progress,
+  stats,
 }: {
   book: Book;
   subjectName: string;
-  progress: Progress[];
+  /** Server hisobi; `undefined` — yuklanmoqda (`null` — kitobda tayyor mavzu yo'q). */
+  stats: DashboardBook | null | undefined;
 }) {
   const t = useTranslations("cabinet.subjects");
   const paths = useAppPaths();
   const locale = useLocale() as Locale;
-  const { data: chapters } = useChapters(book.id);
-
-  const topics = chapters?.flatMap((chapter) => chapter.topics).filter((topic) => topic.ready);
-  const read = new Set(
-    progress.filter((item) => item.readStatus === "completed").map((item) => item.topicId),
-  );
-  const done = topics?.filter((topic) => read.has(topic.id)).length ?? 0;
   const bookTitle = getLocalized(book.title, locale);
 
   return (
@@ -44,18 +37,20 @@ function BookRow({
         {subjectName}
       </Link>
       <p className="text-muted text-sm">{bookTitle}</p>
-      {!topics ? (
+      {stats === undefined ? (
         <Skeleton className="h-4 w-full max-w-xs" />
-      ) : topics.length === 0 ? (
+      ) : stats === null ? (
         <p className="text-muted text-sm">{t("soon")}</p>
       ) : (
         <div className="flex max-w-xs flex-col gap-1">
           <ProgressBar
-            value={done}
-            max={topics.length}
+            value={stats.topicsRead}
+            max={stats.topicsTotal}
             label={t("progressLabel", { title: subjectName })}
           />
-          <p className="text-muted text-sm">{t("topicsRead", { done, total: topics.length })}</p>
+          <p className="text-muted text-sm">
+            {t("topicsRead", { done: stats.topicsRead, total: stats.topicsTotal })}
+          </p>
         </div>
       )}
     </li>
@@ -68,7 +63,7 @@ export function SubjectsList({ limit }: { limit?: number }) {
   const tc = useTranslations("cabinet");
   const locale = useLocale() as Locale;
   const { grade, books, subjects, isPending } = useMyBooks();
-  const { data: progress = [] } = useProgress();
+  const { data: dashboard } = useDashboard();
 
   if (grade === undefined) {
     return (
@@ -116,7 +111,11 @@ export function SubjectsList({ limit }: { limit?: number }) {
             subjectName={
               subject ? getLocalized(subject.name, locale) : getLocalized(book.title, locale)
             }
-            progress={progress}
+            stats={
+              dashboard
+                ? (dashboard.subjects.find((item) => item.bookId === book.id) ?? null)
+                : undefined
+            }
           />
         );
       })}

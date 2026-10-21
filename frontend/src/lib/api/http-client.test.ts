@@ -99,13 +99,6 @@ describe("xatolar", () => {
   });
 });
 
-describe("qolgan metodlar", () => {
-  it("keyingi bosqichda xatosi (501)", async () => {
-    const api = apiWith(fetch);
-    await expect(api.getProgress()).rejects.toMatchObject({ status: 501, code: "not_implemented" });
-  });
-});
-
 describe("so'rov tanasi va token", () => {
   it("POST tanasini va server tokenini uzatadi", async () => {
     let seen: { body: string; auth: string | null } | undefined;

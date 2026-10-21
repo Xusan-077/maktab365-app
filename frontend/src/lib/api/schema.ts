@@ -529,6 +529,189 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/progress/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["me_progress_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/progress/{topic_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["me_progress_retrieve"];
+        /** Mavzu progressini yozish (idempotent, monoton) */
+        put: operations["me_progress_update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/events/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** O'qish voqeasi: topic_opened | topic_read | exercise_answered */
+        post: operations["me_events_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/bookmarks/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["me_bookmarks_list"];
+        put?: never;
+        /** Xatcho'p qo'yish (takror yuborilsa 200) */
+        post: operations["me_bookmarks_create"];
+        /** Xatcho'pni olib tashlash (yo'q bo'lsa ham 204) */
+        delete: operations["me_bookmarks_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/recent/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["me_recent_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/goals/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["me_goals_list"];
+        put?: never;
+        post: operations["me_goals_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/goals/{goal_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["me_goals_retrieve"];
+        put?: never;
+        post?: never;
+        delete: operations["me_goals_delete"];
+        options?: never;
+        head?: never;
+        patch: operations["me_goals_update"];
+        trace?: never;
+    };
+    "/api/v1/me/dashboard/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Kabinet bosh sahifasi: davom ettirish, fanlar, takrorlash, haftalik natija */
+        get: operations["me_dashboard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/results/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Natijalar mavzu kesimida: o'zlashtirilgan, takrorlash kerak, jarayonda */
+        get: operations["me_results"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/teacher/dashboard/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["me_teacher_dashboard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/merge-guest-data/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mehmon ma'lumotini akkauntga qo'shish (idempotent, har ro'yxat 500 tagacha) */
+        post: operations["me_merge_guest_data"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/support/": {
         parameters: {
             query?: never;
@@ -608,6 +791,26 @@ export interface components {
             topics_count: number;
             chapters: components["schemas"]["Chapter"][];
         };
+        Bookmark: {
+            /** Format: uuid */
+            readonly id: string;
+            kind: components["schemas"]["BookmarkKindEnum"];
+            readonly topic_id: string | null;
+            readonly book_id: string | null;
+            /** Format: date-time */
+            readonly created_at: string;
+        };
+        /**
+         * @description * `book` - Book
+         *     * `topic` - Topic
+         * @enum {string}
+         */
+        BookmarkKindEnum: "book" | "topic";
+        BookmarkWriteRequest: {
+            kind: components["schemas"]["BookmarkKindEnum"];
+            topic_id?: string;
+            book_id?: string;
+        };
         Breadcrumb: {
             subject: components["schemas"]["BreadcrumbSubject"];
             book: components["schemas"]["BreadcrumbBook"];
@@ -639,10 +842,54 @@ export interface components {
          * @enum {string}
          */
         CheckStatusEnum: "ok" | "error";
+        Dashboard: {
+            continue: components["schemas"]["TopicProgress"] | null;
+            has_progress: boolean;
+            subjects: components["schemas"]["DashboardBook"][];
+            review: components["schemas"]["ReviewSummary"];
+            weekly: components["schemas"]["Weekly"];
+            saved_count: number;
+        };
+        DashboardBook: {
+            book_id: string;
+            subject_id: string;
+            grade: number;
+            topics_total: number;
+            topics_read: number;
+            topics_passed: number;
+        };
         EmailRequest: {
             /** Format: email */
             email: string;
         };
+        EventRequest: {
+            type: components["schemas"]["TypeEnum"];
+            topic_id: string;
+            exercise_id?: string;
+            correct?: boolean;
+            /** @default 1 */
+            attempt: number;
+            last_block_id?: string;
+        };
+        ExerciseStats: {
+            solved?: string[];
+            attempts?: {
+                [key: string]: number;
+            };
+        };
+        ExerciseStatsRequest: {
+            solved?: string[];
+            attempts?: {
+                [key: string]: number;
+            };
+        };
+        /**
+         * @description * `not_started` - Not started
+         *     * `in_progress` - In progress
+         *     * `passed` - Passed
+         * @enum {string}
+         */
+        ExerciseStatusEnum: "not_started" | "in_progress" | "passed";
         Export: {
             /** Format: date-time */
             exported_at: string;
@@ -650,6 +897,7 @@ export interface components {
             profile: components["schemas"]["Profile"];
             identities: components["schemas"]["ExportIdentity"][];
             auth_events: components["schemas"]["ExportEvent"][];
+            learning: components["schemas"]["ExportLearning"];
         };
         ExportEvent: {
             type: string;
@@ -668,6 +916,11 @@ export interface components {
             verified: boolean;
             /** Format: date-time */
             created_at: string;
+        };
+        ExportLearning: {
+            progress: components["schemas"]["TopicProgress"][];
+            bookmarks: components["schemas"]["Bookmark"][];
+            goals: components["schemas"]["StudyGoal"][];
         };
         ExportUser: {
             /** Format: uuid */
@@ -689,6 +942,19 @@ export interface components {
         Grade: {
             grade: number;
             books_count: number;
+        };
+        /** @description PUT: to'liq holat. Yuborilmagan maydonga tegilmaydi. */
+        GuestProgressRequest: {
+            read_status?: components["schemas"]["ReadStatusEnum"];
+            exercise_status?: components["schemas"]["ExerciseStatusEnum"];
+            last_block_id?: string;
+            /** Format: double */
+            scroll_position?: number | null;
+            mistakes?: components["schemas"]["MistakeRequest"][];
+            exercise_stats?: components["schemas"]["ExerciseStatsRequest"];
+            /** Format: date-time */
+            updated_at?: string;
+            topic_id: string;
         };
         Health: {
             status: components["schemas"]["HealthStatusEnum"];
@@ -748,6 +1014,28 @@ export interface components {
             /** Format: date-time */
             readonly date_joined: string;
             readonly profile: components["schemas"]["Profile"];
+        };
+        MergeRequestRequest: {
+            progress?: components["schemas"]["GuestProgressRequest"][];
+            bookmarks?: components["schemas"]["BookmarkWriteRequest"][];
+        };
+        MergeResult: {
+            progress: number;
+            bookmarks: number;
+            failed: string[];
+        };
+        MistakeOut: {
+            exercise_id: string;
+            attempts: number;
+            /** Format: date-time */
+            last_wrong_at: string | null;
+        };
+        MistakeRequest: {
+            exercise_id: string;
+            /** @default 1 */
+            attempts: number;
+            /** Format: date-time */
+            last_wrong_at?: string | null;
         };
         Ok: {
             ok: boolean;
@@ -830,6 +1118,13 @@ export interface components {
         PatchedRoleRequest: {
             role?: components["schemas"]["RoleEnum"];
         };
+        PatchedStudyGoalPatchRequest: {
+            title?: string;
+            topic_id?: string | null;
+            /** Format: date */
+            due_date?: string | null;
+            done?: boolean;
+        };
         Profile: {
             readonly display_name: string;
             /** Format: uri */
@@ -841,6 +1136,18 @@ export interface components {
             /** Format: date-time */
             readonly onboarded_at: string | null;
         };
+        /** @description PUT: to'liq holat. Yuborilmagan maydonga tegilmaydi. */
+        ProgressWriteRequest: {
+            read_status?: components["schemas"]["ReadStatusEnum"];
+            exercise_status?: components["schemas"]["ExerciseStatusEnum"];
+            last_block_id?: string;
+            /** Format: double */
+            scroll_position?: number | null;
+            mistakes?: components["schemas"]["MistakeRequest"][];
+            exercise_stats?: components["schemas"]["ExerciseStatsRequest"];
+            /** Format: date-time */
+            updated_at?: string;
+        };
         /**
          * @description * `password` - Password
          *     * `google` - Google
@@ -849,6 +1156,19 @@ export interface components {
          * @enum {string}
          */
         ProviderEnum: "password" | "google" | "telegram" | "email_otp";
+        /**
+         * @description * `not_started` - Not started
+         *     * `in_progress` - In progress
+         *     * `read` - Read
+         * @enum {string}
+         */
+        ReadStatusEnum: "not_started" | "in_progress" | "read";
+        RecentView: {
+            readonly topic_id: string;
+            readonly book_id: string;
+            /** Format: date-time */
+            viewed_at: string;
+        };
         RefreshRequest: {
             refresh: string;
         };
@@ -858,6 +1178,21 @@ export interface components {
             password: string;
             display_name?: string;
             locale?: components["schemas"]["LocaleEnum"];
+        };
+        ResultCounts: {
+            mastered: number;
+            review: number;
+            in_progress: number;
+        };
+        Results: {
+            counts: components["schemas"]["ResultCounts"];
+            mastered: components["schemas"]["TopicProgress"][];
+            review: components["schemas"]["TopicProgress"][];
+            in_progress: components["schemas"]["TopicProgress"][];
+        };
+        ReviewSummary: {
+            count: number;
+            items: components["schemas"]["TopicProgress"][];
         };
         /**
          * @description * `student` - Student
@@ -886,6 +1221,26 @@ export interface components {
             snippet: string;
             /** Format: double */
             rank: number;
+        };
+        StudyGoal: {
+            /** Format: uuid */
+            readonly id: string;
+            title: string;
+            readonly topic_id: string | null;
+            /** Format: date */
+            due_date?: string | null;
+            readonly done: boolean;
+            /** Format: date-time */
+            done_at?: string | null;
+            /** Format: date-time */
+            readonly created_at: string;
+        };
+        StudyGoalWriteRequest: {
+            title: string;
+            topic_id?: string | null;
+            /** Format: date */
+            due_date?: string | null;
+            done?: boolean;
         };
         Subject: {
             slug: string;
@@ -938,6 +1293,13 @@ export interface components {
          * @enum {string}
          */
         SupportStatusEnum: "new" | "in_progress" | "resolved" | "spam";
+        TeacherDashboard: {
+            recent: components["schemas"]["RecentView"][];
+            saved_topics: components["schemas"]["Bookmark"][];
+            saved_books: components["schemas"]["Bookmark"][];
+            saved_topics_count: number;
+            saved_books_count: number;
+        };
         /** @description Telegram Login Widget qaytargan maydonlar (imzo tekshiruvi providers/telegram.py da). */
         TelegramAuthRequest: {
             locale?: components["schemas"]["LocaleEnum"];
@@ -973,12 +1335,47 @@ export interface components {
             slug: string;
             title: components["schemas"]["LocalizedText"];
         };
+        TopicProgress: {
+            readonly topic_id: string;
+            readonly book_id: string;
+            read_status?: components["schemas"]["ReadStatusEnum"];
+            exercise_status?: components["schemas"]["ExerciseStatusEnum"];
+            last_block_id?: string;
+            /** Format: double */
+            scroll_position?: number | null;
+            mistakes: components["schemas"]["MistakeOut"][];
+            readonly exercise_stats: components["schemas"]["ExerciseStats"];
+            /** Format: date-time */
+            first_opened_at?: string | null;
+            /** Format: date-time */
+            read_at?: string | null;
+            /** Format: date-time */
+            passed_at?: string | null;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
         TopicSummary: {
             slug: string;
             order: number;
             title: components["schemas"]["LocalizedText"];
             summary: components["schemas"]["LocalizedText"];
             readonly unverified: boolean;
+        };
+        /**
+         * @description * `topic_opened` - topic_opened
+         *     * `topic_read` - topic_read
+         *     * `exercise_answered` - exercise_answered
+         * @enum {string}
+         */
+        TypeEnum: "topic_opened" | "topic_read" | "exercise_answered";
+        Weekly: {
+            /** Format: date-time */
+            since: string;
+            finished: number;
+            read: number;
+            exercises_passed: number;
+            mistakes: number;
+            active: number;
         };
     };
     responses: never;
@@ -1718,6 +2115,396 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SearchResponse"];
+                };
+            };
+        };
+    };
+    me_progress_list: {
+        parameters: {
+            query?: {
+                /** @description Kitob slug'i */
+                book?: string;
+                exercise_status?: string;
+                /** @description Faqat xatosi borlar */
+                needs_review?: boolean;
+                read_status?: string;
+                /** @description Mavzu kaliti */
+                topic?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TopicProgress"][];
+                };
+            };
+        };
+    };
+    me_progress_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                topic_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TopicProgress"];
+                };
+            };
+        };
+    };
+    me_progress_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                topic_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["ProgressWriteRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ProgressWriteRequest"];
+                "multipart/form-data": components["schemas"]["ProgressWriteRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TopicProgress"];
+                };
+            };
+        };
+    };
+    me_events_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EventRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["EventRequest"];
+                "multipart/form-data": components["schemas"]["EventRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TopicProgress"];
+                };
+            };
+        };
+    };
+    me_bookmarks_list: {
+        parameters: {
+            query?: {
+                kind?: "book" | "topic";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Bookmark"][];
+                };
+            };
+        };
+    };
+    me_bookmarks_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BookmarkWriteRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["BookmarkWriteRequest"];
+                "multipart/form-data": components["schemas"]["BookmarkWriteRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Bookmark"];
+                };
+            };
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Bookmark"];
+                };
+            };
+        };
+    };
+    me_bookmarks_delete: {
+        parameters: {
+            query: {
+                book_id?: string;
+                kind: "book" | "topic";
+                topic_id?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    me_recent_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecentView"][];
+                };
+            };
+        };
+    };
+    me_goals_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudyGoal"][];
+                };
+            };
+        };
+    };
+    me_goals_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StudyGoalWriteRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["StudyGoalWriteRequest"];
+                "multipart/form-data": components["schemas"]["StudyGoalWriteRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudyGoal"];
+                };
+            };
+        };
+    };
+    me_goals_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                goal_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudyGoal"];
+                };
+            };
+        };
+    };
+    me_goals_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                goal_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    me_goals_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                goal_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedStudyGoalPatchRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedStudyGoalPatchRequest"];
+                "multipart/form-data": components["schemas"]["PatchedStudyGoalPatchRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudyGoal"];
+                };
+            };
+        };
+    };
+    me_dashboard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Dashboard"];
+                };
+            };
+        };
+    };
+    me_results: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Results"];
+                };
+            };
+        };
+    };
+    me_teacher_dashboard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeacherDashboard"];
+                };
+            };
+        };
+    };
+    me_merge_guest_data: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["MergeRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["MergeRequestRequest"];
+                "multipart/form-data": components["schemas"]["MergeRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MergeResult"];
                 };
             };
         };

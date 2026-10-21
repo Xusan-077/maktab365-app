@@ -197,6 +197,9 @@ SPECTACULAR_SETTINGS = {
         "LocaleEnum": "apps.accounts.models.Locale.choices",
         "SupportKindEnum": "apps.support.models.Kind.choices",
         "SupportStatusEnum": "apps.support.models.Status.choices",
+        "BookmarkKindEnum": "apps.learning.models.BookmarkKind.choices",
+        "ReadStatusEnum": "apps.learning.models.ReadStatus.choices",
+        "ExerciseStatusEnum": "apps.learning.models.ExerciseStatus.choices",
     },
 }
 

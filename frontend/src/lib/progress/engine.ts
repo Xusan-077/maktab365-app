@@ -6,6 +6,31 @@ import { SyncQueue } from "./queue";
 
 export const SYNC_STORAGE_PREFIX = "maktab365-sync:";
 
+const ACCOUNT_DATA_KEYS = [
+  ["progress"],
+  queryKeys.bookmarks(),
+  queryKeys.dashboard(),
+  queryKeys.results(),
+  queryKeys.recent(),
+  queryKeys.teacherDashboard(),
+] as const;
+
+/**
+ * Optimistic yozilgan keshni (progress, xatcho'plar) serverdagi haqiqiy holatga qaytaradi:
+ * faol bo'lmagan so'rovlar ham qayta yuklanadi, shunda eski optimistic qiymat qolib ketmaydi.
+ */
+export function rollbackOptimistic(queryClient: QueryClient): void {
+  for (const queryKey of [["progress"], queryKeys.bookmarks()]) {
+    void queryClient.invalidateQueries({ queryKey, refetchType: "all" });
+  }
+  refreshAccountData(queryClient);
+}
+
+/** Progressga bog'liq barcha so'rovlarni serverdan qayta o'qitadi. */
+export function refreshAccountData(queryClient: QueryClient): void {
+  for (const queryKey of ACCOUNT_DATA_KEYS) void queryClient.invalidateQueries({ queryKey });
+}
+
 let active: { userId: string; queue: SyncQueue } | null = null;
 
 /**
@@ -19,15 +44,17 @@ export function getSyncQueue(userId: string, queryClient: QueryClient): SyncQueu
     api: {
       saveProgress: (input) => getApi().saveProgress(input),
       setBookmark: (topicId, bookmarked) => getApi().setBookmark(topicId, bookmarked),
+      recordTopicOpened: (topicId) => getApi().recordTopicOpened(topicId),
     },
     storageKey: `${SYNC_STORAGE_PREFIX}${userId}`,
     storage: typeof localStorage === "undefined" ? undefined : localStorage,
     onChange: (items) => useSyncStore.getState().setPending(items),
     onSynced: (remaining) => {
       if (remaining > 0) return;
-      void queryClient.invalidateQueries({ queryKey: ["progress"] });
-      void queryClient.invalidateQueries({ queryKey: queryKeys.bookmarks() });
+      refreshAccountData(queryClient);
     },
+    // Server rad etgan yozuv: optimistic holat serverdagi haqiqiy holatga qaytariladi (rollback).
+    onDropped: () => rollbackOptimistic(queryClient),
   });
   active = { userId, queue };
   useSyncStore.getState().setPending(queue.pending);

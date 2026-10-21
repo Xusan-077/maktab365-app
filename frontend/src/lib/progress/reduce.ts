@@ -97,7 +97,12 @@ export function toTopicState(progress: Progress): TopicState {
 
 /** Serverga yuboriladigan to'liq holat (delta emas): takror yuborish xavfsiz. */
 export function toSaveInput(progress: Progress): SaveProgressInput {
-  return { topicId: progress.topicId, ...toTopicState(progress) };
+  return {
+    topicId: progress.topicId,
+    ...toTopicState(progress),
+    // Hodisa vaqti: eski qurilmaning kech kelgan yozuvi yangisini bosmasligi uchun.
+    updatedAt: progress.updatedAt,
+  };
 }
 
 /** Yuborilmagan yozuvni ko'rsatish uchun `Progress` ko'rinishiga keltiradi. */

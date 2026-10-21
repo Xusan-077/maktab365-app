@@ -31,6 +31,87 @@ export type SaveProgressInput = {
   mistakes?: string[];
   solved?: string[];
   attempts?: Record<string, number>;
+  /** Yozuv paydo bo'lgan vaqt (ISO): eski qurilmaning kech kelgan yozuvi yangisini bosmaydi. */
+  updatedAt?: string;
+};
+
+/** Mehmon rejimida saqlangan bitta mavzu progressi. */
+export interface GuestProgress {
+  readStatus?: ReadStatus;
+  exerciseStatus?: ExerciseStatus;
+  lastBlockId?: string;
+  mistakes: string[];
+  solved?: string[];
+  attempts?: Record<string, number>;
+  /** ISO sana. */
+  updatedAt: string;
+}
+
+export interface GuestData {
+  progress: Record<string, GuestProgress>;
+  /** Mavzu id'lari. */
+  bookmarks: string[];
+}
+
+export interface MergeResult {
+  progress: number;
+  bookmarks: number;
+  /** Qo'shib bo'lmagan mavzu/kitob id'lari (masalan, mavzu endi yo'q). */
+  failed: string[];
+}
+
+/** Mashq natijasi bo'yicha mavzu holati: takrorlash kerak / yaxshi o'zlashtirilgan / jarayonda. */
+export type ResultGroup = "review" | "mastered" | "inProgress";
+
+export type DashboardBook = {
+  bookId: string;
+  subjectId: string;
+  grade: number;
+  topicsTotal: number;
+  topicsRead: number;
+  topicsPassed: number;
+};
+
+export type WeeklyStats = {
+  /** ISO sana: hisob boshlangan vaqt. */
+  since: string;
+  finished: number;
+  read: number;
+  exercisesPassed: number;
+  mistakes: number;
+  active: number;
+};
+
+/** O'quvchi kabinetining bosh sahifasi (`GET /me/dashboard/`). */
+export type Dashboard = {
+  continue: Progress | null;
+  /** `continue` bo'sh bo'lganda: hech narsa boshlanmaganmi (false) yoki hammasi tugaganmi (true). */
+  hasProgress: boolean;
+  subjects: DashboardBook[];
+  review: { count: number; items: Progress[] };
+  weekly: WeeklyStats;
+  savedCount: number;
+};
+
+/** "Natijalar" (`GET /me/results/`): mavzu kesimida. */
+export type Results = Record<ResultGroup, Progress[]> & {
+  counts: Record<ResultGroup, number>;
+};
+
+export type RecentTopic = {
+  topicId: string;
+  bookId: string;
+  /** ISO sana. */
+  viewedAt: string;
+};
+
+/** O'qituvchi bosh sahifasi (`GET /me/teacher/dashboard/`). */
+export type TeacherDashboard = {
+  recent: RecentTopic[];
+  savedTopics: Bookmark[];
+  savedBooks: BookBookmark[];
+  savedTopicsCount: number;
+  savedBooksCount: number;
 };
 
 export type Bookmark = {

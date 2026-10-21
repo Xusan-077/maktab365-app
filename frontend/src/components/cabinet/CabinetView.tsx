@@ -5,11 +5,9 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { PAGE_STACK } from "@/components/layout/containers";
 import { buttonVariants } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { useBookmarks } from "@/hooks/useBookmarks";
+import { useDashboard } from "@/hooks/useDashboard";
 import { useMe } from "@/hooks/useMe";
-import { useProgress } from "@/hooks/useProgress";
 import { Link } from "@/lib/i18n/navigation";
-import { groupByMastery, hasActivity, pickContinue } from "@/lib/progress/review";
 import { catalogPath, ROUTES } from "@/lib/utils/routes";
 import { ContinueCard } from "./ContinueCard";
 import { EmptyText, Panel } from "./Panel";
@@ -43,16 +41,19 @@ function StartCard({ finished }: { finished: boolean }) {
   );
 }
 
-/** O'quvchi kabineti: shaxsiy o'qish sahifasi (davom ettirish, takrorlash, saqlanganlar, natija, reja). */
+/**
+ * O'quvchi kabineti: shaxsiy o'qish sahifasi (davom ettirish, takrorlash, saqlanganlar, natija, reja).
+ * Ma'lumot bitta `dashboard` so'rovidan keladi; ro'yxatlar (`ReviewList`, `SubjectsList`,
+ * `WeeklySummary`) o'sha keshni o'qiydi.
+ */
 export function CabinetView() {
   const t = useTranslations("cabinet");
   const { data: me } = useMe();
-  const { data: progress, isPending, isError } = useProgress();
-  const { data: bookmarks } = useBookmarks();
+  const { data: dashboard, isPending, isError } = useDashboard();
 
-  const next = progress ? pickContinue(progress) : undefined;
-  const hasProgress = progress?.some(hasActivity) ?? false;
-  const reviewCount = progress ? groupByMastery(progress).review.length : 0;
+  const next = dashboard?.continue ?? undefined;
+  const reviewCount = dashboard?.review.count ?? 0;
+  const savedCount = dashboard?.savedCount ?? 0;
 
   return (
     <div className={PAGE_STACK}>
@@ -65,7 +66,7 @@ export function CabinetView() {
       ) : next ? (
         <ContinueCard progress={next} />
       ) : (
-        <StartCard finished={hasProgress} />
+        <StartCard finished={dashboard?.hasProgress ?? false} />
       )}
 
       <div className="grid gap-4 lg:grid-cols-2">
@@ -94,9 +95,9 @@ export function CabinetView() {
         <Panel
           title={t("saved.title")}
           footer={
-            (bookmarks?.length ?? 0) > DASHBOARD_LIST_LIMIT && (
+            savedCount > DASHBOARD_LIST_LIMIT && (
               <Link href={ROUTES.cabinetSaved} className="text-link hover:underline">
-                {t("saved.all", { count: bookmarks?.length ?? 0 })}
+                {t("saved.all", { count: savedCount })}
               </Link>
             )
           }

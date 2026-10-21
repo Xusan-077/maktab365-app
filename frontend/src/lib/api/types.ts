@@ -4,9 +4,15 @@ import type { Book, BookFilters, Chapter, Grade, Subject } from "@/types/catalog
 import type {
   BookBookmark,
   Bookmark,
+  Dashboard,
+  GuestData,
+  MergeResult,
   Progress,
   ProgressFilters,
+  RecentTopic,
+  Results,
   SaveProgressInput,
+  TeacherDashboard,
   ToggleBookBookmarkResult,
   ToggleBookmarkResult,
 } from "@/types/progress";
@@ -26,7 +32,20 @@ export interface MaktabApi {
   getTopic(topicId: string): Promise<Topic>;
   searchTopics(query: string, filters?: TopicSearchFilters): Promise<TopicSearchResult[]>;
   getProgress(filters?: ProgressFilters): Promise<Progress[]>;
+  /** Idempotent va monoton: holat pasaymaydi, takror yuborish xavfsiz (oflayn navbat uchun). */
   saveProgress(input: SaveProgressInput): Promise<Progress>;
+  /** Mavzu ochilganini yozadi ("yaqinda ochilganlar"); takror yuborish xavfsiz. */
+  recordTopicOpened(topicId: string): Promise<void>;
+  /** Oxirgi ochilgan mavzular, eng yangisi birinchi. */
+  getRecent(): Promise<RecentTopic[]>;
+  /** Kabinet bosh sahifasi: davom ettirish, fanlar, takrorlash kerak, haftalik natija. */
+  getDashboard(): Promise<Dashboard>;
+  /** "Natijalar": mavzu kesimida (o'zlashtirilgan / takrorlash kerak / jarayonda). */
+  getResults(): Promise<Results>;
+  /** O'qituvchi bosh sahifasi: yaqinda ochilgan va saqlangan materiallar. */
+  getTeacherDashboard(): Promise<TeacherDashboard>;
+  /** Mehmon ma'lumotini akkauntga qo'shadi. Idempotent: takror chaqirish hech narsani o'zgartirmaydi. */
+  mergeGuestData(data: GuestData): Promise<MergeResult>;
   getBookmarks(): Promise<Bookmark[]>;
   toggleBookmark(topicId: string): Promise<ToggleBookmarkResult>;
   /** Xatcho'pni aniq holatga keltiradi (takror yuborilsa ham xavfsiz — oflayn navbat uchun). */

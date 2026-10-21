@@ -1,21 +1,18 @@
 "use client";
 
-import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { useProgress } from "@/hooks/useProgress";
-import { weeklySummary } from "@/lib/progress/summary";
+import { useDashboard } from "@/hooks/useDashboard";
 import { EmptyText } from "./Panel";
 
 /** Oxirgi 7 kun: tugatilgan mavzular va mashq natijalari (umumiy foiz emas, aniq sonlar). */
 export function WeeklySummary() {
   const t = useTranslations("cabinet.weekly");
-  const { data: progress, isPending } = useProgress();
-  const [now] = useState(() => new Date());
+  const { data: dashboard, isPending } = useDashboard();
 
   if (isPending) return <Skeleton className="h-20 w-full" />;
-  const summary = weeklySummary(progress ?? [], now);
-  if (summary.active === 0) return <EmptyText>{t("empty")}</EmptyText>;
+  const summary = dashboard?.weekly;
+  if (!summary || summary.active === 0) return <EmptyText>{t("empty")}</EmptyText>;
 
   const rows = [
     { key: "finished", value: summary.finished },

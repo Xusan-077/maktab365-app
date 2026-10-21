@@ -9,8 +9,9 @@ import { apiQueries } from "@/lib/api/queries";
 import { queryKeys } from "@/lib/api/query-keys";
 import { setApiSession } from "@/lib/api/session";
 import { useToast } from "@/hooks/useToast";
-import { getSyncQueue, stopSync } from "@/lib/progress/engine";
-import { collectGuestData, hasGuestData, mergeGuestData } from "@/lib/merge-guest-data";
+import { getSyncQueue, refreshAccountData, stopSync } from "@/lib/progress/engine";
+import { GuestMerger } from "@/lib/progress/guest-merge";
+import { collectGuestData } from "@/lib/merge-guest-data";
 import { useGuestStore } from "@/stores/guest.store";
 import { useReadingStore } from "@/stores/reading.store";
 
@@ -39,7 +40,12 @@ function AuthBridge({ children }: { children: ReactNode }) {
   setApiSession(userId ? { id: userId, name: userName } : null);
 
   const knownUserId = useRef<string | null | undefined>(undefined);
-  const mergedFor = useRef<string | null>(null);
+  const toastRef = useRef(toast);
+  const tRef = useRef(t);
+  useEffect(() => {
+    toastRef.current = toast;
+    tRef.current = t;
+  });
 
   useEffect(() => {
     void useGuestStore.persist.rehydrate();
@@ -72,32 +78,40 @@ function AuthBridge({ children }: { children: ReactNode }) {
     };
   }, [userId, queryClient]);
 
+  // Birinchi kirishdan keyin mehmon ma'lumoti akkauntga qo'shiladi (server idempotent). Xatoda
+  // ma'lumot saqlanadi va eksponensial kechikish bilan, internet qaytganda hamda keyingi kirishda
+  // qayta uriniladi; muvaffaqiyatda mehmon store'i tozalanadi.
   useEffect(() => {
-    if (!userId || mergedFor.current === userId) return;
-    mergedFor.current = userId;
-    let active = true;
-    (async () => {
-      await Promise.all([useGuestStore.persist.rehydrate(), useReadingStore.persist.rehydrate()]);
-      if (!active) return;
-      const { progress, bookmarks } = useGuestStore.getState();
-      const guest = collectGuestData({ progress, bookmarks }, useReadingStore.getState().positions);
-      if (!hasGuestData(guest)) return;
-      const result = await mergeGuestData(getApi(), guest);
-      if (result.failed.length === 0) useGuestStore.getState().clear();
-      for (const queryKey of USER_QUERY_KEYS) void queryClient.invalidateQueries({ queryKey });
-      toast({
-        variant: "success",
-        title: t("guestMerged"),
-        description: t("guestMergedHint"),
-      });
-    })().catch(() => {
-      // Qo'shish muvaffaqiyatsiz bo'lsa mehmon ma'lumoti saqlanib qoladi; keyingi kirishda qayta uriniladi.
-      mergedFor.current = null;
+    if (!userId) return;
+    const merger = new GuestMerger({
+      api: getApi(),
+      load: async () => {
+        await Promise.all([useGuestStore.persist.rehydrate(), useReadingStore.persist.rehydrate()]);
+        const { progress, bookmarks } = useGuestStore.getState();
+        return collectGuestData({ progress, bookmarks }, useReadingStore.getState().positions);
+      },
+      onMerged: (result) => {
+        useGuestStore.getState().clear();
+        refreshAccountData(queryClient);
+        for (const queryKey of USER_QUERY_KEYS) void queryClient.invalidateQueries({ queryKey });
+        // Faqat haqiqatan nimadir qo'shilganda xabar beramiz (reading pozitsiyalari har kirishda yig'iladi).
+        if (result.progress + result.bookmarks > 0) {
+          toastRef.current({
+            variant: "success",
+            title: tRef.current("guestMerged"),
+            description: tRef.current("guestMergedHint"),
+          });
+        }
+      },
     });
+    void merger.start();
+    const onOnline = () => merger.retryNow();
+    window.addEventListener("online", onOnline);
     return () => {
-      active = false;
+      window.removeEventListener("online", onOnline);
+      merger.dispose();
     };
-  }, [userId, queryClient, toast, t]);
+  }, [userId, queryClient]);
 
   return children;
 }

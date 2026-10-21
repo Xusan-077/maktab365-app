@@ -4,11 +4,14 @@ import type { SaveProgressInput } from "@/types/progress";
 /** Serverga yuborilishi kutilayotgan yozuv. Ikkalasi ham to'liq holat (delta emas), shuning uchun takror yuborish xavfsiz. */
 export type SyncItem =
   | { kind: "progress"; topicId: string; input: SaveProgressInput }
-  | { kind: "bookmark"; topicId: string; bookmarked: boolean };
+  | { kind: "bookmark"; topicId: string; bookmarked: boolean }
+  /** Mavzu ochildi ("yaqinda ochilganlar"); takror yuborish xavfsiz. */
+  | { kind: "opened"; topicId: string };
 
 export interface SyncApi {
   saveProgress(input: SaveProgressInput): Promise<unknown>;
   setBookmark(topicId: string, bookmarked: boolean): Promise<unknown>;
+  recordTopicOpened(topicId: string): Promise<unknown>;
 }
 
 type SyncStorage = Pick<Storage, "getItem" | "setItem">;
@@ -25,6 +28,8 @@ export interface SyncQueueOptions {
   onChange?: (items: readonly SyncItem[]) => void;
   /** Kamida bitta yozuv yuborilgan flush tugaganda. */
   onSynced?: (remaining: number) => void;
+  /** Server yozuvni rad etdi (qayta urinish foydasiz): optimistic holat serverdagiga qaytarilishi kerak. */
+  onDropped?: (item: SyncItem, error: unknown) => void;
   baseDelayMs?: number;
   maxDelayMs?: number;
 }
@@ -46,7 +51,7 @@ function loadItems(storage: SyncStorage | undefined, key: string): SyncItem[] {
       (item): item is SyncItem =>
         typeof item === "object" &&
         item !== null &&
-        (item.kind === "progress" || item.kind === "bookmark") &&
+        (item.kind === "progress" || item.kind === "bookmark" || item.kind === "opened") &&
         typeof item.topicId === "string",
     );
   } catch {
@@ -124,6 +129,7 @@ export class SyncQueue {
       } catch (error) {
         if (isPermanentError(error)) {
           this.remove(item);
+          this.options.onDropped?.(item, error);
           continue;
         }
         this.failures++;
@@ -139,9 +145,14 @@ export class SyncQueue {
 
   private send(item: SyncItem): Promise<unknown> {
     const { api } = this.options;
-    return item.kind === "progress"
-      ? api.saveProgress(item.input)
-      : api.setBookmark(item.topicId, item.bookmarked);
+    switch (item.kind) {
+      case "progress":
+        return api.saveProgress(item.input);
+      case "bookmark":
+        return api.setBookmark(item.topicId, item.bookmarked);
+      case "opened":
+        return api.recordTopicOpened(item.topicId);
+    }
   }
 
   /** Yuborilgan yozuvni olib tashlaydi; kutish paytida yangisi bilan almashtirilgan bo'lsa, qoladi. */

@@ -1,6 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
 import { ApiError } from "@/lib/api/types";
-import { isPermanentError, overlayProgress, SyncQueue, type SyncApi, type SyncItem } from "./queue";
+import {
+  isPermanentError,
+  overlayProgress,
+  SyncQueue,
+  type SyncApi,
+  type SyncItem,
+  type SyncQueueOptions,
+} from "./queue";
 
 const progressItem = (
   topicId: string,
@@ -13,10 +20,15 @@ const progressItem = (
 
 const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
 
-function setup(overrides: Partial<SyncApi> = {}, online = { value: true }) {
+function setup(
+  overrides: Partial<SyncApi> = {},
+  online = { value: true },
+  options: Partial<SyncQueueOptions> = {},
+) {
   const api = {
     saveProgress: vi.fn().mockResolvedValue({}),
     setBookmark: vi.fn().mockResolvedValue({}),
+    recordTopicOpened: vi.fn().mockResolvedValue({}),
     ...overrides,
   };
   const memory = new Map<string, string>();
@@ -30,6 +42,7 @@ function setup(overrides: Partial<SyncApi> = {}, online = { value: true }) {
       api,
       storage,
       storageKey: "q",
+      ...options,
       isOnline: () => online.value,
       schedule: (callback, delay) => {
         const entry = { callback, delay };
@@ -139,6 +152,55 @@ describe("SyncQueue", () => {
     await queue.flush();
     expect(saveProgress).toHaveBeenLastCalledWith({ topicId: "a", readStatus: "completed" });
     expect(queue.pending).toEqual([]);
+  });
+
+  it("mavzu ochilishini yuboradi va takror yuborishda dublikat qilmaydi", async () => {
+    const { api, make, online } = setup();
+    online.value = false;
+    const queue = make();
+    queue.enqueue({ kind: "opened", topicId: "a" });
+    queue.enqueue({ kind: "opened", topicId: "a" });
+    expect(queue.pending).toHaveLength(1);
+    online.value = true;
+    await queue.flush();
+    expect(api.recordTopicOpened).toHaveBeenCalledTimes(1);
+    expect(api.recordTopicOpened).toHaveBeenCalledWith("a");
+  });
+
+  it("server rad etgan yozuv navbatdan chiqadi va onDropped chaqiriladi (rollback)", async () => {
+    const onDropped = vi.fn();
+    const rejected = new ApiError("topilmadi", 404, { code: "not_found" });
+    const { api, make } = setup(
+      { saveProgress: vi.fn().mockRejectedValueOnce(rejected) },
+      { value: true },
+      { onDropped },
+    );
+    const queue = make();
+    const item = progressItem("a");
+    queue.enqueue(item);
+    queue.enqueue({ kind: "bookmark", topicId: "b", bookmarked: true });
+    await queue.flush();
+    expect(onDropped).toHaveBeenCalledTimes(1);
+    expect(onDropped).toHaveBeenCalledWith(item, rejected);
+    // rad etilgani qayta urinilmaydi, keyingi yozuv esa yuboriladi
+    expect(api.saveProgress).toHaveBeenCalledTimes(1);
+    expect(api.setBookmark).toHaveBeenCalledWith("b", true);
+    expect(queue.pending).toEqual([]);
+  });
+
+  it("vaqtinchalik xatoda onDropped chaqirilmaydi va yozuv qoladi", async () => {
+    const onDropped = vi.fn();
+    const { make, timers } = setup(
+      { saveProgress: vi.fn().mockRejectedValue(new ApiError("server", 503)) },
+      { value: true },
+      { onDropped },
+    );
+    const queue = make();
+    queue.enqueue(progressItem("a"));
+    await queue.flush();
+    expect(onDropped).not.toHaveBeenCalled();
+    expect(queue.pending).toHaveLength(1);
+    expect(timers).toHaveLength(1);
   });
 
   it("buzilgan saqlangan navbatni e'tiborsiz qoldiradi", () => {

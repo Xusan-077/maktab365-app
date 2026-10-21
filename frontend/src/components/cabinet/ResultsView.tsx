@@ -8,21 +8,20 @@ import { buttonVariants } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 import { Skeleton } from "@/components/ui/Skeleton";
-import { useProgress } from "@/hooks/useProgress";
+import { useResults } from "@/hooks/useResults";
 import { Link } from "@/lib/i18n/navigation";
-import { groupByMastery, type Mastery } from "@/lib/progress/review";
 import { catalogPath } from "@/lib/utils/routes";
 import { sectionDomId } from "@/lib/utils/topic-sections";
-import type { Progress } from "@/types/progress";
+import type { Progress, ResultGroup } from "@/types/progress";
 import { EmptyText } from "./Panel";
 import { ProgressStatus } from "./ProgressStatus";
 import { TopicRow } from "./TopicRow";
 
 const CABINET_CATALOG = catalogPath("kabinet");
 
-const GROUPS: Mastery[] = ["review", "inProgress", "mastered"];
+const GROUPS: ResultGroup[] = ["review", "inProgress", "mastered"];
 
-function ResultGroup({ mastery, items }: { mastery: Mastery; items: Progress[] }) {
+function ResultSection({ mastery, items }: { mastery: ResultGroup; items: Progress[] }) {
   const t = useTranslations(`cabinet.results.${mastery}`);
   return (
     <section aria-labelledby={`results-${mastery}`} className="flex flex-col gap-3">
@@ -59,10 +58,11 @@ function ResultGroup({ mastery, items }: { mastery: Mastery; items: Progress[] }
 export function ResultsView() {
   const t = useTranslations("cabinet.results");
   const tc = useTranslations("cabinet");
-  const { data: progress, isPending, isError } = useProgress();
+  const { data: groups, isPending, isError } = useResults();
 
-  const groups = groupByMastery(progress ?? []);
-  const total = groups.mastered.length + groups.review.length + groups.inProgress.length;
+  const total = groups
+    ? groups.counts.mastered + groups.counts.review + groups.counts.inProgress
+    : 0;
 
   return (
     <div className={PAGE_STACK}>
@@ -70,7 +70,7 @@ export function ResultsView() {
 
       {isPending ? (
         <Skeleton className="h-40 w-full rounded-xl" />
-      ) : isError ? (
+      ) : isError || !groups ? (
         <EmptyText>{tc("loadFailed")}</EmptyText>
       ) : total === 0 ? (
         <EmptyState
@@ -88,15 +88,15 @@ export function ResultsView() {
           <div className="flex flex-col gap-1">
             <p className="font-medium">
               {t("summary", {
-                mastered: groups.mastered.length,
-                review: groups.review.length,
-                progress: groups.inProgress.length,
+                mastered: groups.counts.mastered,
+                review: groups.counts.review,
+                progress: groups.counts.inProgress,
               })}
             </p>
             <p className="text-muted text-sm">{t("statesNote")}</p>
           </div>
           {GROUPS.map((mastery) => (
-            <ResultGroup key={mastery} mastery={mastery} items={groups[mastery]} />
+            <ResultSection key={mastery} mastery={mastery} items={groups[mastery]} />
           ))}
         </>
       )}

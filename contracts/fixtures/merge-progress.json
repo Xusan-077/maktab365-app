@@ -1,0 +1,294 @@
+{
+  "description": "Mehmon progressini akkauntga qo'shish qoidalari. Backend (merge-guest-data/) va frontend (mergeProgress) bir xil natija berishi kerak. Holat nomlari backend ko'rinishida; mistakes/solved tartibsiz (saralangan).",
+  "topic_kind": "progress",
+  "cases": [
+    {
+      "name": "akkaunt bo'sh: mehmon qiymatlarini oladi",
+      "account": null,
+      "guest": {
+        "read_status": "in_progress",
+        "exercise_status": "in_progress",
+        "last_block_id": "b1",
+        "mistakes": [
+          "e1"
+        ],
+        "solved": [
+          "e2"
+        ],
+        "attempts": {
+          "e1": 1,
+          "e2": 1
+        },
+        "updated_at": "2026-01-01T00:00:00Z"
+      },
+      "merged": {
+        "read_status": "in_progress",
+        "exercise_status": "in_progress",
+        "last_block_id": "b1",
+        "mistakes": [
+          "e1"
+        ],
+        "solved": [
+          "e2"
+        ],
+        "attempts": {
+          "e1": 1,
+          "e2": 1
+        },
+        "updated_at": "2026-01-01T00:00:00Z"
+      }
+    },
+    {
+      "name": "holat pasaymaydi: akkauntdagi yuqori holat qoladi",
+      "account": {
+        "read_status": "read",
+        "exercise_status": "passed",
+        "last_block_id": "b9",
+        "mistakes": [],
+        "solved": [
+          "e1",
+          "e2"
+        ],
+        "attempts": {
+          "e1": 1,
+          "e2": 1
+        },
+        "updated_at": "2026-01-02T00:00:00Z"
+      },
+      "guest": {
+        "read_status": "in_progress",
+        "exercise_status": "in_progress",
+        "last_block_id": "b1",
+        "mistakes": [],
+        "solved": [],
+        "attempts": {},
+        "updated_at": "2026-01-01T00:00:00Z"
+      },
+      "merged": {
+        "read_status": "read",
+        "exercise_status": "passed",
+        "last_block_id": "b9",
+        "mistakes": [],
+        "solved": [
+          "e1",
+          "e2"
+        ],
+        "attempts": {
+          "e1": 1,
+          "e2": 1
+        },
+        "updated_at": "2026-01-02T00:00:00Z"
+      }
+    },
+    {
+      "name": "mehmonning yuqori holati olinadi, ikki holat alohida",
+      "account": {
+        "read_status": "in_progress",
+        "exercise_status": "not_started",
+        "last_block_id": "b1",
+        "mistakes": [],
+        "solved": [],
+        "attempts": {},
+        "updated_at": "2026-01-02T00:00:00Z"
+      },
+      "guest": {
+        "read_status": "read",
+        "exercise_status": "in_progress",
+        "last_block_id": "",
+        "mistakes": [],
+        "solved": [],
+        "attempts": {},
+        "updated_at": "2026-01-03T00:00:00Z"
+      },
+      "merged": {
+        "read_status": "read",
+        "exercise_status": "in_progress",
+        "last_block_id": "b1",
+        "mistakes": [],
+        "solved": [],
+        "attempts": {},
+        "updated_at": "2026-01-02T00:00:00Z"
+      }
+    },
+    {
+      "name": "xatolar birlashmasi, takrorlanmaydi",
+      "account": {
+        "read_status": "in_progress",
+        "exercise_status": "in_progress",
+        "last_block_id": "",
+        "mistakes": [
+          "e1"
+        ],
+        "solved": [],
+        "attempts": {
+          "e1": 1
+        },
+        "updated_at": "2026-01-02T00:00:00Z"
+      },
+      "guest": {
+        "read_status": "in_progress",
+        "exercise_status": "in_progress",
+        "last_block_id": "",
+        "mistakes": [
+          "e1",
+          "e2"
+        ],
+        "solved": [],
+        "attempts": {
+          "e2": 1
+        },
+        "updated_at": "2026-01-01T00:00:00Z"
+      },
+      "merged": {
+        "read_status": "in_progress",
+        "exercise_status": "in_progress",
+        "last_block_id": "",
+        "mistakes": [
+          "e1",
+          "e2"
+        ],
+        "solved": [],
+        "attempts": {
+          "e1": 1,
+          "e2": 1
+        },
+        "updated_at": "2026-01-02T00:00:00Z"
+      }
+    },
+    {
+      "name": "yechilganlar birlashmasi, urinishlar eng kattasi",
+      "account": {
+        "read_status": "in_progress",
+        "exercise_status": "in_progress",
+        "last_block_id": "",
+        "mistakes": [],
+        "solved": [
+          "e1"
+        ],
+        "attempts": {
+          "e1": 3
+        },
+        "updated_at": "2026-01-02T00:00:00Z"
+      },
+      "guest": {
+        "read_status": "in_progress",
+        "exercise_status": "in_progress",
+        "last_block_id": "",
+        "mistakes": [],
+        "solved": [
+          "e2"
+        ],
+        "attempts": {
+          "e1": 1,
+          "e2": 2
+        },
+        "updated_at": "2026-01-01T00:00:00Z"
+      },
+      "merged": {
+        "read_status": "in_progress",
+        "exercise_status": "in_progress",
+        "last_block_id": "",
+        "mistakes": [],
+        "solved": [
+          "e1",
+          "e2"
+        ],
+        "attempts": {
+          "e1": 3,
+          "e2": 2
+        },
+        "updated_at": "2026-01-02T00:00:00Z"
+      }
+    },
+    {
+      "name": "last_block_id: mehmon yozuvi yangiroq bo'lsa u yutadi",
+      "account": {
+        "read_status": "in_progress",
+        "exercise_status": "not_started",
+        "last_block_id": "b1",
+        "mistakes": [],
+        "solved": [],
+        "attempts": {},
+        "updated_at": "2026-01-01T00:00:00Z"
+      },
+      "guest": {
+        "read_status": "in_progress",
+        "exercise_status": "not_started",
+        "last_block_id": "b2",
+        "mistakes": [],
+        "solved": [],
+        "attempts": {},
+        "updated_at": "2026-01-03T00:00:00Z"
+      },
+      "merged": {
+        "read_status": "in_progress",
+        "exercise_status": "not_started",
+        "last_block_id": "b2",
+        "mistakes": [],
+        "solved": [],
+        "attempts": {},
+        "updated_at": "2026-01-03T00:00:00Z"
+      }
+    },
+    {
+      "name": "last_block_id: mehmon yozuvi eskiroq bo'lsa akkaunt qoladi",
+      "account": {
+        "read_status": "in_progress",
+        "exercise_status": "not_started",
+        "last_block_id": "b1",
+        "mistakes": [],
+        "solved": [],
+        "attempts": {},
+        "updated_at": "2026-01-03T00:00:00Z"
+      },
+      "guest": {
+        "read_status": "in_progress",
+        "exercise_status": "not_started",
+        "last_block_id": "b2",
+        "mistakes": [],
+        "solved": [],
+        "attempts": {},
+        "updated_at": "2026-01-01T00:00:00Z"
+      },
+      "merged": {
+        "read_status": "in_progress",
+        "exercise_status": "not_started",
+        "last_block_id": "b1",
+        "mistakes": [],
+        "solved": [],
+        "attempts": {},
+        "updated_at": "2026-01-03T00:00:00Z"
+      }
+    },
+    {
+      "name": "last_block_id: akkauntda yo'q bo'lsa eski mehmon bloki ham olinadi",
+      "account": {
+        "read_status": "in_progress",
+        "exercise_status": "not_started",
+        "last_block_id": "",
+        "mistakes": [],
+        "solved": [],
+        "attempts": {},
+        "updated_at": "2026-01-03T00:00:00Z"
+      },
+      "guest": {
+        "read_status": "in_progress",
+        "exercise_status": "not_started",
+        "last_block_id": "b2",
+        "mistakes": [],
+        "solved": [],
+        "attempts": {},
+        "updated_at": "2026-01-01T00:00:00Z"
+      },
+      "merged": {
+        "read_status": "in_progress",
+        "exercise_status": "not_started",
+        "last_block_id": "b2",
+        "mistakes": [],
+        "solved": [],
+        "attempts": {},
+        "updated_at": "2026-01-03T00:00:00Z"
+      }
+    }
+  ]
+}
