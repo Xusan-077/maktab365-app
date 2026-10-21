@@ -2,7 +2,9 @@
 
 import { SearchX } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import { SearchSnippet } from "@/components/catalog/SearchSnippet";
 import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAppPaths } from "@/hooks/useAppPaths";
@@ -19,13 +21,29 @@ import { TopicSaveButton } from "./SaveButtons";
 /** Kitob va mavzular bo'yicha qidiruv natijalari (tanlangan fan/sinflar filtri bilan). */
 export function SearchResults({ query }: { query: string }) {
   const t = useTranslations("teacher.results");
+  const tErrors = useTranslations("errors");
   const locale = useLocale() as Locale;
   const paths = useAppPaths();
   const selection = useTeacherSelection();
-  const { data: foundBooks, isPending: booksPending } = useBooks({ q: query });
-  const { data: foundTopics, isPending: topicsPending } = useSearchTopics(query);
+  const booksQuery = useBooks({ q: query });
+  const topicsQuery = useSearchTopics(query);
+  const { data: foundBooks, isPending: booksPending } = booksQuery;
+  const { data: foundTopics, isPending: topicsPending } = topicsQuery;
   const { data: allBooks = [] } = useBooks();
 
+  if (booksQuery.isError || topicsQuery.isError) {
+    return (
+      <div role="alert" className="flex flex-col items-start gap-3">
+        <p className="text-danger">{tErrors("backendDown")}</p>
+        <Button
+          variant="secondary"
+          onClick={() => void Promise.all([booksQuery.refetch(), topicsQuery.refetch()])}
+        >
+          {tErrors("retry")}
+        </Button>
+      </div>
+    );
+  }
   if (booksPending || topicsPending) return <Skeleton className="h-40 w-full" />;
 
   const bookById = new Map(allBooks.map((book) => [book.id, book]));
@@ -58,7 +76,7 @@ export function SearchResults({ query }: { query: string }) {
             {t("topics")}
           </h2>
           <ul className="divide-border border-border bg-surface flex flex-col divide-y rounded-xl border">
-            {topics.map(({ topic, bookTitle, chapterTitle }) => {
+            {topics.map(({ topic, bookTitle, chapterTitle, snippet }) => {
               const title = getLocalized(topic.title, locale);
               return (
                 <li key={topic.id} className="flex items-center justify-between gap-3 p-4">
@@ -76,6 +94,7 @@ export function SearchResults({ query }: { query: string }) {
                     <p className="text-muted text-sm">
                       {getLocalized(bookTitle, locale)} · {getLocalized(chapterTitle, locale)}
                     </p>
+                    <SearchSnippet snippet={snippet} className="text-muted text-sm" />
                   </div>
                   {topic.ready ? (
                     <TopicSaveButton topicId={topic.id} title={title} />

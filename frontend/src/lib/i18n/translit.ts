@@ -253,3 +253,67 @@ export function transliterateMessages(
   }
   return result;
 }
+
+const CYRILLIC_TO_LATIN: Record<string, string> = {
+  а: "a",
+  б: "b",
+  в: "v",
+  г: "g",
+  д: "d",
+  ж: "j",
+  з: "z",
+  и: "i",
+  й: "y",
+  к: "k",
+  л: "l",
+  м: "m",
+  н: "n",
+  о: "o",
+  п: "p",
+  р: "r",
+  с: "s",
+  т: "t",
+  у: "u",
+  ф: "f",
+  х: "x",
+  ц: "ts",
+  ч: "ch",
+  ш: "sh",
+  щ: "shch",
+  ъ: "'",
+  ь: "",
+  ы: "i",
+  э: "e",
+  ю: "yu",
+  я: "ya",
+  ё: "yo",
+  ў: "o'",
+  ғ: "g'",
+  қ: "q",
+  ҳ: "h",
+};
+
+const isWordChar = (ch: string | undefined) => !!ch && /^[а-яёўғқҳa-z0-9]$/i.test(ch);
+
+/**
+ * Kirill (o'zbek, rus) → lotin. Bosh harf registri saqlanadi; so'z boshidagi `е` → `ye`
+ * (Европа → Yevropa), boshqa joyda `e`. Backend `apps/core/translit.py` bilan bir xil natija
+ * beradi (umumiy vektorlar: `contracts/fixtures/translit.json`).
+ */
+export function cyrillicToLatin(input: string): string {
+  const chars = [...input];
+  return chars
+    .map((ch, index) => {
+      const lower = ch.toLowerCase();
+      const latin =
+        lower === "е" ? (isWordChar(chars[index - 1]) ? "e" : "ye") : CYRILLIC_TO_LATIN[lower];
+      if (latin === undefined) return ch;
+      return ch !== lower && latin ? latin[0].toUpperCase() + latin.slice(1) : latin;
+    })
+    .join("");
+}
+
+/** Qidiruv uchun: kichik harf, kirill → lotin, tutuq belgilari olib tashlanadi (backend bilan bir xil). */
+export function normalizeSearchText(input: string): string {
+  return cyrillicToLatin(input.toLowerCase()).replace(/['ʻʼ‘’`´]/g, "");
+}

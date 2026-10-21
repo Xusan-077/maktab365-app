@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
 import { Select } from "@/components/ui/Select";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { useAppPaths } from "@/hooks/useAppPaths";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useGrades } from "@/hooks/useGrades";
 import { useSearchTopics } from "@/hooks/useSearchTopics";
@@ -17,6 +18,7 @@ import { useSubjects } from "@/hooks/useSubjects";
 import { apiQueries } from "@/lib/api/queries";
 import { defaultLocale, isLocale } from "@/lib/i18n/config";
 import { getLocalized } from "@/lib/i18n/localized";
+import { Link } from "@/lib/i18n/navigation";
 import {
   hasActiveFilters,
   toBookFilters,
@@ -25,16 +27,19 @@ import {
 } from "@/lib/utils/catalog-params";
 import { GRADES, type Grade, type TopicSummary } from "@/types/catalog";
 import { BookCard } from "./BookCard";
+import { SearchSnippet } from "./SearchSnippet";
 
 const SEARCH_DEBOUNCE_MS = 250;
 
 /** Katalog: sinf/fan/qidiruv filtrlari URL'ga yoziladi (sahifa qayta yuklanmaydi, havola ulashish mumkin). */
 export function CatalogView({ initial }: { initial: CatalogFilters }) {
   const t = useTranslations("catalog");
+  const tErrors = useTranslations("errors");
   const tHome = useTranslations("home.grades");
   const rawLocale = useLocale();
   const locale = isLocale(rawLocale) ? rawLocale : defaultLocale;
   const reduceMotion = useReducedMotion();
+  const paths = useAppPaths();
 
   const [grade, setGrade] = useState<Grade | undefined>(initial.grade);
   const [subject, setSubject] = useState<string | undefined>(initial.subject);
@@ -210,9 +215,12 @@ export function CatalogView({ initial }: { initial: CatalogFilters }) {
       </p>
 
       {books.isError ? (
-        <p role="alert" className="text-danger">
-          {t("error")}
-        </p>
+        <div role="alert" className="flex flex-col items-start gap-3">
+          <p className="text-danger">{tErrors("backendDown")}</p>
+          <Button variant="secondary" onClick={() => void books.refetch()}>
+            {tErrors("retry")}
+          </Button>
+        </div>
       ) : books.isPending ? (
         <CatalogSkeleton label={t("loading")} />
       ) : noResults ? (
@@ -263,6 +271,30 @@ export function CatalogView({ initial }: { initial: CatalogFilters }) {
             ))}
           </AnimatePresence>
         </ul>
+      )}
+
+      {q && (topicHits.data?.length ?? 0) > 0 && (
+        <section aria-labelledby="catalog-topic-hits" className="flex flex-col gap-3">
+          <h2 id="catalog-topic-hits" className="text-xl font-semibold">
+            {t("topicsTitle")}
+          </h2>
+          <ul className="divide-border border-border bg-surface flex flex-col divide-y rounded-xl border">
+            {topicHits.data?.map(({ topic, bookTitle, chapterTitle, snippet }) => (
+              <li key={topic.id} className="flex flex-col gap-1 p-4">
+                <Link
+                  href={paths.topic(topic.bookId, topic.id)}
+                  className="text-link rounded-md text-lg font-medium hover:underline"
+                >
+                  {getLocalized(topic.title, locale)}
+                </Link>
+                <p className="text-muted text-sm">
+                  {getLocalized(bookTitle, locale)} · {getLocalized(chapterTitle, locale)}
+                </p>
+                <SearchSnippet snippet={snippet} className="text-muted text-sm" />
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
     </div>
   );

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { BookPageContent } from "@/components/catalog/BookPageContent";
-import { getBookPageData } from "@/lib/api/server";
+import { getBookMeta } from "@/lib/api/server";
 import { bookStaticParams } from "@/lib/api/static-params";
 import { getLocalized } from "@/lib/i18n/localized";
 import { routing } from "@/lib/i18n/routing";
@@ -19,8 +19,10 @@ export async function generateMetadata({
 }: PageProps<"/[locale]/darsliklar/[bookId]">): Promise<Metadata> {
   const { locale, bookId } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
-  const data = await getBookPageData(bookId);
-  if (!data) notFound();
+  const data = await getBookMeta(bookId);
+  if (data === null) notFound();
+  // Backend ishlamasa (build) umumiy metadata; sahifa o'zi so'rov vaqtida to'ldiriladi.
+  if (!data) return { alternates: getAlternates(locale, bookPath(bookId)) };
   const { book, subject } = data;
   const t = await getTranslations({ locale, namespace: "book.meta" });
   const title = getLocalized(book.title, locale);

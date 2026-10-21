@@ -64,6 +64,32 @@ describe("xatolar", () => {
     await expect(api.health()).rejects.toMatchObject({ status: 0, code: "network_error" });
   });
 
+  it("GET tarmoq uzilishida qayta uriniladi, keyin muvaffaqiyat", async () => {
+    let calls = 0;
+    const api = apiWith((async () => {
+      calls += 1;
+      if (calls < 3) throw new TypeError("fetch failed");
+      return json({ status: "ok", checks: { database: "ok", redis: "ok" } });
+    }) as typeof fetch);
+    expect((await api.health()).status).toBe("ok");
+    expect(calls).toBe(3);
+  });
+
+  it("POST tarmoq uzilishida qayta urinilmaydi", async () => {
+    let calls = 0;
+    const client = createHttpClient({
+      baseUrl: "http://api.test",
+      fetch: (async () => {
+        calls += 1;
+        throw new TypeError("fetch failed");
+      }) as typeof fetch,
+    });
+    await expect(
+      client.POST("/api/v1/auth/password/forgot/", { body: { email: "a@b.uz" } }),
+    ).rejects.toMatchObject({ code: "network_error" });
+    expect(calls).toBe(1);
+  });
+
   it("timeout dan keyin timeout xatosi", async () => {
     const hang = ((_input: string, init: RequestInit) =>
       new Promise((_, reject) => {
@@ -76,7 +102,7 @@ describe("xatolar", () => {
 describe("qolgan metodlar", () => {
   it("keyingi bosqichda xatosi (501)", async () => {
     const api = apiWith(fetch);
-    await expect(api.getGrades()).rejects.toMatchObject({ status: 501, code: "not_implemented" });
+    await expect(api.getProgress()).rejects.toMatchObject({ status: 501, code: "not_implemented" });
   });
 });
 

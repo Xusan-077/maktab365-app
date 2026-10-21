@@ -298,6 +298,7 @@
     "splashResetFailed": "Brauzer xotirasiga yozib bo'lmadi"
   },
   "catalog": {
+    "topicsTitle": "Topilgan mavzular",
     "meta": {
       "title": "Darsliklar",
       "description": "1–11-sinf darsliklari: sinf va fan bo'yicha toping yoki kitob va mavzu nomini qidiring."
@@ -525,6 +526,7 @@
   },
   "errors": {
     "title": "Nimadir xato ketdi",
+    "backendDown": "Serverga ulanib bo'lmadi. Internetni tekshirib, qayta urinib ko'ring.",
     "text": "Sahifani yuklab bo'lmadi. Qayta urinib ko'ring.",
     "retry": "Qayta urinish",
     "home": "Bosh sahifaga",

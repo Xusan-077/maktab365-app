@@ -8,7 +8,7 @@ Bitta Django monolit: Python 3.12 · Django 5.2 · DRF · drf-spectacular · sim
 
 - `config/settings/{base,dev,prod,test}.py` — barcha sozlama env orqali (`django-environ`, `.env`). `dev` default (`manage.py`), `prod` — wsgi/asgi, `test` — pytest.
 - `config/{urls,celery,asgi,wsgi}.py`.
-- `apps/core` — qayta ishlatiladigan poydevor (quyida). `apps/accounts` — foydalanuvchi va profil (quyida). `apps/{content,learning,support,analytics}` — hozircha bo'sh ilovalar; domen mantiqi keyingi bosqichlarda.
+- `apps/core` — qayta ishlatiladigan poydevor (quyida). `apps/accounts` — foydalanuvchi va profil (quyida). `apps/content` — kontent (quyida). `apps/{learning,support,analytics}` — hozircha bo'sh ilovalar; domen mantiqi keyingi bosqichlarda.
 
 ## `apps/core` poydevori
 
@@ -34,6 +34,20 @@ Bitta Django monolit: Python 3.12 · Django 5.2 · DRF · drf-spectacular · sim
 - Har auth hodisasi `AuthEvent` ga (`registered`, `login`, `login_failed`, `login_locked`, `logout`, `logout_all`, `email_*`, `password_*`). Refresh — yozilmaydi (shovqin), faqat reuse aniqlansa `refresh_reuse_detected` (grace dan keyin barcha sessiyalar bekor).
 - Kirish usullari (M4): `providers/{base,google,telegram,email_otp,sms}.py` — har biri `verify(payload) -> ProviderIdentity`; `social_services.py` — `sign_in` (identity bo'yicha topish → tasdiqlangan email bo'yicha bog'lash → yaratish), `link_identity`/`unlink_identity`/`set_password`; `otp_services.py` — email kodi (`OtpChallenge`, HMAC xesh). Endpoint'lar: `auth/google|telegram|otp/request|otp/verify/` (javob `{access, refresh, user, is_new}`), `me/identities/` (GET), `me/identities/{provider}/` (POST), `me/identities/{id}/` (DELETE), `me/password/set/`. Bog'lash qoidalari — `social_services.py` docstring'i va README "Xavfsizlik qarorlari". Telegram imzosiga `locale` kirmaydi (`SIGNED_FIELDS`). Sozlamalar: `GOOGLE_CLIENT_ID`, `TELEGRAM_BOT_TOKEN`, `OTP_*`.
 - Parol: Argon2 birinchi hasher, validatorlar (min 8, umumiy, faqat raqam emas) — parol o'rnatadigan oqimlar `validate_password` ni chaqirishi shart.
+
+## `apps/content`
+
+- Modellar: `Subject`, `Book` (slug butun katalogda unique, frontend kitob id'si: `algebra-9`), `Chapter` (slug = papka nomi), `Topic` (slug kitob ichida unique — shuning uchun `book` `chapter.book` nusxasi, `save()` moslaydi; `status` draft|reviewed|published), `TopicRevision`. Mavzu `save()` da sarlavha/bloklar o'zgargan bo'lsagina revision yaratadi (oxirgi 50 ta); muallif: `topic.revision_author` / `revision_comment`.
+- Bloklar sxemasi: `schemas.py` (pydantic) — frontend `src/lib/api/schemas.ts` + `src/lib/content/validate.ts` bilan **1:1**. Blok JSON'i frontend fayllaridagi kabi (camelCase: `answerType`, `sortKey`; widget kind'lari kebab-case: `quadratic-graph`…). `validate_blocks` / `validate_topic_file` `Issue(path, message, code)` qaytaradi (`blocks[3].hint`). Qoida o'zgarsa: avval `contracts/fixtures/` (+ `expected.json`), so'ng ikkala sxema; testlar: `tests/test_schemas.py` va frontend `contract.test.ts`.
+- `import_content <papka> [--dry-run]` (`importer.py`): `frontend/src/content` → baza, idempotent, bitta tranzaksiya; fan/kitob metama'lumoti `catalog_seed.py` da (yangi kitob qo'shilsa shu yerga ham). Status faqat ko'tariladi.
+- Fayllar: `Book.cover/pdf` — `FileField`; `STORAGES` env bilan (`AWS_STORAGE_BUCKET_NAME` bo'lsa S3-mos, aks holda `media/`).
+
+### Ochiq kontent API (M7)
+
+- `urls.py`/`views.py`: `grades/`, `subjects/`, `books/`, `books/<slug>/`, `books/<book>/topics/<topic>/`, `search/` — `AllowAny`, throttle yo'q (kesh ishlaydi; faqat `search/` umumiy throttle'da). Har `get` `@public_cached` (`cache.py`): Redis'da `content:v<versiya>:<hash>`, `ETag`/304, `Cache-Control: public, max-age=CONTENT_CACHE_MAX_AGE`. Subject/Book/Chapter/Topic saqlanganda/o'chirilganda `signals.py` versiyani almashtiradi (commit'dan keyin); `.update()` bilan yozsangiz `bump_content_version()` ni o'zingiz chaqiring.
+- Ko'rinish: `is_staff(user)` (editor/admin/is_staff) hamma statusni ko'radi, javob `private, no-store`. Boshqalar — `published`; `SHOW_DRAFTS_PUBLICLY=true` bo'lsa draft/reviewed ham, `unverified: true` bilan. `topics_ready`/`topics_count` — ko'rinadigan mavzular bo'yicha.
+- Qidiruv (`search.py`): `Topic.search_vector` ('simple', A sarlavha / B mazmun / C bloklar) `Topic.save()` da `reindex_topic` bilan yangilanadi (`.update()` ishlatsangiz o'zingiz chaqiring); matn `apps.core.translit.normalize_search_text` (kirill→lotin, tutuqsiz) bilan normallashadi, so'rov atamalari prefiks (`atama:*`) va hammasi kerak. Snippet Python'da, asl matndan, mos so'zlar `⟦…⟧` ichida. Frontend umumiy vektorlar: `contracts/fixtures/translit.json`.
+- N+1 yo'q: testlar `django_assert_max_num_queries` bilan (`tests/test_api.py`).
 
 ## `apps/support`
 

@@ -2,7 +2,8 @@ import { defineConfig, devices } from "@playwright/test";
 
 /**
  * E2E: haqiqiy backend (docker compose: `docker compose up -d`; dev sozlamasi email kodini
- * `/api/v1/dev/otp/` orqali ko'rsatadi) + frontend production build.
+ * `/api/v1/dev/otp/` orqali ko'rsatadi) + frontend production build (`NEXT_PUBLIC_API_MODE=http`).
+ * Kontent `global-setup.ts` da yuklanadi.
  * `make e2e` yoki `npx playwright test`.
  */
 const PORT = Number(process.env.E2E_PORT ?? 3100);
@@ -10,6 +11,7 @@ const BASE_URL = `http://localhost:${PORT}`;
 
 export default defineConfig({
   testDir: "./e2e",
+  globalSetup: "./e2e/global-setup.ts",
   fullyParallel: false,
   workers: 1,
   retries: process.env.CI ? 1 : 0,
@@ -27,8 +29,8 @@ export default defineConfig({
     timeout: 600_000,
     reuseExistingServer: !process.env.CI,
     env: {
-      // Katalog hali mock; akkaunt (auth, profil, onboarding) — haqiqiy backend.
-      NEXT_PUBLIC_API_MODE: "mock",
+      // Katalog va akkaunt — haqiqiy backend; progress/xatcho'p hali mock.
+      NEXT_PUBLIC_API_MODE: "http",
       // Telegram widget konteyneri (skript tashqi tarmoqdan yuklanadi, testlar unga tayanmaydi).
       NEXT_PUBLIC_TELEGRAM_BOT_USERNAME: "maktab365_e2e_bot",
       NEXT_PUBLIC_SITE_URL: BASE_URL,

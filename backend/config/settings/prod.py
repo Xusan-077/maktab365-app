@@ -6,6 +6,8 @@ ENABLE_API_DOCS = False
 # Dev/e2e qulayliklari prod'da env orqali ham yoqilmasin.
 OTP_DEV_INBOX = False
 CELERY_TASK_ALWAYS_EAGER = False
+# Draft kontentni ochiq ko'rsatish — ongli qaror: faqat env (`SHOW_DRAFTS_PUBLICLY=true`) bilan.
+SHOW_DRAFTS_PUBLICLY = env.bool("SHOW_DRAFTS_PUBLICLY", default=False)
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=True)

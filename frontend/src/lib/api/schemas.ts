@@ -117,28 +117,43 @@ const exerciseSchemas = {
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 
+const hasKeys = (value: unknown, keys: string[]) =>
+  isRecord(value) && Object.keys(value).every((key) => keys.includes(key));
+const isLocalized = (value: unknown) => localizedTextSchema.isValidSync(value, { strict: true });
+const isNumber = (value: unknown) => typeof value === "number" && Number.isFinite(value);
+
+// Backend `apps/content/schemas.py` bilan 1:1: kalitlar to'liq, noma'lum kalit yo'q, turlar qat'iy.
 function hasValidWidgetProps({ kind, props }: { kind?: string; props?: unknown }) {
   if (!isRecord(props)) return false;
   if (kind === "quadratic-graph") {
-    return ["a", "b", "c"].every((key) => typeof props[key] === "number");
+    return hasKeys(props, ["a", "b", "c"]) && ["a", "b", "c"].every((key) => isNumber(props[key]));
   }
   if (kind === "choice-explain") {
     const options = props.options;
     return (
+      hasKeys(props, ["prompt", "options"]) &&
       typeof props.prompt === "string" &&
       Array.isArray(options) &&
       options.length >= 2 &&
-      options.filter((option) => isRecord(option) && option.correct === true).length === 1
+      options.every(
+        (option) =>
+          hasKeys(option, ["text", "correct", "reason"]) &&
+          typeof option.text === "string" &&
+          typeof option.correct === "boolean" &&
+          isLocalized(option.reason),
+      ) &&
+      options.filter((option) => option.correct === true).length === 1
     );
   }
   if (kind === "geometry-points") {
     const points = props.points;
     return (
+      hasKeys(props, ["points"]) &&
       Array.isArray(points) &&
       points.length === 3 &&
       points.every(
         (point) =>
-          isRecord(point) &&
+          hasKeys(point, ["label", "x", "y"]) &&
           typeof point.label === "string" &&
           Number.isInteger(point.x) &&
           Number.isInteger(point.y),
@@ -148,16 +163,16 @@ function hasValidWidgetProps({ kind, props }: { kind?: string; props?: unknown }
   if (kind === "timeline") {
     const events = props.events;
     return (
+      hasKeys(props, ["events"]) &&
       Array.isArray(events) &&
       events.length >= 2 &&
       events.every(
         (event) =>
-          isRecord(event) &&
+          hasKeys(event, ["id", "sortKey", "date", "title", "description"]) &&
           typeof event.id === "string" &&
+          event.id.length > 0 &&
           Number.isInteger(event.sortKey) &&
-          [event.date, event.title, event.description].every(
-            (text) => isRecord(text) && typeof text.uz === "string" && text.uz.trim() !== "",
-          ),
+          [event.date, event.title, event.description].every(isLocalized),
       )
     );
   }
