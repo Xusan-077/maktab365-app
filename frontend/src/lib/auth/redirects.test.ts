@@ -15,7 +15,15 @@ describe("resolveAuthRedirect", () => {
   });
 
   it("kirmagan: ochiq sahifalarga tegmaydi", () => {
-    for (const path of ["/", "/darsliklar", "/kirish", "/kod", "/parolni-unutdim", "/kabinetlar"]) {
+    for (const path of [
+      "/",
+      "/darsliklar",
+      "/kirish",
+      "/royxatdan-otish",
+      "/kod",
+      "/parolni-unutdim",
+      "/kabinetlar",
+    ]) {
       expect(go(path, null)).toBeNull();
     }
   });
@@ -25,6 +33,7 @@ describe("resolveAuthRedirect", () => {
     expect(go("/ustoz/mavzular", student(false))).toBe("/onboarding");
     expect(go("/sozlamalar", student(false))).toBe("/onboarding");
     expect(go("/kirish", student(false))).toBe("/onboarding");
+    expect(go("/royxatdan-otish", student(false))).toBe("/onboarding");
     expect(go("/kod", student(false))).toBe("/onboarding");
     expect(go("/onboarding", student(false))).toBeNull();
     expect(go("/darsliklar", student(false))).toBeNull();
@@ -33,6 +42,7 @@ describe("resolveAuthRedirect", () => {
   it("onboarding tugagan: onboarding va kirishdan rol paneliga", () => {
     expect(go("/onboarding", student())).toBe("/kabinet");
     expect(go("/kirish", teacher)).toBe("/ustoz");
+    expect(go("/royxatdan-otish", teacher)).toBe("/ustoz");
     expect(go("/kod", student())).toBe("/kabinet");
   });
 

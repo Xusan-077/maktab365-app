@@ -68,6 +68,7 @@ export function RegisterForm({ callbackUrl }: { callbackUrl?: string }) {
         type="email"
         autoComplete="email"
         inputMode="email"
+        className="h-11"
         placeholder={t("emailPlaceholder")}
         error={errorText(errors.email?.message)}
         {...register("email")}
@@ -78,6 +79,7 @@ export function RegisterForm({ callbackUrl }: { callbackUrl?: string }) {
         hint={t("passwordHint")}
         showLabel={t("showPassword")}
         hideLabel={t("hidePassword")}
+        className="h-11"
         error={errorText(errors.password?.message)}
         {...register("password")}
       />
@@ -86,6 +88,7 @@ export function RegisterForm({ callbackUrl }: { callbackUrl?: string }) {
         autoComplete="new-password"
         showLabel={t("showPassword")}
         hideLabel={t("hidePassword")}
+        className="h-11"
         error={errorText(errors.passwordConfirm?.message)}
         {...register("passwordConfirm")}
       />

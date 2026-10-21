@@ -4,9 +4,17 @@ import { expect, test, type Page } from "@playwright/test";
 const email = `e2e-${Date.now()}@example.com`;
 const password = "e2e-kuchli-parol-2026";
 
+/** Ikki qadam: email → "Davom etish" → parol → "Kirish". Birinchi qadam backend'ga murojaat qilmaydi. */
 async function submitLogin(page: Page, pass = password) {
   const form = page.getByTestId("login-form");
-  await form.getByLabel("Email").fill(email);
+  const step = page.getByTestId("email-step");
+  // Gidratsiyadan oldingi bosish yo'qolishi mumkin — ikkinchi qadam chiqquncha takrorlanadi.
+  await expect(async () => {
+    if (await form.isVisible()) return;
+    await step.getByLabel("Email").fill(email);
+    await step.getByRole("button", { name: "Davom etish" }).click();
+    await expect(form).toBeVisible({ timeout: 2_000 });
+  }).toPass();
   await form.getByLabel("Parol", { exact: true }).fill(pass);
   await form.getByRole("button", { name: "Kirish" }).click();
 }
@@ -19,7 +27,7 @@ async function signOut(page: Page) {
 
 test.describe.serial("email + parol", () => {
   test("ro'yxatdan o'tish → onboarding → kabinet", async ({ page }) => {
-    await page.goto("/uz/kirish?mode=register");
+    await page.goto("/uz/royxatdan-otish");
     const form = page.getByTestId("register-form");
     await form.getByLabel("Email").fill(email);
     await form.getByLabel("Parol", { exact: true }).fill("123");
@@ -39,6 +47,31 @@ test.describe.serial("email + parol", () => {
     await expect(page).toHaveURL(/\/uz\/kabinet$/);
     // Tasdiqlanmagan email — bloklamaydigan banner.
     await expect(page.getByTestId("email-verify-banner")).toBeVisible();
+  });
+
+  test("kirish sahifasi: tabsiz, ikkinchi qadamda email matn va 'Boshqa email'", async ({
+    page,
+  }) => {
+    await page.goto("/uz/kirish");
+    await expect(page.getByRole("tablist")).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Google bilan davom etish" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Ro'yxatdan o'ting" })).toHaveAttribute(
+      "href",
+      "/uz/royxatdan-otish",
+    );
+
+    const step = page.getByTestId("email-step");
+    await step.getByLabel("Email").fill(email);
+    await step.getByRole("button", { name: "Davom etish" }).click();
+    await expect(page.getByTestId("login-email")).toHaveText(email);
+    await expect(
+      page.getByRole("button", { name: "Parolsiz: kodni emailga yuborish" }),
+    ).toBeVisible();
+    await expect(page.getByRole("link", { name: "Parolni unutdingizmi?" })).toBeVisible();
+
+    await page.getByRole("button", { name: "Boshqa email" }).click();
+    await expect(step.getByLabel("Email")).toHaveValue(email);
+    await expect(page.getByRole("link", { name: "Kirmasdan davom etish" })).toBeVisible();
   });
 
   test("chiqish: panel yana kirishni talab qiladi", async ({ page }) => {

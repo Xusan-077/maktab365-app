@@ -73,7 +73,7 @@ export function TelegramLoginButton({
       role="group"
       aria-label={label}
       data-testid="telegram-login"
-      className="flex min-h-10 justify-center"
+      className="flex min-h-12 w-full items-center justify-center overflow-hidden"
     />
   );
 }

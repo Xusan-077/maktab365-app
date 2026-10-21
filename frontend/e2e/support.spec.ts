@@ -35,7 +35,7 @@ test.describe("yordam va aloqa", () => {
   test("kirgan foydalanuvchi: mavzudan xato yuboradi va panelda holatini ko'radi", async ({
     page,
   }) => {
-    await page.goto("/uz/kirish?mode=register");
+    await page.goto("/uz/royxatdan-otish");
     const register = page.getByTestId("register-form");
     await register.getByLabel("Email").fill(email);
     await register.getByLabel("Parol", { exact: true }).fill(password);

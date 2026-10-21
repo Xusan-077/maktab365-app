@@ -1,36 +1,105 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { signIn } from "next-auth/react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 import { useAuthErrorText } from "@/hooks/useAuthErrorText";
 import { useCompleteSignIn } from "@/hooks/useCompleteSignIn";
+import { authClient, errorCodeOf } from "@/lib/auth/client";
 import { PASSWORD_PROVIDER } from "@/lib/auth/config";
-import { Link } from "@/lib/i18n/navigation";
+import { Link, useRouter } from "@/lib/i18n/navigation";
 import { ROUTES } from "@/lib/utils/routes";
-import { loginSchema, type LoginValues } from "@/lib/validation/auth";
+import {
+  forgotPasswordSchema,
+  loginSchema,
+  type ForgotPasswordValues,
+  type LoginValues,
+} from "@/lib/validation/auth";
 import { FormAlert } from "./FormAlert";
 
-export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
+type ApiLocale = Parameters<typeof authClient.requestOtp>[1];
+
+/**
+ * 1-qadam: faqat email. Backend'ga so'rov yuborilmaydi (akkaunt bor-yo'qligi oshkor bo'lmasin) —
+ * email tekshirilib, keyingi qadamga o'tiladi.
+ */
+export function EmailStep({
+  initialEmail,
+  onContinue,
+}: {
+  initialEmail: string;
+  onContinue: (email: string) => void;
+}) {
   const t = useTranslations("authForm");
   const errorText = useAuthErrorText();
-  const completeSignIn = useCompleteSignIn();
-  const [formError, setFormError] = useState<string>();
   const {
     register,
     handleSubmit,
+    formState: { errors },
+  } = useForm<ForgotPasswordValues>({
+    resolver: yupResolver(forgotPasswordSchema),
+    defaultValues: { email: initialEmail },
+  });
+
+  return (
+    <form
+      noValidate
+      onSubmit={handleSubmit(({ email }) => onContinue(email))}
+      className="flex flex-col gap-4"
+      data-testid="email-step"
+    >
+      <Input
+        label={t("email")}
+        type="email"
+        autoComplete="username"
+        inputMode="email"
+        className="h-11"
+        placeholder={t("emailPlaceholder")}
+        error={errorText(errors.email?.message)}
+        {...register("email")}
+      />
+      <Button type="submit" size="lg">
+        {t("continue")}
+      </Button>
+    </form>
+  );
+}
+
+/** 2-qadam: parol yoki parolsiz (emailga kod). Xatolar forma ustida, forma o'zgarmaydi. */
+export function PasswordStep({
+  email,
+  callbackUrl,
+  onChangeEmail,
+}: {
+  email: string;
+  callbackUrl?: string;
+  onChangeEmail: () => void;
+}) {
+  const t = useTranslations("authForm");
+  const locale = useLocale();
+  const router = useRouter();
+  const errorText = useAuthErrorText();
+  const completeSignIn = useCompleteSignIn();
+  const [formError, setFormError] = useState<string>();
+  const [codePending, setCodePending] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    setFocus,
     formState: { errors, isSubmitting },
   } = useForm<LoginValues>({
     resolver: yupResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: { email, password: "" },
   });
 
-  const onSubmit = handleSubmit(async ({ email, password }) => {
+  useEffect(() => setFocus("password"), [setFocus]);
+
+  const onSubmit = handleSubmit(async ({ password }) => {
     setFormError(undefined);
     const result = await signIn(PASSWORD_PROVIDER, {
       redirect: false,
@@ -45,32 +114,80 @@ export function LoginForm({ callbackUrl }: { callbackUrl?: string }) {
     await completeSignIn(callbackUrl);
   });
 
+  /** Kod yaqinda yuborilgan bo'lsa ham kiritish sahifasiga o'tamiz (taymer o'sha yerda). */
+  const sendCode = async () => {
+    setFormError(undefined);
+    setCodePending(true);
+    try {
+      await authClient.requestOtp(email, locale as ApiLocale);
+    } catch (error) {
+      const code = errorCodeOf(error);
+      if (code !== "otp_cooldown") {
+        setFormError(code);
+        setCodePending(false);
+        return;
+      }
+    }
+    const query = new URLSearchParams({ email, ...(callbackUrl && { callbackUrl }) });
+    router.push(`${ROUTES.otp}?${query}`);
+  };
+
+  const busy = isSubmitting || codePending;
+
   return (
-    <form noValidate onSubmit={onSubmit} className="flex flex-col gap-4" data-testid="login-form">
-      {formError && <FormAlert>{errorText(formError)}</FormAlert>}
-      <Input
-        label={t("email")}
-        type="email"
-        autoComplete="email"
-        inputMode="email"
-        placeholder={t("emailPlaceholder")}
-        error={errorText(errors.email?.message)}
-        {...register("email")}
-      />
-      <PasswordInput
-        label={t("password")}
-        autoComplete="current-password"
-        showLabel={t("showPassword")}
-        hideLabel={t("hidePassword")}
-        error={errorText(errors.password?.message)}
-        {...register("password")}
-      />
-      <Link href={ROUTES.forgotPassword} className="text-link w-fit text-sm hover:underline">
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between gap-3 text-sm">
+        <span className="min-w-0 truncate font-medium" data-testid="login-email">
+          {email}
+        </span>
+        <button
+          type="button"
+          onClick={onChangeEmail}
+          className="text-link inline-flex min-h-11 shrink-0 items-center hover:underline"
+        >
+          {t("changeEmail")}
+        </button>
+      </div>
+      <form noValidate onSubmit={onSubmit} className="flex flex-col gap-4" data-testid="login-form">
+        {formError && <FormAlert>{errorText(formError)}</FormAlert>}
+        {/* Parol menejeri akkaunt nomini topishi uchun; ko'rinmaydi. */}
+        <input
+          type="email"
+          autoComplete="username"
+          value={email}
+          readOnly
+          tabIndex={-1}
+          aria-hidden
+          className="sr-only"
+        />
+        <PasswordInput
+          label={t("password")}
+          autoComplete="current-password"
+          showLabel={t("showPassword")}
+          hideLabel={t("hidePassword")}
+          className="h-11"
+          error={errorText(errors.password?.message)}
+          {...register("password")}
+        />
+        <Button type="submit" size="lg" loading={isSubmitting} disabled={busy}>
+          {t("loginSubmit")}
+        </Button>
+      </form>
+      <Button
+        variant="secondary"
+        size="lg"
+        loading={codePending}
+        disabled={busy}
+        onClick={sendCode}
+      >
+        {t("passwordless")}
+      </Button>
+      <Link
+        href={ROUTES.forgotPassword}
+        className="text-link inline-flex min-h-11 items-center justify-center text-sm hover:underline"
+      >
         {t("forgotLink")}
       </Link>
-      <Button type="submit" size="lg" loading={isSubmitting}>
-        {t("loginSubmit")}
-      </Button>
-    </form>
+    </div>
   );
 }

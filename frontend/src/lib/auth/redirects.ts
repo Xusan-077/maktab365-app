@@ -32,7 +32,8 @@ export function resolveAuthRedirect({ path, returnTo, session }: RedirectInput):
 
   const user = session.user;
   if (typeof user?.onboarded !== "boolean" || !user.role) return null;
-  const onAuthPage = isUnder(path, ROUTES.login) || isUnder(path, ROUTES.otp);
+  const onAuthPage =
+    isUnder(path, ROUTES.login) || isUnder(path, ROUTES.register) || isUnder(path, ROUTES.otp);
   if (!user.onboarded) {
     return isProtected(path) || onAuthPage ? ROUTES.onboarding : null;
   }

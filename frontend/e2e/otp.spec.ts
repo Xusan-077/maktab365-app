@@ -1,4 +1,4 @@
-import { expect, test, type APIRequestContext } from "@playwright/test";
+import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
 
 const API_URL = process.env.E2E_API_URL ?? "http://localhost:8000";
 
@@ -18,16 +18,22 @@ async function codeFor(request: APIRequestContext, email: string): Promise<strin
   return code!;
 }
 
+/** Kirish sahifasi: email → "Davom etish" → "Parolsiz: kodni emailga yuborish". */
+async function requestCode(page: Page, email: string) {
+  const step = page.getByTestId("email-step");
+  await step.getByLabel("Email").fill(email);
+  await step.getByRole("button", { name: "Davom etish" }).click();
+  await page.getByRole("button", { name: "Parolsiz: kodni emailga yuborish" }).click();
+}
+
 test.describe("email kodi bilan kirish", () => {
   test("kod so'rash → 6 katak → onboarding", async ({ page, request }) => {
     const email = `otp-${Date.now()}@example.com`;
     await page.goto("/uz/kirish");
-    const form = page.getByTestId("otp-request");
-    await form.getByLabel("Email").fill(email);
-    await form.getByRole("button", { name: "Kod yuborish" }).click();
+    await requestCode(page, email);
 
     await expect(page).toHaveURL(/\/uz\/kod\?email=/);
-    await expect(page.getByText(email)).toBeVisible();
+    await expect(page.getByText(`${email} manziliga`)).toBeVisible();
     // Birinchi katakka avtomatik fokus; qayta yuborish taymer tugamaguncha o'chiq.
     const cells = page.getByRole("group", { name: "Tasdiqlash kodi" }).getByRole("textbox");
     await expect(cells.first()).toBeFocused();
@@ -56,10 +62,8 @@ test.describe("email kodi bilan kirish", () => {
     request,
   }) => {
     const email = `otp-set-${Date.now()}@example.com`;
-    await page.goto(`/uz/kirish`);
-    const form = page.getByTestId("otp-request");
-    await form.getByLabel("Email").fill(email);
-    await form.getByRole("button", { name: "Kod yuborish" }).click();
+    await page.goto("/uz/kirish");
+    await requestCode(page, email);
     await expect(page).toHaveURL(/\/uz\/kod\?email=/);
     // Kataklar gidratsiyadan keyin fokus oladi — shundan keyin yozamiz.
     await expect(

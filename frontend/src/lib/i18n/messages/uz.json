@@ -894,9 +894,6 @@
     "contactLead": "Savol, taklif yoki xatolik — barchasini shu yerda yozing. Javobni emailingizga yuboramiz."
   },
   "authForm": {
-    "tabsLabel": "Kirish usuli",
-    "loginTab": "Kirish",
-    "registerTab": "Ro'yxatdan o'tish",
     "email": "Email",
     "emailPlaceholder": "siz@misol.uz",
     "password": "Parol",
@@ -988,7 +985,6 @@
       "sent": "Tasdiqlash xati qayta yuborildi"
     },
     "telegram": "Telegram bilan davom etish",
-    "emailCode": "Email'ga kod yuborish",
     "emailCodeSubmit": "Kod yuborish",
     "otp": {
       "title": "Kodni kiriting",
@@ -1000,7 +996,16 @@
       "sent": "Yangi kod yuborildi.",
       "changeEmail": "Boshqa usulni tanlash",
       "missingEmail": "Email ko'rsatilmagan. Kirish sahifasidan kod so'rang."
-    }
+    },
+    "continue": "Davom etish",
+    "changeEmail": "Boshqa email",
+    "passwordless": "Parolsiz: kodni emailga yuborish",
+    "noAccount": "Hisobingiz yo'qmi?",
+    "registerLink": "Ro'yxatdan o'ting",
+    "haveAccount": "Hisobingiz bormi?",
+    "loginLink": "Kiring",
+    "registerTitle": "maktab365 da ro'yxatdan o'tish",
+    "registerText": "Akkaunt progress va xatcho'plarni saqlaydi. Bepul."
   },
   "support": {
     "kindLabel": "Xabar turi",

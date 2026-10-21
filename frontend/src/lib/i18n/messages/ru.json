@@ -894,9 +894,6 @@
     "contactLead": "Вопрос, предложение или ошибка — пишите здесь. Ответ придёт на вашу почту."
   },
   "authForm": {
-    "tabsLabel": "Способ входа",
-    "loginTab": "Вход",
-    "registerTab": "Регистрация",
     "email": "Email",
     "emailPlaceholder": "vy@primer.uz",
     "password": "Пароль",
@@ -988,7 +985,6 @@
       "sent": "Письмо для подтверждения отправлено снова"
     },
     "telegram": "Продолжить через Telegram",
-    "emailCode": "Код на email",
     "emailCodeSubmit": "Отправить код",
     "otp": {
       "title": "Введите код",
@@ -1000,7 +996,16 @@
       "sent": "Новый код отправлен.",
       "changeEmail": "Выбрать другой способ",
       "missingEmail": "Email не указан. Запросите код на странице входа."
-    }
+    },
+    "continue": "Продолжить",
+    "changeEmail": "Другой email",
+    "passwordless": "Без пароля: отправить код на email",
+    "noAccount": "Нет аккаунта?",
+    "registerLink": "Зарегистрируйтесь",
+    "haveAccount": "Уже есть аккаунт?",
+    "loginLink": "Войдите",
+    "registerTitle": "Регистрация в maktab365",
+    "registerText": "Аккаунт сохраняет прогресс и закладки. Бесплатно."
   },
   "support": {
     "kindLabel": "Тип сообщения",

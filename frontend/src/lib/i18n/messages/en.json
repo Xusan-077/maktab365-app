@@ -894,9 +894,6 @@
     "contactLead": "A question, idea or a mistake — write it here. We will reply to your email."
   },
   "authForm": {
-    "tabsLabel": "Sign-in method",
-    "loginTab": "Sign in",
-    "registerTab": "Sign up",
     "email": "Email",
     "emailPlaceholder": "you@example.com",
     "password": "Password",
@@ -988,7 +985,6 @@
       "sent": "Confirmation email sent again"
     },
     "telegram": "Continue with Telegram",
-    "emailCode": "Email me a code",
     "emailCodeSubmit": "Send code",
     "otp": {
       "title": "Enter the code",
@@ -1000,7 +996,16 @@
       "sent": "A new code has been sent.",
       "changeEmail": "Choose another method",
       "missingEmail": "No email provided. Request a code from the sign-in page."
-    }
+    },
+    "continue": "Continue",
+    "changeEmail": "Use another email",
+    "passwordless": "Passwordless: email me a code",
+    "noAccount": "No account yet?",
+    "registerLink": "Sign up",
+    "haveAccount": "Already have an account?",
+    "loginLink": "Sign in",
+    "registerTitle": "Sign up for maktab365",
+    "registerText": "An account keeps your progress and bookmarks. Free."
   },
   "support": {
     "kindLabel": "Message type",
