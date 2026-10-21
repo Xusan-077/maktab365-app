@@ -79,7 +79,12 @@ describe("backendJwt", () => {
     const d = deps(undefined, me({ role: "student" }));
     const result = await backendJwt({ token: session(NOW + 10 * MINUTE) }, d);
     expect(d.fetchMe).toHaveBeenCalledOnce();
-    expect(result?.account).toEqual({ role: "student", onboarded: true, emailVerified: true });
+    expect(result?.account).toEqual({
+      role: "student",
+      staff: null,
+      onboarded: true,
+      emailVerified: true,
+    });
   });
 
   it("muddati uzoq bo'lsa refresh qilinmaydi (onboarding tugagan)", async () => {

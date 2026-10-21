@@ -20,13 +20,19 @@ export const ROUTES = {
   teacherSaved: "/ustoz/saqlanganlar",
   teacherHelp: "/ustoz/yordam",
   settings: "/sozlamalar",
+  admin: "/admin",
   search: "/qidiruv",
   help: "/yordam",
   contact: "/aloqa",
 } as const;
 
 /** Faqat shu yo'llar (va ichkilari) sessiya talab qiladi; qolgan hamma sahifa ochiq. */
-export const PROTECTED_ROUTES = [ROUTES.cabinet, ROUTES.teacher, ROUTES.settings] as const;
+export const PROTECTED_ROUTES = [
+  ROUTES.cabinet,
+  ROUTES.teacher,
+  ROUTES.settings,
+  ROUTES.admin,
+] as const;
 
 /** Havolalar qaysi bazaga ketadi: ochiq sayt yoki shaxsiy panel (o'quvchi kabineti / ustoz paneli). */
 export type AppBase = "marketing" | "kabinet" | "ustoz";

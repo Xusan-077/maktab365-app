@@ -1,5 +1,5 @@
 import type { DefaultSession } from "next-auth";
-import type { AccountState, BackendTokens, PanelRole } from "@/lib/auth/tokens";
+import type { AccountState, BackendTokens, PanelRole, StaffRole } from "@/lib/auth/tokens";
 
 declare module "next-auth" {
   interface Session {
@@ -10,6 +10,8 @@ declare module "next-auth" {
     user: {
       id: string;
       role?: PanelRole;
+      /** Editor/admin; `null` — oddiy foydalanuvchi, `undefined` — eski sessiya. */
+      staff?: StaffRole | null;
       onboarded?: boolean;
       emailVerified?: boolean;
     } & DefaultSession["user"];

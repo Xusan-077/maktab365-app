@@ -64,6 +64,7 @@ export const authConfig = {
           image,
           ...(token.account && {
             role: token.account.role,
+            staff: token.account.staff,
             onboarded: token.account.onboarded,
             emailVerified: token.account.emailVerified,
           }),

@@ -242,3 +242,28 @@ class OtpChallenge(UUIDModel):
 
     def __str__(self) -> str:
         return f"otp {self.created_at:%Y-%m-%d %H:%M}"
+
+
+class AuditLog(UUIDModel):
+    """Admin panel amallari jurnali: kim, nima ustida, qachon, qisqa oldingi/keyingi holat."""
+
+    actor = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL, related_name="audit_logs"
+    )
+    # Foydalanuvchi o'chirilsa ham jurnal o'qiladigan bo'lib qolsin.
+    actor_label = models.CharField(max_length=254, blank=True)
+    action = models.CharField(max_length=32, db_index=True)
+    target_type = models.CharField(max_length=32, db_index=True)
+    target_id = models.CharField(max_length=64, blank=True)
+    target_label = models.CharField(max_length=200, blank=True)
+    before = models.JSONField(null=True, blank=True)
+    after = models.JSONField(null=True, blank=True)
+    ip = models.GenericIPAddressField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [models.Index(fields=["target_type", "target_id"])]
+
+    def __str__(self) -> str:
+        return f"{self.actor_label} {self.action} {self.target_type}:{self.target_id}"

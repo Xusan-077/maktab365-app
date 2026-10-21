@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ApiError } from "@/lib/api/types";
-import { isSameOrigin, toBffUrl, upstreamPath } from "./request-guards";
+import { changesPublicContent, isSameOrigin, toBffUrl, upstreamPath } from "./request-guards";
 import { errorCodeOf } from "./client";
 import { signInErrorCode } from "./sign-in-errors";
 
@@ -30,6 +30,17 @@ describe("BFF", () => {
     expect(
       isSameOrigin(req("PATCH", { origin: "http://localhost:3000", host: "localhost:3000" })),
     ).toBe(true);
+  });
+});
+
+describe("BFF: ochiq kontent keshi", () => {
+  it("faqat muvaffaqiyatli admin yozuvi keshni eskiradi", () => {
+    expect(changesPublicContent("POST", "/api/v1/admin/topics/1/transition/", 200)).toBe(true);
+    expect(changesPublicContent("PATCH", "/api/v1/admin/books/1/", 200)).toBe(true);
+    expect(changesPublicContent("DELETE", "/api/v1/admin/books/1/", 204)).toBe(true);
+    expect(changesPublicContent("GET", "/api/v1/admin/books/", 200)).toBe(false);
+    expect(changesPublicContent("POST", "/api/v1/admin/books/", 400)).toBe(false);
+    expect(changesPublicContent("POST", "/api/v1/me/progress/", 200)).toBe(false);
   });
 });
 

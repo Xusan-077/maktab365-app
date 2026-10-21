@@ -1,8 +1,8 @@
 import { appBaseOfPath, dashboardPath, PROTECTED_ROUTES, ROUTES } from "@/lib/utils/routes";
-import type { PanelRole } from "./tokens";
+import type { PanelRole, StaffRole } from "./tokens";
 
 export interface RedirectSession {
-  user?: { role?: PanelRole; onboarded?: boolean } | null;
+  user?: { role?: PanelRole; staff?: StaffRole | null; onboarded?: boolean } | null;
 }
 
 export interface RedirectInput {

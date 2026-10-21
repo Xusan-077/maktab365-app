@@ -1,6 +1,13 @@
+import { revalidateTag } from "next/cache";
 import { newRequestId, REQUEST_ID_HEADER, resolveBaseUrl } from "@/lib/api/http-client";
 import { clientInfoFrom, forwardHeaders } from "./backend";
-import { errorResponse, isSameOrigin, SAFE_METHODS, upstreamPath } from "./request-guards";
+import {
+  changesPublicContent,
+  errorResponse,
+  isSameOrigin,
+  SAFE_METHODS,
+  upstreamPath,
+} from "./request-guards";
 import { effectiveTokens, readSessionToken } from "./server-token";
 
 /**
@@ -43,6 +50,10 @@ export async function proxyToBackend(request: Request): Promise<Response> {
     });
   } catch {
     return errorResponse(502, "network_error", "Backend is unreachable.");
+  }
+
+  if (changesPublicContent(request.method, path, upstream.status)) {
+    revalidateTag("content", { expire: 0 });
   }
 
   const responseHeaders = new Headers({ "Cache-Control": "no-store" });

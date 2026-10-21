@@ -57,4 +57,12 @@ describe("resolveAuthRedirect", () => {
   it("rol/onboarding maydonlari yo'q sessiya: yo'naltirilmaydi", () => {
     expect(go("/kabinet", { user: {} })).toBeNull();
   });
+
+  it("/admin: kirmagan → kirish; editor/admin o'z joyida, panel redirect'i tegmaydi", () => {
+    expect(go("/admin/kitoblar", null)).toBe("/kirish?callbackUrl=%2Fuz%2Fadmin%2Fkitoblar");
+    const editor: RedirectSession = { user: { role: "teacher", staff: "editor", onboarded: true } };
+    expect(go("/admin", editor)).toBeNull();
+    expect(go("/admin/kitoblar", student())).toBeNull(); // rolni proxy emas, StaffGate hal qiladi
+    expect(go("/admin", student(false))).toBe("/onboarding");
+  });
 });

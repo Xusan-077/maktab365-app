@@ -66,6 +66,16 @@ Bitta Django monolit: Python 3.12 · Django 5.2 · DRF · drf-spectacular · sim
 - Yangi (spam bo'lmagan) xabarda `tasks.notify_staff` (Celery, `on_commit`) `SUPPORT_NOTIFY_EMAILS` ga yuboradi; bo'sh bo'lsa hech narsa.
 - `GET /api/v1/me/support/` — o'z murojaatlari (paginatsiyalangan, spam ko'rsatilmaydi).
 
+## Admin API (M10)
+
+- `/api/v1/admin/` (`admin_urls.py`; view'lar `admin_views.py`, serializer'lar `admin_serializers.py`, mantiq `admin_services.py`): ruxsat `IsRole("editor","admin")`, o'chirish faqat `admin`. Lookup — UUID `id`; slug yaratishda beriladi va keyin o'zgarmaydi (`slug_immutable`), chunki u kitob/mavzu identifikatorlariga (`{kitob}-{mavzu}`) kiradi. `order` server tomonda: yangi bob/mavzu oxiriga qo'shiladi, o'zgartirish faqat `reorder` orqali. Mavzu `status` faqat `transition` bilan o'zgaradi.
+- `POST books/{id}/reorder/ {chapters?: [id…], topics?: {bob_id: [mavzu_id…]}}` — `reorder_book`: `chapters` kitobning barcha boblari, har `topics` ro'yxati o'sha bobning to'liq yangi tarkibi (mavzuni boshqa bobga ko'chirish uchun ikkala bobni bering). `bulk_update` signal bermaydi — `bump_content_version` o'zi chaqiriladi.
+- Nashr qoidalari `admin_services.TRANSITIONS` da (frontend `lib/admin/permissions.ts` nusxasi); xato kodlari `invalid_transition` (400), `transition_forbidden` (403). `reviewed_by/at`, `published_at` shu yerda yoziladi, draft'ga qaytganda tozalanadi.
+- `POST uploads/` (multipart `file`, `kind` = cover|image|pdf): hajm `ADMIN_UPLOAD_MAX_IMAGE_BYTES/PDF_BYTES`, tur fayl boshidagi imzo bilan (JPEG/PNG/WebP/PDF; SVG yo'q) va mijoz `Content-Type` bilan mos bo'lishi shart, nom `slug-<uuid8>.<ext>` ga tozalanadi, `default_storage` (S3-mos) ga yoziladi. Kitob `cover`/`pdf` maydoniga yuklash natijasidagi `path` beriladi (`StoredPathField`: prefiks va mavjudlik tekshiriladi).
+- Audit: `apps/accounts/audit.py` — `record(actor, action, target_type, target_id, label=, before=, after=, request=)` va `snapshot(instance, fields)`; model `AuditLog`. Boshqa app'lar ham shuni ishlatadi. `blocks` jurnalga tushmaydi (faqat `blocks_count`).
+- Xato kodlari `fields` darajasida (`details`): `slug_taken`, `slug_immutable`, `book_immutable`, `invalid_file`, `must_list_all_chapters`, `must_list_all_topics`, `unknown_or_duplicate_topic`, `unknown_chapter`. Fan o'chirish kitob bor bo'lsa `has_dependents` (409).
+- Testlar: `apps/content/tests/test_admin_api.py` (ruxsat matritsasi anon/student/teacher/editor/admin, nashr qoidalari, reorder, yuklash tekshiruvlari, dashboard).
+
 ## Qoidalar
 
 1. API prefiksi `/api/v1`, JSON kalitlari `snake_case`. Yangi view'ga `@extend_schema` bilan operation_id va javob tiplarini bering.

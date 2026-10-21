@@ -108,6 +108,10 @@ if env("AWS_STORAGE_BUCKET_NAME", default=""):
     AWS_QUERYSTRING_AUTH = False
     AWS_DEFAULT_ACL = None
 
+# --- Admin yuklashlari (apps/content/admin_services.py) ---
+ADMIN_UPLOAD_MAX_IMAGE_BYTES = env.int("ADMIN_UPLOAD_MAX_IMAGE_BYTES", default=5 * 1024 * 1024)
+ADMIN_UPLOAD_MAX_PDF_BYTES = env.int("ADMIN_UPLOAD_MAX_PDF_BYTES", default=50 * 1024 * 1024)
+
 # --- Ochiq kontent API ---
 # true bo'lsa draft/reviewed mavzular ochiq API'da `unverified: true` bilan chiqadi. Default false
 # (faqat published); dev'da `dev.py` uni yoqadi, prod'da faqat env bilan ongli ravishda.
@@ -195,6 +199,7 @@ SPECTACULAR_SETTINGS = {
         "RoleEnum": "apps.accounts.models.Role.choices",
         "OnboardingRoleEnum": "apps.accounts.serializers.ONBOARDING_ROLES",
         "LocaleEnum": "apps.accounts.models.Locale.choices",
+        "TopicStatusEnum": "apps.content.models.TopicStatus.choices",
         "SupportKindEnum": "apps.support.models.Kind.choices",
         "SupportStatusEnum": "apps.support.models.Status.choices",
         "BookmarkKindEnum": "apps.learning.models.BookmarkKind.choices",

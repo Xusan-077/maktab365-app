@@ -36,6 +36,16 @@ export function upstreamPath(pathname: string): string | null {
   return path.endsWith("/") ? path : `${path}/`;
 }
 
+/**
+ * Admin yozuvi (kontent o'zgardi) muvaffaqiyatli bo'lsa, Next'dagi ochiq katalog keshi (`content`
+ * tegi, `lib/api/server.ts`) eskirgan: keyingi so'rovda yangilanadi.
+ */
+export function changesPublicContent(method: string, path: string, status: number): boolean {
+  return (
+    !SAFE_METHODS.has(method) && path.startsWith("/api/v1/admin/") && status >= 200 && status < 300
+  );
+}
+
 /** Brauzerdan BFF'ga: oxirgi `/` siz (Next'ning 308 yo'naltirishisiz). */
 export function toBffUrl(url: string): string {
   const parsed = new URL(url);

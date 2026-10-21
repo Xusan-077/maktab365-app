@@ -1050,5 +1050,247 @@
       "description": "Describe the mistake in this topic — the page address is added automatically.",
       "close": "Done"
     }
+  },
+  "admin": {
+    "brand": "Admin panel",
+    "nav": {
+      "main": "Admin menu",
+      "mobile": "Admin bottom menu",
+      "dashboard": "Dashboard",
+      "books": "Books",
+      "users": "Users",
+      "site": "Go to site",
+      "signOut": "Sign out"
+    },
+    "roles": {
+      "student": "Student",
+      "teacher": "Teacher",
+      "editor": "Editor",
+      "admin": "Administrator"
+    },
+    "topbar": {
+      "searchLabel": "Search books",
+      "searchPlaceholder": "Search books"
+    },
+    "common": {
+      "loading": "Loading…",
+      "retry": "Try again",
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "create": "Create",
+      "pagination": "Pagination",
+      "pageOf": "Page {page} of {pages}",
+      "prev": "Previous",
+      "next": "Next"
+    },
+    "status": {
+      "draft": "Draft",
+      "reviewed": "Reviewed",
+      "published": "Published"
+    },
+    "bookStatus": {
+      "draft": "Hidden",
+      "published": "Visible"
+    },
+    "transition": {
+      "review": "Mark reviewed",
+      "publish": "Publish",
+      "unpublish": "Return to draft",
+      "done": {
+        "review": "Topic marked as reviewed",
+        "publish": "Topic published",
+        "unpublish": "Topic returned to draft"
+      }
+    },
+    "dashboard": {
+      "title": "Admin dashboard",
+      "description": "Content status and latest changes.",
+      "allBooks": "All books",
+      "loading": "Loading numbers",
+      "books": "Books",
+      "topics": "Topics",
+      "messages": "Messages",
+      "total": "Total",
+      "newMessages": "New messages",
+      "recentMessages": "Latest new messages",
+      "noMessages": "No new messages.",
+      "recentActivity": "Latest changes",
+      "noActivity": "No changes yet."
+    },
+    "audit": {
+      "actions": {
+        "create": "created",
+        "update": "edited",
+        "delete": "deleted",
+        "transition": "changed the status of",
+        "reorder": "reordered",
+        "upload": "uploaded"
+      },
+      "targets": {
+        "book": "book",
+        "chapter": "chapter",
+        "topic": "topic",
+        "subject": "subject",
+        "file": "file"
+      }
+    },
+    "books": {
+      "title": "Books",
+      "description": "Find textbooks, edit them and manage their publication status.",
+      "new": "New book",
+      "loading": "Loading books",
+      "empty": "No books yet. Add the first one.",
+      "emptyFiltered": "No books match these filters.",
+      "gradeLabel": "Grade {grade}",
+      "filters": {
+        "search": "Search by title or slug",
+        "grade": "Grade",
+        "subject": "Subject",
+        "status": "Status",
+        "allGrades": "All grades",
+        "allSubjects": "All subjects",
+        "allStatuses": "All statuses"
+      },
+      "columns": {
+        "title": "Title",
+        "grade": "Grade",
+        "subject": "Subject",
+        "status": "Status",
+        "topics": "Topics (published / total)",
+        "updated": "Updated"
+      }
+    },
+    "bookForm": {
+      "createTitle": "New book",
+      "createDescription": "Enter the book details. You add chapters and topics after creating it.",
+      "editTitle": "Edit book",
+      "slug": "Slug (book identifier)",
+      "slugHint": "Lowercase Latin letters, digits and hyphens, e.g. algebra-9. It cannot be changed later.",
+      "slugLocked": "The slug is fixed: it is part of links and student progress.",
+      "subject": "Subject",
+      "grade": "Grade",
+      "gradeOption": "Grade {grade}",
+      "choose": "Choose",
+      "year": "Publication year",
+      "title": "Book title",
+      "author": "Author",
+      "edition": "Edition",
+      "publisher": "Publisher",
+      "cover": "Cover (JPG, PNG or WebP)",
+      "pdf": "PDF file",
+      "isPublished": "Show on the site",
+      "isPublishedHint": "When off, the book is visible only in the admin panel. Topics are published separately.",
+      "save": "Save",
+      "create": "Create book",
+      "saved": "Book saved",
+      "created": "Book created",
+      "deleted": "Book deleted",
+      "deleteTitle": "Delete book",
+      "deleteDescription": "“{title}” and all its chapters and topics will be deleted. This cannot be undone.",
+      "backToList": "← Books"
+    },
+    "upload": {
+      "none": "No file uploaded",
+      "choose": "Choose file",
+      "replace": "Replace",
+      "remove": "Remove"
+    },
+    "localized": {
+      "uz": "Uzbek (required)",
+      "ru": "Russian",
+      "en": "English"
+    },
+    "chapter": {
+      "createTitle": "New chapter",
+      "editTitle": "Edit chapter",
+      "title": "Chapter title",
+      "slug": "Slug",
+      "slugHint": "Lowercase Latin letters, digits and hyphens. Filled in from the title.",
+      "slugLocked": "The slug is fixed."
+    },
+    "tree": {
+      "title": "Chapters and topics",
+      "hint": "Drag to reorder or use the ↑ ↓ buttons. A topic can also be moved to another chapter.",
+      "addChapter": "Add chapter",
+      "addTopic": "Add topic",
+      "empty": "No chapters yet. Add the first one.",
+      "emptyChapter": "This chapter has no topics.",
+      "editChapter": "Edit chapter: {title}",
+      "deleteChapter": "Delete chapter: {title}",
+      "deleteTopic": "Delete topic: {title}",
+      "moveUp": "Move up: {title}",
+      "moveDown": "Move down: {title}",
+      "deleteChapterTitle": "Delete chapter",
+      "deleteTopicTitle": "Delete topic",
+      "deleteDescription": "“{title}” will be deleted. This cannot be undone."
+    },
+    "topic": {
+      "createTitle": "New topic",
+      "editTitle": "Edit topic",
+      "title": "Topic title",
+      "slug": "Slug",
+      "slugHint": "Unique within the book: lowercase Latin letters, digits and hyphens. Filled in from the title.",
+      "slugLocked": "The slug is fixed: it is part of the topic link.",
+      "summary": "Short summary",
+      "summaryHint": "Shown in topic lists (Uzbek).",
+      "notes": "Internal notes",
+      "notesHint": "For editors only, not shown on the site.",
+      "blocks": "Topic blocks (JSON)",
+      "blocksHint": "An array of blocks; its shape must follow the textbook block schema. The server validates it on save.",
+      "saved": "Topic saved",
+      "created": "Topic created",
+      "backToBook": "← Back to the book",
+      "inBook": "Book: {book}",
+      "reviewedBy": "Reviewed by {email}",
+      "publishedAt": "published {date}"
+    },
+    "users": {
+      "title": "Users",
+      "description": "Registered users (read-only).",
+      "search": "Search by email",
+      "loading": "Loading users",
+      "empty": "No users found.",
+      "noEmail": "No email",
+      "active": "Active",
+      "inactive": "Inactive",
+      "columns": {
+        "email": "Email",
+        "role": "Role",
+        "status": "Status",
+        "joined": "Joined"
+      }
+    },
+    "validation": {
+      "required": "Required field",
+      "slugInvalid": "Lowercase Latin letters, digits and hyphens only (e.g. vietas-theorem)",
+      "yearInvalid": "Enter a year between 1990 and 2100",
+      "blocksInvalid": "Blocks must be a valid JSON array"
+    },
+    "errors": {
+      "generic": "The action failed. Please try again.",
+      "codes": {
+        "transition_forbidden": "Your role cannot make this status change.",
+        "invalid_transition": "This status change is not possible. Refresh the page.",
+        "has_dependents": "Cannot delete: other records depend on it.",
+        "file_too_large": "The file is too large.",
+        "unsupported_type": "Unsupported file type (images: JPG, PNG, WebP; documents: PDF).",
+        "invalid_kind": "Invalid file category.",
+        "network_error": "Cannot reach the server.",
+        "timeout": "The server did not respond. Please try again.",
+        "not_authenticated": "Please sign in again.",
+        "permission_denied": "You are not allowed to do this.",
+        "not_found": "Not found. Refresh the page.",
+        "throttled": "Too many requests. Try again shortly."
+      },
+      "fields": {
+        "invalid": "Invalid value",
+        "required": "Required field",
+        "slug_taken": "This slug is already taken",
+        "slug_immutable": "The slug cannot be changed",
+        "book_immutable": "The book cannot be changed",
+        "invalid_file": "File not found, upload it again"
+      }
+    }
   }
 }

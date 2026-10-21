@@ -1050,5 +1050,247 @@
       "description": "Mavzudagi xatoni yozing — sahifa manzili o'zi qo'shiladi.",
       "close": "Tayyor"
     }
+  },
+  "admin": {
+    "brand": "Boshqaruv paneli",
+    "nav": {
+      "main": "Admin menyusi",
+      "mobile": "Adminning pastki menyusi",
+      "dashboard": "Bosh sahifa",
+      "books": "Kitoblar",
+      "users": "Foydalanuvchilar",
+      "site": "Saytga o'tish",
+      "signOut": "Chiqish"
+    },
+    "roles": {
+      "student": "O'quvchi",
+      "teacher": "O'qituvchi",
+      "editor": "Muharrir",
+      "admin": "Administrator"
+    },
+    "topbar": {
+      "searchLabel": "Kitoblarni qidirish",
+      "searchPlaceholder": "Kitob qidirish"
+    },
+    "common": {
+      "loading": "Yuklanmoqda…",
+      "retry": "Qayta urinish",
+      "save": "Saqlash",
+      "cancel": "Bekor qilish",
+      "delete": "O'chirish",
+      "create": "Yaratish",
+      "pagination": "Sahifalash",
+      "pageOf": "{page} / {pages}-sahifa",
+      "prev": "Oldingi",
+      "next": "Keyingi"
+    },
+    "status": {
+      "draft": "Qoralama",
+      "reviewed": "Tekshirilgan",
+      "published": "Nashr qilingan"
+    },
+    "bookStatus": {
+      "draft": "Yashirin",
+      "published": "Ochiq"
+    },
+    "transition": {
+      "review": "Tekshirildi",
+      "publish": "Nashr qilish",
+      "unpublish": "Qoralamaga qaytarish",
+      "done": {
+        "review": "Mavzu tekshirildi",
+        "publish": "Mavzu nashr qilindi",
+        "unpublish": "Mavzu qoralamaga qaytarildi"
+      }
+    },
+    "dashboard": {
+      "title": "Boshqaruv paneli",
+      "description": "Kontent holati va oxirgi o'zgarishlar.",
+      "allBooks": "Barcha kitoblar",
+      "loading": "Raqamlar yuklanmoqda",
+      "books": "Kitoblar",
+      "topics": "Mavzular",
+      "messages": "Xabarlar",
+      "total": "Jami",
+      "newMessages": "Yangi xabarlar",
+      "recentMessages": "Yangi xabarlar ro'yxati",
+      "noMessages": "Yangi xabar yo'q.",
+      "recentActivity": "Oxirgi o'zgarishlar",
+      "noActivity": "Hozircha o'zgarish yo'q."
+    },
+    "audit": {
+      "actions": {
+        "create": "yaratdi:",
+        "update": "tahrirladi:",
+        "delete": "o'chirdi:",
+        "transition": "holatini o'zgartirdi:",
+        "reorder": "tartibini o'zgartirdi:",
+        "upload": "yukladi:"
+      },
+      "targets": {
+        "book": "kitob",
+        "chapter": "bob",
+        "topic": "mavzu",
+        "subject": "fan",
+        "file": "fayl"
+      }
+    },
+    "books": {
+      "title": "Kitoblar",
+      "description": "Darsliklarni qidiring, tahrirlang va nashr holatini boshqaring.",
+      "new": "Yangi kitob",
+      "loading": "Kitoblar yuklanmoqda",
+      "empty": "Hali kitob yo'q. Birinchi kitobni qo'shing.",
+      "emptyFiltered": "Bu filtrlar bo'yicha kitob topilmadi.",
+      "gradeLabel": "{grade}-sinf",
+      "filters": {
+        "search": "Nom yoki slug bo'yicha qidirish",
+        "grade": "Sinf",
+        "subject": "Fan",
+        "status": "Holat",
+        "allGrades": "Barcha sinflar",
+        "allSubjects": "Barcha fanlar",
+        "allStatuses": "Barcha holatlar"
+      },
+      "columns": {
+        "title": "Nomi",
+        "grade": "Sinf",
+        "subject": "Fan",
+        "status": "Holat",
+        "topics": "Mavzular (nashr / jami)",
+        "updated": "Yangilangan"
+      }
+    },
+    "bookForm": {
+      "createTitle": "Yangi kitob",
+      "createDescription": "Kitob ma'lumotlarini kiriting. Boblar va mavzularni yaratgandan keyin qo'shasiz.",
+      "editTitle": "Kitobni tahrirlash",
+      "slug": "Slug (kitob identifikatori)",
+      "slugHint": "Kichik lotin harflari, raqamlar va tire, masalan: algebra-9. Keyin o'zgartirib bo'lmaydi.",
+      "slugLocked": "Slug o'zgarmaydi: u havolalar va o'quvchilar progressiga kiritilgan.",
+      "subject": "Fan",
+      "grade": "Sinf",
+      "gradeOption": "{grade}-sinf",
+      "choose": "Tanlang",
+      "year": "Nashr yili",
+      "title": "Kitob nomi",
+      "author": "Muallif",
+      "edition": "Nashr",
+      "publisher": "Nashriyot",
+      "cover": "Muqova (JPG, PNG yoki WebP)",
+      "pdf": "PDF fayl",
+      "isPublished": "Saytda ko'rsatish",
+      "isPublishedHint": "Yoqilmasa, kitob faqat admin panelda ko'rinadi. Mavzular alohida nashr qilinadi.",
+      "save": "Saqlash",
+      "create": "Kitob yaratish",
+      "saved": "Kitob saqlandi",
+      "created": "Kitob yaratildi",
+      "deleted": "Kitob o'chirildi",
+      "deleteTitle": "Kitobni o'chirish",
+      "deleteDescription": "«{title}» va uning barcha bob hamda mavzulari o'chiriladi. Buni qaytarib bo'lmaydi.",
+      "backToList": "← Kitoblar ro'yxati"
+    },
+    "upload": {
+      "none": "Fayl yuklanmagan",
+      "choose": "Fayl tanlash",
+      "replace": "Almashtirish",
+      "remove": "Olib tashlash"
+    },
+    "localized": {
+      "uz": "O'zbekcha (majburiy)",
+      "ru": "Ruscha",
+      "en": "Inglizcha"
+    },
+    "chapter": {
+      "createTitle": "Yangi bob",
+      "editTitle": "Bobni tahrirlash",
+      "title": "Bob nomi",
+      "slug": "Slug",
+      "slugHint": "Kichik lotin harflari, raqamlar va tire. Sarlavhadan avtomatik to'ldiriladi.",
+      "slugLocked": "Slug o'zgarmaydi."
+    },
+    "tree": {
+      "title": "Boblar va mavzular",
+      "hint": "Tartibni sudrab o'zgartiring yoki ↑ ↓ tugmalaridan foydalaning. Mavzuni boshqa bobga ham ko'chirish mumkin.",
+      "addChapter": "Bob qo'shish",
+      "addTopic": "Mavzu qo'shish",
+      "empty": "Hali bob yo'q. Birinchi bobni qo'shing.",
+      "emptyChapter": "Bu bobda mavzu yo'q.",
+      "editChapter": "Bobni tahrirlash: {title}",
+      "deleteChapter": "Bobni o'chirish: {title}",
+      "deleteTopic": "Mavzuni o'chirish: {title}",
+      "moveUp": "Yuqoriga: {title}",
+      "moveDown": "Pastga: {title}",
+      "deleteChapterTitle": "Bobni o'chirish",
+      "deleteTopicTitle": "Mavzuni o'chirish",
+      "deleteDescription": "«{title}» o'chiriladi. Buni qaytarib bo'lmaydi."
+    },
+    "topic": {
+      "createTitle": "Yangi mavzu",
+      "editTitle": "Mavzuni tahrirlash",
+      "title": "Mavzu nomi",
+      "slug": "Slug",
+      "slugHint": "Kitob ichida noyob: kichik lotin harflari, raqamlar va tire. Sarlavhadan to'ldiriladi.",
+      "slugLocked": "Slug o'zgarmaydi: u mavzu havolasiga kiritilgan.",
+      "summary": "Qisqa mazmun",
+      "summaryHint": "Mavzular ro'yxatida ko'rinadi (o'zbekcha).",
+      "notes": "Ichki izohlar",
+      "notesHint": "Faqat tahrirchilar uchun, saytda ko'rinmaydi.",
+      "blocks": "Mavzu bloklari (JSON)",
+      "blocksHint": "Bloklar massivi; tuzilmasi darslik bloklari sxemasiga mos bo'lishi kerak. Server saqlashda tekshiradi.",
+      "saved": "Mavzu saqlandi",
+      "created": "Mavzu yaratildi",
+      "backToBook": "← Kitobga qaytish",
+      "inBook": "Kitob: {book}",
+      "reviewedBy": "Tekshirgan: {email}",
+      "publishedAt": "nashr: {date}"
+    },
+    "users": {
+      "title": "Foydalanuvchilar",
+      "description": "Ro'yxatdan o'tgan foydalanuvchilar (faqat ko'rish).",
+      "search": "Email bo'yicha qidirish",
+      "loading": "Foydalanuvchilar yuklanmoqda",
+      "empty": "Foydalanuvchi topilmadi.",
+      "noEmail": "Email yo'q",
+      "active": "Faol",
+      "inactive": "Nofaol",
+      "columns": {
+        "email": "Email",
+        "role": "Rol",
+        "status": "Holat",
+        "joined": "Ro'yxatdan o'tgan"
+      }
+    },
+    "validation": {
+      "required": "Majburiy maydon",
+      "slugInvalid": "Faqat kichik lotin harflari, raqamlar va tire (masalan, viyet-teoremasi)",
+      "yearInvalid": "1990 dan 2100 gacha yil kiriting",
+      "blocksInvalid": "Bloklar to'g'ri JSON massiv bo'lishi kerak"
+    },
+    "errors": {
+      "generic": "Amalni bajarib bo'lmadi. Qayta urinib ko'ring.",
+      "codes": {
+        "transition_forbidden": "Rolingiz bu holat o'zgarishiga ruxsat bermaydi.",
+        "invalid_transition": "Bu holat o'zgarishi mumkin emas. Sahifani yangilang.",
+        "has_dependents": "O'chirib bo'lmaydi: unga bog'liq yozuvlar bor.",
+        "file_too_large": "Fayl juda katta.",
+        "unsupported_type": "Fayl turi mos emas (rasm: JPG, PNG, WebP; hujjat: PDF).",
+        "invalid_kind": "Noto'g'ri fayl turkumi.",
+        "network_error": "Server bilan aloqa yo'q.",
+        "timeout": "Server javob bermadi. Qayta urinib ko'ring.",
+        "not_authenticated": "Qayta kiring.",
+        "permission_denied": "Bu amalga ruxsatingiz yo'q.",
+        "not_found": "Topilmadi. Sahifani yangilang.",
+        "throttled": "Juda ko'p so'rov. Birozdan keyin urinib ko'ring."
+      },
+      "fields": {
+        "invalid": "Noto'g'ri qiymat",
+        "required": "Majburiy maydon",
+        "slug_taken": "Bu slug band",
+        "slug_immutable": "Slugni o'zgartirib bo'lmaydi",
+        "book_immutable": "Kitobni o'zgartirib bo'lmaydi",
+        "invalid_file": "Fayl topilmadi, qayta yuklang"
+      }
+    }
   }
 }

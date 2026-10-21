@@ -14,8 +14,17 @@ export interface BackendTokens {
 export type PanelRole = "student" | "teacher";
 
 /** Sessiyadagi akkaunt holati: proxy yo'naltirishlari va banner shunga tayanadi. */
+/** Kontent boshqaruvi (`/admin`) roli: faqat editor va admin. */
+export type StaffRole = "editor" | "admin";
+
+export function staffRoleOf(role: string | null | undefined): StaffRole | null {
+  return role === "editor" || role === "admin" ? role : null;
+}
+
 export interface AccountState {
   role: PanelRole;
+  /** `null` — oddiy foydalanuvchi; `undefined` — eski sessiya (cookie `staff` dan oldin yozilgan). */
+  staff?: StaffRole | null;
   onboarded: boolean;
   emailVerified: boolean;
 }
@@ -41,6 +50,7 @@ export function toBackendTokens(pair: { access: string; refresh: string }): Back
 export function toAccountState(me: Me): AccountState {
   return {
     role: me.role === "student" ? "student" : "teacher",
+    staff: staffRoleOf(me.role),
     onboarded: Boolean(me.profile.onboarded_at),
     emailVerified: me.email_verified,
   };

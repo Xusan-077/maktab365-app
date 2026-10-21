@@ -409,6 +409,237 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/dashboard/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["admin_dashboard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/uploads/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["admin_uploads_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/users/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Foydalanuvchilar ro'yxati — faqat admin (faqat o'qish). */
+        get: operations["admin_users_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/subjects/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
+        get: operations["admin_subjects_list"];
+        put?: never;
+        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
+        post: operations["admin_subjects_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/subjects/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
+        get: operations["admin_subjects_retrieve"];
+        put?: never;
+        post?: never;
+        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
+        delete: operations["admin_subjects_delete"];
+        options?: never;
+        head?: never;
+        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
+        patch: operations["admin_subjects_update"];
+        trace?: never;
+    };
+    "/api/v1/admin/books/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
+        get: operations["admin_books_list"];
+        put?: never;
+        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
+        post: operations["admin_books_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/books/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
+        get: operations["admin_books_retrieve"];
+        put?: never;
+        post?: never;
+        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
+        delete: operations["admin_books_delete"];
+        options?: never;
+        head?: never;
+        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
+        patch: operations["admin_books_update"];
+        trace?: never;
+    };
+    "/api/v1/admin/books/{id}/reorder/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Bob va mavzular tartibi bir so'rovda (qoidalar: `admin_services.reorder_book`). */
+        post: operations["admin_books_reorder"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/chapters/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
+        get: operations["admin_chapters_list"];
+        put?: never;
+        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
+        post: operations["admin_chapters_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/chapters/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
+        get: operations["admin_chapters_retrieve"];
+        put?: never;
+        post?: never;
+        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
+        delete: operations["admin_chapters_delete"];
+        options?: never;
+        head?: never;
+        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
+        patch: operations["admin_chapters_update"];
+        trace?: never;
+    };
+    "/api/v1/admin/topics/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
+        get: operations["admin_topics_list"];
+        put?: never;
+        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
+        post: operations["admin_topics_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/topics/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
+        get: operations["admin_topics_retrieve"];
+        put?: never;
+        post?: never;
+        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
+        delete: operations["admin_topics_delete"];
+        options?: never;
+        head?: never;
+        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
+        patch: operations["admin_topics_update"];
+        trace?: never;
+    };
+    "/api/v1/admin/topics/{id}/transition/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Nashr oqimi: draft→reviewed→published (editor/admin), published→draft (admin). */
+        post: operations["admin_topics_transition"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/grades/": {
         parameters: {
             query?: never;
@@ -748,6 +979,26 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AdminDashboard: {
+            books: components["schemas"]["BookCounts"];
+            topics: components["schemas"]["TopicCounts"];
+            new_messages: number;
+            recent_messages: components["schemas"]["RecentMessage"][];
+            recent_activity: components["schemas"]["AuditEntry"][];
+        };
+        AuditEntry: {
+            /** Format: uuid */
+            readonly id: string;
+            actor_label?: string;
+            action: string;
+            target_type: string;
+            target_id?: string;
+            target_label?: string;
+            before?: unknown;
+            after?: unknown;
+            /** Format: date-time */
+            readonly created_at: string;
+        };
         AuthSession: {
             access: string;
             refresh: string;
@@ -773,6 +1024,54 @@ export interface components {
             pdf: string | null;
             readonly topics_ready: boolean;
             topics_count: number;
+        };
+        /** @description Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga kiradi). */
+        BookAdmin: {
+            /** Format: uuid */
+            readonly id: string;
+            slug: string;
+            subject: string;
+            grade: number;
+            title: components["schemas"]["LocalizedText"];
+            author: components["schemas"]["LocalizedText"];
+            publisher?: string;
+            edition: components["schemas"]["LocalizedText"];
+            year: number;
+            cover?: string;
+            /** Format: uri */
+            readonly cover_url: string | null;
+            pdf?: string;
+            /** Format: uri */
+            readonly pdf_url: string | null;
+            order?: number;
+            is_published?: boolean;
+            readonly chapters_count: number;
+            readonly topics_count: number;
+            readonly published_topics_count: number;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        /** @description Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga kiradi). */
+        BookAdminRequest: {
+            slug: string;
+            subject: string;
+            grade: number;
+            title: components["schemas"]["LocalizedTextRequest"];
+            author: components["schemas"]["LocalizedTextRequest"];
+            publisher?: string;
+            edition: components["schemas"]["LocalizedTextRequest"];
+            year: number;
+            cover?: string;
+            pdf?: string;
+            order?: number;
+            is_published?: boolean;
+        };
+        BookCounts: {
+            total: number;
+            draft: number;
+            published: number;
         };
         BookDetail: {
             slug: string;
@@ -835,6 +1134,29 @@ export interface components {
             order: number;
             title: components["schemas"]["LocalizedText"];
             topics: components["schemas"]["TopicSummary"][];
+        };
+        /** @description Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga kiradi). */
+        ChapterAdmin: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            book: string;
+            readonly book_slug: string;
+            slug: string;
+            title: components["schemas"]["LocalizedText"];
+            readonly order: number;
+            readonly topics_count: number;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        /** @description Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga kiradi). */
+        ChapterAdminRequest: {
+            /** Format: uuid */
+            book: string;
+            slug: string;
+            title: components["schemas"]["LocalizedTextRequest"];
         };
         /**
          * @description * `ok` - ok
@@ -999,6 +1321,12 @@ export interface components {
             ru?: string;
             en?: string;
         };
+        /** @description Ko'p tilli matn: API tilni tanlamaydi, klient `getLocalized` bilan tanlaydi. */
+        LocalizedTextRequest: {
+            uz: string;
+            ru?: string;
+            en?: string;
+        };
         LoginRequest: {
             /** Format: email */
             email: string;
@@ -1065,6 +1393,21 @@ export interface components {
             email: string;
             code: string;
         };
+        PaginatedBookAdminList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["BookAdmin"][];
+        };
         PaginatedBookList: {
             /** @example 123 */
             count: number;
@@ -1079,6 +1422,36 @@ export interface components {
              */
             previous?: string | null;
             results: components["schemas"]["Book"][];
+        };
+        PaginatedChapterAdminList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["ChapterAdmin"][];
+        };
+        PaginatedSubjectAdminList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["SubjectAdmin"][];
         };
         PaginatedSupportMessageList: {
             /** @example 123 */
@@ -1095,6 +1468,36 @@ export interface components {
             previous?: string | null;
             results: components["schemas"]["SupportMessage"][];
         };
+        PaginatedTopicListList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["TopicList"][];
+        };
+        PaginatedUserAdminList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["UserAdmin"][];
+        };
         PasswordChangeRequest: {
             current_password?: string;
             new_password: string;
@@ -1106,6 +1509,28 @@ export interface components {
         };
         PasswordSetRequest: {
             new_password: string;
+        };
+        /** @description Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga kiradi). */
+        PatchedBookAdminRequest: {
+            slug?: string;
+            subject?: string;
+            grade?: number;
+            title?: components["schemas"]["LocalizedTextRequest"];
+            author?: components["schemas"]["LocalizedTextRequest"];
+            publisher?: string;
+            edition?: components["schemas"]["LocalizedTextRequest"];
+            year?: number;
+            cover?: string;
+            pdf?: string;
+            order?: number;
+            is_published?: boolean;
+        };
+        /** @description Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga kiradi). */
+        PatchedChapterAdminRequest: {
+            /** Format: uuid */
+            book?: string;
+            slug?: string;
+            title?: components["schemas"]["LocalizedTextRequest"];
         };
         PatchedProfileUpdateRequest: {
             display_name?: string;
@@ -1124,6 +1549,26 @@ export interface components {
             /** Format: date */
             due_date?: string | null;
             done?: boolean;
+        };
+        /** @description Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga kiradi). */
+        PatchedSubjectAdminRequest: {
+            slug?: string;
+            title?: components["schemas"]["LocalizedTextRequest"];
+            icon?: string;
+            order?: number;
+        };
+        /** @description Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga kiradi). */
+        PatchedTopicAdminRequest: {
+            slug?: string;
+            /** Format: uuid */
+            chapter?: string;
+            title?: components["schemas"]["LocalizedTextRequest"];
+            summary?: components["schemas"]["LocalizedTextRequest"];
+            /** @description Mavzu bloklari; sxema: `apps/content/schemas.py` (frontend `TopicBlock`). */
+            blocks?: {
+                [key: string]: unknown;
+            }[];
+            notes?: string;
         };
         Profile: {
             readonly display_name: string;
@@ -1163,6 +1608,14 @@ export interface components {
          * @enum {string}
          */
         ReadStatusEnum: "not_started" | "in_progress" | "read";
+        RecentMessage: {
+            /** Format: uuid */
+            readonly id: string;
+            kind?: components["schemas"]["SupportKindEnum"];
+            message: string;
+            /** Format: date-time */
+            readonly created_at: string;
+        };
         RecentView: {
             readonly topic_id: string;
             readonly book_id: string;
@@ -1178,6 +1631,12 @@ export interface components {
             password: string;
             display_name?: string;
             locale?: components["schemas"]["LocaleEnum"];
+        };
+        ReorderRequest: {
+            chapters?: string[];
+            topics?: {
+                [key: string]: string[];
+            };
         };
         ResultCounts: {
             mastered: number;
@@ -1249,6 +1708,27 @@ export interface components {
             order: number;
             books_count: number;
         };
+        /** @description Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga kiradi). */
+        SubjectAdmin: {
+            /** Format: uuid */
+            readonly id: string;
+            slug: string;
+            title: components["schemas"]["LocalizedText"];
+            icon?: string;
+            order?: number;
+            readonly books_count: number;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        /** @description Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga kiradi). */
+        SubjectAdminRequest: {
+            slug: string;
+            title: components["schemas"]["LocalizedTextRequest"];
+            icon?: string;
+            order?: number;
+        };
         SupportCreateRequest: {
             /** @default  */
             name: string;
@@ -1314,6 +1794,57 @@ export interface components {
         TokenRequest: {
             token: string;
         };
+        /** @description Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga kiradi). */
+        TopicAdmin: {
+            /** Format: uuid */
+            readonly id: string;
+            slug: string;
+            /** Format: uuid */
+            chapter: string;
+            readonly chapter_slug: string;
+            /** Format: uuid */
+            readonly book: string;
+            readonly book_slug: string;
+            title: components["schemas"]["LocalizedText"];
+            summary?: components["schemas"]["LocalizedText"];
+            /** @description Mavzu bloklari; sxema: `apps/content/schemas.py` (frontend `TopicBlock`). */
+            blocks?: {
+                [key: string]: unknown;
+            }[];
+            notes?: string;
+            readonly status: components["schemas"]["TopicStatusEnum"];
+            readonly order: number;
+            /** Format: email */
+            readonly reviewed_by_email: string | null;
+            /** Format: date-time */
+            readonly reviewed_at: string | null;
+            /** Format: date-time */
+            readonly published_at: string | null;
+            readonly allowed_transitions: components["schemas"]["TopicStatusEnum"][];
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        /** @description Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga kiradi). */
+        TopicAdminRequest: {
+            slug: string;
+            /** Format: uuid */
+            chapter: string;
+            title: components["schemas"]["LocalizedTextRequest"];
+            summary?: components["schemas"]["LocalizedTextRequest"];
+            /** @description Mavzu bloklari; sxema: `apps/content/schemas.py` (frontend `TopicBlock`). */
+            blocks?: {
+                [key: string]: unknown;
+            }[];
+            notes?: string;
+        };
+        TopicCounts: {
+            total: number;
+            draft: number;
+            published: number;
+            reviewed: number;
+        };
         TopicDetail: {
             slug: string;
             order: number;
@@ -1335,6 +1866,26 @@ export interface components {
             slug: string;
             title: components["schemas"]["LocalizedText"];
         };
+        TopicList: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly slug: string;
+            /** Format: uuid */
+            readonly chapter: string;
+            readonly chapter_slug: string;
+            /** Format: uuid */
+            readonly book: string;
+            readonly book_slug: string;
+            readonly title: components["schemas"]["LocalizedText"];
+            readonly status: components["schemas"]["TopicStatusEnum"];
+            readonly order: number;
+            /** Format: date-time */
+            readonly reviewed_at: string | null;
+            /** Format: date-time */
+            readonly published_at: string | null;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
         TopicProgress: {
             readonly topic_id: string;
             readonly book_id: string;
@@ -1354,12 +1905,22 @@ export interface components {
             /** Format: date-time */
             readonly updated_at: string;
         };
+        /**
+         * @description * `draft` - Draft
+         *     * `reviewed` - Reviewed
+         *     * `published` - Published
+         * @enum {string}
+         */
+        TopicStatusEnum: "draft" | "reviewed" | "published";
         TopicSummary: {
             slug: string;
             order: number;
             title: components["schemas"]["LocalizedText"];
             summary: components["schemas"]["LocalizedText"];
             readonly unverified: boolean;
+        };
+        TransitionRequest: {
+            to: components["schemas"]["TopicStatusEnum"];
         };
         /**
          * @description * `topic_opened` - topic_opened
@@ -1368,6 +1929,35 @@ export interface components {
          * @enum {string}
          */
         TypeEnum: "topic_opened" | "topic_read" | "exercise_answered";
+        /**
+         * @description * `cover` - cover
+         *     * `image` - image
+         *     * `pdf` - pdf
+         * @enum {string}
+         */
+        UploadRequestKindEnum: "cover" | "image" | "pdf";
+        UploadRequestRequest: {
+            /** Format: binary */
+            file: string;
+            kind: components["schemas"]["UploadRequestKindEnum"];
+        };
+        UploadResult: {
+            path: string;
+            url: string;
+            name: string;
+            size: number;
+            content_type: string;
+        };
+        UserAdmin: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: email */
+            readonly email: string | null;
+            readonly role: components["schemas"]["RoleEnum"];
+            readonly is_active: boolean;
+            /** Format: date-time */
+            readonly date_joined: string;
+        };
         Weekly: {
             /** Format: date-time */
             since: string;
@@ -1967,6 +2557,639 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Health"];
+                };
+            };
+        };
+    };
+    admin_dashboard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminDashboard"];
+                };
+            };
+        };
+    };
+    admin_uploads_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["UploadRequestRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadResult"];
+                };
+            };
+        };
+    };
+    admin_users_list: {
+        parameters: {
+            query?: {
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                role?: "admin" | "editor" | "student" | "teacher";
+                /** @description A search term. */
+                search?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedUserAdminList"];
+                };
+            };
+        };
+    };
+    admin_subjects_list: {
+        parameters: {
+            query?: {
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /** @description A search term. */
+                search?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedSubjectAdminList"];
+                };
+            };
+        };
+    };
+    admin_subjects_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubjectAdminRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["SubjectAdminRequest"];
+                "multipart/form-data": components["schemas"]["SubjectAdminRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubjectAdmin"];
+                };
+            };
+        };
+    };
+    admin_subjects_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this subject. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubjectAdmin"];
+                };
+            };
+        };
+    };
+    admin_subjects_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this subject. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    admin_subjects_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this subject. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedSubjectAdminRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedSubjectAdminRequest"];
+                "multipart/form-data": components["schemas"]["PatchedSubjectAdminRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubjectAdmin"];
+                };
+            };
+        };
+    };
+    admin_books_list: {
+        parameters: {
+            query?: {
+                grade?: number;
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /** @description A search term. */
+                search?: string;
+                status?: "draft" | "published";
+                /** @description Fan slug'i */
+                subject?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedBookAdminList"];
+                };
+            };
+        };
+    };
+    admin_books_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BookAdminRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["BookAdminRequest"];
+                "multipart/form-data": components["schemas"]["BookAdminRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookAdmin"];
+                };
+            };
+        };
+    };
+    admin_books_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this book. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookAdmin"];
+                };
+            };
+        };
+    };
+    admin_books_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this book. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    admin_books_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this book. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedBookAdminRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedBookAdminRequest"];
+                "multipart/form-data": components["schemas"]["PatchedBookAdminRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookAdmin"];
+                };
+            };
+        };
+    };
+    admin_books_reorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this book. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["ReorderRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ReorderRequest"];
+                "multipart/form-data": components["schemas"]["ReorderRequest"];
+            };
+        };
+        responses: {
+            /** @description No response body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    admin_chapters_list: {
+        parameters: {
+            query?: {
+                /** @description Kitob id'si */
+                book?: string;
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /** @description A search term. */
+                search?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedChapterAdminList"];
+                };
+            };
+        };
+    };
+    admin_chapters_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChapterAdminRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ChapterAdminRequest"];
+                "multipart/form-data": components["schemas"]["ChapterAdminRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChapterAdmin"];
+                };
+            };
+        };
+    };
+    admin_chapters_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this chapter. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChapterAdmin"];
+                };
+            };
+        };
+    };
+    admin_chapters_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this chapter. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    admin_chapters_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this chapter. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedChapterAdminRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedChapterAdminRequest"];
+                "multipart/form-data": components["schemas"]["PatchedChapterAdminRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChapterAdmin"];
+                };
+            };
+        };
+    };
+    admin_topics_list: {
+        parameters: {
+            query?: {
+                /** @description Kitob id'si */
+                book?: string;
+                /** @description Bob id'si */
+                chapter?: string;
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /** @description A search term. */
+                search?: string;
+                status?: "draft" | "published" | "reviewed";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedTopicListList"];
+                };
+            };
+        };
+    };
+    admin_topics_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TopicAdminRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["TopicAdminRequest"];
+                "multipart/form-data": components["schemas"]["TopicAdminRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TopicAdmin"];
+                };
+            };
+        };
+    };
+    admin_topics_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this topic. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TopicAdmin"];
+                };
+            };
+        };
+    };
+    admin_topics_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this topic. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    admin_topics_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this topic. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedTopicAdminRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedTopicAdminRequest"];
+                "multipart/form-data": components["schemas"]["PatchedTopicAdminRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TopicAdmin"];
+                };
+            };
+        };
+    };
+    admin_topics_transition: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this topic. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TransitionRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["TransitionRequest"];
+                "multipart/form-data": components["schemas"]["TransitionRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TopicAdmin"];
                 };
             };
         };

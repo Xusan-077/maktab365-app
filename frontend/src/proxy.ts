@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import createMiddleware from "next-intl/middleware";
 import { auth } from "@/auth";
 import { resolveAuthRedirect } from "@/lib/auth/redirects";
+import { isAdminDenied } from "@/lib/auth/staff";
 import { defaultLocale, isLocale, locales } from "@/lib/i18n/config";
 import { routing } from "@/lib/i18n/routing";
 
@@ -24,6 +25,11 @@ export default auth((request) => {
     session: request.auth,
   });
   if (target) return NextResponse.redirect(new URL(`/${locale}${target}`, origin));
+  // Staff bo'lmaganlar uchun /admin mavjud emasdek: noma'lum yo'lga rewrite → 404 holati.
+  const path = pathname.replace(LOCALE_PREFIX, "") || "/";
+  if (isAdminDenied(path, request.auth?.user?.staff)) {
+    return NextResponse.rewrite(new URL(`/${locale}/not-found-admin`, origin));
+  }
   return intlMiddleware(request);
 });
 

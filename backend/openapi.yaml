@@ -591,6 +591,774 @@ paths:
               schema:
                 $ref: '#/components/schemas/Health'
           description: ''
+  /api/v1/admin/dashboard/:
+    get:
+      operationId: admin_dashboard
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminDashboard'
+          description: ''
+  /api/v1/admin/uploads/:
+    post:
+      operationId: admin_uploads_create
+      tags:
+      - admin
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UploadRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadResult'
+          description: ''
+  /api/v1/admin/users/:
+    get:
+      operationId: admin_users_list
+      description: Foydalanuvchilar ro'yxati — faqat admin (faqat o'qish).
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: role
+        schema:
+          type: string
+          enum:
+          - admin
+          - editor
+          - student
+          - teacher
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserAdminList'
+          description: ''
+  /api/v1/admin/subjects/:
+    post:
+      operationId: admin_subjects_create
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubjectAdminRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SubjectAdminRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SubjectAdminRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubjectAdmin'
+          description: ''
+    get:
+      operationId: admin_subjects_list
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSubjectAdminList'
+          description: ''
+  /api/v1/admin/subjects/{id}/:
+    get:
+      operationId: admin_subjects_retrieve
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this subject.
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubjectAdmin'
+          description: ''
+    patch:
+      operationId: admin_subjects_update
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this subject.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSubjectAdminRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSubjectAdminRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSubjectAdminRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubjectAdmin'
+          description: ''
+    delete:
+      operationId: admin_subjects_delete
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this subject.
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/admin/books/:
+    post:
+      operationId: admin_books_create
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookAdminRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BookAdminRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BookAdminRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookAdmin'
+          description: ''
+    get:
+      operationId: admin_books_list
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      parameters:
+      - in: query
+        name: grade
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - draft
+          - published
+      - in: query
+        name: subject
+        schema:
+          type: string
+        description: Fan slug'i
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBookAdminList'
+          description: ''
+  /api/v1/admin/books/{id}/:
+    get:
+      operationId: admin_books_retrieve
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this book.
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookAdmin'
+          description: ''
+    patch:
+      operationId: admin_books_update
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this book.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBookAdminRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBookAdminRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBookAdminRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookAdmin'
+          description: ''
+    delete:
+      operationId: admin_books_delete
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this book.
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/admin/books/{id}/reorder/:
+    post:
+      operationId: admin_books_reorder
+      description: 'Bob va mavzular tartibi bir so''rovda (qoidalar: `admin_services.reorder_book`).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this book.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReorderRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReorderRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReorderRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/admin/chapters/:
+    post:
+      operationId: admin_chapters_create
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChapterAdminRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ChapterAdminRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ChapterAdminRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChapterAdmin'
+          description: ''
+    get:
+      operationId: admin_chapters_list
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      parameters:
+      - in: query
+        name: book
+        schema:
+          type: string
+        description: Kitob id'si
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedChapterAdminList'
+          description: ''
+  /api/v1/admin/chapters/{id}/:
+    get:
+      operationId: admin_chapters_retrieve
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this chapter.
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChapterAdmin'
+          description: ''
+    patch:
+      operationId: admin_chapters_update
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this chapter.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedChapterAdminRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedChapterAdminRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedChapterAdminRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChapterAdmin'
+          description: ''
+    delete:
+      operationId: admin_chapters_delete
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this chapter.
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/admin/topics/:
+    post:
+      operationId: admin_topics_create
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TopicAdminRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TopicAdminRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TopicAdminRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopicAdmin'
+          description: ''
+    get:
+      operationId: admin_topics_list
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      parameters:
+      - in: query
+        name: book
+        schema:
+          type: string
+        description: Kitob id'si
+      - in: query
+        name: chapter
+        schema:
+          type: string
+        description: Bob id'si
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - draft
+          - published
+          - reviewed
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTopicListList'
+          description: ''
+  /api/v1/admin/topics/{id}/:
+    get:
+      operationId: admin_topics_retrieve
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this topic.
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopicAdmin'
+          description: ''
+    patch:
+      operationId: admin_topics_update
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this topic.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTopicAdminRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTopicAdminRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTopicAdminRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopicAdmin'
+          description: ''
+    delete:
+      operationId: admin_topics_delete
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this topic.
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/admin/topics/{id}/transition/:
+    post:
+      operationId: admin_topics_transition
+      description: 'Nashr oqimi: draft→reviewed→published (editor/admin), published→draft
+        (admin).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this topic.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransitionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TransitionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TransitionRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopicAdmin'
+          description: ''
   /api/v1/grades/:
     get:
       operationId: grades_list
@@ -1249,6 +2017,64 @@ paths:
           description: ''
 components:
   schemas:
+    AdminDashboard:
+      type: object
+      properties:
+        books:
+          $ref: '#/components/schemas/BookCounts'
+        topics:
+          $ref: '#/components/schemas/TopicCounts'
+        new_messages:
+          type: integer
+        recent_messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecentMessage'
+        recent_activity:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditEntry'
+      required:
+      - books
+      - new_messages
+      - recent_activity
+      - recent_messages
+      - topics
+    AuditEntry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        actor_label:
+          type: string
+          maxLength: 254
+        action:
+          type: string
+          maxLength: 32
+        target_type:
+          type: string
+          maxLength: 32
+        target_id:
+          type: string
+          maxLength: 64
+        target_label:
+          type: string
+          maxLength: 200
+        before:
+          nullable: true
+        after:
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - action
+      - created_at
+      - id
+      - target_type
     AuthSession:
       type: object
       properties:
@@ -1322,6 +2148,152 @@ components:
       - topics_count
       - topics_ready
       - year
+    BookAdmin:
+      type: object
+      description: Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga
+        kiradi).
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        slug:
+          type: string
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        subject:
+          type: string
+        grade:
+          type: integer
+          maximum: 11
+          minimum: 1
+        title:
+          $ref: '#/components/schemas/LocalizedText'
+        author:
+          $ref: '#/components/schemas/LocalizedText'
+        publisher:
+          type: string
+          maxLength: 200
+        edition:
+          $ref: '#/components/schemas/LocalizedText'
+        year:
+          type: integer
+          maximum: 2100
+          minimum: 1990
+        cover:
+          type: string
+        cover_url:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        pdf:
+          type: string
+        pdf_url:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        is_published:
+          type: boolean
+        chapters_count:
+          type: integer
+          readOnly: true
+        topics_count:
+          type: integer
+          readOnly: true
+        published_topics_count:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - author
+      - chapters_count
+      - cover_url
+      - created_at
+      - edition
+      - grade
+      - id
+      - pdf_url
+      - published_topics_count
+      - slug
+      - subject
+      - title
+      - topics_count
+      - updated_at
+      - year
+    BookAdminRequest:
+      type: object
+      description: Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga
+        kiradi).
+      properties:
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        subject:
+          type: string
+          minLength: 1
+        grade:
+          type: integer
+          maximum: 11
+          minimum: 1
+        title:
+          $ref: '#/components/schemas/LocalizedTextRequest'
+        author:
+          $ref: '#/components/schemas/LocalizedTextRequest'
+        publisher:
+          type: string
+          maxLength: 200
+        edition:
+          $ref: '#/components/schemas/LocalizedTextRequest'
+        year:
+          type: integer
+          maximum: 2100
+          minimum: 1990
+        cover:
+          type: string
+        pdf:
+          type: string
+        order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        is_published:
+          type: boolean
+      required:
+      - author
+      - edition
+      - grade
+      - slug
+      - subject
+      - title
+      - year
+    BookCounts:
+      type: object
+      properties:
+        total:
+          type: integer
+        draft:
+          type: integer
+        published:
+          type: integer
+      required:
+      - draft
+      - published
+      - total
     BookDetail:
       type: object
       properties:
@@ -1495,6 +2467,71 @@ components:
       - slug
       - title
       - topics
+    ChapterAdmin:
+      type: object
+      description: Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga
+        kiradi).
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        book:
+          type: string
+          format: uuid
+        book_slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        slug:
+          type: string
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          $ref: '#/components/schemas/LocalizedText'
+        order:
+          type: integer
+          readOnly: true
+        topics_count:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - book
+      - book_slug
+      - created_at
+      - id
+      - order
+      - slug
+      - title
+      - topics_count
+      - updated_at
+    ChapterAdminRequest:
+      type: object
+      description: Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga
+        kiradi).
+      properties:
+        book:
+          type: string
+          format: uuid
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          $ref: '#/components/schemas/LocalizedTextRequest'
+      required:
+      - book
+      - slug
+      - title
     CheckStatusEnum:
       enum:
       - ok
@@ -1900,6 +2937,22 @@ components:
           type: string
       required:
       - uz
+    LocalizedTextRequest:
+      type: object
+      description: 'Ko''p tilli matn: API tilni tanlamaydi, klient `getLocalized`
+        bilan tanlaydi.'
+      properties:
+        uz:
+          type: string
+          minLength: 1
+        ru:
+          type: string
+          minLength: 1
+        en:
+          type: string
+          minLength: 1
+      required:
+      - uz
     LoginRequest:
       type: object
       properties:
@@ -2086,6 +3139,29 @@ components:
       required:
       - code
       - email
+    PaginatedBookAdminList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookAdmin'
     PaginatedBookList:
       type: object
       required:
@@ -2109,6 +3185,52 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Book'
+    PaginatedChapterAdminList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChapterAdmin'
+    PaginatedSubjectAdminList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubjectAdmin'
     PaginatedSupportMessageList:
       type: object
       required:
@@ -2132,6 +3254,52 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SupportMessage'
+    PaginatedTopicListList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/TopicList'
+    PaginatedUserAdminList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserAdmin'
     PasswordChangeRequest:
       type: object
       properties:
@@ -2173,6 +3341,61 @@ components:
           maxLength: 128
       required:
       - new_password
+    PatchedBookAdminRequest:
+      type: object
+      description: Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga
+        kiradi).
+      properties:
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        subject:
+          type: string
+          minLength: 1
+        grade:
+          type: integer
+          maximum: 11
+          minimum: 1
+        title:
+          $ref: '#/components/schemas/LocalizedTextRequest'
+        author:
+          $ref: '#/components/schemas/LocalizedTextRequest'
+        publisher:
+          type: string
+          maxLength: 200
+        edition:
+          $ref: '#/components/schemas/LocalizedTextRequest'
+        year:
+          type: integer
+          maximum: 2100
+          minimum: 1990
+        cover:
+          type: string
+        pdf:
+          type: string
+        order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        is_published:
+          type: boolean
+    PatchedChapterAdminRequest:
+      type: object
+      description: Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga
+        kiradi).
+      properties:
+        book:
+          type: string
+          format: uuid
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          $ref: '#/components/schemas/LocalizedTextRequest'
     PatchedProfileUpdateRequest:
       type: object
       properties:
@@ -2231,6 +3454,51 @@ components:
           nullable: true
         done:
           type: boolean
+    PatchedSubjectAdminRequest:
+      type: object
+      description: Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga
+        kiradi).
+      properties:
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          $ref: '#/components/schemas/LocalizedTextRequest'
+        icon:
+          type: string
+          maxLength: 64
+        order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+    PatchedTopicAdminRequest:
+      type: object
+      description: Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga
+        kiradi).
+      properties:
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        chapter:
+          type: string
+          format: uuid
+        title:
+          $ref: '#/components/schemas/LocalizedTextRequest'
+        summary:
+          $ref: '#/components/schemas/LocalizedTextRequest'
+        blocks:
+          type: array
+          description: 'Mavzu bloklari; sxema: `apps/content/schemas.py` (frontend
+            `TopicBlock`).'
+          items:
+            type: object
+            additionalProperties: true
+        notes:
+          type: string
     Profile:
       type: object
       properties:
@@ -2320,6 +3588,26 @@ components:
         * `not_started` - Not started
         * `in_progress` - In progress
         * `read` - Read
+    RecentMessage:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        kind:
+          $ref: '#/components/schemas/SupportKindEnum'
+        message:
+          type: string
+          maxLength: 2000
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - message
     RecentView:
       type: object
       properties:
@@ -2365,6 +3653,21 @@ components:
       required:
       - email
       - password
+    ReorderRequest:
+      type: object
+      properties:
+        chapters:
+          type: array
+          items:
+            type: string
+            format: uuid
+        topics:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+              format: uuid
     ResultCounts:
       type: object
       properties:
@@ -2553,6 +3856,68 @@ components:
       - order
       - slug
       - title
+    SubjectAdmin:
+      type: object
+      description: Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga
+        kiradi).
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        slug:
+          type: string
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          $ref: '#/components/schemas/LocalizedText'
+        icon:
+          type: string
+          maxLength: 64
+        order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        books_count:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - books_count
+      - created_at
+      - id
+      - slug
+      - title
+      - updated_at
+    SubjectAdminRequest:
+      type: object
+      description: Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga
+        kiradi).
+      properties:
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          $ref: '#/components/schemas/LocalizedTextRequest'
+        icon:
+          type: string
+          maxLength: 64
+        order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+      required:
+      - slug
+      - title
     SupportCreateRequest:
       type: object
       properties:
@@ -2730,6 +4095,144 @@ components:
           maxLength: 200
       required:
       - token
+    TopicAdmin:
+      type: object
+      description: Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga
+        kiradi).
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        slug:
+          type: string
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        chapter:
+          type: string
+          format: uuid
+        chapter_slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        book:
+          type: string
+          format: uuid
+          readOnly: true
+        book_slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          $ref: '#/components/schemas/LocalizedText'
+        summary:
+          $ref: '#/components/schemas/LocalizedText'
+        blocks:
+          type: array
+          description: 'Mavzu bloklari; sxema: `apps/content/schemas.py` (frontend
+            `TopicBlock`).'
+          items:
+            type: object
+            additionalProperties: true
+        notes:
+          type: string
+        status:
+          allOf:
+          - $ref: '#/components/schemas/TopicStatusEnum'
+          readOnly: true
+        order:
+          type: integer
+          readOnly: true
+        reviewed_by_email:
+          type: string
+          format: email
+          readOnly: true
+          nullable: true
+        reviewed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        published_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        allowed_transitions:
+          type: array
+          items:
+            $ref: '#/components/schemas/TopicStatusEnum'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - allowed_transitions
+      - book
+      - book_slug
+      - chapter
+      - chapter_slug
+      - created_at
+      - id
+      - order
+      - published_at
+      - reviewed_at
+      - reviewed_by_email
+      - slug
+      - status
+      - title
+      - updated_at
+    TopicAdminRequest:
+      type: object
+      description: Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga
+        kiradi).
+      properties:
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        chapter:
+          type: string
+          format: uuid
+        title:
+          $ref: '#/components/schemas/LocalizedTextRequest'
+        summary:
+          $ref: '#/components/schemas/LocalizedTextRequest'
+        blocks:
+          type: array
+          description: 'Mavzu bloklari; sxema: `apps/content/schemas.py` (frontend
+            `TopicBlock`).'
+          items:
+            type: object
+            additionalProperties: true
+        notes:
+          type: string
+      required:
+      - chapter
+      - slug
+      - title
+    TopicCounts:
+      type: object
+      properties:
+        total:
+          type: integer
+        draft:
+          type: integer
+        published:
+          type: integer
+        reviewed:
+          type: integer
+      required:
+      - draft
+      - published
+      - reviewed
+      - total
     TopicDetail:
       type: object
       properties:
@@ -2794,6 +4297,71 @@ components:
       required:
       - slug
       - title
+    TopicList:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        chapter:
+          type: string
+          format: uuid
+          readOnly: true
+        chapter_slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        book:
+          type: string
+          format: uuid
+          readOnly: true
+        book_slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          allOf:
+          - $ref: '#/components/schemas/LocalizedText'
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/TopicStatusEnum'
+          readOnly: true
+        order:
+          type: integer
+          readOnly: true
+        reviewed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        published_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - book
+      - book_slug
+      - chapter
+      - chapter_slug
+      - id
+      - order
+      - published_at
+      - reviewed_at
+      - slug
+      - status
+      - title
+      - updated_at
     TopicProgress:
       type: object
       properties:
@@ -2844,6 +4412,16 @@ components:
       - mistakes
       - topic_id
       - updated_at
+    TopicStatusEnum:
+      enum:
+      - draft
+      - reviewed
+      - published
+      type: string
+      description: |-
+        * `draft` - Draft
+        * `reviewed` - Reviewed
+        * `published` - Published
     TopicSummary:
       type: object
       properties:
@@ -2865,6 +4443,13 @@ components:
       - summary
       - title
       - unverified
+    TransitionRequest:
+      type: object
+      properties:
+        to:
+          $ref: '#/components/schemas/TopicStatusEnum'
+      required:
+      - to
     TypeEnum:
       enum:
       - topic_opened
@@ -2875,6 +4460,75 @@ components:
         * `topic_opened` - topic_opened
         * `topic_read` - topic_read
         * `exercise_answered` - exercise_answered
+    UploadRequestKindEnum:
+      enum:
+      - cover
+      - image
+      - pdf
+      type: string
+      description: |-
+        * `cover` - cover
+        * `image` - image
+        * `pdf` - pdf
+    UploadRequestRequest:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+        kind:
+          $ref: '#/components/schemas/UploadRequestKindEnum'
+      required:
+      - file
+      - kind
+    UploadResult:
+      type: object
+      properties:
+        path:
+          type: string
+        url:
+          type: string
+        name:
+          type: string
+        size:
+          type: integer
+        content_type:
+          type: string
+      required:
+      - content_type
+      - name
+      - path
+      - size
+      - url
+    UserAdmin:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+          nullable: true
+        role:
+          allOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          readOnly: true
+        is_active:
+          type: boolean
+          readOnly: true
+        date_joined:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - date_joined
+      - email
+      - id
+      - is_active
+      - role
     Weekly:
       type: object
       properties:
