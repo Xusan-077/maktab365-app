@@ -297,7 +297,7 @@ function SelectPopup({
       <div className="fixed inset-0 z-[60]">
         <motion.div
           aria-hidden
-          className="absolute inset-0 bg-slate-950/50"
+          className="bg-overlay absolute inset-0"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

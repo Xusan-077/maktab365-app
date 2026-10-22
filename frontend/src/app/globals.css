@@ -59,6 +59,9 @@
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
   --color-danger-soft-foreground: var(--danger-soft-foreground);
+  --color-danger-strong: var(--danger-strong);
+  --color-danger-strong-hover: var(--danger-strong-hover);
+  --color-overlay: var(--overlay);
 
   --font-sans:
     var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
@@ -71,7 +74,7 @@
   --surface: #ffffff;
   --subtle: #f1f5f9;
   --foreground: #0f172a;
-  --muted: #64748b;
+  --muted: #56657a;
   --border: #e2e8f0;
   --ring: #3b82f6;
   --link: #1d4ed8;
@@ -85,6 +88,9 @@
   --danger: #dc2626;
   --danger-soft: #fee2e2;
   --danger-soft-foreground: #991b1b;
+  --danger-strong: #dc2626;
+  --danger-strong-hover: #b91c1c;
+  --overlay: rgb(2 6 23 / 0.5);
 }
 
 :root[data-theme="dark"] {
@@ -107,6 +113,9 @@
   --danger: #f87171;
   --danger-soft: #3b1518;
   --danger-soft-foreground: #fca5a5;
+  --danger-strong: #dc2626;
+  --danger-strong-hover: #b91c1c;
+  --overlay: rgb(2 6 23 / 0.7);
 }
 
 /* Matn hajmi: S / M / L (rem asosida, hamma narsa mutanosib o'zgaradi). */

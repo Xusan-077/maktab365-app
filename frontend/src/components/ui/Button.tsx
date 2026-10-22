@@ -13,14 +13,15 @@ const variants: Record<ButtonVariant, string> = {
   secondary: "border border-border bg-surface text-foreground shadow-xs hover:bg-subtle",
   ghost: "text-foreground hover:bg-subtle",
   accent: "bg-accent text-on-accent shadow-xs hover:bg-accent-200",
-  danger: "bg-red-600 text-white shadow-xs hover:bg-red-700",
+  danger:
+    "bg-danger-strong text-white shadow-xs hover:bg-danger-strong-hover active:bg-danger-strong-hover",
 };
 
 const sizes: Record<ButtonSize, string> = {
-  sm: "h-8 px-3 text-sm",
-  md: "h-10 px-4 text-sm",
+  sm: "h-9 px-3 text-sm sm:h-8",
+  md: "h-11 px-4 text-sm sm:h-10",
   lg: "h-12 px-6 text-base",
-  icon: "size-10",
+  icon: "size-11 sm:size-10",
 };
 
 /** Havola (`<Link>`) ni tugma ko'rinishida chizish uchun ham ishlatiladi. */

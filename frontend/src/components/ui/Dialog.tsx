@@ -49,7 +49,7 @@ export function Dialog({
         if (e.target === e.currentTarget) onOpenChange(false);
       }}
       className={cn(
-        "bg-surface text-foreground p-0 shadow-lg backdrop:bg-slate-950/50",
+        "bg-surface text-foreground backdrop:bg-overlay p-0 shadow-lg",
         placement === "center"
           ? "border-border m-auto w-[calc(100%-2rem)] max-w-lg rounded-xl border"
           : "border-border mx-0 mt-auto mb-0 w-full max-w-none rounded-t-2xl border-t",
