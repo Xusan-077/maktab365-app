@@ -26,19 +26,4 @@ describe("messages", () => {
     expect(cyrl.nav.login).toBe(transliterateMessage("Kirish"));
     expect(cyrl.language.names.en).toBe("English");
   });
-
-  it("Verbatim kalitli xabarlar va matematik ifodalar kirillda o'zgarmaydi", async () => {
-    type Home = {
-      home: {
-        demo: { subjects: { english: Record<string, string>; math: Record<string, string> } };
-      };
-    };
-    const uz = (await getMessages("uz")) as unknown as Home;
-    const cyrl = (await getMessages("uz-Cyrl")) as unknown as Home;
-    const { english, math } = cyrl.home.demo.subjects;
-    expect(english.exampleVerbatim).toBe(uz.home.demo.subjects.english.exampleVerbatim);
-    expect(english.questionVerbatim).toBe(uz.home.demo.subjects.english.questionVerbatim);
-    expect(math.explanation).toContain("x₁ + x₂ = −p");
-    expect(math.question).toContain("x² − 7x + 12 = 0");
-  });
 });

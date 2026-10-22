@@ -5,19 +5,13 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { PAGE_STACK } from "@/components/layout/containers";
 import { MySupportList } from "@/components/support/MySupportList";
 import { SupportForm } from "@/components/support/SupportForm";
-import { useAppBase } from "@/hooks/useAppBase";
 
 /** Panel ichidagi "Yordam": tezkor maslahatlar, murojaat formasi va "Mening xabarlarim". */
 export function HelpView() {
   const t = useTranslations("panel.helpPage");
   const ts = useTranslations("support");
-  const base = useAppBase();
 
-  const tips = [
-    t("tips.search"),
-    t("tips.bookmarks"),
-    ...(base === "ustoz" ? [t("tips.present")] : [t("tips.progress")]),
-  ];
+  const tips = [t("tips.search"), t("tips.bookmarks"), t("tips.progress")];
 
   return (
     <div className={PAGE_STACK}>

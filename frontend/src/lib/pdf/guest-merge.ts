@@ -3,12 +3,22 @@ import type { PdfPosition } from "./progress";
 
 export type PdfMergeOutcome = "empty" | "merged" | "failed";
 
+export interface GuestPdfData {
+  /** `{ [kitob id]: oxirgi sahifa va yozuv vaqti }`. */
+  positions: Record<string, PdfPosition>;
+  /** Saqlangan kitob id'lari. */
+  bookmarks: string[];
+}
+
 export interface PdfMergeOptions {
   api: {
-    mergeGuest(items: GuestPdfProgress[]): Promise<{ pdf_progress: number; failed: string[] }>;
+    mergeGuest(data: {
+      progress?: GuestPdfProgress[];
+      bookmarks?: string[];
+    }): Promise<{ pdf_progress: number; pdf_bookmarks: number; failed: string[] }>;
   };
-  /** Mehmon pozitsiyalari (store rehydrate qilingan). */
-  load: () => Promise<Record<string, PdfPosition>>;
+  /** Mehmon ma'lumoti (store rehydrate qilingan). */
+  load: () => Promise<GuestPdfData>;
   /** Server qabul qildi: store tozalanadi, keshlar yangilanadi. */
   onMerged: () => void;
 }
@@ -25,15 +35,22 @@ export function toGuestItems(positions: Record<string, PdfPosition>): GuestPdfPr
 }
 
 /**
- * Mehmonning PDF pozitsiyalarini akkauntga qo'shadi (idempotent). Xatoda ma'lumot saqlanadi va
- * keyingi kirishda yoki internet qaytganda qayta yuboriladi (chaqiruvchi `merge` ni qayta ishga tushiradi).
+ * Mehmonning PDF pozitsiyalari va saqlangan kitoblarini akkauntga qo'shadi (idempotent). Xatoda
+ * ma'lumot saqlanadi va keyingi kirishda yoki internet qaytganda qayta yuboriladi (chaqiruvchi
+ * `merge` ni qayta ishga tushiradi).
  */
 export async function mergePdfGuestData(options: PdfMergeOptions): Promise<PdfMergeOutcome> {
-  const items = toGuestItems(await options.load());
-  if (items.length === 0) return "empty";
+  const { positions, bookmarks } = await options.load();
+  const items = toGuestItems(positions);
+  if (items.length === 0 && bookmarks.length === 0) return "empty";
   try {
-    for (let start = 0; start < items.length; start += PDF_MERGE_CHUNK) {
-      await options.api.mergeGuest(items.slice(start, start + PDF_MERGE_CHUNK));
+    const chunks = Math.ceil(Math.max(items.length, bookmarks.length) / PDF_MERGE_CHUNK);
+    for (let index = 0; index < chunks; index += 1) {
+      const start = index * PDF_MERGE_CHUNK;
+      await options.api.mergeGuest({
+        progress: items.slice(start, start + PDF_MERGE_CHUNK),
+        bookmarks: bookmarks.slice(start, start + PDF_MERGE_CHUNK),
+      });
     }
   } catch {
     return "failed";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { BookOpen, Inbox, Layers } from "lucide-react";
+import { BookOpen, Inbox, Layers, Library } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardTitle } from "@/components/ui/Card";
@@ -25,7 +25,6 @@ function Stat({ label, value, hint }: { label: string; value: number; hint?: str
 
 function Counts({ data }: { data: AdminDashboard }) {
   const t = useTranslations("admin.dashboard");
-  const ts = useTranslations("admin.status");
   const tb = useTranslations("admin.bookStatus");
   return (
     <div className="grid gap-4 md:grid-cols-3">
@@ -35,21 +34,18 @@ function Counts({ data }: { data: AdminDashboard }) {
           {t("books")}
         </CardTitle>
         <dl className="mt-4 grid grid-cols-3 gap-3" data-testid="books-counts">
-          <Stat label={t("total")} value={data.books.total} />
-          <Stat label={tb("published")} value={data.books.published} />
-          <Stat label={tb("draft")} value={data.books.draft} />
+          <Stat label={t("total")} value={data.pdf_books.total} />
+          <Stat label={tb("published")} value={data.pdf_books.published} />
+          <Stat label={tb("draft")} value={data.pdf_books.draft} />
         </dl>
       </Card>
       <Card>
         <CardTitle className="flex items-center gap-2">
-          <Layers className="text-link size-5" aria-hidden />
-          {t("topics")}
+          <Library className="text-link size-5" aria-hidden />
+          {t("subjects")}
         </CardTitle>
-        <dl className="mt-4 grid grid-cols-4 gap-3" data-testid="topics-counts">
-          <Stat label={t("total")} value={data.topics.total} />
-          <Stat label={ts("draft")} value={data.topics.draft} />
-          <Stat label={ts("reviewed")} value={data.topics.reviewed} />
-          <Stat label={ts("published")} value={data.topics.published} />
+        <dl className="mt-4" data-testid="subjects-count">
+          <Stat label={t("total")} value={data.subjects_count} />
         </dl>
       </Card>
       <Card>
@@ -126,7 +122,7 @@ function RecentActivity({ data }: { data: AdminDashboard }) {
   );
 }
 
-/** Dashboard: kitob/mavzu sonlari (status bo'yicha), yangi xabarlar va oxirgi o'zgarishlar. */
+/** Dashboard: kitob/fan sonlari (kitoblar status bo'yicha), yangi xabarlar va oxirgi o'zgarishlar. */
 export function DashboardView() {
   const t = useTranslations("admin.dashboard");
   const { data, error, isPending, refetch } = useQuery(adminQueries.dashboard());
@@ -138,7 +134,7 @@ export function DashboardView() {
         description={t("description")}
         action={
           <Link
-            href={ADMIN_ROUTES.books}
+            href={ADMIN_ROUTES.pdfBooks}
             className="text-link text-sm font-medium underline-offset-4 hover:underline"
           >
             {t("allBooks")}

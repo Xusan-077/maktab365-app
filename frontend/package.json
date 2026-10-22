@@ -4,13 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "npm run content:validate",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "content:validate": "tsx scripts/validate-content.ts",
-    "content:import": "cd ../backend && uv run python manage.py import_content ../frontend/src/content",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",

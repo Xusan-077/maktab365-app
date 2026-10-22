@@ -1,4 +1,4 @@
-import { createHttpClient, unwrap, type HttpClient } from "@/lib/api/http-client";
+import { createHttpClient, toApiError, unwrap, type HttpClient } from "@/lib/api/http-client";
 import type { components } from "@/lib/api/schema";
 
 type Schemas = components["schemas"];
@@ -8,6 +8,9 @@ export type PdfFileUrl = Schemas["PdfFileUrl"];
 export type PdfProgress = Schemas["PdfProgress"];
 export type PdfSubject = Schemas["Subject"];
 export type GuestPdfProgress = Schemas["GuestPdfProgressRequest"];
+export type PdfBookmark = Schemas["PdfBookmark"];
+export type PdfLibrary = Schemas["PdfLibrary"];
+export type PdfLibraryItem = Schemas["PdfLibraryItem"];
 
 export const PDF_PAGE_SIZE = 24;
 
@@ -85,13 +88,49 @@ export class PdfBooksApi {
     return unwrap(result);
   }
 
-  /** Mehmon pozitsiyalarini akkauntga qo'shadi (`merge-guest-data/`); qo'shilmagan id'lar `failed`. */
-  async mergeGuest(items: GuestPdfProgress[]): Promise<{ pdf_progress: number; failed: string[] }> {
-    const result = await this.client.POST("/api/v1/me/merge-guest-data/", {
-      body: { pdf_progress: items },
+  /** Kabinet bosh sahifasi: oxirgi ochilgan kitoblar (birinchisi — "davom ettirish") va saqlanganlar soni. */
+  async library(): Promise<PdfLibrary> {
+    return unwrap(await this.client.GET("/api/v1/me/library/"));
+  }
+
+  /** Saqlangan kitoblar, eng yangisi birinchi. */
+  async bookmarks(): Promise<PdfBookmark[]> {
+    return unwrap(await this.client.GET("/api/v1/me/pdf-bookmarks/"));
+  }
+
+  /** Idempotent: takror saqlash xavfsiz. */
+  async addBookmark(id: string): Promise<PdfBookmark> {
+    const result = await this.client.PUT("/api/v1/me/pdf-bookmarks/{pdf_book_id}/", {
+      params: { path: { pdf_book_id: id } },
     });
-    const data = unwrap(result);
-    return { pdf_progress: data.pdf_progress, failed: data.failed };
+    return unwrap(result);
+  }
+
+  /** Idempotent: saqlanmagan kitobni olib tashlash xato emas. */
+  async removeBookmark(id: string): Promise<void> {
+    const result = await this.client.DELETE("/api/v1/me/pdf-bookmarks/{pdf_book_id}/", {
+      params: { path: { pdf_book_id: id } },
+    });
+    if (result.response.status >= 400) throw toApiError(result.response, result.error);
+  }
+
+  /**
+   * Mehmon ma'lumotini akkauntga qo'shadi (`merge-guest-data/`): oxirgi sahifalar va saqlangan
+   * kitoblar. Qo'shilmagan id'lar `failed`.
+   */
+  async mergeGuest(data: {
+    progress?: GuestPdfProgress[];
+    bookmarks?: string[];
+  }): Promise<{ pdf_progress: number; pdf_bookmarks: number; failed: string[] }> {
+    const result = await this.client.POST("/api/v1/me/merge-guest-data/", {
+      body: { pdf_progress: data.progress ?? [], pdf_bookmarks: data.bookmarks ?? [] },
+    });
+    const merged = unwrap(result);
+    return {
+      pdf_progress: merged.pdf_progress,
+      pdf_bookmarks: merged.pdf_bookmarks,
+      failed: merged.failed,
+    };
   }
 }
 

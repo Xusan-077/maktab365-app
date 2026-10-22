@@ -4,36 +4,32 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { SearchSnippet } from "@/components/catalog/SearchSnippet";
-import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Dialog } from "@/components/ui/Dialog";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { useAppPaths } from "@/hooks/useAppPaths";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
-import { useSearchTopics } from "@/hooks/useSearchTopics";
-import { apiQueries, SEARCH_MIN_LENGTH } from "@/lib/api/queries";
 import type { Locale } from "@/lib/i18n/config";
 import { getLocalized } from "@/lib/i18n/localized";
 import { Link, usePathname, useRouter } from "@/lib/i18n/navigation";
+import { pdfQueries, SEARCH_MIN_LENGTH } from "@/lib/pdf-books/queries";
 import { cn } from "@/lib/utils/cn";
+import { pdfBookPath } from "@/lib/utils/routes";
 
 const SEARCH_DEBOUNCE_MS = 200;
-const MAX_RESULTS = 6;
+const MAX_RESULTS = 8;
 
 const isEditable = (target: EventTarget | null) =>
   target instanceof HTMLElement &&
   (target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName));
 
 /**
- * Panel qidiruvi: topbar'dagi tugma yoki ⌘K / Ctrl+K / "/" bilan ochiladi. Natijalar
- * joriy panel ichidagi kitob va mavzu sahifalariga olib boradi (marketing yo'llariga emas).
+ * Panel qidiruvi: topbar'dagi tugma yoki ⌘K / Ctrl+K / "/" bilan ochiladi. Darsliklar nomi
+ * bo'yicha qidiriladi, natija o'qish sahifasiga olib boradi.
  */
 export function PanelSearch({ className }: { className?: string }) {
   const t = useTranslations("panel.search");
   const tErrors = useTranslations("errors");
   const locale = useLocale() as Locale;
-  const paths = useAppPaths();
   const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -42,8 +38,7 @@ export function PanelSearch({ className }: { className?: string }) {
   const q = useDebouncedValue(input.trim(), SEARCH_DEBOUNCE_MS);
   const enabled = q.length >= SEARCH_MIN_LENGTH;
 
-  const books = useQuery({ ...apiQueries.books({ q }), enabled });
-  const topics = useSearchTopics(q);
+  const books = useQuery({ ...pdfQueries.list({ q }), enabled });
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -74,16 +69,10 @@ export function PanelSearch({ className }: { className?: string }) {
     setInput("");
   }
 
-  const bookHits = (books.data ?? []).slice(0, MAX_RESULTS);
-  const topicHits = (topics.data ?? []).slice(0, MAX_RESULTS);
-  const failed = enabled && (books.isError || topics.isError);
-  const pending = enabled && !failed && (books.isPending || topics.isPending);
-  const firstTopic = topicHits.find((hit) => hit.topic.ready);
-  const firstHref = bookHits[0]
-    ? paths.book(bookHits[0].id)
-    : firstTopic
-      ? paths.topic(firstTopic.topic.bookId, firstTopic.topic.id)
-      : undefined;
+  const hits = (books.data?.results ?? []).slice(0, MAX_RESULTS);
+  const failed = enabled && books.isError;
+  const pending = enabled && !failed && books.isPending;
+  const firstHref = hits[0] ? pdfBookPath(hits[0].id) : undefined;
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -133,61 +122,30 @@ export function PanelSearch({ className }: { className?: string }) {
           {failed && (
             <div role="alert" className="flex flex-col items-start gap-2">
               <p className="text-danger text-sm">{tErrors("backendDown")}</p>
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={() => void Promise.all([books.refetch(), topics.refetch()])}
-              >
+              <Button size="sm" variant="secondary" onClick={() => void books.refetch()}>
                 {tErrors("retry")}
               </Button>
             </div>
           )}
-          {enabled && !pending && !failed && bookHits.length === 0 && topicHits.length === 0 && (
+          {enabled && !pending && !failed && hits.length === 0 && (
             <p className="text-muted text-sm">{t("empty", { query: q })}</p>
           )}
 
-          {bookHits.length > 0 && (
+          {hits.length > 0 && (
             <section aria-label={t("books")}>
               <h3 className="text-muted px-3 pb-1 text-xs font-semibold uppercase">{t("books")}</h3>
               <ul>
-                {bookHits.map((book) => (
+                {hits.map((book) => (
                   <li key={book.id}>
-                    <Link href={paths.book(book.id)} className={itemClasses}>
+                    <Link href={pdfBookPath(book.id)} className={itemClasses}>
                       <span className="font-medium">{getLocalized(book.title, locale)}</span>
                       <span className="text-muted text-sm">
-                        {getLocalized(book.author, locale)}
+                        {t("meta", {
+                          grade: book.grade,
+                          subject: getLocalized(book.subject_title, locale),
+                        })}
                       </span>
                     </Link>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          {topicHits.length > 0 && (
-            <section aria-label={t("topics")}>
-              <h3 className="text-muted px-3 pb-1 text-xs font-semibold uppercase">
-                {t("topics")}
-              </h3>
-              <ul>
-                {topicHits.map(({ topic, bookTitle, chapterTitle, snippet }) => (
-                  <li key={topic.id}>
-                    {topic.ready ? (
-                      <Link href={paths.topic(topic.bookId, topic.id)} className={itemClasses}>
-                        <span className="font-medium">{getLocalized(topic.title, locale)}</span>
-                        <span className="text-muted text-sm">
-                          {getLocalized(bookTitle, locale)} · {getLocalized(chapterTitle, locale)}
-                        </span>
-                        <SearchSnippet snippet={snippet} className="text-muted text-sm" />
-                      </Link>
-                    ) : (
-                      <span className={cn(itemClasses, "text-muted hover:bg-transparent")}>
-                        <span className="flex items-center gap-2">
-                          {getLocalized(topic.title, locale)}
-                          <Badge variant="accent">{t("soon")}</Badge>
-                        </span>
-                      </span>
-                    )}
                   </li>
                 ))}
               </ul>

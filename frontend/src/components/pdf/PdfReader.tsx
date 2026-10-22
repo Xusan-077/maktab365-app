@@ -16,6 +16,8 @@ import { clampPage, parsePageParam } from "@/lib/pdf/page-nav";
 import { swipeDirection } from "@/lib/pdf/swipe";
 import { pdfQueries } from "@/lib/pdf-books/queries";
 import { ROUTES } from "@/lib/utils/routes";
+import { ReportErrorLink } from "@/components/support/ReportErrorLink";
+import { PdfBookmarkButton } from "./PdfBookmarkButton";
 import { PdfPageCanvas } from "./PdfPageCanvas";
 import { PdfToolbar } from "./PdfToolbar";
 import { usePdfDocument } from "./usePdfDocument";
@@ -138,7 +140,7 @@ export function PdfReader({ bookId }: { bookId: string }) {
         message={t(notFound ? "notFound" : "loadError")}
         action={
           notFound ? (
-            <Link href={ROUTES.pdfBooks} className="text-link underline">
+            <Link href={ROUTES.textbooks} className="text-link underline">
               {t("back")}
             </Link>
           ) : (
@@ -157,13 +159,14 @@ export function PdfReader({ bookId }: { bookId: string }) {
     <div className="flex flex-col gap-3" data-testid="pdf-reader">
       <div className="flex flex-wrap items-center gap-3">
         <Link
-          href={ROUTES.pdfBooks}
+          href={ROUTES.textbooks}
           className="text-link inline-flex items-center gap-1 text-sm font-medium underline-offset-4 hover:underline"
         >
           <ArrowLeft className="size-4" aria-hidden />
           {t("back")}
         </Link>
         {book.data && <h1 className="min-w-0 flex-1 truncate text-lg font-semibold">{title}</h1>}
+        {book.data && <PdfBookmarkButton bookId={bookId} />}
       </div>
 
       <div className="bg-background/90 sticky top-0 z-10 -mx-4 px-4 py-2 backdrop-blur sm:-mx-6 sm:px-6">
@@ -212,6 +215,8 @@ export function PdfReader({ bookId }: { bookId: string }) {
           </div>
         )}
       </div>
+
+      {book.data && <ReportErrorLink topicId={bookId} />}
     </div>
   );
 }

@@ -1,104 +1,35 @@
 {
   "meta": {
     "title": "maktab365 — textbooks for grades 1–11",
-    "description": "Textbooks for grades 1–11, organised by topic. Free, for students and teachers."
+    "description": "Read grade 1–11 textbooks online, page by page. Free, for students and teachers."
   },
   "brand": {
     "name": "maktab365",
-    "tagline": "Textbooks for grades 1–11, organised by topic — free, for students and teachers."
+    "tagline": "Grade 1–11 textbooks — read online, free, for students and teachers."
   },
   "home": {
     "hero": {
-      "title": "Every school topic — easier to understand.",
-      "subtitle": "Textbooks for grades 1–11, organised by topic: a short explanation, an example and practice. Free, no sign-up needed.",
+      "title": "School textbooks — in one place, free.",
+      "subtitle": "Find grade 1–11 textbooks by grade and subject and read them online page by page. The page where you stopped is remembered.",
       "cta": "Browse textbooks",
       "how": "How does it work?"
-    },
-    "demo": {
-      "badge": "Mini lesson",
-      "subjectLabel": "Choose a subject",
-      "explanationLabel": "Explanation",
-      "questionLabel": "Question",
-      "optionsLabel": "Answer options",
-      "correctTitle": "Correct!",
-      "wrongTitle": "Almost! Try again",
-      "footnote": "Real topics work the same way: read, practise, see the result.",
-      "subjects": {
-        "math": {
-          "name": "Mathematics",
-          "explanation": "Vieta's theorem: the sum of the roots is x₁ + x₂ = −p, their product is x₁ · x₂ = q.",
-          "question": "What is the sum of the roots of x² − 7x + 12 = 0?",
-          "option0": "7",
-          "option1": "−7",
-          "option2": "12",
-          "correct": "Here p = −7, so the sum is −p = 7.",
-          "wrong": "Remember: x₁ + x₂ = −p. Here p = −7."
-        },
-        "english": {
-          "name": "English",
-          "explanation": "Past Simple is used for a finished action at a definite time. For example:",
-          "exampleVerbatim": "I went to school yesterday.",
-          "question": "Complete the sentence:",
-          "questionVerbatim": "Yesterday I ___ to the library.",
-          "option0": "go",
-          "option1": "went",
-          "option2": "gone",
-          "correct": "Correct! Yesterday is a definite past time, so we use Past Simple.",
-          "wrong": "Yesterday points to the past, so you need the second form of the verb."
-        }
-      }
-    },
-    "grades": {
-      "title": "Choose your grade",
-      "hint": "Pick a grade and its subjects appear below.",
-      "label": "Grades",
-      "chip": "Grade {grade}",
-      "reset": "All grades"
-    },
-    "subjects": {
-      "title": "Subjects",
-      "subtitleAll": "Subjects across all grades",
-      "subtitleGrade": "Grade {grade} subjects",
-      "booksCount": "{count, plural, one {# textbook} other {# textbooks}}",
-      "ready": "Topics ready",
-      "soon": "Coming soon",
-      "empty": "No subjects found for this grade.",
-      "error": "Couldn't load subjects. Try refreshing the page.",
-      "loading": "Loading subjects"
-    },
-    "anatomy": {
-      "title": "What's inside a single topic?",
-      "subtitle": "Every topic follows the same clear structure. Example: {book} — {topic}.",
-      "book": "Grade 9 Algebra",
-      "stepOf": "Block {step}",
-      "blocks": {
-        "goal": "Goal",
-        "explanation": "Explanation",
-        "rule": "Rule",
-        "example": "Example",
-        "exercise": "Exercise",
-        "summary": "Summary",
-        "widget": "Interactive widget"
-      },
-      "widgetText": "Change the coefficients and see how the roots respond.",
-      "exerciseTypes": "Multiple choice, typed answer or true/false"
     },
     "audience": {
       "title": "For students and teachers",
       "student": {
         "title": "For students",
         "items": {
-          "a": "Not a wall of text, but a topic: find what you need fast.",
-          "b": "Practice right away, with an explanation of the answer.",
-          "c": "We remember where you left off."
+          "a": "Quickly find the textbook you need by grade and subject.",
+          "b": "Read page by page on a phone or a computer.",
+          "c": "The page where you stopped is remembered."
         }
       },
       "teacher": {
         "title": "For teachers",
         "items": {
-          "a": "A ready sequence of topics for lesson planning.",
-          "b": "Examples and exercises can be worked through together in class.",
-          "c": "Everything is free and every topic can be shared by link."
+          "a": "Find the textbooks you need for a lesson and collect them with “Save”.",
+          "b": "The page number is in the link: share the exact page with the class.",
+          "c": "Everything is free, no sign-up required."
         }
       }
     },
@@ -106,20 +37,16 @@
       "title": "How does it work?",
       "steps": {
         "one": {
-          "title": "Pick a grade and subject",
-          "text": "Find a textbook by grade and subject, or use search."
+          "title": "Choose a grade and subject",
+          "text": "Find a textbook by grade and subject or search by title."
         },
         "two": {
-          "title": "Read the topic",
-          "text": "A short goal, an explanation, the rule and examples."
+          "title": "Open the textbook",
+          "text": "The textbook opens page by page: turn pages with buttons, arrow keys or by typing a page number."
         },
         "three": {
-          "title": "Practise",
-          "text": "Answer the questions — the result and explanation appear instantly."
-        },
-        "four": {
-          "title": "Keep going",
-          "text": "Move on through the topics and come back to review."
+          "title": "Continue",
+          "text": "Your last page is remembered — sign in to continue on any device."
         }
       }
     },
@@ -128,26 +55,30 @@
       "items": {
         "free": {
           "q": "Is the platform free?",
-          "a": "Yes, all textbooks and topics are free."
+          "a": "Yes, all textbooks are free."
         },
         "account": {
           "q": "Do I need an account?",
-          "a": "Not for reading or practising. Signing in is optional and helps save your results."
+          "a": "Not needed. Signing in is optional: it keeps your last page and saved textbooks in your account."
         },
         "phone": {
           "q": "Does it work on a phone?",
-          "a": "Yes. The site is built for phones, and the bottom bar opens textbooks and search with one tap."
+          "a": "Yes. The site is built for phones: swipe to turn pages or use the buttons."
         },
         "languages": {
           "q": "Which languages are available?",
-          "a": "Uzbek (Latin and Cyrillic), Russian and English. Language coverage grows as topic texts are translated."
+          "a": "The site is in Uzbek (Latin and Cyrillic), Russian and English. The textbooks themselves are in the language of the uploaded file."
         }
       }
     },
     "cta": {
-      "title": "Open your first topic now",
-      "text": "Choose your grade and start with today's topic.",
+      "title": "Open your first textbook now",
+      "text": "Choose your grade and start reading.",
       "button": "Browse textbooks"
+    },
+    "catalog": {
+      "title": "Choose a grade and subject",
+      "hint": "Find a textbook and start reading."
     }
   },
   "ui": {
@@ -167,7 +98,6 @@
   },
   "nav": {
     "textbooks": "Textbooks",
-    "subjects": "Subjects",
     "about": "About",
     "login": "Log in",
     "search": "Search",
@@ -176,12 +106,11 @@
     "mobile": "Mobile navigation",
     "home": "Home",
     "goToCabinet": "Go to dashboard",
-    "goToTeacher": "Go to teacher panel",
-    "pdfBooks": "PDF textbooks"
+    "goToTeacher": "Go to teacher panel"
   },
   "search": {
     "label": "Search the site",
-    "placeholder": "Search for a topic, subject or grade…",
+    "placeholder": "Search textbooks by title…",
     "submit": "Search"
   },
   "language": {
@@ -298,229 +227,6 @@
     "splashResetDone": "Done. Fully reload the home page.",
     "splashResetFailed": "Couldn't write to browser storage"
   },
-  "catalog": {
-    "topicsTitle": "Matching topics",
-    "meta": {
-      "title": "Textbooks",
-      "description": "Textbooks for grades 1–11: browse by grade and subject, or search by book or topic name."
-    },
-    "title": "Textbooks",
-    "subtitle": "Browse by grade and subject, or search by book or topic name.",
-    "searchLabel": "Search books or topics",
-    "searchPlaceholder": "Book or topic name…",
-    "gradeLabel": "Grade",
-    "subjectLabel": "Subject",
-    "allSubjects": "All subjects",
-    "activeFilters": "Active filters",
-    "removeFilter": "Remove filter: {label}",
-    "searchChip": "Search: “{query}”",
-    "clearAll": "Clear all",
-    "resultCount": "{count, plural, one {# textbook found} other {# textbooks found}}",
-    "matchedTopics": "Matching topics",
-    "loading": "Loading textbooks",
-    "error": "Couldn't load textbooks. Try refreshing the page.",
-    "empty": {
-      "title": "Nothing found",
-      "text": "No textbooks match the selected filters.",
-      "tryGrade": "Try another grade:",
-      "tryQuery": "Shorten your search or try a different word."
-    },
-    "readProgress": "{done} of {total} topics read",
-    "readProgressLabel": "{title}: topics read"
-  },
-  "book": {
-    "author": "Author",
-    "year": "Year published",
-    "edition": "Edition",
-    "grade": "Grade",
-    "subject": "Subject",
-    "pdfRead": "Read PDF",
-    "pdfMissing": "PDF not uploaded yet",
-    "learn": "Learn by topics",
-    "soon": "Coming soon",
-    "details": "Book page",
-    "chapters": "Chapters and topics",
-    "chapterLabel": "Chapter {order}",
-    "topicsCount": "{count, plural, one {# topic} other {# topics}}",
-    "noChapters": "Topics will be added soon.",
-    "meta": {
-      "description": "Grade {grade} {subject} textbook. Author: {author}. Published {year}, {edition}."
-    }
-  },
-  "topicStatus": {
-    "none": "Not read",
-    "started": "Started",
-    "completed": "Read"
-  },
-  "topic": {
-    "meta": {
-      "description": "{book} · {chapter}: the topic “{title}” — explanation, examples and practice."
-    },
-    "notReady": "This topic is not ready yet",
-    "toc": {
-      "label": "Topic contents",
-      "title": "Contents"
-    },
-    "sections": {
-      "goal": "What you will learn",
-      "explanation": "Plain explanation",
-      "rule": "Key rule",
-      "example": "Worked example",
-      "exercise": "Try it yourself",
-      "summary": "Short summary"
-    },
-    "toolbar": {
-      "label": "Topic actions",
-      "bookmark": "Bookmark",
-      "bookmarked": "Bookmarked",
-      "print": "Print",
-      "bookmarkAdded": "Added to bookmarks",
-      "bookmarkRemoved": "Removed from bookmarks",
-      "error": "Could not complete the action, please try again",
-      "bookmarkGuestHint": "When you sign in, bookmarks move to your account."
-    },
-    "resume": {
-      "message": "Your last reading spot is saved.",
-      "action": "Continue",
-      "dismiss": "Dismiss"
-    },
-    "example": {
-      "stepLabel": "Step {current} of {total}",
-      "next": "Next step",
-      "showAll": "Show all",
-      "restart": "Start over",
-      "done": "All steps shown"
-    },
-    "exercise": {
-      "label": "Exercise {order}",
-      "check": "Check",
-      "hint": "Hint",
-      "hideHint": "Hide hint",
-      "showExplanation": "Show explanation",
-      "hideExplanation": "Hide explanation",
-      "explanationTitle": "Explanation",
-      "answerLabel": "Your answer",
-      "answerPlaceholder": "Type your answer",
-      "answerRequired": "Enter or choose an answer first.",
-      "true": "True",
-      "false": "False",
-      "correct": "Correct! Well done.",
-      "incorrect": "Not quite yet. Check the hint and try again.",
-      "correctAnswer": "Correct answer: {answer}",
-      "progress": "{done} of {total} exercises done",
-      "allDone": "All exercises done",
-      "saveInvite": "Sign in to save your result.",
-      "saveInviteAction": "Sign in",
-      "saved": "Result saved",
-      "teacherAnswer": "Answer (for teacher)",
-      "syncing": "Sending your result; if you are offline it will be sent when you are back online",
-      "orderHint": "Use the buttons to put the items in the correct order.",
-      "moveUp": "{item} — move up",
-      "moveDown": "{item} — move down"
-    },
-    "choiceExplain": {
-      "title": "Pick an option and see the reason",
-      "hint": "You will see why each option is right or wrong.",
-      "correct": "Correct",
-      "incorrect": "Incorrect",
-      "reason": "Reason",
-      "reset": "Start over"
-    },
-    "graph": {
-      "title": "Change the coefficients",
-      "hint": "Drag the sliders: the graph and roots update instantly.",
-      "figure": "Graph of a quadratic function",
-      "discriminant": "Discriminant",
-      "roots": "Roots",
-      "noRoots": "No real roots",
-      "sum": "Sum",
-      "product": "Product",
-      "vertex": "Vertex",
-      "aZero": "The coefficient a must not be zero: the parabola turns into a straight line.",
-      "reset": "Initial values",
-      "loading": "Loading widget…"
-    },
-    "next": {
-      "label": "Next topic",
-      "title": "Next topic",
-      "last": "This is the last topic in the book",
-      "toBook": "Back to the book contents",
-      "previous": "Previous topic"
-    },
-    "teacher": {
-      "title": "For teachers",
-      "present": "Present in class",
-      "hint": "F — present in class. In the mode: space or → next step, ← back, A answers, Esc exit.",
-      "showAnswers": "Show answers",
-      "hideAnswers": "Hide answers",
-      "barLabel": "Presentation controls",
-      "prevStep": "Previous step",
-      "nextStep": "Next step",
-      "exit": "Exit",
-      "share": {
-        "open": "Link and QR",
-        "title": "Link and QR code",
-        "description": "Students scan it with a phone camera to open the topic.",
-        "linkLabel": "Topic link",
-        "copy": "Copy",
-        "copied": "Link copied",
-        "copyFailed": "Could not copy. Select the link and copy it by hand.",
-        "qrLabel": "QR code for the topic link",
-        "larger": "Enlarge",
-        "smaller": "Shrink"
-      },
-      "print": {
-        "open": "Print selection",
-        "title": "Print",
-        "description": "Only the selected sections will be printed.",
-        "sections": "Sections",
-        "withAnswers": "With exercise answers",
-        "action": "Print",
-        "cancel": "Cancel"
-      }
-    },
-    "markRead": {
-      "action": "I have read this topic",
-      "done": "Topic marked as read"
-    },
-    "draft": "Not yet reviewed",
-    "draftHint": "This topic's text has not been checked against the textbook yet; it may contain mistakes.",
-    "geometryPoints": {
-      "title": "Drag the points",
-      "hint": "Drag the vertices with a mouse or finger, or focus one and use the arrow keys.",
-      "figure": "A triangle and its vertices",
-      "point": "Point {label}: ({x}, {y})",
-      "reset": "Reset",
-      "angle": {
-        "right": "Right triangle",
-        "acute": "Acute triangle",
-        "obtuse": "Obtuse triangle",
-        "degenerate": "The points are collinear — no triangle"
-      },
-      "side": {
-        "equilateral": "equilateral",
-        "isosceles": "isosceles",
-        "scalene": "scalene"
-      },
-      "pythagoras": "The squares of the legs add up to the square of the hypotenuse: {a} + {b} = {c}."
-    },
-    "timeline": {
-      "title": "Timeline",
-      "hint": "Select a date to open a short note. Use the arrow keys to move between dates."
-    }
-  },
-  "subjectsPage": {
-    "meta": {
-      "title": "Subjects",
-      "description": "Textbooks by school subject: pick a grade and find the book you need."
-    },
-    "title": "Subjects",
-    "subtitle": "Choose a subject and see its textbooks for every grade.",
-    "booksCount": "{count, plural, one {# textbook} other {# textbooks}}",
-    "metaSubject": "{subject} textbooks for grades 1–11",
-    "gradeHeading": "Grade {grade}",
-    "empty": "No textbooks have been added for this subject yet."
-  },
   "breadcrumb": {
     "label": "Breadcrumb",
     "home": "Home"
@@ -536,14 +242,13 @@
     "backToPanel": "Back to home",
     "notFoundCode": "404",
     "toTextbooks": "Browse textbooks",
-    "searchLabel": "Search for a textbook or topic",
-    "searchPlaceholder": "Textbook or topic name…",
-    "popularSubjects": "Popular subjects"
+    "searchLabel": "Search textbooks",
+    "searchPlaceholder": "Textbook title…"
   },
   "auth": {
     "signInGoogle": "Sign in with Google",
     "loginTitle": "Sign in to maktab365",
-    "loginText": "Signing in is optional: you can read the textbooks without an account. When you sign in, your progress and bookmarks are kept in your account.",
+    "loginText": "Signing in is optional: you can read textbooks without an account. If you sign in, your last page and saved textbooks are kept in your account.",
     "continueAsGuest": "Continue without signing in",
     "loading": "Loading…",
     "menuLabel": "User menu: {name}",
@@ -552,16 +257,16 @@
     "settings": "Settings",
     "signOut": "Sign out",
     "guestMerged": "Guest data added to your account",
-    "guestMergedHint": "Your progress and bookmarks are now in your account."
+    "guestMergedHint": "Your last pages and saved textbooks are now in your account."
   },
   "onboarding": {
     "title": "How will you use maktab365?",
     "text": "We ask this once. You can change it later in settings.",
     "roleLegend": "Who are you?",
     "roleStudent": "I am a student",
-    "roleStudentHint": "I read topics and practise",
+    "roleStudentHint": "I read textbooks",
     "roleTeacher": "I am a teacher",
-    "roleTeacherHint": "I look for materials for my lessons",
+    "roleTeacherHint": "I look for textbooks for lessons",
     "nameLabel": "Your name",
     "gradeLabel": "Your grade",
     "gradePlaceholder": "Choose a grade",
@@ -594,9 +299,9 @@
     "signOut": "Sign out of account",
     "about": {
       "title": "About the project",
-      "text": "maktab365 is a free platform for reading grade 1–11 textbooks topic by topic.",
-      "free": "All textbooks and exercises are free.",
-      "topics": "Every topic: rule, solved example, exercise and summary.",
+      "text": "maktab365 is a free platform for reading grade 1–11 textbooks online.",
+      "free": "All textbooks are free.",
+      "topics": "Find by grade and subject and read page by page: your last page is remembered.",
       "languages": "In Uzbek (Latin and Cyrillic), Russian and English."
     },
     "data": {
@@ -654,185 +359,23 @@
   "cabinet": {
     "title": "Dashboard",
     "greeting": "Hello, {name}!",
-    "lead": "Pick up the topic you started last.",
-    "browse": "Browse textbooks",
-    "loadFailed": "Could not load your data. Try refreshing the page.",
+    "lead": "Pick up the textbook you opened last.",
     "nav": {
       "label": "Dashboard sections",
       "home": "Home",
-      "subjects": "My subjects",
       "textbooks": "Textbooks",
-      "results": "Results",
-      "saved": "Saved",
-      "pdfBooks": "PDF textbooks"
-    },
-    "continue": {
-      "title": "{subject} · {topic}",
-      "titleNoSubject": "{topic}",
-      "lastPart": "Last part you read: {part}",
-      "partStart": "the start of the topic",
-      "partWithTitle": "{section} — {title}",
-      "partExercise": "{section}, exercise {order}",
-      "action": "Continue",
-      "actionLabel": "Continue the topic: {topic}",
-      "emptyTitle": "Start your first topic",
-      "emptyText": "Pick a textbook and read one topic. Your continue card will appear here.",
-      "doneTitle": "You have finished every topic you started",
-      "doneText": "Pick a new topic, or see what to review in Results."
-    },
-    "status": {
-      "read": {
-        "none": "Topic not read",
-        "started": "Reading started",
-        "completed": "I have read the topic"
-      },
-      "exercise": {
-        "none": "Exercises not done",
-        "in_progress": "Exercises in progress",
-        "completed": "I have passed the exercises"
-      },
-      "mistakes": "{count} exercises with mistakes"
-    },
-    "subjects": {
-      "title": "My subjects",
-      "pageLead": "Grade {grade} subjects and your reading progress in them.",
-      "empty": "No textbooks for your grade have been added yet.",
-      "noGrade": "Your grade is not set. Choose it in settings and your subjects will show up here.",
-      "settings": "Go to settings",
-      "soon": "Topics coming soon",
-      "topicsRead": "{done} of {total} topics read",
-      "progressLabel": "{title}: topics read",
-      "all": "All subjects"
-    },
-    "review": {
-      "title": "To review",
-      "empty": "Nothing to review. If you make a mistake in an exercise, the topic will show up here.",
-      "action": "Go to exercises",
-      "all": "All ({count})"
-    },
-    "saved": {
-      "title": "Saved",
-      "empty": "Nothing saved yet. Use the bookmark button on a topic page to save it for later.",
-      "remove": "{topic} — remove from saved",
-      "removeAction": "Remove",
-      "all": "All ({count})"
-    },
-    "weekly": {
-      "title": "This week",
-      "period": "Last 7 days",
-      "finished": "Finished topics",
-      "read": "Topics read",
-      "passed": "Topics with exercises passed",
-      "mistakes": "Exercises with mistakes",
-      "empty": "No results this week yet. Read a topic and do its exercises.",
-      "more": "See by topic"
-    },
-    "results": {
-      "title": "Results",
-      "lead": "Topic by topic: what you know well and what to review.",
-      "summary": "{mastered} well learned · {review} to review · {progress} in progress",
-      "statesNote": "“I have read the topic” and “I have passed the exercises” are tracked separately.",
-      "mastered": {
-        "title": "Well learned",
-        "text": "Exercises done without mistakes.",
-        "empty": "No well-learned topics yet."
-      },
-      "review": {
-        "title": "To review",
-        "text": "You made mistakes in the exercises.",
-        "empty": "Nothing to review."
-      },
-      "inProgress": {
-        "title": "In progress",
-        "text": "Started, but the exercises are not finished.",
-        "empty": "No topics in progress."
-      },
-      "emptyTitle": "Start your first topic",
-      "emptyText": "Results appear here once you read a topic and do its exercises: what you know well and what to review."
-    },
-    "plan": {
-      "title": "Study plan",
-      "lead": "Add small goals for yourself and tick them off.",
-      "listLabel": "Goals list",
-      "fieldLabel": "New goal",
-      "placeholder": "For example: review Vieta's theorem",
-      "add": "Add",
-      "empty": "Your plan is empty. Write a first goal, for example: read one topic today.",
-      "progress": "{done} of {total} done",
-      "edit": "Edit: {title}",
-      "remove": "Delete: {title}",
-      "editLabel": "Goal text",
-      "save": "Save",
-      "cancel": "Cancel",
-      "removed": "Goal deleted",
-      "failed": "Could not do that, please try again",
-      "errors": {
-        "titleRequired": "Write a goal",
-        "titleTooLong": "Keep the goal under 120 characters"
-      }
+      "saved": "Saved"
     }
   },
   "teacher": {
     "title": "Teacher panel",
     "greeting": "Hello, {name}!",
-    "lead": "Find the material you need, fast.",
+    "lead": "Find and save textbooks for your lessons.",
     "nav": {
       "label": "Teacher panel sections",
-      "books": "Textbooks",
-      "topics": "Topics",
       "saved": "Saved",
-      "pdfBooks": "PDF textbooks"
-    },
-    "search": {
-      "label": "Search for a book or topic",
-      "placeholder": "Search for a book or topic…"
-    },
-    "filter": {
-      "subjects": "Subjects",
-      "grades": "Grades",
-      "reset": "Back to my subjects and grades"
-    },
-    "books": {
-      "title": "Books",
-      "empty": "No books found for the selected subjects and grades.",
-      "clearFilters": "Clear filter",
-      "loadFailed": "Could not load books. Try refreshing the page."
-    },
-    "recent": {
-      "title": "Recently opened topics",
-      "empty": "You have not opened any topics yet. They will show up here (on this device)."
-    },
-    "saved": {
-      "title": "Saved materials",
-      "pageTitle": "Saved",
-      "books": "Books",
-      "topics": "Topics",
-      "emptyBooks": "No saved books. Add one with the Save button on a book card.",
-      "emptyTopics": "No saved topics. Add one with the Save or bookmark button on a topic.",
-      "all": "All saved"
-    },
-    "results": {
-      "books": "Books",
-      "topics": "Topics",
-      "soon": "Coming soon",
-      "empty": "Nothing found for “{query}” in the selected subjects and grades.",
-      "hidden": "{count} results are hidden by the filter."
-    },
-    "topicsPage": {
-      "title": "Topics",
-      "lead": "Topics in the selected subjects and grades. Open a ready topic and show it in class.",
-      "empty": "No books with ready topics in the selected subjects and grades.",
-      "chapter": "Chapter {order}. {title}",
-      "soon": "Coming soon"
-    },
-    "save": {
-      "save": "Save",
-      "saved": "Saved",
-      "saveLabel": "{title} — save",
-      "removeLabel": "{title} — remove from saved",
-      "added": "Saved",
-      "removed": "Removed from saved",
-      "error": "Could not do that, please try again"
+      "home": "Home",
+      "textbooks": "Textbooks"
     }
   },
   "panel": {
@@ -846,42 +389,40 @@
     "search": {
       "open": "Open search",
       "title": "Search",
-      "label": "Search textbooks or topics",
-      "placeholder": "Search textbooks or topics",
+      "label": "Search textbooks",
+      "placeholder": "Search textbooks by title",
       "hint": "Type at least 2 characters. Quick open: Ctrl+K or /.",
       "empty": "Nothing found for “{query}”.",
       "books": "Textbooks",
-      "topics": "Topics",
-      "soon": "Soon"
+      "meta": "Grade {grade} · {subject}"
     },
     "helpPage": {
       "title": "Help",
       "lead": "Have a question or idea, or found a bug? Write to us.",
       "tipsTitle": "Quick tips",
       "tips": {
-        "search": "On any page press Ctrl+K (or /) to quickly search textbooks and topics.",
-        "bookmarks": "Press “Save” on a topic and it appears under “Saved”.",
-        "present": "On a topic page, F turns on “Present in class” mode and Esc leaves it.",
-        "progress": "Read a topic and solve the exercises — results show up under “Results”."
+        "search": "On any page press Ctrl+K (or /) to quickly search textbooks.",
+        "bookmarks": "Press “Save” on a textbook and it appears under “Saved”.",
+        "progress": "Your last opened page is remembered: “Continue” on the home page takes you there."
       },
       "formTitle": "Send a message"
     }
   },
   "aboutPage": {
     "title": "About the project",
-    "lead": "maktab365 — grade 1–11 textbooks topic by topic, free, for students and teachers.",
+    "lead": "maktab365 — grade 1–11 textbooks online, free, for students and teachers.",
     "points": {
       "free": {
         "title": "Everything is free",
-        "text": "No payment for textbooks, topics or exercises."
+        "text": "No payment for reading textbooks."
       },
       "topics": {
-        "title": "Topic by topic",
-        "text": "Textbooks are split into chapters and chapters into short topics: rule, example, exercise and summary in one place."
+        "title": "By grade and subject",
+        "text": "Find a textbook by grade and subject and read it page by page; the page where you stopped is remembered."
       },
       "roles": {
         "title": "For students and teachers",
-        "text": "Students track progress; teachers present a topic in class and save materials."
+        "text": "Students continue where they stopped; teachers save the textbooks they need."
       },
       "languages": {
         "title": "In several languages",
@@ -1008,7 +549,7 @@
     "haveAccount": "Already have an account?",
     "loginLink": "Sign in",
     "registerTitle": "Sign up for maktab365",
-    "registerText": "An account keeps your progress and bookmarks. Free."
+    "registerText": "An account keeps your last page and saved textbooks. Free."
   },
   "support": {
     "kindLabel": "Message type",
@@ -1050,7 +591,7 @@
     "reportError": {
       "link": "Found a mistake?",
       "title": "Report a mistake",
-      "description": "Describe the mistake in this topic — the page address is added automatically.",
+      "description": "Describe the mistake in the textbook — the page address is added automatically.",
       "close": "Done"
     }
   },
@@ -1064,7 +605,6 @@
       "users": "Users",
       "site": "Go to site",
       "signOut": "Sign out",
-      "pdfBooks": "Books (PDF)",
       "subjects": "Subjects"
     },
     "roles": {
@@ -1089,39 +629,24 @@
       "prev": "Previous",
       "next": "Next"
     },
-    "status": {
-      "draft": "Draft",
-      "reviewed": "Reviewed",
-      "published": "Published"
-    },
     "bookStatus": {
       "draft": "Hidden",
       "published": "Visible"
     },
-    "transition": {
-      "review": "Mark reviewed",
-      "publish": "Publish",
-      "unpublish": "Return to draft",
-      "done": {
-        "review": "Topic marked as reviewed",
-        "publish": "Topic published",
-        "unpublish": "Topic returned to draft"
-      }
-    },
     "dashboard": {
       "title": "Admin dashboard",
-      "description": "Content status and latest changes.",
+      "description": "Books, subjects and recent changes.",
       "allBooks": "All books",
       "loading": "Loading numbers",
       "books": "Books",
-      "topics": "Topics",
       "messages": "Messages",
       "total": "Total",
       "newMessages": "New messages",
       "recentMessages": "Latest new messages",
       "noMessages": "No new messages.",
       "recentActivity": "Latest changes",
-      "noActivity": "No changes yet."
+      "noActivity": "No changes yet.",
+      "subjects": "Subjects"
     },
     "audit": {
       "actions": {
@@ -1141,114 +666,20 @@
       }
     },
     "books": {
-      "title": "Books",
-      "description": "Find textbooks, edit them and manage their publication status.",
-      "new": "New book",
-      "loading": "Loading books",
-      "empty": "No books yet. Add the first one.",
-      "emptyFiltered": "No books match these filters.",
       "gradeLabel": "Grade {grade}",
       "filters": {
-        "search": "Search by title or slug",
         "grade": "Grade",
         "subject": "Subject",
         "status": "Status",
         "allGrades": "All grades",
         "allSubjects": "All subjects",
         "allStatuses": "All statuses"
-      },
-      "columns": {
-        "title": "Title",
-        "grade": "Grade",
-        "subject": "Subject",
-        "status": "Status",
-        "topics": "Topics (published / total)",
-        "updated": "Updated"
       }
-    },
-    "bookForm": {
-      "createTitle": "New book",
-      "createDescription": "Enter the book details. You add chapters and topics after creating it.",
-      "editTitle": "Edit book",
-      "slug": "Slug (book identifier)",
-      "slugHint": "Lowercase Latin letters, digits and hyphens, e.g. algebra-9. It cannot be changed later.",
-      "slugLocked": "The slug is fixed: it is part of links and student progress.",
-      "subject": "Subject",
-      "grade": "Grade",
-      "gradeOption": "Grade {grade}",
-      "choose": "Choose",
-      "year": "Publication year",
-      "title": "Book title",
-      "author": "Author",
-      "edition": "Edition",
-      "publisher": "Publisher",
-      "cover": "Cover (JPG, PNG or WebP)",
-      "pdf": "PDF file",
-      "isPublished": "Show on the site",
-      "isPublishedHint": "When off, the book is visible only in the admin panel. Topics are published separately.",
-      "save": "Save",
-      "create": "Create book",
-      "saved": "Book saved",
-      "created": "Book created",
-      "deleted": "Book deleted",
-      "deleteTitle": "Delete book",
-      "deleteDescription": "“{title}” and all its chapters and topics will be deleted. This cannot be undone.",
-      "backToList": "← Books"
-    },
-    "upload": {
-      "none": "No file uploaded",
-      "choose": "Choose file",
-      "replace": "Replace",
-      "remove": "Remove"
     },
     "localized": {
       "uz": "Uzbek (required)",
       "ru": "Russian",
       "en": "English"
-    },
-    "chapter": {
-      "createTitle": "New chapter",
-      "editTitle": "Edit chapter",
-      "title": "Chapter title",
-      "slug": "Slug",
-      "slugHint": "Lowercase Latin letters, digits and hyphens. Filled in from the title.",
-      "slugLocked": "The slug is fixed."
-    },
-    "tree": {
-      "title": "Chapters and topics",
-      "hint": "Drag to reorder or use the ↑ ↓ buttons. A topic can also be moved to another chapter.",
-      "addChapter": "Add chapter",
-      "addTopic": "Add topic",
-      "empty": "No chapters yet. Add the first one.",
-      "emptyChapter": "This chapter has no topics.",
-      "editChapter": "Edit chapter: {title}",
-      "deleteChapter": "Delete chapter: {title}",
-      "deleteTopic": "Delete topic: {title}",
-      "moveUp": "Move up: {title}",
-      "moveDown": "Move down: {title}",
-      "deleteChapterTitle": "Delete chapter",
-      "deleteTopicTitle": "Delete topic",
-      "deleteDescription": "“{title}” will be deleted. This cannot be undone."
-    },
-    "topic": {
-      "createTitle": "New topic",
-      "editTitle": "Edit topic",
-      "title": "Topic title",
-      "slug": "Slug",
-      "slugHint": "Unique within the book: lowercase Latin letters, digits and hyphens. Filled in from the title.",
-      "slugLocked": "The slug is fixed: it is part of the topic link.",
-      "summary": "Short summary",
-      "summaryHint": "Shown in topic lists (Uzbek).",
-      "notes": "Internal notes",
-      "notesHint": "For editors only, not shown on the site.",
-      "blocks": "Topic blocks (JSON)",
-      "blocksHint": "An array of blocks; its shape must follow the textbook block schema. The server validates it on save.",
-      "saved": "Topic saved",
-      "created": "Topic created",
-      "backToBook": "← Back to the book",
-      "inBook": "Book: {book}",
-      "reviewedBy": "Reviewed by {email}",
-      "publishedAt": "published {date}"
     },
     "users": {
       "title": "Users",
@@ -1421,24 +852,26 @@
   },
   "pdfBooks": {
     "meta": {
-      "title": "PDF textbooks",
-      "description": "Read grade 1–11 PDF textbooks online, page by page. Free.",
-      "readerTitle": "PDF textbook"
+      "title": "Textbooks",
+      "description": "Find grade 1–11 textbooks by grade and subject and read them online page by page. Free.",
+      "readerTitle": "Textbook"
     },
     "catalog": {
-      "title": "PDF textbooks",
+      "title": "Textbooks",
       "description": "Pick a grade and subject, open a textbook and read it page by page.",
       "gradeFilter": "Grade",
       "subjectFilter": "Subject",
       "allGrades": "All",
       "allSubjects": "All subjects",
       "gradeLabel": "Grade {grade}",
-      "loading": "Loading PDF textbooks",
-      "results": "PDF textbooks list",
-      "empty": "No PDF textbooks yet.",
-      "emptyFiltered": "No PDF textbooks for this grade and subject.",
-      "error": "Could not load PDF textbooks.",
-      "retry": "Try again"
+      "loading": "Loading textbooks",
+      "results": "Textbook list",
+      "empty": "No textbooks yet.",
+      "emptyFiltered": "No textbooks found for this grade, subject or search.",
+      "error": "Could not load the textbooks.",
+      "retry": "Try again",
+      "searchLabel": "Search textbooks by title",
+      "searchPlaceholder": "Textbook title…"
     },
     "card": {
       "meta": "Grade {grade} · {subject}",
@@ -1447,7 +880,7 @@
       "unverified": "Not reviewed yet"
     },
     "reader": {
-      "back": "PDF textbooks",
+      "back": "Textbooks",
       "toolbar": "Pages",
       "prev": "Previous page",
       "next": "Next page",
@@ -1459,8 +892,31 @@
       "notFound": "This textbook was not found or is not published yet.",
       "retry": "Try again"
     },
-    "search": {
-      "title": "PDF textbooks"
+    "bookmark": {
+      "save": "Save",
+      "saved": "Saved"
+    }
+  },
+  "library": {
+    "loadFailed": "Could not load the data. Refresh the page.",
+    "continue": {
+      "position": "Page {page} of {total}",
+      "action": "Continue",
+      "actionLabel": "Continue “{title}”",
+      "emptyTitle": "Open your first textbook",
+      "emptyText": "Pick a grade and subject and read the textbook page by page. Where you stopped is remembered here.",
+      "browse": "Browse textbooks"
+    },
+    "recent": {
+      "title": "Recently opened",
+      "empty": "No other opened textbooks."
+    },
+    "saved": {
+      "title": "Saved",
+      "all": "All ({count})",
+      "empty": "You have not saved anything yet. Press “Save” on a textbook page.",
+      "browse": "Go to textbooks",
+      "loadFailed": "Could not load saved textbooks."
     }
   }
 }

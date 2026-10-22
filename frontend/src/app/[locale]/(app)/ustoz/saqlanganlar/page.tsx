@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { TeacherSavedView } from "@/components/teacher/TeacherSavedView";
+import { SavedView } from "@/components/cabinet/SavedView";
 import { routing } from "@/lib/i18n/routing";
 
 type Props = PageProps<"/[locale]/ustoz/saqlanganlar">;
@@ -18,5 +18,5 @@ export default async function Page({ params }: Props) {
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
-  return <TeacherSavedView />;
+  return <SavedView />;
 }

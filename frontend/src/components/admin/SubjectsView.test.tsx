@@ -23,7 +23,7 @@ import { SubjectsView } from "./SubjectsView";
 
 const t = uz.admin.subjects;
 const subject = (slug: string, name: string, books: number, order: number) =>
-  ({ id: `id-${slug}`, slug, title: { uz: name }, order, books_count: books }) as AdminSubject;
+  ({ id: `id-${slug}`, slug, title: { uz: name }, order, pdf_books_count: books }) as AdminSubject;
 const SUBJECTS = [subject("algebra", "Algebra", 2, 2), subject("fizika", "Fizika", 0, 9)];
 
 function setup(role = "admin") {

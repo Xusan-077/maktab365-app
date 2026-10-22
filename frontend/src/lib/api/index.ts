@@ -16,41 +16,6 @@ export const ACCOUNT_METHODS = [
   "getMySupport",
 ] as const satisfies readonly (keyof MaktabApi)[];
 
-/**
- * O'qish jarayoni (M8): progress, xatcho'p, reja, oxirgi ko'rilganlar, dashboard/natijalar va
- * mehmon ma'lumotini qo'shish. `http` rejimida haqiqiy backend (`/api/v1/me/...`).
- */
-export const LEARNING_METHODS = [
-  "getProgress",
-  "saveProgress",
-  "recordTopicOpened",
-  "getRecent",
-  "getDashboard",
-  "getResults",
-  "getTeacherDashboard",
-  "mergeGuestData",
-  "getBookmarks",
-  "toggleBookmark",
-  "setBookmark",
-  "getBookBookmarks",
-  "toggleBookBookmark",
-  "getGoals",
-  "createGoal",
-  "updateGoal",
-  "deleteGoal",
-] as const satisfies readonly (keyof MaktabApi)[];
-
-/** Katalog (fan, kitob, bob, mavzu, qidiruv) metodlari: backend `/api/v1` ochiq kontent API'si. */
-export const CATALOG_METHODS = [
-  "getGrades",
-  "getSubjects",
-  "getBooks",
-  "getBook",
-  "getChapters",
-  "getTopic",
-  "searchTopics",
-] as const satisfies readonly (keyof MaktabApi)[];
-
 /** `methods` ro'yxatidagi metodlar `overlay` dan, qolganlari `base` dan olinadi. */
 export function withMethods(
   base: MaktabApi,
@@ -67,7 +32,7 @@ export function withMethods(
   });
 }
 
-/** Akkaunt metodlari `account` dan, qolganlari (katalog, progress…) `base` dan. */
+/** Akkaunt metodlari `account` dan, qolganlari `base` dan. */
 export const withAccountApi = (base: MaktabApi, account: MaktabApi): MaktabApi =>
   withMethods(base, account, ACCOUNT_METHODS);
 
@@ -75,23 +40,16 @@ let instance: MaktabApi | undefined;
 
 /**
  * `NEXT_PUBLIC_API_MODE=mock|http` bo'yicha tanlangan klient (default: mock).
- * - `mock`: hammasi mock, lekin akkaunt metodlari haqiqiy backend'ga boradi (sessiya backend tokenlari bilan).
- * - `http`: katalog (`CATALOG_METHODS`), akkaunt, o'qish jarayoni (`LEARNING_METHODS`) va health —
- *   hammasi backend.
+ * - `mock`: akkaunt metodlari haqiqiy backend'ga boradi (sessiya backend tokenlari bilan), health mock.
+ * - `http`: hammasi backend.
  */
 export function getApi(): MaktabApi {
   if (instance) return instance;
   const mock = new MockApi({ latencyMs: process.env.NODE_ENV === "development" ? 200 : 0 });
-  if (API_MODE === "http") {
-    instance = withMethods(mock, new HttpApi(), [
-      "health",
-      ...CATALOG_METHODS,
-      ...ACCOUNT_METHODS,
-      ...LEARNING_METHODS,
-    ]);
-  } else {
-    instance = withAccountApi(mock, new HttpApi());
-  }
+  instance =
+    API_MODE === "http"
+      ? withMethods(mock, new HttpApi(), ["health", ...ACCOUNT_METHODS])
+      : withAccountApi(mock, new HttpApi());
   return instance;
 }
 

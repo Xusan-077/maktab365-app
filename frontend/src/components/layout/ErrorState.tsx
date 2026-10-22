@@ -4,26 +4,18 @@ import { Search } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button, buttonVariants } from "@/components/ui/Button";
 import { useAppBase } from "@/hooks/useAppBase";
-import { useSubjects } from "@/hooks/useSubjects";
-import { getLocalized } from "@/lib/i18n/localized";
 import { getPathname, Link } from "@/lib/i18n/navigation";
-import { baseHome, catalogPath, subjectPath, type AppBase } from "@/lib/utils/routes";
-import type { Locale } from "@/lib/i18n/config";
+import { baseHome, catalogPath } from "@/lib/utils/routes";
 import { Logo } from "./Logo";
 import { MAIN_CONTENT_ID } from "./SkipLink";
 
-const POPULAR_SUBJECTS = 6;
-
-/** Ustoz panelida katalog qidiruvi URL'da emas, shuning uchun u yerda qidiruv maydoni ko'rsatilmaydi. */
-const hasUrlSearch = (base: AppBase) => base !== "ustoz";
-
-function NotFoundSearch({ base }: { base: AppBase }) {
+function NotFoundSearch() {
   const t = useTranslations("errors");
   const locale = useLocale();
   return (
     <form
       role="search"
-      action={getPathname({ href: catalogPath(base), locale })}
+      action={getPathname({ href: catalogPath(), locale })}
       method="get"
       className="relative w-full max-w-md"
     >
@@ -39,30 +31,6 @@ function NotFoundSearch({ base }: { base: AppBase }) {
         className="border-border bg-surface text-foreground placeholder:text-muted hover:border-primary-300 h-12 w-full rounded-lg border pr-3 pl-10 text-base shadow-xs transition-colors"
       />
     </form>
-  );
-}
-
-function PopularSubjects({ base }: { base: AppBase }) {
-  const t = useTranslations("errors");
-  const locale = useLocale() as Locale;
-  const { data: subjects } = useSubjects();
-  if (!subjects || subjects.length === 0) return null;
-  return (
-    <nav aria-label={t("popularSubjects")} className="flex flex-col gap-2">
-      <p className="text-muted text-sm font-medium">{t("popularSubjects")}</p>
-      <ul className="flex flex-wrap gap-2">
-        {subjects.slice(0, POPULAR_SUBJECTS).map((subject) => (
-          <li key={subject.id}>
-            <Link
-              href={subjectPath(subject.slug, base)}
-              className="border-border bg-surface hover:bg-subtle inline-flex h-9 items-center rounded-full border px-4 text-sm font-medium transition-colors"
-            >
-              {getLocalized(subject.name, locale)}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </nav>
   );
 }
 
@@ -102,7 +70,7 @@ export function ErrorState({
           {notFound ? t("notFoundText") : t("text")}
         </p>
       </div>
-      {notFound && hasUrlSearch(base) && <NotFoundSearch base={base} />}
+      {notFound && <NotFoundSearch />}
       <div className="flex flex-wrap justify-center gap-3">
         {onRetry && <Button onClick={onRetry}>{t("retry")}</Button>}
         <Link
@@ -112,12 +80,11 @@ export function ErrorState({
           {panel ? t("backToPanel") : t("home")}
         </Link>
         {notFound && (
-          <Link href={catalogPath(base)} className={buttonVariants({ variant: "secondary" })}>
+          <Link href={catalogPath()} className={buttonVariants({ variant: "secondary" })}>
             {t("toTextbooks")}
           </Link>
         )}
       </div>
-      {notFound && <PopularSubjects base={base} />}
     </div>
   );
 

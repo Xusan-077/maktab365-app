@@ -1,8 +1,6 @@
 export const ROUTES = {
   home: "/",
   textbooks: "/darsliklar",
-  pdfBooks: "/pdf-kitoblar",
-  subjects: "/fanlar",
   about: "/loyiha-haqida",
   login: "/kirish",
   register: "/royxatdan-otish",
@@ -12,12 +10,9 @@ export const ROUTES = {
   verifyEmail: "/email-tasdiqlash",
   onboarding: "/onboarding",
   cabinet: "/kabinet",
-  cabinetSubjects: "/kabinet/fanlar",
-  cabinetResults: "/kabinet/natijalar",
   cabinetSaved: "/kabinet/saqlanganlar",
   cabinetHelp: "/kabinet/yordam",
   teacher: "/ustoz",
-  teacherTopics: "/ustoz/mavzular",
   teacherSaved: "/ustoz/saqlanganlar",
   teacherHelp: "/ustoz/yordam",
   settings: "/sozlamalar",
@@ -60,34 +55,10 @@ export const roleBase = (role: "student" | "teacher"): PanelBase =>
 /** Bazaning bosh sahifasi: marketing → `/`, panel → kabinet yoki ustoz bosh sahifasi. */
 export const baseHome = (base: AppBase) => (base === "marketing" ? ROUTES.home : BASE_PREFIX[base]);
 
-/** Katalog: marketing/kabinet `…/darsliklar`; ustozda katalog panelning bosh sahifasi. */
-export const catalogPath = (base: AppBase = "marketing") =>
-  base === "ustoz" ? ROUTES.teacher : `${BASE_PREFIX[base]}${ROUTES.textbooks}`;
-
-/** Fanlar ro'yxati: marketing `/fanlar`, kabinet "Fanlarim", ustozda — katalog. */
-export const subjectsPath = (base: AppBase = "marketing") =>
-  base === "marketing"
-    ? ROUTES.subjects
-    : base === "kabinet"
-      ? ROUTES.cabinetSubjects
-      : ROUTES.teacher;
-
-export const subjectPath = (slug: string, base: AppBase = "marketing") =>
-  `${BASE_PREFIX[base]}${ROUTES.subjects}/${slug}`;
-export const bookPath = (bookId: string, base: AppBase = "marketing") =>
-  `${BASE_PREFIX[base]}${ROUTES.textbooks}/${bookId}`;
+/** Darsliklar katalogi (sinf → fan → kitoblar): hamma uchun ochiq, panel ichida ham shu sahifa. */
+export const catalogPath = () => ROUTES.textbooks;
 /** PDF darslik o'qish sahifasi (hamma uchun ochiq: marketing qobig'ida). */
-export const pdfBookPath = (id: string) => `${ROUTES.pdfBooks}/${id}`;
-export const topicPath = (bookId: string, topicId: string, base: AppBase = "marketing") =>
-  `${bookPath(bookId, base)}/${topicId}`;
-
-/** Mavzu sahifasida oxirgi o'qilgan blokka olib boradigan havola (`ReadingTracker` hash'ni o'qiydi). */
-export const topicBlockPath = (
-  bookId: string,
-  topicId: string,
-  blockId: string,
-  base: AppBase = "marketing",
-) => `${topicPath(bookId, topicId, base)}#block-${encodeURIComponent(blockId)}`;
+export const pdfBookPath = (id: string) => `${ROUTES.textbooks}/${id}`;
 
 /** Panel ichidagi Yordam sahifasi (rolga mos). */
 export const helpPath = (base: PanelBase) =>
@@ -102,12 +73,4 @@ export function safeCallbackPath(value: string | null | undefined): string | und
   return value && value.startsWith("/") && !value.startsWith("//") && !value.includes("\\")
     ? value
     : undefined;
-}
-
-/**
- * Panel yo'lini (`/uz/ustoz/darsliklar/...`) ochiq sayt yo'liga aylantiradi (`/uz/darsliklar/...`):
- * ulashiladigan havola kirishni talab qilmasin. Panel bo'lmagan yo'l o'zgarmaydi.
- */
-export function toPublicPath(pathname: string): string {
-  return pathname.replace(/^((?:\/[A-Za-z-]+)?)\/(?:kabinet|ustoz)(?=\/)/, "$1");
 }

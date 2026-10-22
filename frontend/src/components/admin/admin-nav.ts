@@ -1,4 +1,4 @@
-import { BookOpen, FileText, LayoutDashboard, Library, Users, type LucideIcon } from "lucide-react";
+import { FileText, LayoutDashboard, Library, Users, type LucideIcon } from "lucide-react";
 import { canSeeUsers } from "@/lib/admin/permissions";
 import { ADMIN_ROUTES } from "@/lib/admin/routes";
 import type { StaffRole } from "@/lib/auth/tokens";
@@ -26,15 +26,6 @@ const ITEMS: AdminNavItem[] = [
   },
   {
     key: "books",
-    href: ADMIN_ROUTES.books,
-    icon: BookOpen,
-    // Mavzu tahrirlash sahifalari ham "Kitoblar" bo'limiga kiradi.
-    isActive: (pathname) =>
-      within(ADMIN_ROUTES.books)(pathname) || within(`${ADMIN_ROUTES.home}/mavzular`)(pathname),
-    allowed: () => true,
-  },
-  {
-    key: "pdfBooks",
     href: ADMIN_ROUTES.pdfBooks,
     icon: FileText,
     isActive: within(ADMIN_ROUTES.pdfBooks),

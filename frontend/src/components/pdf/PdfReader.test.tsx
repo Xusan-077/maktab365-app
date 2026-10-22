@@ -17,7 +17,7 @@ const api = vi.hoisted(() => ({ book: vi.fn() }));
 
 vi.mock("next/navigation", () => ({ useSearchParams: () => nav.params }));
 vi.mock("@/lib/i18n/navigation", () => ({
-  usePathname: () => "/pdf-kitoblar/book-1",
+  usePathname: () => "/darsliklar/book-1",
   useRouter: () => ({ replace: nav.replace }),
   Link: ({ href, children }: { href: string; children: ReactNode }) => (
     <a href={href}>{children}</a>
@@ -28,6 +28,8 @@ vi.mock("@/lib/pdf-books/api", () => ({
   getPdfBooksApi: () => api,
   PDF_PAGE_SIZE: 24,
 }));
+vi.mock("./PdfBookmarkButton", () => ({ PdfBookmarkButton: () => null }));
+vi.mock("@/components/support/ReportErrorLink", () => ({ ReportErrorLink: () => null }));
 vi.mock("./usePdfDocument", () => ({
   usePdfDocument: () => ({ doc: { numPages: 240 }, loading: false, error: null, reload: vi.fn() }),
 }));
@@ -80,7 +82,7 @@ describe("PdfReader", () => {
     setup("page=999");
     expect(await currentPage()).toBe("240");
     await waitFor(() =>
-      expect(nav.replace).toHaveBeenCalledWith("/pdf-kitoblar/book-1?page=240", { scroll: false }),
+      expect(nav.replace).toHaveBeenCalledWith("/darsliklar/book-1?page=240", { scroll: false }),
     );
   });
 
@@ -89,7 +91,7 @@ describe("PdfReader", () => {
     setup();
     expect(await currentPage()).toBe("37");
     await waitFor(() =>
-      expect(nav.replace).toHaveBeenCalledWith("/pdf-kitoblar/book-1?page=37", { scroll: false }),
+      expect(nav.replace).toHaveBeenCalledWith("/darsliklar/book-1?page=37", { scroll: false }),
     );
   });
 
@@ -106,10 +108,10 @@ describe("PdfReader", () => {
     await currentPage();
     fireEvent.keyDown(window, { key: "ArrowRight" });
     fireEvent.keyDown(window, { key: "ArrowLeft" });
-    expect(nav.replace).toHaveBeenNthCalledWith(1, "/pdf-kitoblar/book-1?page=6", {
+    expect(nav.replace).toHaveBeenNthCalledWith(1, "/darsliklar/book-1?page=6", {
       scroll: false,
     });
-    expect(nav.replace).toHaveBeenNthCalledWith(2, "/pdf-kitoblar/book-1?page=4", {
+    expect(nav.replace).toHaveBeenNthCalledWith(2, "/darsliklar/book-1?page=4", {
       scroll: false,
     });
   });
@@ -143,10 +145,10 @@ describe("PdfReader", () => {
     };
     swipe(300, 100);
     swipe(100, 300);
-    expect(nav.replace).toHaveBeenNthCalledWith(1, "/pdf-kitoblar/book-1?page=6", {
+    expect(nav.replace).toHaveBeenNthCalledWith(1, "/darsliklar/book-1?page=6", {
       scroll: false,
     });
-    expect(nav.replace).toHaveBeenNthCalledWith(2, "/pdf-kitoblar/book-1?page=4", {
+    expect(nav.replace).toHaveBeenNthCalledWith(2, "/darsliklar/book-1?page=4", {
       scroll: false,
     });
   });

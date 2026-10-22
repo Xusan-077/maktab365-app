@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { Controller, useForm, useWatch, type Resolver } from "react-hook-form";
 import { GraduationCap, UserRound } from "lucide-react";
@@ -10,10 +10,10 @@ import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { MultiSelect, Select } from "@/components/ui/Select";
-import { useSubjects } from "@/hooks/useSubjects";
 import { useToast } from "@/hooks/useToast";
 import { getApi } from "@/lib/api";
 import { queryKeys } from "@/lib/api/query-keys";
+import { pdfQueries } from "@/lib/pdf-books/queries";
 import type { Locale } from "@/lib/i18n/config";
 import { getLocalized } from "@/lib/i18n/localized";
 import { profileSchema, toProfileInput, type ProfileFormValues } from "@/lib/validation/profile";
@@ -58,7 +58,7 @@ export function ProfileForm({ initial, defaultName = "", submitLabel, onSaved }:
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { update: updateSession } = useSession();
-  const { data: subjects } = useSubjects();
+  const { data: subjects } = useQuery(pdfQueries.subjects());
   const gradeOptions = useMemo(
     () => GRADES.map((grade) => ({ value: String(grade), label: t("gradeOption", { grade }) })),
     [t],
@@ -66,8 +66,8 @@ export function ProfileForm({ initial, defaultName = "", submitLabel, onSaved }:
   const subjectOptions = useMemo(
     () =>
       (subjects ?? []).map((subject) => ({
-        value: subject.id,
-        label: getLocalized(subject.name, locale),
+        value: subject.slug,
+        label: getLocalized(subject.title, locale),
       })),
     [subjects, locale],
   );

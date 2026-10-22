@@ -5,14 +5,15 @@ const keys = (role: "editor" | "admin") => adminNavFor(role).map((item) => item.
 
 describe("adminNavFor", () => {
   it("foydalanuvchilar bo'limi faqat admin'ga", () => {
-    expect(keys("admin")).toEqual(["dashboard", "books", "pdfBooks", "subjects", "users"]);
-    expect(keys("editor")).toEqual(["dashboard", "books", "pdfBooks", "subjects"]);
+    expect(keys("admin")).toEqual(["dashboard", "books", "subjects", "users"]);
+    expect(keys("editor")).toEqual(["dashboard", "books", "subjects"]);
   });
 
-  it("mavzu sahifalari Kitoblar bo'limini faol qiladi", () => {
+  it("kitob sahifalari Kitoblar bo'limini faol qiladi", () => {
     const books = adminNavFor("editor").find((item) => item.key === "books")!;
+    expect(books.isActive("/admin/kitoblar")).toBe(true);
     expect(books.isActive("/admin/kitoblar/abc")).toBe(true);
-    expect(books.isActive("/admin/mavzular/xyz")).toBe(true);
+    expect(books.isActive("/admin/fanlar")).toBe(false);
     expect(books.isActive("/admin")).toBe(false);
   });
 });

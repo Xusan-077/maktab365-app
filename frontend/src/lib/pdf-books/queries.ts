@@ -1,6 +1,9 @@
 import { queryOptions } from "@tanstack/react-query";
 import { getPdfBooksApi, type PdfBookFilters } from "./api";
 
+/** Qidiruv so'rovi shuncha belgidan boshlanadi. */
+export const SEARCH_MIN_LENGTH = 2;
+
 /** Ochiq javoblar backend keshiga (`CONTENT_CACHE_MAX_AGE`, 60 s) mos: shuncha vaqt yangi hisoblanadi. */
 const PUBLIC_STALE_MS = 60_000;
 
@@ -12,6 +15,8 @@ export const pdfKeys = {
   fileUrl: (id: string) => ["pdf-books", "file-url", id] as const,
   progress: (id: string) => ["pdf-progress", id] as const,
   allProgress: () => ["pdf-progress", "all"] as const,
+  library: () => ["pdf-library"] as const,
+  bookmarks: () => ["pdf-bookmarks"] as const,
 };
 
 export const pdfQueries = {
@@ -52,4 +57,8 @@ export const pdfQueries = {
       queryKey: pdfKeys.allProgress(),
       queryFn: () => getPdfBooksApi().allProgress(),
     }),
+  library: () =>
+    queryOptions({ queryKey: pdfKeys.library(), queryFn: () => getPdfBooksApi().library() }),
+  bookmarks: () =>
+    queryOptions({ queryKey: pdfKeys.bookmarks(), queryFn: () => getPdfBooksApi().bookmarks() }),
 };

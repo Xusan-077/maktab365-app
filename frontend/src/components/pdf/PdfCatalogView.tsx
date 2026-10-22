@@ -2,10 +2,11 @@
 
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { FileText } from "lucide-react";
+import { FileText, Search } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { Pagination } from "@/components/admin/Pagination";
+import { useDebouncedSearch } from "@/components/admin/useDebouncedSearch";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -28,6 +29,7 @@ export function parsePdfFilters(params: { get(name: string): string | null }): P
   return {
     grade: grade && grade >= 1 && grade <= 11 ? grade : undefined,
     subject: params.get("subject")?.trim() || undefined,
+    q: params.get("q")?.trim() || undefined,
     page: page && page > 1 ? page : undefined,
   };
 }
@@ -36,6 +38,7 @@ export function serializePdfFilters(filters: PdfBookFilters): string {
   const query = new URLSearchParams();
   if (filters.grade) query.set("grade", String(filters.grade));
   if (filters.subject) query.set("subject", filters.subject);
+  if (filters.q) query.set("q", filters.q);
   if (filters.page && filters.page > 1) query.set("page", String(filters.page));
   return query.toString();
 }
@@ -78,14 +81,33 @@ export function PdfCatalogView() {
   const resume = usePdfProgressMap();
   const subjects = useQuery(pdfQueries.subjects(filters.grade));
   const books = useQuery(pdfQueries.list(filters));
-
   const navigate = (next: PdfBookFilters) => {
     const query = serializePdfFilters(next);
     router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
   };
 
+  const [search, setSearch] = useDebouncedSearch(filters.q, (q) =>
+    navigate({ ...filters, q, page: undefined }),
+  );
+
   return (
     <div className="flex flex-col gap-6">
+      <div role="search" className="relative max-w-md">
+        <Search
+          className="text-muted pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
+          aria-hidden
+        />
+        <input
+          type="search"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          aria-label={t("searchLabel")}
+          placeholder={t("searchPlaceholder")}
+          data-testid="pdf-search"
+          className="border-border bg-surface text-foreground placeholder:text-muted hover:border-primary-300 h-10 w-full rounded-lg border pr-3 pl-9 text-sm shadow-xs transition-colors"
+        />
+      </div>
+
       <section aria-labelledby="pdf-grades" className="flex flex-col gap-2">
         <h2 id="pdf-grades" className="text-muted text-sm font-medium">
           {t("gradeFilter")}
@@ -94,7 +116,7 @@ export function PdfCatalogView() {
           <Chip
             active={!filters.grade}
             testId="pdf-grade-all"
-            onClick={() => navigate({ subject: undefined })}
+            onClick={() => navigate({ q: filters.q })}
           >
             {t("allGrades")}
           </Chip>
@@ -103,7 +125,7 @@ export function PdfCatalogView() {
               key={grade}
               active={filters.grade === grade}
               testId={`pdf-grade-${grade}`}
-              onClick={() => navigate({ grade, subject: undefined })}
+              onClick={() => navigate({ grade, q: filters.q })}
             >
               {t("gradeLabel", { grade })}
             </Chip>
@@ -120,7 +142,7 @@ export function PdfCatalogView() {
             <Chip
               active={!filters.subject}
               testId="pdf-subject-all"
-              onClick={() => navigate({ grade: filters.grade })}
+              onClick={() => navigate({ grade: filters.grade, q: filters.q })}
             >
               {t("allSubjects")}
             </Chip>
@@ -129,7 +151,9 @@ export function PdfCatalogView() {
                 key={subject.slug}
                 active={filters.subject === subject.slug}
                 testId={`pdf-subject-${subject.slug}`}
-                onClick={() => navigate({ grade: filters.grade, subject: subject.slug })}
+                onClick={() =>
+                  navigate({ grade: filters.grade, subject: subject.slug, q: filters.q })
+                }
               >
                 {getLocalized(subject.title, locale)}
               </Chip>
@@ -157,7 +181,7 @@ export function PdfCatalogView() {
         </div>
       ) : books.data.results.length === 0 ? (
         <EmptyState icon={FileText}>
-          {filters.grade || filters.subject ? t("emptyFiltered") : t("empty")}
+          {filters.grade || filters.subject || filters.q ? t("emptyFiltered") : t("empty")}
         </EmptyState>
       ) : (
         <div className="flex flex-col gap-4">

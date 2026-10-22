@@ -10,7 +10,7 @@ export function SearchForm({ className, autoFocus }: { className?: string; autoF
   return (
     <form
       role="search"
-      action={getPathname({ href: ROUTES.search, locale })}
+      action={getPathname({ href: ROUTES.textbooks, locale })}
       method="get"
       className={cn("relative", className)}
     >

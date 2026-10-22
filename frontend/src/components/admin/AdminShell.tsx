@@ -87,7 +87,9 @@ function AdminSearch() {
   function submit(event: FormEvent) {
     event.preventDefault();
     const q = query.trim();
-    router.push(q ? `${ADMIN_ROUTES.books}?${new URLSearchParams({ q })}` : ADMIN_ROUTES.books);
+    router.push(
+      q ? `${ADMIN_ROUTES.pdfBooks}?${new URLSearchParams({ q })}` : ADMIN_ROUTES.pdfBooks,
+    );
   }
 
   return (

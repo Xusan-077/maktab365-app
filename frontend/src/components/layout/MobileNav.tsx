@@ -2,7 +2,7 @@
 
 import { useState, type ComponentType } from "react";
 import { Link, usePathname } from "@/lib/i18n/navigation";
-import { BookOpen, LayoutGrid, Menu, Search } from "lucide-react";
+import { BookOpen, Menu, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { buttonVariants } from "@/components/ui/Button";
 import { Dialog } from "@/components/ui/Dialog";
@@ -63,7 +63,7 @@ function BarButton({
   );
 }
 
-/** lg dan kichik ekranlarda pastki navigatsiya: Darsliklar, Fanlar, Qidiruv va Menyu doim bir tegish uzoqlikda. */
+/** lg dan kichik ekranlarda pastki navigatsiya: Darsliklar, Qidiruv va Menyu doim bir tegish uzoqlikda. */
 export function MobileNav() {
   const t = useTranslations();
   const pathname = usePathname();
@@ -78,19 +78,13 @@ export function MobileNav() {
     <>
       <nav
         aria-label={t("nav.mobile")}
-        className="border-border bg-surface/95 present:hidden fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 gap-1 border-t px-2 pt-1 pb-[max(0.25rem,env(safe-area-inset-bottom))] backdrop-blur lg:hidden print:hidden"
+        className="border-border bg-surface/95 present:hidden fixed inset-x-0 bottom-0 z-40 grid grid-cols-3 gap-1 border-t px-2 pt-1 pb-[max(0.25rem,env(safe-area-inset-bottom))] backdrop-blur lg:hidden print:hidden"
       >
         <BarLink
           href={ROUTES.textbooks}
           icon={BookOpen}
           label={t("nav.textbooks")}
           active={isActive(ROUTES.textbooks)}
-        />
-        <BarLink
-          href={ROUTES.subjects}
-          icon={LayoutGrid}
-          label={t("nav.subjects")}
-          active={isActive(ROUTES.subjects)}
         />
         <BarButton icon={Search} label={t("nav.search")} onClick={() => setSearchOpen(true)} />
         <BarButton icon={Menu} label={t("nav.menu")} onClick={() => setMenuOpen(true)} />
@@ -107,15 +101,6 @@ export function MobileNav() {
 
       <Dialog open={menuOpen} onOpenChange={setMenuOpen} title={t("menu.title")} placement="bottom">
         <ul className="flex flex-col">
-          <li>
-            <Link
-              href={ROUTES.pdfBooks}
-              onClick={() => setMenuOpen(false)}
-              className="hover:bg-subtle flex min-h-12 items-center rounded-lg px-2 text-base font-medium"
-            >
-              {t("nav.pdfBooks")}
-            </Link>
-          </li>
           <li>
             <Link
               href={ROUTES.about}

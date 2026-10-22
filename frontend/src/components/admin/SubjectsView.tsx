@@ -88,12 +88,12 @@ export function SubjectsView() {
             <tbody className="divide-border divide-y">
               {data.map((subject) => {
                 const name = getLocalized(subject.title, locale);
-                const hasBooks = subject.books_count > 0;
+                const hasBooks = subject.pdf_books_count > 0;
                 return (
                   <tr key={subject.id} className="hover:bg-subtle/60">
                     <td className="px-4 py-3 font-medium">{name}</td>
                     <td className="text-muted px-4 py-3">{subject.slug}</td>
-                    <td className="px-4 py-3 tabular-nums">{subject.books_count}</td>
+                    <td className="px-4 py-3 tabular-nums">{subject.pdf_books_count}</td>
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-1">
                         <Button

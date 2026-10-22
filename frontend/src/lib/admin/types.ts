@@ -2,16 +2,6 @@ import type { components } from "@/lib/api/schema";
 
 type Schemas = components["schemas"];
 
-export type AdminBook = Schemas["BookAdmin"];
-export type AdminBookInput = Schemas["BookAdminRequest"];
-export type AdminBookPatch = Schemas["PatchedBookAdminRequest"];
-export type AdminChapter = Schemas["ChapterAdmin"];
-export type AdminChapterInput = Schemas["ChapterAdminRequest"];
-export type AdminChapterPatch = Schemas["PatchedChapterAdminRequest"];
-export type AdminTopic = Schemas["TopicAdmin"];
-export type AdminTopicItem = Schemas["TopicList"];
-export type AdminTopicInput = Schemas["TopicAdminRequest"];
-export type AdminTopicPatch = Schemas["PatchedTopicAdminRequest"];
 export type AdminSubject = Schemas["SubjectAdmin"];
 export type AdminSubjectInput = Schemas["SubjectAdminRequest"];
 export type AdminSubjectPatch = Schemas["PatchedSubjectAdminRequest"];
@@ -20,8 +10,6 @@ export type AdminDashboard = Schemas["AdminDashboard"];
 export type AuditEntry = Schemas["AuditEntry"];
 export type UploadResult = Schemas["UploadResult"];
 export type UploadKind = Schemas["UploadRequestKindEnum"];
-export type ReorderInput = Schemas["ReorderRequest"];
-export type TopicStatus = Schemas["TopicStatusEnum"];
 export type AdminPdfBook = Schemas["PdfBookAdmin"];
 export type AdminPdfBookInput = Schemas["PdfBookAdminRequest"];
 export type AdminPdfBookPatch = Schemas["PatchedPdfBookAdminRequest"];

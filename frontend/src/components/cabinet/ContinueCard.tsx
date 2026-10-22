@@ -1,67 +1,56 @@
 "use client";
 
+import { FileText } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { buttonVariants } from "@/components/ui/Button";
-import { Skeleton } from "@/components/ui/Skeleton";
-import { useAppPaths } from "@/hooks/useAppPaths";
-import { useTopicContext } from "@/hooks/useTopicContext";
 import type { Locale } from "@/lib/i18n/config";
 import { getLocalized } from "@/lib/i18n/localized";
 import { Link } from "@/lib/i18n/navigation";
-import { describeBlock } from "@/lib/utils/topic-sections";
-import type { Progress } from "@/types/progress";
-import { ProgressStatus } from "./ProgressStatus";
+import type { PdfLibraryItem } from "@/lib/pdf-books/api";
+import { pdfBookPath } from "@/lib/utils/routes";
 
-/** Oxirgi boshlangan mavzu: fan, mavzu, oxirgi o'qilgan qism va "Davom ettirish" (lastBlockId'ga olib boradi). */
-export function ContinueCard({ progress }: { progress: Progress }) {
-  const t = useTranslations("cabinet.continue");
-  const ts = useTranslations("topic.sections");
+/** Oxirgi ochilgan darslik: nom, fan va sinf, joriy bet va "Davom ettirish" (shu betga olib boradi). */
+export function ContinueCard({ item }: { item: PdfLibraryItem }) {
+  const t = useTranslations("library.continue");
+  const tc = useTranslations("pdfBooks.card");
   const locale = useLocale() as Locale;
-  const paths = useAppPaths();
-  const { topic, subject } = useTopicContext(progress.topicId);
-
-  if (!topic) return <Skeleton className="h-44 w-full rounded-xl" />;
-
-  const topicTitle = getLocalized(topic.title, locale);
-  const description = progress.lastBlockId
-    ? describeBlock(topic.blocks, progress.lastBlockId)
-    : undefined;
-
-  let part = t("partStart");
-  if (description) {
-    const section = ts(description.section);
-    if (description.exerciseOrder) {
-      part = t("partExercise", { section, order: description.exerciseOrder });
-    } else if (description.title) {
-      part = t("partWithTitle", { section, title: getLocalized(description.title, locale) });
-    } else {
-      part = section;
-    }
-  }
-
-  const href =
-    description && progress.lastBlockId
-      ? paths.topicBlock(topic.bookId, topic.id, progress.lastBlockId)
-      : paths.topic(topic.bookId, topic.id);
+  const { book } = item;
+  const title = getLocalized(book.title, locale);
 
   return (
     <section
       aria-labelledby="continue-title"
-      className="border-border bg-surface flex flex-col gap-4 rounded-xl border p-6"
+      data-testid="continue-card"
+      className="border-border bg-surface flex flex-col gap-4 rounded-xl border p-6 sm:flex-row"
     >
-      <div className="flex flex-col gap-1.5">
-        <h2 id="continue-title" className="text-2xl font-semibold tracking-tight text-balance">
-          {subject
-            ? t("title", { subject: getLocalized(subject.name, locale), topic: topicTitle })
-            : t("titleNoSubject", { topic: topicTitle })}
-        </h2>
-        <p className="text-muted">{t("lastPart", { part })}</p>
-      </div>
-      <ProgressStatus progress={progress} />
-      <div>
+      {book.cover ? (
+        // Backend/R2 manzili (tashqi domen): next/image sozlamasi shart emas.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={book.cover}
+          alt=""
+          className="bg-subtle h-40 w-28 shrink-0 rounded-md object-cover"
+        />
+      ) : (
+        <span className="bg-subtle text-muted flex h-40 w-28 shrink-0 items-center justify-center rounded-md">
+          <FileText className="size-10" aria-hidden />
+        </span>
+      )}
+      <div className="flex min-w-0 flex-col items-start gap-3">
+        <div className="flex flex-col gap-1.5">
+          <h2 id="continue-title" className="text-2xl font-semibold tracking-tight text-balance">
+            {title}
+          </h2>
+          <p className="text-muted">
+            {tc("meta", { grade: book.grade, subject: getLocalized(book.subject_title, locale) })}
+          </p>
+          <p className="text-muted tabular-nums">
+            {t("position", { page: item.last_page, total: book.page_count })}
+          </p>
+        </div>
         <Link
-          href={href}
-          aria-label={t("actionLabel", { topic: topicTitle })}
+          href={`${pdfBookPath(book.id)}?page=${item.last_page}`}
+          aria-label={t("actionLabel", { title })}
           className={buttonVariants({ size: "lg" })}
         >
           {t("action")}

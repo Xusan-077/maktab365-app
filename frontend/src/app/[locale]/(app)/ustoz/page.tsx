@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { TeacherView } from "@/components/teacher/TeacherView";
+import { LibraryHome } from "@/components/cabinet/LibraryHome";
 import { routing } from "@/lib/i18n/routing";
 
 type Props = PageProps<"/[locale]/ustoz">;
@@ -19,5 +19,5 @@ export default async function TeacherPage({ params }: Props) {
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
-  return <TeacherView />;
+  return <LibraryHome base="ustoz" />;
 }

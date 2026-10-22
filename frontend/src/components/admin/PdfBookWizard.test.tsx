@@ -70,7 +70,7 @@ describe("PdfBookWizard", () => {
     pick(pdf());
     fireEvent.click(screen.getByRole("button", { name: t.start }));
 
-    await waitFor(() => expect(router.push).toHaveBeenCalledWith("/admin/pdf-kitoblar/book-1"));
+    await waitFor(() => expect(router.push).toHaveBeenCalledWith("/admin/kitoblar/book-1"));
     expect(api.createPdfBook).toHaveBeenCalledWith({
       title: { uz: "Algebra 5" },
       grade: 5,
@@ -114,7 +114,7 @@ describe("PdfBookWizard", () => {
     expect(router.push).not.toHaveBeenCalled();
 
     fireEvent.click(screen.getByRole("button", { name: t.retry }));
-    await waitFor(() => expect(router.push).toHaveBeenCalledWith("/admin/pdf-kitoblar/book-1"));
+    await waitFor(() => expect(router.push).toHaveBeenCalledWith("/admin/kitoblar/book-1"));
     expect(api.createPdfBook).toHaveBeenCalledTimes(1);
     expect(upload.uploadPdf).toHaveBeenCalledTimes(2);
   });

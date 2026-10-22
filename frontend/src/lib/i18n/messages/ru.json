@@ -1,104 +1,35 @@
 {
   "meta": {
     "title": "maktab365 — учебники 1–11 классов",
-    "description": "Учебники 1–11 классов по темам. Бесплатно, для учеников и учителей."
+    "description": "Учебники 1–11 классов онлайн, страница за страницей. Бесплатно, для учеников и учителей."
   },
   "brand": {
     "name": "maktab365",
-    "tagline": "Учебники 1–11 классов по темам — бесплатно, для учеников и учителей."
+    "tagline": "Учебники 1–11 классов — читайте онлайн, бесплатно, для учеников и учителей."
   },
   "home": {
     "hero": {
-      "title": "Каждая тема в школе — понятнее.",
-      "subtitle": "Учебники 1–11 классов по темам: короткое объяснение, пример и упражнение. Бесплатно и без регистрации.",
+      "title": "Школьные учебники — в одном месте, бесплатно.",
+      "subtitle": "Находите учебники 1–11 классов по классу и предмету и читайте онлайн постранично. Место, где вы остановились, запоминается.",
       "cta": "Смотреть учебники",
       "how": "Как это работает?"
-    },
-    "demo": {
-      "badge": "Мини-урок",
-      "subjectLabel": "Выберите предмет",
-      "explanationLabel": "Объяснение",
-      "questionLabel": "Вопрос",
-      "optionsLabel": "Варианты ответа",
-      "correctTitle": "Верно!",
-      "wrongTitle": "Почти! Попробуйте ещё раз",
-      "footnote": "В настоящих темах всё так же: читайте, тренируйтесь, смотрите результат.",
-      "subjects": {
-        "math": {
-          "name": "Математика",
-          "explanation": "Теорема Виета: сумма корней x₁ + x₂ = −p, произведение x₁ · x₂ = q.",
-          "question": "Чему равна сумма корней уравнения x² − 7x + 12 = 0?",
-          "option0": "7",
-          "option1": "−7",
-          "option2": "12",
-          "correct": "В уравнении p = −7, а сумма равна −p = 7.",
-          "wrong": "Вспомните: x₁ + x₂ = −p. Здесь p = −7."
-        },
-        "english": {
-          "name": "Английский язык",
-          "explanation": "Past Simple используется для завершённого действия с точным временем. Например:",
-          "exampleVerbatim": "I went to school yesterday.",
-          "question": "Дополните предложение:",
-          "questionVerbatim": "Yesterday I ___ to the library.",
-          "option0": "go",
-          "option1": "went",
-          "option2": "gone",
-          "correct": "Верно! Yesterday — точное прошедшее время, поэтому используется Past Simple.",
-          "wrong": "Yesterday указывает на прошлое, значит нужна вторая форма глагола."
-        }
-      }
-    },
-    "grades": {
-      "title": "Выберите свой класс",
-      "hint": "Выберите класс — ниже появятся его предметы.",
-      "label": "Классы",
-      "chip": "{grade} класс",
-      "reset": "Все классы"
-    },
-    "subjects": {
-      "title": "Предметы",
-      "subtitleAll": "Предметы по всем классам",
-      "subtitleGrade": "Предметы {grade} класса",
-      "booksCount": "{count, plural, one {# учебник} few {# учебника} many {# учебников} other {# учебника}}",
-      "ready": "Темы готовы",
-      "soon": "Скоро",
-      "empty": "Для этого класса предметы не найдены.",
-      "error": "Не удалось загрузить предметы. Обновите страницу.",
-      "loading": "Предметы загружаются"
-    },
-    "anatomy": {
-      "title": "Что внутри одной темы?",
-      "subtitle": "Каждая тема построена в одном понятном порядке. Пример: {book} — {topic}.",
-      "book": "Алгебра, 9 класс",
-      "stepOf": "Блок {step}",
-      "blocks": {
-        "goal": "Цель",
-        "explanation": "Объяснение",
-        "rule": "Правило",
-        "example": "Пример",
-        "exercise": "Упражнение",
-        "summary": "Итог",
-        "widget": "Интерактивный виджет"
-      },
-      "widgetText": "Меняйте коэффициенты и смотрите, как меняются корни.",
-      "exerciseTypes": "Выбор ответа, ввод ответа или «верно/неверно»"
     },
     "audience": {
       "title": "Для учеников и учителей",
       "student": {
         "title": "Ученику",
         "items": {
-          "a": "Не длинный текст, а тема: быстро находите нужное.",
-          "b": "Упражнение сразу, с объяснением ответа.",
-          "c": "Мы запоминаем, где вы остановились."
+          "a": "Быстро находите нужный учебник по классу и предмету.",
+          "b": "Читайте постранично и на телефоне, и на компьютере.",
+          "c": "Место, где вы остановились, запоминается."
         }
       },
       "teacher": {
         "title": "Учителю",
         "items": {
-          "a": "Готовая последовательность тем для планирования урока.",
-          "b": "Примеры и упражнения можно разбирать вместе с классом.",
-          "c": "Всё бесплатно, любой темой можно поделиться по ссылке."
+          "a": "Находите нужные для урока учебники и собирайте их кнопкой «Сохранить».",
+          "b": "Номер страницы в ссылке: делитесь нужной страницей с классом.",
+          "c": "Всё бесплатно, регистрация не обязательна."
         }
       }
     },
@@ -107,19 +38,15 @@
       "steps": {
         "one": {
           "title": "Выберите класс и предмет",
-          "text": "Найдите учебник по классу и предмету или воспользуйтесь поиском."
+          "text": "Найдите учебник по классу и предмету или по названию."
         },
         "two": {
-          "title": "Прочитайте тему",
-          "text": "Короткая цель, объяснение, правило и примеры."
+          "title": "Откройте учебник",
+          "text": "Учебник открывается постранично: листайте кнопками, стрелками или вводите номер страницы."
         },
         "three": {
-          "title": "Потренируйтесь",
-          "text": "Отвечайте на вопросы — результат и объяснение сразу на экране."
-        },
-        "four": {
-          "title": "Двигайтесь дальше",
-          "text": "Переходите к следующим темам и возвращайтесь повторить."
+          "title": "Продолжайте",
+          "text": "Последняя страница запоминается — после входа вы продолжите на любом устройстве."
         }
       }
     },
@@ -128,26 +55,30 @@
       "items": {
         "free": {
           "q": "Платформа бесплатная?",
-          "a": "Да, все учебники и темы бесплатны."
+          "a": "Да, все учебники бесплатны."
         },
         "account": {
           "q": "Нужен ли аккаунт?",
-          "a": "Для чтения и упражнений не нужен. Вход необязателен: он помогает сохранять ваши результаты."
+          "a": "Не нужен. Вход необязателен: он сохраняет последнюю страницу и сохранённые учебники в аккаунте."
         },
         "phone": {
           "q": "Работает ли на телефоне?",
-          "a": "Да. Сайт адаптирован под телефон, а нижняя панель открывает учебники и поиск одним касанием."
+          "a": "Да. Сайт адаптирован под телефон: листайте страницы свайпом или кнопками."
         },
         "languages": {
           "q": "На каких языках?",
-          "a": "На узбекском (латиница и кириллица), русском и английском. Покрытие языков растёт по мере перевода текстов тем."
+          "a": "Сайт на узбекском (латиница и кириллица), русском и английском. Сами учебники — на языке загруженного файла."
         }
       }
     },
     "cta": {
-      "title": "Откройте первую тему прямо сейчас",
-      "text": "Выберите свой класс и начните с сегодняшней темы.",
+      "title": "Откройте первый учебник прямо сейчас",
+      "text": "Выберите свой класс и начните читать.",
       "button": "Смотреть учебники"
+    },
+    "catalog": {
+      "title": "Выберите класс и предмет",
+      "hint": "Найдите учебник и начните читать."
     }
   },
   "ui": {
@@ -167,7 +98,6 @@
   },
   "nav": {
     "textbooks": "Учебники",
-    "subjects": "Предметы",
     "about": "О проекте",
     "login": "Войти",
     "search": "Поиск",
@@ -176,12 +106,11 @@
     "mobile": "Мобильная навигация",
     "home": "Главная",
     "goToCabinet": "Перейти в кабинет",
-    "goToTeacher": "Перейти в панель учителя",
-    "pdfBooks": "PDF-учебники"
+    "goToTeacher": "Перейти в панель учителя"
   },
   "search": {
     "label": "Поиск по сайту",
-    "placeholder": "Найдите тему, предмет или класс…",
+    "placeholder": "Найдите учебник по названию…",
     "submit": "Искать"
   },
   "language": {
@@ -298,229 +227,6 @@
     "splashResetDone": "Готово. Полностью обновите главную страницу.",
     "splashResetFailed": "Не удалось записать в хранилище браузера"
   },
-  "catalog": {
-    "topicsTitle": "Найденные темы",
-    "meta": {
-      "title": "Учебники",
-      "description": "Учебники 1–11 классов: найдите по классу и предмету или ищите по названию книги и темы."
-    },
-    "title": "Учебники",
-    "subtitle": "Найдите по классу и предмету или ищите по названию книги или темы.",
-    "searchLabel": "Поиск книги или темы",
-    "searchPlaceholder": "Название книги или темы…",
-    "gradeLabel": "Класс",
-    "subjectLabel": "Предмет",
-    "allSubjects": "Все предметы",
-    "activeFilters": "Активные фильтры",
-    "removeFilter": "Убрать фильтр: {label}",
-    "searchChip": "Поиск: «{query}»",
-    "clearAll": "Сбросить всё",
-    "resultCount": "{count, plural, one {Найден # учебник} few {Найдено # учебника} many {Найдено # учебников} other {Найдено # учебника}}",
-    "matchedTopics": "Подходящие темы",
-    "loading": "Учебники загружаются",
-    "error": "Не удалось загрузить учебники. Обновите страницу.",
-    "empty": {
-      "title": "Ничего не найдено",
-      "text": "По выбранным фильтрам учебников нет.",
-      "tryGrade": "Попробуйте другой класс:",
-      "tryQuery": "Сократите запрос или поищите другим словом."
-    },
-    "readProgress": "Прочитано тем: {done} из {total}",
-    "readProgressLabel": "{title}: прочитанные темы"
-  },
-  "book": {
-    "author": "Автор",
-    "year": "Год издания",
-    "edition": "Издание",
-    "grade": "Класс",
-    "subject": "Предмет",
-    "pdfRead": "Читать PDF",
-    "pdfMissing": "PDF ещё не загружен",
-    "learn": "Учиться по темам",
-    "soon": "Скоро",
-    "details": "Страница книги",
-    "chapters": "Главы и темы",
-    "chapterLabel": "Глава {order}",
-    "topicsCount": "{count, plural, one {# тема} few {# темы} many {# тем} other {# темы}}",
-    "noChapters": "Темы скоро появятся.",
-    "meta": {
-      "description": "Учебник «{subject}», {grade} класс. Автор: {author}. Год издания: {year}, {edition}."
-    }
-  },
-  "topicStatus": {
-    "none": "Не прочитано",
-    "started": "Начато",
-    "completed": "Прочитано"
-  },
-  "topic": {
-    "meta": {
-      "description": "{book} · {chapter}: тема «{title}» — объяснение, примеры и упражнения."
-    },
-    "notReady": "Эта тема ещё не готова",
-    "toc": {
-      "label": "Содержание темы",
-      "title": "Содержание"
-    },
-    "sections": {
-      "goal": "Чему вы научитесь",
-      "explanation": "Простое объяснение",
-      "rule": "Главное правило",
-      "example": "Решённый пример",
-      "exercise": "Выполните сами",
-      "summary": "Краткий итог"
-    },
-    "toolbar": {
-      "label": "Действия с темой",
-      "bookmark": "В закладки",
-      "bookmarked": "В закладках",
-      "print": "Печать",
-      "bookmarkAdded": "Добавлено в закладки",
-      "bookmarkRemoved": "Убрано из закладок",
-      "error": "Не удалось выполнить действие, попробуйте ещё раз",
-      "bookmarkGuestHint": "После входа закладки перенесутся в аккаунт."
-    },
-    "resume": {
-      "message": "Место, где вы остановились, сохранено.",
-      "action": "Продолжить",
-      "dismiss": "Закрыть"
-    },
-    "example": {
-      "stepLabel": "Шаг {current} из {total}",
-      "next": "Следующий шаг",
-      "showAll": "Показать всё",
-      "restart": "Начать заново",
-      "done": "Все шаги показаны"
-    },
-    "exercise": {
-      "label": "Упражнение {order}",
-      "check": "Проверить",
-      "hint": "Подсказка",
-      "hideHint": "Скрыть подсказку",
-      "showExplanation": "Показать объяснение",
-      "hideExplanation": "Скрыть объяснение",
-      "explanationTitle": "Объяснение",
-      "answerLabel": "Ваш ответ",
-      "answerPlaceholder": "Введите ответ",
-      "answerRequired": "Сначала введите или выберите ответ.",
-      "true": "Верно",
-      "false": "Неверно",
-      "correct": "Верно! Молодец.",
-      "incorrect": "Пока неверно. Посмотрите подсказку и попробуйте ещё раз.",
-      "correctAnswer": "Правильный ответ: {answer}",
-      "progress": "Выполнено упражнений: {done} из {total}",
-      "allDone": "Все упражнения выполнены",
-      "saveInvite": "Войдите, чтобы сохранить результат.",
-      "saveInviteAction": "Войти",
-      "saved": "Результат сохранён",
-      "teacherAnswer": "Ответ (для учителя)",
-      "syncing": "Результат отправляется; без интернета отправится, когда он появится",
-      "orderHint": "Расставьте в правильном порядке с помощью кнопок.",
-      "moveUp": "{item} — выше",
-      "moveDown": "{item} — ниже"
-    },
-    "choiceExplain": {
-      "title": "Выберите вариант и посмотрите причину",
-      "hint": "Вы увидите, почему каждый вариант верен или неверен.",
-      "correct": "Верно",
-      "incorrect": "Неверно",
-      "reason": "Причина",
-      "reset": "Начать заново"
-    },
-    "graph": {
-      "title": "Меняйте коэффициенты",
-      "hint": "Двигайте ползунки: график и корни меняются сразу.",
-      "figure": "График квадратичной функции",
-      "discriminant": "Дискриминант",
-      "roots": "Корни",
-      "noRoots": "Действительных корней нет",
-      "sum": "Сумма",
-      "product": "Произведение",
-      "vertex": "Вершина",
-      "aZero": "Коэффициент a не должен быть равен нулю: парабола превращается в прямую.",
-      "reset": "Исходные значения",
-      "loading": "Загрузка виджета…"
-    },
-    "next": {
-      "label": "Следующая тема",
-      "title": "Следующая тема",
-      "last": "Это последняя тема в учебнике",
-      "toBook": "Вернуться к содержанию учебника",
-      "previous": "Предыдущая тема"
-    },
-    "teacher": {
-      "title": "Для учителя",
-      "present": "Показать на уроке",
-      "hint": "F — показ на уроке. В режиме: пробел или → следующий шаг, ← назад, A ответы, Esc выход.",
-      "showAnswers": "Показать ответы",
-      "hideAnswers": "Скрыть ответы",
-      "barLabel": "Управление показом на уроке",
-      "prevStep": "Предыдущий шаг",
-      "nextStep": "Следующий шаг",
-      "exit": "Выйти",
-      "share": {
-        "open": "Ссылка и QR",
-        "title": "Ссылка и QR-код",
-        "description": "Ученики наводят камеру телефона и открывают тему.",
-        "linkLabel": "Ссылка на тему",
-        "copy": "Копировать",
-        "copied": "Ссылка скопирована",
-        "copyFailed": "Не удалось скопировать. Выделите ссылку и скопируйте вручную.",
-        "qrLabel": "QR-код ссылки на тему",
-        "larger": "Увеличить",
-        "smaller": "Уменьшить"
-      },
-      "print": {
-        "open": "Печать выбранного",
-        "title": "Печать",
-        "description": "Будут напечатаны только выбранные разделы.",
-        "sections": "Разделы",
-        "withAnswers": "С ответами к упражнениям",
-        "action": "Печать",
-        "cancel": "Отмена"
-      }
-    },
-    "markRead": {
-      "action": "Я прочитал(а) тему",
-      "done": "Тема отмечена как прочитанная"
-    },
-    "draft": "Не проверено",
-    "draftHint": "Текст этой темы ещё не сверен с учебником; возможны ошибки.",
-    "geometryPoints": {
-      "title": "Подвигайте точки",
-      "hint": "Перетаскивайте вершины мышью или пальцем, либо выберите и нажимайте стрелки.",
-      "figure": "Треугольник и его вершины",
-      "point": "Точка {label}: ({x}; {y})",
-      "reset": "Исходное положение",
-      "angle": {
-        "right": "Прямоугольный треугольник",
-        "acute": "Остроугольный треугольник",
-        "obtuse": "Тупоугольный треугольник",
-        "degenerate": "Вершины на одной прямой — треугольника нет"
-      },
-      "side": {
-        "equilateral": "равносторонний",
-        "isosceles": "равнобедренный",
-        "scalene": "разносторонний"
-      },
-      "pythagoras": "Сумма квадратов катетов равна квадрату гипотенузы: {a} + {b} = {c}."
-    },
-    "timeline": {
-      "title": "Линия времени",
-      "hint": "Нажмите на дату — откроется краткое пояснение. Между датами можно ходить стрелками."
-    }
-  },
-  "subjectsPage": {
-    "meta": {
-      "title": "Предметы",
-      "description": "Учебники по школьным предметам: выберите класс и найдите нужную книгу."
-    },
-    "title": "Предметы",
-    "subtitle": "Выберите предмет и смотрите учебники по нему для всех классов.",
-    "booksCount": "{count, plural, one {# учебник} few {# учебника} many {# учебников} other {# учебника}}",
-    "metaSubject": "{subject}: учебники 1–11 классов",
-    "gradeHeading": "{grade} класс",
-    "empty": "Учебники по этому предмету ещё не добавлены."
-  },
   "breadcrumb": {
     "label": "Навигационная цепочка",
     "home": "Главная"
@@ -536,14 +242,13 @@
     "backToPanel": "Вернуться на главную",
     "notFoundCode": "404",
     "toTextbooks": "К учебникам",
-    "searchLabel": "Поиск учебника или темы",
-    "searchPlaceholder": "Название учебника или темы…",
-    "popularSubjects": "Популярные предметы"
+    "searchLabel": "Поиск учебника",
+    "searchPlaceholder": "Название учебника…"
   },
   "auth": {
     "signInGoogle": "Войти через Google",
     "loginTitle": "Вход в maktab365",
-    "loginText": "Вход необязателен: учебники можно читать и без аккаунта. После входа прогресс и закладки сохраняются в аккаунте.",
+    "loginText": "Вход необязателен: читать учебники можно и без аккаунта. После входа последняя страница и сохранённые учебники останутся в аккаунте.",
     "continueAsGuest": "Продолжить без входа",
     "loading": "Загрузка…",
     "menuLabel": "Меню пользователя: {name}",
@@ -552,16 +257,16 @@
     "settings": "Настройки",
     "signOut": "Выйти",
     "guestMerged": "Данные гостя добавлены в аккаунт",
-    "guestMergedHint": "Ваш прогресс и закладки теперь в аккаунте."
+    "guestMergedHint": "Последние страницы и сохранённые учебники теперь в вашем аккаунте."
   },
   "onboarding": {
     "title": "Как вы будете пользоваться maktab365?",
     "text": "Это спрашивается один раз. Позже можно изменить в настройках.",
     "roleLegend": "Кто вы?",
     "roleStudent": "Я ученик",
-    "roleStudentHint": "Читаю темы и выполняю упражнения",
+    "roleStudentHint": "Читаю учебники",
     "roleTeacher": "Я учитель",
-    "roleTeacherHint": "Ищу материалы для уроков",
+    "roleTeacherHint": "Ищу учебники для уроков",
     "nameLabel": "Ваше имя",
     "gradeLabel": "Ваш класс",
     "gradePlaceholder": "Выберите класс",
@@ -594,9 +299,9 @@
     "signOut": "Выйти из аккаунта",
     "about": {
       "title": "О проекте",
-      "text": "maktab365 — бесплатная платформа для чтения учебников 1–11 классов по темам.",
-      "free": "Все учебники и упражнения бесплатны.",
-      "topics": "Каждая тема: правило, разобранный пример, упражнение и вывод.",
+      "text": "maktab365 — бесплатная платформа для чтения учебников 1–11 классов онлайн.",
+      "free": "Все учебники бесплатны.",
+      "topics": "Находите по классу и предмету, читайте постранично: последняя страница запоминается.",
       "languages": "На узбекском (латиница и кириллица), русском и английском."
     },
     "data": {
@@ -654,185 +359,23 @@
   "cabinet": {
     "title": "Кабинет",
     "greeting": "Здравствуйте, {name}!",
-    "lead": "Продолжите последнюю начатую тему.",
-    "browse": "Перейти к учебникам",
-    "loadFailed": "Не удалось загрузить данные. Обновите страницу.",
+    "lead": "Продолжите последний открытый учебник.",
     "nav": {
       "label": "Разделы кабинета",
       "home": "Главная",
-      "subjects": "Мои предметы",
       "textbooks": "Учебники",
-      "results": "Результаты",
-      "saved": "Сохранённое",
-      "pdfBooks": "PDF-учебники"
-    },
-    "continue": {
-      "title": "{subject} · {topic}",
-      "titleNoSubject": "{topic}",
-      "lastPart": "Последняя прочитанная часть: {part}",
-      "partStart": "начало темы",
-      "partWithTitle": "{section} — {title}",
-      "partExercise": "{section}, упражнение {order}",
-      "action": "Продолжить",
-      "actionLabel": "Продолжить тему «{topic}»",
-      "emptyTitle": "Начните первую тему",
-      "emptyText": "Выберите учебник и прочитайте одну тему. Карточка продолжения появится здесь.",
-      "doneTitle": "Все начатые темы завершены",
-      "doneText": "Выберите новую тему или посмотрите темы для повторения в «Результатах»."
-    },
-    "status": {
-      "read": {
-        "none": "Тема не прочитана",
-        "started": "Чтение начато",
-        "completed": "Тему прочитал(а)"
-      },
-      "exercise": {
-        "none": "Упражнения не выполнены",
-        "in_progress": "Упражнения в процессе",
-        "completed": "Упражнения пройдены"
-      },
-      "mistakes": "Ошибки в упражнениях: {count}"
-    },
-    "subjects": {
-      "title": "Мои предметы",
-      "pageLead": "Предметы {grade} класса и ваш прогресс по ним.",
-      "empty": "Учебники для вашего класса пока не добавлены.",
-      "noGrade": "Класс не указан. Выберите класс в настройках, и здесь появятся ваши предметы.",
-      "settings": "Перейти в настройки",
-      "soon": "Темы скоро появятся",
-      "topicsRead": "Прочитано тем: {done} из {total}",
-      "progressLabel": "{title}: прочитанные темы",
-      "all": "Все предметы"
-    },
-    "review": {
-      "title": "Нужно повторить",
-      "empty": "Тем для повторения нет. Если ошибётесь в упражнении, тема появится здесь.",
-      "action": "К упражнениям",
-      "all": "Все ({count})"
-    },
-    "saved": {
-      "title": "Сохранённое",
-      "empty": "Пока ничего не сохранено. Сохраняйте темы кнопкой закладки на странице темы, чтобы вернуться позже.",
-      "remove": "{topic} — убрать из сохранённого",
-      "removeAction": "Убрать",
-      "all": "Все ({count})"
-    },
-    "weekly": {
-      "title": "Итоги недели",
-      "period": "Последние 7 дней",
-      "finished": "Завершённые темы",
-      "read": "Прочитанные темы",
-      "passed": "Темы с пройденными упражнениями",
-      "mistakes": "Упражнения с ошибками",
-      "empty": "На этой неделе результатов пока нет. Прочитайте тему и выполните упражнения.",
-      "more": "Посмотреть по темам"
-    },
-    "results": {
-      "title": "Результаты",
-      "lead": "По темам: что вы усвоили хорошо и что нужно повторить.",
-      "summary": "Усвоено хорошо: {mastered} · Повторить: {review} · В процессе: {progress}",
-      "statesNote": "«Тему прочитал(а)» и «Упражнения пройдены» учитываются отдельно.",
-      "mastered": {
-        "title": "Хорошо усвоено",
-        "text": "Упражнения выполнены без ошибок.",
-        "empty": "Хорошо усвоенных тем пока нет."
-      },
-      "review": {
-        "title": "Нужно повторить",
-        "text": "В упражнениях были ошибки.",
-        "empty": "Тем для повторения нет."
-      },
-      "inProgress": {
-        "title": "В процессе",
-        "text": "Начаты, но упражнения не завершены.",
-        "empty": "Тем в процессе нет."
-      },
-      "emptyTitle": "Начните первую тему",
-      "emptyText": "Результаты появятся здесь после того, как вы прочитаете тему и выполните упражнения: что вы знаете хорошо и что нужно повторить."
-    },
-    "plan": {
-      "title": "План обучения",
-      "lead": "Добавляйте себе небольшие цели и отмечайте выполненные.",
-      "listLabel": "Список целей",
-      "fieldLabel": "Новая цель",
-      "placeholder": "Например: повторить теорему Виета",
-      "add": "Добавить",
-      "empty": "План пуст. Напишите первую цель, например: сегодня прочитать одну тему.",
-      "progress": "Выполнено {done} из {total}",
-      "edit": "Изменить: {title}",
-      "remove": "Удалить: {title}",
-      "editLabel": "Текст цели",
-      "save": "Сохранить",
-      "cancel": "Отмена",
-      "removed": "Цель удалена",
-      "failed": "Не удалось выполнить действие, попробуйте ещё раз",
-      "errors": {
-        "titleRequired": "Напишите цель",
-        "titleTooLong": "Цель не длиннее 120 символов"
-      }
+      "saved": "Сохранённое"
     }
   },
   "teacher": {
     "title": "Панель учителя",
     "greeting": "Здравствуйте, {name}!",
-    "lead": "Быстро находите нужный материал.",
+    "lead": "Находите и сохраняйте учебники для уроков.",
     "nav": {
       "label": "Разделы панели учителя",
-      "books": "Учебники",
-      "topics": "Темы",
       "saved": "Сохранённое",
-      "pdfBooks": "PDF-учебники"
-    },
-    "search": {
-      "label": "Поиск книги или темы",
-      "placeholder": "Найдите книгу или тему…"
-    },
-    "filter": {
-      "subjects": "Предметы",
-      "grades": "Классы",
-      "reset": "Вернуться к моим предметам и классам"
-    },
-    "books": {
-      "title": "Книги",
-      "empty": "По выбранным предметам и классам книг не найдено.",
-      "clearFilters": "Сбросить фильтр",
-      "loadFailed": "Не удалось загрузить книги. Обновите страницу."
-    },
-    "recent": {
-      "title": "Недавно открытые темы",
-      "empty": "Вы ещё не открывали тем. Открытые темы появятся здесь (на этом устройстве)."
-    },
-    "saved": {
-      "title": "Сохранённые материалы",
-      "pageTitle": "Сохранённое",
-      "books": "Книги",
-      "topics": "Темы",
-      "emptyBooks": "Сохранённых книг нет. Добавьте кнопкой «Сохранить» на карточке книги.",
-      "emptyTopics": "Сохранённых тем нет. Добавьте кнопкой «Сохранить» или закладки у темы.",
-      "all": "Всё сохранённое"
-    },
-    "results": {
-      "books": "Книги",
-      "topics": "Темы",
-      "soon": "Скоро",
-      "empty": "По запросу «{query}» в выбранных предметах и классах ничего не найдено.",
-      "hidden": "Из-за фильтра скрыто результатов: {count}."
-    },
-    "topicsPage": {
-      "title": "Темы",
-      "lead": "Темы выбранных предметов и классов. Откройте готовую тему и покажите на уроке.",
-      "empty": "В выбранных предметах и классах нет книг с готовыми темами.",
-      "chapter": "Глава {order}. {title}",
-      "soon": "Скоро"
-    },
-    "save": {
-      "save": "Сохранить",
-      "saved": "Сохранено",
-      "saveLabel": "{title} — сохранить",
-      "removeLabel": "{title} — убрать из сохранённого",
-      "added": "Сохранено",
-      "removed": "Убрано из сохранённого",
-      "error": "Не удалось выполнить действие, попробуйте ещё раз"
+      "home": "Главная",
+      "textbooks": "Учебники"
     }
   },
   "panel": {
@@ -846,42 +389,40 @@
     "search": {
       "open": "Открыть поиск",
       "title": "Поиск",
-      "label": "Поиск учебника или темы",
-      "placeholder": "Поиск учебника или темы",
+      "label": "Поиск учебника",
+      "placeholder": "Найти учебник по названию",
       "hint": "Введите минимум 2 символа. Быстрое открытие: Ctrl+K или /.",
       "empty": "По запросу «{query}» ничего не найдено.",
       "books": "Учебники",
-      "topics": "Темы",
-      "soon": "Скоро"
+      "meta": "{grade} класс · {subject}"
     },
     "helpPage": {
       "title": "Помощь",
       "lead": "Есть вопрос, предложение или нашли ошибку? Напишите нам.",
       "tipsTitle": "Быстрые советы",
       "tips": {
-        "search": "На любой странице нажмите Ctrl+K (или /), чтобы быстро найти учебник или тему.",
-        "bookmarks": "Нажмите «Сохранить» у темы — она появится в разделе «Сохранённое».",
-        "present": "На странице темы клавиша F включает режим «Показ на уроке», а Esc выходит из него.",
-        "progress": "Прочитайте тему и решите упражнения — результаты появятся в разделе «Результаты»."
+        "search": "На любой странице нажмите Ctrl+K (или /), чтобы быстро найти учебник.",
+        "bookmarks": "Нажмите «Сохранить» в учебнике — он появится в разделе «Сохранённое».",
+        "progress": "Последняя открытая страница запоминается: «Продолжить» на главной ведёт на неё."
       },
       "formTitle": "Отправить сообщение"
     }
   },
   "aboutPage": {
     "title": "О проекте",
-    "lead": "maktab365 — учебники 1–11 классов по темам, бесплатно, для ученика и учителя.",
+    "lead": "maktab365 — учебники 1–11 классов онлайн, бесплатно, для ученика и учителя.",
     "points": {
       "free": {
         "title": "Всё бесплатно",
-        "text": "Учебники, темы и упражнения без оплаты."
+        "text": "Чтение учебников без оплаты."
       },
       "topics": {
-        "title": "По темам",
-        "text": "Учебник разбит на главы, главы — на короткие темы: правило, пример, упражнение и вывод в одном месте."
+        "title": "По классу и предмету",
+        "text": "Учебник находится по классу и предмету и читается постранично; место, где вы остановились, запоминается."
       },
       "roles": {
         "title": "Для ученика и учителя",
-        "text": "Ученик следит за прогрессом, учитель показывает тему на уроке и сохраняет материалы."
+        "text": "Ученик продолжает с того места, где остановился, учитель сохраняет нужные учебники."
       },
       "languages": {
         "title": "На нескольких языках",
@@ -1008,7 +549,7 @@
     "haveAccount": "Уже есть аккаунт?",
     "loginLink": "Войдите",
     "registerTitle": "Регистрация в maktab365",
-    "registerText": "Аккаунт сохраняет прогресс и закладки. Бесплатно."
+    "registerText": "Аккаунт хранит последнюю страницу и сохранённые учебники. Бесплатно."
   },
   "support": {
     "kindLabel": "Тип сообщения",
@@ -1050,7 +591,7 @@
     "reportError": {
       "link": "Нашли ошибку?",
       "title": "Сообщить об ошибке",
-      "description": "Опишите ошибку в теме — адрес страницы добавится сам.",
+      "description": "Опишите ошибку в учебнике — адрес страницы добавится сам.",
       "close": "Готово"
     }
   },
@@ -1060,11 +601,10 @@
       "main": "Admin menu",
       "mobile": "Admin bottom menu",
       "dashboard": "Dashboard",
-      "books": "Books",
+      "books": "Книги",
       "users": "Users",
       "site": "Go to site",
       "signOut": "Sign out",
-      "pdfBooks": "Книги (PDF)",
       "subjects": "Предметы"
     },
     "roles": {
@@ -1089,39 +629,24 @@
       "prev": "Previous",
       "next": "Next"
     },
-    "status": {
-      "draft": "Draft",
-      "reviewed": "Reviewed",
-      "published": "Published"
-    },
     "bookStatus": {
       "draft": "Hidden",
       "published": "Visible"
     },
-    "transition": {
-      "review": "Mark reviewed",
-      "publish": "Publish",
-      "unpublish": "Return to draft",
-      "done": {
-        "review": "Topic marked as reviewed",
-        "publish": "Topic published",
-        "unpublish": "Topic returned to draft"
-      }
-    },
     "dashboard": {
       "title": "Admin dashboard",
-      "description": "Content status and latest changes.",
+      "description": "Книги, предметы и последние изменения.",
       "allBooks": "All books",
       "loading": "Loading numbers",
       "books": "Books",
-      "topics": "Topics",
       "messages": "Messages",
       "total": "Total",
       "newMessages": "New messages",
       "recentMessages": "Latest new messages",
       "noMessages": "No new messages.",
       "recentActivity": "Latest changes",
-      "noActivity": "No changes yet."
+      "noActivity": "No changes yet.",
+      "subjects": "Предметы"
     },
     "audit": {
       "actions": {
@@ -1141,114 +666,20 @@
       }
     },
     "books": {
-      "title": "Books",
-      "description": "Find textbooks, edit them and manage their publication status.",
-      "new": "New book",
-      "loading": "Loading books",
-      "empty": "No books yet. Add the first one.",
-      "emptyFiltered": "No books match these filters.",
       "gradeLabel": "Grade {grade}",
       "filters": {
-        "search": "Search by title or slug",
         "grade": "Grade",
         "subject": "Subject",
         "status": "Status",
         "allGrades": "All grades",
         "allSubjects": "All subjects",
         "allStatuses": "All statuses"
-      },
-      "columns": {
-        "title": "Title",
-        "grade": "Grade",
-        "subject": "Subject",
-        "status": "Status",
-        "topics": "Topics (published / total)",
-        "updated": "Updated"
       }
-    },
-    "bookForm": {
-      "createTitle": "New book",
-      "createDescription": "Enter the book details. You add chapters and topics after creating it.",
-      "editTitle": "Edit book",
-      "slug": "Slug (book identifier)",
-      "slugHint": "Lowercase Latin letters, digits and hyphens, e.g. algebra-9. It cannot be changed later.",
-      "slugLocked": "The slug is fixed: it is part of links and student progress.",
-      "subject": "Subject",
-      "grade": "Grade",
-      "gradeOption": "Grade {grade}",
-      "choose": "Choose",
-      "year": "Publication year",
-      "title": "Book title",
-      "author": "Author",
-      "edition": "Edition",
-      "publisher": "Publisher",
-      "cover": "Cover (JPG, PNG or WebP)",
-      "pdf": "PDF file",
-      "isPublished": "Show on the site",
-      "isPublishedHint": "When off, the book is visible only in the admin panel. Topics are published separately.",
-      "save": "Save",
-      "create": "Create book",
-      "saved": "Book saved",
-      "created": "Book created",
-      "deleted": "Book deleted",
-      "deleteTitle": "Delete book",
-      "deleteDescription": "“{title}” and all its chapters and topics will be deleted. This cannot be undone.",
-      "backToList": "← Books"
-    },
-    "upload": {
-      "none": "No file uploaded",
-      "choose": "Choose file",
-      "replace": "Replace",
-      "remove": "Remove"
     },
     "localized": {
       "uz": "Uzbek (required)",
       "ru": "Russian",
       "en": "English"
-    },
-    "chapter": {
-      "createTitle": "New chapter",
-      "editTitle": "Edit chapter",
-      "title": "Chapter title",
-      "slug": "Slug",
-      "slugHint": "Lowercase Latin letters, digits and hyphens. Filled in from the title.",
-      "slugLocked": "The slug is fixed."
-    },
-    "tree": {
-      "title": "Chapters and topics",
-      "hint": "Drag to reorder or use the ↑ ↓ buttons. A topic can also be moved to another chapter.",
-      "addChapter": "Add chapter",
-      "addTopic": "Add topic",
-      "empty": "No chapters yet. Add the first one.",
-      "emptyChapter": "This chapter has no topics.",
-      "editChapter": "Edit chapter: {title}",
-      "deleteChapter": "Delete chapter: {title}",
-      "deleteTopic": "Delete topic: {title}",
-      "moveUp": "Move up: {title}",
-      "moveDown": "Move down: {title}",
-      "deleteChapterTitle": "Delete chapter",
-      "deleteTopicTitle": "Delete topic",
-      "deleteDescription": "“{title}” will be deleted. This cannot be undone."
-    },
-    "topic": {
-      "createTitle": "New topic",
-      "editTitle": "Edit topic",
-      "title": "Topic title",
-      "slug": "Slug",
-      "slugHint": "Unique within the book: lowercase Latin letters, digits and hyphens. Filled in from the title.",
-      "slugLocked": "The slug is fixed: it is part of the topic link.",
-      "summary": "Short summary",
-      "summaryHint": "Shown in topic lists (Uzbek).",
-      "notes": "Internal notes",
-      "notesHint": "For editors only, not shown on the site.",
-      "blocks": "Topic blocks (JSON)",
-      "blocksHint": "An array of blocks; its shape must follow the textbook block schema. The server validates it on save.",
-      "saved": "Topic saved",
-      "created": "Topic created",
-      "backToBook": "← Back to the book",
-      "inBook": "Book: {book}",
-      "reviewedBy": "Reviewed by {email}",
-      "publishedAt": "published {date}"
     },
     "users": {
       "title": "Users",
@@ -1421,24 +852,26 @@
   },
   "pdfBooks": {
     "meta": {
-      "title": "PDF-учебники",
-      "description": "Читайте PDF-учебники 1–11 классов онлайн, постранично. Бесплатно.",
-      "readerTitle": "PDF-учебник"
+      "title": "Учебники",
+      "description": "Находите учебники 1–11 классов по классу и предмету и читайте онлайн постранично. Бесплатно.",
+      "readerTitle": "Учебник"
     },
     "catalog": {
-      "title": "PDF-учебники",
+      "title": "Учебники",
       "description": "Выберите класс и предмет, откройте учебник и читайте постранично.",
       "gradeFilter": "Класс",
       "subjectFilter": "Предмет",
       "allGrades": "Все",
       "allSubjects": "Все предметы",
       "gradeLabel": "{grade} класс",
-      "loading": "Загрузка PDF-учебников",
-      "results": "Список PDF-учебников",
-      "empty": "PDF-учебников пока нет.",
-      "emptyFiltered": "Для этого класса и предмета PDF-учебников нет.",
-      "error": "Не удалось загрузить PDF-учебники.",
-      "retry": "Повторить"
+      "loading": "Учебники загружаются",
+      "results": "Список учебников",
+      "empty": "Учебников пока нет.",
+      "emptyFiltered": "По этому классу, предмету или запросу учебников не найдено.",
+      "error": "Не удалось загрузить учебники.",
+      "retry": "Повторить",
+      "searchLabel": "Поиск учебника по названию",
+      "searchPlaceholder": "Название учебника…"
     },
     "card": {
       "meta": "{grade} класс · {subject}",
@@ -1447,7 +880,7 @@
       "unverified": "Не прошёл проверку"
     },
     "reader": {
-      "back": "PDF-учебники",
+      "back": "Учебники",
       "toolbar": "Страницы",
       "prev": "Предыдущая страница",
       "next": "Следующая страница",
@@ -1459,8 +892,31 @@
       "notFound": "Учебник не найден или ещё не опубликован.",
       "retry": "Повторить"
     },
-    "search": {
-      "title": "PDF-учебники"
+    "bookmark": {
+      "save": "Сохранить",
+      "saved": "Сохранено"
+    }
+  },
+  "library": {
+    "loadFailed": "Не удалось загрузить данные. Обновите страницу.",
+    "continue": {
+      "position": "Страница {page} из {total}",
+      "action": "Продолжить",
+      "actionLabel": "Продолжить «{title}»",
+      "emptyTitle": "Откройте первый учебник",
+      "emptyText": "Выберите класс и предмет и читайте учебник постранично. Здесь запомнится, где вы остановились.",
+      "browse": "Смотреть учебники"
+    },
+    "recent": {
+      "title": "Недавно открытые",
+      "empty": "Других открытых учебников нет."
+    },
+    "saved": {
+      "title": "Сохранённое",
+      "all": "Все ({count})",
+      "empty": "Вы пока ничего не сохранили. Нажмите «Сохранить» на странице учебника.",
+      "browse": "К учебникам",
+      "loadFailed": "Не удалось загрузить сохранённое."
     }
   }
 }

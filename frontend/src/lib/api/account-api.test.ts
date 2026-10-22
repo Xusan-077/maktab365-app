@@ -4,14 +4,14 @@ import type { MaktabApi } from "./types";
 
 describe("withAccountApi", () => {
   it("akkaunt metodlari backend'ga, qolganlari asosiy klientga", async () => {
-    const base = { getMe: vi.fn(), getSubjects: vi.fn(async () => ["mock"]) };
-    const account = { getMe: vi.fn(async () => ({ id: "u1" })), getSubjects: vi.fn() };
+    const base = { getMe: vi.fn(), health: vi.fn(async () => ({ status: "ok" })) };
+    const account = { getMe: vi.fn(async () => ({ id: "u1" })), health: vi.fn() };
     const api = withAccountApi(base as unknown as MaktabApi, account as unknown as MaktabApi);
 
     expect(await api.getMe()).toEqual({ id: "u1" });
-    expect(await api.getSubjects()).toEqual(["mock"]);
+    expect(await api.health()).toEqual({ status: "ok" });
     expect(base.getMe).not.toHaveBeenCalled();
-    expect(account.getSubjects).not.toHaveBeenCalled();
+    expect(account.health).not.toHaveBeenCalled();
   });
 
   it("metodlar o'z obyektiga bog'langan (this)", async () => {

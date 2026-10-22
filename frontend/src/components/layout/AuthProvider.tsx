@@ -4,33 +4,25 @@ import { useEffect, useRef, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { SessionProvider, useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
-import { getApi } from "@/lib/api";
-import { apiQueries } from "@/lib/api/queries";
 import { queryKeys } from "@/lib/api/query-keys";
 import { setApiSession } from "@/lib/api/session";
 import { useToast } from "@/hooks/useToast";
-import { getSyncQueue, refreshAccountData, stopSync } from "@/lib/progress/engine";
+import { clearLegacyStorage } from "@/lib/legacy-storage";
 import { mergePdfGuestData } from "@/lib/pdf/guest-merge";
 import { getPdfBooksApi } from "@/lib/pdf-books/api";
-import { GuestMerger } from "@/lib/progress/guest-merge";
-import { collectGuestData } from "@/lib/merge-guest-data";
-import { useGuestStore } from "@/stores/guest.store";
 import { usePdfGuestStore } from "@/stores/pdf-guest.store";
-import { useReadingStore } from "@/stores/reading.store";
 
 const USER_QUERY_KEYS = [
   queryKeys.me(),
-  queryKeys.bookmarks(),
-  queryKeys.bookBookmarks(),
-  queryKeys.goals(),
-  ["progress"],
   ["pdf-progress"],
+  ["pdf-bookmarks"],
+  ["pdf-library"],
 ] as const;
 
 /**
- * Auth.js sessiyasini API klientiga ulaydi va kirgandan keyin mehmon ma'lumotini akkauntga qo'shadi.
- * Sessiya `children` renderidan oldin yoziladi, shuning uchun bolalarning birinchi so'rovlari
- * allaqachon to'g'ri akkaunt bilan ketadi.
+ * Auth.js sessiyasini API klientiga ulaydi va kirgandan keyin mehmonning PDF o'qish pozitsiyasi
+ * hamda saqlangan kitoblarini akkauntga qo'shadi. Sessiya `children` renderidan oldin yoziladi,
+ * shuning uchun bolalarning birinchi so'rovlari allaqachon to'g'ri akkaunt bilan ketadi.
  */
 function AuthBridge({ children }: { children: ReactNode }) {
   const { data, status } = useSession();
@@ -52,7 +44,7 @@ function AuthBridge({ children }: { children: ReactNode }) {
   });
 
   useEffect(() => {
-    void useGuestStore.persist.rehydrate();
+    clearLegacyStorage();
     void usePdfGuestStore.persist.rehydrate();
   }, []);
 
@@ -65,61 +57,9 @@ function AuthBridge({ children }: { children: ReactNode }) {
     }
   }, [status, userId, queryClient]);
 
-  // Akkaunt yozuvlari navbati: kirganda progress oldindan yuklanadi, saqlanib qolgan (oflayn)
-  // yozuvlar yuboriladi, internet qaytganda qayta uriniladi.
-  useEffect(() => {
-    if (!userId) {
-      stopSync();
-      return;
-    }
-    const queue = getSyncQueue(userId, queryClient);
-    void queryClient.prefetchQuery(apiQueries.progress());
-    void queue.flush();
-    const onOnline = () => void queue.flush();
-    window.addEventListener("online", onOnline);
-    return () => {
-      window.removeEventListener("online", onOnline);
-      stopSync();
-    };
-  }, [userId, queryClient]);
-
-  // Birinchi kirishdan keyin mehmon ma'lumoti akkauntga qo'shiladi (server idempotent). Xatoda
-  // ma'lumot saqlanadi va eksponensial kechikish bilan, internet qaytganda hamda keyingi kirishda
-  // qayta uriniladi; muvaffaqiyatda mehmon store'i tozalanadi.
-  useEffect(() => {
-    if (!userId) return;
-    const merger = new GuestMerger({
-      api: getApi(),
-      load: async () => {
-        await Promise.all([useGuestStore.persist.rehydrate(), useReadingStore.persist.rehydrate()]);
-        const { progress, bookmarks } = useGuestStore.getState();
-        return collectGuestData({ progress, bookmarks }, useReadingStore.getState().positions);
-      },
-      onMerged: (result) => {
-        useGuestStore.getState().clear();
-        refreshAccountData(queryClient);
-        for (const queryKey of USER_QUERY_KEYS) void queryClient.invalidateQueries({ queryKey });
-        // Faqat haqiqatan nimadir qo'shilganda xabar beramiz (reading pozitsiyalari har kirishda yig'iladi).
-        if (result.progress + result.bookmarks > 0) {
-          toastRef.current({
-            variant: "success",
-            title: tRef.current("guestMerged"),
-            description: tRef.current("guestMergedHint"),
-          });
-        }
-      },
-    });
-    void merger.start();
-    const onOnline = () => merger.retryNow();
-    window.addEventListener("online", onOnline);
-    return () => {
-      window.removeEventListener("online", onOnline);
-      merger.dispose();
-    };
-  }, [userId, queryClient]);
-
-  // Mehmonning PDF o'qish pozitsiyasi ham shu kirishda akkauntga qo'shiladi (mavjud
-  // `merge-guest-data/`; server idempotent, vaqti yangiroq pozitsiya yutadi).
+  // Birinchi kirishdan keyin mehmon ma'lumoti akkauntga qo'shiladi (`merge-guest-data/`; server
+  // idempotent, vaqti yangiroq pozitsiya yutadi). Xatoda ma'lumot saqlanadi va internet qaytganda
+  // hamda keyingi kirishda qayta uriniladi; muvaffaqiyatda mehmon store'i tozalanadi.
   useEffect(() => {
     if (!userId) return;
     const merge = () =>
@@ -127,11 +67,17 @@ function AuthBridge({ children }: { children: ReactNode }) {
         api: getPdfBooksApi(),
         load: async () => {
           await usePdfGuestStore.persist.rehydrate();
-          return usePdfGuestStore.getState().positions;
+          const { positions, bookmarks } = usePdfGuestStore.getState();
+          return { positions, bookmarks };
         },
         onMerged: () => {
           usePdfGuestStore.getState().clear();
-          void queryClient.invalidateQueries({ queryKey: ["pdf-progress"] });
+          for (const queryKey of USER_QUERY_KEYS) void queryClient.invalidateQueries({ queryKey });
+          toastRef.current({
+            variant: "success",
+            title: tRef.current("guestMerged"),
+            description: tRef.current("guestMergedHint"),
+          });
         },
       });
     merge();

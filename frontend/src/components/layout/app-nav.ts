@@ -1,13 +1,4 @@
-import {
-  Bookmark,
-  BookOpen,
-  ChartColumn,
-  FileText,
-  House,
-  Layers,
-  Library,
-  type LucideIcon,
-} from "lucide-react";
+import { Bookmark, BookOpen, FileText, House, type LucideIcon } from "lucide-react";
 import { ROUTES, type PanelBase } from "@/lib/utils/routes";
 
 export interface AppNavItem {
@@ -20,12 +11,18 @@ export interface AppNavItem {
 }
 
 const exact = (href: string) => (pathname: string) => pathname === href;
-const within =
-  (...hrefs: string[]) =>
-  (pathname: string) =>
-    hrefs.some((href) => pathname === href || pathname.startsWith(`${href}/`));
+const within = (href: string) => (pathname: string) =>
+  pathname === href || pathname.startsWith(`${href}/`);
 
-/** O'quvchi: Bosh sahifa · Fanlarim · Darsliklar · Natijalar · Saqlanganlar. */
+/** "Darsliklar" ochiq katalogga olib boradi (panel qobig'idan tashqarida), shuning uchun faol emas. */
+const textbooks = (labelKey: string): AppNavItem => ({
+  labelKey,
+  href: ROUTES.textbooks,
+  icon: FileText,
+  isActive: () => false,
+});
+
+/** O'quvchi: Bosh sahifa · Darsliklar · Saqlanganlar. */
 const STUDENT_NAV: AppNavItem[] = [
   {
     labelKey: "cabinet.nav.home",
@@ -33,30 +30,7 @@ const STUDENT_NAV: AppNavItem[] = [
     icon: House,
     isActive: exact(ROUTES.cabinet),
   },
-  {
-    labelKey: "cabinet.nav.subjects",
-    href: ROUTES.cabinetSubjects,
-    icon: Library,
-    isActive: within(ROUTES.cabinetSubjects),
-  },
-  {
-    labelKey: "cabinet.nav.textbooks",
-    href: `${ROUTES.cabinet}${ROUTES.textbooks}`,
-    icon: BookOpen,
-    isActive: within(`${ROUTES.cabinet}${ROUTES.textbooks}`),
-  },
-  {
-    labelKey: "cabinet.nav.pdfBooks",
-    href: ROUTES.pdfBooks,
-    icon: FileText,
-    isActive: () => false,
-  },
-  {
-    labelKey: "cabinet.nav.results",
-    href: ROUTES.cabinetResults,
-    icon: ChartColumn,
-    isActive: within(ROUTES.cabinetResults),
-  },
+  textbooks("cabinet.nav.textbooks"),
   {
     labelKey: "cabinet.nav.saved",
     href: ROUTES.cabinetSaved,
@@ -65,31 +39,15 @@ const STUDENT_NAV: AppNavItem[] = [
   },
 ];
 
-/** O'qituvchi: Darsliklar · Mavzular · Saqlanganlar. Fan/kitob/mavzu sahifalari "Darsliklar" ostida. */
+/** O'qituvchi: Bosh sahifa · Darsliklar · Saqlanganlar. */
 const TEACHER_NAV: AppNavItem[] = [
   {
-    labelKey: "teacher.nav.books",
+    labelKey: "teacher.nav.home",
     href: ROUTES.teacher,
     icon: BookOpen,
-    isActive: (pathname) =>
-      pathname === ROUTES.teacher ||
-      within(
-        `${ROUTES.teacher}${ROUTES.textbooks}`,
-        `${ROUTES.teacher}${ROUTES.subjects}`,
-      )(pathname),
+    isActive: exact(ROUTES.teacher),
   },
-  {
-    labelKey: "teacher.nav.pdfBooks",
-    href: ROUTES.pdfBooks,
-    icon: FileText,
-    isActive: () => false,
-  },
-  {
-    labelKey: "teacher.nav.topics",
-    href: ROUTES.teacherTopics,
-    icon: Layers,
-    isActive: within(ROUTES.teacherTopics),
-  },
+  textbooks("teacher.nav.textbooks"),
   {
     labelKey: "teacher.nav.saved",
     href: ROUTES.teacherSaved,
