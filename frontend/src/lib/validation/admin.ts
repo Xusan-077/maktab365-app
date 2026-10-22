@@ -42,6 +42,10 @@ export function createBookSchema() {
   });
 }
 
+export function createSubjectSchema() {
+  return object({ slug: slug(), title: localized() });
+}
+
 export function createChapterSchema() {
   return object({ slug: slug(), title: localized() });
 }

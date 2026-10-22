@@ -1064,7 +1064,8 @@
       "users": "Foydalanuvchilar",
       "site": "Saytga o'tish",
       "signOut": "Chiqish",
-      "pdfBooks": "Kitoblar (PDF)"
+      "pdfBooks": "Kitoblar (PDF)",
+      "subjects": "Fanlar"
     },
     "roles": {
       "student": "O'quvchi",
@@ -1321,6 +1322,31 @@
         "tooLarge": "Fayl juda katta (eng ko'pi 100 MB).",
         "missing": "PDF faylni tanlang."
       }
+    },
+    "subjects": {
+      "title": "Fanlar",
+      "description": "Katalogdagi fanlar. Kitob yoki PDF qo'shishda shu ro'yxatdan tanlanadi.",
+      "new": "Fan qo'shish",
+      "loading": "Fanlar yuklanmoqda",
+      "empty": "Hozircha fan yo'q.",
+      "columns": {
+        "name": "Nomi",
+        "slug": "Slug",
+        "books": "Kitoblar",
+        "actions": "Amallar"
+      },
+      "createTitle": "Yangi fan",
+      "editTitle": "Fanni tahrirlash",
+      "name": "Fan nomi",
+      "slug": "Slug",
+      "slugHint": "Kichik lotin harflari, raqamlar va tire. Nomdan avtomatik to'ldiriladi.",
+      "slugLocked": "Slug o'zgarmaydi.",
+      "editLabel": "{name} fanini tahrirlash",
+      "deleteLabel": "{name} fanini o'chirish",
+      "hasBooks": "Kitobi bor fanni o'chirib bo'lmaydi.",
+      "deleteTitle": "Fanni o'chirasizmi?",
+      "deleteDescription": "«{name}» fani o'chiriladi. Bu amalni qaytarib bo'lmaydi.",
+      "deleted": "Fan o'chirildi"
     },
     "pdfBooks": {
       "title": "Kitoblar (PDF)",

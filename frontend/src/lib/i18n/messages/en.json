@@ -1064,7 +1064,8 @@
       "users": "Users",
       "site": "Go to site",
       "signOut": "Sign out",
-      "pdfBooks": "Books (PDF)"
+      "pdfBooks": "Books (PDF)",
+      "subjects": "Subjects"
     },
     "roles": {
       "student": "Student",
@@ -1321,6 +1322,31 @@
         "tooLarge": "The file is too large (100 MB max).",
         "missing": "Choose a PDF file."
       }
+    },
+    "subjects": {
+      "title": "Subjects",
+      "description": "Catalogue subjects. They are chosen when adding a book or a PDF.",
+      "new": "Add subject",
+      "loading": "Loading subjects",
+      "empty": "No subjects yet.",
+      "columns": {
+        "name": "Name",
+        "slug": "Slug",
+        "books": "Books",
+        "actions": "Actions"
+      },
+      "createTitle": "New subject",
+      "editTitle": "Edit subject",
+      "name": "Subject name",
+      "slug": "Slug",
+      "slugHint": "Lowercase Latin letters, digits and hyphens. Filled in from the name.",
+      "slugLocked": "The slug is fixed.",
+      "editLabel": "Edit subject {name}",
+      "deleteLabel": "Delete subject {name}",
+      "hasBooks": "A subject that has books cannot be deleted.",
+      "deleteTitle": "Delete this subject?",
+      "deleteDescription": "The subject “{name}” will be deleted. This cannot be undone.",
+      "deleted": "Subject deleted"
     },
     "pdfBooks": {
       "title": "Books (PDF)",

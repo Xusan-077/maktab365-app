@@ -1,4 +1,4 @@
-import { BookOpen, FileText, LayoutDashboard, Users, type LucideIcon } from "lucide-react";
+import { BookOpen, FileText, LayoutDashboard, Library, Users, type LucideIcon } from "lucide-react";
 import { canSeeUsers } from "@/lib/admin/permissions";
 import { ADMIN_ROUTES } from "@/lib/admin/routes";
 import type { StaffRole } from "@/lib/auth/tokens";
@@ -38,6 +38,13 @@ const ITEMS: AdminNavItem[] = [
     href: ADMIN_ROUTES.pdfBooks,
     icon: FileText,
     isActive: within(ADMIN_ROUTES.pdfBooks),
+    allowed: () => true,
+  },
+  {
+    key: "subjects",
+    href: ADMIN_ROUTES.subjects,
+    icon: Library,
+    isActive: within(ADMIN_ROUTES.subjects),
     allowed: () => true,
   },
   {

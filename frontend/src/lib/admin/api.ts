@@ -12,6 +12,8 @@ import {
   type AdminPdfBookInput,
   type AdminPdfBookPatch,
   type AdminSubject,
+  type AdminSubjectInput,
+  type AdminSubjectPatch,
   type AdminTopic,
   type AdminTopicInput,
   type AdminTopicItem,
@@ -46,6 +48,24 @@ export class AdminApi {
       params: { query: { page_size: MAX_PAGE_SIZE } },
     });
     return unwrap(result).results;
+  }
+
+  async createSubject(input: AdminSubjectInput): Promise<AdminSubject> {
+    return unwrap(await this.client.POST("/api/v1/admin/subjects/", { body: input }));
+  }
+
+  async updateSubject(id: string, patch: AdminSubjectPatch): Promise<AdminSubject> {
+    const result = await this.client.PATCH("/api/v1/admin/subjects/{id}/", {
+      params: { path: { id } },
+      body: patch,
+    });
+    return unwrap(result);
+  }
+
+  async deleteSubject(id: string): Promise<void> {
+    this.assertDeleted(
+      await this.client.DELETE("/api/v1/admin/subjects/{id}/", { params: { path: { id } } }),
+    );
   }
 
   async books(params: BookListParams = {}): Promise<Page<AdminBook>> {
