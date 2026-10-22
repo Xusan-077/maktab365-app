@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import re
 
+from apps.content.management.commands.seed_subjects import SUBJECTS
+
 AUTHOR = {"uz": "Mualliflar jamoasi", "ru": "Коллектив авторов", "en": "Team of authors"}
 
 
@@ -16,29 +18,6 @@ def _edition(number: int) -> dict[str, str]:
     ordinal = {1: "1st", 2: "2nd", 3: "3rd"}[number]
     return {"uz": f"{number}-nashr", "ru": f"{number}-е издание", "en": f"{ordinal} edition"}
 
-
-SUBJECTS: dict[str, dict] = {
-    "algebra": {
-        "order": 2,
-        "icon": "sigma",
-        "title": {"uz": "Algebra", "ru": "Алгебра", "en": "Algebra"},
-    },
-    "geometriya": {
-        "order": 3,
-        "icon": "triangle",
-        "title": {"uz": "Geometriya", "ru": "Геометрия", "en": "Geometry"},
-    },
-    "ingliz-tili": {
-        "order": 4,
-        "icon": "languages",
-        "title": {"uz": "Ingliz tili", "ru": "Английский язык", "en": "English"},
-    },
-    "tarix": {
-        "order": 6,
-        "icon": "landmark",
-        "title": {"uz": "Tarix", "ru": "История", "en": "History"},
-    },
-}
 
 BOOKS: dict[str, dict] = {
     "algebra-9": {

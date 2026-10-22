@@ -184,6 +184,7 @@ def test_merge_without_pdf_progress_still_works(api):
         "progress": 0,
         "bookmarks": 0,
         "pdf_progress": 0,
+        "pdf_bookmarks": 0,
         "failed": [],
     }
 

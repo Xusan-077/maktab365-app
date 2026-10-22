@@ -3,7 +3,7 @@ from io import StringIO
 import pytest
 from django.core.management import call_command
 
-from apps.content.catalog_seed import SUBJECTS as IMPORTED
+from apps.content.catalog_seed import subject_fields
 from apps.content.management.commands.seed_subjects import SUBJECTS
 from apps.content.models import Subject
 
@@ -40,8 +40,11 @@ def test_keeps_admin_edits():
     assert subject.order == 99
 
 
-def test_orders_are_unique_and_import_subjects_unchanged():
+def test_orders_are_unique():
     orders = [meta["order"] for meta in SUBJECTS.values()]
     assert len(orders) == len(set(orders))
-    for slug, meta in IMPORTED.items():
-        assert SUBJECTS[slug] == meta
+
+
+def test_covers_the_four_core_content_subjects():
+    for slug in ("algebra", "geometriya", "ingliz-tili", "tarix"):
+        assert subject_fields(slug)["title"] == SUBJECTS[slug]["title"]

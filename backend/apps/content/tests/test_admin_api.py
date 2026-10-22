@@ -396,7 +396,7 @@ def test_dashboard_numbers_and_queries(editor, shelf, django_assert_max_num_quer
     SupportMessage.objects.create(message="Savol matni yetarli", email="a@b.co")
     SupportMessage.objects.create(message="Spam xabar matni", status="spam")
     editor.post(f"{BASE}/books/", book_payload(), "json")
-    with django_assert_max_num_queries(8):
+    with django_assert_max_num_queries(10):
         data = editor.get(f"{BASE}/dashboard/").data
     assert data["books"] == {"total": 3, "published": 2, "draft": 1}
     assert data["topics"] == {"total": 5, "draft": 1, "reviewed": 0, "published": 4}

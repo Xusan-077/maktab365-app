@@ -116,6 +116,7 @@ def delete_account(user: User, request=None) -> None:
     user.study_goals.all().delete()
     user.recent_views.all().delete()
     user.pdf_progress.all().delete()
+    user.pdf_bookmarks.all().delete()
     Profile.objects.filter(user=user).update(
         display_name="",
         avatar_url="",
@@ -183,6 +184,7 @@ def export_data(user: User, request=None) -> dict:
             "bookmarks": user.bookmarks.select_related("topic__book", "book"),
             "goals": user.study_goals.select_related("topic__book"),
             "pdf_progress": user.pdf_progress.select_related("pdf_book"),
+            "pdf_bookmarks": user.pdf_bookmarks.select_related("pdf_book"),
         },
     }
 

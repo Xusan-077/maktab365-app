@@ -555,3 +555,22 @@ def test_signed_read_url_is_short_lived(catalog, anon, algebra, remote, settings
 
     assert body == {"url": "https://r2.test/get_object/0?exp=600", "expires_in": 600}
     assert anon.get(f"{PUBLIC}/{book.pk}/file/").status_code == 404  # S3'da backend fayl bermaydi
+
+
+def test_dashboard_counts_pdf_books_and_subjects(editor, catalog, algebra):
+    catalog.pdf_book(algebra, 9)
+    catalog.pdf_book(algebra, 8, "draft")
+
+    data = editor.get("/api/v1/admin/dashboard/").data
+
+    assert data["pdf_books"] == {"total": 2, "published": 1, "draft": 1}
+    assert data["subjects_count"] == 1
+
+
+def test_admin_subjects_report_pdf_books_count(editor, catalog, algebra):
+    catalog.pdf_book(algebra, 9)
+    catalog.pdf_book(algebra, 8, "draft")
+
+    rows = editor.get("/api/v1/admin/subjects/").data["results"]
+
+    assert [(row["slug"], row["pdf_books_count"]) for row in rows] == [("algebra", 2)]

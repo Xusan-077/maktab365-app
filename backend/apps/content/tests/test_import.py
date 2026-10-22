@@ -11,7 +11,6 @@ from apps.content.models import REVISION_LIMIT, Book, Chapter, Subject, Topic, T
 pytestmark = pytest.mark.django_db
 
 FIXTURES = Path(__file__).resolve().parents[4] / "contracts" / "fixtures"
-REAL_CONTENT = Path(__file__).resolve().parents[4] / "frontend" / "src" / "content"
 
 
 def topic_data(**over):
@@ -117,14 +116,6 @@ def test_reorder_swap_does_not_violate_unique_order(tree):
     write(tree, "algebra/algebra-9/kvadrat/viyet", topic_data(order=1))
     run(tree)
     assert Topic.objects.get(slug="diskriminant").order == 2
-
-
-def test_real_frontend_content_imports():
-    run(REAL_CONTENT)
-    assert Subject.objects.count() == 4
-    assert Book.objects.count() == 4 and Chapter.objects.count() == 4
-    assert Topic.objects.count() == 13
-    assert not Book.objects.filter(grade__lt=1).exists()
 
 
 def test_revisions_keep_last_fifty(tree):

@@ -15,7 +15,7 @@ from rest_framework.exceptions import NotFound, ValidationError
 from apps.content.models import PdfBook
 from apps.content.pdf_services import visible_pdf_books
 
-from ..models import PdfReadProgress
+from ..models import PdfBookmark, PdfReadProgress
 
 
 def resolve_pdf_book(request, pdf_book_id) -> PdfBook:
@@ -64,3 +64,51 @@ def apply_pdf_progress(
         except IntegrityError:  # ikki parallel birinchi yozuv: ikkinchisi yangilash yo'liga tushadi
             continue
     raise RuntimeError("pdf progress upsert did not settle")  # pragma: no cover
+
+
+LIBRARY_LIMIT = 8
+
+
+def add_pdf_bookmark(user, book: PdfBook) -> tuple[PdfBookmark, bool]:
+    """`(xatcho'p, yangi yaratildimi)`; takror qo'shish xavfsiz."""
+    existing = PdfBookmark.objects.filter(user=user, pdf_book=book).first()
+    if existing:
+        return existing, False
+    try:
+        with transaction.atomic():
+            return PdfBookmark.objects.create(user=user, pdf_book=book), True
+    except IntegrityError:  # parallel so'rov oldin yaratib qo'ydi
+        return PdfBookmark.objects.get(user=user, pdf_book=book), False
+
+
+def remove_pdf_bookmark(user, book_id) -> None:
+    """Idempotent: yo'q yozuvni olib tashlash xato emas (kitob yashirilgan bo'lsa ham ishlaydi)."""
+    try:
+        key = uuid.UUID(str(book_id))
+    except ValueError:
+        raise NotFound() from None
+    PdfBookmark.objects.filter(user=user, pdf_book_id=key).delete()
+
+
+def visible_bookmarks(request, user):
+    """Foydalanuvchining xatcho'plari: faqat hozir ko'rinadigan kitoblar, eng yangisi birinchi."""
+    visible = visible_pdf_books(request)
+    return (
+        PdfBookmark.objects.filter(user=user, pdf_book__in=visible)
+        .select_related("pdf_book__subject")
+        .order_by("-created_at")
+    )
+
+
+def library(request, user) -> dict:
+    """Kabinet bosh sahifasi: oxirgi ochilgan kitoblar (birinchisi — "davom ettirish")."""
+    visible = visible_pdf_books(request)
+    rows = (
+        PdfReadProgress.objects.filter(user=user, pdf_book__in=visible)
+        .select_related("pdf_book__subject")
+        .order_by("-updated_at")[:LIBRARY_LIMIT]
+    )
+    return {
+        "items": list(rows),
+        "saved_count": visible_bookmarks(request, user).count(),
+    }

@@ -1,10 +1,13 @@
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
+from apps.content.pdf_serializers import PdfBookSerializer
+
 from .models import (
     Bookmark,
     BookmarkKind,
     ExerciseStatus,
+    PdfBookmark,
     PdfReadProgress,
     ReadStatus,
     RecentView,
@@ -81,6 +84,33 @@ class PdfProgressSerializer(serializers.ModelSerializer):
     def get_last_page(self, row) -> int:
         # Kitob qisqa fayl bilan almashtirilgan bo'lsa ham chegaradan chiqmaydi.
         return min(row.last_page, row.pdf_book.page_count) if row.pdf_book.page_count else 1
+
+
+class PdfLibraryItemSerializer(serializers.ModelSerializer):
+    book = PdfBookSerializer(source="pdf_book")
+    last_page = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PdfReadProgress
+        fields = ["book", "last_page", "updated_at"]
+        read_only_fields = fields
+
+    def get_last_page(self, row) -> int:
+        return min(row.last_page, row.pdf_book.page_count) if row.pdf_book.page_count else 1
+
+
+class PdfLibrarySerializer(serializers.Serializer):
+    items = PdfLibraryItemSerializer(many=True)
+    saved_count = serializers.IntegerField()
+
+
+class PdfBookmarkSerializer(serializers.ModelSerializer):
+    book = PdfBookSerializer(source="pdf_book")
+
+    class Meta:
+        model = PdfBookmark
+        fields = ["book", "created_at"]
+        read_only_fields = fields
 
 
 class TopicProgressSerializer(serializers.ModelSerializer):
@@ -282,10 +312,14 @@ class MergeRequestSerializer(serializers.Serializer):
     progress = GuestProgressSerializer(many=True, required=False, max_length=MERGE_LIMIT)
     bookmarks = BookmarkWriteSerializer(many=True, required=False, max_length=MERGE_LIMIT)
     pdf_progress = GuestPdfProgressSerializer(many=True, required=False, max_length=MERGE_LIMIT)
+    pdf_bookmarks = serializers.ListField(
+        child=serializers.CharField(max_length=64), required=False, max_length=MERGE_LIMIT
+    )
 
 
 class MergeResultSerializer(serializers.Serializer):
     progress = serializers.IntegerField()
     bookmarks = serializers.IntegerField()
     pdf_progress = serializers.IntegerField()
+    pdf_bookmarks = serializers.IntegerField()
     failed = serializers.ListField(child=serializers.CharField())

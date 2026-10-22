@@ -167,3 +167,22 @@ class PdfReadProgress(UUIDModel, TimeStampedModel):
 
     def __str__(self):
         return f"{self.user_id}/{self.pdf_book_id}"
+
+
+class PdfBookmark(UUIDModel):
+    """Saqlangan PDF darslik (foydalanuvchi + kitob uchun bitta yozuv)."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="pdf_bookmarks"
+    )
+    pdf_book = models.ForeignKey("content.PdfBook", on_delete=models.CASCADE, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(fields=["user", "pdf_book"], name="pdf_bookmark_once_per_book")
+        ]
+
+    def __str__(self):
+        return f"{self.user_id}/{self.pdf_book_id}"

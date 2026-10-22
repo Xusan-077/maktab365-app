@@ -19,6 +19,8 @@ from .serializers import (
     EventSerializer,
     MergeRequestSerializer,
     MergeResultSerializer,
+    PdfBookmarkSerializer,
+    PdfLibrarySerializer,
     PdfProgressSerializer,
     PdfProgressWriteSerializer,
     ProgressWriteSerializer,
@@ -34,7 +36,15 @@ from .services import dashboard
 from .services import progress as progress_service
 from .services.bookmarks import add_bookmark, visible_book
 from .services.merge import merge_guest_data
-from .services.pdf import apply_pdf_progress, clamp_page, resolve_pdf_book
+from .services.pdf import (
+    add_pdf_bookmark,
+    apply_pdf_progress,
+    clamp_page,
+    remove_pdf_bookmark,
+    resolve_pdf_book,
+    visible_bookmarks,
+)
+from .services.pdf import library as pdf_library
 from .services.topics import key_expr, resolve_topic
 
 TAGS = ["learning"]
@@ -346,6 +356,7 @@ class MergeGuestDataView(APIView):
             data.get("progress", []),
             data.get("bookmarks", []),
             data.get("pdf_progress", []),
+            data.get("pdf_bookmarks", []),
         )
         return Response(MergeResultSerializer(result).data)
 
@@ -399,3 +410,57 @@ class PdfProgressDetailView(APIView):
         row, _changed = apply_pdf_progress(request.user, book, page, data.get("updated_at"))
         row.pdf_book = book
         return Response(PdfProgressSerializer(row).data)
+
+
+class PdfBookmarkListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        operation_id="me_pdf_bookmarks_list",
+        tags=TAGS,
+        summary="Saqlangan PDF darsliklar (eng yangisi birinchi)",
+        responses=PdfBookmarkSerializer(many=True),
+    )
+    def get(self, request):
+        rows = visible_bookmarks(request, request.user)[:200]
+        return Response(PdfBookmarkSerializer(rows, many=True).data)
+
+
+class PdfBookmarkDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        operation_id="me_pdf_bookmarks_update",
+        tags=TAGS,
+        summary="Kitobni saqlash (idempotent)",
+        request=None,
+        responses=PdfBookmarkSerializer,
+    )
+    def put(self, request, pdf_book_id):
+        book = resolve_pdf_book(request, pdf_book_id)
+        bookmark, _created = add_pdf_bookmark(request.user, book)
+        bookmark.pdf_book = book
+        return Response(PdfBookmarkSerializer(bookmark).data)
+
+    @extend_schema(
+        operation_id="me_pdf_bookmarks_delete",
+        tags=TAGS,
+        summary="Saqlanganlardan olib tashlash (idempotent)",
+        responses={204: None},
+    )
+    def delete(self, request, pdf_book_id):
+        remove_pdf_bookmark(request.user, pdf_book_id)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class LibraryView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        operation_id="me_library",
+        tags=TAGS,
+        summary="Kabinet: oxirgi ochilgan PDF darsliklar va saqlanganlar soni",
+        responses=PdfLibrarySerializer,
+    )
+    def get(self, request):
+        return Response(PdfLibrarySerializer(pdf_library(request, request.user)).data)

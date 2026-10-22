@@ -25,7 +25,7 @@ from .admin_serializers import (
     UploadRequestSerializer,
     UploadResultSerializer,
 )
-from .models import Book, Chapter, Subject, Topic, TopicStatus
+from .models import Book, Chapter, PdfBook, PdfBookStatus, Subject, Topic, TopicStatus
 
 
 class ReorderResultSerializer(serializers.Serializer):
@@ -118,7 +118,10 @@ class SubjectAdminViewSet(AdminViewSet):
     ordering = ["order", "slug"]
 
     def get_queryset(self):
-        return Subject.objects.annotate(books_count=Count("books"))
+        return Subject.objects.annotate(
+            books_count=Count("books", distinct=True),
+            pdf_books_count=Count("pdf_books", distinct=True),
+        )
 
 
 @extend_schema_view(
@@ -356,6 +359,8 @@ class AuditEntrySerializer(serializers.ModelSerializer):
 
 class AdminDashboardSerializer(serializers.Serializer):
     books = BookCountsSerializer()
+    pdf_books = BookCountsSerializer()
+    subjects_count = serializers.IntegerField()
     topics = TopicCountsSerializer()
     new_messages = serializers.IntegerField()
     recent_messages = RecentMessageSerializer(many=True)
@@ -372,6 +377,11 @@ class DashboardView(APIView):
             published=Count("pk", filter=Q(is_published=True)),
             draft=Count("pk", filter=Q(is_published=False)),
         )
+        pdf_books = PdfBook.objects.aggregate(
+            total=Count("pk"),
+            published=Count("pk", filter=Q(status=PdfBookStatus.PUBLISHED)),
+            draft=Count("pk", filter=Q(status=PdfBookStatus.DRAFT)),
+        )
         topics = Topic.objects.aggregate(
             total=Count("pk"),
             **{s.value: Count("pk", filter=Q(status=s)) for s in TopicStatus},
@@ -379,6 +389,8 @@ class DashboardView(APIView):
         new = SupportMessage.objects.filter(status=SupportStatus.NEW)
         data = {
             "books": books,
+            "pdf_books": pdf_books,
+            "subjects_count": Subject.objects.count(),
             "topics": topics,
             "new_messages": new.count(),
             "recent_messages": new.order_by("-created_at")[:5],

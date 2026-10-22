@@ -127,6 +127,7 @@ class TestEndpoint:
             "progress": 1,
             "bookmarks": 2,
             "pdf_progress": 0,
+            "pdf_bookmarks": 0,
             "failed": ["yoq-mavzu", "yoq-kitob"],
         }
         second = api.post(URL, body, format="json").json()
@@ -140,6 +141,7 @@ class TestEndpoint:
             "progress": 0,
             "bookmarks": 0,
             "pdf_progress": 0,
+            "pdf_bookmarks": 0,
             "failed": [],
         }
 

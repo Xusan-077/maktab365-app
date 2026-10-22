@@ -1,12 +1,30 @@
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from apps.content.catalog_seed import SUBJECTS as IMPORTED
 from apps.content.models import Subject
 
-# Maktab fanlari. `import_content` biladigan to'rtta fan `catalog_seed` dan olinadi: slug,
-# tartib va sarlavha ikki joyda farq qilmasin.
-EXTRA: dict[str, dict] = {
+# Maktab fanlari: slug barqaror (kitoblar shunga bog'lanadi), `order` ro'yxat tartibi.
+SUBJECTS: dict[str, dict] = {
+    "algebra": {
+        "order": 2,
+        "icon": "sigma",
+        "title": {"uz": "Algebra", "ru": "Алгебра", "en": "Algebra"},
+    },
+    "geometriya": {
+        "order": 3,
+        "icon": "triangle",
+        "title": {"uz": "Geometriya", "ru": "Геометрия", "en": "Geometry"},
+    },
+    "ingliz-tili": {
+        "order": 4,
+        "icon": "languages",
+        "title": {"uz": "Ingliz tili", "ru": "Английский язык", "en": "English"},
+    },
+    "tarix": {
+        "order": 6,
+        "icon": "landmark",
+        "title": {"uz": "Tarix", "ru": "История", "en": "History"},
+    },
     "matematika": {
         "order": 1,
         "icon": "calculator",
@@ -83,8 +101,6 @@ EXTRA: dict[str, dict] = {
         "title": {"uz": "Musiqa", "ru": "Музыка", "en": "Music"},
     },
 }
-
-SUBJECTS: dict[str, dict] = {**IMPORTED, **EXTRA}
 
 
 class Command(BaseCommand):

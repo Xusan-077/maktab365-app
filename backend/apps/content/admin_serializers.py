@@ -76,10 +76,21 @@ class ImmutableSlugMixin:
 class SubjectAdminSerializer(ImmutableSlugMixin, serializers.ModelSerializer):
     title = LocalizedInput()
     books_count = serializers.IntegerField(read_only=True)
+    pdf_books_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Subject
-        fields = ["id", "slug", "title", "icon", "order", "books_count", "created_at", "updated_at"]
+        fields = [
+            "id",
+            "slug",
+            "title",
+            "icon",
+            "order",
+            "books_count",
+            "pdf_books_count",
+            "created_at",
+            "updated_at",
+        ]
         read_only_fields = ["id", "created_at", "updated_at"]
 
 
