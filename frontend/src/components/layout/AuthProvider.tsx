@@ -10,9 +10,12 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { setApiSession } from "@/lib/api/session";
 import { useToast } from "@/hooks/useToast";
 import { getSyncQueue, refreshAccountData, stopSync } from "@/lib/progress/engine";
+import { mergePdfGuestData } from "@/lib/pdf/guest-merge";
+import { getPdfBooksApi } from "@/lib/pdf-books/api";
 import { GuestMerger } from "@/lib/progress/guest-merge";
 import { collectGuestData } from "@/lib/merge-guest-data";
 import { useGuestStore } from "@/stores/guest.store";
+import { usePdfGuestStore } from "@/stores/pdf-guest.store";
 import { useReadingStore } from "@/stores/reading.store";
 
 const USER_QUERY_KEYS = [
@@ -21,6 +24,7 @@ const USER_QUERY_KEYS = [
   queryKeys.bookBookmarks(),
   queryKeys.goals(),
   ["progress"],
+  ["pdf-progress"],
 ] as const;
 
 /**
@@ -49,6 +53,7 @@ function AuthBridge({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     void useGuestStore.persist.rehydrate();
+    void usePdfGuestStore.persist.rehydrate();
   }, []);
 
   useEffect(() => {
@@ -111,6 +116,27 @@ function AuthBridge({ children }: { children: ReactNode }) {
       window.removeEventListener("online", onOnline);
       merger.dispose();
     };
+  }, [userId, queryClient]);
+
+  // Mehmonning PDF o'qish pozitsiyasi ham shu kirishda akkauntga qo'shiladi (mavjud
+  // `merge-guest-data/`; server idempotent, vaqti yangiroq pozitsiya yutadi).
+  useEffect(() => {
+    if (!userId) return;
+    const merge = () =>
+      void mergePdfGuestData({
+        api: getPdfBooksApi(),
+        load: async () => {
+          await usePdfGuestStore.persist.rehydrate();
+          return usePdfGuestStore.getState().positions;
+        },
+        onMerged: () => {
+          usePdfGuestStore.getState().clear();
+          void queryClient.invalidateQueries({ queryKey: ["pdf-progress"] });
+        },
+      });
+    merge();
+    window.addEventListener("online", merge);
+    return () => window.removeEventListener("online", merge);
   }, [userId, queryClient]);
 
   return children;

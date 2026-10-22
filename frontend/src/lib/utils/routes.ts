@@ -1,6 +1,7 @@
 export const ROUTES = {
   home: "/",
   textbooks: "/darsliklar",
+  pdfBooks: "/pdf-kitoblar",
   subjects: "/fanlar",
   about: "/loyiha-haqida",
   login: "/kirish",
@@ -75,6 +76,8 @@ export const subjectPath = (slug: string, base: AppBase = "marketing") =>
   `${BASE_PREFIX[base]}${ROUTES.subjects}/${slug}`;
 export const bookPath = (bookId: string, base: AppBase = "marketing") =>
   `${BASE_PREFIX[base]}${ROUTES.textbooks}/${bookId}`;
+/** PDF darslik o'qish sahifasi (hamma uchun ochiq: marketing qobig'ida). */
+export const pdfBookPath = (id: string) => `${ROUTES.pdfBooks}/${id}`;
 export const topicPath = (bookId: string, topicId: string, base: AppBase = "marketing") =>
   `${bookPath(bookId, base)}/${topicId}`;
 

@@ -2,6 +2,7 @@ import {
   Bookmark,
   BookOpen,
   ChartColumn,
+  FileText,
   House,
   Layers,
   Library,
@@ -45,6 +46,12 @@ const STUDENT_NAV: AppNavItem[] = [
     isActive: within(`${ROUTES.cabinet}${ROUTES.textbooks}`),
   },
   {
+    labelKey: "cabinet.nav.pdfBooks",
+    href: ROUTES.pdfBooks,
+    icon: FileText,
+    isActive: () => false,
+  },
+  {
     labelKey: "cabinet.nav.results",
     href: ROUTES.cabinetResults,
     icon: ChartColumn,
@@ -70,6 +77,12 @@ const TEACHER_NAV: AppNavItem[] = [
         `${ROUTES.teacher}${ROUTES.textbooks}`,
         `${ROUTES.teacher}${ROUTES.subjects}`,
       )(pathname),
+  },
+  {
+    labelKey: "teacher.nav.pdfBooks",
+    href: ROUTES.pdfBooks,
+    icon: FileText,
+    isActive: () => false,
   },
   {
     labelKey: "teacher.nav.topics",

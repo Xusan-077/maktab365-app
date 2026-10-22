@@ -27,6 +27,7 @@ import {
 } from "@/lib/utils/catalog-params";
 import { GRADES, type Grade, type TopicSummary } from "@/types/catalog";
 import { BookCard } from "./BookCard";
+import { PdfSearchSection } from "@/components/pdf/PdfSearchSection";
 import { SearchSnippet } from "./SearchSnippet";
 
 const SEARCH_DEBOUNCE_MS = 250;
@@ -296,6 +297,8 @@ export function CatalogView({ initial }: { initial: CatalogFilters }) {
           </ul>
         </section>
       )}
+
+      {q && <PdfSearchSection query={q} />}
     </div>
   );
 }

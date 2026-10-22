@@ -1,0 +1,217 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { ArrowLeft } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
+import { Button } from "@/components/ui/Button";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { usePdfProgress } from "@/hooks/usePdfProgress";
+import { ApiError } from "@/lib/api/types";
+import type { Locale } from "@/lib/i18n/config";
+import { getLocalized } from "@/lib/i18n/localized";
+import { Link, usePathname, useRouter } from "@/lib/i18n/navigation";
+import { clampPage, parsePageParam } from "@/lib/pdf/page-nav";
+import { swipeDirection } from "@/lib/pdf/swipe";
+import { pdfQueries } from "@/lib/pdf-books/queries";
+import { ROUTES } from "@/lib/utils/routes";
+import { PdfPageCanvas } from "./PdfPageCanvas";
+import { PdfToolbar } from "./PdfToolbar";
+import { usePdfDocument } from "./usePdfDocument";
+
+const isTypingTarget = (target: EventTarget | null) =>
+  target instanceof HTMLElement &&
+  (target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName));
+
+/** Imzolangan URL muddati tugagach birinchi xatoda yangi URL bilan hujjat qayta ochiladi. */
+const MAX_AUTO_RELOADS = 1;
+
+function ReaderMessage({ message, action }: { message: string; action?: React.ReactNode }) {
+  return (
+    <div role="alert" className="flex flex-col items-start gap-3 py-8">
+      <p className="text-danger">{message}</p>
+      {action}
+    </div>
+  );
+}
+
+/**
+ * PDF darslik o'qish oynasi: bir vaqtda faqat ko'rinayotgan sahifa chiziladi. Sahifa URL'da
+ * (`?page=12`), tugmalar/raqam maydoni/←→/swipe bilan o'tiladi, oxirgi sahifa eslab qolinadi.
+ */
+export function PdfReader({ bookId }: { bookId: string }) {
+  const t = useTranslations("pdfBooks.reader");
+  const locale = useLocale() as Locale;
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const book = useQuery(pdfQueries.book(bookId));
+  const total = book.data?.page_count ?? 0;
+  const progress = usePdfProgress(bookId, total);
+  const document = usePdfDocument(bookId);
+  const [renderFailed, setRenderFailed] = useState(false);
+  const reloads = useRef(0);
+
+  const rawPage = searchParams.get("page");
+  const urlPage = total > 0 ? parsePageParam(rawPage, total) : null;
+  // URL > saqlangan pozitsiya > 1. Pozitsiya aniqlanguncha `null`.
+  const page = total === 0 ? null : (urlPage ?? (progress.ready ? progress.resume : null));
+
+  const setPageInUrl = useCallback(
+    (next: number) => router.replace(`${pathname}?page=${next}`, { scroll: false }),
+    [router, pathname],
+  );
+
+  // URL'ni haqiqiy sahifaga keltiradi (saqlangan pozitsiya, 1..N ga tuzatilgan qiymat).
+  useEffect(() => {
+    if (page !== null && rawPage !== String(page)) setPageInUrl(page);
+  }, [page, rawPage, setPageInUrl]);
+
+  // Joriy sahifani eslab qoladi (saqlangan bilan bir xil bo'lsa qayta yozilmaydi).
+  const savedPage = progress.position?.page;
+  const { record } = progress;
+  useEffect(() => {
+    if (page !== null && progress.ready && page !== savedPage) record(page);
+  }, [page, progress.ready, savedPage, record]);
+
+  const goTo = useCallback(
+    (next: number) => {
+      if (total > 0) setPageInUrl(clampPage(next, total));
+    },
+    [total, setPageInUrl],
+  );
+
+  useEffect(() => {
+    if (page === null) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
+      if (isTypingTarget(event.target)) return;
+      if (event.key === "ArrowLeft" && page > 1) {
+        event.preventDefault();
+        goTo(page - 1);
+      } else if (event.key === "ArrowRight" && page < total) {
+        event.preventDefault();
+        goTo(page + 1);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [page, total, goTo]);
+
+  const touch = useRef<{ x: number; y: number; at: number } | null>(null);
+  const onPointerDown = (event: PointerEvent) => {
+    if (event.pointerType === "mouse") return;
+    touch.current = { x: event.clientX, y: event.clientY, at: event.timeStamp };
+  };
+  const onPointerUp = (event: PointerEvent) => {
+    const start = touch.current;
+    touch.current = null;
+    if (!start || page === null) return;
+    const direction = swipeDirection(
+      event.clientX - start.x,
+      event.clientY - start.y,
+      event.timeStamp - start.at,
+    );
+    if (direction === "next" && page < total) goTo(page + 1);
+    if (direction === "prev" && page > 1) goTo(page - 1);
+  };
+
+  const retry = () => {
+    reloads.current = 0;
+    setRenderFailed(false);
+    document.reload();
+  };
+  const onRenderError = () => {
+    if (reloads.current < MAX_AUTO_RELOADS) {
+      reloads.current += 1;
+      document.reload();
+    } else {
+      setRenderFailed(true);
+    }
+  };
+
+  if (book.error) {
+    const notFound = book.error instanceof ApiError && book.error.status === 404;
+    return (
+      <ReaderMessage
+        message={t(notFound ? "notFound" : "loadError")}
+        action={
+          notFound ? (
+            <Link href={ROUTES.pdfBooks} className="text-link underline">
+              {t("back")}
+            </Link>
+          ) : (
+            <Button variant="secondary" onClick={() => void book.refetch()}>
+              {t("retry")}
+            </Button>
+          )
+        }
+      />
+    );
+  }
+
+  const title = book.data ? getLocalized(book.data.title, locale) : "";
+
+  return (
+    <div className="flex flex-col gap-3" data-testid="pdf-reader">
+      <div className="flex flex-wrap items-center gap-3">
+        <Link
+          href={ROUTES.pdfBooks}
+          className="text-link inline-flex items-center gap-1 text-sm font-medium underline-offset-4 hover:underline"
+        >
+          <ArrowLeft className="size-4" aria-hidden />
+          {t("back")}
+        </Link>
+        {book.data && <h1 className="min-w-0 flex-1 truncate text-lg font-semibold">{title}</h1>}
+      </div>
+
+      <div className="bg-background/90 sticky top-0 z-10 -mx-4 px-4 py-2 backdrop-blur sm:-mx-6 sm:px-6">
+        {page !== null && total > 0 ? (
+          <PdfToolbar page={page} total={total} onGo={goTo} />
+        ) : (
+          <Skeleton className="mx-auto h-10 w-56" />
+        )}
+      </div>
+
+      <div
+        className="touch-pan-y select-none"
+        onPointerDown={onPointerDown}
+        onPointerUp={onPointerUp}
+        onPointerCancel={() => (touch.current = null)}
+      >
+        {document.error && !document.doc ? (
+          <ReaderMessage
+            message={t("loadError")}
+            action={
+              <Button variant="secondary" onClick={retry}>
+                {t("retry")}
+              </Button>
+            }
+          />
+        ) : renderFailed ? (
+          <ReaderMessage
+            message={t("pageError")}
+            action={
+              <Button variant="secondary" onClick={retry}>
+                {t("retry")}
+              </Button>
+            }
+          />
+        ) : document.doc && page !== null ? (
+          <PdfPageCanvas
+            doc={document.doc}
+            pageNumber={page}
+            label={t("position", { page, total })}
+            onRendered={() => (reloads.current = 0)}
+            onError={onRenderError}
+          />
+        ) : (
+          <div role="status" aria-label={t("loading")}>
+            <Skeleton className="mx-auto aspect-[1/1.4] w-full max-w-3xl" />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

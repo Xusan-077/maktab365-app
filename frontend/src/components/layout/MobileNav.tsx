@@ -109,6 +109,15 @@ export function MobileNav() {
         <ul className="flex flex-col">
           <li>
             <Link
+              href={ROUTES.pdfBooks}
+              onClick={() => setMenuOpen(false)}
+              className="hover:bg-subtle flex min-h-12 items-center rounded-lg px-2 text-base font-medium"
+            >
+              {t("nav.pdfBooks")}
+            </Link>
+          </li>
+          <li>
+            <Link
               href={ROUTES.about}
               onClick={() => setMenuOpen(false)}
               className="hover:bg-subtle flex min-h-12 items-center rounded-lg px-2 text-base font-medium"

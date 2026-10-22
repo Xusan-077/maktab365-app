@@ -15,6 +15,7 @@ import type { Locale } from "@/lib/i18n/config";
 import { getLocalized } from "@/lib/i18n/localized";
 import { Link } from "@/lib/i18n/navigation";
 import { filterBooks, matchesBook } from "@/lib/utils/teacher-filters";
+import { PdfSearchSection } from "@/components/pdf/PdfSearchSection";
 import { BookGrid } from "./BookGrid";
 import { TopicSaveButton } from "./SaveButtons";
 
@@ -107,6 +108,8 @@ export function SearchResults({ query }: { query: string }) {
           </ul>
         </section>
       )}
+
+      <PdfSearchSection query={query} />
 
       {hidden > 0 && <p className="text-muted text-sm">{t("hidden", { count: hidden })}</p>}
     </div>
