@@ -640,6 +640,120 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/pdf-books/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
+        get: operations["admin_pdf_books_list"];
+        put?: never;
+        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
+        post: operations["admin_pdf_books_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/pdf-books/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
+        get: operations["admin_pdf_books_retrieve"];
+        put?: never;
+        post?: never;
+        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
+        delete: operations["admin_pdf_books_delete"];
+        options?: never;
+        head?: never;
+        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
+        patch: operations["admin_pdf_books_update"];
+        trace?: never;
+    };
+    "/api/v1/admin/pdf-books/{id}/transition/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Nashr: draft→published (editor/admin, fayl bo'lishi shart), published→draft (admin). */
+        post: operations["admin_pdf_books_transition"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/pdf-books/{id}/upload/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Lokal (dev) rejim: faylni backend orqali yuklash
+         * @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin.
+         */
+        post: operations["admin_pdf_books_upload_file"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/pdf-books/{id}/upload-complete/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * S3 multipart yuklashni yakunlash: tekshiruv, sahifalar soni
+         * @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin.
+         */
+        post: operations["admin_pdf_books_upload_complete"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/pdf-books/{id}/upload-init/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Yuklashni boshlash (yangi fayl yoki almashtirish)
+         * @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin.
+         */
+        post: operations["admin_pdf_books_upload_init"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/grades/": {
         parameters: {
             query?: never;
@@ -752,6 +866,86 @@ export interface paths {
          * @description Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi o'rniga kesh ishlaydi.
          */
         get: operations["search_topics"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pdf-books/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * PDF darsliklar (sahifalangan)
+         * @description Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi o'rniga kesh ishlaydi.
+         */
+        get: operations["pdf_books_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pdf-books/subjects/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * PDF darsligi bor fanlar (ixtiyoriy: sinf bo'yicha), `books_count` — PDF soni
+         * @description Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi o'rniga kesh ishlaydi.
+         */
+        get: operations["pdf_books_subjects_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pdf-books/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * PDF darslik
+         * @description Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi o'rniga kesh ishlaydi.
+         */
+        get: operations["pdf_books_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pdf-books/{id}/file-url/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Qisqa muddatli o'qish URL'i (keshlanmaydi)
+         * @description Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi o'rniga kesh ishlaydi.
+         */
+        get: operations["pdf_books_file_url"];
         put?: never;
         post?: never;
         delete?: never;
@@ -919,6 +1113,40 @@ export interface paths {
         };
         get: operations["me_teacher_dashboard"];
         put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/pdf-progress/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** PDF darsliklar bo'yicha oxirgi sahifalar (eng yangisi birinchi) */
+        get: operations["me_pdf_progress_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/pdf-progress/{pdf_book_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["me_pdf_progress_retrieve"];
+        /** Oxirgi sahifani yozish (idempotent; qat'iy yangiroq mijoz vaqti yutadi) */
+        put: operations["me_pdf_progress_update"];
         post?: never;
         delete?: never;
         options?: never;
@@ -1243,6 +1471,7 @@ export interface components {
             progress: components["schemas"]["TopicProgress"][];
             bookmarks: components["schemas"]["Bookmark"][];
             goals: components["schemas"]["StudyGoal"][];
+            pdf_progress: components["schemas"]["PdfProgress"][];
         };
         ExportUser: {
             /** Format: uuid */
@@ -1264,6 +1493,13 @@ export interface components {
         Grade: {
             grade: number;
             books_count: number;
+        };
+        /** @description PUT: PDF darslikda oxirgi sahifa. `updated_at` — mijozdagi yozuv vaqti. */
+        GuestPdfProgressRequest: {
+            last_page: number;
+            /** Format: date-time */
+            updated_at?: string;
+            pdf_book_id: string;
         };
         /** @description PUT: to'liq holat. Yuborilmagan maydonga tegilmaydi. */
         GuestProgressRequest: {
@@ -1346,10 +1582,12 @@ export interface components {
         MergeRequestRequest: {
             progress?: components["schemas"]["GuestProgressRequest"][];
             bookmarks?: components["schemas"]["BookmarkWriteRequest"][];
+            pdf_progress?: components["schemas"]["GuestPdfProgressRequest"][];
         };
         MergeResult: {
             progress: number;
             bookmarks: number;
+            pdf_progress: number;
             failed: string[];
         };
         MistakeOut: {
@@ -1365,6 +1603,12 @@ export interface components {
             /** Format: date-time */
             last_wrong_at?: string | null;
         };
+        /**
+         * @description * `direct` - direct
+         *     * `proxy` - proxy
+         * @enum {string}
+         */
+        ModeEnum: "direct" | "proxy";
         Ok: {
             ok: boolean;
         };
@@ -1437,6 +1681,36 @@ export interface components {
              */
             previous?: string | null;
             results: components["schemas"]["ChapterAdmin"][];
+        };
+        PaginatedPdfBookAdminList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["PdfBookAdmin"][];
+        };
+        PaginatedPdfBookList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["PdfBook"][];
         };
         PaginatedSubjectAdminList: {
             /** @example 123 */
@@ -1532,6 +1806,12 @@ export interface components {
             slug?: string;
             title?: components["schemas"]["LocalizedTextRequest"];
         };
+        PatchedPdfBookAdminRequest: {
+            title?: components["schemas"]["LocalizedTextRequest"];
+            grade?: number;
+            subject?: string;
+            cover?: string;
+        };
         PatchedProfileUpdateRequest: {
             display_name?: string;
             avatar_url?: string;
@@ -1569,6 +1849,106 @@ export interface components {
                 [key: string]: unknown;
             }[];
             notes?: string;
+        };
+        PdfBook: {
+            /** Format: uuid */
+            id: string;
+            title: components["schemas"]["LocalizedText"];
+            grade: number;
+            subject: string;
+            subject_title: components["schemas"]["LocalizedText"];
+            page_count: number;
+            size_bytes: number;
+            /** Format: uri */
+            cover: string | null;
+            readonly unverified: boolean;
+            /** Format: date-time */
+            published_at: string | null;
+        };
+        PdfBookAdmin: {
+            /** Format: uuid */
+            readonly id: string;
+            title: components["schemas"]["LocalizedText"];
+            grade: number;
+            subject: string;
+            cover?: string;
+            /** Format: uri */
+            readonly cover_url: string | null;
+            readonly has_file: boolean;
+            readonly size_bytes: number;
+            readonly page_count: number;
+            readonly status: components["schemas"]["PdfBookAdminStatusEnum"];
+            /** Format: date-time */
+            readonly published_at: string | null;
+            readonly upload_pending: boolean;
+            readonly allowed_transitions: string[];
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        PdfBookAdminRequest: {
+            title: components["schemas"]["LocalizedTextRequest"];
+            grade: number;
+            subject: string;
+            cover?: string;
+        };
+        /**
+         * @description * `draft` - Draft
+         *     * `published` - Published
+         * @enum {string}
+         */
+        PdfBookAdminStatusEnum: "draft" | "published";
+        PdfFileUrl: {
+            /** @description Qisqa muddatli URL (S3: imzolangan; dev: backend yo'li) */
+            url: string;
+            expires_in: number;
+        };
+        PdfProgress: {
+            /** Format: uuid */
+            readonly pdf_book_id: string;
+            readonly last_page: number;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        /** @description PUT: PDF darslikda oxirgi sahifa. `updated_at` — mijozdagi yozuv vaqti. */
+        PdfProgressWriteRequest: {
+            last_page: number;
+            /** Format: date-time */
+            updated_at?: string;
+        };
+        PdfTransitionRequest: {
+            to: components["schemas"]["PdfTransitionToEnum"];
+        };
+        /**
+         * @description * `draft` - draft
+         *     * `published` - published
+         * @enum {string}
+         */
+        PdfTransitionToEnum: "draft" | "published";
+        PdfUploadCompleteRequest: {
+            parts: components["schemas"]["PdfUploadPartRequest"][];
+        };
+        PdfUploadFileRequest: {
+            /** Format: binary */
+            file: string;
+        };
+        PdfUploadInitRequest: {
+            filename: string;
+            size: number;
+            content_type: string;
+        };
+        PdfUploadPartRequest: {
+            part_number: number;
+            etag: string;
+        };
+        PdfUploadPlan: {
+            mode: components["schemas"]["ModeEnum"];
+            /** @description direct: har bo'lak hajmi (oxirgisidan boshqa) */
+            part_size: number;
+            /** @description direct: har bo'lak uchun imzolangan PUT URL */
+            part_urls: string[];
+            expires_in: number;
         };
         Profile: {
             readonly display_name: string;
@@ -1667,9 +2047,21 @@ export interface components {
             grade: number;
             subject: string;
         };
+        SearchPdfBook: {
+            /** Format: uuid */
+            id: string;
+            title: components["schemas"]["LocalizedText"];
+            grade: number;
+            subject: string;
+            page_count: number;
+            /** Format: uri */
+            cover: string | null;
+            readonly unverified: boolean;
+        };
         SearchResponse: {
             count: number;
             results: components["schemas"]["SearchResult"][];
+            pdf_books?: components["schemas"]["SearchPdfBook"][];
         };
         SearchResult: {
             topic: components["schemas"]["TopicSummary"];
@@ -3194,6 +3586,243 @@ export interface operations {
             };
         };
     };
+    admin_pdf_books_list: {
+        parameters: {
+            query?: {
+                grade?: number;
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /** @description A search term. */
+                search?: string;
+                status?: "draft" | "published";
+                /** @description Fan slug'i */
+                subject?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedPdfBookAdminList"];
+                };
+            };
+        };
+    };
+    admin_pdf_books_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PdfBookAdminRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PdfBookAdminRequest"];
+                "multipart/form-data": components["schemas"]["PdfBookAdminRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PdfBookAdmin"];
+                };
+            };
+        };
+    };
+    admin_pdf_books_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this pdf book. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PdfBookAdmin"];
+                };
+            };
+        };
+    };
+    admin_pdf_books_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this pdf book. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    admin_pdf_books_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this pdf book. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedPdfBookAdminRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedPdfBookAdminRequest"];
+                "multipart/form-data": components["schemas"]["PatchedPdfBookAdminRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PdfBookAdmin"];
+                };
+            };
+        };
+    };
+    admin_pdf_books_transition: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this pdf book. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PdfTransitionRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PdfTransitionRequest"];
+                "multipart/form-data": components["schemas"]["PdfTransitionRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PdfBookAdmin"];
+                };
+            };
+        };
+    };
+    admin_pdf_books_upload_file: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this pdf book. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["PdfUploadFileRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PdfBookAdmin"];
+                };
+            };
+        };
+    };
+    admin_pdf_books_upload_complete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this pdf book. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PdfUploadCompleteRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PdfUploadCompleteRequest"];
+                "multipart/form-data": components["schemas"]["PdfUploadCompleteRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PdfBookAdmin"];
+                };
+            };
+        };
+    };
+    admin_pdf_books_upload_init: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this pdf book. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PdfUploadInitRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PdfUploadInitRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PdfUploadPlan"];
+                };
+            };
+        };
+    };
     grades_list: {
         parameters: {
             query?: never;
@@ -3338,6 +3967,100 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SearchResponse"];
+                };
+            };
+        };
+    };
+    pdf_books_list: {
+        parameters: {
+            query?: {
+                /** @description Sinf (1–11) */
+                grade?: number;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /** @description Kitob nomi bo'yicha */
+                q?: string;
+                /** @description Fan slug'i */
+                subject?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedPdfBookList"];
+                };
+            };
+        };
+    };
+    pdf_books_subjects_list: {
+        parameters: {
+            query?: {
+                /** @description Sinf (1–11) */
+                grade?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Subject"][];
+                };
+            };
+        };
+    };
+    pdf_books_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PdfBook"];
+                };
+            };
+        };
+    };
+    pdf_books_file_url: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PdfFileUrl"];
                 };
             };
         };
@@ -3703,6 +4426,73 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TeacherDashboard"];
+                };
+            };
+        };
+    };
+    me_pdf_progress_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PdfProgress"][];
+                };
+            };
+        };
+    };
+    me_pdf_progress_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                pdf_book_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PdfProgress"];
+                };
+            };
+        };
+    };
+    me_pdf_progress_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                pdf_book_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PdfProgressWriteRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PdfProgressWriteRequest"];
+                "multipart/form-data": components["schemas"]["PdfProgressWriteRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PdfProgress"];
                 };
             };
         };

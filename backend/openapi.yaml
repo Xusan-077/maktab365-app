@@ -675,33 +675,6 @@ paths:
                 $ref: '#/components/schemas/PaginatedUserAdminList'
           description: ''
   /api/v1/admin/subjects/:
-    post:
-      operationId: admin_subjects_create
-      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
-        — faqat admin.'
-      tags:
-      - admin
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SubjectAdminRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/SubjectAdminRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/SubjectAdminRequest'
-        required: true
-      security:
-      - jwtAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SubjectAdmin'
-          description: ''
     get:
       operationId: admin_subjects_list
       description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
@@ -741,6 +714,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedSubjectAdminList'
+          description: ''
+    post:
+      operationId: admin_subjects_create
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubjectAdminRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SubjectAdminRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SubjectAdminRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubjectAdmin'
           description: ''
   /api/v1/admin/subjects/{id}/:
     get:
@@ -820,33 +820,6 @@ paths:
         '204':
           description: No response body
   /api/v1/admin/books/:
-    post:
-      operationId: admin_books_create
-      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
-        — faqat admin.'
-      tags:
-      - admin
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BookAdminRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/BookAdminRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/BookAdminRequest'
-        required: true
-      security:
-      - jwtAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BookAdmin'
-          description: ''
     get:
       operationId: admin_books_list
       description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
@@ -902,6 +875,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedBookAdminList'
+          description: ''
+    post:
+      operationId: admin_books_create
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookAdminRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BookAdminRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BookAdminRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookAdmin'
           description: ''
   /api/v1/admin/books/{id}/:
     get:
@@ -1011,33 +1011,6 @@ paths:
         '200':
           description: No response body
   /api/v1/admin/chapters/:
-    post:
-      operationId: admin_chapters_create
-      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
-        — faqat admin.'
-      tags:
-      - admin
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ChapterAdminRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/ChapterAdminRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/ChapterAdminRequest'
-        required: true
-      security:
-      - jwtAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ChapterAdmin'
-          description: ''
     get:
       operationId: admin_chapters_list
       description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
@@ -1082,6 +1055,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedChapterAdminList'
+          description: ''
+    post:
+      operationId: admin_chapters_create
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChapterAdminRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ChapterAdminRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ChapterAdminRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChapterAdmin'
           description: ''
   /api/v1/admin/chapters/{id}/:
     get:
@@ -1161,33 +1161,6 @@ paths:
         '204':
           description: No response body
   /api/v1/admin/topics/:
-    post:
-      operationId: admin_topics_create
-      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
-        — faqat admin.'
-      tags:
-      - admin
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/TopicAdminRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/TopicAdminRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/TopicAdminRequest'
-        required: true
-      security:
-      - jwtAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TopicAdmin'
-          description: ''
     get:
       operationId: admin_topics_list
       description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
@@ -1245,6 +1218,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedTopicListList'
+          description: ''
+    post:
+      operationId: admin_topics_create
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TopicAdminRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TopicAdminRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TopicAdminRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopicAdmin'
           description: ''
   /api/v1/admin/topics/{id}/:
     get:
@@ -1358,6 +1358,305 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TopicAdmin'
+          description: ''
+  /api/v1/admin/pdf-books/:
+    get:
+      operationId: admin_pdf_books_list
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      parameters:
+      - in: query
+        name: grade
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - draft
+          - published
+      - in: query
+        name: subject
+        schema:
+          type: string
+        description: Fan slug'i
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPdfBookAdminList'
+          description: ''
+    post:
+      operationId: admin_pdf_books_create
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PdfBookAdminRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PdfBookAdminRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PdfBookAdminRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PdfBookAdmin'
+          description: ''
+  /api/v1/admin/pdf-books/{id}/:
+    get:
+      operationId: admin_pdf_books_retrieve
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this pdf book.
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PdfBookAdmin'
+          description: ''
+    patch:
+      operationId: admin_pdf_books_update
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this pdf book.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPdfBookAdminRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPdfBookAdminRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPdfBookAdminRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PdfBookAdmin'
+          description: ''
+    delete:
+      operationId: admin_pdf_books_delete
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this pdf book.
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/admin/pdf-books/{id}/transition/:
+    post:
+      operationId: admin_pdf_books_transition
+      description: 'Nashr: draft→published (editor/admin, fayl bo''lishi shart), published→draft
+        (admin).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this pdf book.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PdfTransitionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PdfTransitionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PdfTransitionRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PdfBookAdmin'
+          description: ''
+  /api/v1/admin/pdf-books/{id}/upload/:
+    post:
+      operationId: admin_pdf_books_upload_file
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      summary: 'Lokal (dev) rejim: faylni backend orqali yuklash'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this pdf book.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PdfUploadFileRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PdfBookAdmin'
+          description: ''
+  /api/v1/admin/pdf-books/{id}/upload-complete/:
+    post:
+      operationId: admin_pdf_books_upload_complete
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      summary: 'S3 multipart yuklashni yakunlash: tekshiruv, sahifalar soni'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this pdf book.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PdfUploadCompleteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PdfUploadCompleteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PdfUploadCompleteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PdfBookAdmin'
+          description: ''
+  /api/v1/admin/pdf-books/{id}/upload-init/:
+    post:
+      operationId: admin_pdf_books_upload_init
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      summary: Yuklashni boshlash (yangi fayl yoki almashtirish)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this pdf book.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PdfUploadInitRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PdfUploadInitRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PdfUploadPlan'
           description: ''
   /api/v1/grades/:
     get:
@@ -1562,6 +1861,129 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SearchResponse'
+          description: ''
+  /api/v1/pdf-books/:
+    get:
+      operationId: pdf_books_list
+      description: Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi
+        o'rniga kesh ishlaydi.
+      summary: PDF darsliklar (sahifalangan)
+      parameters:
+      - in: query
+        name: grade
+        schema:
+          type: integer
+        description: Sinf (1–11)
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Kitob nomi bo'yicha
+      - in: query
+        name: subject
+        schema:
+          type: string
+        description: Fan slug'i
+      tags:
+      - content
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPdfBookList'
+          description: ''
+  /api/v1/pdf-books/subjects/:
+    get:
+      operationId: pdf_books_subjects_list
+      description: Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi
+        o'rniga kesh ishlaydi.
+      summary: 'PDF darsligi bor fanlar (ixtiyoriy: sinf bo''yicha), `books_count`
+        — PDF soni'
+      parameters:
+      - in: query
+        name: grade
+        schema:
+          type: integer
+        description: Sinf (1–11)
+      tags:
+      - content
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Subject'
+          description: ''
+  /api/v1/pdf-books/{id}/:
+    get:
+      operationId: pdf_books_retrieve
+      description: Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi
+        o'rniga kesh ishlaydi.
+      summary: PDF darslik
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - content
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PdfBook'
+          description: ''
+  /api/v1/pdf-books/{id}/file-url/:
+    get:
+      operationId: pdf_books_file_url
+      description: Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi
+        o'rniga kesh ishlaydi.
+      summary: Qisqa muddatli o'qish URL'i (keshlanmaydi)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - content
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PdfFileUrl'
           description: ''
   /api/v1/me/progress/:
     get:
@@ -1933,6 +2355,75 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TeacherDashboard'
+          description: ''
+  /api/v1/me/pdf-progress/:
+    get:
+      operationId: me_pdf_progress_list
+      summary: PDF darsliklar bo'yicha oxirgi sahifalar (eng yangisi birinchi)
+      tags:
+      - learning
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PdfProgress'
+          description: ''
+  /api/v1/me/pdf-progress/{pdf_book_id}/:
+    get:
+      operationId: me_pdf_progress_retrieve
+      parameters:
+      - in: path
+        name: pdf_book_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - learning
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PdfProgress'
+          description: ''
+    put:
+      operationId: me_pdf_progress_update
+      summary: Oxirgi sahifani yozish (idempotent; qat'iy yangiroq mijoz vaqti yutadi)
+      parameters:
+      - in: path
+        name: pdf_book_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - learning
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PdfProgressWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PdfProgressWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PdfProgressWriteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PdfProgress'
           description: ''
   /api/v1/me/merge-guest-data/:
     post:
@@ -2750,9 +3241,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/StudyGoal'
+        pdf_progress:
+          type: array
+          items:
+            $ref: '#/components/schemas/PdfProgress'
       required:
       - bookmarks
       - goals
+      - pdf_progress
       - progress
     ExportUser:
       type: object
@@ -2807,6 +3303,25 @@ components:
       required:
       - books_count
       - grade
+    GuestPdfProgressRequest:
+      type: object
+      description: 'PUT: PDF darslikda oxirgi sahifa. `updated_at` — mijozdagi yozuv
+        vaqti.'
+      properties:
+        last_page:
+          type: integer
+          maximum: 100000
+          minimum: 1
+        updated_at:
+          type: string
+          format: date-time
+        pdf_book_id:
+          type: string
+          minLength: 1
+          maxLength: 64
+      required:
+      - last_page
+      - pdf_book_id
     GuestProgressRequest:
       type: object
       description: 'PUT: to''liq holat. Yuborilmagan maydonga tegilmaydi.'
@@ -3014,12 +3529,18 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BookmarkWriteRequest'
+        pdf_progress:
+          type: array
+          items:
+            $ref: '#/components/schemas/GuestPdfProgressRequest'
     MergeResult:
       type: object
       properties:
         progress:
           type: integer
         bookmarks:
+          type: integer
+        pdf_progress:
           type: integer
         failed:
           type: array
@@ -3028,6 +3549,7 @@ components:
       required:
       - bookmarks
       - failed
+      - pdf_progress
       - progress
     MistakeOut:
       type: object
@@ -3062,6 +3584,14 @@ components:
           nullable: true
       required:
       - exercise_id
+    ModeEnum:
+      enum:
+      - direct
+      - proxy
+      type: string
+      description: |-
+        * `direct` - direct
+        * `proxy` - proxy
     Ok:
       type: object
       properties:
@@ -3208,6 +3738,52 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ChapterAdmin'
+    PaginatedPdfBookAdminList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PdfBookAdmin'
+    PaginatedPdfBookList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PdfBook'
     PaginatedSubjectAdminList:
       type: object
       required:
@@ -3396,6 +3972,20 @@ components:
           pattern: ^[-a-zA-Z0-9_]+$
         title:
           $ref: '#/components/schemas/LocalizedTextRequest'
+    PatchedPdfBookAdminRequest:
+      type: object
+      properties:
+        title:
+          $ref: '#/components/schemas/LocalizedTextRequest'
+        grade:
+          type: integer
+          maximum: 11
+          minimum: 1
+        subject:
+          type: string
+          minLength: 1
+        cover:
+          type: string
     PatchedProfileUpdateRequest:
       type: object
       properties:
@@ -3499,6 +4089,271 @@ components:
             additionalProperties: true
         notes:
           type: string
+    PdfBook:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          $ref: '#/components/schemas/LocalizedText'
+        grade:
+          type: integer
+        subject:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        subject_title:
+          $ref: '#/components/schemas/LocalizedText'
+        page_count:
+          type: integer
+        size_bytes:
+          type: integer
+        cover:
+          type: string
+          format: uri
+          nullable: true
+        unverified:
+          type: boolean
+          readOnly: true
+        published_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - cover
+      - grade
+      - id
+      - page_count
+      - published_at
+      - size_bytes
+      - subject
+      - subject_title
+      - title
+      - unverified
+    PdfBookAdmin:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          $ref: '#/components/schemas/LocalizedText'
+        grade:
+          type: integer
+          maximum: 11
+          minimum: 1
+        subject:
+          type: string
+        cover:
+          type: string
+        cover_url:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        has_file:
+          type: boolean
+          readOnly: true
+        size_bytes:
+          type: integer
+          readOnly: true
+        page_count:
+          type: integer
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/PdfBookAdminStatusEnum'
+          readOnly: true
+        published_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        upload_pending:
+          type: boolean
+          readOnly: true
+        allowed_transitions:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - allowed_transitions
+      - cover_url
+      - created_at
+      - grade
+      - has_file
+      - id
+      - page_count
+      - published_at
+      - size_bytes
+      - status
+      - subject
+      - title
+      - updated_at
+      - upload_pending
+    PdfBookAdminRequest:
+      type: object
+      properties:
+        title:
+          $ref: '#/components/schemas/LocalizedTextRequest'
+        grade:
+          type: integer
+          maximum: 11
+          minimum: 1
+        subject:
+          type: string
+          minLength: 1
+        cover:
+          type: string
+      required:
+      - grade
+      - subject
+      - title
+    PdfBookAdminStatusEnum:
+      enum:
+      - draft
+      - published
+      type: string
+      description: |-
+        * `draft` - Draft
+        * `published` - Published
+    PdfFileUrl:
+      type: object
+      properties:
+        url:
+          type: string
+          description: 'Qisqa muddatli URL (S3: imzolangan; dev: backend yo''li)'
+        expires_in:
+          type: integer
+      required:
+      - expires_in
+      - url
+    PdfProgress:
+      type: object
+      properties:
+        pdf_book_id:
+          type: string
+          format: uuid
+          readOnly: true
+        last_page:
+          type: integer
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - last_page
+      - pdf_book_id
+      - updated_at
+    PdfProgressWriteRequest:
+      type: object
+      description: 'PUT: PDF darslikda oxirgi sahifa. `updated_at` — mijozdagi yozuv
+        vaqti.'
+      properties:
+        last_page:
+          type: integer
+          maximum: 100000
+          minimum: 1
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - last_page
+    PdfTransitionRequest:
+      type: object
+      properties:
+        to:
+          $ref: '#/components/schemas/PdfTransitionToEnum'
+      required:
+      - to
+    PdfTransitionToEnum:
+      enum:
+      - draft
+      - published
+      type: string
+      description: |-
+        * `draft` - draft
+        * `published` - published
+    PdfUploadCompleteRequest:
+      type: object
+      properties:
+        parts:
+          type: array
+          items:
+            $ref: '#/components/schemas/PdfUploadPartRequest'
+      required:
+      - parts
+    PdfUploadFileRequest:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+      required:
+      - file
+    PdfUploadInitRequest:
+      type: object
+      properties:
+        filename:
+          type: string
+          minLength: 1
+          maxLength: 255
+        size:
+          type: integer
+          minimum: 1
+        content_type:
+          type: string
+          minLength: 1
+          maxLength: 100
+      required:
+      - content_type
+      - filename
+      - size
+    PdfUploadPartRequest:
+      type: object
+      properties:
+        part_number:
+          type: integer
+          maximum: 10000
+          minimum: 1
+        etag:
+          type: string
+          minLength: 1
+          maxLength: 200
+      required:
+      - etag
+      - part_number
+    PdfUploadPlan:
+      type: object
+      properties:
+        mode:
+          $ref: '#/components/schemas/ModeEnum'
+        part_size:
+          type: integer
+          description: 'direct: har bo''lak hajmi (oxirgisidan boshqa)'
+        part_urls:
+          type: array
+          items:
+            type: string
+          description: 'direct: har bo''lak uchun imzolangan PUT URL'
+        expires_in:
+          type: integer
+      required:
+      - expires_in
+      - mode
+      - part_size
+      - part_urls
     Profile:
       type: object
       properties:
@@ -3745,6 +4600,36 @@ components:
       - slug
       - subject
       - title
+    SearchPdfBook:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          $ref: '#/components/schemas/LocalizedText'
+        grade:
+          type: integer
+        subject:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        page_count:
+          type: integer
+        cover:
+          type: string
+          format: uri
+          nullable: true
+        unverified:
+          type: boolean
+          readOnly: true
+      required:
+      - cover
+      - grade
+      - id
+      - page_count
+      - subject
+      - title
+      - unverified
     SearchResponse:
       type: object
       properties:
@@ -3754,6 +4639,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SearchResult'
+        pdf_books:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchPdfBook'
       required:
       - count
       - results

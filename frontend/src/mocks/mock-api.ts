@@ -610,6 +610,7 @@ export class MockApi implements MaktabApi {
               done: goal.done,
               created_at: goal.createdAt,
             })),
+            pdf_progress: [],
           },
         };
       }),
