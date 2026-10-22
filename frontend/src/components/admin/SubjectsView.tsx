@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Library, Pencil, Plus, Trash2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { cn } from "@/lib/utils/cn";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -71,12 +72,19 @@ export function SubjectsView() {
         </EmptyState>
       ) : (
         <div className="border-border bg-surface overflow-x-auto rounded-xl border">
-          <table className="w-full min-w-[32rem] text-sm" data-testid="subjects-table">
+          <table className="w-full text-sm sm:min-w-[32rem]" data-testid="subjects-table">
             <caption className="sr-only">{t("title")}</caption>
             <thead className="bg-subtle text-muted">
               <tr>
                 {(["name", "slug", "books"] as const).map((column) => (
-                  <th key={column} scope="col" className="px-4 py-2.5 text-left font-medium">
+                  <th
+                    key={column}
+                    scope="col"
+                    className={cn(
+                      "px-4 py-2.5 text-left font-medium",
+                      column === "slug" && "hidden sm:table-cell",
+                    )}
+                  >
                     {t(`columns.${column}`)}
                   </th>
                 ))}
@@ -92,7 +100,7 @@ export function SubjectsView() {
                 return (
                   <tr key={subject.id} className="hover:bg-subtle/60">
                     <td className="px-4 py-3 font-medium">{name}</td>
-                    <td className="text-muted px-4 py-3">{subject.slug}</td>
+                    <td className="text-muted hidden px-4 py-3 sm:table-cell">{subject.slug}</td>
                     <td className="px-4 py-3 tabular-nums">{subject.pdf_books_count}</td>
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-1">

@@ -71,7 +71,7 @@ export function LibraryHome({ base }: { base: PanelBase }) {
             <ul className="flex flex-col gap-3">
               {older.slice(0, PANEL_LIST_LIMIT).map((item) => (
                 <li key={item.book.id}>
-                  <PdfBookCard book={item.book} resumePage={item.last_page} />
+                  <PdfBookCard layout="row" book={item.book} resumePage={item.last_page} />
                 </li>
               ))}
             </ul>

@@ -8,17 +8,16 @@ import { useSearchParams } from "next/navigation";
 import { Pagination } from "@/components/admin/Pagination";
 import { useDebouncedSearch } from "@/components/admin/useDebouncedSearch";
 import { Button } from "@/components/ui/Button";
+import { Chip } from "@/components/ui/Chip";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { Skeleton } from "@/components/ui/Skeleton";
 import { usePdfProgressMap } from "@/hooks/usePdfProgressMap";
 import type { Locale } from "@/lib/i18n/config";
 import { getLocalized } from "@/lib/i18n/localized";
 import { usePathname, useRouter } from "@/lib/i18n/navigation";
 import { PDF_PAGE_SIZE, type PdfBookFilters } from "@/lib/pdf-books/api";
 import { pdfQueries } from "@/lib/pdf-books/queries";
-import { cn } from "@/lib/utils/cn";
 import { GRADES } from "@/types/catalog";
-import { PdfBookCard } from "./PdfBookCard";
+import { PdfBookCard, PdfBookCardSkeleton } from "./PdfBookCard";
 
 const positiveInt = (raw: string | null) => (raw && /^\d+$/.test(raw) ? Number(raw) : undefined);
 
@@ -41,33 +40,6 @@ export function serializePdfFilters(filters: PdfBookFilters): string {
   if (filters.q) query.set("q", filters.q);
   if (filters.page && filters.page > 1) query.set("page", String(filters.page));
   return query.toString();
-}
-
-function Chip({
-  active,
-  onClick,
-  children,
-  testId,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-  testId?: string;
-}) {
-  return (
-    <button
-      type="button"
-      aria-pressed={active}
-      data-testid={testId}
-      onClick={onClick}
-      className={cn(
-        "border-border bg-surface hover:border-primary-300 min-h-10 rounded-full border px-4 text-sm font-medium transition-colors",
-        active && "border-primary-600 bg-primary-soft text-primary-soft-foreground",
-      )}
-    >
-      {children}
-    </button>
-  );
 }
 
 /** Ochiq PDF katalog: sinf → fan → kitoblar; filtrlar URL'da. */
@@ -114,8 +86,8 @@ export function PdfCatalogView() {
         </h2>
         <div className="flex flex-wrap gap-2">
           <Chip
-            active={!filters.grade}
-            testId="pdf-grade-all"
+            selected={!filters.grade}
+            data-testid="pdf-grade-all"
             onClick={() => navigate({ q: filters.q })}
           >
             {t("allGrades")}
@@ -123,8 +95,8 @@ export function PdfCatalogView() {
           {GRADES.map((grade) => (
             <Chip
               key={grade}
-              active={filters.grade === grade}
-              testId={`pdf-grade-${grade}`}
+              selected={filters.grade === grade}
+              data-testid={`pdf-grade-${grade}`}
               onClick={() => navigate({ grade, q: filters.q })}
             >
               {t("gradeLabel", { grade })}
@@ -140,8 +112,8 @@ export function PdfCatalogView() {
           </h2>
           <div className="flex flex-wrap gap-2">
             <Chip
-              active={!filters.subject}
-              testId="pdf-subject-all"
+              selected={!filters.subject}
+              data-testid="pdf-subject-all"
               onClick={() => navigate({ grade: filters.grade, q: filters.q })}
             >
               {t("allSubjects")}
@@ -149,8 +121,8 @@ export function PdfCatalogView() {
             {subjects.data?.map((subject) => (
               <Chip
                 key={subject.slug}
-                active={filters.subject === subject.slug}
-                testId={`pdf-subject-${subject.slug}`}
+                selected={filters.subject === subject.slug}
+                data-testid={`pdf-subject-${subject.slug}`}
                 onClick={() =>
                   navigate({ grade: filters.grade, subject: subject.slug, q: filters.q })
                 }
@@ -173,10 +145,10 @@ export function PdfCatalogView() {
         <div
           role="status"
           aria-label={t("loading")}
-          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+          className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4"
         >
           {Array.from({ length: 6 }, (_, i) => (
-            <Skeleton key={i} className="h-40" />
+            <PdfBookCardSkeleton key={i} />
           ))}
         </div>
       ) : books.data.results.length === 0 ? (
@@ -186,7 +158,7 @@ export function PdfCatalogView() {
       ) : (
         <div className="flex flex-col gap-4">
           <ul
-            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+            className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4"
             aria-label={t("results")}
             data-testid="pdf-book-list"
           >

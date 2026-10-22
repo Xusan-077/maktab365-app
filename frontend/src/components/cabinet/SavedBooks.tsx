@@ -40,10 +40,21 @@ export function SavedBooks({ limit }: { limit?: number }) {
     );
   }
   return (
-    <ul className="grid gap-4 sm:grid-cols-2" data-testid="saved-books">
+    <ul
+      className={
+        limit === undefined
+          ? "grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4"
+          : "grid gap-3 sm:grid-cols-2"
+      }
+      data-testid="saved-books"
+    >
       {data.slice(0, limit).map(({ book }) => (
         <li key={book.id}>
-          <PdfBookCard book={book} resumePage={resume[book.id]} />
+          <PdfBookCard
+            layout={limit === undefined ? "column" : "row"}
+            book={book}
+            resumePage={resume[book.id]}
+          />
         </li>
       ))}
     </ul>

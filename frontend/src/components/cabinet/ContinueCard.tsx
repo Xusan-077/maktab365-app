@@ -1,7 +1,7 @@
 "use client";
 
-import { FileText } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import { BookCover } from "@/components/pdf/BookCover";
 import { buttonVariants } from "@/components/ui/Button";
 import type { Locale } from "@/lib/i18n/config";
 import { getLocalized } from "@/lib/i18n/localized";
@@ -23,19 +23,7 @@ export function ContinueCard({ item }: { item: PdfLibraryItem }) {
       data-testid="continue-card"
       className="border-border bg-surface flex flex-col gap-4 rounded-xl border p-6 sm:flex-row"
     >
-      {book.cover ? (
-        // Backend/R2 manzili (tashqi domen): next/image sozlamasi shart emas.
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={book.cover}
-          alt=""
-          className="bg-subtle h-40 w-28 shrink-0 rounded-md object-cover"
-        />
-      ) : (
-        <span className="bg-subtle text-muted flex h-40 w-28 shrink-0 items-center justify-center rounded-md">
-          <FileText className="size-10" aria-hidden />
-        </span>
-      )}
+      <BookCover src={book.cover} className="w-28" />
       <div className="flex min-w-0 flex-col items-start gap-3">
         <div className="flex flex-col gap-1.5">
           <h2 id="continue-title" className="text-2xl font-semibold tracking-tight text-balance">
