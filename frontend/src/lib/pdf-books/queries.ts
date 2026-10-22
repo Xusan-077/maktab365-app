@@ -16,6 +16,10 @@ export const pdfKeys = {
   progress: (id: string) => ["pdf-progress", id] as const,
   allProgress: () => ["pdf-progress", "all"] as const,
   library: () => ["pdf-library"] as const,
+  dashboard: () => ["pdf-dashboard"] as const,
+  teacherDashboard: () => ["pdf-dashboard", "teacher"] as const,
+  results: () => ["pdf-results"] as const,
+  goals: () => ["pdf-goals"] as const,
   bookmarks: () => ["pdf-bookmarks"] as const,
 };
 
@@ -61,4 +65,14 @@ export const pdfQueries = {
     queryOptions({ queryKey: pdfKeys.library(), queryFn: () => getPdfBooksApi().library() }),
   bookmarks: () =>
     queryOptions({ queryKey: pdfKeys.bookmarks(), queryFn: () => getPdfBooksApi().bookmarks() }),
+  dashboard: () =>
+    queryOptions({ queryKey: pdfKeys.dashboard(), queryFn: () => getPdfBooksApi().dashboard() }),
+  teacherDashboard: () =>
+    queryOptions({
+      queryKey: pdfKeys.teacherDashboard(),
+      queryFn: () => getPdfBooksApi().teacherDashboard(),
+    }),
+  results: () =>
+    queryOptions({ queryKey: pdfKeys.results(), queryFn: () => getPdfBooksApi().results() }),
+  goals: () => queryOptions({ queryKey: pdfKeys.goals(), queryFn: () => getPdfBooksApi().goals() }),
 };

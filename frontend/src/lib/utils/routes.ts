@@ -11,6 +11,8 @@ export const ROUTES = {
   onboarding: "/onboarding",
   cabinet: "/kabinet",
   cabinetSaved: "/kabinet/saqlanganlar",
+  cabinetResults: "/kabinet/natijalar",
+  cabinetSubjects: "/kabinet/fanlar",
   cabinetHelp: "/kabinet/yordam",
   teacher: "/ustoz",
   teacherSaved: "/ustoz/saqlanganlar",

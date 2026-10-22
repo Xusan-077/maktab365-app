@@ -15,7 +15,7 @@ from rest_framework.exceptions import NotFound, ValidationError
 from apps.content.models import PdfBook
 from apps.content.pdf_services import visible_pdf_books
 
-from ..models import PdfBookmark, PdfReadProgress
+from ..models import PdfBookmark, PdfReadProgress, PdfReadStatus
 
 
 def resolve_pdf_book(request, pdf_book_id) -> PdfBook:
@@ -39,10 +39,26 @@ def clamp_page(book: PdfBook, page: int, *, strict: bool) -> int:
     return page
 
 
+def _finished(book: PdfBook, page: int) -> bool:
+    return book.page_count >= 1 and page >= book.page_count
+
+
+def mark_read(row: PdfReadProgress, now: datetime) -> bool:
+    """Monoton: "o'qilgan" holat bir marta qo'yiladi, qaytib kamaymaydi. O'zgardimi."""
+    if row.read_status == PdfReadStatus.READ:
+        return False
+    row.read_status, row.read_at = PdfReadStatus.READ, now
+    return True
+
+
 def apply_pdf_progress(
     user, book: PdfBook, page: int, client_at: datetime | None
 ) -> tuple[PdfReadProgress, bool]:
-    """`(qator, o'zgardimi)`. `page` oldindan tekshirilgan/qisqartirilgan bo'lishi kerak."""
+    """`(qator, o'zgardimi)`. `page` oldindan tekshirilgan/qisqartirilgan bo'lishi kerak.
+
+    Sahifa qoidasi mijoz vaqti bo'yicha; "o'qilgan" holat esa alohida va monoton: oxirgi betga
+    yetgan yozuv (hatto eskirgan bo'lsa ham) holatni ko'taradi, hech qachon pasaytirmaydi.
+    """
     now = timezone.now()
     at = min(client_at, now) if client_at else now  # kelajak vaqti `now` ga qisqartiriladi
     for _attempt in range(2):
@@ -51,16 +67,28 @@ def apply_pdf_progress(
                 row, created = PdfReadProgress.objects.select_for_update().get_or_create(
                     user=user,
                     pdf_book=book,
-                    defaults={"last_page": page, "client_updated_at": at},
+                    defaults={
+                        "last_page": page,
+                        "client_updated_at": at,
+                        "first_opened_at": now,
+                        **(
+                            {"read_status": PdfReadStatus.READ, "read_at": now}
+                            if _finished(book, page)
+                            else {}
+                        ),
+                    },
                 )
                 if created:
                     return row, True
-                if row.client_updated_at is None or at > row.client_updated_at:
-                    changed = row.last_page != page or row.client_updated_at != at
+                newer = row.client_updated_at is None or at > row.client_updated_at
+                changed = newer and (row.last_page != page or row.client_updated_at != at)
+                if newer:
                     row.last_page, row.client_updated_at = page, at
-                    row.save(update_fields=["last_page", "client_updated_at", "updated_at"])
-                    return row, changed
-                return row, False
+                if _finished(book, page) and mark_read(row, now):
+                    changed = True
+                if newer or changed:
+                    row.save()
+                return row, changed
         except IntegrityError:  # ikki parallel birinchi yozuv: ikkinchisi yangilash yo'liga tushadi
             continue
     raise RuntimeError("pdf progress upsert did not settle")  # pragma: no cover

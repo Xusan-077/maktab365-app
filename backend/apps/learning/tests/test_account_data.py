@@ -23,7 +23,7 @@ def test_export_includes_pdf_data_only(api, book):
 
     learning = api.get("/api/v1/me/export/").json()["learning"]
 
-    assert set(learning) == {"pdf_progress", "pdf_bookmarks"}
+    assert set(learning) == {"pdf_progress", "pdf_bookmarks", "goals"}
     assert [(row["pdf_book_id"], row["last_page"]) for row in learning["pdf_progress"]] == [
         (str(book.pk), 7)
     ]

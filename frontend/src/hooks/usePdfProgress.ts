@@ -3,10 +3,12 @@
 import { useCallback, useEffect, useRef, useSyncExternalStore } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { mergePdfPosition, resumePage, type PdfPosition } from "@/lib/pdf/progress";
-import { getPdfBooksApi } from "@/lib/pdf-books/api";
+import type { PdfProgress } from "@/lib/pdf-books/api";
+import { invalidateReadingData } from "@/lib/pdf-books/cache";
 import { pdfKeys, pdfQueries } from "@/lib/pdf-books/queries";
 import { usePdfGuestStore } from "@/stores/pdf-guest.store";
 import { useAuth } from "./useAuth";
+import { useWriteQueue } from "./useWriteQueue";
 
 /** Akkaunt yozuvi serverga shuncha kechikish bilan yuboriladi (sahifa varaqlashda har bosishda emas). */
 const SAVE_DEBOUNCE_MS = 700;
@@ -18,9 +20,13 @@ const isHydrated = () => usePdfGuestStore.persist.hasHydrated();
 /**
  * PDF darslikda oxirgi ochilgan sahifa. Kirgan foydalanuvchi uchun backend'da (idempotent PUT),
  * mehmon uchun brauzerda (`pdf-guest.store`); kirishda mavjud guest merge birlashtiradi.
+ *
+ * Yozuv avval keshda ko'rinadi (optimistic), so'ng yozuvlar navbati orqali yuboriladi: internet
+ * yo'q/sekin bo'lsa navbatda qoladi va qayta uriniladi; doimiy rad etilsa kesh qaytariladi.
  */
 export function usePdfProgress(bookId: string, pageCount: number) {
   const { status, signedIn } = useAuth();
+  const queue = useWriteQueue();
   const queryClient = useQueryClient();
   const hydrated = useSyncExternalStore(subscribeHydration, isHydrated, () => false);
   const guest = usePdfGuestStore((state) => state.positions[bookId]);
@@ -31,14 +37,44 @@ export function usePdfProgress(bookId: string, pageCount: number) {
   }, []);
 
   const save = useMutation({
-    mutationFn: ({ page, at }: { page: number; at: string }) =>
-      getPdfBooksApi().saveProgress(bookId, page, at),
-    retry: 3,
-    onSuccess: (saved) => {
-      queryClient.setQueryData(pdfKeys.progress(bookId), saved);
-      void queryClient.invalidateQueries({ queryKey: pdfKeys.allProgress() });
+    // Offline'da ham ishlaydi: yozuv `WriteQueue` ga tushadi (standart 'online' rejimida mutatsiya kutib qolardi).
+    networkMode: "always",
+    mutationFn: async ({ page, at }: { page: number; at: string }) => {
+      if (!queue) throw new Error("not signed in");
+      return queue.run({ kind: "progress", bookId, page, at });
+    },
+    onMutate: ({ page, at }) => {
+      const previous = queryClient.getQueryData<PdfProgress | null>(pdfKeys.progress(bookId));
+      const finished = pageCount >= 1 && page >= pageCount;
+      queryClient.setQueryData<PdfProgress>(pdfKeys.progress(bookId), {
+        pdf_book_id: bookId,
+        last_page: page,
+        read_status: finished ? "read" : (previous?.read_status ?? "in_progress"),
+        updated_at: at,
+      });
+      return { previous };
+    },
+    onError: (_error, _vars, context) => {
+      // Server doimiy rad etdi (masalan kitob yashirildi): ko'rsatilgan sahifa qaytariladi.
+      queryClient.setQueryData(pdfKeys.progress(bookId), context?.previous ?? null);
+    },
+    onSuccess: (outcome) => {
+      if (outcome === "sent") void invalidateReadingData(queryClient);
     },
   });
+
+  // Kitob ochilishi serverga bildiriladi (idempotent): sahifa o'zgarmasa ham "oxirgi ochilganlar"da chiqadi.
+  const opened = useRef<string | null>(null);
+  useEffect(() => {
+    if (!queue || opened.current === bookId) return;
+    opened.current = bookId;
+    queue.run({ kind: "event", bookId, event: "book_opened" }).then(
+      (outcome) => {
+        if (outcome === "sent") void invalidateReadingData(queryClient);
+      },
+      () => undefined,
+    );
+  }, [queue, bookId, queryClient]);
 
   const accountPosition: PdfPosition | null = account.data
     ? { page: account.data.last_page, updatedAt: account.data.updated_at }

@@ -1,5 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
-import { mergePdfGuestData, PDF_MERGE_CHUNK, toGuestItems } from "./guest-merge";
+import {
+  MERGE_RETRY_MAX_MS,
+  mergePdfGuestData,
+  mergeRetryDelay,
+  PDF_MERGE_CHUNK,
+  toGuestItems,
+} from "./guest-merge";
 
 const position = (page: number) => ({ page, updatedAt: "2026-01-02T10:00:00.000Z" });
 const merged = { pdf_progress: 1, pdf_bookmarks: 1, failed: [] };
@@ -82,5 +88,47 @@ describe("mergePdfGuestData", () => {
       5,
     ]);
     expect(toGuestItems(positions)).toHaveLength(PDF_MERGE_CHUNK + 5);
+  });
+
+  it("qayta urinish: xatodan keyin o'sha ma'lumot yuboriladi va faqat muvaffaqiyatda tozalanadi", async () => {
+    const api = {
+      mergeGuest: vi.fn().mockRejectedValueOnce(new Error("offline")).mockResolvedValue(merged),
+    };
+    const onMerged = vi.fn();
+    const options = {
+      api,
+      load: async () => ({ positions: { a: position(4) }, bookmarks: ["b"] }),
+      onMerged,
+    };
+
+    expect(await mergePdfGuestData(options)).toBe("failed");
+    expect(onMerged).not.toHaveBeenCalled();
+
+    expect(await mergePdfGuestData(options)).toBe("merged");
+    expect(onMerged).toHaveBeenCalledTimes(1);
+    expect(api.mergeGuest).toHaveBeenCalledTimes(2);
+    expect(api.mergeGuest.mock.calls[1]).toEqual(api.mergeGuest.mock.calls[0]); // bir xil yuklama
+  });
+
+  it("bo'laklardan biri yiqilsa hech narsa tozalanmaydi (idempotent qayta yuborish)", async () => {
+    const api = {
+      mergeGuest: vi.fn().mockResolvedValueOnce(merged).mockRejectedValueOnce(new Error("500")),
+    };
+    const positions = Object.fromEntries(
+      Array.from({ length: PDF_MERGE_CHUNK + 1 }, (_, i) => [`b${i}`, position(1)]),
+    );
+    const onMerged = vi.fn();
+
+    expect(
+      await mergePdfGuestData({ api, load: async () => ({ positions, bookmarks: [] }), onMerged }),
+    ).toBe("failed");
+    expect(onMerged).not.toHaveBeenCalled();
+  });
+});
+
+describe("mergeRetryDelay", () => {
+  it("oraliq oshib boradi va 5 daqiqadan oshmaydi", () => {
+    expect([1, 2, 3].map(mergeRetryDelay)).toEqual([5_000, 15_000, 45_000]);
+    expect(mergeRetryDelay(50)).toBe(MERGE_RETRY_MAX_MS);
   });
 });

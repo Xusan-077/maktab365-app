@@ -24,3 +24,22 @@ export function mergePdfPosition(
 export function resumePage(position: PdfPosition | null | undefined, total: number): number {
   return position ? clampPage(position.page, total) : 1;
 }
+
+export type ReadStatus = "in_progress" | "read";
+
+/** Kitobning oxirgi betiga yetilgan (yoki undan oshgan). */
+export const reachedEnd = (page: number, total: number): boolean => total >= 1 && page >= total;
+
+/**
+ * "O'qilgan" holatini mehmondan akkauntga qo'shish. Backend bilan bir xil qoida
+ * (`contracts/fixtures/merge-pdf-read-status.json`): holat monoton — akkauntda `read` bo'lsa
+ * qoladi; mehmon oxirgi betga yetgan bo'lsa kitob o'qilgan hisoblanadi.
+ */
+export function mergeReadStatus(
+  account: ReadStatus | null | undefined,
+  guestPage: number | null | undefined,
+  total: number,
+): ReadStatus {
+  if (account === "read") return "read";
+  return guestPage != null && reachedEnd(guestPage, total) ? "read" : "in_progress";
+}

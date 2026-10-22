@@ -8,14 +8,14 @@ import { usePdfBookmarks } from "@/hooks/usePdfBookmarks";
 /** "Saqlash" / "Saqlangan": kitobni saqlanganlarga qo'shadi yoki olib tashlaydi. */
 export function PdfBookmarkButton({ bookId }: { bookId: string }) {
   const t = useTranslations("pdfBooks.bookmark");
-  const { ready, isSaved, setSaved, pending } = usePdfBookmarks();
+  const { ready, isSaved, setSaved } = usePdfBookmarks();
   const saved = isSaved(bookId);
   return (
     <Button
       variant={saved ? "primary" : "secondary"}
       size="sm"
       aria-pressed={saved}
-      disabled={!ready || pending}
+      disabled={!ready}
       data-testid="pdf-bookmark"
       onClick={() => setSaved(bookId, !saved)}
     >

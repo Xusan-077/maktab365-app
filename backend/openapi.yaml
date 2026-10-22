@@ -1364,6 +1364,203 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/me/events/:
+    post:
+      operationId: me_events_create
+      summary: 'O''qish hodisasi: kitob ochildi / o''qib bo''lindi (idempotent)'
+      tags:
+      - learning
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EventRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EventRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PdfProgress'
+          description: ''
+  /api/v1/me/recent/:
+    get:
+      operationId: me_recent
+      summary: Oxirgi ochilgan 20 ta kitob (eng yangisi birinchi)
+      tags:
+      - learning
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PdfLibraryItem'
+          description: ''
+  /api/v1/me/dashboard/:
+    get:
+      operationId: me_dashboard
+      summary: 'Bosh sahifa: davom ettirish, fanlarim, takrorlash, haftalik natija'
+      tags:
+      - learning
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dashboard'
+          description: ''
+  /api/v1/me/results/:
+    get:
+      operationId: me_results
+      summary: 'Natijalar: o''qilgan, jarayondagi va takrorlash kerak kitoblar'
+      tags:
+      - learning
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Results'
+          description: ''
+  /api/v1/me/teacher/dashboard/:
+    get:
+      operationId: me_teacher_dashboard
+      summary: 'Ustoz bosh sahifasi: umumiy ko''rsatkichlar + sinflar bo''yicha qamrov'
+      tags:
+      - learning
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeacherDashboard'
+          description: ''
+  /api/v1/me/goals/:
+    get:
+      operationId: me_goals_list
+      summary: Rejalarim (bajarilmaganlar birinchi, muddat bo'yicha)
+      tags:
+      - learning
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Goal'
+          description: ''
+    post:
+      operationId: me_goals_create
+      tags:
+      - learning
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GoalWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GoalWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GoalWriteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Goal'
+          description: ''
+  /api/v1/me/goals/{goal_id}/:
+    get:
+      operationId: me_goals_retrieve
+      parameters:
+      - in: path
+        name: goal_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - learning
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Goal'
+          description: ''
+    patch:
+      operationId: me_goals_partial_update
+      parameters:
+      - in: path
+        name: goal_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - learning
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedGoalWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedGoalWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedGoalWriteRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Goal'
+          description: ''
+    delete:
+      operationId: me_goals_delete
+      summary: Rejani o'chirish (idempotent)
+      parameters:
+      - in: path
+        name: goal_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - learning
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/v1/me/library/:
     get:
       operationId: me_library
@@ -1567,6 +1764,57 @@ components:
       description: |-
         * `ok` - ok
         * `error` - error
+    Dashboard:
+      type: object
+      properties:
+        continue:
+          allOf:
+          - $ref: '#/components/schemas/PdfLibraryItem'
+          nullable: true
+        subjects:
+          type: array
+          items:
+            $ref: '#/components/schemas/DashboardSubject'
+        review:
+          type: array
+          items:
+            $ref: '#/components/schemas/PdfLibraryItem'
+        week:
+          $ref: '#/components/schemas/Week'
+        saved_count:
+          type: integer
+        open_goals:
+          type: integer
+      required:
+      - continue
+      - open_goals
+      - review
+      - saved_count
+      - subjects
+      - week
+    DashboardSubject:
+      type: object
+      properties:
+        slug:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          $ref: '#/components/schemas/LocalizedText'
+        icon:
+          type: string
+        books_total:
+          type: integer
+        books_opened:
+          type: integer
+        books_read:
+          type: integer
+      required:
+      - books_opened
+      - books_read
+      - books_total
+      - icon
+      - slug
+      - title
     EmailRequest:
       type: object
       properties:
@@ -1577,6 +1825,27 @@ components:
           maxLength: 254
       required:
       - email
+    EventKindEnum:
+      enum:
+      - book_opened
+      - book_read
+      type: string
+      description: |-
+        * `book_opened` - book_opened
+        * `book_read` - book_read
+    EventRequest:
+      type: object
+      description: '`book_opened` / `book_read`: ikkalasi ham idempotent.'
+      properties:
+        kind:
+          $ref: '#/components/schemas/EventKindEnum'
+        pdf_book_id:
+          type: string
+          minLength: 1
+          maxLength: 64
+      required:
+      - kind
+      - pdf_book_id
     Export:
       type: object
       properties:
@@ -1657,7 +1926,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PdfBookmark'
+        goals:
+          type: array
+          items:
+            $ref: '#/components/schemas/Goal'
       required:
+      - goals
       - pdf_bookmarks
       - pdf_progress
     ExportUser:
@@ -1690,6 +1964,68 @@ components:
       - id
       - last_login
       - role
+    Goal:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+        book:
+          allOf:
+          - $ref: '#/components/schemas/PdfBook'
+          readOnly: true
+          nullable: true
+        due_date:
+          type: string
+          format: date
+          readOnly: true
+          nullable: true
+        done:
+          type: boolean
+          readOnly: true
+        done_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - book
+      - created_at
+      - done
+      - done_at
+      - due_date
+      - id
+      - title
+    GoalWriteRequest:
+      type: object
+      description: 'POST: title (+ kitob, muddat). PATCH: istalgan maydon; `done`
+        bajarildi/qaytarildi.'
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        pdf_book_id:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 64
+        due_date:
+          type: string
+          format: date
+          nullable: true
+        done:
+          type: boolean
+      required:
+      - title
     GoogleAuthRequest:
       type: object
       properties:
@@ -2154,6 +2490,26 @@ components:
           maxLength: 128
       required:
       - new_password
+    PatchedGoalWriteRequest:
+      type: object
+      description: 'POST: title (+ kitob, muddat). PATCH: istalgan maydon; `done`
+        bajarildi/qaytarildi.'
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        pdf_book_id:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 64
+        due_date:
+          type: string
+          format: date
+          nullable: true
+        done:
+          type: boolean
     PatchedPdfBookAdminRequest:
       type: object
       properties:
@@ -2408,6 +2764,15 @@ components:
         last_page:
           type: integer
           readOnly: true
+        read_status:
+          allOf:
+          - $ref: '#/components/schemas/ReadStatusEnum'
+          readOnly: true
+        read_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
         updated_at:
           type: string
           format: date-time
@@ -2415,6 +2780,8 @@ components:
       required:
       - book
       - last_page
+      - read_at
+      - read_status
       - updated_at
     PdfProgress:
       type: object
@@ -2426,6 +2793,10 @@ components:
         last_page:
           type: integer
           readOnly: true
+        read_status:
+          allOf:
+          - $ref: '#/components/schemas/ReadStatusEnum'
+          readOnly: true
         updated_at:
           type: string
           format: date-time
@@ -2433,6 +2804,7 @@ components:
       required:
       - last_page
       - pdf_book_id
+      - read_status
       - updated_at
     PdfProgressWriteRequest:
       type: object
@@ -2577,6 +2949,14 @@ components:
         * `google` - Google
         * `telegram` - Telegram
         * `email_otp` - Email OTP
+    ReadStatusEnum:
+      enum:
+      - in_progress
+      - read
+      type: string
+      description: |-
+        * `in_progress` - In progress
+        * `read` - Read
     RecentMessage:
       type: object
       properties:
@@ -2626,6 +3006,28 @@ components:
       required:
       - email
       - password
+    Results:
+      type: object
+      properties:
+        read:
+          type: array
+          items:
+            $ref: '#/components/schemas/PdfLibraryItem'
+        in_progress:
+          type: array
+          items:
+            $ref: '#/components/schemas/PdfLibraryItem'
+        review:
+          type: array
+          items:
+            $ref: '#/components/schemas/PdfLibraryItem'
+        review_after_days:
+          type: integer
+      required:
+      - in_progress
+      - read
+      - review
+      - review_after_days
     RoleEnum:
       enum:
       - student
@@ -2825,6 +3227,52 @@ components:
         * `in_progress` - In progress
         * `resolved` - Resolved
         * `spam` - Spam
+    TeacherDashboard:
+      type: object
+      properties:
+        continue:
+          allOf:
+          - $ref: '#/components/schemas/PdfLibraryItem'
+          nullable: true
+        subjects:
+          type: array
+          items:
+            $ref: '#/components/schemas/DashboardSubject'
+        review:
+          type: array
+          items:
+            $ref: '#/components/schemas/PdfLibraryItem'
+        week:
+          $ref: '#/components/schemas/Week'
+        saved_count:
+          type: integer
+        open_goals:
+          type: integer
+        grades:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeacherGrade'
+      required:
+      - continue
+      - grades
+      - open_goals
+      - review
+      - saved_count
+      - subjects
+      - week
+    TeacherGrade:
+      type: object
+      properties:
+        grade:
+          type: integer
+        books_total:
+          type: integer
+        books_opened:
+          type: integer
+      required:
+      - books_opened
+      - books_total
+      - grade
     TelegramAuthRequest:
       type: object
       description: Telegram Login Widget qaytargan maydonlar (imzo tekshiruvi providers/telegram.py
@@ -2949,6 +3397,18 @@ components:
       - id
       - is_active
       - role
+    Week:
+      type: object
+      properties:
+        opened:
+          type: integer
+          description: Shu hafta birinchi marta ochilgan kitoblar
+        read:
+          type: integer
+          description: Shu hafta oxirigacha o'qilgan kitoblar
+      required:
+      - opened
+      - read
   securitySchemes:
     jwtAuth:
       type: http

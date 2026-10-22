@@ -70,3 +70,26 @@ Yoki ildizdan: `make dev`. Boshqa buyruqlar: `make test`, `make lint`, `make sch
   backend `config.settings.dev`, `CELERY_TASK_ALWAYS_EAGER=true`, `FORWARDED_IP_SECRET=dev-forward-secret` va
   yuqoriroq `AUTH_THROTTLE_RATE` / `SUPPORT_THROTTLE_RATE` bilan (alohida baza, masalan `maktab365_e2e`). Global
   setup `seed_subjects` ni o'zi bajaradi (`E2E_SKIP_SEED=1` — o'tkazib yuborish).
+
+**M8 (o'qish jarayoni, PDF darsliklar uchun):** mavzu tizimi olib tashlangani uchun M8 matni (mavzu/mashq progressi)
+PDF kitoblarga moslab bajarildi. Backend `apps/learning` (hammasi login talab qiladi, `/api/v1/me/`):
+
+- **O'qilgan holati:** `PdfReadProgress.read_status` (`in_progress|read`, monoton — bir marta `read` bo'lsa pasaymaydi),
+  `first_opened_at`, `read_at`. Kitobning oxirgi betiga yetish (PUT yoki mehmon merge'i) yoki `book_read` hodisasi "o'qilgan" qiladi.
+  `PUT pdf-progress/{id}/` sahifa uchun idempotent ("qat'iy yangiroq mijoz vaqti yutadi"), holat sahifadan mustaqil.
+- **Hodisalar:** `POST events/` (`book_opened` — kitobni "oxirgi ochilganlar"ga qo'yadi, `book_read`), `GET recent/` (oxirgi 20 ta).
+- **Rejalar:** `StudyGoal` — `GET|POST goals/`, `GET|PATCH|DELETE goals/{id}/` (`done` idempotent; kitob va muddat ixtiyoriy; 100 tagacha).
+- **Bosh sahifa/natijalar:** `GET dashboard/` (davom ettirish, fanlarim, takrorlash kerak, haftalik natija, saqlanganlar, ochiq rejalar),
+  `GET results/` (o'qilgan / jarayondagi / takrorlash kerak), `GET teacher/dashboard/` (faqat `teacher`: dashboard + dars beradigan sinflar
+  bo'yicha qamrov). "Takrorlash kerak" qoidasi `services/review.py`: boshlangan, tugatilmagan kitob 7 kun ochilmasa.
+- **Merge:** `POST merge-guest-data/` o'zgarmadi (idempotent, 500 limit); "o'qilgan" qoidasi ham umumiy kontraktda
+  (`contracts/fixtures/merge-pdf-read-status.json`, backend va frontend testlari).
+- Mashq/"mashqdan o'tdim" va `last_block_id` PDF'da yo'q (mashq yo'q; "davom ettirish" oxirgi betga — `?page=N` — olib boradi).
+
+Frontend: kabinet `/kabinet` (dashboard), `/kabinet/fanlar`, `/kabinet/natijalar`, `/kabinet/saqlanganlar`; ustoz `/ustoz`
+(teacher dashboard). Katalog/saqlanganlardagi "O'qilgan" belgisi serverdan (mehmonda oxirgi betga yetilganidan).
+Yozuvlar (sahifa, xatcho'p, hodisa) `lib/offline/write-queue.ts` orqali: TanStack Query optimistic update, internet yo'q/sekin bo'lsa
+brauzerda (`maktab365-writes:<user>`) navbatga tushadi va internet qaytganda/taymerda qayta yuboriladi, 4xx bo'lsa o'zgarish qaytariladi.
+Mehmon ma'lumoti kirgach merge qilinadi; xatoda saqlanadi va oshib boruvchi oraliq bilan qayta uriniladi. E2E: `frontend/e2e/learning.spec.ts`.
+Rejalar (goals) navbatsiz: optimistic + rollback, offline'da xato ko'rsatiladi.
+

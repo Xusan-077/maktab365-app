@@ -48,14 +48,20 @@ Bitta Django monolit: Python 3.12 · Django 5.2 · DRF · drf-spectacular · sim
 
 ## `apps/learning`
 
-- Modellar: `PdfReadProgress` (unique `user+pdf_book`, `last_page`, `client_updated_at`) va `PdfBookmark` (unique `user+pdf_book`).
+- Modellar: `PdfReadProgress` (unique `user+pdf_book`, `last_page`, `client_updated_at`, `read_status` in_progress|read, `first_opened_at`, `read_at`),
+  `PdfBookmark` (unique `user+pdf_book`) va `StudyGoal` (title, `pdf_book?`, `due_date?`, `done_at`; foydalanuvchiga 100 tagacha).
   Hammasi login talab qiladi (`/api/v1/me/`): `pdf-progress/`, `pdf-progress/{id}/` (PUT idempotent), `pdf-bookmarks/`,
-  `pdf-bookmarks/{id}/` (PUT/DELETE idempotent), `library/` (oxirgi ochilganlar + saqlanganlar soni), `merge-guest-data/`.
+  `pdf-bookmarks/{id}/` (PUT/DELETE idempotent), `library/` (oxirgi ochilganlar + saqlanganlar soni), `merge-guest-data/`,
+  `events/` (`book_opened|book_read`), `recent/` (20 ta), `goals/[{id}/]` (CRUD; begonaniki 404), `dashboard/`, `results/`,
+  `teacher/dashboard/` (`IsRole("teacher")`). "Oxirgi ochilganlar" alohida model emas — `PdfReadProgress.updated_at` bo'yicha.
 - `services/pdf.py`: ko'rinish (`resolve_pdf_book` = ochiq API qoidasi), `apply_pdf_progress` (qat'iy yangiroq mijoz vaqti
   yutadi), xatcho'p qo'shish/olib tashlash, `library`. `services/merge.py`: mehmon sahifalari va xatcho'plari (har ro'yxat 500 tagacha;
   ko'rinmaydigan/yo'q kitob `failed` ga tushadi). Kontrakt: `contracts/fixtures/merge-pdf-progress.json` (backend va frontend).
-- Egalik: queryset'lar `user=request.user` bilan. `delete_account` o'qish ma'lumotlarini o'chiradi, `export_data` `learning.pdf_progress`
-  va `learning.pdf_bookmarks` ni beradi.
+- "O'qilgan" holati monoton (`services/pdf.mark_read`): oxirgi betga yetgan yozuv (eskirgan bo'lsa ham) ko'taradi, hech qachon pasaytirmaydi;
+  umumiy kontrakt `contracts/fixtures/merge-pdf-read-status.json`. `services/review.py` — "takrorlash kerak" (boshlangan, tugatilmagan,
+  `REVIEW_AFTER_DAYS` kun ochilmagan); `services/dashboard.py` — bosh sahifa/natijalar/ustoz yig'masi; `services/events.py`, `services/goals.py`.
+- Egalik: queryset'lar `user=request.user` bilan. `delete_account` o'qish ma'lumotlarini (rejalar ham) o'chiradi, `export_data` `learning.pdf_progress`,
+  `learning.pdf_bookmarks` va `learning.goals` ni beradi.
 - Testlar: `apps/learning/tests/` (`conftest.py` — `api`, `other_api`; `Catalog` — `apps/content/tests/conftest.py`).
 
 ## `apps/support`

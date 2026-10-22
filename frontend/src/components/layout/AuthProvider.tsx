@@ -8,16 +8,29 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { setApiSession } from "@/lib/api/session";
 import { useToast } from "@/hooks/useToast";
 import { clearLegacyStorage } from "@/lib/legacy-storage";
-import { mergePdfGuestData } from "@/lib/pdf/guest-merge";
+import { getWriteQueue, onWriteSent } from "@/lib/offline/pdf-write-queue";
+import { mergePdfGuestData, mergeRetryDelay } from "@/lib/pdf/guest-merge";
 import { getPdfBooksApi } from "@/lib/pdf-books/api";
+import {
+  clearBookmarkOverride,
+  getBookmarkOverrides,
+  invalidateReadingData,
+} from "@/lib/pdf-books/cache";
 import { usePdfGuestStore } from "@/stores/pdf-guest.store";
 
 const USER_QUERY_KEYS = [
   queryKeys.me(),
   ["pdf-progress"],
   ["pdf-bookmarks"],
+  ["pdf-bookmarks-pending"],
   ["pdf-library"],
+  ["pdf-dashboard"],
+  ["pdf-results"],
+  ["pdf-goals"],
 ] as const;
+
+/** Yozuvlar navbatida qolgan amallar shuncha oraliqda qayta yuboriladi (internet bor, server sekin bo'lsa). */
+export const QUEUE_RETRY_MS = 30_000;
 
 /**
  * Auth.js sessiyasini API klientiga ulaydi va kirgandan keyin mehmonning PDF o'qish pozitsiyasi
@@ -58,12 +71,17 @@ function AuthBridge({ children }: { children: ReactNode }) {
   }, [status, userId, queryClient]);
 
   // Birinchi kirishdan keyin mehmon ma'lumoti akkauntga qo'shiladi (`merge-guest-data/`; server
-  // idempotent, vaqti yangiroq pozitsiya yutadi). Xatoda ma'lumot saqlanadi va internet qaytganda
-  // hamda keyingi kirishda qayta uriniladi; muvaffaqiyatda mehmon store'i tozalanadi.
+  // idempotent, vaqti yangiroq pozitsiya yutadi). Xatoda ma'lumot saqlanadi va internet qaytganda,
+  // kutish oralig'i oshib boruvchi taymerda hamda keyingi kirishda qayta uriniladi; muvaffaqiyatda
+  // mehmon store'i tozalanadi.
   useEffect(() => {
     if (!userId) return;
-    const merge = () =>
-      void mergePdfGuestData({
+    let failures = 0;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let stopped = false;
+    const merge = async () => {
+      clearTimeout(timer);
+      const outcome = await mergePdfGuestData({
         api: getPdfBooksApi(),
         load: async () => {
           await usePdfGuestStore.persist.rehydrate();
@@ -80,9 +98,52 @@ function AuthBridge({ children }: { children: ReactNode }) {
           });
         },
       });
-    merge();
-    window.addEventListener("online", merge);
-    return () => window.removeEventListener("online", merge);
+      if (stopped) return;
+      if (outcome === "failed") {
+        failures += 1;
+        timer = setTimeout(() => void merge(), mergeRetryDelay(failures));
+      } else {
+        failures = 0;
+      }
+    };
+    const onOnline = () => void merge();
+    void merge();
+    window.addEventListener("online", onOnline);
+    return () => {
+      stopped = true;
+      clearTimeout(timer);
+      window.removeEventListener("online", onOnline);
+    };
+  }, [userId, queryClient]);
+
+  // Offline/sekin internetda navbatga tushgan yozuvlar (sahifa, xatcho'p, hodisa) qayta yuboriladi:
+  // kirganda, internet qaytganda, sahifa yana ko'ringanda va navbat bo'sh bo'lmaguncha taymerda.
+  useEffect(() => {
+    if (!userId) return;
+    const queue = getWriteQueue(userId);
+    const flush = () => {
+      if (queue.size > 0) void queue.flush();
+    };
+    const stopListening = onWriteSent((op) => {
+      void invalidateReadingData(queryClient).then(() => {
+        if (op.kind === "bookmark" && getBookmarkOverrides(queryClient)[op.bookId] === op.saved) {
+          clearBookmarkOverride(queryClient, op.bookId);
+        }
+      });
+    });
+    const onVisible = () => {
+      if (document.visibilityState === "visible") flush();
+    };
+    flush();
+    const interval = setInterval(flush, QUEUE_RETRY_MS);
+    window.addEventListener("online", flush);
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      stopListening();
+      clearInterval(interval);
+      window.removeEventListener("online", flush);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, [userId, queryClient]);
 
   return children;

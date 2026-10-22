@@ -364,7 +364,9 @@
       "label": "Dashboard sections",
       "home": "Home",
       "textbooks": "Textbooks",
-      "saved": "Saved"
+      "saved": "Saved",
+      "subjects": "My subjects",
+      "results": "Results"
     }
   },
   "teacher": {
@@ -877,7 +879,8 @@
       "meta": "Grade {grade} · {subject}",
       "pages": "{count} pages",
       "resume": "Continue from page {page}",
-      "unverified": "Not reviewed yet"
+      "unverified": "Not reviewed yet",
+      "read": "Read"
     },
     "reader": {
       "back": "Textbooks",
@@ -917,6 +920,73 @@
       "empty": "You have not saved anything yet. Press “Save” on a textbook page.",
       "browse": "Go to textbooks",
       "loadFailed": "Could not load saved textbooks."
+    },
+    "stats": {
+      "weekOpened": "Opened this week",
+      "weekRead": "Finished this week",
+      "saved": "Saved",
+      "goals": "Open goals"
+    },
+    "review": {
+      "title": "Time to review",
+      "note": "Textbooks you left over a week ago"
+    },
+    "subjects": {
+      "title": "My subjects",
+      "all": "All my subjects",
+      "progress": "{read} of {total} read",
+      "pageTitle": "My subjects",
+      "lead": "The subjects you've started and the textbooks in them.",
+      "empty": "You haven't started any subject yet. Open a textbook and its subject will show up here.",
+      "browse": "Browse textbooks",
+      "opened": "{opened} of {total} textbooks opened",
+      "loadFailed": "Couldn't load your subjects."
+    },
+    "grades": {
+      "title": "By grade",
+      "note": "The grades you teach",
+      "grade": "Grade {grade}",
+      "progress": "{opened} of {total} opened",
+      "empty": "Pick the grades you teach in settings."
+    },
+    "goals": {
+      "title": "My goals",
+      "empty": "No goals yet. For example: “Finish algebra chapter 1”.",
+      "titleLabel": "Goal name",
+      "titlePlaceholder": "New goal",
+      "dueLabel": "Due date",
+      "add": "Add",
+      "due": "Due: {date}",
+      "markDone": "Mark “{title}” as done",
+      "markOpen": "Reopen “{title}”",
+      "remove": "Delete “{title}”",
+      "saveFailed": "Couldn't save the goal. Please try again.",
+      "loadFailed": "Couldn't load your goals.",
+      "errors": {
+        "required": "Enter a goal name",
+        "tooLong": "The name is too long"
+      }
+    },
+    "results": {
+      "title": "Results",
+      "lead": "Which textbooks you've finished and what's worth reviewing.",
+      "loadFailed": "Couldn't load your results.",
+      "empty": "No results yet. Open a textbook and read it to the end.",
+      "browse": "Browse textbooks",
+      "review": {
+        "title": "Time to review",
+        "note": "Not opened for {days} days"
+      },
+      "read": {
+        "title": "Read to the end",
+        "note": "Well mastered",
+        "empty": "You haven't finished any textbook yet."
+      },
+      "inProgress": {
+        "title": "In progress",
+        "note": "Started, not finished",
+        "empty": "No textbooks in progress."
+      }
     }
   }
 }

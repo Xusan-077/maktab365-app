@@ -1,7 +1,14 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { mergePdfPosition, resumePage, type PdfPosition } from "./progress";
+import {
+  mergePdfPosition,
+  mergeReadStatus,
+  reachedEnd,
+  resumePage,
+  type PdfPosition,
+  type ReadStatus,
+} from "./progress";
 
 interface Entry {
   last_page: number;
@@ -43,5 +50,33 @@ describe("resumePage", () => {
 
   it("pozitsiya yo'q — 1", () => {
     expect(resumePage(null, 10)).toBe(1);
+  });
+});
+
+interface ReadCase {
+  name: string;
+  page_count: number;
+  account: ReadStatus | null;
+  guest_page: number | null;
+  merged_status: ReadStatus;
+}
+
+const readFixture = JSON.parse(
+  readFileSync(
+    path.resolve(__dirname, "../../../../contracts/fixtures/merge-pdf-read-status.json"),
+    "utf8",
+  ),
+) as { cases: ReadCase[] };
+
+describe("mergeReadStatus — backend bilan umumiy shartnoma", () => {
+  it.each(readFixture.cases.map((c) => [c.name, c] as const))("%s", (_name, c) => {
+    expect(mergeReadStatus(c.account, c.guest_page, c.page_count)).toBe(c.merged_status);
+  });
+
+  it("reachedEnd: oxirgi bet va undan keyingisi; bo'sh kitob hech qachon", () => {
+    expect(reachedEnd(10, 10)).toBe(true);
+    expect(reachedEnd(11, 10)).toBe(true);
+    expect(reachedEnd(9, 10)).toBe(false);
+    expect(reachedEnd(1, 0)).toBe(false);
   });
 });

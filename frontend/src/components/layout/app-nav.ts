@@ -1,4 +1,12 @@
-import { Bookmark, BookOpen, FileText, House, type LucideIcon } from "lucide-react";
+import {
+  Bookmark,
+  BookOpen,
+  ChartColumn,
+  FileText,
+  GraduationCap,
+  House,
+  type LucideIcon,
+} from "lucide-react";
 import { ROUTES, type PanelBase } from "@/lib/utils/routes";
 
 export interface AppNavItem {
@@ -22,7 +30,7 @@ const textbooks = (labelKey: string): AppNavItem => ({
   isActive: () => false,
 });
 
-/** O'quvchi: Bosh sahifa · Darsliklar · Saqlanganlar. */
+/** O'quvchi: Bosh sahifa · Darsliklar · Fanlarim · Natijalar · Saqlanganlar. */
 const STUDENT_NAV: AppNavItem[] = [
   {
     labelKey: "cabinet.nav.home",
@@ -31,6 +39,18 @@ const STUDENT_NAV: AppNavItem[] = [
     isActive: exact(ROUTES.cabinet),
   },
   textbooks("cabinet.nav.textbooks"),
+  {
+    labelKey: "cabinet.nav.subjects",
+    href: ROUTES.cabinetSubjects,
+    icon: GraduationCap,
+    isActive: within(ROUTES.cabinetSubjects),
+  },
+  {
+    labelKey: "cabinet.nav.results",
+    href: ROUTES.cabinetResults,
+    icon: ChartColumn,
+    isActive: within(ROUTES.cabinetResults),
+  },
   {
     labelKey: "cabinet.nav.saved",
     href: ROUTES.cabinetSaved,

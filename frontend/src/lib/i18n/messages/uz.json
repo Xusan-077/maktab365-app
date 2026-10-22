@@ -364,7 +364,9 @@
       "label": "Kabinet bo'limlari",
       "home": "Bosh sahifa",
       "textbooks": "Darsliklar",
-      "saved": "Saqlanganlar"
+      "saved": "Saqlanganlar",
+      "subjects": "Fanlarim",
+      "results": "Natijalar"
     }
   },
   "teacher": {
@@ -877,7 +879,8 @@
       "meta": "{grade}-sinf · {subject}",
       "pages": "{count} bet",
       "resume": "{page}-betdan davom etish",
-      "unverified": "Tekshiruvdan o'tmagan"
+      "unverified": "Tekshiruvdan o'tmagan",
+      "read": "O'qilgan"
     },
     "reader": {
       "back": "Darsliklar",
@@ -917,6 +920,73 @@
       "empty": "Hali hech narsa saqlamagansiz. Darslik sahifasidagi «Saqlash» tugmasi bilan saqlang.",
       "browse": "Darsliklarga o'tish",
       "loadFailed": "Saqlanganlarni yuklab bo'lmadi."
+    },
+    "stats": {
+      "weekOpened": "Shu hafta ochilgan",
+      "weekRead": "Shu hafta o'qilgan",
+      "saved": "Saqlanganlar",
+      "goals": "Ochiq rejalar"
+    },
+    "review": {
+      "title": "Takrorlash kerak",
+      "note": "Bir haftadan beri to'xtab qolgan darsliklar"
+    },
+    "subjects": {
+      "title": "Fanlarim",
+      "all": "Barcha fanlarim",
+      "progress": "{read} / {total} o'qilgan",
+      "pageTitle": "Fanlarim",
+      "lead": "O'qiy boshlagan fanlaringiz va ulardagi darsliklar.",
+      "empty": "Hali birorta fan boshlanmagan. Darslikni ochsangiz, fan shu yerda paydo bo'ladi.",
+      "browse": "Darsliklarni ko'rish",
+      "opened": "{opened} / {total} darslik ochilgan",
+      "loadFailed": "Fanlarni yuklab bo'lmadi."
+    },
+    "grades": {
+      "title": "Sinflar bo'yicha",
+      "note": "Dars beradigan sinflaringiz",
+      "grade": "{grade}-sinf",
+      "progress": "{opened} / {total} ochilgan",
+      "empty": "Sozlamalarda dars beradigan sinflaringizni tanlang."
+    },
+    "goals": {
+      "title": "Rejalarim",
+      "empty": "Hali reja yo'q. Masalan: «Algebra 1-bobni tugatish».",
+      "titleLabel": "Reja nomi",
+      "titlePlaceholder": "Yangi reja",
+      "dueLabel": "Muddat",
+      "add": "Qo'shish",
+      "due": "Muddat: {date}",
+      "markDone": "«{title}» ni bajarildi deb belgilash",
+      "markOpen": "«{title}» ni qayta ochish",
+      "remove": "«{title}» ni o'chirish",
+      "saveFailed": "Rejani saqlab bo'lmadi. Qayta urinib ko'ring.",
+      "loadFailed": "Rejalarni yuklab bo'lmadi.",
+      "errors": {
+        "required": "Reja nomini yozing",
+        "tooLong": "Nom juda uzun"
+      }
+    },
+    "results": {
+      "title": "Natijalar",
+      "lead": "Qaysi darsliklarni oxirigacha o'qigansiz va nimani takrorlash kerak.",
+      "loadFailed": "Natijalarni yuklab bo'lmadi.",
+      "empty": "Hali natija yo'q. Darslikni oching va oxirigacha o'qing.",
+      "browse": "Darsliklarni ko'rish",
+      "review": {
+        "title": "Takrorlash kerak",
+        "note": "{days} kundan beri ochilmagan"
+      },
+      "read": {
+        "title": "Oxirigacha o'qilgan",
+        "note": "Yaxshi o'zlashtirilgan",
+        "empty": "Hali birorta darslik oxirigacha o'qilmagan."
+      },
+      "inProgress": {
+        "title": "Jarayonda",
+        "note": "Boshlangan, tugallanmagan",
+        "empty": "Boshlangan darslik yo'q."
+      }
     }
   }
 }

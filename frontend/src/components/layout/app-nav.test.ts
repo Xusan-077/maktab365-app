@@ -2,10 +2,12 @@ import { describe, expect, it } from "vitest";
 import { appNavFor } from "./app-nav";
 
 describe("appNavFor", () => {
-  it("o'quvchi va o'qituvchi: Bosh sahifa, Darsliklar, Saqlanganlar", () => {
+  it("o'quvchi: Bosh sahifa, Darsliklar, Fanlarim, Natijalar, Saqlanganlar; ustoz: Bosh sahifa, Darsliklar, Saqlanganlar", () => {
     expect(appNavFor("kabinet").map((item) => item.href)).toEqual([
       "/kabinet",
       "/darsliklar",
+      "/kabinet/fanlar",
+      "/kabinet/natijalar",
       "/kabinet/saqlanganlar",
     ]);
     expect(appNavFor("ustoz").map((item) => item.href)).toEqual([
@@ -23,7 +25,7 @@ describe("appNavFor", () => {
   });
 
   it("Bosh sahifa faqat o'z yo'lida, Saqlanganlar ichki yo'llarda faol", () => {
-    const [home, , saved] = appNavFor("kabinet");
+    const [home, , , , saved] = appNavFor("kabinet");
     expect(home!.isActive("/kabinet")).toBe(true);
     expect(home!.isActive("/kabinet/saqlanganlar")).toBe(false);
     expect(saved!.isActive("/kabinet/saqlanganlar")).toBe(true);

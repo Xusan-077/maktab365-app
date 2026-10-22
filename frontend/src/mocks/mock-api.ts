@@ -180,6 +180,7 @@ export class MockApi implements MaktabApi {
           learning: {
             pdf_progress: [],
             pdf_bookmarks: [],
+            goals: [],
           },
         };
       }),

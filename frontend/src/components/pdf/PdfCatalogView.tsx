@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { listItem, m } from "@/components/ui/motion";
-import { usePdfProgressMap } from "@/hooks/usePdfProgressMap";
+import { isBookRead, usePdfProgressMap } from "@/hooks/usePdfProgressMap";
 import type { Locale } from "@/lib/i18n/config";
 import { getLocalized } from "@/lib/i18n/localized";
 import { usePathname, useRouter } from "@/lib/i18n/navigation";
@@ -176,7 +176,11 @@ export function PdfCatalogView() {
                 initial="hidden"
                 animate="show"
               >
-                <PdfBookCard book={book} resumePage={resume[book.id]} />
+                <PdfBookCard
+                  book={book}
+                  resumePage={resume[book.id]?.page}
+                  read={isBookRead(resume[book.id], book.page_count)}
+                />
               </m.li>
             ))}
           </ul>

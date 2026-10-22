@@ -1,0 +1,40 @@
+{
+  "description": "PDF darslikning \"o'qilgan\" holatini mehmondan akkauntga qo'shish. Holat monoton: `read` bir marta qo'yilgach pasaymaydi. Mehmon kitobning oxirgi betiga yetgan bo'lsa (`guest_page >= page_count`) kitob o'qilgan hisoblanadi; sahifa (`last_page`) qoidasi alohida (merge-pdf-progress.json). Backend (merge-guest-data/) va frontend bir xil natija berishi kerak.",
+  "cases": [
+    {
+      "name": "akkaunt bo'sh, mehmon oxirgi betda: o'qilgan",
+      "page_count": 20,
+      "account": null,
+      "guest_page": 20,
+      "merged_status": "read"
+    },
+    {
+      "name": "akkaunt bo'sh, mehmon o'rtada: jarayonda",
+      "page_count": 20,
+      "account": null,
+      "guest_page": 7,
+      "merged_status": "in_progress"
+    },
+    {
+      "name": "akkaunt o'qilgan, mehmon boshida: o'qilgan qoladi (pasaymaydi)",
+      "page_count": 20,
+      "account": "read",
+      "guest_page": 1,
+      "merged_status": "read"
+    },
+    {
+      "name": "akkaunt jarayonda, mehmon oxirgi betda: o'qilgan",
+      "page_count": 20,
+      "account": "in_progress",
+      "guest_page": 20,
+      "merged_status": "read"
+    },
+    {
+      "name": "akkaunt jarayonda, mehmon oldinroq: jarayonda",
+      "page_count": 20,
+      "account": "in_progress",
+      "guest_page": 19,
+      "merged_status": "in_progress"
+    }
+  ]
+}

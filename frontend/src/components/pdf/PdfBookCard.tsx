@@ -15,12 +15,19 @@ export interface PdfBookCardProps {
   book: PdfBook;
   /** Oxirgi o'qilgan sahifa (bo'lsa "davom etish" belgisi). */
   resumePage?: number;
+  /** Kitob oxirigacha o'qilgan ("O'qilgan" belgisi). */
+  read?: boolean;
   /** `column` — katalog gridi (muqova tepada); `row` — tor panellar (muqova chapda). */
   layout?: "column" | "row";
 }
 
 /** Katalog kartasi: muqova (3:4), nom, fan va sinf, betlar soni. */
-export function PdfBookCard({ book, resumePage, layout = "column" }: PdfBookCardProps) {
+export function PdfBookCard({
+  book,
+  resumePage,
+  read = false,
+  layout = "column",
+}: PdfBookCardProps) {
   const t = useTranslations("pdfBooks.card");
   const locale = useLocale() as Locale;
   const title = getLocalized(book.title, locale);
@@ -44,10 +51,15 @@ export function PdfBookCard({ book, resumePage, layout = "column" }: PdfBookCard
           {t("meta", { grade: book.grade, subject: getLocalized(book.subject_title, locale) })}
         </p>
         <p className="text-muted text-sm tabular-nums">{t("pages", { count: book.page_count })}</p>
-        {((resumePage && resumePage > 1) || book.unverified) && (
+        {(read || (resumePage && resumePage > 1) || book.unverified) && (
           <div className="mt-auto flex flex-wrap gap-1.5 pt-1.5">
-            {resumePage && resumePage > 1 && (
-              <Badge variant="primary">{t("resume", { page: resumePage })}</Badge>
+            {read ? (
+              <Badge variant="success" data-testid="pdf-read-badge">
+                {t("read")}
+              </Badge>
+            ) : (
+              resumePage &&
+              resumePage > 1 && <Badge variant="primary">{t("resume", { page: resumePage })}</Badge>
             )}
             {book.unverified && <Badge variant="accent">{t("unverified")}</Badge>}
           </div>

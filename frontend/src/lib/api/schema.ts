@@ -758,6 +758,125 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/events/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** O'qish hodisasi: kitob ochildi / o'qib bo'lindi (idempotent) */
+        post: operations["me_events_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/recent/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Oxirgi ochilgan 20 ta kitob (eng yangisi birinchi) */
+        get: operations["me_recent"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/dashboard/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Bosh sahifa: davom ettirish, fanlarim, takrorlash, haftalik natija */
+        get: operations["me_dashboard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/results/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Natijalar: o'qilgan, jarayondagi va takrorlash kerak kitoblar */
+        get: operations["me_results"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/teacher/dashboard/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Ustoz bosh sahifasi: umumiy ko'rsatkichlar + sinflar bo'yicha qamrov */
+        get: operations["me_teacher_dashboard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/goals/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Rejalarim (bajarilmaganlar birinchi, muddat bo'yicha) */
+        get: operations["me_goals_list"];
+        put?: never;
+        post: operations["me_goals_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/goals/{goal_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["me_goals_retrieve"];
+        put?: never;
+        post?: never;
+        /** Rejani o'chirish (idempotent) */
+        delete: operations["me_goals_delete"];
+        options?: never;
+        head?: never;
+        patch: operations["me_goals_partial_update"];
+        trace?: never;
+    };
     "/api/v1/me/library/": {
         parameters: {
             query?: never;
@@ -869,9 +988,36 @@ export interface components {
          * @enum {string}
          */
         CheckStatusEnum: "ok" | "error";
+        Dashboard: {
+            continue: components["schemas"]["PdfLibraryItem"] | null;
+            subjects: components["schemas"]["DashboardSubject"][];
+            review: components["schemas"]["PdfLibraryItem"][];
+            week: components["schemas"]["Week"];
+            saved_count: number;
+            open_goals: number;
+        };
+        DashboardSubject: {
+            slug: string;
+            title: components["schemas"]["LocalizedText"];
+            icon: string;
+            books_total: number;
+            books_opened: number;
+            books_read: number;
+        };
         EmailRequest: {
             /** Format: email */
             email: string;
+        };
+        /**
+         * @description * `book_opened` - book_opened
+         *     * `book_read` - book_read
+         * @enum {string}
+         */
+        EventKindEnum: "book_opened" | "book_read";
+        /** @description `book_opened` / `book_read`: ikkalasi ham idempotent. */
+        EventRequest: {
+            kind: components["schemas"]["EventKindEnum"];
+            pdf_book_id: string;
         };
         Export: {
             /** Format: date-time */
@@ -903,6 +1049,7 @@ export interface components {
         ExportLearning: {
             pdf_progress: components["schemas"]["PdfProgress"][];
             pdf_bookmarks: components["schemas"]["PdfBookmark"][];
+            goals: components["schemas"]["Goal"][];
         };
         ExportUser: {
             /** Format: uuid */
@@ -916,6 +1063,27 @@ export interface components {
             date_joined: string;
             /** Format: date-time */
             last_login: string | null;
+        };
+        Goal: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly title: string;
+            readonly book: components["schemas"]["PdfBook"] | null;
+            /** Format: date */
+            readonly due_date: string | null;
+            readonly done: boolean;
+            /** Format: date-time */
+            readonly done_at: string | null;
+            /** Format: date-time */
+            readonly created_at: string;
+        };
+        /** @description POST: title (+ kitob, muddat). PATCH: istalgan maydon; `done` bajarildi/qaytarildi. */
+        GoalWriteRequest: {
+            title: string;
+            pdf_book_id?: string | null;
+            /** Format: date */
+            due_date?: string | null;
+            done?: boolean;
         };
         GoogleAuthRequest: {
             locale?: components["schemas"]["LocaleEnum"];
@@ -1123,6 +1291,14 @@ export interface components {
         PasswordSetRequest: {
             new_password: string;
         };
+        /** @description POST: title (+ kitob, muddat). PATCH: istalgan maydon; `done` bajarildi/qaytarildi. */
+        PatchedGoalWriteRequest: {
+            title?: string;
+            pdf_book_id?: string | null;
+            /** Format: date */
+            due_date?: string | null;
+            done?: boolean;
+        };
         PatchedPdfBookAdminRequest: {
             title?: components["schemas"]["LocalizedTextRequest"];
             grade?: number;
@@ -1213,6 +1389,9 @@ export interface components {
         PdfLibraryItem: {
             book: components["schemas"]["PdfBook"];
             readonly last_page: number;
+            readonly read_status: components["schemas"]["ReadStatusEnum"];
+            /** Format: date-time */
+            readonly read_at: string | null;
             /** Format: date-time */
             readonly updated_at: string;
         };
@@ -1220,6 +1399,7 @@ export interface components {
             /** Format: uuid */
             readonly pdf_book_id: string;
             readonly last_page: number;
+            readonly read_status: components["schemas"]["ReadStatusEnum"];
             /** Format: date-time */
             readonly updated_at: string;
         };
@@ -1275,6 +1455,12 @@ export interface components {
          * @enum {string}
          */
         ProviderEnum: "password" | "google" | "telegram" | "email_otp";
+        /**
+         * @description * `in_progress` - In progress
+         *     * `read` - Read
+         * @enum {string}
+         */
+        ReadStatusEnum: "in_progress" | "read";
         RecentMessage: {
             /** Format: uuid */
             readonly id: string;
@@ -1292,6 +1478,12 @@ export interface components {
             password: string;
             display_name?: string;
             locale?: components["schemas"]["LocaleEnum"];
+        };
+        Results: {
+            read: components["schemas"]["PdfLibraryItem"][];
+            in_progress: components["schemas"]["PdfLibraryItem"][];
+            review: components["schemas"]["PdfLibraryItem"][];
+            review_after_days: number;
         };
         /**
          * @description * `student` - Student
@@ -1373,6 +1565,20 @@ export interface components {
          * @enum {string}
          */
         SupportStatusEnum: "new" | "in_progress" | "resolved" | "spam";
+        TeacherDashboard: {
+            continue: components["schemas"]["PdfLibraryItem"] | null;
+            subjects: components["schemas"]["DashboardSubject"][];
+            review: components["schemas"]["PdfLibraryItem"][];
+            week: components["schemas"]["Week"];
+            saved_count: number;
+            open_goals: number;
+            grades: components["schemas"]["TeacherGrade"][];
+        };
+        TeacherGrade: {
+            grade: number;
+            books_total: number;
+            books_opened: number;
+        };
         /** @description Telegram Login Widget qaytargan maydonlar (imzo tekshiruvi providers/telegram.py da). */
         TelegramAuthRequest: {
             locale?: components["schemas"]["LocaleEnum"];
@@ -1421,6 +1627,12 @@ export interface components {
             readonly is_active: boolean;
             /** Format: date-time */
             readonly date_joined: string;
+        };
+        Week: {
+            /** @description Shu hafta birinchi marta ochilgan kitoblar */
+            opened: number;
+            /** @description Shu hafta oxirigacha o'qilgan kitoblar */
+            read: number;
         };
     };
     responses: never;
@@ -2666,6 +2878,219 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    me_events_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EventRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["EventRequest"];
+                "multipart/form-data": components["schemas"]["EventRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PdfProgress"];
+                };
+            };
+        };
+    };
+    me_recent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PdfLibraryItem"][];
+                };
+            };
+        };
+    };
+    me_dashboard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Dashboard"];
+                };
+            };
+        };
+    };
+    me_results: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Results"];
+                };
+            };
+        };
+    };
+    me_teacher_dashboard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeacherDashboard"];
+                };
+            };
+        };
+    };
+    me_goals_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Goal"][];
+                };
+            };
+        };
+    };
+    me_goals_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GoalWriteRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["GoalWriteRequest"];
+                "multipart/form-data": components["schemas"]["GoalWriteRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Goal"];
+                };
+            };
+        };
+    };
+    me_goals_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                goal_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Goal"];
+                };
+            };
+        };
+    };
+    me_goals_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                goal_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    me_goals_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                goal_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedGoalWriteRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedGoalWriteRequest"];
+                "multipart/form-data": components["schemas"]["PatchedGoalWriteRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Goal"];
+                };
             };
         };
     };

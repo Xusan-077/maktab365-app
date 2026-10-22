@@ -1,7 +1,7 @@
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from apps.learning.serializers import PdfBookmarkSerializer, PdfProgressSerializer
+from apps.learning.serializers import GoalSerializer, PdfBookmarkSerializer, PdfProgressSerializer
 
 from . import services
 from .models import Locale, Profile, Role, User
@@ -128,6 +128,7 @@ class ExportUserSerializer(serializers.Serializer):
 class ExportLearningSerializer(serializers.Serializer):
     pdf_progress = PdfProgressSerializer(many=True)
     pdf_bookmarks = PdfBookmarkSerializer(many=True)
+    goals = GoalSerializer(many=True)
 
 
 class ExportSerializer(serializers.Serializer):

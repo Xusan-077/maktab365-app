@@ -26,8 +26,8 @@ const MOVED: { source: string; destination: string }[] = [
   { source: `/${LOCALE}/fanlar/:subject`, destination: "/:locale/darsliklar?subject=:subject" },
   // Panel ichidagi eski bo'limlar
   { source: `/${LOCALE}/kabinet/darsliklar/:path*`, destination: "/:locale/darsliklar" },
-  { source: `/${LOCALE}/kabinet/fanlar/:path*`, destination: "/:locale/darsliklar" },
-  { source: `/${LOCALE}/kabinet/natijalar`, destination: "/:locale/kabinet" },
+  // `/kabinet/fanlar` va `/kabinet/natijalar` — yana haqiqiy sahifalar (Fanlarim, Natijalar); eski ichki yo'llar (`/fanlar/<slug>`) yo'naltiriladi
+  { source: `/${LOCALE}/kabinet/fanlar/:path+`, destination: "/:locale/darsliklar" },
   { source: `/${LOCALE}/ustoz/darsliklar/:path*`, destination: "/:locale/darsliklar" },
   { source: `/${LOCALE}/ustoz/fanlar/:path*`, destination: "/:locale/darsliklar" },
   { source: `/${LOCALE}/ustoz/mavzular`, destination: "/:locale/ustoz" },

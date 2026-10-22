@@ -1,8 +1,14 @@
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
+from django.utils import timezone
 
 from apps.core.models import TimeStampedModel, UUIDModel
+
+
+class PdfReadStatus(models.TextChoices):
+    IN_PROGRESS = "in_progress", "In progress"
+    READ = "read", "Read"
 
 
 class PdfReadProgress(UUIDModel, TimeStampedModel):
@@ -16,6 +22,12 @@ class PdfReadProgress(UUIDModel, TimeStampedModel):
     # Faqat shu vaqtdan yangiroq mijoz yozuvi sahifani almashtiradi: kech kelgan eski yozuv
     # (boshqa qurilma, oflayn navbat) yangisini bosmaydi.
     client_updated_at = models.DateTimeField(null=True, blank=True)
+    # Holat monoton: `read` bir marta qo'yilgach orqaga qaytmaydi (o'quvchi sahifaga qaytsa ham).
+    read_status = models.CharField(
+        max_length=16, choices=PdfReadStatus.choices, default=PdfReadStatus.IN_PROGRESS
+    )
+    first_opened_at = models.DateTimeField(default=timezone.now)
+    read_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         constraints = [
@@ -45,3 +57,23 @@ class PdfBookmark(UUIDModel):
 
     def __str__(self):
         return f"{self.user_id}/{self.pdf_book_id}"
+
+
+class StudyGoal(UUIDModel, TimeStampedModel):
+    """O'quvchining shaxsiy rejasi: nom, ixtiyoriy kitob va muddat."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="study_goals"
+    )
+    title = models.CharField(max_length=200)
+    pdf_book = models.ForeignKey(
+        "content.PdfBook", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    due_date = models.DateField(null=True, blank=True)
+    done_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        indexes = [models.Index(fields=["user", "done_at"])]
+
+    def __str__(self):
+        return f"{self.user_id}/{self.title}"

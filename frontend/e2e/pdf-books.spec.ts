@@ -219,13 +219,19 @@ test.describe.serial("PDF darsliklar", () => {
     await card.getByRole("link", { name: "Davom ettirish" }).click();
     await expect(page).toHaveURL(new RegExp(`/uz/darsliklar/${bookId}\\?page=3$`));
 
-    // Saqlanganlar; menyuda faqat Bosh sahifa, Darsliklar, Saqlanganlar.
+    // Saqlanganlar; o'quvchi menyusi: Bosh sahifa, Darsliklar, Fanlarim, Natijalar, Saqlanganlar.
     await page.goto("/uz/kabinet/saqlanganlar");
     await expect(page.getByTestId("saved-books")).toContainText(TITLE);
     const menu = page
       .locator("[data-app-sidebar]")
       .getByRole("navigation", { name: "Panel menyusi" });
-    await expect(menu.getByRole("link")).toHaveText(["Bosh sahifa", "Darsliklar", "Saqlanganlar"]);
+    await expect(menu.getByRole("link")).toHaveText([
+      "Bosh sahifa",
+      "Darsliklar",
+      "Fanlarim",
+      "Natijalar",
+      "Saqlanganlar",
+    ]);
 
     // Saqlashni bekor qilish.
     await page.goto(`/uz/darsliklar/${bookId}`);

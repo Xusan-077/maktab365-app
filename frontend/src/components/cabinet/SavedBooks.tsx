@@ -8,7 +8,7 @@ import { buttonVariants } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/hooks/useAuth";
-import { usePdfProgressMap } from "@/hooks/usePdfProgressMap";
+import { isBookRead, usePdfProgressMap } from "@/hooks/usePdfProgressMap";
 import { Link } from "@/lib/i18n/navigation";
 import { pdfQueries } from "@/lib/pdf-books/queries";
 import { catalogPath } from "@/lib/utils/routes";
@@ -53,7 +53,8 @@ export function SavedBooks({ limit }: { limit?: number }) {
           <PdfBookCard
             layout={limit === undefined ? "column" : "row"}
             book={book}
-            resumePage={resume[book.id]}
+            resumePage={resume[book.id]?.page}
+            read={isBookRead(resume[book.id], book.page_count)}
           />
         </li>
       ))}

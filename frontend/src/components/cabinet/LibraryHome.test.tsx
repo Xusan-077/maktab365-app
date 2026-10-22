@@ -7,7 +7,9 @@ import { NextIntlClientProvider } from "next-intl";
 import uz from "@/lib/i18n/messages/uz.json";
 
 const api = vi.hoisted(() => ({
-  library: vi.fn(),
+  dashboard: vi.fn(),
+  teacherDashboard: vi.fn(),
+  goals: vi.fn(),
   bookmarks: vi.fn(),
   allProgress: vi.fn(),
 }));
@@ -25,7 +27,6 @@ vi.mock("@/hooks/useAuth", () => ({
 vi.mock("@/hooks/useMe", () => ({
   useMe: () => ({ data: { role: "student", name: "Aziza", grade: 7 } }),
 }));
-vi.mock("@/hooks/usePdfProgressMap", () => ({ usePdfProgressMap: () => ({}) }));
 vi.mock("@/lib/pdf-books/api", () => ({ getPdfBooksApi: () => api, PDF_PAGE_SIZE: 24 }));
 
 import { LibraryHome } from "./LibraryHome";
@@ -44,6 +45,24 @@ const book = (id: string, title: string, pages = 100) => ({
   published_at: null,
 });
 
+const item = (b: ReturnType<typeof book>, last_page: number, read_status = "in_progress") => ({
+  book: b,
+  last_page,
+  read_status,
+  read_at: null,
+  updated_at: "2026-01-01T00:00:00Z",
+});
+
+const dashboard = (over: Record<string, unknown> = {}) => ({
+  continue: null,
+  subjects: [],
+  review: [],
+  week: { opened: 0, read: 0 },
+  saved_count: 0,
+  open_goals: 0,
+  ...over,
+});
+
 function setup(base: "kabinet" | "ustoz" = "kabinet") {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   render(
@@ -58,18 +77,14 @@ function setup(base: "kabinet" | "ustoz" = "kabinet") {
 beforeEach(() => {
   vi.clearAllMocks();
   api.bookmarks.mockResolvedValue([]);
+  api.goals.mockResolvedValue([]);
+  api.allProgress.mockResolvedValue([]);
 });
 afterEach(cleanup);
 
 describe("LibraryHome", () => {
-  it("oxirgi kitob 'Davom ettirish' kartochkasida, aynan o'sha betga olib boradi", async () => {
-    api.library.mockResolvedValue({
-      items: [
-        { book: book("b1", "Algebra 9"), last_page: 12, updated_at: "2026-01-02T00:00:00Z" },
-        { book: book("b2", "Geometriya 9"), last_page: 3, updated_at: "2026-01-01T00:00:00Z" },
-      ],
-      saved_count: 0,
-    });
+  it("'Davom ettirish' kartochkasi oxirgi kitobning aynan o'sha betiga olib boradi", async () => {
+    api.dashboard.mockResolvedValue(dashboard({ continue: item(book("b1", "Algebra 9"), 12) }));
     setup();
 
     const card = await screen.findByTestId("continue-card");
@@ -77,12 +92,51 @@ describe("LibraryHome", () => {
     expect(card.textContent).toContain("12 / 100-bet");
     const action = screen.getByRole("link", { name: /Algebra 9/ });
     expect(action.getAttribute("href")).toBe("/darsliklar/b1?page=12");
-    // Qolgan ochilganlar "Oxirgi ochilganlar" ro'yxatida
-    expect(await screen.findByText("Geometriya 9")).toBeTruthy();
+  });
+
+  it("haftalik ko'rsatkichlar va saqlanganlar soni serverdan", async () => {
+    api.dashboard.mockResolvedValue(
+      dashboard({
+        continue: item(book("b1", "Algebra 9"), 3),
+        week: { opened: 4, read: 2 },
+        saved_count: 5,
+        open_goals: 1,
+      }),
+    );
+    setup();
+
+    expect((await screen.findByTestId("stat-week-opened")).textContent).toBe("4");
+    expect(screen.getByTestId("stat-week-read").textContent).toBe("2");
+    expect(screen.getByTestId("stat-saved").textContent).toBe("5");
+    expect(screen.getByTestId("stat-goals").textContent).toBe("1");
+  });
+
+  it("'Takrorlash kerak' va 'Fanlarim' panellari dashboard javobidan chiziladi", async () => {
+    api.dashboard.mockResolvedValue(
+      dashboard({
+        continue: item(book("b1", "Algebra 9"), 12),
+        review: [item(book("b2", "Geometriya 9"), 30)],
+        subjects: [
+          {
+            slug: "algebra",
+            title: { uz: "Algebra" },
+            icon: "",
+            books_total: 4,
+            books_opened: 2,
+            books_read: 1,
+          },
+        ],
+      }),
+    );
+    setup();
+
+    const review = await screen.findByTestId("review-list");
+    expect(review.textContent).toContain("Geometriya 9");
+    expect(screen.getByText("1 / 4 o'qilgan")).toBeTruthy();
   });
 
   it("hech narsa ochilmagan bo'lsa katalogga (o'quvchi sinfi bilan) taklif qiladi", async () => {
-    api.library.mockResolvedValue({ items: [], saved_count: 0 });
+    api.dashboard.mockResolvedValue(dashboard());
     setup();
 
     expect(await screen.findByText(t.continue.emptyTitle)).toBeTruthy();
@@ -91,8 +145,8 @@ describe("LibraryHome", () => {
     expect(screen.queryByTestId("continue-card")).toBeNull();
   });
 
-  it("saqlanganlar paneli saqlangan kitoblarni ko'rsatadi", async () => {
-    api.library.mockResolvedValue({ items: [], saved_count: 1 });
+  it("saqlanganlar paneli saqlangan kitoblarni ko'rsatadi (ustoz paneli)", async () => {
+    api.teacherDashboard.mockResolvedValue({ ...dashboard({ saved_count: 1 }), grades: [] });
     api.bookmarks.mockResolvedValue([
       { book: book("b3", "Fizika 9"), created_at: "2026-01-01T00:00:00Z" },
     ]);
@@ -101,10 +155,23 @@ describe("LibraryHome", () => {
     expect(await screen.findByTestId("saved-books")).toBeTruthy();
     expect(screen.getByText("Fizika 9")).toBeTruthy();
     expect(screen.getByRole("heading", { name: /Salom/ })).toBeTruthy();
+    expect(api.dashboard).not.toHaveBeenCalled(); // ustoz o'z endpoint'idan oladi
+  });
+
+  it("ustoz: sinflar bo'yicha qamrov teacher dashboard'dan", async () => {
+    api.teacherDashboard.mockResolvedValue({
+      ...dashboard({ continue: item(book("b1", "Algebra 9"), 2) }),
+      grades: [{ grade: 9, books_total: 5, books_opened: 2 }],
+    });
+    setup("ustoz");
+
+    const grades = await screen.findByTestId("grades-list");
+    expect(grades.textContent).toContain("9-sinf");
+    expect(grades.textContent).toContain("2 / 5 ochilgan");
   });
 
   it("yuklash xatosida xabar chiqadi", async () => {
-    api.library.mockRejectedValue(new Error("boom"));
+    api.dashboard.mockRejectedValue(new Error("boom"));
     setup();
 
     expect(await screen.findByText(t.loadFailed)).toBeTruthy();

@@ -26,6 +26,13 @@ export interface PdfMergeOptions {
 /** Server har ro'yxat uchun shuncha elementni qabul qiladi. */
 export const PDF_MERGE_CHUNK = 500;
 
+/** Mehmon ma'lumotini qo'shish xatosidan keyin qayta urinish oralig'i: 5s, 15s, 45s … 5 daqiqagacha. */
+export const MERGE_RETRY_BASE_MS = 5_000;
+export const MERGE_RETRY_MAX_MS = 300_000;
+
+/** `failures` — ketma-ket muvaffaqiyatsiz urinishlar soni (≥ 1). */
+export const mergeRetryDelay = (failures: number) =>
+  Math.min(MERGE_RETRY_BASE_MS * 3 ** Math.max(failures - 1, 0), MERGE_RETRY_MAX_MS);
 export function toGuestItems(positions: Record<string, PdfPosition>): GuestPdfProgress[] {
   return Object.entries(positions).map(([id, position]) => ({
     pdf_book_id: id,

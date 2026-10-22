@@ -1,3 +1,6 @@
+import contextlib
+
+from django.core.exceptions import ValidationError as DjangoValidationError
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.exceptions import NotFound
@@ -5,15 +8,27 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.core.permissions import IsRole
+
 from .models import PdfReadProgress
 from .serializers import (
+    DashboardSerializer,
+    EventSerializer,
+    GoalSerializer,
+    GoalWriteSerializer,
     MergeRequestSerializer,
     MergeResultSerializer,
     PdfBookmarkSerializer,
+    PdfLibraryItemSerializer,
     PdfLibrarySerializer,
     PdfProgressSerializer,
     PdfProgressWriteSerializer,
+    ResultsSerializer,
+    TeacherDashboardSerializer,
 )
+from .services import dashboard as dashboard_service
+from .services.events import record_event
+from .services.goals import create_goal, user_goals
 from .services.merge import merge_guest_data
 from .services.pdf import (
     add_pdf_bookmark,
@@ -151,3 +166,154 @@ class MergeGuestDataView(APIView):
             request, data.get("pdf_progress", []), data.get("pdf_bookmarks", [])
         )
         return Response(MergeResultSerializer(result).data)
+
+
+class EventView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        operation_id="me_events_create",
+        tags=TAGS,
+        summary="O'qish hodisasi: kitob ochildi / o'qib bo'lindi (idempotent)",
+        request=EventSerializer,
+        responses=PdfProgressSerializer,
+    )
+    def post(self, request):
+        serializer = EventSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        book = resolve_pdf_book(request, data["pdf_book_id"])
+        row = record_event(request.user, book, data["kind"])
+        row.pdf_book = book
+        return Response(PdfProgressSerializer(row).data)
+
+
+class RecentView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        operation_id="me_recent",
+        tags=TAGS,
+        summary="Oxirgi ochilgan 20 ta kitob (eng yangisi birinchi)",
+        responses=PdfLibraryItemSerializer(many=True),
+    )
+    def get(self, request):
+        rows = dashboard_service.recent(request, request.user)
+        return Response(PdfLibraryItemSerializer(rows, many=True).data)
+
+
+class DashboardView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        operation_id="me_dashboard",
+        tags=TAGS,
+        summary="Bosh sahifa: davom ettirish, fanlarim, takrorlash, haftalik natija",
+        responses=DashboardSerializer,
+    )
+    def get(self, request):
+        data = dashboard_service.dashboard(request, request.user)
+        return Response(DashboardSerializer(data).data)
+
+
+class ResultsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        operation_id="me_results",
+        tags=TAGS,
+        summary="Natijalar: o'qilgan, jarayondagi va takrorlash kerak kitoblar",
+        responses=ResultsSerializer,
+    )
+    def get(self, request):
+        return Response(ResultsSerializer(dashboard_service.results(request, request.user)).data)
+
+
+class TeacherDashboardView(APIView):
+    permission_classes = [IsRole("teacher")]
+
+    @extend_schema(
+        operation_id="me_teacher_dashboard",
+        tags=TAGS,
+        summary="Ustoz bosh sahifasi: umumiy ko'rsatkichlar + sinflar bo'yicha qamrov",
+        responses=TeacherDashboardSerializer,
+    )
+    def get(self, request):
+        data = dashboard_service.teacher_dashboard(request, request.user)
+        return Response(TeacherDashboardSerializer(data).data)
+
+
+class GoalListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        operation_id="me_goals_list",
+        tags=TAGS,
+        summary="Rejalarim (bajarilmaganlar birinchi, muddat bo'yicha)",
+        responses=GoalSerializer(many=True),
+    )
+    def get(self, request):
+        return Response(GoalSerializer(user_goals(request.user), many=True).data)
+
+    @extend_schema(
+        operation_id="me_goals_create",
+        tags=TAGS,
+        request=GoalWriteSerializer,
+        responses={201: GoalSerializer},
+    )
+    def post(self, request):
+        serializer = GoalWriteSerializer(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        goal = create_goal(
+            request.user,
+            title=data["title"],
+            pdf_book=data.get("pdf_book_id"),
+            due_date=data.get("due_date"),
+        )
+        if data.get("done"):
+            serializer.apply(goal)
+        return Response(GoalSerializer(goal).data, status=status.HTTP_201_CREATED)
+
+
+class GoalDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def _goal(self, request, goal_id):
+        # Faqat o'zining rejasi: begonaniki 404 (mavjudligi oshkor bo'lmaydi).
+        try:
+            goal = user_goals(request.user).filter(pk=goal_id).first()
+        except DjangoValidationError:
+            goal = None
+        if goal is None:
+            raise NotFound()
+        return goal
+
+    @extend_schema(operation_id="me_goals_retrieve", tags=TAGS, responses=GoalSerializer)
+    def get(self, request, goal_id):
+        return Response(GoalSerializer(self._goal(request, goal_id)).data)
+
+    @extend_schema(
+        operation_id="me_goals_partial_update",
+        tags=TAGS,
+        request=GoalWriteSerializer,
+        responses=GoalSerializer,
+    )
+    def patch(self, request, goal_id):
+        goal = self._goal(request, goal_id)
+        serializer = GoalWriteSerializer(
+            data=request.data, partial=True, context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+        return Response(GoalSerializer(serializer.apply(goal)).data)
+
+    @extend_schema(
+        operation_id="me_goals_delete",
+        tags=TAGS,
+        summary="Rejani o'chirish (idempotent)",
+        responses={204: None},
+    )
+    def delete(self, request, goal_id):
+        with contextlib.suppress(DjangoValidationError):
+            user_goals(request.user).filter(pk=goal_id).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

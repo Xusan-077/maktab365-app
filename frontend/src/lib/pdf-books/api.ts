@@ -11,6 +11,15 @@ export type GuestPdfProgress = Schemas["GuestPdfProgressRequest"];
 export type PdfBookmark = Schemas["PdfBookmark"];
 export type PdfLibrary = Schemas["PdfLibrary"];
 export type PdfLibraryItem = Schemas["PdfLibraryItem"];
+export type ReadStatus = Schemas["ReadStatusEnum"];
+export type Dashboard = Schemas["Dashboard"];
+export type DashboardSubject = Schemas["DashboardSubject"];
+export type TeacherDashboard = Schemas["TeacherDashboard"];
+export type Results = Schemas["Results"];
+export type Goal = Schemas["Goal"];
+export type GoalInput = Schemas["GoalWriteRequest"];
+export type GoalPatch = Schemas["PatchedGoalWriteRequest"];
+export type ReadEvent = Schemas["EventKindEnum"];
 
 export const PDF_PAGE_SIZE = 24;
 
@@ -110,6 +119,53 @@ export class PdfBooksApi {
   async removeBookmark(id: string): Promise<void> {
     const result = await this.client.DELETE("/api/v1/me/pdf-bookmarks/{pdf_book_id}/", {
       params: { path: { pdf_book_id: id } },
+    });
+    if (result.response.status >= 400) throw toApiError(result.response, result.error);
+  }
+
+  /** O'qish hodisasi (kitob ochildi / o'qib bo'lindi); idempotent. */
+  async recordEvent(id: string, event: ReadEvent): Promise<PdfProgress> {
+    const result = await this.client.POST("/api/v1/me/events/", {
+      body: { kind: event, pdf_book_id: id },
+    });
+    return unwrap(result);
+  }
+
+  /** Kabinet bosh sahifasi: davom ettirish, fanlarim, takrorlash kerak, haftalik natija. */
+  async dashboard(): Promise<Dashboard> {
+    return unwrap(await this.client.GET("/api/v1/me/dashboard/"));
+  }
+
+  /** Ustoz bosh sahifasi (faqat `teacher` roli). */
+  async teacherDashboard(): Promise<TeacherDashboard> {
+    return unwrap(await this.client.GET("/api/v1/me/teacher/dashboard/"));
+  }
+
+  /** Natijalar: o'qilgan, jarayondagi va takrorlash kerak kitoblar. */
+  async results(): Promise<Results> {
+    return unwrap(await this.client.GET("/api/v1/me/results/"));
+  }
+
+  async goals(): Promise<Goal[]> {
+    return unwrap(await this.client.GET("/api/v1/me/goals/"));
+  }
+
+  async createGoal(input: GoalInput): Promise<Goal> {
+    return unwrap(await this.client.POST("/api/v1/me/goals/", { body: input }));
+  }
+
+  async updateGoal(id: string, patch: GoalPatch): Promise<Goal> {
+    const result = await this.client.PATCH("/api/v1/me/goals/{goal_id}/", {
+      params: { path: { goal_id: id } },
+      body: patch,
+    });
+    return unwrap(result);
+  }
+
+  /** Idempotent: o'chirilgan rejani qayta o'chirish xato emas. */
+  async deleteGoal(id: string): Promise<void> {
+    const result = await this.client.DELETE("/api/v1/me/goals/{goal_id}/", {
+      params: { path: { goal_id: id } },
     });
     if (result.response.status >= 400) throw toApiError(result.response, result.error);
   }
