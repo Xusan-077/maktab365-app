@@ -8,6 +8,9 @@ import {
   type AdminChapterInput,
   type AdminChapterPatch,
   type AdminDashboard,
+  type AdminPdfBook,
+  type AdminPdfBookInput,
+  type AdminPdfBookPatch,
   type AdminSubject,
   type AdminTopic,
   type AdminTopicInput,
@@ -16,6 +19,9 @@ import {
   type AdminUser,
   type BookListParams,
   type Page,
+  type PdfBookStatus,
+  type PdfUploadPart,
+  type PdfUploadPlan,
   type ReorderInput,
   type TopicStatus,
   type UploadKind,
@@ -182,6 +188,76 @@ export class AdminApi {
         form.set("file", file);
         return form;
       },
+    });
+    return unwrap(result);
+  }
+
+  async pdfBooks(params: BookListParams = {}): Promise<Page<AdminPdfBook>> {
+    const { page, search, grade, subject, status } = params;
+    const result = await this.client.GET("/api/v1/admin/pdf-books/", {
+      params: {
+        query: {
+          page,
+          page_size: PAGE_SIZE,
+          search: search || undefined,
+          grade,
+          subject: subject || undefined,
+          status,
+        },
+      },
+    });
+    return unwrap(result);
+  }
+
+  async pdfBook(id: string): Promise<AdminPdfBook> {
+    const result = await this.client.GET("/api/v1/admin/pdf-books/{id}/", {
+      params: { path: { id } },
+    });
+    return unwrap(result);
+  }
+
+  async createPdfBook(input: AdminPdfBookInput): Promise<AdminPdfBook> {
+    return unwrap(await this.client.POST("/api/v1/admin/pdf-books/", { body: input }));
+  }
+
+  async updatePdfBook(id: string, patch: AdminPdfBookPatch): Promise<AdminPdfBook> {
+    const result = await this.client.PATCH("/api/v1/admin/pdf-books/{id}/", {
+      params: { path: { id } },
+      body: patch,
+    });
+    return unwrap(result);
+  }
+
+  async deletePdfBook(id: string): Promise<void> {
+    this.assertDeleted(
+      await this.client.DELETE("/api/v1/admin/pdf-books/{id}/", { params: { path: { id } } }),
+    );
+  }
+
+  async transitionPdfBook(id: string, to: PdfBookStatus): Promise<AdminPdfBook> {
+    const result = await this.client.POST("/api/v1/admin/pdf-books/{id}/transition/", {
+      params: { path: { id } },
+      body: { to },
+    });
+    return unwrap(result);
+  }
+
+  /** PDF yuklashni boshlaydi: S3'ga to'g'ridan-to'g'ri (`direct`) yoki backend orqali (`proxy`, dev). */
+  async initPdfUpload(
+    id: string,
+    file: { name: string; size: number; type: string },
+  ): Promise<PdfUploadPlan> {
+    const result = await this.client.POST("/api/v1/admin/pdf-books/{id}/upload-init/", {
+      params: { path: { id } },
+      body: { filename: file.name, size: file.size, content_type: file.type },
+    });
+    return unwrap(result);
+  }
+
+  async completePdfUpload(id: string, parts: PdfUploadPart[]): Promise<AdminPdfBook> {
+    const result = await this.client.POST("/api/v1/admin/pdf-books/{id}/upload-complete/", {
+      params: { path: { id } },
+      body: { parts },
     });
     return unwrap(result);
   }

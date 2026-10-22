@@ -20,6 +20,12 @@ export type UploadResult = Schemas["UploadResult"];
 export type UploadKind = Schemas["UploadRequestKindEnum"];
 export type ReorderInput = Schemas["ReorderRequest"];
 export type TopicStatus = Schemas["TopicStatusEnum"];
+export type AdminPdfBook = Schemas["PdfBookAdmin"];
+export type AdminPdfBookInput = Schemas["PdfBookAdminRequest"];
+export type AdminPdfBookPatch = Schemas["PatchedPdfBookAdminRequest"];
+export type PdfUploadPlan = Schemas["PdfUploadPlan"];
+export type PdfUploadPart = Schemas["PdfUploadPartRequest"];
+export type PdfBookStatus = Schemas["PdfBookAdminStatusEnum"];
 export type BookStatus = "published" | "draft";
 
 export interface Page<T> {

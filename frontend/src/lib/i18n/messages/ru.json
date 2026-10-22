@@ -176,7 +176,8 @@
     "mobile": "Мобильная навигация",
     "home": "Главная",
     "goToCabinet": "Перейти в кабинет",
-    "goToTeacher": "Перейти в панель учителя"
+    "goToTeacher": "Перейти в панель учителя",
+    "pdfBooks": "PDF-учебники"
   },
   "search": {
     "label": "Поиск по сайту",
@@ -662,7 +663,8 @@
       "subjects": "Мои предметы",
       "textbooks": "Учебники",
       "results": "Результаты",
-      "saved": "Сохранённое"
+      "saved": "Сохранённое",
+      "pdfBooks": "PDF-учебники"
     },
     "continue": {
       "title": "{subject} · {topic}",
@@ -778,7 +780,8 @@
       "label": "Разделы панели учителя",
       "books": "Учебники",
       "topics": "Темы",
-      "saved": "Сохранённое"
+      "saved": "Сохранённое",
+      "pdfBooks": "PDF-учебники"
     },
     "search": {
       "label": "Поиск книги или темы",
@@ -1060,7 +1063,8 @@
       "books": "Books",
       "users": "Users",
       "site": "Go to site",
-      "signOut": "Sign out"
+      "signOut": "Sign out",
+      "pdfBooks": "Книги (PDF)"
     },
     "roles": {
       "student": "Student",
@@ -1281,7 +1285,16 @@
         "not_authenticated": "Please sign in again.",
         "permission_denied": "You are not allowed to do this.",
         "not_found": "Not found. Refresh the page.",
-        "throttled": "Too many requests. Try again shortly."
+        "throttled": "Too many requests. Try again shortly.",
+        "file_empty": "Файл пустой.",
+        "invalid_pdf": "PDF повреждён или не читается.",
+        "pdf_encrypted": "PDF с паролем не принимаются.",
+        "no_file": "Сначала загрузите PDF-файл.",
+        "no_pending_upload": "Загрузка не начата. Выберите файл заново.",
+        "upload_incomplete": "Файл загружен не полностью. Попробуйте ещё раз.",
+        "direct_upload_required": "В этой среде файлы идут напрямую в хранилище. Обновите страницу.",
+        "invalid_parts": "Загруженные части некорректны. Попробуйте ещё раз.",
+        "upload_failed": "Не удалось загрузить файл. Проверьте соединение и попробуйте ещё раз."
       },
       "fields": {
         "invalid": "Invalid value",
@@ -1291,6 +1304,137 @@
         "book_immutable": "The book cannot be changed",
         "invalid_file": "File not found, upload it again"
       }
+    },
+    "pdfUpload": {
+      "none": "PDF не выбран",
+      "hint": "Только PDF, до 100 МБ",
+      "choose": "Выбрать PDF",
+      "replace": "Выбрать другой файл",
+      "progress": "Ход загрузки",
+      "phases": {
+        "uploading": "Загрузка файла…",
+        "cover": "Подготовка обложки…"
+      },
+      "problems": {
+        "notPdf": "Принимаются только PDF-файлы.",
+        "empty": "Файл пустой.",
+        "tooLarge": "Файл слишком большой (максимум 100 МБ).",
+        "missing": "Выберите PDF-файл."
+      }
+    },
+    "pdfBooks": {
+      "title": "Книги (PDF)",
+      "description": "Загружайте, публикуйте и управляйте PDF-учебниками. Ученики читают их постранично.",
+      "new": "Добавить PDF-книгу",
+      "loading": "Загрузка PDF-книг",
+      "empty": "PDF-книг пока нет. Добавьте первую.",
+      "emptyFiltered": "По этим фильтрам PDF-книг не найдено.",
+      "filters": {
+        "search": "Поиск по названию"
+      },
+      "columns": {
+        "title": "Название",
+        "grade": "Класс",
+        "subject": "Предмет",
+        "pages": "Страниц",
+        "size": "Размер",
+        "status": "Статус",
+        "updated": "Обновлено"
+      }
+    },
+    "pdfWizard": {
+      "createTitle": "Новая PDF-книга",
+      "createDescription": "Выберите класс и предмет, затем введите название и загрузите PDF.",
+      "steps": {
+        "label": "Шаги",
+        "grade": "Класс",
+        "subject": "Предмет",
+        "file": "Название и PDF"
+      },
+      "gradeHeading": "Для какого класса?",
+      "subjectHeading": "{grade} класс: какой предмет?",
+      "fileHeading": "{grade} класс: название и PDF-файл",
+      "gradeOption": "{grade} класс",
+      "gradeLabel": "Класс",
+      "subjectLabel": "Предмет",
+      "titleLabel": "Название книги",
+      "pdfLabel": "PDF-файл",
+      "next": "Далее",
+      "back": "Назад",
+      "start": "Загрузить и сохранить",
+      "retry": "Повторить",
+      "created": "PDF-книга загружена. Нажмите «Опубликовать», чтобы сделать её видимой.",
+      "coverFailed": "Обложку не удалось создать автоматически. Позже попробуйте загрузить файл заново."
+    },
+    "pdfEdit": {
+      "editTitle": "Редактирование PDF-книги",
+      "backToList": "← Список PDF-книг",
+      "formLabel": "Данные PDF-книги",
+      "info": {
+        "pages": "Страниц",
+        "size": "Размер файла",
+        "updated": "Обновлено"
+      },
+      "publish": "Опубликовать",
+      "unpublish": "Скрыть",
+      "published": "Книга опубликована",
+      "unpublished": "Книга скрыта",
+      "publishNeedsFile": "Перед публикацией загрузите PDF-файл.",
+      "replaceTitle": "Заменить PDF-файл",
+      "uploadTitle": "Загрузить PDF-файл",
+      "fileLabel": "Новый PDF-файл",
+      "replaceAction": "Заменить",
+      "uploadAction": "Загрузить",
+      "replaced": "PDF-файл загружен",
+      "coverFailed": "Обложку не удалось создать автоматически.",
+      "saved": "Сохранено",
+      "deleted": "PDF-книга удалена",
+      "deleteTitle": "Удаление PDF-книги",
+      "deleteDescription": "«{title}» и её файл будут удалены. Это действие нельзя отменить."
+    }
+  },
+  "pdfBooks": {
+    "meta": {
+      "title": "PDF-учебники",
+      "description": "Читайте PDF-учебники 1–11 классов онлайн, постранично. Бесплатно.",
+      "readerTitle": "PDF-учебник"
+    },
+    "catalog": {
+      "title": "PDF-учебники",
+      "description": "Выберите класс и предмет, откройте учебник и читайте постранично.",
+      "gradeFilter": "Класс",
+      "subjectFilter": "Предмет",
+      "allGrades": "Все",
+      "allSubjects": "Все предметы",
+      "gradeLabel": "{grade} класс",
+      "loading": "Загрузка PDF-учебников",
+      "results": "Список PDF-учебников",
+      "empty": "PDF-учебников пока нет.",
+      "emptyFiltered": "Для этого класса и предмета PDF-учебников нет.",
+      "error": "Не удалось загрузить PDF-учебники.",
+      "retry": "Повторить"
+    },
+    "card": {
+      "meta": "{grade} класс · {subject}",
+      "pages": "{count} стр.",
+      "resume": "Продолжить со стр. {page}",
+      "unverified": "Не прошёл проверку"
+    },
+    "reader": {
+      "back": "PDF-учебники",
+      "toolbar": "Страницы",
+      "prev": "Предыдущая страница",
+      "next": "Следующая страница",
+      "pageInput": "Номер страницы",
+      "position": "Страница {page} из {total}",
+      "loading": "Загрузка страницы",
+      "loadError": "Не удалось открыть учебник. Проверьте соединение и попробуйте ещё раз.",
+      "pageError": "Не удалось показать страницу.",
+      "notFound": "Учебник не найден или ещё не опубликован.",
+      "retry": "Повторить"
+    },
+    "search": {
+      "title": "PDF-учебники"
     }
   }
 }

@@ -54,3 +54,30 @@ export function toBffUrl(url: string): string {
   }
   return parsed.toString();
 }
+
+/** BFF orqali o'tadigan so'rov tanasi chegarasi: oddiy API so'rovlari (JSON, muqova rasmi). */
+export const MAX_BODY_BYTES = 12 * 1024 * 1024;
+/**
+ * Lokal (dev) PDF yuklash `POST …/admin/pdf-books/<id>/upload/` backend orqali ketadi; prod'da PDF
+ * baytlari BFF'dan o'tmaydi (to'g'ridan-to'g'ri R2/S3), bu chegara faqat dev uchun. Backend
+ * `PDF_BOOK_MAX_BYTES` (100 MB) + multipart ustamasi.
+ */
+export const MAX_PDF_BODY_BYTES = 105 * 1024 * 1024;
+const PDF_UPLOAD_PATH = /^\/api\/v1\/admin\/pdf-books\/[0-9a-f-]{36}\/upload\/$/;
+
+export const isPdfUploadPath = (path: string) => PDF_UPLOAD_PATH.test(path);
+
+const PDF_FILE_PATH = /^\/api\/v1\/pdf-books\/[0-9a-f-]{36}\/file\/$/;
+
+/** Lokal (dev) PDF fayl endpoint'i: Range va kesh sarlavhalari BFF orqali o'tadi. */
+export const isPdfFilePath = (path: string) => PDF_FILE_PATH.test(path);
+
+export function bodyLimitFor(path: string): number {
+  return isPdfUploadPath(path) ? MAX_PDF_BODY_BYTES : MAX_BODY_BYTES;
+}
+
+/** `Content-Length` chegaradan oshsa (tanani o'qimasdan) rad etish uchun. */
+export function declaresTooLargeBody(request: Request, path: string): boolean {
+  const length = Number(request.headers.get("content-length"));
+  return Number.isFinite(length) && length > bodyLimitFor(path);
+}

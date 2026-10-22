@@ -176,7 +176,8 @@
     "mobile": "Mobil navigatsiya",
     "home": "Bosh sahifa",
     "goToCabinet": "Kabinetga o'tish",
-    "goToTeacher": "Ustoz paneliga o'tish"
+    "goToTeacher": "Ustoz paneliga o'tish",
+    "pdfBooks": "PDF darsliklar"
   },
   "search": {
     "label": "Saytdan qidirish",
@@ -662,7 +663,8 @@
       "subjects": "Fanlarim",
       "textbooks": "Darsliklar",
       "results": "Natijalar",
-      "saved": "Saqlanganlar"
+      "saved": "Saqlanganlar",
+      "pdfBooks": "PDF darsliklar"
     },
     "continue": {
       "title": "{subject} · {topic}",
@@ -778,7 +780,8 @@
       "label": "Ustoz paneli bo'limlari",
       "books": "Darsliklar",
       "topics": "Mavzular",
-      "saved": "Saqlanganlar"
+      "saved": "Saqlanganlar",
+      "pdfBooks": "PDF darsliklar"
     },
     "search": {
       "label": "Kitob yoki mavzuni qidiring",
@@ -1060,7 +1063,8 @@
       "books": "Kitoblar",
       "users": "Foydalanuvchilar",
       "site": "Saytga o'tish",
-      "signOut": "Chiqish"
+      "signOut": "Chiqish",
+      "pdfBooks": "Kitoblar (PDF)"
     },
     "roles": {
       "student": "O'quvchi",
@@ -1281,7 +1285,16 @@
         "not_authenticated": "Qayta kiring.",
         "permission_denied": "Bu amalga ruxsatingiz yo'q.",
         "not_found": "Topilmadi. Sahifani yangilang.",
-        "throttled": "Juda ko'p so'rov. Birozdan keyin urinib ko'ring."
+        "throttled": "Juda ko'p so'rov. Birozdan keyin urinib ko'ring.",
+        "file_empty": "Fayl bo'sh.",
+        "invalid_pdf": "PDF fayl buzilgan yoki o'qib bo'lmadi.",
+        "pdf_encrypted": "Parol bilan himoyalangan PDF qabul qilinmaydi.",
+        "no_file": "Avval PDF fayl yuklang.",
+        "no_pending_upload": "Yuklash boshlanmagan. Faylni qayta tanlang.",
+        "upload_incomplete": "Fayl to'liq yuklanmadi. Qayta urinib ko'ring.",
+        "direct_upload_required": "Bu muhitda fayl to'g'ridan-to'g'ri saqlashga yuklanadi. Sahifani yangilang.",
+        "invalid_parts": "Yuklangan bo'laklar noto'g'ri. Qayta urinib ko'ring.",
+        "upload_failed": "Faylni yuklab bo'lmadi. Internetni tekshirib, qayta urinib ko'ring."
       },
       "fields": {
         "invalid": "Noto'g'ri qiymat",
@@ -1291,6 +1304,137 @@
         "book_immutable": "Kitobni o'zgartirib bo'lmaydi",
         "invalid_file": "Fayl topilmadi, qayta yuklang"
       }
+    },
+    "pdfUpload": {
+      "none": "PDF tanlanmagan",
+      "hint": "Faqat PDF, 100 MB gacha",
+      "choose": "PDF tanlash",
+      "replace": "Boshqa fayl tanlash",
+      "progress": "Yuklash jarayoni",
+      "phases": {
+        "uploading": "Fayl yuklanmoqda…",
+        "cover": "Muqova tayyorlanmoqda…"
+      },
+      "problems": {
+        "notPdf": "Faqat PDF fayl qabul qilinadi.",
+        "empty": "Fayl bo'sh.",
+        "tooLarge": "Fayl juda katta (eng ko'pi 100 MB).",
+        "missing": "PDF faylni tanlang."
+      }
+    },
+    "pdfBooks": {
+      "title": "Kitoblar (PDF)",
+      "description": "PDF darsliklarni yuklang, nashr qiling va boshqaring. O'quvchilar ularni sahifa-sahifa o'qiydi.",
+      "new": "PDF kitob qo'shish",
+      "loading": "PDF kitoblar yuklanmoqda",
+      "empty": "Hali PDF kitob yo'q. Birinchisini qo'shing.",
+      "emptyFiltered": "Bu filtrlar bo'yicha PDF kitob topilmadi.",
+      "filters": {
+        "search": "Nom bo'yicha qidirish"
+      },
+      "columns": {
+        "title": "Nomi",
+        "grade": "Sinf",
+        "subject": "Fan",
+        "pages": "Betlar",
+        "size": "Hajmi",
+        "status": "Holat",
+        "updated": "Yangilangan"
+      }
+    },
+    "pdfWizard": {
+      "createTitle": "Yangi PDF kitob",
+      "createDescription": "Sinf va fanni tanlang, so'ng kitob nomini kiriting va PDF faylni yuklang.",
+      "steps": {
+        "label": "Qadamlar",
+        "grade": "Sinf",
+        "subject": "Fan",
+        "file": "Nom va PDF"
+      },
+      "gradeHeading": "Qaysi sinf uchun?",
+      "subjectHeading": "{grade}-sinf: qaysi fan?",
+      "fileHeading": "{grade}-sinf: nom va PDF fayl",
+      "gradeOption": "{grade}-sinf",
+      "gradeLabel": "Sinf",
+      "subjectLabel": "Fan",
+      "titleLabel": "Kitob nomi",
+      "pdfLabel": "PDF fayl",
+      "next": "Davom etish",
+      "back": "Orqaga",
+      "start": "Yuklash va saqlash",
+      "retry": "Qayta urinish",
+      "created": "PDF kitob yuklandi. Ko'rinishi uchun «Nashr qilish» tugmasini bosing.",
+      "coverFailed": "Muqova avtomatik yaratilmadi. Keyinroq faylni qayta yuklab ko'ring."
+    },
+    "pdfEdit": {
+      "editTitle": "PDF kitobni tahrirlash",
+      "backToList": "← PDF kitoblar ro'yxati",
+      "formLabel": "PDF kitob ma'lumotlari",
+      "info": {
+        "pages": "Betlar soni",
+        "size": "Fayl hajmi",
+        "updated": "Yangilangan"
+      },
+      "publish": "Nashr qilish",
+      "unpublish": "Yashirish",
+      "published": "Kitob nashr qilindi",
+      "unpublished": "Kitob yashirildi",
+      "publishNeedsFile": "Nashr qilish uchun avval PDF fayl yuklang.",
+      "replaceTitle": "PDF faylni almashtirish",
+      "uploadTitle": "PDF faylni yuklash",
+      "fileLabel": "Yangi PDF fayl",
+      "replaceAction": "Almashtirish",
+      "uploadAction": "Yuklash",
+      "replaced": "PDF fayl yuklandi",
+      "coverFailed": "Muqova avtomatik yaratilmadi.",
+      "saved": "Saqlandi",
+      "deleted": "PDF kitob o'chirildi",
+      "deleteTitle": "PDF kitobni o'chirish",
+      "deleteDescription": "«{title}» va uning fayli o'chiriladi. Buni qaytarib bo'lmaydi."
+    }
+  },
+  "pdfBooks": {
+    "meta": {
+      "title": "PDF darsliklar",
+      "description": "1–11-sinf PDF darsliklarini sahifa-sahifa onlayn o'qing. Bepul.",
+      "readerTitle": "PDF darslik"
+    },
+    "catalog": {
+      "title": "PDF darsliklar",
+      "description": "Sinf va fanni tanlang, darslikni oching va sahifa-sahifa o'qing.",
+      "gradeFilter": "Sinf",
+      "subjectFilter": "Fan",
+      "allGrades": "Hammasi",
+      "allSubjects": "Barcha fanlar",
+      "gradeLabel": "{grade}-sinf",
+      "loading": "PDF darsliklar yuklanmoqda",
+      "results": "PDF darsliklar ro'yxati",
+      "empty": "Hozircha PDF darslik yo'q.",
+      "emptyFiltered": "Bu sinf va fan bo'yicha PDF darslik topilmadi.",
+      "error": "PDF darsliklarni yuklab bo'lmadi.",
+      "retry": "Qayta urinish"
+    },
+    "card": {
+      "meta": "{grade}-sinf · {subject}",
+      "pages": "{count} bet",
+      "resume": "{page}-betdan davom etish",
+      "unverified": "Tekshiruvdan o'tmagan"
+    },
+    "reader": {
+      "back": "PDF darsliklar",
+      "toolbar": "Sahifalar",
+      "prev": "Oldingi sahifa",
+      "next": "Keyingi sahifa",
+      "pageInput": "Sahifa raqami",
+      "position": "{page} / {total}-sahifa",
+      "loading": "Sahifa yuklanmoqda",
+      "loadError": "Darslikni ochib bo'lmadi. Internetni tekshirib, qayta urinib ko'ring.",
+      "pageError": "Sahifani ko'rsatib bo'lmadi.",
+      "notFound": "Bunday darslik topilmadi yoki u hali nashr qilinmagan.",
+      "retry": "Qayta urinish"
+    },
+    "search": {
+      "title": "PDF darsliklar"
     }
   }
 }

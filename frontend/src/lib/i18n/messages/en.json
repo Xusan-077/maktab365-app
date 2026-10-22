@@ -176,7 +176,8 @@
     "mobile": "Mobile navigation",
     "home": "Home",
     "goToCabinet": "Go to dashboard",
-    "goToTeacher": "Go to teacher panel"
+    "goToTeacher": "Go to teacher panel",
+    "pdfBooks": "PDF textbooks"
   },
   "search": {
     "label": "Search the site",
@@ -662,7 +663,8 @@
       "subjects": "My subjects",
       "textbooks": "Textbooks",
       "results": "Results",
-      "saved": "Saved"
+      "saved": "Saved",
+      "pdfBooks": "PDF textbooks"
     },
     "continue": {
       "title": "{subject} · {topic}",
@@ -778,7 +780,8 @@
       "label": "Teacher panel sections",
       "books": "Textbooks",
       "topics": "Topics",
-      "saved": "Saved"
+      "saved": "Saved",
+      "pdfBooks": "PDF textbooks"
     },
     "search": {
       "label": "Search for a book or topic",
@@ -1060,7 +1063,8 @@
       "books": "Books",
       "users": "Users",
       "site": "Go to site",
-      "signOut": "Sign out"
+      "signOut": "Sign out",
+      "pdfBooks": "Books (PDF)"
     },
     "roles": {
       "student": "Student",
@@ -1281,7 +1285,16 @@
         "not_authenticated": "Please sign in again.",
         "permission_denied": "You are not allowed to do this.",
         "not_found": "Not found. Refresh the page.",
-        "throttled": "Too many requests. Try again shortly."
+        "throttled": "Too many requests. Try again shortly.",
+        "file_empty": "The file is empty.",
+        "invalid_pdf": "The PDF is damaged or could not be read.",
+        "pdf_encrypted": "Password-protected PDFs are not accepted.",
+        "no_file": "Upload a PDF first.",
+        "no_pending_upload": "No upload in progress. Choose the file again.",
+        "upload_incomplete": "The file was not fully uploaded. Try again.",
+        "direct_upload_required": "In this environment files go straight to storage. Reload the page.",
+        "invalid_parts": "The uploaded parts are invalid. Try again.",
+        "upload_failed": "Could not upload the file. Check your connection and try again."
       },
       "fields": {
         "invalid": "Invalid value",
@@ -1291,6 +1304,137 @@
         "book_immutable": "The book cannot be changed",
         "invalid_file": "File not found, upload it again"
       }
+    },
+    "pdfUpload": {
+      "none": "No PDF selected",
+      "hint": "PDF only, up to 100 MB",
+      "choose": "Choose PDF",
+      "replace": "Choose another file",
+      "progress": "Upload progress",
+      "phases": {
+        "uploading": "Uploading file…",
+        "cover": "Preparing cover…"
+      },
+      "problems": {
+        "notPdf": "Only PDF files are accepted.",
+        "empty": "The file is empty.",
+        "tooLarge": "The file is too large (100 MB max).",
+        "missing": "Choose a PDF file."
+      }
+    },
+    "pdfBooks": {
+      "title": "Books (PDF)",
+      "description": "Upload, publish and manage PDF textbooks. Students read them page by page.",
+      "new": "Add PDF book",
+      "loading": "Loading PDF books",
+      "empty": "No PDF books yet. Add the first one.",
+      "emptyFiltered": "No PDF books match these filters.",
+      "filters": {
+        "search": "Search by title"
+      },
+      "columns": {
+        "title": "Title",
+        "grade": "Grade",
+        "subject": "Subject",
+        "pages": "Pages",
+        "size": "Size",
+        "status": "Status",
+        "updated": "Updated"
+      }
+    },
+    "pdfWizard": {
+      "createTitle": "New PDF book",
+      "createDescription": "Pick the grade and subject, then enter the title and upload the PDF.",
+      "steps": {
+        "label": "Steps",
+        "grade": "Grade",
+        "subject": "Subject",
+        "file": "Title and PDF"
+      },
+      "gradeHeading": "Which grade?",
+      "subjectHeading": "Grade {grade}: which subject?",
+      "fileHeading": "Grade {grade}: title and PDF file",
+      "gradeOption": "Grade {grade}",
+      "gradeLabel": "Grade",
+      "subjectLabel": "Subject",
+      "titleLabel": "Book title",
+      "pdfLabel": "PDF file",
+      "next": "Continue",
+      "back": "Back",
+      "start": "Upload and save",
+      "retry": "Try again",
+      "created": "PDF book uploaded. Press “Publish” to make it visible.",
+      "coverFailed": "The cover could not be created automatically. Try re-uploading the file later."
+    },
+    "pdfEdit": {
+      "editTitle": "Edit PDF book",
+      "backToList": "← PDF books",
+      "formLabel": "PDF book details",
+      "info": {
+        "pages": "Pages",
+        "size": "File size",
+        "updated": "Updated"
+      },
+      "publish": "Publish",
+      "unpublish": "Hide",
+      "published": "Book published",
+      "unpublished": "Book hidden",
+      "publishNeedsFile": "Upload a PDF file before publishing.",
+      "replaceTitle": "Replace PDF file",
+      "uploadTitle": "Upload PDF file",
+      "fileLabel": "New PDF file",
+      "replaceAction": "Replace",
+      "uploadAction": "Upload",
+      "replaced": "PDF file uploaded",
+      "coverFailed": "The cover could not be created automatically.",
+      "saved": "Saved",
+      "deleted": "PDF book deleted",
+      "deleteTitle": "Delete PDF book",
+      "deleteDescription": "“{title}” and its file will be deleted. This cannot be undone."
+    }
+  },
+  "pdfBooks": {
+    "meta": {
+      "title": "PDF textbooks",
+      "description": "Read grade 1–11 PDF textbooks online, page by page. Free.",
+      "readerTitle": "PDF textbook"
+    },
+    "catalog": {
+      "title": "PDF textbooks",
+      "description": "Pick a grade and subject, open a textbook and read it page by page.",
+      "gradeFilter": "Grade",
+      "subjectFilter": "Subject",
+      "allGrades": "All",
+      "allSubjects": "All subjects",
+      "gradeLabel": "Grade {grade}",
+      "loading": "Loading PDF textbooks",
+      "results": "PDF textbooks list",
+      "empty": "No PDF textbooks yet.",
+      "emptyFiltered": "No PDF textbooks for this grade and subject.",
+      "error": "Could not load PDF textbooks.",
+      "retry": "Try again"
+    },
+    "card": {
+      "meta": "Grade {grade} · {subject}",
+      "pages": "{count} pages",
+      "resume": "Continue from page {page}",
+      "unverified": "Not reviewed yet"
+    },
+    "reader": {
+      "back": "PDF textbooks",
+      "toolbar": "Pages",
+      "prev": "Previous page",
+      "next": "Next page",
+      "pageInput": "Page number",
+      "position": "Page {page} of {total}",
+      "loading": "Loading page",
+      "loadError": "Could not open the textbook. Check your connection and try again.",
+      "pageError": "Could not show the page.",
+      "notFound": "This textbook was not found or is not published yet.",
+      "retry": "Try again"
+    },
+    "search": {
+      "title": "PDF textbooks"
     }
   }
 }

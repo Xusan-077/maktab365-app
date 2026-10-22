@@ -10,6 +10,8 @@ export const adminKeys = {
   subjects: () => [...ADMIN_ROOT_KEY, "subjects"] as const,
   books: (params: BookListParams) => [...ADMIN_ROOT_KEY, "books", params] as const,
   book: (id: string) => [...ADMIN_ROOT_KEY, "book", id] as const,
+  pdfBooks: (params: BookListParams) => [...ADMIN_ROOT_KEY, "pdf-books", params] as const,
+  pdfBook: (id: string) => [...ADMIN_ROOT_KEY, "pdf-book", id] as const,
   tree: (bookId: string) => [...ADMIN_ROOT_KEY, "tree", bookId] as const,
   topic: (id: string) => [...ADMIN_ROOT_KEY, "topic", id] as const,
   users: (params: { page?: number; search?: string }) =>
@@ -33,6 +35,14 @@ export const adminQueries = {
     }),
   book: (id: string) =>
     queryOptions({ queryKey: adminKeys.book(id), queryFn: () => getAdminApi().book(id) }),
+  pdfBooks: (params: BookListParams) =>
+    queryOptions({
+      queryKey: adminKeys.pdfBooks(params),
+      queryFn: () => getAdminApi().pdfBooks(params),
+      placeholderData: (previous) => previous,
+    }),
+  pdfBook: (id: string) =>
+    queryOptions({ queryKey: adminKeys.pdfBook(id), queryFn: () => getAdminApi().pdfBook(id) }),
   /** Kitob daraxti: boblar va mavzular birga. */
   tree: (bookId: string) =>
     queryOptions({

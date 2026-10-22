@@ -63,3 +63,12 @@ export function createTopicSchema() {
       }),
   });
 }
+
+/** PDF kitob ma'lumotlari: sinf, fan va nom (uz majburiy). Fayl alohida tekshiriladi. */
+export function createPdfBookSchema() {
+  return object({
+    subject: string().required("required"),
+    grade: string().required("required"),
+    title: localized(),
+  });
+}
