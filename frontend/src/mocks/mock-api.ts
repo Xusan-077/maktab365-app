@@ -178,9 +178,6 @@ export class MockApi implements MaktabApi {
           identities: [],
           auth_events: [],
           learning: {
-            progress: [],
-            bookmarks: [],
-            goals: [],
             pdf_progress: [],
             pdf_bookmarks: [],
           },

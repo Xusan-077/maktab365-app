@@ -495,151 +495,6 @@ export interface paths {
         patch: operations["admin_subjects_update"];
         trace?: never;
     };
-    "/api/v1/admin/books/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
-        get: operations["admin_books_list"];
-        put?: never;
-        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
-        post: operations["admin_books_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/admin/books/{id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
-        get: operations["admin_books_retrieve"];
-        put?: never;
-        post?: never;
-        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
-        delete: operations["admin_books_delete"];
-        options?: never;
-        head?: never;
-        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
-        patch: operations["admin_books_update"];
-        trace?: never;
-    };
-    "/api/v1/admin/books/{id}/reorder/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @description Bob va mavzular tartibi bir so'rovda (qoidalar: `admin_services.reorder_book`). */
-        post: operations["admin_books_reorder"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/admin/chapters/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
-        get: operations["admin_chapters_list"];
-        put?: never;
-        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
-        post: operations["admin_chapters_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/admin/chapters/{id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
-        get: operations["admin_chapters_retrieve"];
-        put?: never;
-        post?: never;
-        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
-        delete: operations["admin_chapters_delete"];
-        options?: never;
-        head?: never;
-        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
-        patch: operations["admin_chapters_update"];
-        trace?: never;
-    };
-    "/api/v1/admin/topics/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
-        get: operations["admin_topics_list"];
-        put?: never;
-        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
-        post: operations["admin_topics_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/admin/topics/{id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
-        get: operations["admin_topics_retrieve"];
-        put?: never;
-        post?: never;
-        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
-        delete: operations["admin_topics_delete"];
-        options?: never;
-        head?: never;
-        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
-        patch: operations["admin_topics_update"];
-        trace?: never;
-    };
-    "/api/v1/admin/topics/{id}/transition/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @description Nashr oqimi: draft→reviewed→published (editor/admin), published→draft (admin). */
-        post: operations["admin_topics_transition"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/admin/pdf-books/": {
         parameters: {
             query?: never;
@@ -754,126 +609,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/grades/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Sinflar (1–11) va ulardagi kitoblar soni
-         * @description Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi o'rniga kesh ishlaydi.
-         */
-        get: operations["grades_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/subjects/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Kitobi bor fanlar (ixtiyoriy: sinf bo'yicha)
-         * @description Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi o'rniga kesh ishlaydi.
-         */
-        get: operations["subjects_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/books/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Kitoblar (sahifalangan)
-         * @description Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi o'rniga kesh ishlaydi.
-         */
-        get: operations["books_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/books/{slug}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Kitob: boblar va mavzular ro'yxati (bloklarsiz)
-         * @description Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi o'rniga kesh ishlaydi.
-         */
-        get: operations["books_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/books/{book}/topics/{topic}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Mavzu: to'liq bloklar, oldingi/keyingi mavzu, breadcrumb
-         * @description Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi o'rniga kesh ishlaydi.
-         */
-        get: operations["topics_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/search/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Mavzular bo'yicha qidiruv (lotin va kirill)
-         * @description Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi o'rniga kesh ishlaydi.
-         */
-        get: operations["search_topics"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/pdf-books/": {
         parameters: {
             query?: never;
@@ -946,172 +681,6 @@ export interface paths {
          * @description Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi o'rniga kesh ishlaydi.
          */
         get: operations["pdf_books_file_url"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/me/progress/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["me_progress_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/me/progress/{topic_id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["me_progress_retrieve"];
-        /** Mavzu progressini yozish (idempotent, monoton) */
-        put: operations["me_progress_update"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/me/events/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** O'qish voqeasi: topic_opened | topic_read | exercise_answered */
-        post: operations["me_events_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/me/bookmarks/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["me_bookmarks_list"];
-        put?: never;
-        /** Xatcho'p qo'yish (takror yuborilsa 200) */
-        post: operations["me_bookmarks_create"];
-        /** Xatcho'pni olib tashlash (yo'q bo'lsa ham 204) */
-        delete: operations["me_bookmarks_delete"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/me/recent/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["me_recent_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/me/goals/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["me_goals_list"];
-        put?: never;
-        post: operations["me_goals_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/me/goals/{goal_id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["me_goals_retrieve"];
-        put?: never;
-        post?: never;
-        delete: operations["me_goals_delete"];
-        options?: never;
-        head?: never;
-        patch: operations["me_goals_update"];
-        trace?: never;
-    };
-    "/api/v1/me/dashboard/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Kabinet bosh sahifasi: davom ettirish, fanlar, takrorlash, haftalik natija */
-        get: operations["me_dashboard"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/me/results/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Natijalar mavzu kesimida: o'zlashtirilgan, takrorlash kerak, jarayonda */
-        get: operations["me_results"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/me/teacher/dashboard/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["me_teacher_dashboard"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1260,10 +829,8 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         AdminDashboard: {
-            books: components["schemas"]["BookCounts"];
             pdf_books: components["schemas"]["BookCounts"];
             subjects_count: number;
-            topics: components["schemas"]["TopicCounts"];
             new_messages: number;
             recent_messages: components["schemas"]["RecentMessage"][];
             recent_activity: components["schemas"]["AuditEntry"][];
@@ -1291,154 +858,10 @@ export interface components {
             access: string;
             refresh: string;
         };
-        Book: {
-            slug: string;
-            subject: string;
-            grade: number;
-            title: components["schemas"]["LocalizedText"];
-            author: components["schemas"]["LocalizedText"];
-            publisher: string;
-            edition: components["schemas"]["LocalizedText"];
-            year: number;
-            /** Format: uri */
-            cover: string | null;
-            /** Format: uri */
-            pdf: string | null;
-            readonly topics_ready: boolean;
-            topics_count: number;
-        };
-        /** @description Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga kiradi). */
-        BookAdmin: {
-            /** Format: uuid */
-            readonly id: string;
-            slug: string;
-            subject: string;
-            grade: number;
-            title: components["schemas"]["LocalizedText"];
-            author: components["schemas"]["LocalizedText"];
-            publisher?: string;
-            edition: components["schemas"]["LocalizedText"];
-            year: number;
-            cover?: string;
-            /** Format: uri */
-            readonly cover_url: string | null;
-            pdf?: string;
-            /** Format: uri */
-            readonly pdf_url: string | null;
-            order?: number;
-            is_published?: boolean;
-            readonly chapters_count: number;
-            readonly topics_count: number;
-            readonly published_topics_count: number;
-            /** Format: date-time */
-            readonly created_at: string;
-            /** Format: date-time */
-            readonly updated_at: string;
-        };
-        /** @description Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga kiradi). */
-        BookAdminRequest: {
-            slug: string;
-            subject: string;
-            grade: number;
-            title: components["schemas"]["LocalizedTextRequest"];
-            author: components["schemas"]["LocalizedTextRequest"];
-            publisher?: string;
-            edition: components["schemas"]["LocalizedTextRequest"];
-            year: number;
-            cover?: string;
-            pdf?: string;
-            order?: number;
-            is_published?: boolean;
-        };
         BookCounts: {
             total: number;
             draft: number;
             published: number;
-        };
-        BookDetail: {
-            slug: string;
-            subject: string;
-            grade: number;
-            title: components["schemas"]["LocalizedText"];
-            author: components["schemas"]["LocalizedText"];
-            publisher: string;
-            edition: components["schemas"]["LocalizedText"];
-            year: number;
-            /** Format: uri */
-            cover: string | null;
-            /** Format: uri */
-            pdf: string | null;
-            readonly topics_ready: boolean;
-            topics_count: number;
-            chapters: components["schemas"]["Chapter"][];
-        };
-        Bookmark: {
-            /** Format: uuid */
-            readonly id: string;
-            kind: components["schemas"]["BookmarkKindEnum"];
-            readonly topic_id: string | null;
-            readonly book_id: string | null;
-            /** Format: date-time */
-            readonly created_at: string;
-        };
-        /**
-         * @description * `book` - Book
-         *     * `topic` - Topic
-         * @enum {string}
-         */
-        BookmarkKindEnum: "book" | "topic";
-        BookmarkWriteRequest: {
-            kind: components["schemas"]["BookmarkKindEnum"];
-            topic_id?: string;
-            book_id?: string;
-        };
-        Breadcrumb: {
-            subject: components["schemas"]["BreadcrumbSubject"];
-            book: components["schemas"]["BreadcrumbBook"];
-            chapter: components["schemas"]["BreadcrumbChapter"];
-        };
-        BreadcrumbBook: {
-            slug: string;
-            title: components["schemas"]["LocalizedText"];
-            grade: number;
-        };
-        BreadcrumbChapter: {
-            slug: string;
-            order: number;
-            title: components["schemas"]["LocalizedText"];
-        };
-        BreadcrumbSubject: {
-            slug: string;
-            title: components["schemas"]["LocalizedText"];
-        };
-        Chapter: {
-            slug: string;
-            order: number;
-            title: components["schemas"]["LocalizedText"];
-            topics: components["schemas"]["TopicSummary"][];
-        };
-        /** @description Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga kiradi). */
-        ChapterAdmin: {
-            /** Format: uuid */
-            readonly id: string;
-            /** Format: uuid */
-            book: string;
-            readonly book_slug: string;
-            slug: string;
-            title: components["schemas"]["LocalizedText"];
-            readonly order: number;
-            readonly topics_count: number;
-            /** Format: date-time */
-            readonly created_at: string;
-            /** Format: date-time */
-            readonly updated_at: string;
-        };
-        /** @description Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga kiradi). */
-        ChapterAdminRequest: {
-            /** Format: uuid */
-            book: string;
-            slug: string;
-            title: components["schemas"]["LocalizedTextRequest"];
         };
         /**
          * @description * `ok` - ok
@@ -1446,54 +869,10 @@ export interface components {
          * @enum {string}
          */
         CheckStatusEnum: "ok" | "error";
-        Dashboard: {
-            continue: components["schemas"]["TopicProgress"] | null;
-            has_progress: boolean;
-            subjects: components["schemas"]["DashboardBook"][];
-            review: components["schemas"]["ReviewSummary"];
-            weekly: components["schemas"]["Weekly"];
-            saved_count: number;
-        };
-        DashboardBook: {
-            book_id: string;
-            subject_id: string;
-            grade: number;
-            topics_total: number;
-            topics_read: number;
-            topics_passed: number;
-        };
         EmailRequest: {
             /** Format: email */
             email: string;
         };
-        EventRequest: {
-            type: components["schemas"]["TypeEnum"];
-            topic_id: string;
-            exercise_id?: string;
-            correct?: boolean;
-            /** @default 1 */
-            attempt: number;
-            last_block_id?: string;
-        };
-        ExerciseStats: {
-            solved?: string[];
-            attempts?: {
-                [key: string]: number;
-            };
-        };
-        ExerciseStatsRequest: {
-            solved?: string[];
-            attempts?: {
-                [key: string]: number;
-            };
-        };
-        /**
-         * @description * `not_started` - Not started
-         *     * `in_progress` - In progress
-         *     * `passed` - Passed
-         * @enum {string}
-         */
-        ExerciseStatusEnum: "not_started" | "in_progress" | "passed";
         Export: {
             /** Format: date-time */
             exported_at: string;
@@ -1522,9 +901,6 @@ export interface components {
             created_at: string;
         };
         ExportLearning: {
-            progress: components["schemas"]["TopicProgress"][];
-            bookmarks: components["schemas"]["Bookmark"][];
-            goals: components["schemas"]["StudyGoal"][];
             pdf_progress: components["schemas"]["PdfProgress"][];
             pdf_bookmarks: components["schemas"]["PdfBookmark"][];
         };
@@ -1545,29 +921,12 @@ export interface components {
             locale?: components["schemas"]["LocaleEnum"];
             id_token: string;
         };
-        Grade: {
-            grade: number;
-            books_count: number;
-        };
         /** @description PUT: PDF darslikda oxirgi sahifa. `updated_at` — mijozdagi yozuv vaqti. */
         GuestPdfProgressRequest: {
             last_page: number;
             /** Format: date-time */
             updated_at?: string;
             pdf_book_id: string;
-        };
-        /** @description PUT: to'liq holat. Yuborilmagan maydonga tegilmaydi. */
-        GuestProgressRequest: {
-            read_status?: components["schemas"]["ReadStatusEnum"];
-            exercise_status?: components["schemas"]["ExerciseStatusEnum"];
-            last_block_id?: string;
-            /** Format: double */
-            scroll_position?: number | null;
-            mistakes?: components["schemas"]["MistakeRequest"][];
-            exercise_stats?: components["schemas"]["ExerciseStatsRequest"];
-            /** Format: date-time */
-            updated_at?: string;
-            topic_id: string;
         };
         Health: {
             status: components["schemas"]["HealthStatusEnum"];
@@ -1635,30 +994,13 @@ export interface components {
             readonly profile: components["schemas"]["Profile"];
         };
         MergeRequestRequest: {
-            progress?: components["schemas"]["GuestProgressRequest"][];
-            bookmarks?: components["schemas"]["BookmarkWriteRequest"][];
             pdf_progress?: components["schemas"]["GuestPdfProgressRequest"][];
             pdf_bookmarks?: string[];
         };
         MergeResult: {
-            progress: number;
-            bookmarks: number;
             pdf_progress: number;
             pdf_bookmarks: number;
             failed: string[];
-        };
-        MistakeOut: {
-            exercise_id: string;
-            attempts: number;
-            /** Format: date-time */
-            last_wrong_at: string | null;
-        };
-        MistakeRequest: {
-            exercise_id: string;
-            /** @default 1 */
-            attempts: number;
-            /** Format: date-time */
-            last_wrong_at?: string | null;
         };
         /**
          * @description * `direct` - direct
@@ -1693,51 +1035,6 @@ export interface components {
             /** Format: email */
             email: string;
             code: string;
-        };
-        PaginatedBookAdminList: {
-            /** @example 123 */
-            count: number;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=4
-             */
-            next?: string | null;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=2
-             */
-            previous?: string | null;
-            results: components["schemas"]["BookAdmin"][];
-        };
-        PaginatedBookList: {
-            /** @example 123 */
-            count: number;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=4
-             */
-            next?: string | null;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=2
-             */
-            previous?: string | null;
-            results: components["schemas"]["Book"][];
-        };
-        PaginatedChapterAdminList: {
-            /** @example 123 */
-            count: number;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=4
-             */
-            next?: string | null;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=2
-             */
-            previous?: string | null;
-            results: components["schemas"]["ChapterAdmin"][];
         };
         PaginatedPdfBookAdminList: {
             /** @example 123 */
@@ -1799,21 +1096,6 @@ export interface components {
             previous?: string | null;
             results: components["schemas"]["SupportMessage"][];
         };
-        PaginatedTopicListList: {
-            /** @example 123 */
-            count: number;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=4
-             */
-            next?: string | null;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=2
-             */
-            previous?: string | null;
-            results: components["schemas"]["TopicList"][];
-        };
         PaginatedUserAdminList: {
             /** @example 123 */
             count: number;
@@ -1841,28 +1123,6 @@ export interface components {
         PasswordSetRequest: {
             new_password: string;
         };
-        /** @description Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga kiradi). */
-        PatchedBookAdminRequest: {
-            slug?: string;
-            subject?: string;
-            grade?: number;
-            title?: components["schemas"]["LocalizedTextRequest"];
-            author?: components["schemas"]["LocalizedTextRequest"];
-            publisher?: string;
-            edition?: components["schemas"]["LocalizedTextRequest"];
-            year?: number;
-            cover?: string;
-            pdf?: string;
-            order?: number;
-            is_published?: boolean;
-        };
-        /** @description Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga kiradi). */
-        PatchedChapterAdminRequest: {
-            /** Format: uuid */
-            book?: string;
-            slug?: string;
-            title?: components["schemas"]["LocalizedTextRequest"];
-        };
         PatchedPdfBookAdminRequest: {
             title?: components["schemas"]["LocalizedTextRequest"];
             grade?: number;
@@ -1880,32 +1140,12 @@ export interface components {
         PatchedRoleRequest: {
             role?: components["schemas"]["RoleEnum"];
         };
-        PatchedStudyGoalPatchRequest: {
-            title?: string;
-            topic_id?: string | null;
-            /** Format: date */
-            due_date?: string | null;
-            done?: boolean;
-        };
-        /** @description Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga kiradi). */
+        /** @description Slug yaratishda beriladi, keyin o'zgarmaydi (u kitob/fan identifikatorlariga kiradi). */
         PatchedSubjectAdminRequest: {
             slug?: string;
             title?: components["schemas"]["LocalizedTextRequest"];
             icon?: string;
             order?: number;
-        };
-        /** @description Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga kiradi). */
-        PatchedTopicAdminRequest: {
-            slug?: string;
-            /** Format: uuid */
-            chapter?: string;
-            title?: components["schemas"]["LocalizedTextRequest"];
-            summary?: components["schemas"]["LocalizedTextRequest"];
-            /** @description Mavzu bloklari; sxema: `apps/content/schemas.py` (frontend `TopicBlock`). */
-            blocks?: {
-                [key: string]: unknown;
-            }[];
-            notes?: string;
         };
         PdfBook: {
             /** Format: uuid */
@@ -1990,14 +1230,8 @@ export interface components {
             updated_at?: string;
         };
         PdfTransitionRequest: {
-            to: components["schemas"]["PdfTransitionToEnum"];
+            to: components["schemas"]["ToEnum"];
         };
-        /**
-         * @description * `draft` - draft
-         *     * `published` - published
-         * @enum {string}
-         */
-        PdfTransitionToEnum: "draft" | "published";
         PdfUploadCompleteRequest: {
             parts: components["schemas"]["PdfUploadPartRequest"][];
         };
@@ -2033,18 +1267,6 @@ export interface components {
             /** Format: date-time */
             readonly onboarded_at: string | null;
         };
-        /** @description PUT: to'liq holat. Yuborilmagan maydonga tegilmaydi. */
-        ProgressWriteRequest: {
-            read_status?: components["schemas"]["ReadStatusEnum"];
-            exercise_status?: components["schemas"]["ExerciseStatusEnum"];
-            last_block_id?: string;
-            /** Format: double */
-            scroll_position?: number | null;
-            mistakes?: components["schemas"]["MistakeRequest"][];
-            exercise_stats?: components["schemas"]["ExerciseStatsRequest"];
-            /** Format: date-time */
-            updated_at?: string;
-        };
         /**
          * @description * `password` - Password
          *     * `google` - Google
@@ -2053,13 +1275,6 @@ export interface components {
          * @enum {string}
          */
         ProviderEnum: "password" | "google" | "telegram" | "email_otp";
-        /**
-         * @description * `not_started` - Not started
-         *     * `in_progress` - In progress
-         *     * `read` - Read
-         * @enum {string}
-         */
-        ReadStatusEnum: "not_started" | "in_progress" | "read";
         RecentMessage: {
             /** Format: uuid */
             readonly id: string;
@@ -2067,12 +1282,6 @@ export interface components {
             message: string;
             /** Format: date-time */
             readonly created_at: string;
-        };
-        RecentView: {
-            readonly topic_id: string;
-            readonly book_id: string;
-            /** Format: date-time */
-            viewed_at: string;
         };
         RefreshRequest: {
             refresh: string;
@@ -2084,27 +1293,6 @@ export interface components {
             display_name?: string;
             locale?: components["schemas"]["LocaleEnum"];
         };
-        ReorderRequest: {
-            chapters?: string[];
-            topics?: {
-                [key: string]: string[];
-            };
-        };
-        ResultCounts: {
-            mastered: number;
-            review: number;
-            in_progress: number;
-        };
-        Results: {
-            counts: components["schemas"]["ResultCounts"];
-            mastered: components["schemas"]["TopicProgress"][];
-            review: components["schemas"]["TopicProgress"][];
-            in_progress: components["schemas"]["TopicProgress"][];
-        };
-        ReviewSummary: {
-            count: number;
-            items: components["schemas"]["TopicProgress"][];
-        };
         /**
          * @description * `student` - Student
          *     * `teacher` - Teacher
@@ -2113,58 +1301,6 @@ export interface components {
          * @enum {string}
          */
         RoleEnum: "student" | "teacher" | "editor" | "admin";
-        SearchBook: {
-            slug: string;
-            title: components["schemas"]["LocalizedText"];
-            grade: number;
-            subject: string;
-        };
-        SearchPdfBook: {
-            /** Format: uuid */
-            id: string;
-            title: components["schemas"]["LocalizedText"];
-            grade: number;
-            subject: string;
-            page_count: number;
-            /** Format: uri */
-            cover: string | null;
-            readonly unverified: boolean;
-        };
-        SearchResponse: {
-            count: number;
-            results: components["schemas"]["SearchResult"][];
-            pdf_books?: components["schemas"]["SearchPdfBook"][];
-        };
-        SearchResult: {
-            topic: components["schemas"]["TopicSummary"];
-            book: components["schemas"]["SearchBook"];
-            chapter_order: number;
-            chapter_title: components["schemas"]["LocalizedText"];
-            /** @description Mos so'zlar ⟦…⟧ ichida belgilangan parcha (asl matndan). */
-            snippet: string;
-            /** Format: double */
-            rank: number;
-        };
-        StudyGoal: {
-            /** Format: uuid */
-            readonly id: string;
-            title: string;
-            readonly topic_id: string | null;
-            /** Format: date */
-            due_date?: string | null;
-            readonly done: boolean;
-            /** Format: date-time */
-            done_at?: string | null;
-            /** Format: date-time */
-            readonly created_at: string;
-        };
-        StudyGoalWriteRequest: {
-            title: string;
-            topic_id?: string | null;
-            /** Format: date */
-            due_date?: string | null;
-            done?: boolean;
-        };
         Subject: {
             slug: string;
             title: components["schemas"]["LocalizedText"];
@@ -2172,7 +1308,7 @@ export interface components {
             order: number;
             books_count: number;
         };
-        /** @description Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga kiradi). */
+        /** @description Slug yaratishda beriladi, keyin o'zgarmaydi (u kitob/fan identifikatorlariga kiradi). */
         SubjectAdmin: {
             /** Format: uuid */
             readonly id: string;
@@ -2180,14 +1316,13 @@ export interface components {
             title: components["schemas"]["LocalizedText"];
             icon?: string;
             order?: number;
-            readonly books_count: number;
             readonly pdf_books_count: number;
             /** Format: date-time */
             readonly created_at: string;
             /** Format: date-time */
             readonly updated_at: string;
         };
-        /** @description Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga kiradi). */
+        /** @description Slug yaratishda beriladi, keyin o'zgarmaydi (u kitob/fan identifikatorlariga kiradi). */
         SubjectAdminRequest: {
             slug: string;
             title: components["schemas"]["LocalizedTextRequest"];
@@ -2238,13 +1373,6 @@ export interface components {
          * @enum {string}
          */
         SupportStatusEnum: "new" | "in_progress" | "resolved" | "spam";
-        TeacherDashboard: {
-            recent: components["schemas"]["RecentView"][];
-            saved_topics: components["schemas"]["Bookmark"][];
-            saved_books: components["schemas"]["Bookmark"][];
-            saved_topics_count: number;
-            saved_books_count: number;
-        };
         /** @description Telegram Login Widget qaytargan maydonlar (imzo tekshiruvi providers/telegram.py da). */
         TelegramAuthRequest: {
             locale?: components["schemas"]["LocaleEnum"];
@@ -2256,144 +1384,15 @@ export interface components {
             auth_date: number;
             hash: string;
         };
+        /**
+         * @description * `draft` - draft
+         *     * `published` - published
+         * @enum {string}
+         */
+        ToEnum: "draft" | "published";
         TokenRequest: {
             token: string;
         };
-        /** @description Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga kiradi). */
-        TopicAdmin: {
-            /** Format: uuid */
-            readonly id: string;
-            slug: string;
-            /** Format: uuid */
-            chapter: string;
-            readonly chapter_slug: string;
-            /** Format: uuid */
-            readonly book: string;
-            readonly book_slug: string;
-            title: components["schemas"]["LocalizedText"];
-            summary?: components["schemas"]["LocalizedText"];
-            /** @description Mavzu bloklari; sxema: `apps/content/schemas.py` (frontend `TopicBlock`). */
-            blocks?: {
-                [key: string]: unknown;
-            }[];
-            notes?: string;
-            readonly status: components["schemas"]["TopicStatusEnum"];
-            readonly order: number;
-            /** Format: email */
-            readonly reviewed_by_email: string | null;
-            /** Format: date-time */
-            readonly reviewed_at: string | null;
-            /** Format: date-time */
-            readonly published_at: string | null;
-            readonly allowed_transitions: components["schemas"]["TopicStatusEnum"][];
-            /** Format: date-time */
-            readonly created_at: string;
-            /** Format: date-time */
-            readonly updated_at: string;
-        };
-        /** @description Slug yaratishda beriladi, keyin o'zgarmaydi (u mavzu/kitob identifikatorlariga kiradi). */
-        TopicAdminRequest: {
-            slug: string;
-            /** Format: uuid */
-            chapter: string;
-            title: components["schemas"]["LocalizedTextRequest"];
-            summary?: components["schemas"]["LocalizedTextRequest"];
-            /** @description Mavzu bloklari; sxema: `apps/content/schemas.py` (frontend `TopicBlock`). */
-            blocks?: {
-                [key: string]: unknown;
-            }[];
-            notes?: string;
-        };
-        TopicCounts: {
-            total: number;
-            draft: number;
-            published: number;
-            reviewed: number;
-        };
-        TopicDetail: {
-            slug: string;
-            order: number;
-            title: components["schemas"]["LocalizedText"];
-            summary: components["schemas"]["LocalizedText"];
-            readonly unverified: boolean;
-            book: string;
-            chapter: string;
-            status: string;
-            /** @description Mavzu bloklari; sxema: `apps/content/schemas.py` (frontend `TopicBlock`). */
-            blocks: {
-                [key: string]: unknown;
-            }[];
-            previous: components["schemas"]["TopicLink"] | null;
-            next: components["schemas"]["TopicLink"] | null;
-            breadcrumb: components["schemas"]["Breadcrumb"];
-        };
-        TopicLink: {
-            slug: string;
-            title: components["schemas"]["LocalizedText"];
-        };
-        TopicList: {
-            /** Format: uuid */
-            readonly id: string;
-            readonly slug: string;
-            /** Format: uuid */
-            readonly chapter: string;
-            readonly chapter_slug: string;
-            /** Format: uuid */
-            readonly book: string;
-            readonly book_slug: string;
-            readonly title: components["schemas"]["LocalizedText"];
-            readonly status: components["schemas"]["TopicStatusEnum"];
-            readonly order: number;
-            /** Format: date-time */
-            readonly reviewed_at: string | null;
-            /** Format: date-time */
-            readonly published_at: string | null;
-            /** Format: date-time */
-            readonly updated_at: string;
-        };
-        TopicProgress: {
-            readonly topic_id: string;
-            readonly book_id: string;
-            read_status?: components["schemas"]["ReadStatusEnum"];
-            exercise_status?: components["schemas"]["ExerciseStatusEnum"];
-            last_block_id?: string;
-            /** Format: double */
-            scroll_position?: number | null;
-            mistakes: components["schemas"]["MistakeOut"][];
-            readonly exercise_stats: components["schemas"]["ExerciseStats"];
-            /** Format: date-time */
-            first_opened_at?: string | null;
-            /** Format: date-time */
-            read_at?: string | null;
-            /** Format: date-time */
-            passed_at?: string | null;
-            /** Format: date-time */
-            readonly updated_at: string;
-        };
-        /**
-         * @description * `draft` - Draft
-         *     * `reviewed` - Reviewed
-         *     * `published` - Published
-         * @enum {string}
-         */
-        TopicStatusEnum: "draft" | "reviewed" | "published";
-        TopicSummary: {
-            slug: string;
-            order: number;
-            title: components["schemas"]["LocalizedText"];
-            summary: components["schemas"]["LocalizedText"];
-            readonly unverified: boolean;
-        };
-        TransitionRequest: {
-            to: components["schemas"]["TopicStatusEnum"];
-        };
-        /**
-         * @description * `topic_opened` - topic_opened
-         *     * `topic_read` - topic_read
-         *     * `exercise_answered` - exercise_answered
-         * @enum {string}
-         */
-        TypeEnum: "topic_opened" | "topic_read" | "exercise_answered";
         /**
          * @description * `cover` - cover
          *     * `image` - image
@@ -2422,15 +1421,6 @@ export interface components {
             readonly is_active: boolean;
             /** Format: date-time */
             readonly date_joined: string;
-        };
-        Weekly: {
-            /** Format: date-time */
-            since: string;
-            finished: number;
-            read: number;
-            exercises_passed: number;
-            mistakes: number;
-            active: number;
         };
     };
     responses: never;
@@ -3221,444 +2211,6 @@ export interface operations {
             };
         };
     };
-    admin_books_list: {
-        parameters: {
-            query?: {
-                grade?: number;
-                /** @description Which field to use when ordering the results. */
-                ordering?: string;
-                /** @description A page number within the paginated result set. */
-                page?: number;
-                /** @description Number of results to return per page. */
-                page_size?: number;
-                /** @description A search term. */
-                search?: string;
-                status?: "draft" | "published";
-                /** @description Fan slug'i */
-                subject?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedBookAdminList"];
-                };
-            };
-        };
-    };
-    admin_books_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["BookAdminRequest"];
-                "application/x-www-form-urlencoded": components["schemas"]["BookAdminRequest"];
-                "multipart/form-data": components["schemas"]["BookAdminRequest"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BookAdmin"];
-                };
-            };
-        };
-    };
-    admin_books_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A UUID string identifying this book. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BookAdmin"];
-                };
-            };
-        };
-    };
-    admin_books_delete: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A UUID string identifying this book. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    admin_books_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A UUID string identifying this book. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["PatchedBookAdminRequest"];
-                "application/x-www-form-urlencoded": components["schemas"]["PatchedBookAdminRequest"];
-                "multipart/form-data": components["schemas"]["PatchedBookAdminRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BookAdmin"];
-                };
-            };
-        };
-    };
-    admin_books_reorder: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A UUID string identifying this book. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["ReorderRequest"];
-                "application/x-www-form-urlencoded": components["schemas"]["ReorderRequest"];
-                "multipart/form-data": components["schemas"]["ReorderRequest"];
-            };
-        };
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    admin_chapters_list: {
-        parameters: {
-            query?: {
-                /** @description Kitob id'si */
-                book?: string;
-                /** @description Which field to use when ordering the results. */
-                ordering?: string;
-                /** @description A page number within the paginated result set. */
-                page?: number;
-                /** @description Number of results to return per page. */
-                page_size?: number;
-                /** @description A search term. */
-                search?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedChapterAdminList"];
-                };
-            };
-        };
-    };
-    admin_chapters_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ChapterAdminRequest"];
-                "application/x-www-form-urlencoded": components["schemas"]["ChapterAdminRequest"];
-                "multipart/form-data": components["schemas"]["ChapterAdminRequest"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ChapterAdmin"];
-                };
-            };
-        };
-    };
-    admin_chapters_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A UUID string identifying this chapter. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ChapterAdmin"];
-                };
-            };
-        };
-    };
-    admin_chapters_delete: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A UUID string identifying this chapter. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    admin_chapters_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A UUID string identifying this chapter. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["PatchedChapterAdminRequest"];
-                "application/x-www-form-urlencoded": components["schemas"]["PatchedChapterAdminRequest"];
-                "multipart/form-data": components["schemas"]["PatchedChapterAdminRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ChapterAdmin"];
-                };
-            };
-        };
-    };
-    admin_topics_list: {
-        parameters: {
-            query?: {
-                /** @description Kitob id'si */
-                book?: string;
-                /** @description Bob id'si */
-                chapter?: string;
-                /** @description Which field to use when ordering the results. */
-                ordering?: string;
-                /** @description A page number within the paginated result set. */
-                page?: number;
-                /** @description Number of results to return per page. */
-                page_size?: number;
-                /** @description A search term. */
-                search?: string;
-                status?: "draft" | "published" | "reviewed";
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedTopicListList"];
-                };
-            };
-        };
-    };
-    admin_topics_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["TopicAdminRequest"];
-                "application/x-www-form-urlencoded": components["schemas"]["TopicAdminRequest"];
-                "multipart/form-data": components["schemas"]["TopicAdminRequest"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TopicAdmin"];
-                };
-            };
-        };
-    };
-    admin_topics_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A UUID string identifying this topic. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TopicAdmin"];
-                };
-            };
-        };
-    };
-    admin_topics_delete: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A UUID string identifying this topic. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    admin_topics_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A UUID string identifying this topic. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["PatchedTopicAdminRequest"];
-                "application/x-www-form-urlencoded": components["schemas"]["PatchedTopicAdminRequest"];
-                "multipart/form-data": components["schemas"]["PatchedTopicAdminRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TopicAdmin"];
-                };
-            };
-        };
-    };
-    admin_topics_transition: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A UUID string identifying this topic. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["TransitionRequest"];
-                "application/x-www-form-urlencoded": components["schemas"]["TransitionRequest"];
-                "multipart/form-data": components["schemas"]["TransitionRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TopicAdmin"];
-                };
-            };
-        };
-    };
     admin_pdf_books_list: {
         parameters: {
             query?: {
@@ -3896,154 +2448,6 @@ export interface operations {
             };
         };
     };
-    grades_list: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Grade"][];
-                };
-            };
-        };
-    };
-    subjects_list: {
-        parameters: {
-            query?: {
-                /** @description Sinf (1–11) */
-                grade?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Subject"][];
-                };
-            };
-        };
-    };
-    books_list: {
-        parameters: {
-            query?: {
-                /** @description Sinf (1–11) */
-                grade?: number;
-                /** @description A page number within the paginated result set. */
-                page?: number;
-                /** @description Number of results to return per page. */
-                page_size?: number;
-                /** @description Kitob nomi/muallifi bo'yicha */
-                q?: string;
-                /** @description Fan slug'i */
-                subject?: string;
-                /** @description Mavzulari bor/yo'q kitoblar */
-                topics_ready?: boolean;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedBookList"];
-                };
-            };
-        };
-    };
-    books_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                slug: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BookDetail"];
-                };
-            };
-        };
-    };
-    topics_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                book: string;
-                topic: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TopicDetail"];
-                };
-            };
-        };
-    };
-    search_topics: {
-        parameters: {
-            query: {
-                /** @description Kitob slug'i */
-                book?: string;
-                /** @description Sinf (1–11) */
-                grade?: number;
-                /** @description Eng ko'pi 50 ta */
-                limit?: number;
-                /** @description Til (yoki Accept-Language); hozir faqat qidiruv snippetini tanlaydi. */
-                locale?: "en" | "ru" | "uz";
-                /** @description Qidiruv so'rovi */
-                q: string;
-                /** @description Fan slug'i */
-                subject?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SearchResponse"];
-                };
-            };
-        };
-    };
     pdf_books_list: {
         parameters: {
             query?: {
@@ -4134,371 +2538,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PdfFileUrl"];
-                };
-            };
-        };
-    };
-    me_progress_list: {
-        parameters: {
-            query?: {
-                /** @description Kitob slug'i */
-                book?: string;
-                exercise_status?: string;
-                /** @description Faqat xatosi borlar */
-                needs_review?: boolean;
-                read_status?: string;
-                /** @description Mavzu kaliti */
-                topic?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TopicProgress"][];
-                };
-            };
-        };
-    };
-    me_progress_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                topic_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TopicProgress"];
-                };
-            };
-        };
-    };
-    me_progress_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                topic_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["ProgressWriteRequest"];
-                "application/x-www-form-urlencoded": components["schemas"]["ProgressWriteRequest"];
-                "multipart/form-data": components["schemas"]["ProgressWriteRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TopicProgress"];
-                };
-            };
-        };
-    };
-    me_events_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["EventRequest"];
-                "application/x-www-form-urlencoded": components["schemas"]["EventRequest"];
-                "multipart/form-data": components["schemas"]["EventRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TopicProgress"];
-                };
-            };
-        };
-    };
-    me_bookmarks_list: {
-        parameters: {
-            query?: {
-                kind?: "book" | "topic";
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Bookmark"][];
-                };
-            };
-        };
-    };
-    me_bookmarks_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["BookmarkWriteRequest"];
-                "application/x-www-form-urlencoded": components["schemas"]["BookmarkWriteRequest"];
-                "multipart/form-data": components["schemas"]["BookmarkWriteRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Bookmark"];
-                };
-            };
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Bookmark"];
-                };
-            };
-        };
-    };
-    me_bookmarks_delete: {
-        parameters: {
-            query: {
-                book_id?: string;
-                kind: "book" | "topic";
-                topic_id?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    me_recent_list: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RecentView"][];
-                };
-            };
-        };
-    };
-    me_goals_list: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["StudyGoal"][];
-                };
-            };
-        };
-    };
-    me_goals_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["StudyGoalWriteRequest"];
-                "application/x-www-form-urlencoded": components["schemas"]["StudyGoalWriteRequest"];
-                "multipart/form-data": components["schemas"]["StudyGoalWriteRequest"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["StudyGoal"];
-                };
-            };
-        };
-    };
-    me_goals_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                goal_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["StudyGoal"];
-                };
-            };
-        };
-    };
-    me_goals_delete: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                goal_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    me_goals_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                goal_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["PatchedStudyGoalPatchRequest"];
-                "application/x-www-form-urlencoded": components["schemas"]["PatchedStudyGoalPatchRequest"];
-                "multipart/form-data": components["schemas"]["PatchedStudyGoalPatchRequest"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["StudyGoal"];
-                };
-            };
-        };
-    };
-    me_dashboard: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Dashboard"];
-                };
-            };
-        };
-    };
-    me_results: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Results"];
-                };
-            };
-        };
-    };
-    me_teacher_dashboard: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TeacherDashboard"];
                 };
             };
         };
