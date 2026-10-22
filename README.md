@@ -1,6 +1,6 @@
 # Maktab365
 
-1–11-sinf darsliklari mavzular bo'yicha, bepul, o'quvchi va o'qituvchi uchun platforma.
+1–11-sinf darsliklari (PDF) onlayn, bepul, o'quvchi va o'qituvchi uchun platforma.
 
 ## Struktura
 
@@ -37,32 +37,36 @@ Yoki ildizdan: `make dev`. Boshqa buyruqlar: `make test`, `make lint`, `make sch
 - E2E: `make e2e` (yoki `cd frontend && npx playwright test`; birinchi marta `npx playwright install chromium`).
 - Ma'lum cheklovlar: parol almashtirilgach boshqa qurilmalardagi access token o'z muddatigacha (≤15 daq) ishlaydi; refresh single-flight bitta jarayon ichida — bir nechta server instansiyasida bir vaqtdagi refresh'da sessiya kamdan-kam yo'qolishi mumkin. Mijoz IP (throttle/audit): backend `X-Forwarded-For` ga faqat Next serveridan umumiy sir bilan kelganda ishonadi (`FORWARDED_IP_SECRET` = frontend `BACKEND_FORWARD_SECRET`); prod'da ikkalasiga kuchli qiymat bering, proxy ortida bo'lsa `TRUSTED_PROXY_HOPS` ni sozlang.
 
-**M6 (kontent modellari + import):** backend `apps/content` — `Subject → Book → Chapter → Topic` (+ `TopicRevision`, oxirgi 50 ta), mavzu bloklari pydantic sxemasi (`apps/content/schemas.py`) bilan tekshiriladi va frontend yup sxemasi bilan 1:1 mos. Ikki tomon ham ildizdagi [`contracts/fixtures/`](contracts/fixtures) namunalari (`topic-valid.json`, `topic-invalid-*.json`, kutilgan xato yo'llari — `expected.json`) bilan test qilinadi: yangi qoida qo'shilsa, avval fixture, keyin ikkala sxema. Frontend kontentini bazaga yuklash:
-
-```bash
-cd backend && uv run python manage.py import_content ../frontend/src/content [--dry-run]
-# yoki frontend/ dan: npm run content:import
-```
-
-Import idempotent (slug bo'yicha upsert, hammasi bitta tranzaksiyada), bazadagi status faylnikidan yuqori bo'lsa pasaymaydi. Fayllar (muqova, PDF) dev'da `backend/media/`, prod'da S3-mos saqlash (`AWS_STORAGE_BUCKET_NAME`, qarang `backend/.env.example`). Frontend hali mock kontentda — ko'rinadigan o'zgarish yo'q.
-
-**M7 (ochiq kontent API + qidiruv + frontend):** backend (loginsiz, faqat published): `GET /api/v1/grades/`, `subjects/?grade=`, `books/?grade=&subject=&q=&topics_ready=` (sahifalangan), `books/{slug}/` (boblar + mavzular, bloklarsiz), `books/{book}/topics/{topic}/` (bloklar, oldingi/keyingi, breadcrumb), `search/?q=&grade=&subject=&book=` (PostgreSQL full-text, kirill so'rov lotinga o'giriladi, snippet). Javoblar Redis'da (kontent versiyasiga bog'liq kalit; kontent o'zgarsa tozalanadi), `ETag`/`If-None-Match`, `Cache-Control: public, max-age=60`. Staff (editor/admin) draft/reviewed mavzularni ham ko'radi (keshlanmaydi); ochiq API'da `SHOW_DRAFTS_PUBLICLY=true` bo'lsa ular `unverified: true` bilan chiqadi (frontend "Tekshiruvdan o'tmagan" belgisi). Default: dev'da (`settings.dev`, docker-compose, e2e) `true`, boshqa muhitda va prod'da `false`. **Prod'da draft kontentni ochiq ko'rsatish — ongli qaror, faqat `SHOW_DRAFTS_PUBLICLY=true` env bilan yoqiladi.**
-
-- Frontend: `NEXT_PUBLIC_API_MODE=http` da katalog, fan, kitob, mavzu, bosh sahifa va qidiruv backend'dan (`HttpApi`); progress/xatcho'p/maqsad (M8) ham backend'da; fikr hali mock'da. Server tomonda `"use cache"` (ISR: 5 daqiqa, teg `content`); `npm run build` backend'siz ham o'tadi: `http` rejimida `generateStaticParams` slug'larni `frontend/src/content` fayllaridan oladi (`import_content` bilan bir manba), backend'ga murojaat qilmaydi; backend build vaqtida o'chiq bo'lsa sahifalar "teshik" bo'lib qoladi va birinchi so'rovda on-demand ISR bilan chiqadi (fayllarda yo'q yangi mavzular ham shunday). Backend xatosi — qayta urinish tugmali xato holati.
-- Kontentni yuklash: `npm run content:import` (yoki `cd backend && uv run python manage.py import_content ../frontend/src/content`); e2e `global-setup.ts` compose backend'da `import_content /content` ni o'zi bajaradi (`E2E_SKIP_IMPORT=1` — o'tkazib yuborish, `E2E_API_URL`, `E2E_PORT`).
-- Umumiy shartnoma vektorlari: `contracts/fixtures/translit.json` (kirill→lotin; backend `apps/core/translit.py`, frontend `lib/i18n/translit.ts`).
-
 **Docker portlari:** host'da 5432/6379 band bo'lsa (masalan, lokal Postgres), ildizdagi `.env` ga `POSTGRES_PORT=55432` (yoki `REDIS_PORT`) yozing va `backend/.env` dagi `DATABASE_URL` portini mos qiling. Konteynerlar ichida portlar o'zgarmaydi.
 
 **M9 (yordam va aloqa):** backend `apps/support` — `POST /api/v1/support/` (mehmon ham yuboradi; IP bo'yicha 5/soat, honeypot, uzunlik limiti, oddiy spam filtri, yangi xabar staff'ga Celery orqali `SUPPORT_NOTIFY_EMAILS` ga yuboriladi) va `GET /api/v1/me/support/` (o'z murojaatlari va holati). Admin'da `SupportMessage` holati (`new/in_progress/resolved/spam`) va `staff_note` boshqariladi. Frontend: marketing `/yordam` ("Yordam va aloqa" — FAQ + forma), panel `/kabinet/yordam` va `/ustoz/yordam` (forma + "Mening xabarlarim"), mavzu sahifasida "Xato topdingizmi?" dialogi (mavzu va sahifa manzili avtomatik qo'shiladi). Murojaat metodlari (`sendSupport`, `getMySupport`) `NEXT_PUBLIC_BACKEND_AUTH=true` da mock rejimida ham haqiqiy backend'ga boradi. E2E: `frontend/e2e/support.spec.ts`.
 
-**M8 (o'qish jarayoni):** backend `apps/learning` (hammasi login talab qiladi, `/api/v1/me/`): `progress/` (ro'yxat + filtr), `progress/{topic_id}/` (`GET`; `PUT` — idempotent va monoton: holat pasaymaydi, yechilgan mashqlar/urinishlar faqat o'sadi, `last_block_id`/`mistakes` faqat yangiroq mijoz vaqtidan `updated_at`), `events/` (`topic_opened|topic_read|exercise_answered`), `bookmarks/` (mavzu va kitob; `POST` takror yuborilsa 200, `DELETE ?kind=&topic_id=|book_id=` idempotent), `recent/` (oxirgi 20 ta), `goals/` (CRUD, 200 tagacha), `dashboard/` (davom ettirish, sinf fanlari bo'yicha o'qilgan/o'tilgan mavzular, takrorlash kerak, haftalik natija, saqlanganlar soni), `results/` (mavzu kesimida: o'zlashtirilgan / takrorlash kerak / jarayonda; "o'qidim" va "mashqdan o'tdim" alohida), `teacher/dashboard/` (faqat teacher/editor/admin), `merge-guest-data/` (idempotent, har ro'yxat 500 tagacha). `topic_id` — frontend mavzu id'si (`{kitob}-{mavzu}`, masalan `algebra-9-viyet-teoremasi`). "Takrorlash kerak" mantig'i `services/review.py`. Akkauntni o'chirish o'qish ma'lumotlarini ham o'chiradi, `GET /me/export/` ularni `learning` bo'limida beradi. Mehmon ma'lumotini qo'shish qoidalari ikki tomonda (backend va `frontend/src/lib/merge-guest-data.ts`) umumiy fixture bilan tekshiriladi: `contracts/fixtures/merge-*.json`.
+**M11 (PDF darsliklar):** admin `/admin/kitoblar` — sinf → fan → nom va PDF (progress bilan yuklash, muqova 1-sahifadan adminning brauzerida pdf.js bilan), tahrirlash, faylni almashtirish, nashr/yashirish (yashirish va o'chirish faqat admin), audit. Ochiq: `/darsliklar` (sinf → fan → kitoblar) va `/darsliklar/<id>?page=N` (sahifa-sahifa o'qish: ◀ ▶, "12 / 240" maydoni, ←/→, mobilda swipe). Backend: `PdfBook` (`apps/content`), `PdfReadProgress` (`apps/learning`); admin `/api/v1/admin/pdf-books/…`, ochiq `/api/v1/pdf-books/…`, `me/pdf-progress/`; mehmon pozitsiyasi `merge-guest-data/` (`pdf_progress`) orqali birlashadi (qoida: `contracts/fixtures/merge-pdf-progress.json`).
 
-- Frontend: kirgan foydalanuvchi uchun progress/xatcho'p/maqsad/oxirgi ko'rilganlar haqiqiy API'dan (`NEXT_PUBLIC_API_MODE=http`); yozuvlar optimistic keshga tushadi va oflayn navbat (`lib/progress/queue.ts`) orqali yuboriladi (oflayn/sekin internetda saqlanadi va qayta uriniladi; server rad etsa kesh serverdagi holatga qaytadi). Mehmon rejimi o'zgarmagan (Zustand persist). Birinchi kirishdan keyin `GuestMerger` (`lib/progress/guest-merge.ts`) mehmon ma'lumotini `merge-guest-data/` ga yuboradi: muvaffaqiyatda `guest.store` tozalanadi, xatoda saqlanib eksponensial kechikish bilan, internet qaytganda va keyingi kirishda qayta uriniladi. `/kabinet` (bosh, natijalar, fanlarim) va `/ustoz` sahifalari `dashboard/`, `results/`, `teacher/dashboard/` dan; "Davom ettirish" `last_block_id` ga olib boradi. E2E: `frontend/e2e/learning.spec.ts` (mehmon o'qiydi + xatcho'p → ro'yxatdan o'tadi → ma'lumot akkauntda → boshqa brauzerda "Davom ettirish").
-
-**M10 (admin: kitoblar, boblar/mavzular daraxti, nashr oqimi):** backend `/api/v1/admin/` (faqat `editor` va `admin`): `subjects|books|chapters|topics` CRUD (ro'yxatlar filtr/qidiruv/tartiblash bilan, draft ham ko'rinadi), `POST books/{id}/reorder/` (boblar va mavzular tartibi bir so'rovda, mavzuni boshqa bobga ko'chirish ham), `POST topics/{id}/transition/ {to}` (draft→reviewed→published: editor/admin; published→draft: faqat admin), `POST uploads/` (muqova/rasm ≤5 MB, PDF ≤50 MB; MIME imzo bo'yicha tekshiriladi), `GET dashboard/`, `GET users/` (faqat admin). Har yozuv `AuditLog` ga tushadi (kim, nima, qachon, qisqa oldingi/keyingi). O'chirish — faqat admin. Frontend `/admin/**`: alohida qobiq (sidebar + topbar), faqat editor/admin (proxy sessiya bo'yicha 404 qiladi, `StaffGate` backend `/me/` bo'yicha qayta tekshiradi; Foydalanuvchilar bo'limi faqat admin'ga). Admin matnlari uz va en tillarida (ru va uz-Cyrl da hozircha en/uz'dan olinadi). Editor rolini faqat admin beradi: lokal sinov uchun `docker compose exec backend python manage.py shell -c "from apps.accounts.models import User; User.objects.filter(email='...').update(role='editor')"` va qayta kiring (rol sessiyaga kirishda yoziladi). Admin yozuvi BFF orqali o'tganda Next'dagi `content` keshi ham eskiradi (`revalidateTag`), shuning uchun nashr qilingan mavzu ochiq sahifada darrov ko'rinadi.
-
-**M11 (PDF darsliklar):** admin `/admin/pdf-kitoblar` — sinf → fan → nom va PDF (progress bilan yuklash, muqova 1-sahifadan adminning brauzerida pdf.js bilan), tahrirlash, faylni almashtirish, nashr/yashirish (yashirish va o'chirish faqat admin), audit. Ochiq: `/pdf-kitoblar` (sinf → fan → kitoblar) va `/pdf-kitoblar/<id>?page=N` (sahifa-sahifa o'qish: ◀ ▶, "12 / 240" maydoni, ←/→, mobilda swipe). Backend: `PdfBook` (`apps/content`), `PdfReadProgress` (`apps/learning`); admin `/api/v1/admin/pdf-books/…`, ochiq `/api/v1/pdf-books/…`, `me/pdf-progress/`; mehmon pozitsiyasi `merge-guest-data/` (`pdf_progress`) orqali birlashadi (qoida: `contracts/fixtures/merge-pdf-progress.json`).
 - **Saqlash:** prod'da S3-mos (Cloudflare R2): brauzer faylni multipart bilan **to'g'ridan-to'g'ri** R2'ga yuklaydi va imzolangan URL (`PDF_SIGNED_URL_SECONDS`, default 15 daq) bilan Range orqali o'qiydi — baytlar Vercel BFF'dan o'tmaydi (4.5 MB cheklov). Dev'da (`AWS_STORAGE_BUCKET_NAME` bo'sh) fayl backend orqali (`media/`, Range qo'llab-quvvatlanadi, BFF orqali).
 - **Admin:** `python manage.py create_admin` (`ADMIN_EMAIL`/`ADMIN_PASSWORD` env'dan; bo'sh bo'lsa xato; idempotent). Qiymatlar kodda/Git'da yo'q.
 - **Env/R2 CORS:** `backend/.env.example` (PDF_* kalitlari) va `backend/README.md`.
+
+**M12 (faqat PDF darsliklar):** mavzu tizimi (kitob/bob/mavzu, mashqlar, progress, natijalar, maqsadlar,
+`import_content`) olib tashlandi; platformada admin yuklagan PDF darsliklar (`PdfBook`) qoladi.
+
+- **Ochiq:** `/darsliklar` — sinf → fan → kitoblar (muqova, nom bo'yicha qidiruv, faqat nashr qilinganlar);
+  o'qish `/darsliklar/{id}?page=N`. Bosh sahifa va Ctrl+K qidiruvi shu katalogdan foydalanadi.
+  API: `GET /api/v1/pdf-books/`, `pdf-books/subjects/`, `pdf-books/{id}/`, `file-url/`.
+- **Kabinet (o'quvchi) va ustoz paneli:** bosh sahifada "Davom ettirish" (oxirgi ochilgan kitob va bet) va
+  oxirgi ochilganlar (`GET /me/library/`), "Saqlanganlar" (`GET|PUT|DELETE /me/pdf-bookmarks/{id}/`),
+  oxirgi sahifa (`/me/pdf-progress/`). Mehmonning sahifalari va saqlangan kitoblari brauzerda turadi va
+  kirgach `POST /me/merge-guest-data/` bilan akkauntga qo'shiladi (eski `maktab365-guest*` kalitlari bir marta tozalanadi).
+- **Admin:** `/admin/kitoblar` (PDF kitoblar), `/admin/fanlar` (fanlar: qo'shish, nom, o'chirish — PDF kitobi bor fan
+  o'chmaydi), `/admin/foydalanuvchilar`. Fanlar: `python manage.py seed_subjects` (19 ta asosiy fan; idempotent,
+  mavjudiga tegmaydi).
+- **Eski manzillar** 308 bilan yo'naltiriladi (`frontend/next.config.ts`): `/pdf-kitoblar*` → `/darsliklar*`,
+  `/fanlar*`, `/darsliklar/{slug}[/{mavzu}]`, panel ichidagi eski bo'limlar → `/darsliklar`, `/admin/pdf-kitoblar*` →
+  `/admin/kitoblar*`.
+- **Migratsiyalar qaytarilmaydi:** `content 0004` va `learning 0004` mavzu tizimi jadvallarini (Book, Chapter, Topic,
+  TopicRevision, TopicProgress, eski Bookmark, StudyGoal, RecentView) o'chiradi. Prod'da `migrate` dan oldin Postgres
+  zaxirasini oling.
+- E2E lokal backend bilan: `E2E_MANAGE_CWD=<backend papkasi> E2E_API_URL=http://localhost:8001 npx playwright test`;
+  backend `config.settings.dev`, `CELERY_TASK_ALWAYS_EAGER=true`, `FORWARDED_IP_SECRET=dev-forward-secret` va
+  yuqoriroq `AUTH_THROTTLE_RATE` / `SUPPORT_THROTTLE_RATE` bilan (alohida baza, masalan `maktab365_e2e`). Global
+  setup `seed_subjects` ni o'zi bajaradi (`E2E_SKIP_SEED=1` — o'tkazib yuborish).

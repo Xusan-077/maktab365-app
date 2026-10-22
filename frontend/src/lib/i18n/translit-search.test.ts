@@ -1,4 +1,4 @@
-/** Backend (`apps/content/tests/test_search.py`) bilan umumiy vektorlar: `contracts/fixtures/translit.json`. */
+/** Kirill → lotin vektorlari: `contracts/fixtures/translit.json`. */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";

@@ -4,7 +4,6 @@ import { randomPassword } from "./credentials";
 /** Har ishga tushirishda yangi akkaunt — backend bazasi tozalanmasa ham to'qnashuv yo'q. */
 const email = `e2e-support-${Date.now()}@example.com`;
 const password = randomPassword();
-const TOPIC_URL = "/uz/darsliklar/algebra-9/algebra-9-viyet-teoremasi";
 
 test.describe("yordam va aloqa", () => {
   test("mehmon: validatsiya, keyin xabar yuborish", async ({ page }) => {
@@ -33,7 +32,7 @@ test.describe("yordam va aloqa", () => {
     await expect(page.getByTestId("support-form")).toBeVisible();
   });
 
-  test("kirgan foydalanuvchi: mavzudan xato yuboradi va panelda holatini ko'radi", async ({
+  test("kirgan foydalanuvchi: darslikdagi xatoni yuboradi va panelda holatini ko'radi", async ({
     page,
   }) => {
     await page.goto("/uz/royxatdan-otish");
@@ -50,32 +49,25 @@ test.describe("yordam va aloqa", () => {
     await page.getByRole("button", { name: "Davom etish" }).click();
     await expect(page).toHaveURL(/\/uz\/kabinet$/);
 
-    // Mavzudagi "Xato topdingizmi?" — dialog mavzu va sahifa manzili bilan yuboradi.
-    await page.goto(TOPIC_URL);
-    await page.getByRole("button", { name: "Xato topdingizmi?" }).click();
-    const dialog = page.getByRole("dialog", { name: "Xato haqida xabar" });
+    await page.goto("/uz/kabinet/yordam");
     // Kirgan foydalanuvchidan email so'ralmaydi.
-    await expect(dialog.getByLabel("Email")).toHaveCount(0);
-    await dialog
+    const form = page.getByTestId("support-form");
+    await expect(form.getByLabel("Email")).toHaveCount(0);
+    await form.getByText("Darslikdagi xato", { exact: true }).click();
+    await form
       .getByLabel("Xabaringiz")
       .fill("Formulada ikkinchi misol natijasi noto'g'ri chiqqan.");
-    await dialog.getByRole("button", { name: "Yuborish" }).click();
-    await expect(dialog.getByTestId("support-sent")).toBeVisible();
-    await dialog.getByTestId("support-sent").getByRole("button", { name: "Tayyor" }).click();
-    await expect(dialog).toBeHidden();
-
-    await page.goto("/uz/kabinet/yordam");
+    await form.getByRole("button", { name: "Yuborish" }).click();
+    await expect(page.getByTestId("support-sent")).toBeVisible();
     const mine = page.getByTestId("my-support");
     await expect(mine).toContainText("Darslikdagi xato");
     await expect(mine).toContainText("Formulada ikkinchi misol natijasi noto'g'ri chiqqan.");
     await expect(mine).toContainText("Yangi");
 
-    // Panel formasidan ham yuboriladi va ro'yxat yangilanadi.
-    const form = page.getByTestId("support-form");
+    // Ikkinchi xabar ham yuboriladi va ro'yxat yangilanadi.
+    await page.getByRole("button", { name: "Yana xabar yuborish" }).click();
     await form.getByText("Savol", { exact: true }).click();
-    await form
-      .getByLabel("Xabaringiz")
-      .fill("Natijalar bo'limida o'tgan haftani ko'rsa bo'ladimi?");
+    await form.getByLabel("Xabaringiz").fill("Darslikni qaysi formatda yuklab olsa bo'ladi?");
     await form.getByRole("button", { name: "Yuborish" }).click();
     await expect(page.getByTestId("support-sent")).toBeVisible();
     await expect(page.getByTestId("my-support").getByRole("listitem")).toHaveCount(2);

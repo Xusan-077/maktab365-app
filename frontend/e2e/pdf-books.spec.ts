@@ -59,6 +59,13 @@ async function savedPage(page: Page): Promise<number | null> {
   return response.ok() ? ((await response.json()) as { last_page: number }).last_page : null;
 }
 
+/** Serverda saqlangan kitoblar (BFF orqali, sessiya cookie bilan). */
+async function savedBookIds(page: Page): Promise<string[]> {
+  const response = await page.request.get("/api/backend/api/v1/me/pdf-bookmarks/");
+  if (!response.ok()) return [];
+  return ((await response.json()) as { book: { id: string } }[]).map((row) => row.book.id);
+}
+
 test.describe.serial("PDF darsliklar", () => {
   test("admin: PDF yuklaydi, muqova yaratiladi va kitobni nashr qiladi", async ({
     page,
@@ -72,12 +79,10 @@ test.describe.serial("PDF darsliklar", () => {
     await signIn(page, adminEmail, adminPassword);
 
     // --- Sinf → fan → nom va PDF (ketma-ket qadamlar).
-    await page.goto("/uz/admin/pdf-kitoblar");
-    await expect(page.getByRole("navigation", { name: "Admin menyusi" })).toContainText(
-      "Kitoblar (PDF)",
-    );
+    await page.goto("/uz/admin/kitoblar");
+    await expect(page.getByRole("navigation", { name: "Admin menyusi" })).toContainText("Kitoblar");
     await page.getByRole("link", { name: "PDF kitob qo'shish" }).first().click();
-    await expect(page).toHaveURL(/\/uz\/admin\/pdf-kitoblar\/yangi$/);
+    await expect(page).toHaveURL(/\/uz\/admin\/kitoblar\/yangi$/);
 
     const next = page.getByRole("button", { name: "Davom etish" });
     await expect(next).toBeDisabled(); // sinf tanlanmaguncha
@@ -96,7 +101,7 @@ test.describe.serial("PDF darsliklar", () => {
     await page.getByRole("button", { name: "Yuklash va saqlash" }).click();
 
     // --- Yuklangach kitob sahifasiga o'tadi: betlar soni aniqlangan, muqova 1-sahifadan.
-    await expect(page).toHaveURL(/\/uz\/admin\/pdf-kitoblar\/[0-9a-f-]{36}$/, { timeout: 60_000 });
+    await expect(page).toHaveURL(/\/uz\/admin\/kitoblar\/[0-9a-f-]{36}$/, { timeout: 60_000 });
     bookId = new URL(page.url()).pathname.split("/").pop()!;
     await expect(page.getByRole("heading", { name: TITLE, level: 1 })).toBeVisible();
     await expect(page.getByTestId("pdf-details")).toContainText(String(PAGES));
@@ -110,7 +115,7 @@ test.describe.serial("PDF darsliklar", () => {
     // --- Nashr: yashirin → ochiq.
     await page.getByRole("button", { name: "Nashr qilish" }).click();
     await expect(page.getByRole("button", { name: "Yashirish" })).toBeVisible();
-    await page.goto("/uz/admin/pdf-kitoblar");
+    await page.goto("/uz/admin/kitoblar");
     await expect(page.getByTestId("pdf-books-table")).toContainText(TITLE);
   });
 
@@ -119,7 +124,7 @@ test.describe.serial("PDF darsliklar", () => {
   }) => {
     await register(page, studentEmail);
 
-    await page.goto("/uz/pdf-kitoblar");
+    await page.goto("/uz/darsliklar");
     await page.getByTestId("pdf-grade-9").click();
     await page.getByTestId("pdf-subject-algebra").click();
     const card = page.getByTestId("pdf-book-card").filter({ hasText: TITLE });
@@ -127,7 +132,7 @@ test.describe.serial("PDF darsliklar", () => {
     await card.click();
 
     // --- Ochilganda 1-sahifa, URL'da ?page=1, «1 / 8».
-    await expect(page).toHaveURL(new RegExp(`/uz/pdf-kitoblar/${bookId}\\?page=1$`));
+    await expect(page).toHaveURL(new RegExp(`/uz/darsliklar/${bookId}\\?page=1$`));
     await expect(page.getByTestId("pdf-canvas")).toBeVisible();
     await expect(page.getByTestId("pdf-page-total")).toHaveText(`/ ${PAGES}`);
 
@@ -158,37 +163,118 @@ test.describe.serial("PDF darsliklar", () => {
     await expect.poll(() => savedPage(page), { timeout: 15_000 }).toBe(5);
 
     // --- Qayta ochilganda (sahifasiz URL) 5-sahifadan davom etadi; katalogda belgi bor.
-    await page.goto(`/uz/pdf-kitoblar/${bookId}`);
+    await page.goto(`/uz/darsliklar/${bookId}`);
     await expect(page).toHaveURL(/\?page=5$/);
     await expect(page.getByTestId("pdf-page-input")).toHaveValue("5");
-    await page.goto("/uz/pdf-kitoblar?grade=9");
+    await page.goto("/uz/darsliklar?grade=9");
     await expect(page.getByTestId("pdf-book-card").filter({ hasText: TITLE })).toContainText(
       "5-betdan davom etish",
     );
 
     // --- URL'dagi sahifa saqlangandan ustun.
-    await page.goto(`/uz/pdf-kitoblar/${bookId}?page=2`);
+    await page.goto(`/uz/darsliklar/${bookId}?page=2`);
     await expect(page.getByTestId("pdf-page-input")).toHaveValue("2");
   });
 
   test("mehmon pozitsiyasi ro'yxatdan o'tganda akkauntga qo'shiladi", async ({ page }) => {
     // Mehmon: 4-sahifagacha o'qiydi (brauzerda saqlanadi).
-    await page.goto(`/uz/pdf-kitoblar/${bookId}?page=4`);
+    await page.goto(`/uz/darsliklar/${bookId}?page=4`);
     await expect(page.getByTestId("pdf-canvas")).toHaveAttribute("data-page", "4");
     await expect
       .poll(() => page.evaluate(() => localStorage.getItem("maktab365-guest-pdf")))
       .toContain(bookId);
+    // Mehmon kitobni saqlaydi (brauzerda turadi).
+    await page.getByTestId("pdf-bookmark").click();
+    await expect(page.getByTestId("pdf-bookmark")).toHaveAttribute("aria-pressed", "true");
 
-    // Ro'yxatdan o'tgach mavjud guest merge pozitsiyani akkauntga yozadi.
+    // Ro'yxatdan o'tgach guest merge pozitsiyani va saqlangan kitobni akkauntga yozadi.
     await register(page, guestEmail);
     await expect.poll(() => savedPage(page), { timeout: 20_000 }).toBe(4);
+    await expect.poll(() => savedBookIds(page), { timeout: 20_000 }).toContain(bookId);
     await expect
       .poll(() => page.evaluate(() => localStorage.getItem("maktab365-guest-pdf")))
       .not.toContain(bookId);
 
-    // Kitob 4-sahifadan ochiladi.
-    await page.goto(`/uz/pdf-kitoblar/${bookId}`);
+    // Kitob 4-sahifadan ochiladi, saqlangan holda.
+    await page.goto(`/uz/darsliklar/${bookId}`);
     await expect(page).toHaveURL(/\?page=4$/);
+    await expect(page.getByTestId("pdf-bookmark")).toHaveAttribute("aria-pressed", "true");
+  });
+
+  test("o'quvchi: saqlaydi, kabinetda 'Davom ettirish' va 'Saqlanganlar' ko'rinadi", async ({
+    page,
+  }) => {
+    await signIn(page, studentEmail, userPassword);
+    await page.goto(`/uz/darsliklar/${bookId}?page=3`);
+    await expect(page.getByTestId("pdf-canvas")).toHaveAttribute("data-page", "3");
+    await page.getByTestId("pdf-bookmark").click();
+    await expect.poll(() => savedBookIds(page)).toContain(bookId);
+    await expect.poll(() => savedPage(page), { timeout: 15_000 }).toBe(3);
+
+    // Kabinet: oxirgi ochilgan kitob shu betga qaytaradi.
+    await page.goto("/uz/kabinet");
+    const card = page.getByTestId("continue-card");
+    await expect(card).toContainText(TITLE);
+    await expect(card).toContainText(`3 / ${PAGES}`);
+    await card.getByRole("link", { name: "Davom ettirish" }).click();
+    await expect(page).toHaveURL(new RegExp(`/uz/darsliklar/${bookId}\\?page=3$`));
+
+    // Saqlanganlar; menyuda faqat Bosh sahifa, Darsliklar, Saqlanganlar.
+    await page.goto("/uz/kabinet/saqlanganlar");
+    await expect(page.getByTestId("saved-books")).toContainText(TITLE);
+    const menu = page
+      .locator("[data-app-sidebar]")
+      .getByRole("navigation", { name: "Panel menyusi" });
+    await expect(menu.getByRole("link")).toHaveText(["Bosh sahifa", "Darsliklar", "Saqlanganlar"]);
+
+    // Saqlashni bekor qilish.
+    await page.goto(`/uz/darsliklar/${bookId}`);
+    await page.getByTestId("pdf-bookmark").click();
+    await expect.poll(() => savedBookIds(page)).not.toContain(bookId);
+  });
+
+  test("qidiruv: katalogda nom bo'yicha va Ctrl+K orqali", async ({ page }) => {
+    await page.goto(`/uz/darsliklar?q=${encodeURIComponent(TITLE)}`);
+    await expect(page.getByTestId("pdf-book-card")).toHaveCount(1);
+    await expect(page.getByTestId("pdf-search")).toHaveValue(TITLE);
+
+    await page.goto("/uz/darsliklar?q=mavjud-bo'lmagan-kitob");
+    await expect(page.getByTestId("pdf-book-card")).toHaveCount(0);
+
+    await signIn(page, studentEmail, userPassword);
+    await page.keyboard.press("Control+k");
+    await page.getByLabel("Darslik qidirish").fill(TITLE);
+    await page
+      .getByRole("dialog")
+      .getByRole("link", { name: new RegExp(TITLE) })
+      .click();
+    await expect(page).toHaveURL(new RegExp(`/uz/darsliklar/${bookId}`));
+  });
+
+  test("viewer'dan xato yuboriladi va yordam sahifasida ko'rinadi", async ({ page }) => {
+    await signIn(page, studentEmail, userPassword);
+    await page.goto(`/uz/darsliklar/${bookId}?page=2`);
+    await page.getByRole("button", { name: "Xato topdingizmi?" }).click();
+    const dialog = page.getByRole("dialog", { name: "Xato haqida xabar" });
+    await dialog.getByLabel("Xabaringiz").fill("Ikkinchi betdagi rasm noto'g'ri joylashgan.");
+    await dialog.getByRole("button", { name: "Yuborish" }).click();
+    await expect(dialog.getByTestId("support-sent")).toBeVisible();
+
+    await page.goto("/uz/kabinet/yordam");
+    await expect(page.getByTestId("my-support")).toContainText("Ikkinchi betdagi rasm");
+  });
+
+  test("eski manzillar yangi joyga yo'naltiriladi", async ({ page }) => {
+    await page.goto(`/uz/pdf-kitoblar/${bookId}`);
+    await expect(page).toHaveURL(new RegExp(`/uz/darsliklar/${bookId}`));
+    await page.goto("/uz/fanlar/algebra");
+    await expect(page).toHaveURL(/\/uz\/darsliklar\?subject=algebra$/);
+    await page.goto("/uz/darsliklar/algebra-9/diskriminant");
+    await expect(page).toHaveURL(/\/uz\/darsliklar$/);
+    await page.goto("/uz/darsliklar/algebra-9");
+    await expect(page).toHaveURL(/\/uz\/darsliklar$/);
+    await page.goto("/uz/admin/pdf-kitoblar");
+    await expect(page).toHaveURL(/\/uz\/(admin\/kitoblar|kirish)/);
   });
 
   test("oddiy foydalanuvchi admin PDF API'siga kira olmaydi", async ({ page }) => {
@@ -208,7 +294,7 @@ test.describe.serial("PDF darsliklar", () => {
       { data: { to: "draft" } },
     );
     expect(publish.status()).toBe(403);
-    await page.goto("/uz/admin/pdf-kitoblar");
+    await page.goto("/uz/admin/kitoblar");
     await expect(page.getByRole("heading", { name: "Sahifa topilmadi" })).toBeVisible();
   });
 });

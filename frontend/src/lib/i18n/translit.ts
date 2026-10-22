@@ -297,8 +297,7 @@ const isWordChar = (ch: string | undefined) => !!ch && /^[а-яёўғқҳa-z0-9]
 
 /**
  * Kirill (o'zbek, rus) → lotin. Bosh harf registri saqlanadi; so'z boshidagi `е` → `ye`
- * (Европа → Yevropa), boshqa joyda `e`. Backend `apps/core/translit.py` bilan bir xil natija
- * beradi (umumiy vektorlar: `contracts/fixtures/translit.json`).
+ * (Европа → Yevropa), boshqa joyda `e`. `contracts/fixtures/translit.json` vektorlari bilan tekshiriladi.
  */
 export function cyrillicToLatin(input: string): string {
   const chars = [...input];
@@ -313,7 +312,7 @@ export function cyrillicToLatin(input: string): string {
     .join("");
 }
 
-/** Qidiruv uchun: kichik harf, kirill → lotin, tutuq belgilari olib tashlanadi (backend bilan bir xil). */
+/** Qidiruv uchun: kichik harf, kirill → lotin, tutuq belgilari olib tashlanadi. */
 export function normalizeSearchText(input: string): string {
   return cyrillicToLatin(input.toLowerCase()).replace(/['ʻʼ‘’`´]/g, "");
 }

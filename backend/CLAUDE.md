@@ -37,27 +37,26 @@ Bitta Django monolit: Python 3.12 · Django 5.2 · DRF · drf-spectacular · sim
 
 ## `apps/content`
 
-- Modellar: `Subject`, `Book` (slug butun katalogda unique, frontend kitob id'si: `algebra-9`), `Chapter` (slug = papka nomi), `Topic` (slug kitob ichida unique — shuning uchun `book` `chapter.book` nusxasi, `save()` moslaydi; `status` draft|reviewed|published), `TopicRevision`. Mavzu `save()` da sarlavha/bloklar o'zgargan bo'lsagina revision yaratadi (oxirgi 50 ta); muallif: `topic.revision_author` / `revision_comment`.
-- Bloklar sxemasi: `schemas.py` (pydantic) — frontend `src/lib/api/schemas.ts` + `src/lib/content/validate.ts` bilan **1:1**. Blok JSON'i frontend fayllaridagi kabi (camelCase: `answerType`, `sortKey`; widget kind'lari kebab-case: `quadratic-graph`…). `validate_blocks` / `validate_topic_file` `Issue(path, message, code)` qaytaradi (`blocks[3].hint`). Qoida o'zgarsa: avval `contracts/fixtures/` (+ `expected.json`), so'ng ikkala sxema; testlar: `tests/test_schemas.py` va frontend `contract.test.ts`.
-- `import_content <papka> [--dry-run]` (`importer.py`): `frontend/src/content` → baza, idempotent, bitta tranzaksiya; fan/kitob metama'lumoti `catalog_seed.py` da (yangi kitob qo'shilsa shu yerga ham). Status faqat ko'tariladi.
-- Fayllar: `Book.cover/pdf` — `FileField`; `STORAGES` env bilan (`AWS_STORAGE_BUCKET_NAME` bo'lsa S3-mos, aks holda `media/`).
+- Modellar: `Subject` (slug unique, `title` LocalizedText, `icon`, `order`) va `PdfBook` (qarang "PDF darsliklar"). Mavzu tizimi
+  (`Book`, `Chapter`, `Topic`, `TopicRevision`, mavzu bloklari, `import_content`, qidiruv indeksi) olib tashlangan
+  (`content 0004`, `learning 0004` — qaytarilmaydi).
+- Fanlar: `python manage.py seed_subjects` — asosiy maktab fanlari (`management/commands/seed_subjects.py`, ro'yxat shu faylda);
+  idempotent, mavjud fanga tegmaydi (admin tahriri saqlanadi). Admin `/api/v1/admin/subjects/` orqali ham boshqaradi.
+- Ochiq API (`urls.py`): faqat `pdf-books/*` (`pdf_views.py`); `AllowAny`, kesh `cache.public_cached` (Redis, `content:version`
+  `signals.py` da Subject/PdfBook o'zgarganda almashadi). `is_staff(user)` hamma statusni ko'radi (`private, no-store`).
+- `views.py` — faqat umumiy yordamchilar (`PublicView`, `_int_param`, `GRADE_PARAM`).
 
-### Ochiq kontent API (M7)
+## `apps/learning`
 
-- `urls.py`/`views.py`: `grades/`, `subjects/`, `books/`, `books/<slug>/`, `books/<book>/topics/<topic>/`, `search/` — `AllowAny`, throttle yo'q (kesh ishlaydi; faqat `search/` umumiy throttle'da). Har `get` `@public_cached` (`cache.py`): Redis'da `content:v<versiya>:<hash>`, `ETag`/304, `Cache-Control: public, max-age=CONTENT_CACHE_MAX_AGE`. Subject/Book/Chapter/Topic saqlanganda/o'chirilganda `signals.py` versiyani almashtiradi (commit'dan keyin); `.update()` bilan yozsangiz `bump_content_version()` ni o'zingiz chaqiring.
-- Ko'rinish: `is_staff(user)` (editor/admin/is_staff) hamma statusni ko'radi, javob `private, no-store`. Boshqalar — `published`; `SHOW_DRAFTS_PUBLICLY=true` bo'lsa draft/reviewed ham, `unverified: true` bilan. `topics_ready`/`topics_count` — ko'rinadigan mavzular bo'yicha.
-- Qidiruv (`search.py`): `Topic.search_vector` ('simple', A sarlavha / B mazmun / C bloklar) `Topic.save()` da `reindex_topic` bilan yangilanadi (`.update()` ishlatsangiz o'zingiz chaqiring); matn `apps.core.translit.normalize_search_text` (kirill→lotin, tutuqsiz) bilan normallashadi, so'rov atamalari prefiks (`atama:*`) va hammasi kerak. Snippet Python'da, asl matndan, mos so'zlar `⟦…⟧` ichida. Frontend umumiy vektorlar: `contracts/fixtures/translit.json`.
-- N+1 yo'q: testlar `django_assert_max_num_queries` bilan (`tests/test_api.py`).
-
-## `apps/learning` (M8)
-
-- Modellar: `TopicProgress` (unique `user+topic`; `read_status` not_started|in_progress|read va `exercise_status` not_started|in_progress|passed — alohida; `last_block_id`, `scroll_position`, `mistakes` `[{exercise_id, attempts, last_wrong_at}]`, `exercise_stats` `{solved, attempts}`, `first_opened_at/read_at/passed_at`, `client_updated_at`), `Bookmark` (`kind` book|topic, `CheckConstraint` + shartli unique), `StudyGoal`, `RecentView` (har foydalanuvchida oxirgi `RECENT_LIMIT=20`).
-- Mavzu kaliti: API'da `topic_id` = `{book.slug}-{topic.slug}` (frontend mavzu id'si; `services/topics.py`: `topic_key`, `resolve_topic` — ko'rinish qoidasi ochiq kontent API'si bilan bir xil, ko'rinmaydigan mavzu 404). Yangi so'rovda `Concat` ga `output_field=CharField()` kerak (`key_expr`).
-- `services/progress.py`: `apply_update` (PUT) — holatlar `max`, `exercise_stats` birlashma/eng katta, `last_block_id`/`scroll_position`/`mistakes` faqat `updated_at >= client_updated_at` bo'lsa almashadi (kelajak vaqti `now` ga qisqartiriladi); o'zgarish bo'lmasa saqlanmaydi (`updated_at` siljimaydi), bo'sh yozuv qator yaratmaydi. `apply_event`: `exercise_answered` mashq id'sini mavzu bloklaridan tekshiradi (`unknown_exercise` 400), xato — `mistakes` ga, birinchi urinishdagi (`attempt=1`) to'g'ri javob — `mistakes` dan o'chiradi, barcha mashq yechilsa `passed`. Voqealar idempotent emas (urinishlar o'sadi) — oflayn navbat PUT ishlatadi, `events/` faqat `topic_opened` uchun (RecentView).
-- `services/review.py` — "Takrorlash kerak" (xatosi bor mavzu; eng ko'p xato, teng bo'lsa eng yangi), o'zlashtirish guruhlari (review/mastered/in_progress), `pick_continue`, haftalik hisob (`jsonb_array_length`). `services/dashboard.py` — kabinet/ustoz yig'ma javoblari (so'rovlar soni ma'lumotga bog'liq emas, testda 14 tagacha).
-- `services/merge.py` + `progress.merge_progress`: holatlar eng yuqorisi, xatolar birlashmasi, `last_block_id` — qat'iy yangiroq yozuvniki; takror chaqirish `0` o'zgarish. Ko'rinmaydigan/yo'q mavzu `failed` ro'yxatiga tushadi (butun so'rov muvaffaqiyatsiz bo'lmaydi). Qoida o'zgarsa: avval `contracts/fixtures/merge-*.json`, so'ng backend va `frontend/src/lib/merge-guest-data.ts`.
-- Egalik: barcha queryset'lar `user=request.user` bilan; begonaning maqsadi 404. `delete_account` o'qish ma'lumotlarini o'chiradi, `export_data` `learning` beradi.
-- Testlar: `apps/learning/tests/` (`conftest.py` — `library`, `api`, `other_api`).
+- Modellar: `PdfReadProgress` (unique `user+pdf_book`, `last_page`, `client_updated_at`) va `PdfBookmark` (unique `user+pdf_book`).
+  Hammasi login talab qiladi (`/api/v1/me/`): `pdf-progress/`, `pdf-progress/{id}/` (PUT idempotent), `pdf-bookmarks/`,
+  `pdf-bookmarks/{id}/` (PUT/DELETE idempotent), `library/` (oxirgi ochilganlar + saqlanganlar soni), `merge-guest-data/`.
+- `services/pdf.py`: ko'rinish (`resolve_pdf_book` = ochiq API qoidasi), `apply_pdf_progress` (qat'iy yangiroq mijoz vaqti
+  yutadi), xatcho'p qo'shish/olib tashlash, `library`. `services/merge.py`: mehmon sahifalari va xatcho'plari (har ro'yxat 500 tagacha;
+  ko'rinmaydigan/yo'q kitob `failed` ga tushadi). Kontrakt: `contracts/fixtures/merge-pdf-progress.json` (backend va frontend).
+- Egalik: queryset'lar `user=request.user` bilan. `delete_account` o'qish ma'lumotlarini o'chiradi, `export_data` `learning.pdf_progress`
+  va `learning.pdf_bookmarks` ni beradi.
+- Testlar: `apps/learning/tests/` (`conftest.py` — `api`, `other_api`; `Catalog` — `apps/content/tests/conftest.py`).
 
 ## `apps/support`
 
@@ -66,15 +65,17 @@ Bitta Django monolit: Python 3.12 · Django 5.2 · DRF · drf-spectacular · sim
 - Yangi (spam bo'lmagan) xabarda `tasks.notify_staff` (Celery, `on_commit`) `SUPPORT_NOTIFY_EMAILS` ga yuboradi; bo'sh bo'lsa hech narsa.
 - `GET /api/v1/me/support/` — o'z murojaatlari (paginatsiyalangan, spam ko'rsatilmaydi).
 
-## Admin API (M10)
+## Admin API
 
-- `/api/v1/admin/` (`admin_urls.py`; view'lar `admin_views.py`, serializer'lar `admin_serializers.py`, mantiq `admin_services.py`): ruxsat `IsRole("editor","admin")`, o'chirish faqat `admin`. Lookup — UUID `id`; slug yaratishda beriladi va keyin o'zgarmaydi (`slug_immutable`), chunki u kitob/mavzu identifikatorlariga (`{kitob}-{mavzu}`) kiradi. `order` server tomonda: yangi bob/mavzu oxiriga qo'shiladi, o'zgartirish faqat `reorder` orqali. Mavzu `status` faqat `transition` bilan o'zgaradi.
-- `POST books/{id}/reorder/ {chapters?: [id…], topics?: {bob_id: [mavzu_id…]}}` — `reorder_book`: `chapters` kitobning barcha boblari, har `topics` ro'yxati o'sha bobning to'liq yangi tarkibi (mavzuni boshqa bobga ko'chirish uchun ikkala bobni bering). `bulk_update` signal bermaydi — `bump_content_version` o'zi chaqiriladi.
-- Nashr qoidalari `admin_services.TRANSITIONS` da (frontend `lib/admin/permissions.ts` nusxasi); xato kodlari `invalid_transition` (400), `transition_forbidden` (403). `reviewed_by/at`, `published_at` shu yerda yoziladi, draft'ga qaytganda tozalanadi.
-- `POST uploads/` (multipart `file`, `kind` = cover|image|pdf): hajm `ADMIN_UPLOAD_MAX_IMAGE_BYTES/PDF_BYTES`, tur fayl boshidagi imzo bilan (JPEG/PNG/WebP/PDF; SVG yo'q) va mijoz `Content-Type` bilan mos bo'lishi shart, nom `slug-<uuid8>.<ext>` ga tozalanadi, `default_storage` (S3-mos) ga yoziladi. Kitob `cover`/`pdf` maydoniga yuklash natijasidagi `path` beriladi (`StoredPathField`: prefiks va mavjudlik tekshiriladi).
-- Audit: `apps/accounts/audit.py` — `record(actor, action, target_type, target_id, label=, before=, after=, request=)` va `snapshot(instance, fields)`; model `AuditLog`. Boshqa app'lar ham shuni ishlatadi. `blocks` jurnalga tushmaydi (faqat `blocks_count`).
-- Xato kodlari `fields` darajasida (`details`): `slug_taken`, `slug_immutable`, `book_immutable`, `invalid_file`, `must_list_all_chapters`, `must_list_all_topics`, `unknown_or_duplicate_topic`, `unknown_chapter`. Fan o'chirish kitob bor bo'lsa `has_dependents` (409).
-- Testlar: `apps/content/tests/test_admin_api.py` (ruxsat matritsasi anon/student/teacher/editor/admin, nashr qoidalari, reorder, yuklash tekshiruvlari, dashboard).
+- `/api/v1/admin/` (`admin_urls.py`; view'lar `admin_views.py`, serializer'lar `admin_serializers.py`, mantiq `admin_services.py`): ruxsat
+  `IsRole("editor","admin")`, o'chirish faqat `admin`. Resurslar: `subjects` (CRUD; slug yaratishda beriladi va o'zgarmaydi —
+  `slug_immutable`; PDF kitobi bor fan o'chirilmaydi — `409 has_dependents`; `pdf_books_count`), `pdf-books` (qarang "PDF darsliklar"),
+  `uploads/`, `dashboard/` (`pdf_books` {total, published, draft}, `subjects_count`, yangi xabarlar, oxirgi o'zgarishlar), `users/` (faqat admin).
+- `POST uploads/` (multipart `file`, `kind` = cover|image|pdf): hajm `ADMIN_UPLOAD_MAX_IMAGE_BYTES/PDF_BYTES`, tur fayl boshidagi imzo bilan
+  (JPEG/PNG/WebP, `%PDF`); xatolar `unsupported_type` (415), `file_too_large` (413), `validation_error` (400).
+- Audit: `apps/accounts/audit.py` — `record(actor, action, target_type, target_id, label=, before=, after=, request=)` va `snapshot(instance, fields)`.
+- Xato kodlari `fields` darajasida (`details`): `slug_taken`, `slug_immutable`, `invalid_file`.
+- Testlar: `apps/content/tests/test_admin_api.py` (ruxsat matritsasi anon/student/teacher/editor/admin, fanlar, yuklash tekshiruvlari, dashboard).
 
 ## Qoidalar
 
@@ -93,7 +94,7 @@ Bitta Django monolit: Python 3.12 · Django 5.2 · DRF · drf-spectacular · sim
 - `uv run python manage.py makemigrations --check --dry-run`
 - `make schema` — `openapi.yaml` ni yozadi.
 
-## PDF darsliklar (M11)
+## PDF darsliklar
 
 - `PdfBook` (`apps/content/models.py`; `Book` dan alohida): `title`, `grade`, `subject`, `file` (kalit `pdf-books/<uuid>.pdf`, DB'da bayt yo'q), `size_bytes`, `page_count` (pypdf, S3'dan vaqtinchalik faylga oqim bilan), `cover`, `status` draft|published. Yuklash: `upload-init` → (S3: brauzer presigned multipart PUT; dev: `upload/` multipart) → `upload-complete`; `pending_file` yangi faylni `activate`gacha alohida saqlaydi (almashtirish xatosida eski fayl qoladi). Mantiq: `pdf_services.py`, saqlash/URL: `pdf_storage.py`, admin view: `pdf_admin_views.py`, ochiq: `pdf_views.py`.
 - Ko'rinish: `visible_pdf_books` — fayli bor va published; staff hammasini, `SHOW_DRAFTS_PUBLICLY` draft'ni `unverified` bilan. Nashrdan qaytarish va o'chirish faqat admin. O'qish URL'i qisqa muddatli (`PDF_SIGNED_URL_SECONDS`); dev'da imzolangan token + `file/` (Range).

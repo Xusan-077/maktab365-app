@@ -1,16 +1,16 @@
 # Maktab365 (monorepo)
 
-1–11-sinf darsliklari mavzular bo'yicha, bepul, o'quvchi va o'qituvchi uchun platforma.
+1–11-sinf darsliklari (PDF) onlayn, bepul, o'quvchi va o'qituvchi uchun platforma.
 
 ## Xarita
 
-| Papka | Vazifasi |
-| --- | --- |
-| `frontend/` | Next.js (App Router) ilovasi — Vercel'ga deploy (Root Directory = `frontend`). |
-| `backend/` | Django + DRF API (keyingi bosqichda). `backend/openapi.yaml` — API shartnomasi. |
-| `brand/` | Logo to'plami (manba fayllar). Saytda `frontend/public/` nusxalari ishlatiladi. |
-| `.github/workflows/ci.yml` | CI: path filter bilan frontend va backend job'lari. |
-| `Makefile` | Ikkala tomon uchun umumiy buyruqlar (`make dev/test/lint/schema/types/e2e`). |
+| Papka                      | Vazifasi                                                                        |
+| -------------------------- | ------------------------------------------------------------------------------- |
+| `frontend/`                | Next.js (App Router) ilovasi — Vercel'ga deploy (Root Directory = `frontend`).  |
+| `backend/`                 | Django + DRF API (keyingi bosqichda). `backend/openapi.yaml` — API shartnomasi. |
+| `brand/`                   | Logo to'plami (manba fayllar). Saytda `frontend/public/` nusxalari ishlatiladi. |
+| `.github/workflows/ci.yml` | CI: path filter bilan frontend va backend job'lari.                             |
+| `Makefile`                 | Ikkala tomon uchun umumiy buyruqlar (`make dev/test/lint/schema/types/e2e`).    |
 
 `frontend/` va `backend/` ichida ularning o'z `CLAUDE.md` fayli bor — shu papkada ishlaganda o'sha qoidalar amal qiladi (`frontend/CLAUDE.md`, `backend/CLAUDE.md` — backend'niki Django sozlanganda qo'shiladi).
 
