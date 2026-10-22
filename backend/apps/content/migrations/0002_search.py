@@ -6,14 +6,6 @@ from django.conf import settings
 from django.db import migrations, models
 
 
-def reindex_all(apps, schema_editor):
-    from apps.content.search import reindex_topic
-
-    Topic = apps.get_model("content", "Topic")
-    for topic in Topic.objects.all():
-        reindex_topic(topic)
-
-
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -40,5 +32,6 @@ class Migration(migrations.Migration):
                 fields=["search_vector"], name="topic_search_vector_gin"
             ),
         ),
-        migrations.RunPython(reindex_all, migrations.RunPython.noop),
+        # Qidiruv indeksi keyinroq olib tashlangan (0004): bo'sh bazada qayta indekslash kerak emas.
+        migrations.RunPython(migrations.RunPython.noop, migrations.RunPython.noop),
     ]

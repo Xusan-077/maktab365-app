@@ -1,6 +1,6 @@
 """
 Ochiq kontent keshi: javob tanasi Redis'da, kalit kontent versiyasiga bog'liq. Kontent
-(fan/kitob/bob/mavzu) o'zgarsa versiya almashadi va eski kalitlar o'z-o'zidan eskiradi.
+(fan/PDF kitob) o'zgarsa versiya almashadi va eski kalitlar o'z-o'zidan eskiradi.
 """
 
 import hashlib
@@ -31,7 +31,6 @@ def bump_content_version() -> None:
 
 
 def _cache_key(request, show_drafts: bool) -> str:
-    # Til (Accept-Language/?locale=) qidiruv snippetiga ta'sir qiladi.
     query = request.META.get("QUERY_STRING", "")
     raw = f"{request.path}?{query}|{request_locale(request)}|{show_drafts}"
     return f"content:v{content_version()}:{hashlib.sha1(raw.encode()).hexdigest()}"  # noqa: S324
@@ -55,7 +54,7 @@ def is_staff(user) -> bool:
 
 
 def show_drafts(request) -> bool:
-    """Draft/reviewed mavzular ko'rinadimi: staff yoki `SHOW_DRAFTS_PUBLICLY`."""
+    """Qoralama PDF kitoblar ko'rinadimi: staff yoki `SHOW_DRAFTS_PUBLICLY`."""
     return is_staff(request.user) or settings.SHOW_DRAFTS_PUBLICLY
 
 

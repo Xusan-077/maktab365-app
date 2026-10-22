@@ -338,14 +338,16 @@ def test_subjects_with_pdf_books(catalog, anon, algebra):
     assert {s["slug"] for s in everything} == {"algebra", "geometriya"}
 
 
-def test_search_includes_pdf_books_by_title(catalog, anon, algebra):
+def test_list_searches_titles_and_hides_drafts(catalog, anon, algebra):
     catalog.pdf_book(algebra, 9, title={"uz": "Matematika darsligi"})
     catalog.pdf_book(algebra, 9, "draft", title={"uz": "Matematika qoralama"})
 
-    found = anon.get("/api/v1/search/", {"q": "matematika"}).json()
+    found = anon.get(f"{PUBLIC}/", {"q": "matematika"}).json()
 
-    assert [b["title"]["uz"] for b in found["pdf_books"]] == ["Matematika darsligi"]
-    assert anon.get("/api/v1/search/", {"q": "matematika", "book": "x"}).json()["pdf_books"] == []
+    assert [b["title"]["uz"] for b in found["results"]] == ["Matematika darsligi"]
+    assert anon.get(f"{PUBLIC}/", {"q": "yo'q"}).json()["results"] == []
+    # Eski mavzu/kitob qidiruvi olib tashlangan
+    assert anon.get("/api/v1/search/", {"q": "matematika"}).status_code == 404
 
 
 # --- Fayl berish (lokal) ---

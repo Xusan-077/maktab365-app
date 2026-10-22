@@ -1,4 +1,4 @@
-"""Admin panel mantiqi: nashr oqimi, tartiblash, fayl yuklash (view'lar faqat HTTP)."""
+"""Admin panel mantiqi: xatolar, fayl yuklash (view'lar faqat HTTP)."""
 
 import re
 import uuid
@@ -6,15 +6,9 @@ from dataclasses import dataclass
 
 from django.conf import settings
 from django.core.files.storage import default_storage
-from django.db import transaction
-from django.db.models import Max
-from django.utils import timezone
 from django.utils.text import slugify
 from rest_framework import status
-from rest_framework.exceptions import APIException, ValidationError
-
-from .cache import bump_content_version
-from .models import Chapter, Topic, TopicStatus
+from rest_framework.exceptions import APIException
 
 # --- Xatolar ---
 
@@ -48,89 +42,7 @@ class HasDependents(APIException):
     default_detail = "Cannot delete: other records depend on this one."
 
 
-# --- Nashr oqimi ---
-
 EDITORS = ("editor", "admin")
-# (qayerdan, qayerga) -> ruxsat etilgan rollar
-TRANSITIONS: dict[tuple[str, str], tuple[str, ...]] = {
-    (TopicStatus.DRAFT, TopicStatus.REVIEWED): EDITORS,
-    (TopicStatus.REVIEWED, TopicStatus.PUBLISHED): EDITORS,
-    (TopicStatus.PUBLISHED, TopicStatus.DRAFT): ("admin",),
-}
-
-
-def allowed_transitions(role: str, current: str) -> list[str]:
-    return [to for (frm, to), roles in TRANSITIONS.items() if frm == current and role in roles]
-
-
-@transaction.atomic
-def transition_topic(topic: Topic, to: str, actor) -> Topic:
-    """Holatni o'zgartiradi (qoidalar `TRANSITIONS`); kesh `Topic.save()` signalida tozalanadi."""
-    topic = Topic.objects.select_for_update().get(pk=topic.pk)
-    roles = TRANSITIONS.get((topic.status, to))
-    if roles is None:
-        raise InvalidTransition()
-    if getattr(actor, "role", "") not in roles:
-        raise TransitionForbidden()
-
-    now = timezone.now()
-    topic.status = to
-    if to == TopicStatus.REVIEWED:
-        topic.reviewed_by, topic.reviewed_at = actor, now
-    elif to == TopicStatus.PUBLISHED:
-        topic.published_at = now
-    else:  # draft'ga qaytarish: tekshiruv va nashr izlari o'chadi
-        topic.reviewed_by = topic.reviewed_at = topic.published_at = None
-    topic.save()
-    return topic
-
-
-# --- Tartiblash ---
-
-
-def _fail(field: str, code: str):
-    raise ValidationError({field: [code]})
-
-
-@transaction.atomic
-def reorder_book(book, chapter_ids: list | None, topic_map: dict | None) -> None:
-    """Bob va mavzular tartibi bir so'rovda.
-
-    `chapter_ids` — kitobning barcha boblari yangi tartibda. `topic_map` — `{bob_id: [mavzu_id…]}`:
-    har bob ro'yxati o'sha bobning to'liq yangi tarkibi (mavzuni boshqa bobga ko'chirish mumkin,
-    shunda ikkala bob ham berilishi kerak). Tartib raqami 1 dan.
-    """
-    chapters = {c.pk: c for c in Chapter.objects.select_for_update().filter(book=book)}
-
-    if chapter_ids is not None:
-        if len(set(chapter_ids)) != len(chapter_ids) or set(chapter_ids) != set(chapters):
-            _fail("chapters", "must_list_all_chapters")
-        for position, pk in enumerate(chapter_ids, start=1):
-            chapters[pk].order = position
-        Chapter.objects.bulk_update(chapters.values(), ["order"])
-
-    if topic_map:
-        topics = {t.pk: t for t in Topic.objects.select_for_update().filter(book=book)}
-        if set(topic_map) - set(chapters):
-            _fail("topics", "unknown_chapter")
-        listed = [pk for ids in topic_map.values() for pk in ids]
-        if len(set(listed)) != len(listed) or set(listed) - set(topics):
-            _fail("topics", "unknown_or_duplicate_topic")
-        # Bobda qolib ro'yxatda yo'q mavzu tartib raqami to'qnashuviga olib keladi.
-        orphan = [t for t in topics.values() if t.chapter_id in topic_map and t.pk not in listed]
-        if orphan:
-            _fail("topics", "must_list_all_topics")
-        for chapter_id, ids in topic_map.items():
-            for position, pk in enumerate(ids, start=1):
-                topics[pk].chapter_id, topics[pk].order = chapter_id, position
-        Topic.objects.bulk_update([topics[pk] for pk in listed], ["chapter", "order"])
-
-    # `bulk_update` signal yubormaydi.
-    transaction.on_commit(bump_content_version)
-
-
-def next_order(queryset) -> int:
-    return (queryset.aggregate(top=Max("order"))["top"] or 0) + 1
 
 
 # --- Fayl yuklash ---

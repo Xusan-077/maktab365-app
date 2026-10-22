@@ -110,11 +110,7 @@ def delete_account(user: User, request=None) -> None:
     blacklist_all(user)
     VerificationToken.objects.filter(user=user).delete()
     Identity.objects.filter(user=user).delete()
-    # O'qish ma'lumotlari (progress, xatcho'p, reja, oxirgi ko'rilganlar) butunlay o'chadi.
-    user.topic_progress.all().delete()
-    user.bookmarks.all().delete()
-    user.study_goals.all().delete()
-    user.recent_views.all().delete()
+    # O'qish ma'lumotlari (oxirgi sahifalar, saqlangan kitoblar) butunlay o'chadi.
     user.pdf_progress.all().delete()
     user.pdf_bookmarks.all().delete()
     Profile.objects.filter(user=user).update(
@@ -180,9 +176,6 @@ def export_data(user: User, request=None) -> dict:
             for e in user.auth_events.all()
         ],
         "learning": {
-            "progress": user.topic_progress.select_related("topic__book"),
-            "bookmarks": user.bookmarks.select_related("topic__book", "book"),
-            "goals": user.study_goals.select_related("topic__book"),
             "pdf_progress": user.pdf_progress.select_related("pdf_book"),
             "pdf_bookmarks": user.pdf_bookmarks.select_related("pdf_book"),
         },

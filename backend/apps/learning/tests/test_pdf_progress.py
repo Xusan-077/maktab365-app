@@ -181,8 +181,6 @@ def test_merge_reports_unknown_books_and_clamps_pages(api, book, user):
 
 def test_merge_without_pdf_progress_still_works(api):
     assert api.post(MERGE, {}, "json").json() == {
-        "progress": 0,
-        "bookmarks": 0,
         "pdf_progress": 0,
         "pdf_bookmarks": 0,
         "failed": [],

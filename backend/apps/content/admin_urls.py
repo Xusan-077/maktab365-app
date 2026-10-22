@@ -6,9 +6,6 @@ from .pdf_admin_views import PdfBookAdminViewSet
 
 router = SimpleRouter()
 router.register("subjects", views.SubjectAdminViewSet, basename="admin-subject")
-router.register("books", views.BookAdminViewSet, basename="admin-book")
-router.register("chapters", views.ChapterAdminViewSet, basename="admin-chapter")
-router.register("topics", views.TopicAdminViewSet, basename="admin-topic")
 router.register("pdf-books", PdfBookAdminViewSet, basename="admin-pdf-book")
 
 urlpatterns = [

@@ -48,8 +48,6 @@ services:
       # Hot reload: manba kod konteynerga ulanadi, .venv esa image ichida qoladi.
       - ./backend:/app
       - /app/.venv
-      # Kontent importi: `python manage.py import_content /content` (e2e global-setup shuni chaqiradi).
-      - ./frontend/src/content:/content:ro
     depends_on:
       postgres:
         condition: service_healthy

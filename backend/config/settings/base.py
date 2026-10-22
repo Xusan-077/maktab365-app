@@ -216,12 +216,8 @@ SPECTACULAR_SETTINGS = {
         "RoleEnum": "apps.accounts.models.Role.choices",
         "OnboardingRoleEnum": "apps.accounts.serializers.ONBOARDING_ROLES",
         "LocaleEnum": "apps.accounts.models.Locale.choices",
-        "TopicStatusEnum": "apps.content.models.TopicStatus.choices",
         "SupportKindEnum": "apps.support.models.Kind.choices",
         "SupportStatusEnum": "apps.support.models.Status.choices",
-        "BookmarkKindEnum": "apps.learning.models.BookmarkKind.choices",
-        "ReadStatusEnum": "apps.learning.models.ReadStatus.choices",
-        "ExerciseStatusEnum": "apps.learning.models.ExerciseStatus.choices",
     },
 }
 
