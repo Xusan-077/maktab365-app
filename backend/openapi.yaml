@@ -2425,6 +2425,75 @@ paths:
               schema:
                 $ref: '#/components/schemas/PdfProgress'
           description: ''
+  /api/v1/me/pdf-bookmarks/:
+    get:
+      operationId: me_pdf_bookmarks_list
+      summary: Saqlangan PDF darsliklar (eng yangisi birinchi)
+      tags:
+      - learning
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PdfBookmark'
+          description: ''
+  /api/v1/me/pdf-bookmarks/{pdf_book_id}/:
+    put:
+      operationId: me_pdf_bookmarks_update
+      summary: Kitobni saqlash (idempotent)
+      parameters:
+      - in: path
+        name: pdf_book_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - learning
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PdfBookmark'
+          description: ''
+    delete:
+      operationId: me_pdf_bookmarks_delete
+      summary: Saqlanganlardan olib tashlash (idempotent)
+      parameters:
+      - in: path
+        name: pdf_book_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - learning
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/me/library/:
+    get:
+      operationId: me_library
+      summary: 'Kabinet: oxirgi ochilgan PDF darsliklar va saqlanganlar soni'
+      tags:
+      - learning
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PdfLibrary'
+          description: ''
   /api/v1/me/merge-guest-data/:
     post:
       operationId: me_merge_guest_data
@@ -2513,6 +2582,10 @@ components:
       properties:
         books:
           $ref: '#/components/schemas/BookCounts'
+        pdf_books:
+          $ref: '#/components/schemas/BookCounts'
+        subjects_count:
+          type: integer
         topics:
           $ref: '#/components/schemas/TopicCounts'
         new_messages:
@@ -2528,8 +2601,10 @@ components:
       required:
       - books
       - new_messages
+      - pdf_books
       - recent_activity
       - recent_messages
+      - subjects_count
       - topics
     AuditEntry:
       type: object
@@ -3245,9 +3320,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PdfProgress'
+        pdf_bookmarks:
+          type: array
+          items:
+            $ref: '#/components/schemas/PdfBookmark'
       required:
       - bookmarks
       - goals
+      - pdf_bookmarks
       - pdf_progress
       - progress
     ExportUser:
@@ -3533,6 +3613,13 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/GuestPdfProgressRequest'
+        pdf_bookmarks:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 64
+          maxItems: 500
     MergeResult:
       type: object
       properties:
@@ -3542,6 +3629,8 @@ components:
           type: integer
         pdf_progress:
           type: integer
+        pdf_bookmarks:
+          type: integer
         failed:
           type: array
           items:
@@ -3549,6 +3638,7 @@ components:
       required:
       - bookmarks
       - failed
+      - pdf_bookmarks
       - pdf_progress
       - progress
     MistakeOut:
@@ -4227,6 +4317,18 @@ components:
       description: |-
         * `draft` - Draft
         * `published` - Published
+    PdfBookmark:
+      type: object
+      properties:
+        book:
+          $ref: '#/components/schemas/PdfBook'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - book
+      - created_at
     PdfFileUrl:
       type: object
       properties:
@@ -4238,6 +4340,34 @@ components:
       required:
       - expires_in
       - url
+    PdfLibrary:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PdfLibraryItem'
+        saved_count:
+          type: integer
+      required:
+      - items
+      - saved_count
+    PdfLibraryItem:
+      type: object
+      properties:
+        book:
+          $ref: '#/components/schemas/PdfBook'
+        last_page:
+          type: integer
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - book
+      - last_page
+      - updated_at
     PdfProgress:
       type: object
       properties:
@@ -4770,6 +4900,9 @@ components:
         books_count:
           type: integer
           readOnly: true
+        pdf_books_count:
+          type: integer
+          readOnly: true
         created_at:
           type: string
           format: date-time
@@ -4782,6 +4915,7 @@ components:
       - books_count
       - created_at
       - id
+      - pdf_books_count
       - slug
       - title
       - updated_at

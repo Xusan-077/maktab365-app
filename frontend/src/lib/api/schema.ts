@@ -1154,6 +1154,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/pdf-bookmarks/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Saqlangan PDF darsliklar (eng yangisi birinchi) */
+        get: operations["me_pdf_bookmarks_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/pdf-bookmarks/{pdf_book_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Kitobni saqlash (idempotent) */
+        put: operations["me_pdf_bookmarks_update"];
+        post?: never;
+        /** Saqlanganlardan olib tashlash (idempotent) */
+        delete: operations["me_pdf_bookmarks_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/library/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Kabinet: oxirgi ochilgan PDF darsliklar va saqlanganlar soni */
+        get: operations["me_library"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/merge-guest-data/": {
         parameters: {
             query?: never;
@@ -1209,6 +1261,8 @@ export interface components {
     schemas: {
         AdminDashboard: {
             books: components["schemas"]["BookCounts"];
+            pdf_books: components["schemas"]["BookCounts"];
+            subjects_count: number;
             topics: components["schemas"]["TopicCounts"];
             new_messages: number;
             recent_messages: components["schemas"]["RecentMessage"][];
@@ -1472,6 +1526,7 @@ export interface components {
             bookmarks: components["schemas"]["Bookmark"][];
             goals: components["schemas"]["StudyGoal"][];
             pdf_progress: components["schemas"]["PdfProgress"][];
+            pdf_bookmarks: components["schemas"]["PdfBookmark"][];
         };
         ExportUser: {
             /** Format: uuid */
@@ -1583,11 +1638,13 @@ export interface components {
             progress?: components["schemas"]["GuestProgressRequest"][];
             bookmarks?: components["schemas"]["BookmarkWriteRequest"][];
             pdf_progress?: components["schemas"]["GuestPdfProgressRequest"][];
+            pdf_bookmarks?: string[];
         };
         MergeResult: {
             progress: number;
             bookmarks: number;
             pdf_progress: number;
+            pdf_bookmarks: number;
             failed: string[];
         };
         MistakeOut: {
@@ -1899,10 +1956,25 @@ export interface components {
          * @enum {string}
          */
         PdfBookAdminStatusEnum: "draft" | "published";
+        PdfBookmark: {
+            book: components["schemas"]["PdfBook"];
+            /** Format: date-time */
+            readonly created_at: string;
+        };
         PdfFileUrl: {
             /** @description Qisqa muddatli URL (S3: imzolangan; dev: backend yo'li) */
             url: string;
             expires_in: number;
+        };
+        PdfLibrary: {
+            items: components["schemas"]["PdfLibraryItem"][];
+            saved_count: number;
+        };
+        PdfLibraryItem: {
+            book: components["schemas"]["PdfBook"];
+            readonly last_page: number;
+            /** Format: date-time */
+            readonly updated_at: string;
         };
         PdfProgress: {
             /** Format: uuid */
@@ -2109,6 +2181,7 @@ export interface components {
             icon?: string;
             order?: number;
             readonly books_count: number;
+            readonly pdf_books_count: number;
             /** Format: date-time */
             readonly created_at: string;
             /** Format: date-time */
@@ -4493,6 +4566,85 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PdfProgress"];
+                };
+            };
+        };
+    };
+    me_pdf_bookmarks_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PdfBookmark"][];
+                };
+            };
+        };
+    };
+    me_pdf_bookmarks_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                pdf_book_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PdfBookmark"];
+                };
+            };
+        };
+    };
+    me_pdf_bookmarks_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                pdf_book_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    me_library: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PdfLibrary"];
                 };
             };
         };
