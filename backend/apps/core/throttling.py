@@ -58,3 +58,9 @@ class SupportRateThrottle(_ClientIpMixin, _LiveRateMixin, AnonRateThrottle):
 
     def get_cache_key(self, request, view):
         return self.cache_format % {"scope": self.scope, "ident": self.get_ident(request)}
+
+
+class PdfUploadThrottle(_LiveRateMixin, UserRateThrottle):
+    """Admin PDF yuklash endpointlari: kirgan foydalanuvchi bo'yicha."""
+
+    scope = "pdf_upload"

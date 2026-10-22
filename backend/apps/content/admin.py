@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Book, Chapter, Subject, Topic, TopicRevision
+from .models import Book, Chapter, PdfBook, Subject, Topic, TopicRevision
 
 
 class ChapterInline(admin.TabularInline):
@@ -72,3 +72,10 @@ class TopicRevisionAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         return False
+
+
+@admin.register(PdfBook)
+class PdfBookAdmin(admin.ModelAdmin):
+    list_display = ["id", "grade", "subject", "status", "page_count", "created_at"]
+    list_filter = ["subject", "grade", "status"]
+    readonly_fields = ["file", "size_bytes", "page_count"]

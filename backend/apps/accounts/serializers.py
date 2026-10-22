@@ -3,6 +3,7 @@ from rest_framework import serializers
 
 from apps.learning.serializers import (
     BookmarkSerializer,
+    PdfProgressSerializer,
     StudyGoalSerializer,
     TopicProgressSerializer,
 )
@@ -133,6 +134,7 @@ class ExportLearningSerializer(serializers.Serializer):
     progress = TopicProgressSerializer(many=True)
     bookmarks = BookmarkSerializer(many=True)
     goals = StudyGoalSerializer(many=True)
+    pdf_progress = PdfProgressSerializer(many=True)
 
 
 class ExportSerializer(serializers.Serializer):

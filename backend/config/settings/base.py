@@ -107,10 +107,22 @@ if env("AWS_STORAGE_BUCKET_NAME", default=""):
     AWS_S3_CUSTOM_DOMAIN = env("AWS_S3_CUSTOM_DOMAIN", default=None)
     AWS_QUERYSTRING_AUTH = False
     AWS_DEFAULT_ACL = None
+    # R2/S3: imzolangan URL'lar v4 bilan; katta PDF tekshiruvi diskka tushadi (RAM'ga emas).
+    AWS_S3_SIGNATURE_VERSION = env("AWS_S3_SIGNATURE_VERSION", default="s3v4")
+    AWS_S3_MAX_MEMORY_SIZE = 16 * 1024 * 1024
 
 # --- Admin yuklashlari (apps/content/admin_services.py) ---
 ADMIN_UPLOAD_MAX_IMAGE_BYTES = env.int("ADMIN_UPLOAD_MAX_IMAGE_BYTES", default=5 * 1024 * 1024)
 ADMIN_UPLOAD_MAX_PDF_BYTES = env.int("ADMIN_UPLOAD_MAX_PDF_BYTES", default=50 * 1024 * 1024)
+
+# --- PDF darsliklar (apps/content/pdf_*.py) ---
+PDF_BOOK_MAX_BYTES = env.int("PDF_BOOK_MAX_BYTES", default=100 * 1024 * 1024)
+# Obyekt saqlashga to'g'ridan-to'g'ri multipart yuklash: har bo'lak (R2/S3 kamida 5 MiB).
+PDF_UPLOAD_PART_BYTES = env.int("PDF_UPLOAD_PART_BYTES", default=8 * 1024 * 1024)
+# Imzolangan o'qish/yuklash URL'lari muddati (soniya); 10–15 daqiqa tavsiya etiladi.
+PDF_SIGNED_URL_SECONDS = env.int("PDF_SIGNED_URL_SECONDS", default=15 * 60)
+# Admin yuklash endpointlari (init/upload/complete): foydalanuvchi bo'yicha.
+PDF_UPLOAD_THROTTLE_RATE = env("PDF_UPLOAD_THROTTLE_RATE", default="60/hour")
 
 # --- Ochiq kontent API ---
 # true bo'lsa draft/reviewed mavzular ochiq API'da `unverified: true` bilan chiqadi. Default false
@@ -138,6 +150,7 @@ REST_FRAMEWORK = {
         "auth_email": "5/min",
         # Yordam murojaatlari: IP bo'yicha soatiga 5 ta (e2e uchun env bilan oshiriladi).
         "support": env("SUPPORT_THROTTLE_RATE", default="5/hour"),
+        "pdf_upload": PDF_UPLOAD_THROTTLE_RATE,
     },
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "EXCEPTION_HANDLER": "apps.core.exceptions.api_exception_handler",
@@ -194,6 +207,10 @@ SPECTACULAR_SETTINGS = {
     "SCHEMA_PATH_PREFIX": r"/api/v1",
     "COMPONENT_SPLIT_REQUEST": True,
     "SORT_OPERATIONS": False,
+    "POSTPROCESSING_HOOKS": [
+        "drf_spectacular.hooks.postprocess_schema_enums",
+        "apps.core.openapi.sort_path_methods",
+    ],
     "ENUM_NAME_OVERRIDES": {
         "CheckStatusEnum": "apps.core.views.CHECK_STATUS_CHOICES",
         "RoleEnum": "apps.accounts.models.Role.choices",

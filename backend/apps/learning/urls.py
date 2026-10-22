@@ -17,5 +17,11 @@ urlpatterns = [
     path(
         "me/teacher/dashboard/", views.TeacherDashboardView.as_view(), name="me-teacher-dashboard"
     ),
+    path("me/pdf-progress/", views.PdfProgressListView.as_view(), name="me-pdf-progress"),
+    path(
+        "me/pdf-progress/<str:pdf_book_id>/",
+        views.PdfProgressDetailView.as_view(),
+        name="me-pdf-progress-detail",
+    ),
     path("me/merge-guest-data/", views.MergeGuestDataView.as_view(), name="me-merge-guest-data"),
 ]

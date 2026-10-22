@@ -17,6 +17,7 @@ dependencies = [
     "google-auth>=2.62.0",
     "psycopg[binary]>=3.3.6",
     "pydantic>=2.14.1",
+    "pypdf>=6.21.2",
     "redis>=8.1.0",
     "requests>=2.34.2",
     "sentry-sdk>=2.72.0",

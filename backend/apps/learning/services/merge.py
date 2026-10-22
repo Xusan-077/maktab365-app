@@ -9,20 +9,23 @@ from rest_framework.exceptions import NotFound
 
 from ..models import BookmarkKind
 from .bookmarks import add_bookmark, visible_book
+from .pdf import apply_pdf_progress, clamp_page, resolve_pdf_book
 from .progress import merge_progress
 from .topics import resolve_topics
 
 MERGE_LIMIT = 500
 
 
-def merge_guest_data(request, progress: list[dict], bookmarks: list[dict]) -> dict:
-    """`{progress, bookmarks, failed}`: o'zgargan yozuvlar va qo'shib bo'lmagan id'lar."""
+def merge_guest_data(
+    request, progress: list[dict], bookmarks: list[dict], pdf_progress: list[dict] | None = None
+) -> dict:
+    """`{progress, bookmarks, pdf_progress, failed}`: o'zgarganlar soni, qo'shilmagan id'lar."""
     user = request.user
     keys = [item["topic_id"] for item in progress]
     keys += [item["topic_id"] for item in bookmarks if item["kind"] == BookmarkKind.TOPIC]
     topics = resolve_topics(request, keys)
 
-    result = {"progress": 0, "bookmarks": 0, "failed": []}
+    result = {"progress": 0, "bookmarks": 0, "pdf_progress": 0, "failed": []}
     with transaction.atomic():
         for item in progress:
             topic = topics.get(item["topic_id"])
@@ -46,5 +49,14 @@ def merge_guest_data(request, progress: list[dict], bookmarks: list[dict]) -> di
                     continue
                 if add_bookmark(user, book=book)[1]:
                     result["bookmarks"] += 1
+        for item in pdf_progress or []:
+            try:
+                book = resolve_pdf_book(request, item["pdf_book_id"])
+            except NotFound:
+                result["failed"].append(item["pdf_book_id"])
+                continue
+            page = clamp_page(book, item["last_page"], strict=False)
+            if apply_pdf_progress(user, book, page, item.get("updated_at"))[1]:
+                result["pdf_progress"] += 1
     result["failed"] = list(dict.fromkeys(result["failed"]))
     return result

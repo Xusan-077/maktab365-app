@@ -15,6 +15,12 @@ urlpatterns = [
     path("api/v1/", include("apps.support.urls")),
 ]
 
+# Dev: yuklangan fayllar (muqova rasmlari) lokal `media/` dan beriladi; prod'da S3-mos saqlash.
+if settings.DEBUG:
+    from django.conf.urls.static import static
+
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
 # Sxema va Swagger faqat dev'da (prod'da API tuzilmasi ochilmaydi).
 if getattr(settings, "ENABLE_API_DOCS", False):
     urlpatterns += [

@@ -27,6 +27,7 @@ REST_FRAMEWORK = {  # noqa: F405
         "auth": "1000/min",
         "auth_email": "1000/min",
         "support": "1000/hour",
+        "pdf_upload": "1000/hour",
     },
 }
 EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"

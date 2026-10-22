@@ -139,6 +139,20 @@ class SearchResultSerializer(serializers.Serializer):
     rank = serializers.FloatField()
 
 
+class SearchPdfBookSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    title = LocalizedField()
+    grade = serializers.IntegerField()
+    subject = serializers.SlugField(source="subject.slug")
+    page_count = serializers.IntegerField()
+    cover = serializers.FileField(use_url=True, allow_null=True)
+    unverified = serializers.SerializerMethodField()
+
+    def get_unverified(self, book) -> bool:
+        return book.status != "published"
+
+
 class SearchResponseSerializer(serializers.Serializer):
     count = serializers.IntegerField()
     results = SearchResultSerializer(many=True)
+    pdf_books = SearchPdfBookSerializer(many=True, required=False)

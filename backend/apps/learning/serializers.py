@@ -5,6 +5,7 @@ from .models import (
     Bookmark,
     BookmarkKind,
     ExerciseStatus,
+    PdfReadProgress,
     ReadStatus,
     RecentView,
     StudyGoal,
@@ -59,6 +60,27 @@ class ProgressWriteSerializer(serializers.Serializer):
     exercise_stats = ExerciseStatsSerializer(required=False)
     # Mijozdagi yozuv vaqti: eski qurilmaning kech kelgan yozuvi yangisini bosmaydi.
     updated_at = serializers.DateTimeField(required=False)
+
+
+class PdfProgressWriteSerializer(serializers.Serializer):
+    """PUT: PDF darslikda oxirgi sahifa. `updated_at` — mijozdagi yozuv vaqti."""
+
+    last_page = serializers.IntegerField(min_value=1, max_value=100000)
+    updated_at = serializers.DateTimeField(required=False)
+
+
+class PdfProgressSerializer(serializers.ModelSerializer):
+    pdf_book_id = serializers.UUIDField(read_only=True)
+    last_page = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PdfReadProgress
+        fields = ["pdf_book_id", "last_page", "updated_at"]
+        read_only_fields = fields
+
+    def get_last_page(self, row) -> int:
+        # Kitob qisqa fayl bilan almashtirilgan bo'lsa ham chegaradan chiqmaydi.
+        return min(row.last_page, row.pdf_book.page_count) if row.pdf_book.page_count else 1
 
 
 class TopicProgressSerializer(serializers.ModelSerializer):
@@ -252,12 +274,18 @@ class GuestProgressSerializer(ProgressWriteSerializer):
     topic_id = serializers.CharField(max_length=200)
 
 
+class GuestPdfProgressSerializer(PdfProgressWriteSerializer):
+    pdf_book_id = serializers.CharField(max_length=64)
+
+
 class MergeRequestSerializer(serializers.Serializer):
     progress = GuestProgressSerializer(many=True, required=False, max_length=MERGE_LIMIT)
     bookmarks = BookmarkWriteSerializer(many=True, required=False, max_length=MERGE_LIMIT)
+    pdf_progress = GuestPdfProgressSerializer(many=True, required=False, max_length=MERGE_LIMIT)
 
 
 class MergeResultSerializer(serializers.Serializer):
     progress = serializers.IntegerField()
     bookmarks = serializers.IntegerField()
+    pdf_progress = serializers.IntegerField()
     failed = serializers.ListField(child=serializers.CharField())

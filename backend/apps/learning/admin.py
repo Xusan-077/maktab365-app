@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Bookmark, RecentView, StudyGoal, TopicProgress
+from .models import Bookmark, PdfReadProgress, RecentView, StudyGoal, TopicProgress
 
 
 @admin.register(TopicProgress)
@@ -26,3 +26,9 @@ class StudyGoalAdmin(admin.ModelAdmin):
 class RecentViewAdmin(admin.ModelAdmin):
     list_display = ("user", "topic", "viewed_at")
     raw_id_fields = ("user", "topic")
+
+
+@admin.register(PdfReadProgress)
+class PdfReadProgressAdmin(admin.ModelAdmin):
+    list_display = ("user", "pdf_book", "last_page", "updated_at")
+    raw_id_fields = ("user", "pdf_book")

@@ -92,3 +92,10 @@ Bitta Django monolit: Python 3.12 · Django 5.2 · DRF · drf-spectacular · sim
 - `uv run ruff check .` · `uv run ruff format .`
 - `uv run python manage.py makemigrations --check --dry-run`
 - `make schema` — `openapi.yaml` ni yozadi.
+
+## PDF darsliklar (M11)
+
+- `PdfBook` (`apps/content/models.py`; `Book` dan alohida): `title`, `grade`, `subject`, `file` (kalit `pdf-books/<uuid>.pdf`, DB'da bayt yo'q), `size_bytes`, `page_count` (pypdf, S3'dan vaqtinchalik faylga oqim bilan), `cover`, `status` draft|published. Yuklash: `upload-init` → (S3: brauzer presigned multipart PUT; dev: `upload/` multipart) → `upload-complete`; `pending_file` yangi faylni `activate`gacha alohida saqlaydi (almashtirish xatosida eski fayl qoladi). Mantiq: `pdf_services.py`, saqlash/URL: `pdf_storage.py`, admin view: `pdf_admin_views.py`, ochiq: `pdf_views.py`.
+- Ko'rinish: `visible_pdf_books` — fayli bor va published; staff hammasini, `SHOW_DRAFTS_PUBLICLY` draft'ni `unverified` bilan. Nashrdan qaytarish va o'chirish faqat admin. O'qish URL'i qisqa muddatli (`PDF_SIGNED_URL_SECONDS`); dev'da imzolangan token + `file/` (Range).
+- `PdfReadProgress` (`apps/learning`): oxirgi sahifa; qat'iy yangiroq mijoz vaqti yutadi (idempotent), merge `pdf_progress`.
+- `create_admin` (qat'iy, env bo'sh bo'lsa xato) va `ensure_admin` (jim) umumiy mantiq: `accounts/admin_bootstrap.py`.

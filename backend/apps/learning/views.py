@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 
 from apps.core.permissions import IsRole
 
-from .models import Bookmark, BookmarkKind, RecentView, StudyGoal, TopicProgress
+from .models import Bookmark, BookmarkKind, PdfReadProgress, RecentView, StudyGoal, TopicProgress
 from .serializers import (
     GOAL_LIMIT,
     BookmarkSerializer,
@@ -19,6 +19,8 @@ from .serializers import (
     EventSerializer,
     MergeRequestSerializer,
     MergeResultSerializer,
+    PdfProgressSerializer,
+    PdfProgressWriteSerializer,
     ProgressWriteSerializer,
     RecentViewSerializer,
     ResultsSerializer,
@@ -32,6 +34,7 @@ from .services import dashboard
 from .services import progress as progress_service
 from .services.bookmarks import add_bookmark, visible_book
 from .services.merge import merge_guest_data
+from .services.pdf import apply_pdf_progress, clamp_page, resolve_pdf_book
 from .services.topics import key_expr, resolve_topic
 
 TAGS = ["learning"]
@@ -338,5 +341,61 @@ class MergeGuestDataView(APIView):
         serializer = MergeRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
-        result = merge_guest_data(request, data.get("progress", []), data.get("bookmarks", []))
+        result = merge_guest_data(
+            request,
+            data.get("progress", []),
+            data.get("bookmarks", []),
+            data.get("pdf_progress", []),
+        )
         return Response(MergeResultSerializer(result).data)
+
+
+def _pdf_progress_qs(user):
+    return PdfReadProgress.objects.filter(user=user).select_related("pdf_book")
+
+
+class PdfProgressListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        operation_id="me_pdf_progress_list",
+        tags=TAGS,
+        summary="PDF darsliklar bo'yicha oxirgi sahifalar (eng yangisi birinchi)",
+        responses=PdfProgressSerializer(many=True),
+    )
+    def get(self, request):
+        rows = _pdf_progress_qs(request.user).order_by("-updated_at")[:200]
+        return Response(PdfProgressSerializer(rows, many=True).data)
+
+
+class PdfProgressDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        operation_id="me_pdf_progress_retrieve",
+        tags=TAGS,
+        responses=PdfProgressSerializer,
+    )
+    def get(self, request, pdf_book_id):
+        book = resolve_pdf_book(request, pdf_book_id)
+        row = _pdf_progress_qs(request.user).filter(pdf_book=book).first()
+        if row is None:
+            raise NotFound()
+        return Response(PdfProgressSerializer(row).data)
+
+    @extend_schema(
+        operation_id="me_pdf_progress_update",
+        tags=TAGS,
+        summary="Oxirgi sahifani yozish (idempotent; qat'iy yangiroq mijoz vaqti yutadi)",
+        request=PdfProgressWriteSerializer,
+        responses=PdfProgressSerializer,
+    )
+    def put(self, request, pdf_book_id):
+        serializer = PdfProgressWriteSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        book = resolve_pdf_book(request, pdf_book_id)
+        data = serializer.validated_data
+        page = clamp_page(book, data["last_page"], strict=True)
+        row, _changed = apply_pdf_progress(request.user, book, page, data.get("updated_at"))
+        row.pdf_book = book
+        return Response(PdfProgressSerializer(row).data)

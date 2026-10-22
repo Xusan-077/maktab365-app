@@ -9,6 +9,7 @@ from rest_framework.views import APIView
 
 from .cache import is_staff, public_cached, request_locale, show_drafts
 from .models import Book, Chapter, Subject, Topic, TopicStatus
+from .pdf_services import visible_pdf_books
 from .search import make_snippet, query_terms, search_topics
 from .serializers import (
     BookDetailSerializer,
@@ -21,6 +22,7 @@ from .serializers import (
 
 GRADES = range(1, 12)
 SEARCH_LIMIT_DEFAULT, SEARCH_LIMIT_MAX = 20, 50
+SEARCH_PDF_LIMIT = 10
 
 GRADE_PARAM = OpenApiParameter("grade", OpenApiTypes.INT, description="Sinf (1–11)")
 SUBJECT_PARAM = OpenApiParameter("subject", OpenApiTypes.STR, description="Fan slug'i")
@@ -228,7 +230,7 @@ class SearchView(PublicView, APIView):
     def get(self, request):
         terms = query_terms(request.query_params.get("q", ""))
         if not terms:
-            return Response({"count": 0, "results": []})
+            return Response({"count": 0, "results": [], "pdf_books": []})
         topics = _visible_topics(request).select_related("chapter", "book__subject")
         if not is_staff(request.user):
             topics = topics.filter(book__is_published=True)
@@ -245,4 +247,27 @@ class SearchView(PublicView, APIView):
         for topic in found:
             topic.snippet = make_snippet(topic, terms, locale)
         count = len(found) if len(found) < limit else matches.count()
-        return Response(SearchResponseSerializer({"count": count, "results": found}).data)
+        pdf_books = self._pdf_books(request)
+        return Response(
+            SearchResponseSerializer(
+                {"count": count, "results": found, "pdf_books": pdf_books},
+                context={"request": request},
+            ).data
+        )
+
+    @staticmethod
+    def _pdf_books(request) -> list:
+        """Nomi bo'yicha mos PDF darsliklar (kitob/mavzu bo'yicha toraytirilgan qidiruvda yo'q)."""
+        query = request.query_params.get("q", "").strip()
+        if request.query_params.get("book") or len(query) < 2:
+            return []
+        books = visible_pdf_books(request).filter(
+            Q(title__uz__icontains=query)
+            | Q(title__ru__icontains=query)
+            | Q(title__en__icontains=query)
+        )
+        if (grade := _int_param(request, "grade")) is not None:
+            books = books.filter(grade=grade)
+        if subject := request.query_params.get("subject"):
+            books = books.filter(subject__slug=subject)
+        return list(books.order_by("grade", "-created_at")[:SEARCH_PDF_LIMIT])
