@@ -35,6 +35,7 @@ export function PdfToolbar({ page, total, onGo, disabled }: PdfToolbarProps) {
     >
       <Button
         variant="secondary"
+        size="icon"
         aria-label={t("prev")}
         data-testid="pdf-prev"
         disabled={disabled || page <= 1}
@@ -54,7 +55,7 @@ export function PdfToolbar({ page, total, onGo, disabled }: PdfToolbarProps) {
           value={draft ?? String(page)}
           disabled={disabled}
           style={{ width: `${String(total).length + 2}ch` }}
-          className="border-border bg-surface text-foreground focus-visible:ring-ring h-10 rounded-lg border px-1 text-center"
+          className="border-border bg-surface text-foreground focus-visible:ring-ring h-11 rounded-lg border px-1 text-center sm:h-10"
           onFocus={(event) => event.currentTarget.select()}
           onChange={(event) => setDraft(event.target.value)}
           onBlur={commit}
@@ -79,6 +80,7 @@ export function PdfToolbar({ page, total, onGo, disabled }: PdfToolbarProps) {
 
       <Button
         variant="secondary"
+        size="icon"
         aria-label={t("next")}
         data-testid="pdf-next"
         disabled={disabled || page >= total}

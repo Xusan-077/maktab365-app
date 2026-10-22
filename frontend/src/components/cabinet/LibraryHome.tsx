@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useMe } from "@/hooks/useMe";
 import { Link } from "@/lib/i18n/navigation";
 import { pdfQueries } from "@/lib/pdf-books/queries";
+import { cn } from "@/lib/utils/cn";
 import { catalogPath, ROUTES, type PanelBase } from "@/lib/utils/routes";
 import { ContinueCard } from "./ContinueCard";
 import { EmptyText, Panel } from "./Panel";
@@ -63,33 +64,33 @@ export function LibraryHome({ base }: { base: PanelBase }) {
         <StartCard />
       )}
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Panel title={tl("recent.title")}>
-          {older.length === 0 ? (
-            <EmptyText>{tl("recent.empty")}</EmptyText>
-          ) : (
-            <ul className="flex flex-col gap-3">
-              {older.slice(0, PANEL_LIST_LIMIT).map((item) => (
-                <li key={item.book.id}>
-                  <PdfBookCard layout="row" book={item.book} resumePage={item.last_page} />
-                </li>
-              ))}
-            </ul>
+      {(latest || savedCount > 0) && (
+        <div className={cn("grid gap-4", older.length > 0 && "lg:grid-cols-2")}>
+          {older.length > 0 && (
+            <Panel title={tl("recent.title")}>
+              <ul className="flex flex-col gap-3">
+                {older.slice(0, PANEL_LIST_LIMIT).map((item) => (
+                  <li key={item.book.id}>
+                    <PdfBookCard layout="row" book={item.book} resumePage={item.last_page} />
+                  </li>
+                ))}
+              </ul>
+            </Panel>
           )}
-        </Panel>
-        <Panel
-          title={tl("saved.title")}
-          footer={
-            savedCount > PANEL_LIST_LIMIT && (
-              <Link href={savedHref} className="text-link hover:underline">
-                {tl("saved.all", { count: savedCount })}
-              </Link>
-            )
-          }
-        >
-          <SavedBooks limit={PANEL_LIST_LIMIT} />
-        </Panel>
-      </div>
+          <Panel
+            title={tl("saved.title")}
+            footer={
+              savedCount > PANEL_LIST_LIMIT && (
+                <Link href={savedHref} className="text-link hover:underline">
+                  {tl("saved.all", { count: savedCount })}
+                </Link>
+              )
+            }
+          >
+            <SavedBooks limit={PANEL_LIST_LIMIT} />
+          </Panel>
+        </div>
+      )}
     </div>
   );
 }
