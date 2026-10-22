@@ -7,6 +7,7 @@ import { AuthProvider } from "@/components/layout/AuthProvider";
 import { PreferencesProvider } from "@/components/layout/PreferencesProvider";
 import { QueryProvider } from "@/components/layout/QueryProvider";
 import { SkipLink } from "@/components/layout/SkipLink";
+import { MotionProvider } from "@/components/ui/motion";
 import { Toaster } from "@/components/ui/Toast";
 import { routing } from "@/lib/i18n/routing";
 import { SITE_URL } from "@/lib/i18n/seo";
@@ -56,10 +57,12 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[lo
         <NextIntlClientProvider locale={locale}>
           <QueryProvider>
             <AuthProvider>
-              <PreferencesProvider />
-              <SkipLink />
-              {children}
-              <Toaster />
+              <MotionProvider>
+                <PreferencesProvider />
+                <SkipLink />
+                {children}
+                <Toaster />
+              </MotionProvider>
             </AuthProvider>
           </QueryProvider>
         </NextIntlClientProvider>

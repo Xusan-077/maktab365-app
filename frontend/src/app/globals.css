@@ -154,9 +154,10 @@ body:has(dialog[open]) {
   overflow: hidden;
 }
 
-@keyframes ui-fade-in {
+@keyframes ui-rise {
   from {
     opacity: 0;
+    transform: translateY(10px);
   }
 }
 @keyframes ui-pop-in {
@@ -165,20 +166,52 @@ body:has(dialog[open]) {
     transform: translateY(8px) scale(0.98);
   }
 }
-@keyframes ui-slide-up {
-  from {
-    transform: translateY(100%);
-  }
+
+/* Sahifa/hero kirishi: gidratsiyani kutmaydi. `--i` — ketma-ketlik tartibi (stagger). */
+.enter {
+  animation: ui-rise 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--i, 0) * 60ms);
 }
 
-dialog[open] {
-  animation: ui-pop-in 0.18s ease-out;
+/* Native <dialog>: ochilish va yopilish (display/overlay diskret o'tish bilan). */
+dialog {
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+  transition:
+    opacity 0.18s ease-out,
+    transform 0.18s ease-out,
+    overlay 0.18s allow-discrete,
+    display 0.18s allow-discrete;
 }
-dialog[open][data-placement="bottom"] {
-  animation: ui-slide-up 0.22s ease-out;
+dialog[open] {
+  opacity: 1;
+  transform: none;
+}
+dialog[data-placement="bottom"] {
+  transform: translateY(100%);
+  transition-duration: 0.22s;
+}
+dialog::backdrop {
+  opacity: 0;
+  transition:
+    opacity 0.18s ease-out,
+    overlay 0.18s allow-discrete,
+    display 0.18s allow-discrete;
 }
 dialog[open]::backdrop {
-  animation: ui-fade-in 0.18s ease-out;
+  opacity: 1;
+}
+@starting-style {
+  dialog[open] {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  dialog[open][data-placement="bottom"] {
+    transform: translateY(100%);
+  }
+  dialog[open]::backdrop {
+    opacity: 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

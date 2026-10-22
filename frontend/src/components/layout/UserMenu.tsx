@@ -4,7 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { signOut } from "next-auth/react";
 import { LayoutDashboard, LifeBuoy, LogOut, Settings } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { buttonVariants } from "@/components/ui/Button";
+import { AnimatePresence, m, popover } from "@/components/ui/motion";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAppBase } from "@/hooks/useAppBase";
 import { useAuth } from "@/hooks/useAuth";
@@ -62,7 +62,7 @@ export function Avatar({
 }
 
 /**
- * Marketing headerida: "Kirish" (Google) yoki "Kabinetga o'tish" + avatar menyusi.
+ * Marketing headerida: "Kirish" yoki avatar menyusi (kabinet/ustoz paneliga o'tish menyuning birinchi bandi).
  * Panel topbar'ida (`variant="panel"`): avatar menyusi (sozlamalar, yordam, chiqish).
  */
 export function UserMenu({ variant = "site" }: { variant?: "site" | "panel" }) {
@@ -134,15 +134,9 @@ export function UserMenu({ variant = "site" }: { variant?: "site" | "panel" }) {
   const close = () => closeMenu(false);
 
   const panel = variant === "panel";
-  const goTo = me ? dashboardPath(me.role) : me === null ? ROUTES.onboarding : undefined;
 
   return (
     <div ref={rootRef} className="relative flex items-center gap-2">
-      {!panel && goTo && (
-        <Link href={goTo} className={buttonVariants({ className: "hidden sm:inline-flex" })}>
-          {me?.role === "teacher" ? tn("goToTeacher") : tn("goToCabinet")}
-        </Link>
-      )}
       <button
         ref={buttonRef}
         type="button"
@@ -161,55 +155,62 @@ export function UserMenu({ variant = "site" }: { variant?: "site" | "panel" }) {
       >
         <Avatar name={name} image={sessionUser.image} />
       </button>
-      {open && (
-        <div
-          ref={menuRef}
-          id={menuId}
-          role="menu"
-          aria-label={t("menuLabel", { name })}
-          onKeyDown={onMenuKeyDown}
-          className="border-border bg-surface absolute top-full right-0 z-50 mt-2 w-64 max-w-[calc(100vw-2rem)] rounded-xl border p-2 shadow-lg"
-        >
-          <div className="px-3 py-2">
-            <p className="truncate text-sm font-semibold">{name}</p>
-            {sessionUser.email && (
-              <p className="text-muted truncate text-xs">{sessionUser.email}</p>
-            )}
-          </div>
-          <div className="border-border border-t pt-1">
-            {!panel && me && (
-              <Link
+      <AnimatePresence>
+        {open && (
+          <m.div
+            ref={menuRef}
+            variants={popover}
+            initial="hidden"
+            animate="show"
+            exit="exit"
+            style={{ transformOrigin: "top right" }}
+            id={menuId}
+            role="menu"
+            aria-label={t("menuLabel", { name })}
+            onKeyDown={onMenuKeyDown}
+            className="border-border bg-surface absolute top-full right-0 z-50 mt-2 w-64 max-w-[calc(100vw-2rem)] rounded-xl border p-2 shadow-lg"
+          >
+            <div className="px-3 py-2">
+              <p className="truncate text-sm font-semibold">{name}</p>
+              {sessionUser.email && (
+                <p className="text-muted truncate text-xs">{sessionUser.email}</p>
+              )}
+            </div>
+            <div className="border-border border-t pt-1">
+              {!panel && me && (
+                <Link
+                  role="menuitem"
+                  href={dashboardPath(me.role)}
+                  onClick={close}
+                  className={itemClasses}
+                >
+                  <LayoutDashboard className="size-4" aria-hidden />
+                  {me.role === "teacher" ? t("teacherPanel") : t("cabinet")}
+                </Link>
+              )}
+              {panel && base !== "marketing" && (
+                <Link role="menuitem" href={helpPath(base)} onClick={close} className={itemClasses}>
+                  <LifeBuoy className="size-4" aria-hidden />
+                  {tp("help")}
+                </Link>
+              )}
+              <Link role="menuitem" href={ROUTES.settings} onClick={close} className={itemClasses}>
+                <Settings className="size-4" aria-hidden />
+                {t("settings")}
+              </Link>
+              <button
+                type="button"
                 role="menuitem"
-                href={dashboardPath(me.role)}
-                onClick={close}
+                onClick={() => void signOut({ redirectTo: `/${locale}` })}
                 className={itemClasses}
               >
-                <LayoutDashboard className="size-4" aria-hidden />
-                {me.role === "teacher" ? t("teacherPanel") : t("cabinet")}
-              </Link>
-            )}
-            {panel && base !== "marketing" && (
-              <Link role="menuitem" href={helpPath(base)} onClick={close} className={itemClasses}>
-                <LifeBuoy className="size-4" aria-hidden />
-                {tp("help")}
-              </Link>
-            )}
-            <Link role="menuitem" href={ROUTES.settings} onClick={close} className={itemClasses}>
-              <Settings className="size-4" aria-hidden />
-              {t("settings")}
-            </Link>
-            <button
-              type="button"
-              role="menuitem"
-              onClick={() => void signOut({ redirectTo: `/${locale}` })}
-              className={itemClasses}
-            >
-              <LogOut className="size-4" aria-hidden />
-              {t("signOut")}
-            </button>
-          </div>
-        </div>
-      )}
+                <LogOut className="size-4" aria-hidden />
+                {t("signOut")}
+              </button>
+            </div>
+          </m.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

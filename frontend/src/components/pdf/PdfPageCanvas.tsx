@@ -44,19 +44,32 @@ export function PdfPageCanvas({ doc, pageNumber, label, onRendered, onError }: P
     void (async () => {
       try {
         page = await doc.getPage(pageNumber);
-        const canvas = canvasRef.current;
-        if (cancelled || !canvas) return;
+        if (cancelled) return;
         const ratio = Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO);
         const fit = width / page.getViewport({ scale: 1 }).width;
         const viewport = page.getViewport({ scale: fit * ratio });
-        canvas.width = Math.floor(viewport.width);
-        canvas.height = Math.floor(viewport.height);
+        // Sahifa ekrandan tashqari canvas'da chiziladi: tayyor bo'lgach bir zumda almashadi
+        // (joriy sahifa bo'sh oq kadrsiz turadi, o'lcham sakramaydi).
+        const buffer = document.createElement("canvas");
+        buffer.width = Math.floor(viewport.width);
+        buffer.height = Math.floor(viewport.height);
+        const context = buffer.getContext("2d");
+        if (!context) throw new Error("Canvas is not available");
+        task = page.render({ canvas: buffer, canvasContext: context, viewport });
+        await task.promise;
+        const canvas = canvasRef.current;
+        if (cancelled || !canvas) return;
+        canvas.width = buffer.width;
+        canvas.height = buffer.height;
         canvas.style.width = `${Math.floor(viewport.width / ratio)}px`;
         canvas.style.height = `${Math.floor(viewport.height / ratio)}px`;
-        const context = canvas.getContext("2d");
-        if (!context) throw new Error("Canvas is not available");
-        task = page.render({ canvas, canvasContext: context, viewport });
-        await task.promise;
+        canvas.getContext("2d")?.drawImage(buffer, 0, 0);
+        if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          canvas.animate([{ opacity: 0.55 }, { opacity: 1 }], {
+            duration: 160,
+            easing: "ease-out",
+          });
+        }
         if (!cancelled) notifyRendered();
       } catch (error) {
         if (!cancelled && !isCancelled(error)) notifyError(error);

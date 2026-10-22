@@ -10,12 +10,14 @@ import { useDebouncedSearch } from "@/components/admin/useDebouncedSearch";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { listItem, m } from "@/components/ui/motion";
 import { usePdfProgressMap } from "@/hooks/usePdfProgressMap";
 import type { Locale } from "@/lib/i18n/config";
 import { getLocalized } from "@/lib/i18n/localized";
 import { usePathname, useRouter } from "@/lib/i18n/navigation";
 import { PDF_PAGE_SIZE, type PdfBookFilters } from "@/lib/pdf-books/api";
 import { pdfQueries } from "@/lib/pdf-books/queries";
+import { cn } from "@/lib/utils/cn";
 import { GRADES } from "@/types/catalog";
 import { PdfBookCard, PdfBookCardSkeleton } from "./PdfBookCard";
 
@@ -158,14 +160,24 @@ export function PdfCatalogView() {
       ) : (
         <div className="flex flex-col gap-4">
           <ul
-            className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4"
+            className={cn(
+              "grid grid-cols-2 gap-3 transition-opacity duration-200 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4",
+              books.isPlaceholderData && "pointer-events-none opacity-60",
+            )}
             aria-label={t("results")}
+            aria-busy={books.isPlaceholderData}
             data-testid="pdf-book-list"
           >
-            {books.data.results.map((book) => (
-              <li key={book.id}>
+            {books.data.results.map((book, index) => (
+              <m.li
+                key={book.id}
+                variants={listItem}
+                custom={index}
+                initial="hidden"
+                animate="show"
+              >
                 <PdfBookCard book={book} resumePage={resume[book.id]} />
-              </li>
+              </m.li>
             ))}
           </ul>
           <Pagination

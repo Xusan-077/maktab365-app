@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { useTranslations } from "next-intl";
 import { buttonVariants } from "@/components/ui/Button";
 import { Link } from "@/lib/i18n/navigation";
@@ -15,12 +16,17 @@ export function HeroSection() {
       <div className="mx-auto flex w-full max-w-6xl flex-col items-start gap-6 px-4 py-12 sm:px-6 lg:py-20">
         <h1
           id="hero-title"
-          className="max-w-3xl text-4xl font-bold tracking-tight text-balance sm:text-5xl lg:text-6xl"
+          className="enter max-w-3xl text-4xl font-bold tracking-tight text-balance sm:text-5xl lg:text-6xl"
         >
           {t("title")}
         </h1>
-        <p className="text-muted max-w-2xl text-lg text-pretty">{t("subtitle")}</p>
-        <div className="flex flex-wrap gap-3">
+        <p
+          style={{ "--i": 1 } as CSSProperties}
+          className="enter text-muted max-w-2xl text-lg text-pretty"
+        >
+          {t("subtitle")}
+        </p>
+        <div style={{ "--i": 2 } as CSSProperties} className="enter flex flex-wrap gap-3">
           <Link href={ROUTES.textbooks} className={buttonVariants({ size: "lg" })}>
             {t("cta")}
           </Link>

@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { AlertCircle, CheckCircle2, Info, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils/cn";
+import { AnimatePresence, EASE_OUT, m } from "./motion";
 import { useToastStore, type Toast as ToastData, type ToastVariant } from "@/stores/toast.store";
 
 const AUTO_DISMISS_MS = 5000;
@@ -29,9 +30,12 @@ function ToastItem({ toast }: { toast: ToastData }) {
   }, [dismiss, toast.id]);
 
   return (
-    <div
+    <m.div
+      initial={{ opacity: 0, y: 12, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1, transition: { duration: 0.2, ease: EASE_OUT } }}
+      exit={{ opacity: 0, scale: 0.98, transition: { duration: 0.15 } }}
       role={toast.variant === "error" ? "alert" : "status"}
-      className="border-border bg-surface pointer-events-auto flex [animation:ui-pop-in_0.2s_ease-out] items-start gap-3 rounded-xl border p-4 shadow-lg"
+      className="border-border bg-surface pointer-events-auto flex items-start gap-3 rounded-xl border p-4 shadow-lg"
     >
       <Icon className={cn("mt-0.5 size-5 shrink-0", iconColors[toast.variant])} aria-hidden />
       <div className="min-w-0 flex-1">
@@ -46,7 +50,7 @@ function ToastItem({ toast }: { toast: ToastData }) {
       >
         <X className="size-4" aria-hidden />
       </button>
-    </div>
+    </m.div>
   );
 }
 
@@ -55,9 +59,11 @@ export function Toaster() {
   const toasts = useToastStore((state) => state.toasts);
   return (
     <div className="pointer-events-none fixed inset-x-4 bottom-20 z-[70] flex flex-col items-stretch gap-2 sm:inset-x-auto sm:right-4 sm:w-96 lg:bottom-4">
-      {toasts.map((toast) => (
-        <ToastItem key={toast.id} toast={toast} />
-      ))}
+      <AnimatePresence initial={false}>
+        {toasts.map((toast) => (
+          <ToastItem key={toast.id} toast={toast} />
+        ))}
+      </AnimatePresence>
     </div>
   );
 }
