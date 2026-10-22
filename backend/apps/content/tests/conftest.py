@@ -1,10 +1,11 @@
 import json
+import uuid
 from pathlib import Path
 
 import pytest
 from django.core.cache import cache
 
-from apps.content.models import Book, Chapter, Subject, Topic
+from apps.content.models import Book, Chapter, PdfBook, Subject, Topic
 
 FIXTURES = Path(__file__).resolve().parents[4] / "contracts" / "fixtures"
 
@@ -40,6 +41,19 @@ class Catalog:
             edition={"uz": "1-nashr"},
             year=2020,
             is_published=published,
+            **over,
+        )
+
+    def pdf_book(self, subject, grade=9, status="published", pages=12, **over):
+        """Fayli bor PDF kitob (baytlarsiz: saqlash kaliti yozuvda)."""
+        return PdfBook.objects.create(
+            title=over.pop("title", {"uz": f"{subject.slug.title()} PDF"}),
+            grade=grade,
+            subject=subject,
+            file=over.pop("file", f"pdf-books/{uuid.uuid4()}.pdf"),
+            size_bytes=1024,
+            page_count=pages,
+            status=status,
             **over,
         )
 

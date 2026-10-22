@@ -19,11 +19,12 @@ from apps.accounts.models import (
     User,
     VerificationToken,
 )
+from apps.core.tests.passwords import NEW_TEST_PASSWORD, OTHER_TEST_PASSWORD, TEST_PASSWORD
 
 pytestmark = pytest.mark.django_db
 
-PASSWORD = "kuchli-parol-2026"
-NEW_PASSWORD = "yangi-parol-2027"
+PASSWORD = TEST_PASSWORD
+NEW_PASSWORD = NEW_TEST_PASSWORD
 
 
 @pytest.fixture(autouse=True)
@@ -644,7 +645,7 @@ class TestPasswordReset:
         assert client.post("refresh/", {"refresh": session["refresh"]}).status_code == 401
         assert "password_reset" in event_types(user)
 
-        reused = client.post("password/reset/", {"token": raw, "password": "boshqa-parol-99"})
+        reused = client.post("password/reset/", {"token": raw, "password": OTHER_TEST_PASSWORD})
         assert reused.json()["code"] == "invalid_token"
 
     def test_weak_password_keeps_token_usable(self, client, user):

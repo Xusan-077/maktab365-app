@@ -5,8 +5,8 @@ const keys = (role: "editor" | "admin") => adminNavFor(role).map((item) => item.
 
 describe("adminNavFor", () => {
   it("foydalanuvchilar bo'limi faqat admin'ga", () => {
-    expect(keys("admin")).toEqual(["dashboard", "books", "users"]);
-    expect(keys("editor")).toEqual(["dashboard", "books"]);
+    expect(keys("admin")).toEqual(["dashboard", "books", "pdfBooks", "users"]);
+    expect(keys("editor")).toEqual(["dashboard", "books", "pdfBooks"]);
   });
 
   it("mavzu sahifalari Kitoblar bo'limini faol qiladi", () => {

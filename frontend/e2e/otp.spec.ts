@@ -1,4 +1,5 @@
 import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
+import { randomPassword } from "./credentials";
 
 const API_URL = process.env.E2E_API_URL ?? "http://localhost:8000";
 
@@ -83,10 +84,11 @@ test.describe("email kodi bilan kirish", () => {
     // Yagona usul: o'chirish tugmasi o'chiq.
     await expect(methods.getByRole("button", { name: "O'chirish" })).toBeDisabled();
     // Parolsiz akkaunt → parol o'rnatish formasi (almashtirish emas).
+    const newPassword = randomPassword();
     const setPassword = page.getByTestId("set-password");
     await expect(setPassword).toBeVisible();
-    await setPassword.getByLabel("Yangi parol").fill("otp-yangi-parol-2026");
-    await setPassword.getByLabel("Parolni takrorlang").fill("otp-yangi-parol-2026");
+    await setPassword.getByLabel("Yangi parol").fill(newPassword);
+    await setPassword.getByLabel("Parolni takrorlang").fill(newPassword);
     await setPassword.getByRole("button", { name: "Parolni o'rnatish" }).click();
 
     await expect(methods.getByText("Email va parol")).toBeVisible();

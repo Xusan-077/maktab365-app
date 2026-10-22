@@ -1,6 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { join } from "node:path";
 import { expect, test, type Page } from "@playwright/test";
+import { randomPassword } from "./credentials";
 
 /**
  * Admin (M10): editor kitob yaratadi → bob → mavzu → tekshirildi → nashr → ochiq sahifada ko'rinadi.
@@ -8,7 +9,7 @@ import { expect, test, type Page } from "@playwright/test";
  * (rolni faqat admin o'zgartiradi, UI orqali editor bo'lib bo'lmaydi).
  */
 const stamp = Date.now();
-const password = "e2e-kuchli-parol-2026";
+const password = randomPassword();
 const editorEmail = `e2e-editor-${stamp}@example.com`;
 const studentEmail = `e2e-nonstaff-${stamp}@example.com`;
 const BOOK_SLUG = `e2e-fizika-${stamp}`;
@@ -80,7 +81,7 @@ test("editor: kitob → bob → mavzu → tekshirildi → nashr → ochiq sahifa
   await expect(page.locator("[data-layout=marketing]")).toHaveCount(0);
   await expect(page.locator("[data-app-sidebar]")).toHaveCount(0);
   const nav = page.getByRole("navigation", { name: "Admin menyusi" });
-  await expect(nav.getByRole("link", { name: "Kitoblar" })).toBeVisible();
+  await expect(nav.getByRole("link", { name: "Kitoblar", exact: true })).toBeVisible();
   await expect(nav.getByRole("link", { name: "Foydalanuvchilar" })).toHaveCount(0);
 
   await page.goto("/uz/admin/foydalanuvchilar");

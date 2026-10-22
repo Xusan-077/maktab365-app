@@ -126,6 +126,7 @@ class TestEndpoint:
         assert first == {
             "progress": 1,
             "bookmarks": 2,
+            "pdf_progress": 0,
             "failed": ["yoq-mavzu", "yoq-kitob"],
         }
         second = api.post(URL, body, format="json").json()
@@ -138,6 +139,7 @@ class TestEndpoint:
         assert api.post(URL, {}, format="json").json() == {
             "progress": 0,
             "bookmarks": 0,
+            "pdf_progress": 0,
             "failed": [],
         }
 

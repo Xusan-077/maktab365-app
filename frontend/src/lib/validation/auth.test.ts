@@ -32,11 +32,8 @@ describe("loginSchema", () => {
 });
 
 describe("registerSchema", () => {
-  const valid = {
-    email: "ali@example.com",
-    password: "kuchli-parol",
-    passwordConfirm: "kuchli-parol",
-  };
+  const strong = crypto.randomUUID();
+  const valid = { email: "ali@example.com", password: strong, passwordConfirm: strong };
 
   it("to'g'ri qiymatlar o'tadi", async () => {
     expect(await errors(registerSchema, valid)).toEqual([]);
@@ -53,9 +50,9 @@ describe("registerSchema", () => {
   });
 
   it("parollar mos kelmasa", async () => {
-    expect(await errors(registerSchema, { ...valid, passwordConfirm: "boshqa-parol" })).toEqual([
-      "passwordsMismatch",
-    ]);
+    expect(await errors(registerSchema, { ...valid, passwordConfirm: `${strong}-boshqa` })).toEqual(
+      ["passwordsMismatch"],
+    );
   });
 });
 
@@ -74,8 +71,8 @@ describe("boshqa formalar", () => {
     expect(
       await errors(changePasswordSchema, {
         currentPassword: "",
-        newPassword: "yangi-parol-1",
-        passwordConfirm: "yangi-parol-2",
+        newPassword: crypto.randomUUID(),
+        passwordConfirm: crypto.randomUUID(),
       }),
     ).toEqual(expect.arrayContaining(["currentPasswordRequired", "passwordsMismatch"]));
   });

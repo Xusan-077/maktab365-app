@@ -1,6 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { ApiError } from "@/lib/api/types";
-import { changesPublicContent, isSameOrigin, toBffUrl, upstreamPath } from "./request-guards";
+import {
+  bodyLimitFor,
+  changesPublicContent,
+  declaresTooLargeBody,
+  isPdfFilePath,
+  isSameOrigin,
+  MAX_BODY_BYTES,
+  MAX_PDF_BODY_BYTES,
+  toBffUrl,
+  upstreamPath,
+} from "./request-guards";
 import { errorCodeOf } from "./client";
 import { signInErrorCode } from "./sign-in-errors";
 
@@ -41,6 +51,39 @@ describe("BFF: ochiq kontent keshi", () => {
     expect(changesPublicContent("GET", "/api/v1/admin/books/", 200)).toBe(false);
     expect(changesPublicContent("POST", "/api/v1/admin/books/", 400)).toBe(false);
     expect(changesPublicContent("POST", "/api/v1/me/progress/", 200)).toBe(false);
+  });
+});
+
+describe("BFF: tana hajmi chegarasi", () => {
+  const PDF_PATH = "/api/v1/admin/pdf-books/3f2b8c1e-5d4a-4c7e-9a10-0b6f1d2e3c4d/upload/";
+
+  it("PDF yuklash yo'lida katta chegara, boshqa yo'llarda kichik", () => {
+    expect(bodyLimitFor(PDF_PATH)).toBe(MAX_PDF_BODY_BYTES);
+    expect(bodyLimitFor("/api/v1/admin/uploads/")).toBe(MAX_BODY_BYTES);
+    expect(bodyLimitFor("/api/v1/admin/pdf-books/3f2b8c1e-5d4a-4c7e-9a10-0b6f1d2e3c4d/")).toBe(
+      MAX_BODY_BYTES,
+    );
+    expect(bodyLimitFor("/api/v1/admin/pdf-books/../upload/")).toBe(MAX_BODY_BYTES);
+  });
+
+  it("PDF fayl endpoint'i faqat aniq yo'lda tanib olinadi", () => {
+    const id = "3f2b8c1e-5d4a-4c7e-9a10-0b6f1d2e3c4d";
+    expect(isPdfFilePath(`/api/v1/pdf-books/${id}/file/`)).toBe(true);
+    expect(isPdfFilePath(`/api/v1/pdf-books/${id}/file-url/`)).toBe(false);
+    expect(isPdfFilePath(`/api/v1/pdf-books/${id}/`)).toBe(false);
+  });
+
+  it("e'lon qilingan Content-Length chegaradan oshsa rad etadi", () => {
+    const withLength = (length: number) =>
+      new Request("http://localhost:3000/api/backend/x", {
+        method: "POST",
+        headers: { "content-length": String(length) },
+        body: "x",
+      });
+    expect(declaresTooLargeBody(withLength(MAX_BODY_BYTES + 1), "/api/v1/me/")).toBe(true);
+    expect(declaresTooLargeBody(withLength(MAX_BODY_BYTES), "/api/v1/me/")).toBe(false);
+    expect(declaresTooLargeBody(withLength(MAX_BODY_BYTES + 1), PDF_PATH)).toBe(false);
+    expect(declaresTooLargeBody(withLength(MAX_PDF_BODY_BYTES + 1), PDF_PATH)).toBe(true);
   });
 });
 

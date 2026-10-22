@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { randomPassword } from "./credentials";
 
 /**
  * O'qish jarayoni (M8): mehmon o'qiydi va xatcho'p qo'yadi → ro'yxatdan o'tgach ma'lumot akkauntda →
@@ -7,7 +8,7 @@ import { expect, test, type Page } from "@playwright/test";
 const TOPIC_TITLE = "Viyet teoremasi";
 const TOPIC_URL = "/uz/darsliklar/algebra-9/algebra-9-viyet-teoremasi";
 const email = `e2e-learning-${Date.now()}@example.com`;
-const password = "e2e-kuchli-parol-2026";
+const password = randomPassword();
 
 const GUEST_KEY = "maktab365-guest";
 

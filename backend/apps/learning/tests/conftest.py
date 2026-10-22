@@ -3,6 +3,7 @@ from rest_framework.test import APIClient
 
 from apps.accounts.models import Profile, User
 from apps.content.tests.conftest import Catalog, clear_cache  # noqa: F401 — autouse fixture
+from apps.core.tests.passwords import TEST_PASSWORD
 
 DISCRIMINANT = "algebra-9-diskriminant"
 VIYET = "algebra-9-viyet"
@@ -32,7 +33,7 @@ def library(db):
 
 
 def make_user(email, **profile):
-    user = User.objects.create_user(email=email, password="s3cret-pass-1")
+    user = User.objects.create_user(email=email, password=TEST_PASSWORD)
     if profile:
         Profile.objects.update_or_create(user=user, defaults=profile)
     return user

@@ -1,8 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
+import { randomPassword } from "./credentials";
 
 /** Har ishga tushirishda yangi akkaunt — backend bazasi tozalanmasa ham to'qnashuv yo'q. */
 const email = `e2e-${Date.now()}@example.com`;
-const password = "e2e-kuchli-parol-2026";
+const password = randomPassword();
 
 /** Ikki qadam: email → "Davom etish" → parol → "Kirish". Birinchi qadam backend'ga murojaat qilmaydi. */
 async function submitLogin(page: Page, pass = password) {

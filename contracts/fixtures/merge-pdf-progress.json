@@ -1,0 +1,29 @@
+{
+  "description": "PDF darslikda oxirgi sahifani mehmondan akkauntga qo'shish. Qoida: faqat qat'iy yangiroq mijoz vaqti (`updated_at`) yutadi; tenglikda akkaunt qiymati qoladi. Backend (merge-guest-data/) va frontend bir xil natija berishi kerak.",
+  "cases": [
+    {
+      "name": "akkaunt bo'sh: mehmon sahifasini oladi",
+      "account": null,
+      "guest": { "last_page": 7, "updated_at": "2026-01-02T10:00:00Z" },
+      "merged": { "last_page": 7, "updated_at": "2026-01-02T10:00:00Z" }
+    },
+    {
+      "name": "mehmon yangiroq: mehmon yutadi",
+      "account": { "last_page": 3, "updated_at": "2026-01-01T10:00:00Z" },
+      "guest": { "last_page": 9, "updated_at": "2026-01-02T10:00:00Z" },
+      "merged": { "last_page": 9, "updated_at": "2026-01-02T10:00:00Z" }
+    },
+    {
+      "name": "akkaunt yangiroq: akkaunt qoladi (orqaga ketish ham)",
+      "account": { "last_page": 5, "updated_at": "2026-01-03T10:00:00Z" },
+      "guest": { "last_page": 20, "updated_at": "2026-01-02T10:00:00Z" },
+      "merged": { "last_page": 5, "updated_at": "2026-01-03T10:00:00Z" }
+    },
+    {
+      "name": "vaqt teng: akkaunt qoladi",
+      "account": { "last_page": 4, "updated_at": "2026-01-02T10:00:00Z" },
+      "guest": { "last_page": 8, "updated_at": "2026-01-02T10:00:00Z" },
+      "merged": { "last_page": 4, "updated_at": "2026-01-02T10:00:00Z" }
+    }
+  ]
+}

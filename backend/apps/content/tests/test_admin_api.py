@@ -6,6 +6,7 @@ from rest_framework.test import APIClient
 from apps.accounts.models import AuditLog, User
 from apps.content.cache import content_version
 from apps.content.models import Book, Chapter, Subject, Topic
+from apps.core.tests.passwords import TEST_PASSWORD
 from apps.support.models import SupportMessage
 
 BASE = "/api/v1/admin"
@@ -17,7 +18,7 @@ ROLES = ["student", "teacher", "editor", "admin"]
 def client_as(role=None):
     client = APIClient()
     if role:
-        user = User.objects.create_user(email=f"{role}@example.com", password="s3cret-pass-1")
+        user = User.objects.create_user(email=f"{role}@example.com", password=TEST_PASSWORD)
         user.role = role
         user.save()
         client.force_authenticate(user)

@@ -4,6 +4,7 @@ from django.core.cache import cache
 from rest_framework.test import APIClient
 
 from apps.accounts.models import User
+from apps.core.tests.passwords import TEST_PASSWORD
 from apps.support.models import Kind, Status, SupportMessage
 
 pytestmark = pytest.mark.django_db
@@ -54,7 +55,7 @@ class TestCreate:
         assert msg.user_agent == "pytest-agent"
 
     def test_authenticated_user_is_attached_and_email_falls_back(self, api, send):
-        user = User.objects.create_user(email="stud@example.com", password="kuchli-parol-2026")
+        user = User.objects.create_user(email="stud@example.com", password=TEST_PASSWORD)
         api.force_authenticate(user)
         response = send({"kind": "question", "message": "Qanday qilib natijani ko'raman?"})
         assert response.status_code == 201
@@ -149,8 +150,8 @@ class TestMine:
         assert api.get("/api/v1/me/support/").status_code in (401, 403)
 
     def test_lists_only_own_messages_with_status(self, api, send):
-        alice = User.objects.create_user(email="a@example.com", password="kuchli-parol-2026")
-        bob = User.objects.create_user(email="b@example.com", password="kuchli-parol-2026")
+        alice = User.objects.create_user(email="a@example.com", password=TEST_PASSWORD)
+        bob = User.objects.create_user(email="b@example.com", password=TEST_PASSWORD)
         api.force_authenticate(alice)
         send({"kind": "question", "message": "Alice savoli, uzunroq matn."})
         api.force_authenticate(bob)
@@ -168,7 +169,7 @@ class TestMine:
         assert "email" not in item
 
     def test_spam_is_hidden_from_the_author(self, api, send):
-        user = User.objects.create_user(email="a@example.com", password="kuchli-parol-2026")
+        user = User.objects.create_user(email="a@example.com", password=TEST_PASSWORD)
         api.force_authenticate(user)
         send({"kind": "question", "message": "Best CASINO bonus for you, click here please"})
         send({"kind": "question", "message": "Oddiy savol: natijalar qayerda ko'rinadi?"})

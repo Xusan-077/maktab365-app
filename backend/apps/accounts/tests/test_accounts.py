@@ -7,13 +7,14 @@ from rest_framework.test import APIClient
 
 from apps.accounts import services
 from apps.accounts.models import AuthEvent, Identity, Profile, Role, User
+from apps.core.tests.passwords import TEST_PASSWORD
 
 pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
 def user():
-    return User.objects.create_user(email="Ali@Example.com", password="s3cret-pass-1")
+    return User.objects.create_user(email="Ali@Example.com", password=TEST_PASSWORD)
 
 
 @pytest.fixture
@@ -47,7 +48,7 @@ class TestModels:
         assert user.email_verified_at is None
 
     def test_superuser_is_admin(self):
-        admin = User.objects.create_superuser(email="root@b.uz", password="s3cret-pass-1")
+        admin = User.objects.create_superuser(email="root@b.uz", password=TEST_PASSWORD)
         assert admin.role == Role.ADMIN and admin.is_staff and admin.is_superuser
 
     def test_natural_key_by_email_case_insensitive(self, user):
@@ -64,7 +65,7 @@ class TestModels:
             validate_password(password)
 
     def test_password_validators_accept_strong(self):
-        validate_password("kuchli-parol-2026")
+        validate_password(TEST_PASSWORD)
 
     def test_identity_unique_per_provider_uid(self, user):
         Identity.objects.create(user=user, provider="google", provider_uid="g-1")

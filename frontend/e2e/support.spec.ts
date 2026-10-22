@@ -1,8 +1,9 @@
 import { expect, test } from "@playwright/test";
+import { randomPassword } from "./credentials";
 
 /** Har ishga tushirishda yangi akkaunt — backend bazasi tozalanmasa ham to'qnashuv yo'q. */
 const email = `e2e-support-${Date.now()}@example.com`;
-const password = "e2e-kuchli-parol-2026";
+const password = randomPassword();
 const TOPIC_URL = "/uz/darsliklar/algebra-9/algebra-9-viyet-teoremasi";
 
 test.describe("yordam va aloqa", () => {
