@@ -625,55 +625,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/UploadResult'
           description: ''
-  /api/v1/admin/users/:
-    get:
-      operationId: admin_users_list
-      description: Foydalanuvchilar ro'yxati — faqat admin (faqat o'qish).
-      parameters:
-      - name: ordering
-        required: false
-        in: query
-        description: Which field to use when ordering the results.
-        schema:
-          type: string
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
-      - in: query
-        name: role
-        schema:
-          type: string
-          enum:
-          - admin
-          - editor
-          - student
-          - teacher
-      - name: search
-        required: false
-        in: query
-        description: A search term.
-        schema:
-          type: string
-      tags:
-      - admin
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PaginatedUserAdminList'
-          description: ''
   /api/v1/admin/subjects/:
     get:
       operationId: admin_subjects_list
@@ -811,6 +762,140 @@ paths:
           type: string
           format: uuid
         description: A UUID string identifying this subject.
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/admin/users/:
+    get:
+      operationId: admin_users_list
+      description: Foydalanuvchilar boshqaruvi — faqat admin.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: role
+        schema:
+          type: string
+          enum:
+          - admin
+          - editor
+          - student
+          - teacher
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - active
+          - blocked
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserAdminList'
+          description: ''
+    post:
+      operationId: admin_users_create
+      description: Foydalanuvchilar boshqaruvi — faqat admin.
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserAdminCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserAdminCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserAdminCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserAdminCreated'
+          description: ''
+  /api/v1/admin/users/{id}/:
+    patch:
+      operationId: admin_users_update
+      description: Foydalanuvchilar boshqaruvi — faqat admin.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this user.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserAdminUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserAdminUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserAdminUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserAdmin'
+          description: ''
+    delete:
+      operationId: admin_users_delete
+      description: Foydalanuvchilar boshqaruvi — faqat admin.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this user.
         required: true
       tags:
       - admin
@@ -1214,7 +1299,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PdfBook'
+                $ref: '#/components/schemas/PdfBookDetail'
           description: ''
   /api/v1/pdf-books/{id}/file-url/:
     get:
@@ -1756,6 +1841,70 @@ components:
       - draft
       - published
       - total
+    Chapter:
+      type: object
+      description: 'Yuqori daraja; `children` — ichki bo''limlar (ular uchun `children`
+        yo''q: 2 daraja).'
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+        page:
+          type: integer
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChapterLeaf'
+      required:
+      - id
+      - page
+      - title
+    ChapterLeaf:
+      type: object
+      description: Mundarija qatori. Qiymatlar `pdf_services.chapter_errors` da tekshiriladi.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+        page:
+          type: integer
+      required:
+      - id
+      - page
+      - title
+    ChapterLeafRequest:
+      type: object
+      description: Mundarija qatori. Qiymatlar `pdf_services.chapter_errors` da tekshiriladi.
+      properties:
+        title:
+          type: string
+        page:
+          type: integer
+      required:
+      - page
+      - title
+    ChapterRequest:
+      type: object
+      description: 'Yuqori daraja; `children` — ichki bo''limlar (ular uchun `children`
+        yo''q: 2 daraja).'
+      properties:
+        title:
+          type: string
+        page:
+          type: integer
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChapterLeafRequest'
+      required:
+      - page
+      - title
     CheckStatusEnum:
       enum:
       - ok
@@ -2515,6 +2664,13 @@ components:
       properties:
         title:
           $ref: '#/components/schemas/LocalizedTextRequest'
+        description:
+          type: string
+          maxLength: 2000
+        chapters:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChapterRequest'
         grade:
           type: integer
           maximum: 11
@@ -2583,6 +2739,16 @@ components:
           type: integer
           maximum: 2147483647
           minimum: 0
+    PatchedUserAdminUpdateRequest:
+      type: object
+      properties:
+        display_name:
+          type: string
+          maxLength: 60
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        is_active:
+          type: boolean
     PdfBook:
       type: object
       properties:
@@ -2633,6 +2799,13 @@ components:
           readOnly: true
         title:
           $ref: '#/components/schemas/LocalizedText'
+        description:
+          type: string
+          maxLength: 2000
+        chapters:
+          type: array
+          items:
+            $ref: '#/components/schemas/Chapter'
         grade:
           type: integer
           maximum: 11
@@ -2700,6 +2873,13 @@ components:
       properties:
         title:
           $ref: '#/components/schemas/LocalizedTextRequest'
+        description:
+          type: string
+          maxLength: 2000
+        chapters:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChapterRequest'
         grade:
           type: integer
           maximum: 11
@@ -2721,6 +2901,55 @@ components:
       description: |-
         * `draft` - Draft
         * `published` - Published
+    PdfBookDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          $ref: '#/components/schemas/LocalizedText'
+        grade:
+          type: integer
+        subject:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        subject_title:
+          $ref: '#/components/schemas/LocalizedText'
+        page_count:
+          type: integer
+        size_bytes:
+          type: integer
+        cover:
+          type: string
+          format: uri
+          nullable: true
+        unverified:
+          type: boolean
+          readOnly: true
+        published_at:
+          type: string
+          format: date-time
+          nullable: true
+        description:
+          type: string
+        chapters:
+          type: array
+          items:
+            $ref: '#/components/schemas/Chapter'
+      required:
+      - chapters
+      - cover
+      - description
+      - grade
+      - id
+      - page_count
+      - published_at
+      - size_bytes
+      - subject
+      - subject_title
+      - title
+      - unverified
     PdfBookmark:
       type: object
       properties:
@@ -3380,11 +3609,17 @@ components:
           format: email
           readOnly: true
           nullable: true
+        display_name:
+          type: string
+          readOnly: true
         role:
           allOf:
           - $ref: '#/components/schemas/RoleEnum'
           readOnly: true
         is_active:
+          type: boolean
+          readOnly: true
+        is_env_admin:
           type: boolean
           readOnly: true
         date_joined:
@@ -3393,10 +3628,76 @@ components:
           readOnly: true
       required:
       - date_joined
+      - display_name
       - email
       - id
       - is_active
+      - is_env_admin
       - role
+    UserAdminCreateRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        display_name:
+          type: string
+          maxLength: 60
+        password:
+          type: string
+          writeOnly: true
+          maxLength: 128
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+      required:
+      - email
+      - role
+    UserAdminCreated:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+          nullable: true
+        display_name:
+          type: string
+          readOnly: true
+        role:
+          allOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          readOnly: true
+        is_active:
+          type: boolean
+          readOnly: true
+        is_env_admin:
+          type: boolean
+          readOnly: true
+        date_joined:
+          type: string
+          format: date-time
+          readOnly: true
+        temporary_password:
+          type: string
+          readOnly: true
+          nullable: true
+          description: Parol berilmasa yaratilgan vaqtinchalik parol (faqat shu javobda,
+            bir marta).
+      required:
+      - date_joined
+      - display_name
+      - email
+      - id
+      - is_active
+      - is_env_admin
+      - role
+      - temporary_password
     Week:
       type: object
       properties:

@@ -16,7 +16,7 @@ from rest_framework.views import APIView
 from . import pdf_storage as storage
 from .cache import public_cached
 from .models import PdfBook, Subject
-from .pdf_serializers import PdfBookSerializer, PdfFileUrlSerializer
+from .pdf_serializers import PdfBookDetailSerializer, PdfBookSerializer, PdfFileUrlSerializer
 from .pdf_services import visible_pdf_books
 from .serializers import SubjectSerializer
 from .views import GRADE_PARAM, SUBJECT_PARAM, PublicView, _int_param
@@ -95,14 +95,14 @@ def _visible_book_or_404(request, pk) -> PdfBook:
 class PdfBookDetailView(PublicView, APIView):
     @extend_schema(
         operation_id="pdf_books_retrieve",
-        responses=PdfBookSerializer,
+        responses=PdfBookDetailSerializer,
         summary="PDF darslik",
         tags=TAGS,
     )
     @public_cached
     def get(self, request, pk):
         book = _visible_book_or_404(request, pk)
-        return Response(PdfBookSerializer(book, context={"request": request}).data)
+        return Response(PdfBookDetailSerializer(book, context={"request": request}).data)
 
 
 class PdfFileUrlView(PublicView, APIView):

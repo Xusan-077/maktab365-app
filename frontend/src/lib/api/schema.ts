@@ -441,23 +441,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/admin/users/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description Foydalanuvchilar ro'yxati — faqat admin (faqat o'qish). */
-        get: operations["admin_users_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/admin/subjects/": {
         parameters: {
             query?: never;
@@ -493,6 +476,42 @@ export interface paths {
         head?: never;
         /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
         patch: operations["admin_subjects_update"];
+        trace?: never;
+    };
+    "/api/v1/admin/users/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Foydalanuvchilar boshqaruvi — faqat admin. */
+        get: operations["admin_users_list"];
+        put?: never;
+        /** @description Foydalanuvchilar boshqaruvi — faqat admin. */
+        post: operations["admin_users_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/users/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** @description Foydalanuvchilar boshqaruvi — faqat admin. */
+        delete: operations["admin_users_delete"];
+        options?: never;
+        head?: never;
+        /** @description Foydalanuvchilar boshqaruvi — faqat admin. */
+        patch: operations["admin_users_update"];
         trace?: never;
     };
     "/api/v1/admin/pdf-books/": {
@@ -982,6 +1001,32 @@ export interface components {
             draft: number;
             published: number;
         };
+        /** @description Yuqori daraja; `children` — ichki bo'limlar (ular uchun `children` yo'q: 2 daraja). */
+        Chapter: {
+            /** Format: uuid */
+            readonly id: string;
+            title: string;
+            page: number;
+            children?: components["schemas"]["ChapterLeaf"][];
+        };
+        /** @description Mundarija qatori. Qiymatlar `pdf_services.chapter_errors` da tekshiriladi. */
+        ChapterLeaf: {
+            /** Format: uuid */
+            readonly id: string;
+            title: string;
+            page: number;
+        };
+        /** @description Mundarija qatori. Qiymatlar `pdf_services.chapter_errors` da tekshiriladi. */
+        ChapterLeafRequest: {
+            title: string;
+            page: number;
+        };
+        /** @description Yuqori daraja; `children` — ichki bo'limlar (ular uchun `children` yo'q: 2 daraja). */
+        ChapterRequest: {
+            title: string;
+            page: number;
+            children?: components["schemas"]["ChapterLeafRequest"][];
+        };
         /**
          * @description * `ok` - ok
          *     * `error` - error
@@ -1301,6 +1346,8 @@ export interface components {
         };
         PatchedPdfBookAdminRequest: {
             title?: components["schemas"]["LocalizedTextRequest"];
+            description?: string;
+            chapters?: components["schemas"]["ChapterRequest"][];
             grade?: number;
             subject?: string;
             cover?: string;
@@ -1323,6 +1370,11 @@ export interface components {
             icon?: string;
             order?: number;
         };
+        PatchedUserAdminUpdateRequest: {
+            display_name?: string;
+            role?: components["schemas"]["RoleEnum"];
+            is_active?: boolean;
+        };
         PdfBook: {
             /** Format: uuid */
             id: string;
@@ -1342,6 +1394,8 @@ export interface components {
             /** Format: uuid */
             readonly id: string;
             title: components["schemas"]["LocalizedText"];
+            description?: string;
+            chapters?: components["schemas"]["Chapter"][];
             grade: number;
             subject: string;
             cover?: string;
@@ -1362,6 +1416,8 @@ export interface components {
         };
         PdfBookAdminRequest: {
             title: components["schemas"]["LocalizedTextRequest"];
+            description?: string;
+            chapters?: components["schemas"]["ChapterRequest"][];
             grade: number;
             subject: string;
             cover?: string;
@@ -1372,6 +1428,23 @@ export interface components {
          * @enum {string}
          */
         PdfBookAdminStatusEnum: "draft" | "published";
+        PdfBookDetail: {
+            /** Format: uuid */
+            id: string;
+            title: components["schemas"]["LocalizedText"];
+            grade: number;
+            subject: string;
+            subject_title: components["schemas"]["LocalizedText"];
+            page_count: number;
+            size_bytes: number;
+            /** Format: uri */
+            cover: string | null;
+            readonly unverified: boolean;
+            /** Format: date-time */
+            published_at: string | null;
+            description: string;
+            chapters: components["schemas"]["Chapter"][];
+        };
         PdfBookmark: {
             book: components["schemas"]["PdfBook"];
             /** Format: date-time */
@@ -1623,10 +1696,33 @@ export interface components {
             readonly id: string;
             /** Format: email */
             readonly email: string | null;
+            readonly display_name: string;
             readonly role: components["schemas"]["RoleEnum"];
             readonly is_active: boolean;
+            readonly is_env_admin: boolean;
             /** Format: date-time */
             readonly date_joined: string;
+        };
+        UserAdminCreateRequest: {
+            /** Format: email */
+            email: string;
+            display_name?: string;
+            password?: string;
+            role: components["schemas"]["RoleEnum"];
+        };
+        UserAdminCreated: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: email */
+            readonly email: string | null;
+            readonly display_name: string;
+            readonly role: components["schemas"]["RoleEnum"];
+            readonly is_active: boolean;
+            readonly is_env_admin: boolean;
+            /** Format: date-time */
+            readonly date_joined: string;
+            /** @description Parol berilmasa yaratilgan vaqtinchalik parol (faqat shu javobda, bir marta). */
+            readonly temporary_password: string | null;
         };
         Week: {
             /** @description Shu hafta birinchi marta ochilgan kitoblar */
@@ -2270,35 +2366,6 @@ export interface operations {
             };
         };
     };
-    admin_users_list: {
-        parameters: {
-            query?: {
-                /** @description Which field to use when ordering the results. */
-                ordering?: string;
-                /** @description A page number within the paginated result set. */
-                page?: number;
-                /** @description Number of results to return per page. */
-                page_size?: number;
-                role?: "admin" | "editor" | "student" | "teacher";
-                /** @description A search term. */
-                search?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedUserAdminList"];
-                };
-            };
-        };
-    };
     admin_subjects_list: {
         parameters: {
             query?: {
@@ -2419,6 +2486,110 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SubjectAdmin"];
+                };
+            };
+        };
+    };
+    admin_users_list: {
+        parameters: {
+            query?: {
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                role?: "admin" | "editor" | "student" | "teacher";
+                /** @description A search term. */
+                search?: string;
+                status?: "active" | "blocked";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedUserAdminList"];
+                };
+            };
+        };
+    };
+    admin_users_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserAdminCreateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["UserAdminCreateRequest"];
+                "multipart/form-data": components["schemas"]["UserAdminCreateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserAdminCreated"];
+                };
+            };
+        };
+    };
+    admin_users_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this user. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    admin_users_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this user. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedUserAdminUpdateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedUserAdminUpdateRequest"];
+                "multipart/form-data": components["schemas"]["PatchedUserAdminUpdateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserAdmin"];
                 };
             };
         };
@@ -2728,7 +2899,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PdfBook"];
+                    "application/json": components["schemas"]["PdfBookDetail"];
                 };
             };
         };

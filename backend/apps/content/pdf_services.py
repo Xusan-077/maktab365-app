@@ -10,7 +10,7 @@ from django.utils import timezone
 from . import pdf_storage as storage
 from .admin_services import EDITORS, InvalidTransition, TransitionForbidden, UploadError
 from .cache import is_staff, show_drafts
-from .models import PdfBook, PdfBookStatus
+from .models import CHAPTER_TITLE_MAX, PdfBook, PdfBookChapter, PdfBookStatus
 
 TRANSITIONS: dict[tuple[str, str], tuple[str, ...]] = {
     (PdfBookStatus.DRAFT, PdfBookStatus.PUBLISHED): EDITORS,
@@ -31,6 +31,55 @@ def visible_pdf_books(request):
     if is_staff(request.user) or show_drafts(request):
         return books
     return books.filter(status=PdfBookStatus.PUBLISHED)
+
+
+# --- Mundarija ---
+
+MAX_CHAPTERS = 500
+MAX_CHAPTER_PAGE = 100_000
+
+
+def chapter_errors(chapters: list[dict], page_count: int) -> list[str]:
+    """Mundarija xato kodlari (bo'sh — to'g'ri); `page_count == 0` — yuqori chegara yo'q."""
+    rows = [(item, False) for item in chapters]
+    rows += [(child, True) for item in chapters for child in item.get("children", [])]
+    codes: set[str] = set()
+    if len(rows) > MAX_CHAPTERS:
+        codes.add("chapters_too_many")
+    for row, _is_child in rows:
+        title = (row.get("title") or "").strip()
+        if not title:
+            codes.add("chapter_title_required")
+        elif len(title) > CHAPTER_TITLE_MAX:
+            codes.add("chapter_title_too_long")
+        page = row.get("page")
+        if not isinstance(page, int) or page < 1 or page > MAX_CHAPTER_PAGE:
+            codes.add("chapter_page_invalid")
+        elif page_count and page > page_count:
+            codes.add("chapter_page_exceeds")
+    return sorted(codes)
+
+
+@transaction.atomic
+def replace_chapters(book: PdfBook, chapters: list[dict]) -> None:
+    """Mundarijani butunlay almashtiradi (tartib — ro'yxat tartibi)."""
+    book.chapters.all().delete()
+    getattr(book, "_prefetched_objects_cache", {}).pop("chapters", None)  # javobda eskirmasin
+    order = 0
+    for item in chapters:
+        parent = PdfBookChapter.objects.create(
+            book=book, title=item["title"].strip(), page=item["page"], order=order
+        )
+        order += 1
+        for child in item.get("children", []):
+            PdfBookChapter.objects.create(
+                book=book,
+                parent=parent,
+                title=child["title"].strip(),
+                page=child["page"],
+                order=order,
+            )
+            order += 1
 
 
 # --- Nashr oqimi ---

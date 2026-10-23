@@ -40,7 +40,15 @@ from .pdf_serializers import (
 )
 class PdfBookAdminViewSet(AdminViewSet):
     target_type = "pdf_book"
-    snapshot_fields = ("title", "grade", "subject_id", "status", "page_count", "size_bytes")
+    snapshot_fields = (
+        "title",
+        "description",
+        "grade",
+        "subject_id",
+        "status",
+        "page_count",
+        "size_bytes",
+    )
     serializer_class = PdfBookAdminSerializer
     http_method_names = ["get", "post", "patch", "delete", "head", "options"]
     search_fields = ["title__uz", "title__ru", "title__en"]
@@ -53,10 +61,11 @@ class PdfBookAdminViewSet(AdminViewSet):
     def snap(self, instance):
         data = super().snap(instance)
         data["file"], data["cover"] = str(instance.file or ""), str(instance.cover or "")
+        data["chapters"] = instance.chapters.count()
         return data
 
     def get_queryset(self):
-        qs = PdfBook.objects.select_related("subject")
+        qs = PdfBook.objects.select_related("subject").prefetch_related("chapters")
         params = self.request.query_params
         if params.get("grade", "").isdigit():
             qs = qs.filter(grade=int(params["grade"]))

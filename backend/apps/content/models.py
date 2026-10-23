@@ -1,4 +1,4 @@
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import MaxLengthValidator, MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
 
@@ -19,6 +19,10 @@ class Subject(UUIDModel, TimeStampedModel):
         return self.slug
 
 
+DESCRIPTION_MAX = 2000
+CHAPTER_TITLE_MAX = 200
+
+
 class PdfBookStatus(models.TextChoices):
     DRAFT = "draft", "Draft"
     PUBLISHED = "published", "Published"
@@ -28,6 +32,7 @@ class PdfBook(UUIDModel, TimeStampedModel):
     """PDF darslik: fayl obyekt saqlashda (DB'da emas), o'quvchi sahifa-sahifa o'qiydi."""
 
     title = LocalizedTextField()
+    description = models.TextField(blank=True, validators=[MaxLengthValidator(DESCRIPTION_MAX)])
     grade = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(11)], db_index=True
     )
@@ -57,3 +62,49 @@ class PdfBook(UUIDModel, TimeStampedModel):
         if self.status == PdfBookStatus.PUBLISHED and self.published_at is None:
             self.published_at = timezone.now()
         super().save(*args, **kwargs)
+
+    @property
+    def chapter_tree(self) -> list[dict]:
+        """Mundarija: yuqori daraja bo'limlari, har birida `children` (2 daraja)."""
+        rows = list(self.chapters.all())
+        children: dict = {}
+        for row in rows:
+            if row.parent_id:
+                children.setdefault(row.parent_id, []).append(row)
+        return [
+            {
+                "id": row.pk,
+                "title": row.title,
+                "page": row.page,
+                "children": [
+                    {"id": child.pk, "title": child.title, "page": child.page}
+                    for child in children.get(row.pk, [])
+                ],
+            }
+            for row in rows
+            if row.parent_id is None
+        ]
+
+
+class PdfBookChapter(UUIDModel):
+    """PDF mundarijasi qatori: sarlavha va PDF sahifa raqami (1 dan). Ichma-ich 2 daraja."""
+
+    book = models.ForeignKey(PdfBook, on_delete=models.CASCADE, related_name="chapters")
+    parent = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.CASCADE, related_name="children"
+    )
+    title = models.CharField(max_length=CHAPTER_TITLE_MAX)
+    page = models.PositiveIntegerField(validators=[MinValueValidator(1)])
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["order", "page"]
+        indexes = [models.Index(fields=["book", "order"])]
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(page__gte=1), name="content_chapter_page_gte_1"
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.title} ({self.page})"
