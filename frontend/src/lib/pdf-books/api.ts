@@ -20,6 +20,7 @@ export type Results = Schemas["Results"];
 export type Goal = Schemas["Goal"];
 export type GoalInput = Schemas["GoalWriteRequest"];
 export type GoalPatch = Schemas["PatchedGoalWriteRequest"];
+export type PdfDownload = Schemas["PdfDownload"];
 export type ReadEvent = Schemas["EventKindEnum"];
 
 export const PDF_PAGE_SIZE = 24;
@@ -29,6 +30,8 @@ export interface PdfBookFilters {
   subject?: string;
   q?: string;
   page?: number;
+  /** Standart 24; sinf sahifasi hamma kitobni bir so'rovda oladi (backend chegarasi 100). */
+  pageSize?: number;
 }
 
 export interface PdfBookPage {
@@ -48,7 +51,7 @@ export class PdfBooksApi {
           subject: filters.subject || undefined,
           q: filters.q || undefined,
           page: filters.page,
-          page_size: PDF_PAGE_SIZE,
+          page_size: filters.pageSize ?? PDF_PAGE_SIZE,
         },
       },
     });
@@ -65,6 +68,22 @@ export class PdfBooksApi {
 
   async book(id: string): Promise<PdfBookDetail> {
     const result = await this.client.GET("/api/v1/pdf-books/{id}/", { params: { path: { id } } });
+    return unwrap(result);
+  }
+
+  /** Kitob slug bo'yicha (`9-sinf-algebra`). */
+  async bookBySlug(slug: string): Promise<PdfBookDetail> {
+    const result = await this.client.GET("/api/v1/pdf-books/by-slug/{slug}/", {
+      params: { path: { slug } },
+    });
+    return unwrap(result);
+  }
+
+  /** Yuklab olish URL'i (`attachment`); yuklab olishlar sonini oshiradi. O'chirilgan bo'lsa 403 `download_disabled`. */
+  async download(id: string): Promise<PdfDownload> {
+    const result = await this.client.GET("/api/v1/pdf-books/{id}/download/", {
+      params: { path: { id } },
+    });
     return unwrap(result);
   }
 

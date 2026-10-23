@@ -878,7 +878,10 @@
       "hasBooks": "This subject has {count} book(s), so it can’t be deleted. Move or delete the books first.",
       "deleteTitle": "Delete this subject?",
       "deleteDescription": "The subject “{name}” will be deleted. This cannot be undone.",
-      "deleted": "Subject deleted"
+      "deleted": "Subject deleted",
+      "group": "Subject group",
+      "groupHint": "Tabs on the grade page are built from this group.",
+      "groupNone": "No group"
     },
     "pdfBooks": {
       "title": "Books (PDF)",
@@ -955,7 +958,11 @@
       "saved": "Saved",
       "deleted": "PDF book deleted",
       "deleteTitle": "Delete PDF book",
-      "deleteDescription": "“{title}”, its PDF file, table of contents and readers’ progress will be deleted. This cannot be undone."
+      "deleteDescription": "“{title}”, its PDF file, table of contents and readers’ progress will be deleted. This cannot be undone.",
+      "language": "Book language",
+      "allowDownload": "Allow download",
+      "allowDownloadHint": "When off, the book can only be read online (copyright).",
+      "downloads": "Downloads: {count}"
     },
     "details": {
       "heading": "Description and table of contents",
@@ -1128,6 +1135,126 @@
       "loadError": "Could not open the presentation. Check your connection and try again.",
       "pageError": "Could not show the slide.",
       "retry": "Try again"
+    },
+    "grade": {
+      "breadcrumb": {
+        "label": "Breadcrumb",
+        "home": "Home",
+        "textbooks": "Textbooks",
+        "grade": "Grade {grade}"
+      },
+      "title": "Grade {grade} textbooks",
+      "description": "PDF textbooks for grade {grade}: read online or download.",
+      "statsLabel": "Grade overview",
+      "stats": {
+        "books": "Textbooks",
+        "booksValue": "{count}",
+        "size": "Total size",
+        "free": "Price",
+        "freeValue": "Free"
+      },
+      "groups": {
+        "all": "All",
+        "exact": "Exact sciences",
+        "natural": "Natural sciences",
+        "language": "Languages and literature",
+        "social": "Social and historical",
+        "arts": "Arts and applied"
+      },
+      "tabs": "Subject groups",
+      "searchLabel": "Search textbooks by title",
+      "searchPlaceholder": "Textbook title…",
+      "results": "Textbook list",
+      "found": "{count} textbooks",
+      "empty": "No textbooks have been added for grade {grade} yet.",
+      "emptyFiltered": "No textbooks match this filter.",
+      "clear": "Clear filters",
+      "otherGrades": "Browse other grades",
+      "allGrades": {
+        "title": "All grades",
+        "stages": {
+          "primary": "Primary (1–4)",
+          "middle": "Middle (5–9)",
+          "high": "Upper (10–11)"
+        },
+        "label": "Grade {grade}"
+      },
+      "howTo": {
+        "title": "How to use",
+        "steps": {
+          "choose": {
+            "title": "Pick your grade",
+            "text": "Choose your grade, then the subject group you need."
+          },
+          "open": {
+            "title": "Open the book",
+            "text": "On the book page, see the table of contents and a preview."
+          },
+          "read": {
+            "title": "Read or download",
+            "text": "Read online or save the PDF file to your phone."
+          }
+        }
+      },
+      "meta": {
+        "title": "Grade {grade} textbooks — PDF, read online",
+        "description": "Grade {grade} textbooks ({count}): read online or download as PDF."
+      }
+    },
+    "page": {
+      "read": "Read online",
+      "download": "Download PDF",
+      "downloadSize": "Download PDF ({size})",
+      "downloading": "Preparing…",
+      "downloadFailed": "Could not download. Please try again.",
+      "downloadDisabled": "Downloading this book is turned off for copyright reasons. You can read it online.",
+      "share": "Share",
+      "shareTelegram": "Share on Telegram",
+      "copyLink": "Copy link",
+      "copied": "Link copied",
+      "shareText": "{title} — grade {grade} textbook",
+      "badges": {
+        "pdf": "PDF",
+        "grade": "Grade {grade}"
+      },
+      "passport": {
+        "title": "Book details",
+        "grade": "Grade",
+        "gradeValue": "Grade {grade}",
+        "subject": "Subject",
+        "format": "Format",
+        "size": "Size",
+        "pages": "Pages",
+        "pagesValue": "{count} pages",
+        "language": "Language",
+        "added": "Date added",
+        "price": "Price",
+        "free": "Free",
+        "languages": {
+          "uz": "Uzbek",
+          "ru": "Russian",
+          "en": "English"
+        }
+      },
+      "description": "Description",
+      "toc": "Table of contents",
+      "tocPage": "p. {page}",
+      "tocPresentation": "Presentation",
+      "preview": {
+        "title": "Preview",
+        "hint": "First {count} pages",
+        "pageLabel": "Page {page}",
+        "error": "Could not show the preview."
+      },
+      "similar": "Other textbooks for this grade",
+      "allOfGrade": "All grade {grade} textbooks",
+      "allGrades": "All grades",
+      "reportHint": "Found a mistake in the book?",
+      "meta": {
+        "title": "{title} — grade {grade}, PDF",
+        "description": "{title}: grade {grade}, {subject}. PDF ({size}, {pages} pages) — read online or download."
+      },
+      "shareMore": "More apps…"
     }
   },
   "library": {

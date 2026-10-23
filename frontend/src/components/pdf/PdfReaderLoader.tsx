@@ -1,8 +1,10 @@
 "use client";
 
 import { Suspense } from "react";
+import { useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { pdfQueries } from "@/lib/pdf-books/queries";
 
 // pdf.js faqat brauzerda ishlaydi: SSR'siz va faqat shu sahifada yuklanadi.
 const PdfReader = dynamic(() => import("./PdfReader").then((module) => module.PdfReader), {
@@ -10,11 +12,25 @@ const PdfReader = dynamic(() => import("./PdfReader").then((module) => module.Pd
   loading: () => <Skeleton className="h-96" />,
 });
 
+/**
+ * Kitob serverda topilmaganda (qoralama: faqat staff ko'radi) slug mijozda, BFF orqali (sessiya
+ * bilan) aniqlanadi; topilmasa o'qish oynasi o'zi "topilmadi" xabarini ko'rsatadi.
+ */
+function PdfReaderBySlug({ slug }: { slug: string }) {
+  const book = useQuery(pdfQueries.bookBySlug(slug));
+  if (book.isPending) return <Skeleton className="h-96" />;
+  return <PdfReader bookId={book.data?.id ?? slug} />;
+}
+
 /** Server sahifa uchun client chegarasi: `useSearchParams` Suspense talab qiladi. */
-export function PdfReaderLoader({ bookId }: { bookId: string }) {
+export function PdfReaderLoader(props: { bookId: string } | { slug: string }) {
   return (
     <Suspense fallback={<Skeleton className="h-96" />}>
-      <PdfReader bookId={bookId} />
+      {"bookId" in props ? (
+        <PdfReader bookId={props.bookId} />
+      ) : (
+        <PdfReaderBySlug slug={props.slug} />
+      )}
     </Suspense>
   );
 }

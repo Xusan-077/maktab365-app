@@ -12,6 +12,7 @@ export const pdfKeys = {
   list: (filters: PdfBookFilters) => ["pdf-books", "list", filters] as const,
   subjects: (grade?: number) => ["pdf-books", "subjects", grade ?? null] as const,
   book: (id: string) => ["pdf-books", "book", id] as const,
+  bookBySlug: (slug: string) => ["pdf-books", "book-by-slug", slug] as const,
   fileUrl: (id: string) => ["pdf-books", "file-url", id] as const,
   slidesUrl: (bookId: string, chapterId: string) =>
     ["pdf-books", "slides-url", bookId, chapterId] as const,
@@ -43,6 +44,13 @@ export const pdfQueries = {
     queryOptions({
       queryKey: pdfKeys.book(id),
       queryFn: () => getPdfBooksApi().book(id),
+      staleTime: PUBLIC_STALE_MS,
+    }),
+  /** Slug bo'yicha (qoralamani staff ko'ra olishi uchun mijozda, BFF orqali). */
+  bookBySlug: (slug: string) =>
+    queryOptions({
+      queryKey: pdfKeys.bookBySlug(slug),
+      queryFn: () => getPdfBooksApi().bookBySlug(slug),
       staleTime: PUBLIC_STALE_MS,
     }),
   /** Imzolangan URL: har ochilishda yangi olinadi, keshlanmaydi. */

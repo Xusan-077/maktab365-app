@@ -21,6 +21,8 @@ export interface PdfBookCardProps {
   read?: boolean;
   /** `column` — katalog gridi (muqova tepada); `row` — tor panellar (muqova chapda). */
   layout?: "column" | "row";
+  /** Birinchi ekrandagi karta: muqova rasmi darrov yuklanadi. */
+  priority?: boolean;
 }
 
 /** Oxirgi sahifaning kitobdagi ulushi (0..1). */
@@ -36,6 +38,7 @@ export function PdfBookCard({
   resumePage,
   read = false,
   layout = "column",
+  priority = false,
 }: PdfBookCardProps) {
   const t = useTranslations("pdfBooks.card");
   const locale = useLocale() as Locale;
@@ -51,7 +54,7 @@ export function PdfBookCard({
 
   return (
     <Link
-      href={pdfBookPath(book.id)}
+      href={pdfBookPath(book)}
       data-testid="pdf-book-card"
       className={cn(
         "group flex h-full gap-3.5 rounded-xl focus-visible:outline-offset-4",
@@ -64,6 +67,7 @@ export function PdfBookCard({
           subject={book.subject}
           subjectTitle={subjectTitle}
           src={book.cover}
+          priority={priority}
           className={cn(
             "w-full transition-[transform,box-shadow] duration-300 ease-out",
             "group-hover:shadow-xl motion-safe:group-hover:-translate-y-1 motion-safe:group-active:translate-y-0",

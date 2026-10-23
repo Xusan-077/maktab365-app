@@ -17,7 +17,7 @@ import { parseSlidesParams, readSlidesProgress, withSlidesParams } from "@/lib/p
 import { flattenToc } from "@/lib/pdf/toc";
 import { swipeDirection } from "@/lib/pdf/swipe";
 import { pdfQueries } from "@/lib/pdf-books/queries";
-import { ROUTES } from "@/lib/utils/routes";
+import { pdfBookPath, ROUTES } from "@/lib/utils/routes";
 import { ReportErrorLink } from "@/components/support/ReportErrorLink";
 import { BookCover } from "./BookCover";
 import { PdfBookDescription } from "./PdfBookDescription";
@@ -210,7 +210,7 @@ export function PdfReader({ bookId }: { bookId: string }) {
     <div className="flex flex-col gap-3" data-testid="pdf-reader">
       <div className="flex flex-wrap items-center gap-3">
         <Link
-          href={ROUTES.textbooks}
+          href={book.data ? pdfBookPath(book.data) : ROUTES.textbooks}
           className="text-link inline-flex items-center gap-1 text-sm font-medium underline-offset-4 hover:underline"
         >
           <ArrowLeft className="size-4" aria-hidden />

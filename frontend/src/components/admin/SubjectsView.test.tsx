@@ -23,7 +23,14 @@ import { SubjectsView } from "./SubjectsView";
 
 const t = uz.admin.subjects;
 const subject = (slug: string, name: string, books: number, order: number) =>
-  ({ id: `id-${slug}`, slug, title: { uz: name }, order, pdf_books_count: books }) as AdminSubject;
+  ({
+    id: `id-${slug}`,
+    slug,
+    title: { uz: name },
+    order,
+    group: "exact",
+    pdf_books_count: books,
+  }) as AdminSubject;
 const SUBJECTS = [subject("algebra", "Algebra", 2, 2), subject("fizika", "Fizika", 0, 9)];
 
 function setup(role = "admin") {
@@ -43,6 +50,13 @@ function setup(role = "admin") {
 }
 
 beforeEach(() => {
+  // `Select` (useMediaQuery) uchun: jsdom'da matchMedia yo'q.
+  window.matchMedia = ((query: string) => ({
+    matches: false,
+    media: query,
+    addEventListener: () => {},
+    removeEventListener: () => {},
+  })) as unknown as typeof window.matchMedia;
   vi.clearAllMocks();
   // jsdom'da native <dialog> usullari yo'q.
   HTMLDialogElement.prototype.showModal = function showModal() {
@@ -78,6 +92,7 @@ describe("SubjectsView", () => {
         slug: "ona-tili",
         title: { uz: "Ona tili" },
         order: 10,
+        group: "",
       }),
     );
   });
@@ -106,7 +121,10 @@ describe("SubjectsView", () => {
     fireEvent.click(screen.getByRole("button", { name: uz.admin.common.save }));
 
     await waitFor(() =>
-      expect(api.updateSubject).toHaveBeenCalledWith("id-fizika", { title: { uz: "Fizika 2" } }),
+      expect(api.updateSubject).toHaveBeenCalledWith("id-fizika", {
+        title: { uz: "Fizika 2" },
+        group: "exact",
+      }),
     );
   });
 

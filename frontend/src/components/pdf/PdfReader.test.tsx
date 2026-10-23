@@ -52,6 +52,8 @@ function setup(query = "", extra: Record<string, unknown> = {}) {
     grade: 9,
     subject: "algebra",
     subject_title: { uz: "Algebra" },
+    subject_group: "exact",
+    slug: "9-sinf-algebra",
   });
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   render(

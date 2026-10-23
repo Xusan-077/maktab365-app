@@ -72,7 +72,7 @@ export function PanelSearch({ className }: { className?: string }) {
   const hits = (books.data?.results ?? []).slice(0, MAX_RESULTS);
   const failed = enabled && books.isError;
   const pending = enabled && !failed && books.isPending;
-  const firstHref = hits[0] ? pdfBookPath(hits[0].id) : undefined;
+  const firstHref = hits[0] ? pdfBookPath(hits[0]) : undefined;
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -137,7 +137,7 @@ export function PanelSearch({ className }: { className?: string }) {
               <ul>
                 {hits.map((book) => (
                   <li key={book.id}>
-                    <Link href={pdfBookPath(book.id)} className={itemClasses}>
+                    <Link href={pdfBookPath(book)} className={itemClasses}>
                       <span className="font-medium">{getLocalized(book.title, locale)}</span>
                       <span className="text-muted text-sm">
                         {t("meta", {

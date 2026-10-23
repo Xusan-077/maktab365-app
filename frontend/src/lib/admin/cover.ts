@@ -1,6 +1,6 @@
 import type { AdminApi } from "@/lib/admin/api";
 import type { AdminPdfBook } from "@/lib/admin/types";
-import { renderCover } from "@/lib/pdf/thumbnail";
+import { renderCover, shrinkCoverImage } from "@/lib/pdf/thumbnail";
 
 export type CoverMode = "auto" | "first_page" | "custom";
 
@@ -38,7 +38,7 @@ export async function applyCover(
   let image: File;
   if (choice.mode === "custom") {
     if (!choice.image) throw new Error("Cover image is required");
-    image = choice.image;
+    image = await shrinkCoverImage(choice.image);
   } else {
     if (!pdf) throw new Error("PDF source is required");
     image = await renderCover(pdf);

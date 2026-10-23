@@ -59,8 +59,21 @@ export const baseHome = (base: AppBase) => (base === "marketing" ? ROUTES.home :
 
 /** Darsliklar katalogi (sinf → fan → kitoblar): hamma uchun ochiq, panel ichida ham shu sahifa. */
 export const catalogPath = () => ROUTES.textbooks;
-/** PDF darslik o'qish sahifasi (hamma uchun ochiq: marketing qobig'ida). */
-export const pdfBookPath = (id: string) => `${ROUTES.textbooks}/${id}`;
+/** Sinf sahifasi: `/darsliklar/9`. */
+export const gradePath = (grade: number) => `${ROUTES.textbooks}/${grade}`;
+
+/** Kitobning yo'l qismlari (API `PdfBook` ning ichki to'plami). */
+export interface BookRef {
+  grade: number;
+  slug: string;
+}
+
+/** Kitob sahifasi: `/darsliklar/9/9-sinf-algebra`. */
+export const pdfBookPath = (book: BookRef) => `${gradePath(book.grade)}/${book.slug}`;
+
+/** O'qish oynasi: `/darsliklar/9/9-sinf-algebra/oqish?page=N`. */
+export const readerPath = (book: BookRef, page?: number) =>
+  `${pdfBookPath(book)}/oqish${page && page > 1 ? `?page=${page}` : ""}`;
 
 /** Panel ichidagi Yordam sahifasi (rolga mos). */
 export const helpPath = (base: PanelBase) =>

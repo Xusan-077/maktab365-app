@@ -38,6 +38,8 @@ const book = (id: string, title: string, pages = 100) => ({
   grade: 9,
   subject: "algebra",
   subject_title: { uz: "Algebra" },
+  subject_group: "exact",
+  slug: "9-sinf-algebra",
   page_count: pages,
   size_bytes: 1,
   cover: null,
@@ -91,7 +93,7 @@ describe("LibraryHome", () => {
     expect(card.textContent).toContain("Algebra 9");
     expect(card.textContent).toContain("12 / 100-bet");
     const action = screen.getByRole("link", { name: /Algebra 9/ });
-    expect(action.getAttribute("href")).toBe("/darsliklar/b1?page=12");
+    expect(action.getAttribute("href")).toBe("/darsliklar/9/9-sinf-algebra/oqish?page=12");
   });
 
   it("haftalik ko'rsatkichlar va saqlanganlar soni serverdan", async () => {

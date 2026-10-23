@@ -878,7 +878,10 @@
       "hasBooks": "Bu fanda {count} ta kitob bor, shuning uchun o'chirib bo'lmaydi. Avval kitoblarni boshqa fanga o'tkazing yoki o'chiring.",
       "deleteTitle": "Fanni o'chirasizmi?",
       "deleteDescription": "«{name}» fani o'chiriladi. Bu amalni qaytarib bo'lmaydi.",
-      "deleted": "Fan o'chirildi"
+      "deleted": "Fan o'chirildi",
+      "group": "Fan guruhi",
+      "groupHint": "Sinf sahifasidagi tablar shu guruh bo'yicha tuziladi.",
+      "groupNone": "Guruhsiz"
     },
     "pdfBooks": {
       "title": "Kitoblar (PDF)",
@@ -955,7 +958,11 @@
       "saved": "Saqlandi",
       "deleted": "PDF kitob o'chirildi",
       "deleteTitle": "PDF kitobni o'chirish",
-      "deleteDescription": "«{title}», uning PDF fayli, mundarijasi va o'quvchilarning shu kitob bo'yicha o'qish holati o'chiriladi. Buni qaytarib bo'lmaydi."
+      "deleteDescription": "«{title}», uning PDF fayli, mundarijasi va o'quvchilarning shu kitob bo'yicha o'qish holati o'chiriladi. Buni qaytarib bo'lmaydi.",
+      "language": "Kitob tili",
+      "allowDownload": "Yuklab olishga ruxsat",
+      "allowDownloadHint": "O'chirilsa, kitob faqat onlayn o'qiladi (mualliflik huquqi).",
+      "downloads": "Yuklab olishlar soni: {count}"
     },
     "details": {
       "heading": "Tavsif va mundarija",
@@ -1128,6 +1135,126 @@
       "loadError": "Prezentatsiyani ochib bo'lmadi. Internetni tekshirib, qayta urinib ko'ring.",
       "pageError": "Slaydni ko'rsatib bo'lmadi.",
       "retry": "Qayta urinish"
+    },
+    "grade": {
+      "breadcrumb": {
+        "label": "Sahifa yo'li",
+        "home": "Bosh sahifa",
+        "textbooks": "Darsliklar",
+        "grade": "{grade}-sinf"
+      },
+      "title": "{grade}-sinf darsliklari",
+      "description": "{grade}-sinf uchun PDF darsliklar: onlayn o'qing yoki yuklab oling.",
+      "statsLabel": "Sinf ko'rsatkichlari",
+      "stats": {
+        "books": "Darsliklar",
+        "booksValue": "{count} ta",
+        "size": "Umumiy hajm",
+        "free": "Narxi",
+        "freeValue": "Bepul"
+      },
+      "groups": {
+        "all": "Hammasi",
+        "exact": "Aniq fanlar",
+        "natural": "Tabiiy fanlar",
+        "language": "Tillar va adabiyot",
+        "social": "Ijtimoiy-tarixiy",
+        "arts": "San'at va amaliy"
+      },
+      "tabs": "Fan guruhlari",
+      "searchLabel": "Darslik nomi bo'yicha qidirish",
+      "searchPlaceholder": "Darslik nomi…",
+      "results": "Darsliklar ro'yxati",
+      "found": "{count} ta darslik",
+      "empty": "Hozircha {grade}-sinf uchun darslik qo'shilmagan.",
+      "emptyFiltered": "Bu filtr bo'yicha darslik topilmadi.",
+      "clear": "Filtrlarni tozalash",
+      "otherGrades": "Boshqa sinflarni ko'rish",
+      "allGrades": {
+        "title": "Barcha sinflar",
+        "stages": {
+          "primary": "Boshlang'ich (1–4)",
+          "middle": "O'rta (5–9)",
+          "high": "Yuqori (10–11)"
+        },
+        "label": "{grade}-sinf"
+      },
+      "howTo": {
+        "title": "Qanday foydalanish",
+        "steps": {
+          "choose": {
+            "title": "Sinfni tanlang",
+            "text": "Yuqoridan sinfingizni, so'ng kerakli fan guruhini tanlang."
+          },
+          "open": {
+            "title": "Kitobni oching",
+            "text": "Kitob sahifasida mundarija va namunani ko'ring."
+          },
+          "read": {
+            "title": "O'qing yoki yuklab oling",
+            "text": "Onlayn o'qing yoki PDF faylni telefoningizga saqlang."
+          }
+        }
+      },
+      "meta": {
+        "title": "{grade}-sinf darsliklari — PDF, onlayn o'qish",
+        "description": "{grade}-sinf darsliklari ({count} ta): PDF ko'rinishida onlayn o'qing yoki yuklab oling."
+      }
+    },
+    "page": {
+      "read": "Onlayn o'qish",
+      "download": "PDF yuklab olish",
+      "downloadSize": "PDF yuklab olish ({size})",
+      "downloading": "Tayyorlanmoqda…",
+      "downloadFailed": "Yuklab olib bo'lmadi. Qayta urinib ko'ring.",
+      "downloadDisabled": "Bu kitobni yuklab olish mualliflik huquqi sababli o'chirilgan. Onlayn o'qishingiz mumkin.",
+      "share": "Ulashish",
+      "shareTelegram": "Telegram orqali ulashish",
+      "copyLink": "Havolani nusxalash",
+      "copied": "Havola nusxalandi",
+      "shareText": "{title} — {grade}-sinf darsligi",
+      "badges": {
+        "pdf": "PDF",
+        "grade": "{grade}-sinf"
+      },
+      "passport": {
+        "title": "Kitob pasporti",
+        "grade": "Sinf",
+        "gradeValue": "{grade}-sinf",
+        "subject": "Fan",
+        "format": "Format",
+        "size": "Hajmi",
+        "pages": "Betlar soni",
+        "pagesValue": "{count} bet",
+        "language": "Til",
+        "added": "Qo'shilgan sana",
+        "price": "Narxi",
+        "free": "Bepul",
+        "languages": {
+          "uz": "O'zbek tili",
+          "ru": "Rus tili",
+          "en": "Ingliz tili"
+        }
+      },
+      "description": "Tavsif",
+      "toc": "Mundarija",
+      "tocPage": "{page}-bet",
+      "tocPresentation": "Prezentatsiya",
+      "preview": {
+        "title": "Kitobdan namuna",
+        "hint": "Dastlabki {count} bet",
+        "pageLabel": "{page}-bet",
+        "error": "Namunani ko'rsatib bo'lmadi."
+      },
+      "similar": "Shu sinfning boshqa darsliklari",
+      "allOfGrade": "Barcha {grade}-sinf darsliklari",
+      "allGrades": "Barcha sinflar",
+      "reportHint": "Kitobda xato topdingizmi?",
+      "meta": {
+        "title": "{title} — {grade}-sinf, PDF",
+        "description": "{title}: {grade}-sinf, {subject}. PDF ({size}, {pages} bet) — onlayn o'qing yoki yuklab oling."
+      },
+      "shareMore": "Boshqa ilovalar…"
     }
   },
   "library": {

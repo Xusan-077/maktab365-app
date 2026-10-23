@@ -8,6 +8,7 @@ import { Controller, useForm, type Resolver } from "react-hook-form";
 import { Button } from "@/components/ui/Button";
 import { Dialog } from "@/components/ui/Dialog";
 import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 import { getAdminApi } from "@/lib/admin/api";
 import { ADMIN_ROOT_KEY } from "@/lib/admin/queries";
 import { slugify } from "@/lib/admin/slug";
@@ -20,7 +21,12 @@ import { useAdminErrorText, useAdminFieldErrorText } from "./useAdminErrorText";
 interface SubjectFormValues {
   slug: string;
   title: LocalizedText;
+  /** Katalog tabi uchun guruh; `none` — guruhsiz (faqat «Hammasi» da). */
+  group: string;
 }
+
+const GROUP_NONE = "none";
+const GROUPS = ["exact", "natural", "language", "social", "arts"] as const;
 
 export interface SubjectDialogProps {
   open: boolean;
@@ -39,6 +45,7 @@ function SubjectFormBody({
   const t = useTranslations("admin.subjects");
   const tv = useTranslations("admin.validation");
   const tc = useTranslations("admin.common");
+  const tg = useTranslations("pdfBooks.grade.groups");
   const queryClient = useQueryClient();
   const errorText = useAdminErrorText();
   const fieldErrorText = useAdminFieldErrorText();
@@ -54,6 +61,7 @@ function SubjectFormBody({
     resolver: yupResolver(schema) as unknown as Resolver<SubjectFormValues>,
     defaultValues: {
       slug: subject?.slug ?? "",
+      group: subject?.group || GROUP_NONE,
       title: {
         uz: subject?.title.uz ?? "",
         ru: subject?.title.ru ?? "",
@@ -66,9 +74,10 @@ function SubjectFormBody({
     mutationFn: (values: SubjectFormValues) => {
       const api = getAdminApi();
       const title = toLocalized(values.title);
+      const group = (values.group === GROUP_NONE ? "" : values.group) as AdminSubject["group"];
       return subject
-        ? api.updateSubject(subject.id, { title })
-        : api.createSubject({ slug: values.slug, title, order: nextOrder });
+        ? api.updateSubject(subject.id, { title, group })
+        : api.createSubject({ slug: values.slug, title, order: nextOrder, group });
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ADMIN_ROOT_KEY });
@@ -113,6 +122,23 @@ function SubjectFormBody({
         disabled={Boolean(subject)}
         autoComplete="off"
         {...register("slug")}
+      />
+      <Controller
+        control={control}
+        name="group"
+        render={({ field }) => (
+          <Select
+            label={t("group")}
+            hint={t("groupHint")}
+            value={field.value}
+            onChange={field.onChange}
+            searchable={false}
+            options={[
+              { value: GROUP_NONE, label: t("groupNone") },
+              ...GROUPS.map((group) => ({ value: group, label: tg(group) })),
+            ]}
+          />
+        )}
       />
       {save.isError && !slugError && (
         <p role="alert" className="text-danger text-sm">

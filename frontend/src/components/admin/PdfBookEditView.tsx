@@ -44,7 +44,11 @@ interface FormValues {
   grade: string;
   subject: string;
   title: LocalizedText;
+  language: string;
+  allowDownload: boolean;
 }
+
+const LANGUAGES = ["uz", "ru", "en"] as const;
 
 function Details({ book }: { book: AdminPdfBook }) {
   const t = useTranslations("admin.pdfEdit");
@@ -329,6 +333,7 @@ function PdfBookForm({ book }: { book: AdminPdfBook }) {
   const tw = useTranslations("admin.pdfWizard");
   const tv = useTranslations("admin.validation");
   const tc = useTranslations("admin.common");
+  const tl = useTranslations("pdfBooks.page.passport.languages");
   const locale = useLocale() as Locale;
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -349,6 +354,8 @@ function PdfBookForm({ book }: { book: AdminPdfBook }) {
       grade: String(book.grade),
       subject: book.subject,
       title: { uz: book.title.uz, ru: book.title.ru ?? "", en: book.title.en ?? "" },
+      language: book.language ?? "uz",
+      allowDownload: book.allow_download ?? true,
     },
   });
 
@@ -358,6 +365,8 @@ function PdfBookForm({ book }: { book: AdminPdfBook }) {
         title: toLocalized(values.title),
         grade: Number(values.grade),
         subject: values.subject,
+        language: values.language as AdminPdfBook["language"],
+        allow_download: values.allowDownload,
       }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ADMIN_ROOT_KEY });
@@ -431,6 +440,43 @@ function PdfBookForm({ book }: { book: AdminPdfBook }) {
             />
           )}
         />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Controller
+            control={control}
+            name="language"
+            render={({ field }) => (
+              <Select
+                label={t("language")}
+                value={field.value}
+                onChange={field.onChange}
+                options={LANGUAGES.map((code) => ({ value: code, label: tl(code) }))}
+                searchable={false}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="allowDownload"
+            render={({ field }) => (
+              <label className="flex items-start gap-3 text-sm sm:pt-7">
+                <input
+                  type="checkbox"
+                  className="mt-0.5 size-4"
+                  data-testid="allow-download"
+                  checked={field.value}
+                  onChange={(event) => field.onChange(event.target.checked)}
+                />
+                <span className="flex flex-col">
+                  <span className="font-medium">{t("allowDownload")}</span>
+                  <span className="text-muted">{t("allowDownloadHint")}</span>
+                  <span className="text-muted tabular-nums">
+                    {t("downloads", { count: book.download_count ?? 0 })}
+                  </span>
+                </span>
+              </label>
+            )}
+          />
+        </div>
         {save.isError && (
           <p role="alert" className="text-danger text-sm">
             {errorText(save.error)}

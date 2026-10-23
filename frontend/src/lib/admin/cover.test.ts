@@ -3,6 +3,7 @@ import { applyCover, coverImageProblem, COVER_MAX_BYTES } from "./cover";
 
 vi.mock("@/lib/pdf/thumbnail", () => ({
   renderCover: vi.fn(async () => new File(["x"], "cover.webp", { type: "image/webp" })),
+  shrinkCoverImage: vi.fn(async (file: File) => file),
 }));
 
 const png = (size = 10) => new File([new Uint8Array(size)], "a.png", { type: "image/png" });

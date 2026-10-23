@@ -18,6 +18,7 @@ import { usePathname, useRouter } from "@/lib/i18n/navigation";
 import { PDF_PAGE_SIZE, type PdfBookFilters } from "@/lib/pdf-books/api";
 import { pdfQueries } from "@/lib/pdf-books/queries";
 import { cn } from "@/lib/utils/cn";
+import { gradePath } from "@/lib/utils/routes";
 import { GRADES } from "@/types/catalog";
 import { PdfBookCard, PdfBookCardSkeleton } from "./PdfBookCard";
 
@@ -106,7 +107,7 @@ export function PdfCatalogView() {
               key={grade}
               selected={filters.grade === grade}
               data-testid={`pdf-grade-${grade}`}
-              onClick={() => navigate({ grade, q: filters.q })}
+              onClick={() => router.push(gradePath(grade))}
             >
               {t("gradeLabel", { grade })}
             </Chip>

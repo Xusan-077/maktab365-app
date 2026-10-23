@@ -51,3 +51,40 @@ export async function renderCover(source: CoverSource): Promise<File> {
 }
 
 export const renderCoverFile = (pdf: File): Promise<File> => renderCover({ file: pdf });
+
+/** Yuklangan rasm shu enidan keng bo'lsa kichraytiriladi (kartalar uchun ortiqcha bayt yuklanmasin). */
+export function fitWidth(width: number, max = COVER_WIDTH): number {
+  return width > max ? max : width;
+}
+
+/**
+ * Admin yuklagan muqova rasmini ~600px enigacha kichraytirib WebP (yoki JPEG) qiladi. Rasm allaqachon
+ * kichik bo'lsa yoki brauzer o'qiy olmasa — asl fayl o'zgarishsiz qaytadi.
+ */
+export async function shrinkCoverImage(image: File): Promise<File> {
+  try {
+    const bitmap = await createImageBitmap(image);
+    try {
+      const width = fitWidth(bitmap.width);
+      if (width === bitmap.width && image.size <= 300 * 1024) return image;
+      const height = Math.round((bitmap.height * width) / bitmap.width);
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const context = canvas.getContext("2d");
+      if (!context) return image;
+      context.fillStyle = "#ffffff";
+      context.fillRect(0, 0, width, height);
+      context.drawImage(bitmap, 0, 0, width, height);
+      let blob = await toBlob(canvas, "image/webp");
+      if (blob?.type !== "image/webp") blob = await toBlob(canvas, "image/jpeg");
+      if (!blob || blob.size >= image.size) return image;
+      const webp = blob.type === "image/webp";
+      return new File([blob], webp ? "cover.webp" : "cover.jpg", { type: blob.type });
+    } finally {
+      bitmap.close();
+    }
+  } catch {
+    return image;
+  }
+}

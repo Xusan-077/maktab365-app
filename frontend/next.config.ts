@@ -15,11 +15,11 @@ const MOVED: { source: string; destination: string }[] = [
   // PDF darsliklar asosiy "Darsliklar" bo'limiga ko'chdi
   { source: `/${LOCALE}/pdf-kitoblar`, destination: "/:locale/darsliklar" },
   { source: `/${LOCALE}/pdf-kitoblar/:id`, destination: "/:locale/darsliklar/:id" },
-  // Eski kitob/mavzu sahifalari: `/darsliklar/{kitob}/{mavzu}` (bitta bo'lak — kitob — sahifaning o'zida)
-  { source: `/${LOCALE}/darsliklar/:book/:topic`, destination: "/:locale/darsliklar" },
-  // Kitob id'si uuid: eski slug'lar (`algebra-9`) katalogga ketadi
+  // Eski kitob/mavzu sahifalari: `/darsliklar/{kitob}/{mavzu}`. Sinf (`9`) bilan boshlangan yo'llar
+  // yangi `/darsliklar/{sinf}/{slug}` manzillari — ularga tegilmaydi. (Pattern ichida `$` butun
+  // yo'l oxirini bildiradi, shuning uchun sinf bo'lagi `/` bilan tekshiriladi.)
   {
-    source: `/${LOCALE}/darsliklar/:slug((?![0-9a-fA-F]{8}-[0-9a-fA-F]{4}-).+)`,
+    source: `/${LOCALE}/darsliklar/:book((?![0-9]{1,2}/)[^/]+)/:topic`,
     destination: "/:locale/darsliklar",
   },
   { source: `/${LOCALE}/fanlar`, destination: "/:locale/darsliklar" },

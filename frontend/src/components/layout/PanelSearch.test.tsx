@@ -38,6 +38,8 @@ const hit = {
   grade: 9,
   subject: "algebra",
   subject_title: { uz: "Algebra" },
+  subject_group: "exact",
+  slug: "9-sinf-algebra",
 };
 
 function setup() {
@@ -73,7 +75,7 @@ describe("PanelSearch", () => {
     fireEvent.change(input, { target: { value: "algebra" } });
 
     const link = await screen.findByRole("link", { name: /Algebra 9/ });
-    expect(link.getAttribute("href")).toBe("/darsliklar/b1");
+    expect(link.getAttribute("href")).toBe("/darsliklar/9/9-sinf-algebra");
     expect(link.textContent).toContain("9-sinf · Algebra");
     expect(api.list).toHaveBeenCalledWith(expect.objectContaining({ q: "algebra" }));
   });
@@ -86,7 +88,7 @@ describe("PanelSearch", () => {
     await screen.findByRole("link", { name: /Algebra 9/ });
     fireEvent.submit(input.closest("form")!);
 
-    await waitFor(() => expect(nav.push).toHaveBeenCalledWith("/darsliklar/b1"));
+    await waitFor(() => expect(nav.push).toHaveBeenCalledWith("/darsliklar/9/9-sinf-algebra"));
   });
 
   it("natija bo'lmasa shuni aytadi", async () => {

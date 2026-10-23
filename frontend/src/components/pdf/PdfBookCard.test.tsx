@@ -22,6 +22,8 @@ const book = (over: Partial<PdfBook> = {}): PdfBook => ({
   grade: 9,
   subject: "algebra",
   subject_title: { uz: "Algebra" },
+  subject_group: "exact",
+  slug: "9-sinf-algebra",
   page_count: 200,
   size_bytes: 12 * 1024 * 1024,
   cover: null,

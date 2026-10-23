@@ -7,7 +7,7 @@ import type { Locale } from "@/lib/i18n/config";
 import { getLocalized } from "@/lib/i18n/localized";
 import { Link } from "@/lib/i18n/navigation";
 import type { PdfLibraryItem } from "@/lib/pdf-books/api";
-import { pdfBookPath } from "@/lib/utils/routes";
+import { readerPath } from "@/lib/utils/routes";
 
 /** Oxirgi ochilgan darslik: nom, fan va sinf, joriy bet va "Davom ettirish" (shu betga olib boradi). */
 export function ContinueCard({ item }: { item: PdfLibraryItem }) {
@@ -43,7 +43,7 @@ export function ContinueCard({ item }: { item: PdfLibraryItem }) {
           </p>
         </div>
         <Link
-          href={`${pdfBookPath(book.id)}?page=${item.last_page}`}
+          href={readerPath(book, item.last_page)}
           aria-label={t("actionLabel", { title })}
           className={buttonVariants({ size: "lg" })}
         >
