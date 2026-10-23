@@ -24,7 +24,6 @@ export function ContinueCard({ item }: { item: PdfLibraryItem }) {
       className="border-border bg-surface flex flex-col gap-4 rounded-xl border p-6 sm:flex-row"
     >
       <BookCover
-        src={book.cover}
         grade={book.grade}
         subject={book.subject}
         subjectTitle={getLocalized(book.subject_title, locale)}

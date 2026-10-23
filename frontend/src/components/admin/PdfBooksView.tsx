@@ -208,7 +208,6 @@ export function PdfBooksView() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <BookCover
-                          src={book.cover_url}
                           grade={book.grade}
                           subject={book.subject}
                           subjectTitle={subjectTitles.get(book.subject) ?? book.subject}

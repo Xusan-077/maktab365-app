@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import uz from "@/lib/i18n/messages/uz.json";
 import type { PdfBook } from "@/lib/pdf-books/api";
@@ -56,19 +56,20 @@ describe("PdfBookCard", () => {
     expect(screen.getByTestId("generated-cover").getAttribute("data-tone")).toMatch(/^fallback-/);
   });
 
-  it("o'z muqovasi bo'lsa rasm, yuklanmasa generativ muqovaga qaytadi", () => {
+  it("kitobda PDF birinchi beti rasmi (cover) bo'lsa ham muqova doim generativ", () => {
     const { container } = render(
       <NextIntlClientProvider locale="uz" messages={uz}>
         <PdfBookCard book={book({ cover: "https://r2.test/c.png" })} />
       </NextIntlClientProvider>,
     );
-    const img = container.querySelector("img") as HTMLImageElement;
-    expect(img.src).toBe("https://r2.test/c.png");
-    expect(screen.queryByTestId("generated-cover")).toBeNull();
-
-    fireEvent.error(img);
 
     expect(screen.getByTestId("generated-cover")).toBeTruthy();
+    expect(container.querySelector("img")).toBeNull();
+  });
+
+  it("muqova nisbati 2:3", () => {
+    setup();
+    expect(screen.getByTestId("generated-cover").className).toContain("aspect-[2/3]");
   });
 
   it("nom, sinf va fan, hajm (MB) va betlar sonini ko'rsatadi", () => {

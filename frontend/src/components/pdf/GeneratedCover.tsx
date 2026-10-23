@@ -23,7 +23,7 @@ export function GeneratedCover({ grade, subject, subjectTitle, className }: Gene
       aria-hidden
       data-testid="generated-cover"
       data-tone={coverTone(subject)}
-      className={cn("cover aspect-[3/4] rounded-md", className)}
+      className={cn("cover aspect-[2/3] shrink-0 rounded-md shadow-sm", className)}
     >
       <div className="cover-content">
         <div className="cover-top">

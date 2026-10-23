@@ -60,7 +60,6 @@ export function PdfBookCard({
     >
       <div className={cn("relative shrink-0", row ? "w-20" : "w-full")}>
         <BookCover
-          src={book.cover}
           grade={book.grade}
           subject={book.subject}
           subjectTitle={subjectTitle}
@@ -114,7 +113,7 @@ export function PdfBookCard({
 export function PdfBookCardSkeleton() {
   return (
     <div className="flex flex-col gap-3.5">
-      <Skeleton className="aspect-[3/4] w-full" />
+      <Skeleton className="aspect-[2/3] w-full" />
       <Skeleton className="h-4 w-4/5" />
       <Skeleton className="h-3.5 w-3/5" />
     </div>

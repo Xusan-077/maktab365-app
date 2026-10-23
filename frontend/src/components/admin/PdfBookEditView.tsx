@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import { Controller, useForm, type Resolver } from "react-hook-form";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { BookCover } from "@/components/pdf/BookCover";
 import { Button } from "@/components/ui/Button";
 import { Select } from "@/components/ui/Select";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -367,6 +368,13 @@ export function PdfBookEditView({ id }: { id: string }) {
   const t = useTranslations("admin.pdfEdit");
   const locale = useLocale() as Locale;
   const { data: book, error, isPending, refetch } = useQuery(adminQueries.pdfBook(id));
+  const { data: subjects } = useQuery(adminQueries.subjects());
+  const subjectTitle =
+    (subjects ?? [])
+      .filter((s) => s.slug === book?.subject)
+      .map((s) => getLocalized(s.title, locale))[0] ??
+    book?.subject ??
+    "";
 
   if (error) return <QueryError error={error} onRetry={() => void refetch()} />;
   if (isPending) return <Skeleton className="h-96" />;
@@ -385,16 +393,12 @@ export function PdfBookEditView({ id }: { id: string }) {
       </Link>
       <div className="flex flex-col gap-6">
         <div className="flex flex-wrap items-start gap-5">
-          {book.cover_url && (
-            // Backend/R2 manzili (tashqi domen): next/image sozlamasi shart emas.
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={book.cover_url}
-              alt=""
-              data-testid="pdf-cover"
-              className="bg-subtle h-40 w-28 rounded-lg object-cover"
-            />
-          )}
+          <BookCover
+            grade={book.grade}
+            subject={book.subject}
+            subjectTitle={subjectTitle}
+            className="w-28"
+          />
           <div className="flex min-w-0 flex-1 flex-col gap-4">
             <Details book={book} />
             <PublishActions book={book} />

@@ -175,7 +175,6 @@ export function PdfReader({ bookId }: { bookId: string }) {
         {book.data && (
           <div className="flex min-w-0 flex-1 items-center gap-3">
             <BookCover
-              src={book.data.cover}
               grade={book.data.grade}
               subject={book.data.subject}
               subjectTitle={getLocalized(book.data.subject_title, locale)}
