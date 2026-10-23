@@ -109,7 +109,7 @@ function AdminTopbar() {
   return (
     <header
       data-admin-topbar
-      className="border-border bg-background/85 sticky top-0 z-40 flex h-14 items-center gap-2 border-b px-4 backdrop-blur sm:px-6 print:hidden"
+      className="border-border bg-background sticky top-0 z-40 flex h-14 items-center gap-2 border-b px-4 sm:px-6 print:hidden"
     >
       <Logo variant="mark" height={22} href={ADMIN_ROUTES.home} className="lg:hidden" />
       <AdminSearch />
@@ -129,7 +129,7 @@ function AdminMobileNav() {
   return (
     <nav
       aria-label={t("mobile")}
-      className="border-border bg-surface/95 fixed inset-x-0 bottom-0 z-40 flex gap-1 border-t px-2 pt-1 pb-[max(0.25rem,env(safe-area-inset-bottom))] backdrop-blur lg:hidden print:hidden"
+      className="border-border bg-surface fixed inset-x-0 bottom-0 z-40 flex gap-1 border-t px-2 pt-1 pb-[max(0.25rem,env(safe-area-inset-bottom))] lg:hidden print:hidden"
     >
       {adminNavFor(role).map(({ key, href, icon: Icon, isActive }) => {
         const active = isActive(pathname);

@@ -9,7 +9,7 @@ export function AppTopbar() {
   return (
     <header
       data-app-topbar
-      className="border-border bg-background/85 present:hidden sticky top-0 z-40 flex h-14 items-center gap-2 border-b px-4 backdrop-blur sm:px-6 print:hidden"
+      className="border-border bg-background present:hidden sticky top-0 z-40 flex h-14 items-center gap-2 border-b px-4 sm:px-6 print:hidden"
     >
       <Logo variant="mark" height={22} className="lg:hidden" />
       <div className="ml-auto flex items-center gap-2">

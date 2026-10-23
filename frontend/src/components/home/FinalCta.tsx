@@ -17,7 +17,7 @@ export function FinalCta() {
         >
           {t("title")}
         </h2>
-        <p className="text-primary-100 max-w-xl text-base">{t("text")}</p>
+        <p className="max-w-xl text-base text-white">{t("text")}</p>
         <Link href={ROUTES.textbooks} className={buttonVariants({ variant: "accent", size: "lg" })}>
           {t("button")}
         </Link>

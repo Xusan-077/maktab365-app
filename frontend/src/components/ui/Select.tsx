@@ -155,13 +155,22 @@ function SelectPopup({
     if (sheet) return;
     const anchor = anchorRef.current;
     if (!anchor) return;
-    const update = () => setPosition(computePosition(anchor));
-    update();
-    window.addEventListener("resize", update);
-    window.addEventListener("scroll", update, true);
+    // Scroll/resize paytida joylashuv kadrda bir marta (rAF) va passive tinglovchi bilan yangilanadi.
+    let frame = 0;
+    const apply = () => {
+      frame = 0;
+      setPosition(computePosition(anchor));
+    };
+    const update = () => {
+      if (!frame) frame = requestAnimationFrame(apply);
+    };
+    apply();
+    window.addEventListener("resize", update, { passive: true });
+    window.addEventListener("scroll", update, { capture: true, passive: true });
     return () => {
+      if (frame) cancelAnimationFrame(frame);
       window.removeEventListener("resize", update);
-      window.removeEventListener("scroll", update, true);
+      window.removeEventListener("scroll", update, { capture: true });
     };
   }, [anchorRef, sheet]);
 

@@ -356,17 +356,6 @@ dialog[open]::backdrop {
   --cv-to: #1d4ed8;
   --cv-glow: #5eead4;
 }
-/* Ingichka shovqin: gradient "bosma qog'oz" bo'lib ko'rinadi (kichik SVG, tarmoq so'rovisiz). */
-.cover::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  opacity: 0.12;
-  mix-blend-mode: overlay;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
 /* Umurtqa (chap chekka) va sahifa qirrasi: kitob hissi — haqiqiy rasmli muqovada ham bor. */
 .cover-edge {
   position: absolute;
@@ -428,7 +417,6 @@ dialog[open]::backdrop {
   line-height: 0.82;
   letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums;
-  text-shadow: 0 2cqw 6cqw rgb(0 0 0 / 0.22);
 }
 .cover-grade-label {
   margin-top: 3cqw;

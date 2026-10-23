@@ -78,7 +78,7 @@ export function MobileNav() {
     <>
       <nav
         aria-label={t("nav.mobile")}
-        className="border-border bg-surface/95 present:hidden fixed inset-x-0 bottom-0 z-40 grid grid-cols-3 gap-1 border-t px-2 pt-1 pb-[max(0.25rem,env(safe-area-inset-bottom))] backdrop-blur lg:hidden print:hidden"
+        className="border-border bg-surface present:hidden fixed inset-x-0 bottom-0 z-40 grid grid-cols-3 gap-1 border-t px-2 pt-1 pb-[max(0.25rem,env(safe-area-inset-bottom))] lg:hidden print:hidden"
       >
         <BarLink
           href={ROUTES.textbooks}

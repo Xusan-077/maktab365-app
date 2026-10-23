@@ -32,6 +32,6 @@ export const listItem: Variants = {
 /** Menyu/popover: yuqori-o'ngdan ochiladi, tez yopiladi. */
 export const popover: Variants = {
   hidden: { opacity: 0, y: -4, scale: 0.97 },
-  show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.16, ease: EASE_OUT } },
+  show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.14, ease: EASE_OUT } },
   exit: { opacity: 0, y: -4, scale: 0.97, transition: { duration: 0.12 } },
 };

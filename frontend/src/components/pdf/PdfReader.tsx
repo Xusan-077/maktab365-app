@@ -246,7 +246,7 @@ export function PdfReader({ bookId }: { bookId: string }) {
       </div>
       {book.data?.description && <PdfBookDescription text={book.data.description} />}
 
-      <div className="bg-background/90 sticky top-0 z-10 -mx-4 px-4 py-2 backdrop-blur sm:-mx-6 sm:px-6">
+      <div className="bg-background sticky top-0 z-10 -mx-4 px-4 py-2 sm:-mx-6 sm:px-6">
         {page !== null && total > 0 ? (
           <PdfToolbar page={page} total={total} onGo={goTo} />
         ) : (
