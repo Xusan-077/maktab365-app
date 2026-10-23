@@ -27,6 +27,7 @@ export function ContinueCard({ item }: { item: PdfLibraryItem }) {
         grade={book.grade}
         subject={book.subject}
         subjectTitle={getLocalized(book.subject_title, locale)}
+        src={book.cover}
         className="w-28"
       />
       <div className="flex min-w-0 flex-col items-start gap-3">

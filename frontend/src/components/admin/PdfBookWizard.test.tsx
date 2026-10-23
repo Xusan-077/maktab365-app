@@ -15,7 +15,7 @@ const api = vi.hoisted(() => ({
 }));
 const router = vi.hoisted(() => ({ push: vi.fn() }));
 const upload = vi.hoisted(() => ({ uploadPdf: vi.fn() }));
-const cover = vi.hoisted(() => ({ renderCoverFile: vi.fn() }));
+const cover = vi.hoisted(() => ({ renderCover: vi.fn(), renderCoverFile: vi.fn() }));
 
 vi.mock("@/lib/admin/api", () => ({ getAdminApi: () => api }));
 vi.mock("@/lib/i18n/navigation", () => ({ useRouter: () => router }));
@@ -34,7 +34,7 @@ function setup() {
   api.updatePdfBook.mockResolvedValue(BOOK);
   api.upload.mockResolvedValue({ path: "covers/c.jpg" });
   upload.uploadPdf.mockResolvedValue(BOOK);
-  cover.renderCoverFile.mockResolvedValue(new File(["j"], "cover.jpg", { type: "image/jpeg" }));
+  cover.renderCover.mockResolvedValue(new File(["j"], "cover.jpg", { type: "image/jpeg" }));
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   render(
     <NextIntlClientProvider locale="uz" messages={uz}>
@@ -61,10 +61,16 @@ async function toFileStep() {
   });
 }
 
+const firstPage = () =>
+  fireEvent.click(
+    screen.getByRole("radio", { name: new RegExp(uz.admin.cover.modes.first_page.title) }),
+  );
+
 /** Nom + PDF → «Davom etish» → «Tavsif va mundarija» qadami. */
-async function toDetailsStep() {
+async function toDetailsStep(withFirstPageCover = false) {
   await toFileStep();
   pick(pdf());
+  if (withFirstPageCover) firstPage();
   fireEvent.click(screen.getByRole("button", { name: t.next }));
   await screen.findByTestId("toc-editor");
 }
@@ -92,7 +98,7 @@ afterEach(cleanup);
 describe("PdfBookWizard", () => {
   it("sinf → fan → nom+PDF → o'tkazib yuborish: yozuv yaratadi, yuklaydi, muqovani PATCH qiladi", async () => {
     setup();
-    await toDetailsStep();
+    await toDetailsStep(true);
     fireEvent.click(screen.getByTestId("pdf-skip-details"));
 
     await waitFor(() => expect(router.push).toHaveBeenCalledWith("/admin/kitoblar/book-1"));
@@ -105,7 +111,10 @@ describe("PdfBookWizard", () => {
       expect.objectContaining({ bookId: "book-1", file: expect.any(File) }),
     );
     expect(api.upload).toHaveBeenCalledWith(expect.any(File), "cover");
-    expect(api.updatePdfBook).toHaveBeenCalledWith("book-1", { cover: "covers/c.jpg" });
+    expect(api.updatePdfBook).toHaveBeenCalledWith("book-1", {
+      cover_mode: "first_page",
+      cover: "covers/c.jpg",
+    });
     // O'tkazib yuborilganda tavsif/mundarija yuborilmaydi.
     expect(api.updatePdfBook.mock.calls.some(withChapters)).toBe(false);
   });
@@ -257,11 +266,24 @@ describe("PdfBookWizard", () => {
 
   it("muqova yaratilmasa ham kitob saqlanadi", async () => {
     setup();
-    cover.renderCoverFile.mockRejectedValue(new Error("canvas"));
+    cover.renderCover.mockRejectedValue(new Error("canvas"));
+    await toDetailsStep(true);
+    fireEvent.click(screen.getByTestId("pdf-skip-details"));
+
+    await waitFor(() => expect(router.push).toHaveBeenCalled());
+    expect(api.updatePdfBook).not.toHaveBeenCalledWith(
+      "book-1",
+      expect.objectContaining({ cover: expect.anything() }),
+    );
+  });
+
+  it("avtomatik muqovada rasm yuklanmaydi va muqova PATCH qilinmaydi", async () => {
+    setup();
     await toDetailsStep();
     fireEvent.click(screen.getByTestId("pdf-skip-details"));
 
     await waitFor(() => expect(router.push).toHaveBeenCalled());
-    expect(api.updatePdfBook).not.toHaveBeenCalledWith("book-1", { cover: expect.anything() });
+    expect(api.upload).not.toHaveBeenCalled();
+    expect(cover.renderCover).not.toHaveBeenCalled();
   });
 });

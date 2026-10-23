@@ -54,6 +54,7 @@ class PdfBookAdminViewSet(AdminViewSet):
         "status",
         "page_count",
         "size_bytes",
+        "cover_mode",
     )
     serializer_class = PdfBookAdminSerializer
     http_method_names = ["get", "post", "patch", "delete", "head", "options"]

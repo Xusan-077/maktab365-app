@@ -2145,6 +2145,16 @@ components:
       description: |-
         * `ok` - ok
         * `error` - error
+    CoverModeEnum:
+      enum:
+      - auto
+      - first_page
+      - custom
+      type: string
+      description: |-
+        * `auto` - Generated
+        * `first_page` - First page
+        * `custom` - Custom image
     Dashboard:
       type: object
       properties:
@@ -2930,6 +2940,8 @@ components:
           minLength: 1
         cover:
           type: string
+        cover_mode:
+          $ref: '#/components/schemas/CoverModeEnum'
     PatchedProfileUpdateRequest:
       type: object
       properties:
@@ -3064,6 +3076,8 @@ components:
           type: string
         cover:
           type: string
+        cover_mode:
+          $ref: '#/components/schemas/CoverModeEnum'
         cover_url:
           type: string
           format: uri
@@ -3139,6 +3153,8 @@ components:
           minLength: 1
         cover:
           type: string
+        cover_mode:
+          $ref: '#/components/schemas/CoverModeEnum'
       required:
       - grade
       - subject

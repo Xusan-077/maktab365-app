@@ -63,6 +63,7 @@ export function PdfBookCard({
           grade={book.grade}
           subject={book.subject}
           subjectTitle={subjectTitle}
+          src={book.cover}
           className={cn(
             "w-full transition-[transform,box-shadow] duration-300 ease-out",
             "group-hover:shadow-xl motion-safe:group-hover:-translate-y-1 motion-safe:group-active:translate-y-0",

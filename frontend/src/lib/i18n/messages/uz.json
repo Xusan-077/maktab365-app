@@ -1013,6 +1013,35 @@
       "addFor": "{n}-bo'lim uchun prezentatsiya qo'shish",
       "replaceFor": "{n}-bo'lim prezentatsiyasini almashtirish",
       "removeFor": "{n}-bo'lim prezentatsiyasini o'chirish"
+    },
+    "cover": {
+      "label": "Muqova",
+      "modes": {
+        "auto": {
+          "title": "Avtomatik",
+          "hint": "Sinf va fan rangidagi tayyor muqova."
+        },
+        "first_page": {
+          "title": "PDF ning 1-beti",
+          "hint": "Birinchi bet rasmga aylantirib saqlanadi."
+        },
+        "custom": {
+          "title": "O'z rasmim",
+          "hint": "JPG, PNG yoki WebP rasm yuklang."
+        }
+      },
+      "chooseImage": "Rasm tanlash",
+      "replaceImage": "Rasmni almashtirish",
+      "previewAlt": "Tanlangan muqova",
+      "imageHint": "JPG, PNG yoki WebP, 5 MB gacha. Nisbat 2:3 bo'lgani yaxshi.",
+      "problems": {
+        "type": "Faqat JPG, PNG yoki WebP rasm mumkin.",
+        "size": "Rasm 5 MB dan oshmasin."
+      },
+      "save": "Muqovani saqlash",
+      "saved": "Muqova saqlandi",
+      "needImage": "Avval rasm tanlang.",
+      "needFile": "Birinchi bet uchun avval PDF yuklang."
     }
   },
   "pdfBooks": {

@@ -1169,6 +1169,13 @@ export interface components {
          * @enum {string}
          */
         CheckStatusEnum: "ok" | "error";
+        /**
+         * @description * `auto` - Generated
+         *     * `first_page` - First page
+         *     * `custom` - Custom image
+         * @enum {string}
+         */
+        CoverModeEnum: "auto" | "first_page" | "custom";
         Dashboard: {
             continue: components["schemas"]["PdfLibraryItem"] | null;
             subjects: components["schemas"]["DashboardSubject"][];
@@ -1495,6 +1502,7 @@ export interface components {
             grade?: number;
             subject?: string;
             cover?: string;
+            cover_mode?: components["schemas"]["CoverModeEnum"];
         };
         PatchedProfileUpdateRequest: {
             display_name?: string;
@@ -1543,6 +1551,7 @@ export interface components {
             grade: number;
             subject: string;
             cover?: string;
+            cover_mode?: components["schemas"]["CoverModeEnum"];
             /** Format: uri */
             readonly cover_url: string | null;
             readonly has_file: boolean;
@@ -1565,6 +1574,7 @@ export interface components {
             grade: number;
             subject: string;
             cover?: string;
+            cover_mode?: components["schemas"]["CoverModeEnum"];
         };
         /**
          * @description * `draft` - Draft

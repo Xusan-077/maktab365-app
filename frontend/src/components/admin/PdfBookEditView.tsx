@@ -7,6 +7,9 @@ import { useLocale, useTranslations } from "next-intl";
 import { Controller, useForm, type Resolver } from "react-hook-form";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BookCover } from "@/components/pdf/BookCover";
+import { applyCover, coverImageProblem, type CoverChoice } from "@/lib/admin/cover";
+import { resolveFileUrl } from "@/lib/pdf/file-url";
+import { getPdfBooksApi } from "@/lib/pdf-books/api";
 import { Button } from "@/components/ui/Button";
 import { Select } from "@/components/ui/Select";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -29,6 +32,7 @@ import { useAdminIdentity } from "./AdminRoleProvider";
 import { BookDetailsFields, toDetailsPatch, type BookDetailsValue } from "./BookDetailsFields";
 import type { SlidesContext } from "./ChapterSlides";
 import { ConfirmDialog } from "./ConfirmDialog";
+import { CoverPicker } from "./CoverPicker";
 import { LocalizedFields, toLocalized } from "./LocalizedFields";
 import { PdfFilePicker } from "./PdfFilePicker";
 import { QueryError } from "./QueryError";
@@ -112,7 +116,12 @@ function ReplaceFile({ book }: { book: AdminPdfBook }) {
   const [problem, setProblem] = useState<PdfFileProblem | null>(null);
 
   const replace = useMutation({
-    mutationFn: () => upload.run(book.id, file!),
+    // PDF 1-beti rejimida yangi fayldan muqova qayta chiziladi; boshqa rejimda muqova o'zgarmaydi.
+    mutationFn: () =>
+      upload.run(book.id, file!, {
+        mode: book.cover_mode === "first_page" ? "first_page" : "auto",
+        image: null,
+      }),
     onSuccess: async ({ coverFailed }) => {
       await queryClient.invalidateQueries({ queryKey: ADMIN_ROOT_KEY });
       setFile(null);
@@ -153,6 +162,85 @@ function ReplaceFile({ book }: { book: AdminPdfBook }) {
         >
           {t(book.has_file ? "replaceAction" : "uploadAction")}
         </Button>
+      </div>
+    </section>
+  );
+}
+
+/** Muqova rejimi: avtomatik, PDF 1-beti (saqlangan fayldan) yoki o'z rasmi. */
+function CoverSection({ book, subjectTitle }: { book: AdminPdfBook; subjectTitle: string }) {
+  const t = useTranslations("admin.cover");
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const errorText = useAdminErrorText();
+  const initial = useMemo<CoverChoice>(
+    () => ({ mode: book.cover_mode ?? "auto", image: null }),
+    [book.cover_mode],
+  );
+  const [choice, setChoice] = useState<CoverChoice>(initial);
+  const missingImage = choice.mode === "custom" && !choice.image;
+  const invalidImage = choice.image ? coverImageProblem(choice.image) !== null : false;
+  const unchanged = choice.mode === initial.mode && choice.mode !== "custom";
+  const missingFile = choice.mode === "first_page" && !book.has_file;
+
+  const save = useMutation({
+    mutationFn: async () => {
+      let pdf: { url: string } | undefined;
+      if (choice.mode === "first_page") {
+        const { url } = await getPdfBooksApi().fileUrl(book.id);
+        pdf = { url: resolveFileUrl(url, window.location.origin) };
+      }
+      return applyCover(getAdminApi(), book.id, choice, pdf);
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ADMIN_ROOT_KEY });
+      toast({ variant: "success", title: t("saved") });
+    },
+  });
+
+  return (
+    <section
+      className="flex flex-col gap-3"
+      aria-labelledby="pdf-cover"
+      data-testid="cover-section"
+    >
+      <h2 id="pdf-cover" className="sr-only">
+        {t("label")}
+      </h2>
+      <div className="flex flex-wrap items-start gap-5">
+        <BookCover
+          grade={book.grade}
+          subject={book.subject}
+          subjectTitle={subjectTitle}
+          src={book.cover_url}
+          className="w-24"
+        />
+        <div className="flex min-w-0 flex-1 flex-col gap-3">
+          <CoverPicker
+            value={choice}
+            onChange={(next) => {
+              setChoice(next);
+              save.reset();
+            }}
+            disabled={save.isPending}
+            firstPageUnavailable={!book.has_file}
+          />
+          {missingFile && <p className="text-muted text-sm">{t("needFile")}</p>}
+          {save.isError && (
+            <p role="alert" className="text-danger text-sm">
+              {errorText(save.error)}
+            </p>
+          )}
+          <div>
+            <Button
+              loading={save.isPending}
+              disabled={unchanged || missingImage || invalidImage || missingFile}
+              onClick={() => save.mutate()}
+            >
+              {t("save")}
+            </Button>
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -403,18 +491,11 @@ export function PdfBookEditView({ id }: { id: string }) {
         {t("backToList")}
       </Link>
       <div className="flex flex-col gap-6">
-        <div className="flex flex-wrap items-start gap-5">
-          <BookCover
-            grade={book.grade}
-            subject={book.subject}
-            subjectTitle={subjectTitle}
-            className="w-28"
-          />
-          <div className="flex min-w-0 flex-1 flex-col gap-4">
-            <Details book={book} />
-            <PublishActions book={book} />
-          </div>
+        <div className="flex min-w-0 flex-col gap-4">
+          <Details book={book} />
+          <PublishActions book={book} />
         </div>
+        <CoverSection key={`cover-${book.updated_at}`} book={book} subjectTitle={subjectTitle} />
         <ReplaceFile key={book.updated_at} book={book} />
         <PdfBookForm key={`form-${book.updated_at}`} book={book} />
         <PdfBookDetailsForm key={`details-${book.updated_at}`} book={book} />

@@ -20,6 +20,7 @@ import { createPdfBookSchema } from "@/lib/validation/admin";
 import { GRADES } from "@/types/catalog";
 import type { LocalizedText } from "@/types/i18n";
 import { chapterProblems } from "@/lib/admin/chapters";
+import { coverImageProblem, type CoverChoice } from "@/lib/admin/cover";
 import {
   BookDetailsFields,
   hasDetails,
@@ -27,6 +28,7 @@ import {
   type BookDetailsValue,
 } from "./BookDetailsFields";
 import { LocalizedFields, toLocalized } from "./LocalizedFields";
+import { CoverPicker } from "./CoverPicker";
 import { PdfFilePicker } from "./PdfFilePicker";
 import { useAdminErrorText, useAdminFieldErrorText } from "./useAdminErrorText";
 import { usePdfUpload, type PdfUploadResult } from "./usePdfUpload";
@@ -132,6 +134,7 @@ export function PdfBookWizard() {
   const [file, setFile] = useState<File | null>(null);
   const [problem, setProblem] = useState<PdfFileProblem | null>(null);
   const [fileMissing, setFileMissing] = useState(false);
+  const [cover, setCover] = useState<CoverChoice>({ mode: "auto", image: null });
   const [details, setDetails] = useState<BookDetailsValue>({ description: "", chapters: [] });
   const [showProblems, setShowProblems] = useState(false);
   // Yuklangach PDF betlari soni ma'lum bo'ladi: mundarija shunga qarab tekshiriladi.
@@ -172,7 +175,7 @@ export function PdfBookWizard() {
       } else {
         state.id = (await api.createPdfBook(body)).id;
       }
-      state.uploaded ??= await upload.run(state.id, file);
+      state.uploaded ??= await upload.run(state.id, file, cover);
       setUploadedPages(state.uploaded.book.page_count);
       // Tavsif/mundarija fayl yuklangach saqlanadi: betlar soni PDF dan tekshiriladi.
       if (withDetails && hasDetails(details)) {
@@ -198,6 +201,7 @@ export function PdfBookWizard() {
       setFileMissing(!file);
       return;
     }
+    if (cover.mode === "custom" && (!cover.image || coverImageProblem(cover.image))) return;
     setStep("details");
   };
   const detailsError = submit.isError
@@ -313,6 +317,7 @@ export function PdfBookWizard() {
               setFileMissing(false);
             }}
           />
+          <CoverPicker value={cover} onChange={setCover} disabled={busy} />
 
           <div className="flex flex-wrap gap-2">
             <Button variant="secondary" disabled={busy} onClick={() => setStep("subject")}>

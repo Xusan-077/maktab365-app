@@ -28,6 +28,12 @@ class PdfBookStatus(models.TextChoices):
     PUBLISHED = "published", "Published"
 
 
+class CoverMode(models.TextChoices):
+    AUTO = "auto", "Generated"
+    FIRST_PAGE = "first_page", "First page"
+    CUSTOM = "custom", "Custom image"
+
+
 class PdfBook(UUIDModel, TimeStampedModel):
     """PDF darslik: fayl obyekt saqlashda (DB'da emas), o'quvchi sahifa-sahifa o'qiydi."""
 
@@ -42,6 +48,8 @@ class PdfBook(UUIDModel, TimeStampedModel):
     size_bytes = models.PositiveBigIntegerField(default=0)
     page_count = models.PositiveIntegerField(default=0)
     cover = models.FileField(upload_to="covers/", blank=True)
+    # `auto` — generativ muqova (`cover` bo'sh); `first_page`/`custom` — `cover` rasmi ko'rsatiladi.
+    cover_mode = models.CharField(max_length=16, choices=CoverMode.choices, default=CoverMode.AUTO)
     status = models.CharField(
         max_length=16, choices=PdfBookStatus.choices, default=PdfBookStatus.DRAFT, db_index=True
     )
@@ -63,6 +71,13 @@ class PdfBook(UUIDModel, TimeStampedModel):
         if self.status == PdfBookStatus.PUBLISHED and self.published_at is None:
             self.published_at = timezone.now()
         super().save(*args, **kwargs)
+
+    @property
+    def public_cover(self):
+        """Ochiq API uchun muqova rasmi: faqat `auto` bo'lmagan rejimda (aks holda generativ)."""
+        if self.cover_mode != CoverMode.AUTO and self.cover:
+            return self.cover
+        return None
 
     @property
     def chapter_tree(self) -> list[dict]:

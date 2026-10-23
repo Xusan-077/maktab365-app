@@ -211,6 +211,7 @@ export function PdfBooksView() {
                           grade={book.grade}
                           subject={book.subject}
                           subjectTitle={subjectTitles.get(book.subject) ?? book.subject}
+                          src={book.cover_url}
                           className="w-9"
                         />
                         <Link

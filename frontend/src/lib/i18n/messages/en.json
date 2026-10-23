@@ -1013,6 +1013,35 @@
       "addFor": "Add a presentation to section {n}",
       "replaceFor": "Replace the presentation of section {n}",
       "removeFor": "Delete the presentation of section {n}"
+    },
+    "cover": {
+      "label": "Cover",
+      "modes": {
+        "auto": {
+          "title": "Automatic",
+          "hint": "Ready-made cover in the grade and subject colour."
+        },
+        "first_page": {
+          "title": "PDF first page",
+          "hint": "The first page is rendered and saved as an image."
+        },
+        "custom": {
+          "title": "My own image",
+          "hint": "Upload a JPG, PNG or WebP image."
+        }
+      },
+      "chooseImage": "Choose image",
+      "replaceImage": "Replace image",
+      "previewAlt": "Selected cover",
+      "imageHint": "JPG, PNG or WebP, up to 5 MB. A 2:3 ratio works best.",
+      "problems": {
+        "type": "Only JPG, PNG or WebP images are allowed.",
+        "size": "The image must not exceed 5 MB."
+      },
+      "save": "Save cover",
+      "saved": "Cover saved",
+      "needImage": "Choose an image first.",
+      "needFile": "Upload a PDF first to use its first page."
     }
   },
   "pdfBooks": {

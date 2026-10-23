@@ -56,7 +56,7 @@ describe("PdfBookCard", () => {
     expect(screen.getByTestId("generated-cover").getAttribute("data-tone")).toMatch(/^fallback-/);
   });
 
-  it("kitobda PDF birinchi beti rasmi (cover) bo'lsa ham muqova doim generativ", () => {
+  it("kitobda muqova rasmi bo'lsa u ko'rsatiladi, generativ muqova zaxirada qoladi", () => {
     const { container } = render(
       <NextIntlClientProvider locale="uz" messages={uz}>
         <PdfBookCard book={book({ cover: "https://r2.test/c.png" })} />
@@ -64,7 +64,7 @@ describe("PdfBookCard", () => {
     );
 
     expect(screen.getByTestId("generated-cover")).toBeTruthy();
-    expect(container.querySelector("img")).toBeNull();
+    expect(container.querySelector("img")?.getAttribute("src")).toBe("https://r2.test/c.png");
   });
 
   it("muqova nisbati 2:3", () => {

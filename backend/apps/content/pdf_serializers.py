@@ -1,7 +1,9 @@
+from django.db import transaction
 from rest_framework import serializers
 
+from . import pdf_storage as storage
 from .admin_serializers import LocalizedInput, StoredPathField
-from .models import PdfBook, Subject
+from .models import CoverMode, PdfBook, Subject
 from .pdf_services import allowed_transitions, chapter_errors, replace_chapters
 from .serializers import LocalizedField
 
@@ -61,6 +63,7 @@ class PdfBookAdminSerializer(serializers.ModelSerializer):
             "grade",
             "subject",
             "cover",
+            "cover_mode",
             "cover_url",
             "has_file",
             "size_bytes",
@@ -88,6 +91,24 @@ class PdfBookAdminSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(codes)
         return value
 
+    def validate(self, attrs):
+        # Muqova rejimi va fayl izchil: `auto` — fayl yo'q, boshqa rejimda fayl majburiy.
+        if "cover_mode" not in attrs and "cover" not in attrs:
+            return attrs
+        mode = attrs.get("cover_mode", getattr(self.instance, "cover_mode", CoverMode.AUTO))
+        if "cover_mode" not in attrs and attrs.get("cover"):
+            mode = attrs["cover_mode"] = CoverMode.CUSTOM if mode == CoverMode.AUTO else mode
+        has_cover = (
+            bool(attrs["cover"])
+            if "cover" in attrs
+            else bool(self.instance and self.instance.cover)
+        )
+        if mode == CoverMode.AUTO:
+            attrs["cover"] = ""
+        elif not has_cover:
+            raise serializers.ValidationError({"cover": ["cover_required"]})
+        return attrs
+
     def create(self, validated_data):
         chapters = validated_data.pop("chapter_tree", None)
         book = super().create(validated_data)
@@ -97,7 +118,12 @@ class PdfBookAdminSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         chapters = validated_data.pop("chapter_tree", None)
+        old_cover = instance.cover.name if instance.cover else ""
         book = super().update(instance, validated_data)
+        new_cover = book.cover.name if book.cover else ""
+        if old_cover and old_cover != new_cover:
+            # Almashtirilgan/olib tashlangan eski rasm tranzaksiyadan keyin saqlashdan tozalanadi.
+            transaction.on_commit(lambda: storage.delete(old_cover))
         if chapters is not None:
             replace_chapters(book, chapters)
         return book
@@ -168,7 +194,7 @@ class PdfBookSerializer(serializers.Serializer):
     subject_title = LocalizedField(source="subject.title")
     page_count = serializers.IntegerField()
     size_bytes = serializers.IntegerField()
-    cover = serializers.FileField(use_url=True, allow_null=True)
+    cover = serializers.FileField(source="public_cover", use_url=True, allow_null=True)
     unverified = serializers.SerializerMethodField()
     published_at = serializers.DateTimeField(allow_null=True)
 

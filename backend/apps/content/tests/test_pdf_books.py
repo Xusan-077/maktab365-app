@@ -714,3 +714,51 @@ def test_admin_subjects_report_pdf_books_count(editor, catalog, algebra):
     rows = editor.get("/api/v1/admin/subjects/").data["results"]
 
     assert [(row["slug"], row["pdf_books_count"]) for row in rows] == [("algebra", 2)]
+
+
+# --- Muqova rejimi ---
+
+
+def _upload_cover(admin, name="c.png"):
+    return admin.post(
+        "/api/v1/admin/uploads/",
+        {
+            "kind": "cover",
+            "file": SimpleUploadedFile(name, b"\x89PNG\r\n\x1a\n" + b"0" * 16, "image/png"),
+        },
+        format="multipart",
+    ).json()["path"]
+
+
+def test_cover_modes_public_visibility_and_cleanup(
+    admin, uploaded, django_capture_on_commit_callbacks
+):
+    url = f"{BASE}/{uploaded['id']}/"
+    assert admin.get(url).json()["cover_mode"] == "auto"
+    admin.post(f"{url}transition/", {"to": "published"}, "json")
+
+    first = _upload_cover(admin, "a.png")
+    with django_capture_on_commit_callbacks(execute=True):
+        resp = admin.patch(url, {"cover_mode": "first_page", "cover": first}, "json")
+    assert resp.status_code == 200 and resp.json()["cover_mode"] == "first_page"
+    public = APIClient().get(f"{PUBLIC}/{uploaded['id']}/").json()
+    assert public["cover"] and public["cover"].endswith(first.split("/")[-1])
+
+    second = _upload_cover(admin, "b.png")
+    with django_capture_on_commit_callbacks(execute=True):
+        admin.patch(url, {"cover_mode": "custom", "cover": second}, "json")
+    assert not default_storage.exists(first) and default_storage.exists(second)
+
+    with django_capture_on_commit_callbacks(execute=True):
+        resp = admin.patch(url, {"cover_mode": "auto"}, "json")
+    assert resp.json()["cover"] == "" and not default_storage.exists(second)
+    assert APIClient().get(f"{PUBLIC}/{uploaded['id']}/").json()["cover"] is None
+    actions = AuditLog.objects.filter(target_id=uploaded["id"], action="update")
+    assert actions.filter(after__cover_mode="auto").exists()
+
+
+def test_cover_mode_requires_file_for_image_modes(admin, uploaded):
+    url = f"{BASE}/{uploaded['id']}/"
+    resp = admin.patch(url, {"cover_mode": "custom"}, "json")
+    assert resp.status_code == 400 and resp.json()["details"]["cover"] == ["cover_required"]
+    assert admin.patch(url, {"cover_mode": "bogus"}, "json").status_code == 400

@@ -222,6 +222,7 @@ export function PdfReader({ bookId }: { bookId: string }) {
               grade={book.data.grade}
               subject={book.data.subject}
               subjectTitle={getLocalized(book.data.subject_title, locale)}
+              src={book.data.cover}
               className="hidden w-9 sm:block"
             />
             <div className="min-w-0">
