@@ -87,6 +87,14 @@
     "catalog": {
       "title": "Choose a grade and subject",
       "hint": "Find a textbook and start reading."
+    },
+    "recent": {
+      "title": "Pick up where you left off",
+      "resumeLabel": "Continue reading",
+      "resumeAt": "Page {page} of {total}",
+      "resume": "Continue",
+      "recent": "Recently viewed",
+      "clear": "Clear"
     }
   },
   "ui": {

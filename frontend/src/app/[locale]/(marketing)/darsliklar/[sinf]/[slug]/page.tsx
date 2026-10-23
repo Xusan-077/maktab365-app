@@ -5,6 +5,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { MARKETING_CONTAINER, PAGE_STACK } from "@/components/layout/containers";
 import { JsonLd } from "@/components/pdf/JsonLd";
+import { RecordRecentBook } from "@/components/pdf/RecordRecentBook";
 import { BookCover } from "@/components/pdf/BookCover";
 import { BookActions } from "@/components/pdf/book/BookActions";
 import { BookPreview } from "@/components/pdf/book/BookPreview";
@@ -16,6 +17,7 @@ import { getLocalized } from "@/lib/i18n/localized";
 import { routing } from "@/lib/i18n/routing";
 import { getAlternates, OG_IMAGES, SITE_URL } from "@/lib/i18n/seo";
 import { parseGradeParam } from "@/lib/pdf/grade-groups";
+import { toRecent } from "@/lib/pdf/recent";
 import { formatBytes } from "@/lib/utils/bytes";
 import { getBookBySlug, getGradeBooks } from "@/lib/pdf-books/server";
 import { bookJsonLd, breadcrumbList } from "@/lib/seo/jsonld";
@@ -98,6 +100,8 @@ export default async function BookPage({
           { label: title },
         ]}
       />
+
+      {!book.unverified && <RecordRecentBook book={toRecent(book)} />}
 
       <header className="grid gap-6 sm:grid-cols-[12rem_minmax(0,1fr)] sm:gap-8">
         <BookCover

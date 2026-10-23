@@ -8,6 +8,7 @@ import { FinalCta } from "@/components/home/FinalCta";
 import { CatalogSection } from "@/components/home/CatalogSection";
 import { HeroSection } from "@/components/home/HeroSection";
 import { HowItWorks } from "@/components/home/HowItWorks";
+import { RecentSection } from "@/components/home/RecentSection";
 import { SplashScreen } from "@/components/layout/SplashScreen";
 import { routing } from "@/lib/i18n/routing";
 import { getAlternates } from "@/lib/i18n/seo";
@@ -28,6 +29,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
     <>
       <SplashScreen />
       <HeroSection />
+      <RecentSection />
       <CatalogSection />
       <AudienceSection />
       <HowItWorks />

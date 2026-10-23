@@ -87,6 +87,14 @@
     "catalog": {
       "title": "Sinf va fanni tanlang",
       "hint": "Darslikni toping va o'qishni boshlang."
+    },
+    "recent": {
+      "title": "Davom eting",
+      "resumeLabel": "Davom ettirish",
+      "resumeAt": "{page} / {total}-bet",
+      "resume": "Davom ettirish",
+      "recent": "Oxirgi ko'rilganlar",
+      "clear": "Tozalash"
     }
   },
   "ui": {

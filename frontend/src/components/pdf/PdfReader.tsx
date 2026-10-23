@@ -21,6 +21,7 @@ import { pdfBookPath, ROUTES } from "@/lib/utils/routes";
 import { ReportErrorLink } from "@/components/support/ReportErrorLink";
 import { BookCover } from "./BookCover";
 import { PdfBookDescription } from "./PdfBookDescription";
+import { RecordRecentBook } from "./RecordRecentBook";
 import { PdfBookmarkButton } from "./PdfBookmarkButton";
 import { PdfPageCanvas } from "./PdfPageCanvas";
 import { PdfSlidesViewer } from "./PdfSlidesViewer";
@@ -208,6 +209,7 @@ export function PdfReader({ bookId }: { bookId: string }) {
 
   return (
     <div className="flex flex-col gap-3" data-testid="pdf-reader">
+      <RecordRecentBook book={book.data && !book.data.unverified ? book.data : undefined} />
       <div className="flex flex-wrap items-center gap-3">
         <Link
           href={book.data ? pdfBookPath(book.data) : ROUTES.textbooks}
