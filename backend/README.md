@@ -63,7 +63,7 @@ Majburiy:
 | `SECRET_KEY` | uzun tasodifiy qiymat (kamida 50 belgi) |
 | `ALLOWED_HOSTS` | `api.maktab365.uz` (vergul bilan) |
 | `CSRF_TRUSTED_ORIGINS` | `https://api.maktab365.uz` |
-| `FRONTEND_ORIGINS` | `https://maktab365.uz` (CORS, vergul bilan) |
+| `FRONTEND_ORIGINS` | `https://darslik365.uz,https://www.darslik365.uz,https://darslik365.vercel.app` (CORS, vergul bilan; sxema bilan, oxirida `/` siz) |
 | `FRONTEND_URL` | `https://maktab365.uz` (email havolalari) |
 | `DATABASE_URL` | Railway Postgres |
 | `REDIS_URL` | Railway Redis (kesh va Celery) |
@@ -105,7 +105,7 @@ Deploy: `railway.json` pre-deploy'da `scripts/predeploy.sh` (`migrate` + `seed_s
 ```json
 [
   {
-    "AllowedOrigins": ["https://<sayt-domeni>", "https://*.vercel.app"],
+    "AllowedOrigins": ["https://darslik365.uz", "https://www.darslik365.uz", "https://darslik365.vercel.app", "https://*.vercel.app"],
     "AllowedMethods": ["GET", "HEAD", "PUT"],
     "AllowedHeaders": ["*"],
     "ExposeHeaders": ["ETag", "Content-Length", "Content-Range", "Accept-Ranges"],

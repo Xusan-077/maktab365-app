@@ -60,8 +60,8 @@ Majburiy:
 | `SECRET_KEY`                                                                                                              | uzun tasodifiy (≥ 50 belgi)                                                           |
 | `ALLOWED_HOSTS`                                                                                                           | API domeni (`api.maktab365.uz`); `healthcheck.railway.app` kodda avtomatik qo'shiladi |
 | `CSRF_TRUSTED_ORIGINS`                                                                                                    | `https://api.maktab365.uz`                                                            |
-| `FRONTEND_ORIGINS`                                                                                                        | `https://maktab365.uz` (vergul bilan)                                                 |
-| `FRONTEND_URL`                                                                                                            | `https://maktab365.uz` (email havolalari)                                             |
+| `FRONTEND_ORIGINS`                                                                                                        | `https://darslik365.uz,https://www.darslik365.uz,https://darslik365.vercel.app` (vergul bilan) |
+| `FRONTEND_URL`                                                                                                            | `https://darslik365.uz` (email havolalari)                                             |
 | `DATABASE_URL`, `REDIS_URL`                                                                                               | Railway Postgres/Redis (reference variable)                                           |
 | `FORWARDED_IP_SECRET`                                                                                                     | kuchli qiymat; Vercel `BACKEND_FORWARD_SECRET` bilan **bir xil**                      |
 | `TRUSTED_PROXY_HOPS`                                                                                                      | `1`                                                                                   |
