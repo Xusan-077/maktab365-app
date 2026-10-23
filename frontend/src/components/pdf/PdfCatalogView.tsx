@@ -144,68 +144,71 @@ export function PdfCatalogView() {
         </section>
       )}
 
-      {books.isError ? (
-        <div role="alert" className="flex flex-col items-start gap-3">
-          <p className="text-danger">{t("error")}</p>
-          <Button variant="secondary" onClick={() => void books.refetch()}>
-            {t("retry")}
-          </Button>
-        </div>
-      ) : books.isPending ? (
-        <div
-          role="status"
-          aria-label={t("loading")}
-          className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4"
-        >
-          {Array.from({ length: 6 }, (_, i) => (
-            <PdfBookCardSkeleton key={i} />
-          ))}
-        </div>
-      ) : books.data.results.length === 0 ? (
-        <EmptyState icon={FileText} action={filtered && clearButton}>
-          {filtered ? t("emptyFiltered") : t("empty")}
-        </EmptyState>
-      ) : (
-        <div className="flex flex-col gap-4">
-          <div className="flex min-h-9 items-center justify-between gap-3">
-            <p className="text-muted text-sm tabular-nums" aria-live="polite">
-              {t("count", { count: books.data.count })}
-            </p>
-            {filtered && clearButton}
+      {/* Ro'yxat balandligi zaxiralanadi: yuklanganda pastdagi kontent (footer) sakramasin. */}
+      <div className="min-h-[34rem]">
+        {books.isError ? (
+          <div role="alert" className="flex flex-col items-start gap-3">
+            <p className="text-danger">{t("error")}</p>
+            <Button variant="secondary" onClick={() => void books.refetch()}>
+              {t("retry")}
+            </Button>
           </div>
-          <ul
-            className={cn(
-              "grid grid-cols-2 gap-3 transition-opacity duration-200 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4",
-              books.isPlaceholderData && "pointer-events-none opacity-60",
-            )}
-            aria-label={t("results")}
-            aria-busy={books.isPlaceholderData}
-            data-testid="pdf-book-list"
+        ) : books.isPending ? (
+          <div
+            role="status"
+            aria-label={t("loading")}
+            className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4"
           >
-            {books.data.results.map((book, index) => (
-              <m.li
-                key={book.id}
-                variants={listItem}
-                custom={index}
-                initial="hidden"
-                animate="show"
-              >
-                <PdfBookCard
-                  book={book}
-                  resumePage={resume[book.id]?.page}
-                  read={isBookRead(resume[book.id], book.page_count)}
-                />
-              </m.li>
+            {Array.from({ length: 6 }, (_, i) => (
+              <PdfBookCardSkeleton key={i} />
             ))}
-          </ul>
-          <Pagination
-            page={filters.page ?? 1}
-            pageSize={PDF_PAGE_SIZE}
-            total={books.data.count}
-            onPageChange={(page) => navigate({ ...filters, page })}
-          />
-        </div>
-      )}
+          </div>
+        ) : books.data.results.length === 0 ? (
+          <EmptyState icon={FileText} action={filtered && clearButton}>
+            {filtered ? t("emptyFiltered") : t("empty")}
+          </EmptyState>
+        ) : (
+          <div className="flex flex-col gap-4">
+            <div className="flex min-h-9 items-center justify-between gap-3">
+              <p className="text-muted text-sm tabular-nums" aria-live="polite">
+                {t("count", { count: books.data.count })}
+              </p>
+              {filtered && clearButton}
+            </div>
+            <ul
+              className={cn(
+                "grid grid-cols-2 gap-3 transition-opacity duration-200 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4",
+                books.isPlaceholderData && "pointer-events-none opacity-60",
+              )}
+              aria-label={t("results")}
+              aria-busy={books.isPlaceholderData}
+              data-testid="pdf-book-list"
+            >
+              {books.data.results.map((book, index) => (
+                <m.li
+                  key={book.id}
+                  variants={listItem}
+                  custom={index}
+                  initial="hidden"
+                  animate="show"
+                >
+                  <PdfBookCard
+                    book={book}
+                    resumePage={resume[book.id]?.page}
+                    read={isBookRead(resume[book.id], book.page_count)}
+                  />
+                </m.li>
+              ))}
+            </ul>
+            <Pagination
+              page={filters.page ?? 1}
+              pageSize={PDF_PAGE_SIZE}
+              total={books.data.count}
+              onPageChange={(page) => navigate({ ...filters, page })}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

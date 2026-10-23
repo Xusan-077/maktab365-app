@@ -33,7 +33,7 @@ export default async function PdfBooksPage({ params }: PageProps<"/[locale]/dars
     <div className={`${MARKETING_CONTAINER} py-8 ${PAGE_STACK}`}>
       <PageHeader title={t("title")} description={t("description")} />
       {/* `useSearchParams` (URL filtrlari) uchun chegara */}
-      <Suspense fallback={<Skeleton className="h-96" />}>
+      <Suspense fallback={<Skeleton className="h-[50rem]" />}>
         <PdfCatalogView />
       </Suspense>
     </div>

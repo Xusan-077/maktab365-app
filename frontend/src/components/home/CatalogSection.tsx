@@ -11,7 +11,7 @@ export function CatalogSection() {
   return (
     <Section id={CATALOG_ID} title={t("title")} description={t("hint")}>
       {/* `useSearchParams` (URL filtrlari) uchun chegara */}
-      <Suspense fallback={<Skeleton className="h-96" />}>
+      <Suspense fallback={<Skeleton className="h-[50rem]" />}>
         <PdfCatalogView />
       </Suspense>
     </Section>
