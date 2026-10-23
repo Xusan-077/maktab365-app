@@ -548,3 +548,108 @@ dialog[open]::backdrop {
   border-radius: 999px;
   background-color: var(--foreground);
 }
+
+/* Hero interaktivligi: `HeroStage` --hx/--hy (−1…1) va --mx/--my (%) ni yozadi; hammasi transform/opacity. */
+.hero-stage {
+  --hx: 0;
+  --hy: 0;
+  --mx: 50%;
+  --my: 50%;
+}
+.hero-glow {
+  background: radial-gradient(
+    28rem circle at var(--mx) var(--my),
+    color-mix(in srgb, var(--primary-soft-foreground) 12%, transparent),
+    transparent 65%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease-out;
+}
+.hero-stage[data-active="true"] .hero-glow {
+  opacity: 1;
+}
+.hero-layer {
+  transform: translate3d(
+    calc(var(--hx) * var(--depth) * 1px),
+    calc(var(--hy) * var(--depth) * 1px),
+    0
+  );
+}
+.hero-orb {
+  animation:
+    ui-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both,
+    hero-bob 6s ease-in-out infinite;
+  animation-delay: var(--delay, 0s), var(--delay, 0s);
+}
+.hero-tilt {
+  transform: perspective(900px) rotateY(calc(var(--hx) * 9deg)) rotateX(calc(var(--hy) * -7deg));
+  transition: transform 0.12s linear;
+}
+.hero-float {
+  animation: hero-bob 7s ease-in-out infinite;
+  animation-delay: calc(0.9s + var(--n, 0) * -1.3s);
+}
+@keyframes hero-bob {
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+/* Hero: sarlavha so'zma-so'z chiqadi, oxirgi so'z yaltirab turadi. */
+.hero-word {
+  display: inline-block;
+  animation: hero-word-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--w, 0) * 70ms);
+}
+.hero-word-accent {
+  background: linear-gradient(
+    100deg,
+    var(--primary-soft-foreground) 30%,
+    var(--color-accent-400) 50%,
+    var(--primary-soft-foreground) 70%
+  );
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation:
+    hero-word-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both,
+    hero-shimmer 4.5s ease-in-out 1.2s infinite;
+  animation-delay: calc(var(--w, 0) * 70ms), 1.2s;
+}
+@keyframes hero-word-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5em);
+    filter: blur(6px);
+  }
+}
+@keyframes hero-shimmer {
+  0%,
+  100% {
+    background-position: 100% 0;
+  }
+  50% {
+    background-position: 0 0;
+  }
+}
+/* Sinf tugmalari ketma-ket "sakrab" chiqadi; tanlangan sinfda muqovalar aylanib almashadi. */
+.hero-chip {
+  animation: hero-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation-delay: calc(0.35s + var(--c, 0) * 40ms);
+}
+@keyframes hero-pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.6);
+  }
+}
+.hero-flip {
+  animation: hero-flip 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes hero-flip {
+  from {
+    opacity: 0.2;
+    transform: perspective(600px) rotateY(-70deg) scale(0.92);
+  }
+}

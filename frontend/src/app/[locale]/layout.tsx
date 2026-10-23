@@ -24,7 +24,7 @@ const inter = Inter({
 });
 
 /** Brend ko'k rangi: brauzer interfeysi va PWA manifest uchun. */
-export const viewport: Viewport = { themeColor: "#1D4FC6" };
+export const viewport: Viewport = { themeColor: "#1554D1" };
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));

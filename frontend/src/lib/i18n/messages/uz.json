@@ -14,6 +14,13 @@
       "how": "Qanday ishlaydi?",
       "searchLabel": "Darslik nomi bo'yicha qidirish",
       "searchPlaceholder": "Masalan: Algebra 9",
+      "searchExamples": {
+        "a": "Algebra 9",
+        "b": "Biologiya 7",
+        "c": "Tarix 8",
+        "d": "Fizika 10",
+        "e": "Ona tili 5"
+      },
       "search": "Qidirish",
       "gradesLabel": "Sinfni tanlang",
       "samples": {

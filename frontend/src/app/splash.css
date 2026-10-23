@@ -1,11 +1,13 @@
 /* Splash (bosh sahifaga birinchi kirish): rang tokenlari */
 :root {
   --splash-bg: #ffffff;
-  --splash-fg: #0b1530;
+  --splash-fg: #071633;
+  --splash-accent: #1554d1;
 }
 :root[data-theme="dark"] {
   --splash-bg: #0b1530;
   --splash-fg: #ffffff;
+  --splash-accent: #4c8bff;
 }
 
 /*

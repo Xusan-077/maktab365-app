@@ -52,7 +52,7 @@ export default function GlobalError({ error, retry }: { error: unknown; retry: (
           <Image
             src="/logo-horizontal.svg"
             alt=""
-            width={197}
+            width={189}
             height={36}
             unoptimized
             className="dark:hidden"
@@ -60,7 +60,7 @@ export default function GlobalError({ error, retry }: { error: unknown; retry: (
           <Image
             src="/logo-horizontal-dark.svg"
             alt=""
-            width={197}
+            width={189}
             height={36}
             unoptimized
             className="hidden dark:block"

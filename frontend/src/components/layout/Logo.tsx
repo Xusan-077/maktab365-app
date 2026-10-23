@@ -12,9 +12,9 @@ const LOGO_ASSETS = {
   horizontal: {
     light: "/logo-horizontal.svg",
     dark: "/logo-horizontal-dark.svg",
-    ratio: 1272 / 233,
+    ratio: 1537 / 293,
   },
-  mark: { light: "/logo-mark.svg", dark: "/logo-mark.svg", ratio: 324 / 233 },
+  mark: { light: "/logo-mark.svg", dark: "/logo-mark.svg", ratio: 429 / 293 },
 } as const;
 
 export interface LogoProps {
