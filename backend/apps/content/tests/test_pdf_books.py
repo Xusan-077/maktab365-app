@@ -565,6 +565,22 @@ def test_direct_upload_part_size_for_5gb(admin, algebra, remote, settings):
     assert plan["part_size"] == 8 * MIB and len(plan["part_urls"]) == 640
 
 
+def test_direct_upload_accepts_long_upload_id(admin, algebra, remote):
+    """R2 multipart UploadId 255 belgidan uzun bo'lishi mumkin (prod'da DataError bergan)."""
+    long_id = "u" * 400
+    remote.create_multipart_upload.return_value = {"UploadId": long_id}
+    book = create_book(admin)
+
+    resp = admin.post(
+        f"{BASE}/{book['id']}/upload-init/",
+        {"filename": "k.pdf", "size": 250, "content_type": "application/pdf"},
+        "json",
+    )
+
+    assert resp.status_code == 200
+    assert PdfBook.objects.get(pk=book["id"]).pending_upload_id == long_id
+
+
 def test_direct_complete_rejects_non_pdf_and_cleans_up(admin, algebra, remote):
     book = create_book(admin)
     admin.post(

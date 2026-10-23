@@ -119,7 +119,7 @@ class PdfUploadPlanSerializer(serializers.Serializer):
 
 class PdfUploadPartSerializer(serializers.Serializer):
     part_number = serializers.IntegerField(min_value=1, max_value=10000)
-    etag = serializers.CharField(max_length=200)
+    etag = serializers.CharField(max_length=1024)
 
 
 class PdfUploadCompleteSerializer(serializers.Serializer):

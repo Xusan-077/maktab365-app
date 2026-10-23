@@ -48,8 +48,9 @@ class PdfBook(UUIDModel, TimeStampedModel):
     published_at = models.DateTimeField(null=True, blank=True)
     # Yuklash davom etayotganda: yangi fayl kaliti va (S3 multipart) upload id. `complete`gacha
     # `file` ga tegilmaydi, shuning uchun almashtirish paytida eski fayl o'qilaveradi.
-    pending_file = models.CharField(max_length=255, blank=True, editable=False)
-    pending_upload_id = models.CharField(max_length=255, blank=True, editable=False)
+    pending_file = models.CharField(max_length=1024, blank=True, editable=False)
+    # R2/S3 UploadId 255 belgidan uzun bo'lishi mumkin: TextField (uzunlik chegarasi yo'q).
+    pending_upload_id = models.TextField(blank=True, editable=False)
 
     class Meta:
         ordering = ["grade", "-created_at"]

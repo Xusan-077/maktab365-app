@@ -3119,7 +3119,7 @@ components:
         etag:
           type: string
           minLength: 1
-          maxLength: 200
+          maxLength: 1024
       required:
       - etag
       - part_number
