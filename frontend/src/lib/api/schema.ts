@@ -425,6 +425,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/stats/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["admin_stats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/uploads/": {
         parameters: {
             query?: never;
@@ -1116,6 +1132,26 @@ export interface paths {
         get: operations["me_support_list"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pdf-books/{id}/stats/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Anonim statistika hodisasi (ochilish yoki sahifa)
+         * @description Anonim hisoblagich: kitob ochildi / sahifa ko'rildi. Faqat son; kirish talab qilinmaydi.
+         */
+        post: operations["pdf_books_stat_event"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1837,6 +1873,51 @@ export interface components {
         SlidesPublic: {
             page_count: number;
             size_bytes: number;
+        };
+        StatBook: {
+            /** Format: uuid */
+            id: string;
+            slug: string;
+            grade: number;
+            title: components["schemas"]["LocalizedText"];
+            opens: number;
+            downloads: number;
+        };
+        StatDay: {
+            /** Format: date */
+            day: string;
+            opens: number;
+            downloads: number;
+        };
+        /**
+         * @description * `open` - open
+         *     * `page` - page
+         * @enum {string}
+         */
+        StatEventKindEnum: "open" | "page";
+        StatEventRequest: {
+            kind: components["schemas"]["StatEventKindEnum"];
+            page?: number;
+        };
+        StatPage: {
+            /** Format: uuid */
+            book_id: string;
+            slug: string;
+            grade: number;
+            title: components["schemas"]["LocalizedText"];
+            page: number;
+            views: number;
+        };
+        StatTotals: {
+            opens: number;
+            downloads: number;
+        };
+        StatsSummary: {
+            days: number;
+            totals: components["schemas"]["StatTotals"];
+            books: components["schemas"]["StatBook"][];
+            daily: components["schemas"]["StatDay"][];
+            top_pages: components["schemas"]["StatPage"][];
         };
         Subject: {
             slug: string;
@@ -2614,6 +2695,27 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AdminDashboard"];
+                };
+            };
+        };
+    };
+    admin_stats: {
+        parameters: {
+            query?: {
+                days?: 30 | 7;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StatsSummary"];
                 };
             };
         };
@@ -3823,6 +3925,32 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["PaginatedSupportMessageList"];
                 };
+            };
+        };
+    };
+    pdf_books_stat_event: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StatEventRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["StatEventRequest"];
+                "multipart/form-data": components["schemas"]["StatEventRequest"];
+            };
+        };
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

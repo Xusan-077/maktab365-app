@@ -156,6 +156,7 @@ REST_FRAMEWORK = {
         # Yordam murojaatlari: IP bo'yicha soatiga 5 ta (e2e uchun env bilan oshiriladi).
         "support": env("SUPPORT_THROTTLE_RATE", default="5/hour"),
         "pdf_upload": PDF_UPLOAD_THROTTLE_RATE,
+        "stats": env("STATS_THROTTLE_RATE", default="600/hour"),
     },
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "EXCEPTION_HANDLER": "apps.core.exceptions.api_exception_handler",

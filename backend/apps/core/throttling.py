@@ -64,3 +64,12 @@ class PdfUploadThrottle(_LiveRateMixin, UserRateThrottle):
     """Admin PDF yuklash endpointlari: kirgan foydalanuvchi bo'yicha."""
 
     scope = "pdf_upload"
+
+
+class StatsThrottle(_ClientIpMixin, _LiveRateMixin, AnonRateThrottle):
+    """Anonim statistika hodisalari: IP bo'yicha (o'qish paytida sahifa-sahifa yuboriladi)."""
+
+    scope = "stats"
+
+    def get_cache_key(self, request, view):
+        return self.cache_format % {"scope": self.scope, "ident": self.get_ident(request)}

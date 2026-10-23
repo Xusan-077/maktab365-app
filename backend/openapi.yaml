@@ -605,6 +605,28 @@ paths:
               schema:
                 $ref: '#/components/schemas/AdminDashboard'
           description: ''
+  /api/v1/admin/stats/:
+    get:
+      operationId: admin_stats
+      parameters:
+      - in: query
+        name: days
+        schema:
+          type: integer
+          enum:
+          - 30
+          - 7
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatsSummary'
+          description: ''
   /api/v1/admin/uploads/:
     post:
       operationId: admin_uploads_create
@@ -2002,6 +2024,38 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedSupportMessageList'
           description: ''
+  /api/v1/pdf-books/{id}/stats/:
+    post:
+      operationId: pdf_books_stat_event
+      description: 'Anonim hisoblagich: kitob ochildi / sahifa ko''rildi. Faqat son;
+        kirish talab qilinmaydi.'
+      summary: Anonim statistika hodisasi (ochilish yoki sahifa)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - content
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StatEventRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StatEventRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StatEventRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '204':
+          description: No response body
 components:
   schemas:
     AdminDashboard:
@@ -3773,6 +3827,120 @@ components:
       required:
       - page_count
       - size_bytes
+    StatBook:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        slug:
+          type: string
+        grade:
+          type: integer
+        title:
+          $ref: '#/components/schemas/LocalizedText'
+        opens:
+          type: integer
+        downloads:
+          type: integer
+      required:
+      - downloads
+      - grade
+      - id
+      - opens
+      - slug
+      - title
+    StatDay:
+      type: object
+      properties:
+        day:
+          type: string
+          format: date
+        opens:
+          type: integer
+        downloads:
+          type: integer
+      required:
+      - day
+      - downloads
+      - opens
+    StatEventKindEnum:
+      enum:
+      - open
+      - page
+      type: string
+      description: |-
+        * `open` - open
+        * `page` - page
+    StatEventRequest:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/StatEventKindEnum'
+        page:
+          type: integer
+          maximum: 100000
+          minimum: 1
+      required:
+      - kind
+    StatPage:
+      type: object
+      properties:
+        book_id:
+          type: string
+          format: uuid
+        slug:
+          type: string
+        grade:
+          type: integer
+        title:
+          $ref: '#/components/schemas/LocalizedText'
+        page:
+          type: integer
+        views:
+          type: integer
+      required:
+      - book_id
+      - grade
+      - page
+      - slug
+      - title
+      - views
+    StatTotals:
+      type: object
+      properties:
+        opens:
+          type: integer
+        downloads:
+          type: integer
+      required:
+      - downloads
+      - opens
+    StatsSummary:
+      type: object
+      properties:
+        days:
+          type: integer
+        totals:
+          $ref: '#/components/schemas/StatTotals'
+        books:
+          type: array
+          items:
+            $ref: '#/components/schemas/StatBook'
+        daily:
+          type: array
+          items:
+            $ref: '#/components/schemas/StatDay'
+        top_pages:
+          type: array
+          items:
+            $ref: '#/components/schemas/StatPage'
+      required:
+      - books
+      - daily
+      - days
+      - top_pages
+      - totals
     Subject:
       type: object
       properties:

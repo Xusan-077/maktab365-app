@@ -14,6 +14,8 @@ from rest_framework.exceptions import APIException, NotFound
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.analytics import services as analytics
+
 from . import pdf_storage as storage
 from .cache import public_cached
 from .models import PdfBook, PdfBookChapter, Subject
@@ -147,6 +149,7 @@ class PdfDownloadView(PublicView, APIView):
             raise DownloadDisabled()
         # `update()` — `updated_at` va ochiq kesh versiyasiga tegmaydi.
         PdfBook.objects.filter(pk=book.pk).update(download_count=F("download_count") + 1)
+        analytics.record_download(book.pk)
         response = Response(PdfDownloadSerializer(storage.download_url(book)).data)
         response["Cache-Control"] = "private, no-store"
         return response
