@@ -1,8 +1,9 @@
 from django.urls import path
 
-from . import pdf_views
+from . import bot_views, pdf_views
 
 urlpatterns = [
+    path("bot/books/", bot_views.BotSearchView.as_view(), name="bot-books"),
     path("pdf-books/", pdf_views.PdfBookListView.as_view(), name="pdf-books"),
     path(
         "pdf-books/subjects/", pdf_views.PdfBookSubjectListView.as_view(), name="pdf-book-subjects"

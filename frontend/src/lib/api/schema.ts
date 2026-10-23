@@ -744,6 +744,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/bot/books/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Bot: kitob qidirish va havolalar (X-Bot-Token talab qilinadi) */
+        get: operations["bot_books_search"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/pdf-books/": {
         parameters: {
             query?: never;
@@ -1198,6 +1215,28 @@ export interface components {
             total: number;
             draft: number;
             published: number;
+        };
+        BotBook: {
+            /** Format: uuid */
+            id: string;
+            slug: string;
+            /** @description So'ralgan tildagi nom (yo'q bo'lsa `uz`) */
+            title: string;
+            grade: number;
+            /** @description So'ralgan tildagi fan nomi */
+            subject: string;
+            page_count: number;
+            size_bytes: number;
+            /**
+             * Format: uri
+             * @description Kitob sahifasi
+             */
+            url: string;
+            /**
+             * Format: uri
+             * @description Onlayn o'qish oynasi
+             */
+            read_url: string;
         };
         /** @description Yuqori daraja; `children` — ichki bo'limlar (ular uchun `children` yo'q: 2 daraja). */
         Chapter: {
@@ -3333,6 +3372,33 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PdfUploadPlan"];
+                };
+            };
+        };
+    };
+    bot_books_search: {
+        parameters: {
+            query?: {
+                /** @description Sinf (1–11) */
+                grade?: number;
+                lang?: "en" | "ru" | "uz";
+                /** @description 1–10, default 5 */
+                limit?: number;
+                /** @description Nom bo'yicha qidiruv (2+ belgi) */
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BotBook"][];
                 };
             };
         };

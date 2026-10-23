@@ -1404,6 +1404,47 @@ paths:
               schema:
                 $ref: '#/components/schemas/PdfUploadPlan'
           description: ''
+  /api/v1/bot/books/:
+    get:
+      operationId: bot_books_search
+      summary: 'Bot: kitob qidirish va havolalar (X-Bot-Token talab qilinadi)'
+      parameters:
+      - in: query
+        name: grade
+        schema:
+          type: integer
+        description: Sinf (1–11)
+      - in: query
+        name: lang
+        schema:
+          type: string
+          enum:
+          - en
+          - ru
+          - uz
+      - in: query
+        name: limit
+        schema:
+          type: integer
+        description: 1–10, default 5
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Nom bo'yicha qidiruv (2+ belgi)
+      tags:
+      - bot
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BotBook'
+          description: ''
   /api/v1/pdf-books/:
     get:
       operationId: pdf_books_list
@@ -2158,6 +2199,44 @@ components:
       - draft
       - published
       - total
+    BotBook:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        slug:
+          type: string
+        title:
+          type: string
+          description: So'ralgan tildagi nom (yo'q bo'lsa `uz`)
+        grade:
+          type: integer
+        subject:
+          type: string
+          description: So'ralgan tildagi fan nomi
+        page_count:
+          type: integer
+        size_bytes:
+          type: integer
+        url:
+          type: string
+          format: uri
+          description: Kitob sahifasi
+        read_url:
+          type: string
+          format: uri
+          description: Onlayn o'qish oynasi
+      required:
+      - grade
+      - id
+      - page_count
+      - read_url
+      - size_bytes
+      - slug
+      - subject
+      - title
+      - url
     Chapter:
       type: object
       description: 'Yuqori daraja; `children` — ichki bo''limlar (ular uchun `children`

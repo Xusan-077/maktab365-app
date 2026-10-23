@@ -134,6 +134,8 @@ PDF_UPLOAD_THROTTLE_RATE = env("PDF_UPLOAD_THROTTLE_RATE", default="60/hour")
 # (faqat published); dev'da `dev.py` uni yoqadi, prod'da faqat env bilan ongli ravishda.
 SHOW_DRAFTS_PUBLICLY = env.bool("SHOW_DRAFTS_PUBLICLY", default=False)
 CONTENT_CACHE_MAX_AGE = env.int("CONTENT_CACHE_MAX_AGE", default=60)
+# Telegram bot qidiruv API'si (`/api/v1/bot/books/`): bo'sh bo'lsa o'chiq (404); sarlavha `X-Bot-Token`.
+BOT_API_TOKEN = env("BOT_API_TOKEN", default="")
 
 # --- DRF ---
 REST_FRAMEWORK = {

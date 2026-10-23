@@ -116,6 +116,14 @@ Deploy: `railway.json` pre-deploy'da `scripts/predeploy.sh` (`migrate` + `seed_s
 
 3. Muqova rasmlari ochiq URL talab qiladi: bucket'ga ommaviy domen ulang va `AWS_S3_CUSTOM_DOMAIN` ga yozing.
 
+### Telegram bot API (tayyorlangan, bot hali yo'q)
+
+`GET /api/v1/bot/books/?q=algebra&grade=9&lang=uz&limit=5` — nom (2+ belgi) va sinf bo'yicha nashr qilingan kitoblar:
+`[{id, slug, title, grade, subject, page_count, size_bytes, url, read_url}]` (`url` — kitob sahifasi, `read_url` —
+o'qish oynasi, `FRONTEND_URL` + `/{lang}/darsliklar/...`). Faqat `BOT_API_TOKEN` env berilganda ishlaydi (bo'sh bo'lsa
+404) va botning serveri `X-Bot-Token: <token>` yuboradi; token noto'g'ri bo'lsa `401 bot_token_invalid`. Javob keshlanmaydi,
+umumiy tezlik chegarasi amal qiladi. Bot ichida foydalanuvchiga `url` yoki `read_url` ni xabar sifatida yuborish kifoya.
+
 ### openapi.yaml
 
 `make schema` natijasi barqaror: `apps/core/openapi.py` hook'i metodlarni qat'iy tartibga soladi
