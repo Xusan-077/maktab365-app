@@ -101,6 +101,7 @@
       "allGrades": "Barcha sinflar",
       "gradeLabel": "{grade}-sinf",
       "meta": "{grades}-sinflar · {count} ta darslik",
+      "metaGrade": "{grade}-sinf · {count} ta darslik",
       "openGrade": "{subject}, {grade}-sinf darsliklari",
       "empty": "Bu sinf uchun fan topilmadi.",
       "error": "Fanlarni yuklab bo'lmadi."

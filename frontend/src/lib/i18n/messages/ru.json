@@ -101,6 +101,7 @@
       "allGrades": "Все классы",
       "gradeLabel": "{grade} класс",
       "meta": "Классы: {grades} · учебников: {count}",
+      "metaGrade": "{grade} класс · учебников: {count}",
       "openGrade": "{subject}, учебники {grade} класса",
       "empty": "Для этого класса предметов нет.",
       "error": "Не удалось загрузить предметы."

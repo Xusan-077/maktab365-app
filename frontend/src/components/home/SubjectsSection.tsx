@@ -113,28 +113,32 @@ export function SubjectsGrid() {
                   </Link>
                 </h3>
                 <p className="text-muted mt-1 text-sm">
-                  {t("meta", {
-                    grades: formatGrades(subject.grades),
-                    count: subject.books_count,
-                  })}
+                  {grade
+                    ? t("metaGrade", { grade, count: subject.books_count })
+                    : t("meta", {
+                        grades: formatGrades(subject.grades),
+                        count: subject.books_count,
+                      })}
                 </p>
               </div>
-              {/* Sinf chiplari kartaning "cho'zilgan" havolasi ustida turadi (z-10) */}
-              <div className="relative z-10 flex flex-wrap gap-1.5">
-                {subject.grades.map((value) => (
-                  <Link
-                    key={value}
-                    href={catalogHref(subject.slug, value)}
-                    aria-label={t("openGrade", {
-                      subject: getLocalized(subject.title, locale),
-                      grade: value,
-                    })}
-                    className="border-border bg-surface hover:border-primary-300 hover:bg-primary-soft rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors"
-                  >
-                    {value}
-                  </Link>
-                ))}
-              </div>
+              {/* Sinf tanlanmaganda: sinf chiplari kartaning "cho'zilgan" havolasi ustida turadi (z-10) */}
+              {!grade && (
+                <div className="relative z-10 flex flex-wrap gap-1.5">
+                  {subject.grades.map((value) => (
+                    <Link
+                      key={value}
+                      href={catalogHref(subject.slug, value)}
+                      aria-label={t("openGrade", {
+                        subject: getLocalized(subject.title, locale),
+                        grade: value,
+                      })}
+                      className="border-border bg-surface hover:border-primary-300 hover:bg-primary-soft rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors"
+                    >
+                      {value}
+                    </Link>
+                  ))}
+                </div>
+              )}
             </m.li>
           ))}
         </ul>
