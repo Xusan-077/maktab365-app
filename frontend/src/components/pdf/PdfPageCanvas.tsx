@@ -18,26 +18,45 @@ export interface PdfPageCanvasProps {
   label: string;
   onRendered?: () => void;
   onError: (error: unknown) => void;
+  /**
+   * `width` (default) — konteyner eniga moslanadi (kitob). `contain` — konteynerga to'liq sig'adi
+   * (en va bo'yi bo'yicha, o'rtada): prezentatsiya uchun; konteynerning balandligi aniq bo'lishi kerak.
+   */
+  fit?: "width" | "contain";
 }
 
-/** Faqat berilgan bitta sahifani konteyner eniga moslab chizadi; sahifa o'zgarsa oldingisi bekor qilinadi. */
-export function PdfPageCanvas({ doc, pageNumber, label, onRendered, onError }: PdfPageCanvasProps) {
+/** Faqat berilgan bitta sahifani konteynerga moslab chizadi; sahifa o'zgarsa oldingisi bekor qilinadi. */
+export function PdfPageCanvas({
+  doc,
+  pageNumber,
+  label,
+  onRendered,
+  onError,
+  fit = "width",
+}: PdfPageCanvasProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [width, setWidth] = useState(0);
+  const [size, setSize] = useState({ width: 0, height: 0 });
+  const { width, height } = size;
+  const contain = fit === "contain";
   const notifyRendered = useEffectEvent(() => onRendered?.());
   const notifyError = useEffectEvent((error: unknown) => onError(error));
 
   useEffect(() => {
     const element = wrapRef.current;
     if (!element) return;
-    const observer = new ResizeObserver(([entry]) => setWidth(Math.floor(entry.contentRect.width)));
+    const observer = new ResizeObserver(([entry]) =>
+      setSize({
+        width: Math.floor(entry.contentRect.width),
+        height: Math.floor(entry.contentRect.height),
+      }),
+    );
     observer.observe(element);
     return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
-    if (!width) return;
+    if (!width || (contain && !height)) return;
     let cancelled = false;
     let task: RenderTask | undefined;
     let page: PDFPageProxy | undefined;
@@ -46,8 +65,11 @@ export function PdfPageCanvas({ doc, pageNumber, label, onRendered, onError }: P
         page = await doc.getPage(pageNumber);
         if (cancelled) return;
         const ratio = Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO);
-        const fit = width / page.getViewport({ scale: 1 }).width;
-        const viewport = page.getViewport({ scale: fit * ratio });
+        const natural = page.getViewport({ scale: 1 });
+        const scale = contain
+          ? Math.min(width / natural.width, height / natural.height)
+          : width / natural.width;
+        const viewport = page.getViewport({ scale: scale * ratio });
         // Sahifa ekrandan tashqari canvas'da chiziladi: tayyor bo'lgach bir zumda almashadi
         // (joriy sahifa bo'sh oq kadrsiz turadi, o'lcham sakramaydi).
         const buffer = document.createElement("canvas");
@@ -80,10 +102,13 @@ export function PdfPageCanvas({ doc, pageNumber, label, onRendered, onError }: P
       task?.cancel();
       page?.cleanup();
     };
-  }, [doc, pageNumber, width]);
+  }, [doc, pageNumber, width, height, contain]);
 
   return (
-    <div ref={wrapRef} className="w-full">
+    <div
+      ref={wrapRef}
+      className={contain ? "flex size-full items-center justify-center" : "w-full"}
+    >
       <canvas
         ref={canvasRef}
         role="img"

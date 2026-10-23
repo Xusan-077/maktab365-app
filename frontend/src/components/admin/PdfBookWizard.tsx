@@ -30,6 +30,10 @@ import { LocalizedFields, toLocalized } from "./LocalizedFields";
 import { PdfFilePicker } from "./PdfFilePicker";
 import { useAdminErrorText, useAdminFieldErrorText } from "./useAdminErrorText";
 import { usePdfUpload, type PdfUploadResult } from "./usePdfUpload";
+import type { SlidesContext } from "./ChapterSlides";
+
+/** Yangi kitob: prezentatsiya kitob saqlangandan keyin (tahrirlash sahifasida) qo'shiladi. */
+const WIZARD_SLIDES: SlidesContext = { byId: new Map(), canDelete: false };
 
 interface WizardValues {
   grade: string;
@@ -344,6 +348,7 @@ export function PdfBookWizard() {
             disabled={busy}
             showProblems={showProblems}
             chaptersError={detailsError}
+            slides={WIZARD_SLIDES}
           />
 
           {submit.isError && !detailsError && (

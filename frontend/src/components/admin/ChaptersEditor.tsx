@@ -20,6 +20,7 @@ import {
   type RowProblem,
 } from "@/lib/admin/chapters";
 import { cn } from "@/lib/utils/cn";
+import { ChapterSlides, type SlidesContext } from "./ChapterSlides";
 
 const iconButton =
   "text-muted hover:bg-subtle hover:text-foreground inline-flex size-11 shrink-0 items-center justify-center rounded-lg transition-colors disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent sm:size-10";
@@ -34,6 +35,8 @@ export interface ChaptersEditorProps {
   disabled?: boolean;
   /** `true` — to'ldirilmagan/noto'g'ri qatorlar xatosi ko'rsatiladi (yuborishga urinishdan keyin). */
   showProblems?: boolean;
+  /** Berilsa, har qatorda ixtiyoriy "Prezentatsiya" boshqaruvi chiqadi. */
+  slides?: SlidesContext;
 }
 
 interface RowFieldsProps {
@@ -45,6 +48,8 @@ interface RowFieldsProps {
   onChange: (patch: Partial<ChapterRow>) => void;
   actions: ReactNode;
   nested?: boolean;
+  /** Qator ostidagi qo'shimcha boshqaruv (prezentatsiya). */
+  footer?: ReactNode;
 }
 
 function RowFields({
@@ -56,6 +61,7 @@ function RowFields({
   onChange,
   actions,
   nested,
+  footer,
 }: RowFieldsProps) {
   const t = useTranslations("admin.toc");
   const errorId = `${row.key}-error`;
@@ -95,6 +101,7 @@ function RowFields({
           {t(`problems.${problem}`, { pages: pageCount ?? 0 })}
         </p>
       )}
+      {footer}
     </div>
   );
 }
@@ -168,6 +175,7 @@ export function ChaptersEditor({
   pageCount,
   disabled,
   showProblems,
+  slides,
 }: ChaptersEditorProps) {
   const t = useTranslations("admin.toc");
   const problems = showProblems ? chapterProblems(value, pageCount) : new Map<string, RowProblem>();
@@ -244,6 +252,16 @@ export function ChaptersEditor({
                   pageCount={pageCount}
                   disabled={disabled}
                   onChange={(patch) => patchTop(index, patch)}
+                  footer={
+                    slides && (
+                      <ChapterSlides
+                        context={slides}
+                        row={draft}
+                        position={String(index + 1)}
+                        disabled={disabled}
+                      />
+                    )
+                  }
                   actions={
                     <>
                       <button
@@ -296,6 +314,16 @@ export function ChaptersEditor({
                     pageCount={pageCount}
                     disabled={disabled}
                     onChange={(patch) => patchChild(index, childIndex, patch)}
+                    footer={
+                      slides && (
+                        <ChapterSlides
+                          context={slides}
+                          row={child}
+                          position={`${index + 1}.${childIndex + 1}`}
+                          disabled={disabled}
+                        />
+                      )
+                    }
                     actions={
                       <>
                         <button

@@ -551,6 +551,106 @@ export interface paths {
         patch: operations["admin_pdf_books_update"];
         trace?: never;
     };
+    "/api/v1/admin/pdf-books/{id}/chapters/{chapter_id}/slides/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Bo'lim prezentatsiyasini o'chirish (faqat admin)
+         * @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin.
+         */
+        delete: operations["admin_pdf_books_slides_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/pdf-books/{id}/chapters/{chapter_id}/slides/upload/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Lokal (dev) rejim: prezentatsiyani backend orqali yuklash
+         * @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin.
+         */
+        post: operations["admin_pdf_books_slides_upload_file"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/pdf-books/{id}/chapters/{chapter_id}/slides/upload-abort/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Tugallanmagan prezentatsiya yuklashini bekor qilish
+         * @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin.
+         */
+        post: operations["admin_pdf_books_slides_upload_abort"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/pdf-books/{id}/chapters/{chapter_id}/slides/upload-complete/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Prezentatsiya multipart yuklashini yakunlash: tekshiruv, slaydlar soni
+         * @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin.
+         */
+        post: operations["admin_pdf_books_slides_upload_complete"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/pdf-books/{id}/chapters/{chapter_id}/slides/upload-init/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Bo'lim prezentatsiyasini yuklashni boshlash (yangi yoki almashtirish)
+         * @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin.
+         */
+        post: operations["admin_pdf_books_slides_upload_init"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/pdf-books/{id}/transition/": {
         parameters: {
             query?: never;
@@ -700,6 +800,26 @@ export interface paths {
          * @description Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi o'rniga kesh ishlaydi.
          */
         get: operations["pdf_books_file_url"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pdf-books/{id}/chapters/{chapter_id}/slides/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Bo'lim prezentatsiyasining qisqa muddatli o'qish URL'i (keshlanmaydi)
+         * @description Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi o'rniga kesh ishlaydi.
+         */
+        get: operations["pdf_books_chapter_slides_url"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1004,25 +1124,41 @@ export interface components {
         /** @description Yuqori daraja; `children` — ichki bo'limlar (ular uchun `children` yo'q: 2 daraja). */
         Chapter: {
             /** Format: uuid */
-            readonly id: string;
+            id?: string;
             title: string;
             page: number;
+            readonly slides: components["schemas"]["SlidesAdmin"] | null;
             children?: components["schemas"]["ChapterLeaf"][];
         };
-        /** @description Mundarija qatori. Qiymatlar `pdf_services.chapter_errors` da tekshiriladi. */
+        /**
+         * @description Mundarija qatori. Qiymatlar `pdf_services.chapter_errors` da tekshiriladi.
+         *
+         *     `id` yozishda ixtiyoriy: berilsa shu bo'lim joyida yangilanadi (prezentatsiyasi saqlanadi),
+         *     berilmasa yangi bo'lim yaratiladi. `slides` faqat o'qiladi.
+         */
         ChapterLeaf: {
             /** Format: uuid */
-            readonly id: string;
+            id?: string;
             title: string;
             page: number;
+            readonly slides: components["schemas"]["SlidesAdmin"] | null;
         };
-        /** @description Mundarija qatori. Qiymatlar `pdf_services.chapter_errors` da tekshiriladi. */
+        /**
+         * @description Mundarija qatori. Qiymatlar `pdf_services.chapter_errors` da tekshiriladi.
+         *
+         *     `id` yozishda ixtiyoriy: berilsa shu bo'lim joyida yangilanadi (prezentatsiyasi saqlanadi),
+         *     berilmasa yangi bo'lim yaratiladi. `slides` faqat o'qiladi.
+         */
         ChapterLeafRequest: {
+            /** Format: uuid */
+            id?: string;
             title: string;
             page: number;
         };
         /** @description Yuqori daraja; `children` — ichki bo'limlar (ular uchun `children` yo'q: 2 daraja). */
         ChapterRequest: {
+            /** Format: uuid */
+            id?: string;
             title: string;
             page: number;
             children?: components["schemas"]["ChapterLeafRequest"][];
@@ -1451,7 +1587,7 @@ export interface components {
             /** Format: date-time */
             published_at: string | null;
             description: string;
-            chapters: components["schemas"]["Chapter"][];
+            chapters: components["schemas"]["PublicChapter"][];
         };
         PdfBookmark: {
             book: components["schemas"]["PdfBook"];
@@ -1495,6 +1631,8 @@ export interface components {
         };
         PdfUploadCompleteRequest: {
             parts: components["schemas"]["PdfUploadPartRequest"][];
+            /** @description Prezentatsiya uchun: asl fayl nomi (ko'rsatish uchun) */
+            filename?: string;
         };
         PdfUploadFileRequest: {
             /** Format: binary */
@@ -1536,6 +1674,21 @@ export interface components {
          * @enum {string}
          */
         ProviderEnum: "password" | "google" | "telegram" | "email_otp";
+        PublicChapter: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            page: number;
+            slides: components["schemas"]["SlidesPublic"] | null;
+            children: components["schemas"]["PublicChapterLeaf"][];
+        };
+        PublicChapterLeaf: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            page: number;
+            slides: components["schemas"]["SlidesPublic"] | null;
+        };
         /**
          * @description * `in_progress` - In progress
          *     * `read` - Read
@@ -1574,6 +1727,27 @@ export interface components {
          * @enum {string}
          */
         RoleEnum: "student" | "teacher" | "editor" | "admin";
+        /** @description Bo'lim prezentatsiyasi (admin): fayl nomi, slaydlar soni, hajm. Fayl kaliti chiqmaydi. */
+        SlidesAdmin: {
+            name: string;
+            page_count: number;
+            size_bytes: number;
+            /** Format: date-time */
+            updated_at: string | null;
+        };
+        /** @description Bo'lim prezentatsiyasi (admin): fayl nomi, slaydlar soni, hajm. Fayl kaliti chiqmaydi. */
+        SlidesAdminRequest: {
+            name: string;
+            page_count: number;
+            size_bytes: number;
+            /** Format: date-time */
+            updated_at: string | null;
+        };
+        /** @description Ochiq API: faqat slaydlar soni va hajm (fayl URL'i alohida endpoint orqali). */
+        SlidesPublic: {
+            page_count: number;
+            size_bytes: number;
+        };
         Subject: {
             slug: string;
             title: components["schemas"]["LocalizedText"];
@@ -2730,6 +2904,135 @@ export interface operations {
             };
         };
     };
+    admin_pdf_books_slides_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chapter_id: string;
+                /** @description A UUID string identifying this pdf book. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PdfBookAdmin"];
+                };
+            };
+        };
+    };
+    admin_pdf_books_slides_upload_file: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chapter_id: string;
+                /** @description A UUID string identifying this pdf book. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["PdfUploadFileRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PdfBookAdmin"];
+                };
+            };
+        };
+    };
+    admin_pdf_books_slides_upload_abort: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chapter_id: string;
+                /** @description A UUID string identifying this pdf book. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    admin_pdf_books_slides_upload_complete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chapter_id: string;
+                /** @description A UUID string identifying this pdf book. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PdfUploadCompleteRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PdfUploadCompleteRequest"];
+                "multipart/form-data": components["schemas"]["PdfUploadCompleteRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PdfBookAdmin"];
+                };
+            };
+        };
+    };
+    admin_pdf_books_slides_upload_init: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chapter_id: string;
+                /** @description A UUID string identifying this pdf book. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PdfUploadInitRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PdfUploadInitRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PdfUploadPlan"];
+                };
+            };
+        };
+    };
     admin_pdf_books_transition: {
         parameters: {
             query?: never;
@@ -2917,6 +3220,28 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PdfFileUrl"];
+                };
+            };
+        };
+    };
+    pdf_books_chapter_slides_url: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chapter_id: string;
                 id: string;
             };
             cookie?: never;

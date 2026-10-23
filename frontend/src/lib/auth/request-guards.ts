@@ -63,11 +63,13 @@ export const MAX_BODY_BYTES = 12 * 1024 * 1024;
  * (`PDF_BOOK_MAX_BYTES`, ixtiyoriy) belgilaydi, BFF'da bu yo'l uchun chegara yo'q.
  */
 export const MAX_PDF_BODY_BYTES = Number.POSITIVE_INFINITY;
-const PDF_UPLOAD_PATH = /^\/api\/v1\/admin\/pdf-books\/[0-9a-f-]{36}\/upload\/$/;
+const PDF_UPLOAD_PATH =
+  /^\/api\/v1\/admin\/pdf-books\/[0-9a-f-]{36}\/(?:chapters\/[0-9a-f-]{36}\/slides\/)?upload\/$/;
 
 export const isPdfUploadPath = (path: string) => PDF_UPLOAD_PATH.test(path);
 
-const PDF_FILE_PATH = /^\/api\/v1\/pdf-books\/[0-9a-f-]{36}\/file\/$/;
+const PDF_FILE_PATH =
+  /^\/api\/v1\/pdf-books\/[0-9a-f-]{36}\/(?:chapters\/[0-9a-f-]{36}\/slides\/)?file\/$/;
 
 /** Lokal (dev) PDF fayl endpoint'i: Range va kesh sarlavhalari BFF orqali o'tadi. */
 export const isPdfFilePath = (path: string) => PDF_FILE_PATH.test(path);

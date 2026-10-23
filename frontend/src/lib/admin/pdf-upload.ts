@@ -27,6 +27,8 @@ export interface PdfUploadApi {
     file: { name: string; size: number; type: string },
   ): Promise<PdfUploadPlan>;
   completePdfUpload(id: string, parts: PdfUploadPart[]): Promise<AdminPdfBook>;
+  /** Ixtiyoriy: bo'laklab yuklash yiqilsa/bekor qilinsa chaqiriladi (tugallanmagan yuklashni tozalaydi). */
+  abortPdfUpload?(id: string): Promise<void>;
 }
 
 export interface UploadPdfOptions {
@@ -37,6 +39,8 @@ export interface UploadPdfOptions {
   /** 0..1 */
   onProgress?: (fraction: number) => void;
   signal?: AbortSignal;
+  /** `proxy` (lokal dev) rejimidagi manzil; berilmasa kitob PDF'i yo'li (`proxyUploadUrl`). */
+  proxyUrl?: string;
   /** Bir vaqtda yuboriladigan bo'laklar (S3 rejimi). */
   concurrency?: number;
   /** Bitta bo'lak uchun qayta urinishlar soni. */
@@ -52,6 +56,10 @@ const DEFAULT_RETRY_DELAY_MS = 800;
 /** Brauzerdan BFF orqali backend'ga (dev "proxy" rejimi): oxirgi `/` siz. */
 export const proxyUploadUrl = (bookId: string) =>
   `${BFF_PREFIX}/api/v1/admin/pdf-books/${bookId}/upload`;
+
+/** Bo'lim prezentatsiyasi uchun `proxy` (lokal dev) manzili: oxirgi `/` siz. */
+export const slidesProxyUrl = (bookId: string, chapterId: string) =>
+  `${BFF_PREFIX}/api/v1/admin/pdf-books/${bookId}/chapters/${chapterId}/slides/upload`;
 
 /** Backend xato tanasi (`{code, message, details?}`) → `ApiError`. */
 function toApiError(result: SendResult): ApiError {
@@ -88,7 +96,7 @@ export async function uploadPdf(options: UploadPdfOptions): Promise<AdminPdfBook
     form.set("file", file);
     const result = await send({
       method: "POST",
-      url: proxyUploadUrl(bookId),
+      url: options.proxyUrl ?? proxyUploadUrl(bookId),
       body: form,
       onProgress: report,
       signal,
@@ -98,6 +106,23 @@ export async function uploadPdf(options: UploadPdfOptions): Promise<AdminPdfBook
     return result.json as AdminPdfBook;
   }
 
+  try {
+    return await uploadParts({ ...options, plan, report });
+  } catch (error) {
+    // Bekor qilish yoki yiqilish: tugallanmagan yuklash tozalanadi (xatosi asosiy xatoni yashirmaydi).
+    await api.abortPdfUpload?.(bookId).catch(() => undefined);
+    throw error;
+  }
+}
+
+interface PartsOptions extends UploadPdfOptions {
+  plan: PdfUploadPlan;
+  report: (loaded: number) => void;
+}
+
+/** S3/R2 (`direct`): bo'laklarni parallel yuboradi va `upload-complete` ni ETag'lar bilan chaqiradi. */
+async function uploadParts(options: PartsOptions): Promise<AdminPdfBook> {
+  const { api, send, bookId, file, signal, onProgress, plan, report } = options;
   const partCount = plan.part_urls.length;
   const loadedByPart = new Array<number>(partCount).fill(0);
   const etags = new Array<string>(partCount);

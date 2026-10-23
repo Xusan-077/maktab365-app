@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, ListTree } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -13,6 +13,8 @@ import type { Locale } from "@/lib/i18n/config";
 import { getLocalized } from "@/lib/i18n/localized";
 import { Link, usePathname, useRouter } from "@/lib/i18n/navigation";
 import { clampPage, parsePageParam } from "@/lib/pdf/page-nav";
+import { parseSlidesParams, readSlidesProgress, withSlidesParams } from "@/lib/pdf/slides";
+import { flattenToc } from "@/lib/pdf/toc";
 import { swipeDirection } from "@/lib/pdf/swipe";
 import { pdfQueries } from "@/lib/pdf-books/queries";
 import { ROUTES } from "@/lib/utils/routes";
@@ -21,6 +23,7 @@ import { BookCover } from "./BookCover";
 import { PdfBookDescription } from "./PdfBookDescription";
 import { PdfBookmarkButton } from "./PdfBookmarkButton";
 import { PdfPageCanvas } from "./PdfPageCanvas";
+import { PdfSlidesViewer } from "./PdfSlidesViewer";
 import { PdfToolbar } from "./PdfToolbar";
 import { PdfTocDrawer } from "./PdfTocDrawer";
 import { usePdfDocument } from "./usePdfDocument";
@@ -66,10 +69,51 @@ export function PdfReader({ bookId }: { bookId: string }) {
   // URL > saqlangan pozitsiya > 1. Pozitsiya aniqlanguncha `null`.
   const page = total === 0 ? null : (urlPage ?? (progress.ready ? progress.resume : null));
 
-  const setPageInUrl = useCallback(
-    (next: number) => router.replace(`${pathname}?page=${next}`, { scroll: false }),
-    [router, pathname],
+  // Boshqa parametrlar (`slides`, `slide`) saqlanadi: sahifa almashganda ko'rgich yopilmaydi.
+  const replaceQuery = useCallback(
+    (patch: Parameters<typeof withSlidesParams>[1]) =>
+      router.replace(`${pathname}?${withSlidesParams(searchParams, patch)}`, { scroll: false }),
+    [router, pathname, searchParams],
   );
+  const setPageInUrl = useCallback((next: number) => replaceQuery({ page: next }), [replaceQuery]);
+
+  // Prezentatsiya: `?slides=<bo'lim id>&slide=N`; faqat prezentatsiyasi bor bo'lim ochiladi.
+  const slidesParams = parseSlidesParams(searchParams);
+  const slidesItem = useMemo(
+    () =>
+      slidesParams.chapterId
+        ? flattenToc(book.data?.chapters ?? []).find(
+            (item) => item.id === slidesParams.chapterId && item.slides,
+          )
+        : undefined,
+    [slidesParams.chapterId, book.data],
+  );
+  const slidesOpen = Boolean(slidesItem);
+  const slideNumber = slidesParams.slide;
+  const openSlides = useCallback(
+    (chapterId: string, startSlide: number) =>
+      replaceQuery({ slides: chapterId, slide: startSlide }),
+    [replaceQuery],
+  );
+  const setSlide = useCallback((next: number) => replaceQuery({ slide: next }), [replaceQuery]);
+  const closeSlides = useCallback(
+    () => replaceQuery({ slides: null, slide: null }),
+    [replaceQuery],
+  );
+  const backToBook = useCallback(
+    () => replaceQuery({ slides: null, slide: null, page: slidesItem?.page ?? null }),
+    [replaceQuery, slidesItem],
+  );
+  // Havola ulashilganda: slayd aytilmagan bo'lsa oxirgi ko'rilgan (yoki 1); yaroqsiz bo'lim — yopiladi.
+  const slidesChapterId = slidesParams.chapterId;
+  useEffect(() => {
+    if (!slidesChapterId || !book.data) return;
+    if (!slidesOpen) {
+      replaceQuery({ slides: null, slide: null });
+    } else if (slideNumber === null) {
+      replaceQuery({ slide: readSlidesProgress(slidesChapterId) ?? 1 });
+    }
+  }, [slidesChapterId, slidesOpen, slideNumber, book.data, replaceQuery]);
 
   // URL'ni haqiqiy sahifaga keltiradi (saqlangan pozitsiya, 1..N ga tuzatilgan qiymat).
   useEffect(() => {
@@ -255,6 +299,21 @@ export function PdfReader({ bookId }: { bookId: string }) {
           chapters={chapters}
           page={page}
           onGo={goTo}
+          onOpenSlides={openSlides}
+        />
+      )}
+
+      {slidesItem?.slides && slidesParams.chapterId && slideNumber !== null && (
+        <PdfSlidesViewer
+          key={slidesParams.chapterId}
+          bookId={bookId}
+          chapterId={slidesParams.chapterId}
+          title={slidesItem.title}
+          slideCount={slidesItem.slides.page_count}
+          slide={slideNumber}
+          onSlide={setSlide}
+          onClose={closeSlides}
+          onBackToBook={backToBook}
         />
       )}
 

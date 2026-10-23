@@ -14,4 +14,14 @@ urlpatterns = [
         name="pdf-book-file-url",
     ),
     path("pdf-books/<uuid:pk>/file/", pdf_views.PdfFileView.as_view(), name="pdf-book-file"),
+    path(
+        "pdf-books/<uuid:pk>/chapters/<uuid:chapter_id>/slides/",
+        pdf_views.PdfChapterSlidesUrlView.as_view(),
+        name="pdf-chapter-slides-url",
+    ),
+    path(
+        "pdf-books/<uuid:pk>/chapters/<uuid:chapter_id>/slides/file/",
+        pdf_views.PdfChapterSlidesFileView.as_view(),
+        name="pdf-chapter-slides-file",
+    ),
 ]

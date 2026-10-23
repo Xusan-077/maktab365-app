@@ -6,12 +6,33 @@ from .pdf_services import allowed_transitions, chapter_errors, replace_chapters
 from .serializers import LocalizedField
 
 
-class ChapterLeafSerializer(serializers.Serializer):
-    """Mundarija qatori. Qiymatlar `pdf_services.chapter_errors` da tekshiriladi."""
+class SlidesAdminSerializer(serializers.Serializer):
+    """Bo'lim prezentatsiyasi (admin): fayl nomi, slaydlar soni, hajm. Fayl kaliti chiqmaydi."""
 
-    id = serializers.UUIDField(read_only=True)
+    name = serializers.CharField()
+    page_count = serializers.IntegerField()
+    size_bytes = serializers.IntegerField()
+    updated_at = serializers.DateTimeField(allow_null=True)
+
+
+class SlidesPublicSerializer(serializers.Serializer):
+    """Ochiq API: faqat slaydlar soni va hajm (fayl URL'i alohida endpoint orqali)."""
+
+    page_count = serializers.IntegerField()
+    size_bytes = serializers.IntegerField()
+
+
+class ChapterLeafSerializer(serializers.Serializer):
+    """Mundarija qatori. Qiymatlar `pdf_services.chapter_errors` da tekshiriladi.
+
+    `id` yozishda ixtiyoriy: berilsa shu bo'lim joyida yangilanadi (prezentatsiyasi saqlanadi),
+    berilmasa yangi bo'lim yaratiladi. `slides` faqat o'qiladi.
+    """
+
+    id = serializers.UUIDField(required=False)
     title = serializers.CharField(allow_blank=True, trim_whitespace=False)
     page = serializers.IntegerField()
+    slides = SlidesAdminSerializer(read_only=True, allow_null=True)
 
 
 class ChapterSerializer(ChapterLeafSerializer):
@@ -124,6 +145,12 @@ class PdfUploadPartSerializer(serializers.Serializer):
 
 class PdfUploadCompleteSerializer(serializers.Serializer):
     parts = PdfUploadPartSerializer(many=True, max_length=10000)
+    filename = serializers.CharField(
+        max_length=255,
+        required=False,
+        allow_blank=True,
+        help_text="Prezentatsiya uchun: asl fayl nomi (ko'rsatish uchun)",
+    )
 
 
 class PdfUploadFileSerializer(serializers.Serializer):
@@ -149,9 +176,20 @@ class PdfBookSerializer(serializers.Serializer):
         return book.status != "published"
 
 
+class PublicChapterLeafSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    title = serializers.CharField()
+    page = serializers.IntegerField()
+    slides = SlidesPublicSerializer(allow_null=True)
+
+
+class PublicChapterSerializer(PublicChapterLeafSerializer):
+    children = PublicChapterLeafSerializer(many=True)
+
+
 class PdfBookDetailSerializer(PdfBookSerializer):
     description = serializers.CharField()
-    chapters = ChapterSerializer(source="chapter_tree", many=True)
+    chapters = PublicChapterSerializer(source="chapter_tree", many=True)
 
 
 class PdfFileUrlSerializer(serializers.Serializer):

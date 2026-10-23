@@ -100,6 +100,37 @@ describe("PdfBookEditView: tavsif va mundarija", () => {
     expect(save(root).disabled).toBe(true);
   });
 
+  it("har saqlangan qatorda ixtiyoriy prezentatsiya boshqaruvi; yangi qatorda saqlash kerakligi aytiladi", async () => {
+    const withSlides = {
+      ...BOOK,
+      chapters: [
+        {
+          id: "c1",
+          title: "Kirish",
+          page: 1,
+          slides: { name: "kirish.pdf", page_count: 9, size_bytes: 1024, updated_at: null },
+          children: [{ id: "c1a", title: "Maqsad", page: 2, slides: null }],
+        },
+      ],
+    };
+    setup({ chapters: withSlides.chapters } as Partial<AdminPdfBook>);
+    const root = await form();
+
+    const controls = within(root).getAllByTestId("chapter-slides");
+    expect(controls.map((c) => c.dataset.hasSlides)).toEqual(["true", "false"]);
+    expect(within(root).getByTestId("slides-info").textContent).toContain("kirish.pdf");
+    expect(within(root).queryByTestId("slides-hint")).toBeNull();
+
+    fireEvent.click(within(root).getByTestId("toc-add"));
+
+    const all = within(root).getAllByTestId("chapter-slides");
+    expect(all).toHaveLength(3);
+    expect(within(all[2]).getByTestId("slides-hint").textContent).toBe(
+      uz.admin.slides.saveRowFirst,
+    );
+    expect(save(root).disabled).toBe(true); // prezentatsiya mundarija formasini "o'zgargan" qilmaydi
+  });
+
   it("o'zgartirib saqlaydi: tavsif va butun mundarija PATCH qilinadi", async () => {
     setup();
     const root = await form();
@@ -117,7 +148,13 @@ describe("PdfBookEditView: tavsif va mundarija", () => {
       expect(api.updatePdfBook).toHaveBeenCalledWith("book-1", {
         description: "Yangi tavsif",
         chapters: [
-          { title: "Kirish", page: 1, children: [{ title: "Maqsad", page: 2 }] },
+          // Saqlangan bo'limlar `id` bilan ketadi (prezentatsiyasi saqlanadi), yangisi `id` siz.
+          {
+            id: "c1",
+            title: "Kirish",
+            page: 1,
+            children: [{ id: "c1a", title: "Maqsad", page: 2 }],
+          },
           { title: "Algebra", page: 5 },
         ],
       }),

@@ -992,6 +992,27 @@
         "added": "{count} qator qo'shildi",
         "skipped": "{count} qator o'qilmadi (oxirida bet raqami yo'q)"
       }
+    },
+    "slides": {
+      "label": "Prezentatsiya",
+      "optional": "Prezentatsiya yo'q (ixtiyoriy)",
+      "add": "Prezentatsiya qo'shish",
+      "replace": "Almashtirish",
+      "info": "{count} slayd · {size}",
+      "uploading": "Yuklanmoqda…",
+      "progress": "Prezentatsiya yuklash jarayoni",
+      "cancel": "Bekor qilish",
+      "retry": "Qayta urinish",
+      "saveBookFirst": "Prezentatsiya kitob saqlangandan keyin, tahrirlash sahifasida qo'shiladi.",
+      "saveRowFirst": "Avval mundarijani saqlang: yangi bo'limga prezentatsiya saqlangandan keyin qo'shiladi.",
+      "uploaded": "Prezentatsiya yuklandi",
+      "deleted": "Prezentatsiya o'chirildi",
+      "deleteTitle": "Prezentatsiyani o'chirish",
+      "deleteDescription": "«{title}» bo'limining prezentatsiyasi va uning fayli o'chiriladi. Buni qaytarib bo'lmaydi.",
+      "choose": "{n}-bo'lim uchun prezentatsiya faylini tanlash",
+      "addFor": "{n}-bo'lim uchun prezentatsiya qo'shish",
+      "replaceFor": "{n}-bo'lim prezentatsiyasini almashtirish",
+      "removeFor": "{n}-bo'lim prezentatsiyasini o'chirish"
     }
   },
   "pdfBooks": {
@@ -1058,6 +1079,26 @@
       "textbook": "DARSLIK",
       "grade": "SINF",
       "pdf": "PDF"
+    },
+    "slides": {
+      "open": "Prezentatsiya",
+      "openLabel": "{title}: prezentatsiyani ochish ({count} slayd)",
+      "resume": "Davom ettirish: {slide}-slayd",
+      "resumeShort": "Davom ettirish",
+      "dialogLabel": "Prezentatsiya: {title}",
+      "back": "Kitobga qaytish",
+      "close": "Yopish",
+      "toolbar": "Slaydlar",
+      "prev": "Oldingi slayd",
+      "next": "Keyingi slayd",
+      "position": "{slide} / {total}-slayd",
+      "slideLabel": "{slide}-slayd, jami {total} ta",
+      "fullscreen": "To'liq ekran",
+      "exitFullscreen": "To'liq ekrandan chiqish",
+      "loading": "Prezentatsiya yuklanmoqda",
+      "loadError": "Prezentatsiyani ochib bo'lmadi. Internetni tekshirib, qayta urinib ko'ring.",
+      "pageError": "Slaydni ko'rsatib bo'lmadi.",
+      "retry": "Qayta urinish"
     }
   },
   "library": {

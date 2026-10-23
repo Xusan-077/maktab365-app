@@ -31,8 +31,12 @@ def is_remote() -> bool:
     return bool(getattr(settings, "AWS_STORAGE_BUCKET_NAME", ""))
 
 
-def new_key() -> str:
-    return f"pdf-books/{uuid.uuid4()}.pdf"
+BOOK_PREFIX = "pdf-books"
+SLIDES_PREFIX = "pdf-slides"
+
+
+def new_key(prefix: str = BOOK_PREFIX) -> str:
+    return f"{prefix}/{uuid.uuid4()}.pdf"
 
 
 def _client():
@@ -70,8 +74,8 @@ class UploadPlan:
     part_urls: tuple[str, ...] = ()
 
 
-def start_upload(size: int) -> UploadPlan:
-    key = new_key()
+def start_upload(size: int, prefix: str = BOOK_PREFIX) -> UploadPlan:
+    key = new_key(prefix)
     if not is_remote():
         return UploadPlan("proxy", key)
     ttl = settings.PDF_SIGNED_URL_SECONDS
@@ -188,27 +192,38 @@ def count_pages(key: str) -> int:
         return _pages_of(tmp)
 
 
-def read_url(book) -> dict:
-    """O'qish URL'i: S3'da imzolangan GET, lokalda imzolangan backend yo'li (token)."""
+def _read_url(key: str, owner: str, local_path: str) -> dict:
+    """S3'da imzolangan GET, lokalda imzolangan backend yo'li (token: egasi + kalit)."""
     ttl = settings.PDF_SIGNED_URL_SECONDS
     if is_remote():
         url = _client().generate_presigned_url(
             "get_object",
             Params={
                 "Bucket": _bucket(),
-                "Key": book.file.name,
+                "Key": key,
                 "ResponseContentType": PDF_MIME,
                 "ResponseContentDisposition": "inline",
             },
             ExpiresIn=ttl,
         )
     else:
-        token = signing.dumps({"book": str(book.pk), "key": book.file.name}, salt=FILE_TOKEN_SALT)
-        url = f"/api/v1/pdf-books/{book.pk}/file/?token={token}"
+        token = signing.dumps({"book": owner, "key": key}, salt=FILE_TOKEN_SALT)
+        url = f"{local_path}?token={token}"
     return {"url": url, "expires_in": ttl}
 
 
-def check_file_token(token: str, book) -> bool:
+def read_url(book) -> dict:
+    """Kitob PDF'ining o'qish URL'i."""
+    return _read_url(book.file.name, str(book.pk), f"/api/v1/pdf-books/{book.pk}/file/")
+
+
+def slides_read_url(book, chapter) -> dict:
+    """Bo'lim prezentatsiyasining o'qish URL'i (kitob PDF'i bilan bir xil mexanizm)."""
+    path = f"/api/v1/pdf-books/{book.pk}/chapters/{chapter.pk}/slides/file/"
+    return _read_url(chapter.slides_file, str(book.pk), path)
+
+
+def check_key_token(token: str, book_id, key: str) -> bool:
     try:
         data = signing.loads(
             token, salt=FILE_TOKEN_SALT, max_age=settings.PDF_SIGNED_URL_SECONDS + 60
@@ -216,4 +231,8 @@ def check_file_token(token: str, book) -> bool:
     except signing.BadSignature:
         return False
     # Fayl almashtirilgan bo'lsa eski token yaroqsiz (kalit boshqa).
-    return data.get("book") == str(book.pk) and data.get("key") == book.file.name
+    return data.get("book") == str(book_id) and data.get("key") == key
+
+
+def check_file_token(token: str, book) -> bool:
+    return check_key_token(token, book.pk, book.file.name)

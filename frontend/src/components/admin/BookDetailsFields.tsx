@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { Textarea } from "@/components/ui/Textarea";
 import { DESCRIPTION_MAX, countRows, toPayload, type ChapterDraft } from "@/lib/admin/chapters";
 import type { AdminPdfBookPatch } from "@/lib/admin/types";
+import type { SlidesContext } from "./ChapterSlides";
 import { ChaptersEditor } from "./ChaptersEditor";
 
 export interface BookDetailsValue {
@@ -21,6 +22,8 @@ export interface BookDetailsFieldsProps {
   /** Backend xatosi matni (masalan, bet PDF dan katta). */
   chaptersError?: string;
   descriptionError?: string;
+  /** Bo'lim prezentatsiyalari konteksti (berilmasa boshqaruv ko'rinmaydi). */
+  slides?: SlidesContext;
 }
 
 /** `PATCH` tanasi: tavsif va mundarija (bo'sh qatorlar tashlanadi). */
@@ -42,6 +45,7 @@ export function BookDetailsFields({
   showProblems,
   chaptersError,
   descriptionError,
+  slides,
 }: BookDetailsFieldsProps) {
   const t = useTranslations("admin.details");
   return (
@@ -63,6 +67,7 @@ export function BookDetailsFields({
         pageCount={pageCount}
         disabled={disabled}
         showProblems={showProblems}
+        slides={slides}
       />
       {chaptersError && (
         <p role="alert" className="text-danger text-sm" data-testid="chapters-error">

@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest";
 import {
   chapterProblems,
   countRows,
+  emptyRow,
   fromApi,
   moveItem,
   parseBulk,
+  slidesById,
   toPayload,
   withoutBlankRows,
   type ChapterDraft,
@@ -126,13 +128,52 @@ describe("moveItem", () => {
 describe("fromApi", () => {
   it("API daraxtini tahrirlanadigan qatorlarga aylantiradi", () => {
     const rows = fromApi([
-      { id: "1", title: "Kirish", page: 1, children: [{ id: "2", title: "Maqsad", page: 2 }] },
-      { id: "3", title: "Algebra", page: 5 },
+      {
+        id: "1",
+        title: "Kirish",
+        page: 1,
+        slides: null,
+        children: [{ id: "2", title: "Maqsad", page: 2, slides: null }],
+      },
+      { id: "3", title: "Algebra", page: 5, slides: null },
     ]);
     expect(rows.map((r) => [r.title, r.page, r.children.length])).toEqual([
       ["Kirish", "1", 1],
       ["Algebra", "5", 0],
     ]);
     expect(new Set(rows.flatMap((r) => [r.key, ...r.children.map((c) => c.key)])).size).toBe(3);
+  });
+});
+
+describe("saqlangan bo'limlar: id va prezentatsiya", () => {
+  const api = [
+    {
+      id: "c1",
+      title: "Kirish",
+      page: 1,
+      slides: { name: "a.pdf", page_count: 4, size_bytes: 10, updated_at: null },
+      children: [{ id: "c1a", title: "Maqsad", page: 2, slides: null }],
+    },
+    { id: "c2", title: "Algebra", page: 5, slides: null },
+  ];
+
+  it("fromApi id'ni saqlaydi, toPayload uni qaytarib yuboradi (prezentatsiya yo'qolmasin)", () => {
+    expect(toPayload(fromApi(api))).toEqual([
+      { id: "c1", title: "Kirish", page: 1, children: [{ id: "c1a", title: "Maqsad", page: 2 }] },
+      { id: "c2", title: "Algebra", page: 5 },
+    ]);
+  });
+
+  it("yangi (saqlanmagan) qator id siz ketadi", () => {
+    const drafts = [...fromApi(api), { ...emptyRow(), title: "Yangi", page: "9", children: [] }];
+    expect(toPayload(drafts).at(-1)).toEqual({ title: "Yangi", page: 9 });
+  });
+
+  it("slidesById: bo'lim va ichki bo'lim bo'yicha prezentatsiya", () => {
+    const map = slidesById(api);
+    expect(map.get("c1")?.page_count).toBe(4);
+    expect(map.get("c1a")).toBeNull();
+    expect(map.get("c2")).toBeNull();
+    expect(map.size).toBe(3);
   });
 });

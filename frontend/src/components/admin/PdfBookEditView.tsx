@@ -24,9 +24,10 @@ import { formatBytes } from "@/lib/utils/bytes";
 import { createPdfBookSchema } from "@/lib/validation/admin";
 import { GRADES } from "@/types/catalog";
 import type { LocalizedText } from "@/types/i18n";
-import { chapterProblems, fromApi } from "@/lib/admin/chapters";
+import { chapterProblems, fromApi, slidesById } from "@/lib/admin/chapters";
 import { useAdminIdentity } from "./AdminRoleProvider";
 import { BookDetailsFields, toDetailsPatch, type BookDetailsValue } from "./BookDetailsFields";
+import type { SlidesContext } from "./ChapterSlides";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { LocalizedFields, toLocalized } from "./LocalizedFields";
 import { PdfFilePicker } from "./PdfFilePicker";
@@ -172,6 +173,15 @@ function PdfBookDetailsForm({ book }: { book: AdminPdfBook }) {
   const [value, setValue] = useState(initial);
   const [showProblems, setShowProblems] = useState(false);
   const pageCount = book.has_file ? book.page_count : undefined;
+  const { role } = useAdminIdentity();
+  const slides = useMemo<SlidesContext>(
+    () => ({
+      bookId: book.id,
+      byId: slidesById(book.chapters ?? []),
+      canDelete: canDelete(role),
+    }),
+    [book.id, book.chapters, role],
+  );
 
   const patch = toDetailsPatch(value);
   const dirty = JSON.stringify(patch) !== JSON.stringify(toDetailsPatch(initial));
@@ -215,6 +225,7 @@ function PdfBookDetailsForm({ book }: { book: AdminPdfBook }) {
         disabled={save.isPending}
         showProblems={showProblems}
         chaptersError={chaptersError}
+        slides={slides}
       />
       <div>
         <Button type="submit" loading={save.isPending} disabled={!dirty}>

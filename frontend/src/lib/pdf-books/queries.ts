@@ -13,6 +13,8 @@ export const pdfKeys = {
   subjects: (grade?: number) => ["pdf-books", "subjects", grade ?? null] as const,
   book: (id: string) => ["pdf-books", "book", id] as const,
   fileUrl: (id: string) => ["pdf-books", "file-url", id] as const,
+  slidesUrl: (bookId: string, chapterId: string) =>
+    ["pdf-books", "slides-url", bookId, chapterId] as const,
   progress: (id: string) => ["pdf-progress", id] as const,
   allProgress: () => ["pdf-progress", "all"] as const,
   library: () => ["pdf-library"] as const,
@@ -48,6 +50,14 @@ export const pdfQueries = {
     queryOptions({
       queryKey: pdfKeys.fileUrl(id),
       queryFn: () => getPdfBooksApi().fileUrl(id),
+      staleTime: 0,
+      gcTime: 0,
+    }),
+  /** Prezentatsiya uchun imzolangan URL: har ochilishda yangi olinadi. */
+  slidesUrl: (bookId: string, chapterId: string) =>
+    queryOptions({
+      queryKey: pdfKeys.slidesUrl(bookId, chapterId),
+      queryFn: () => getPdfBooksApi().slidesUrl(bookId, chapterId),
       staleTime: 0,
       gcTime: 0,
     }),

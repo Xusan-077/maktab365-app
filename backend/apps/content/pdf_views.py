@@ -6,6 +6,7 @@ from email.utils import formatdate
 from django.core.files.storage import default_storage
 from django.db.models import Count, Q
 from django.http import HttpResponse, StreamingHttpResponse
+from django.utils import timezone
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import generics
@@ -15,7 +16,7 @@ from rest_framework.views import APIView
 
 from . import pdf_storage as storage
 from .cache import public_cached
-from .models import PdfBook, Subject
+from .models import PdfBook, PdfBookChapter, Subject
 from .pdf_serializers import PdfBookDetailSerializer, PdfBookSerializer, PdfFileUrlSerializer
 from .pdf_services import visible_pdf_books
 from .serializers import SubjectSerializer
@@ -153,6 +154,45 @@ def _iterate(key: str, start: int, end: int):
             yield chunk
 
 
+def _serve_ranged(request, key: str, etag_seed: str, modified: float):
+    """Lokal saqlashdagi faylni HTTP Range (206/416) va ETag (304) bilan beradi."""
+    size = default_storage.size(key)
+    etag = f'"{etag_seed}-{size}"'
+    base = {
+        "Accept-Ranges": "bytes",
+        "ETag": etag,
+        "Cache-Control": "private, max-age=600",
+        "Content-Disposition": "inline",
+        "Last-Modified": formatdate(modified, usegmt=True),
+    }
+    if request.META.get("HTTP_IF_NONE_MATCH") == etag:
+        response = HttpResponse(status=304)
+        for name, value in base.items():
+            response[name] = value
+        return response
+
+    header = request.META.get("HTTP_RANGE", "")
+    if_range = request.META.get("HTTP_IF_RANGE")
+    window = None if (if_range and if_range != etag) else _parse_range(header, size)
+    if window == "invalid":
+        response = HttpResponse(status=416)
+        response["Content-Range"] = f"bytes */{size}"
+        return response
+
+    start, end = window if window else (0, size - 1)
+    response = StreamingHttpResponse(
+        _iterate(key, start, end),
+        status=206 if window else 200,
+        content_type=storage.PDF_MIME,
+    )
+    response["Content-Length"] = str(end - start + 1)
+    if window:
+        response["Content-Range"] = f"bytes {start}-{end}/{size}"
+    for name, value in base.items():
+        response[name] = value
+    return response
+
+
 class PdfFileView(APIView):
     """Faqat lokal (dev) saqlashda: imzolangan token bilan, HTTP Range qo'llab-quvvatlanadi.
 
@@ -171,39 +211,52 @@ class PdfFileView(APIView):
         token = request.query_params.get("token", "")
         if book is None or not storage.check_file_token(token, book):
             raise NotFound()
-        key = book.file.name
-        size = default_storage.size(key)
-        etag = f'"{book.pk.hex}-{size}"'
-        base = {
-            "Accept-Ranges": "bytes",
-            "ETag": etag,
-            "Cache-Control": "private, max-age=600",
-            "Content-Disposition": "inline",
-            "Last-Modified": formatdate(book.updated_at.timestamp(), usegmt=True),
-        }
-        if request.META.get("HTTP_IF_NONE_MATCH") == etag:
-            response = HttpResponse(status=304)
-            for name, value in base.items():
-                response[name] = value
-            return response
+        return _serve_ranged(request, book.file.name, book.pk.hex, book.updated_at.timestamp())
 
-        header = request.META.get("HTTP_RANGE", "")
-        if_range = request.META.get("HTTP_IF_RANGE")
-        window = None if (if_range and if_range != etag) else _parse_range(header, size)
-        if window == "invalid":
-            response = HttpResponse(status=416)
-            response["Content-Range"] = f"bytes */{size}"
-            return response
 
-        start, end = window if window else (0, size - 1)
-        response = StreamingHttpResponse(
-            _iterate(key, start, end),
-            status=206 if window else 200,
-            content_type=storage.PDF_MIME,
-        )
-        response["Content-Length"] = str(end - start + 1)
-        if window:
-            response["Content-Range"] = f"bytes {start}-{end}/{size}"
-        for name, value in base.items():
-            response[name] = value
+def _chapter_with_slides_or_404(request, pk, chapter_id) -> tuple[PdfBook, PdfBookChapter]:
+    """Ko'rinadigan kitobning prezentatsiyasi bor bo'limi (aks holda 404)."""
+    book = _visible_book_or_404(request, pk)
+    chapter = (
+        PdfBookChapter.objects.filter(book=book, pk=chapter_id).exclude(slides_file="").first()
+    )
+    if chapter is None:
+        raise NotFound("Prezentatsiya topilmadi.")
+    return book, chapter
+
+
+class PdfChapterSlidesUrlView(PublicView, APIView):
+    throttle_classes = APIView.throttle_classes  # imzo berish: umumiy tezlik chegarasida
+
+    @extend_schema(
+        operation_id="pdf_books_chapter_slides_url",
+        responses=PdfFileUrlSerializer,
+        summary="Bo'lim prezentatsiyasining qisqa muddatli o'qish URL'i (keshlanmaydi)",
+        tags=TAGS,
+    )
+    def get(self, request, pk, chapter_id):
+        book, chapter = _chapter_with_slides_or_404(request, pk, chapter_id)
+        response = Response(PdfFileUrlSerializer(storage.slides_read_url(book, chapter)).data)
+        response["Cache-Control"] = "private, no-store"
         return response
+
+
+class PdfChapterSlidesFileView(APIView):
+    """Lokal (dev) saqlashda prezentatsiya fayli: imzolangan token, HTTP Range."""
+
+    authentication_classes: list = []
+    permission_classes: list = []
+    throttle_classes: list = []
+
+    @extend_schema(exclude=True)
+    def get(self, request, pk, chapter_id):
+        if storage.is_remote():
+            raise NotFound()
+        chapter = (
+            PdfBookChapter.objects.filter(book_id=pk, pk=chapter_id).exclude(slides_file="").first()
+        )
+        token = request.query_params.get("token", "")
+        if chapter is None or not storage.check_key_token(token, pk, chapter.slides_file):
+            raise NotFound()
+        modified = (chapter.slides_updated_at or timezone.now()).timestamp()
+        return _serve_ranged(request, chapter.slides_file, chapter.pk.hex, modified)

@@ -4,6 +4,8 @@ export interface TocLeaf {
   id: string;
   title: string;
   page: number;
+  /** Ixtiyoriy prezentatsiya (PDF slaydlar); yo'q bo'lsa `null`/berilmaydi. */
+  slides?: { page_count: number; size_bytes: number } | null;
 }
 
 export interface TocChapter extends TocLeaf {
@@ -18,11 +20,18 @@ export interface TocItem extends TocLeaf {
 /** Daraxt → hujjat tartibidagi tekis ro'yxat (bo'lim, uning ichki bo'limlari, keyingi bo'lim…). */
 export function flattenToc(chapters: readonly TocChapter[]): TocItem[] {
   return chapters.flatMap((chapter) => [
-    { id: chapter.id, title: chapter.title, page: chapter.page, level: 0 as const },
+    {
+      id: chapter.id,
+      title: chapter.title,
+      page: chapter.page,
+      slides: chapter.slides ?? null,
+      level: 0 as const,
+    },
     ...(chapter.children ?? []).map((child) => ({
       id: child.id,
       title: child.title,
       page: child.page,
+      slides: child.slides ?? null,
       level: 1 as const,
     })),
   ]);

@@ -76,6 +76,14 @@ export class PdfBooksApi {
     return unwrap(result);
   }
 
+  /** Bo'lim prezentatsiyasining qisqa muddatli o'qish URL'i (keshlanmaydi). */
+  async slidesUrl(bookId: string, chapterId: string): Promise<PdfFileUrl> {
+    const result = await this.client.GET("/api/v1/pdf-books/{id}/chapters/{chapter_id}/slides/", {
+      params: { path: { id: bookId, chapter_id: chapterId } },
+    });
+    return unwrap(result);
+  }
+
   /** Mening oxirgi sahifam; yozuv yo'q bo'lsa `null`. */
   async myProgress(id: string): Promise<PdfProgress | null> {
     const result = await this.client.GET("/api/v1/me/pdf-progress/{pdf_book_id}/", {

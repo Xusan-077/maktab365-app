@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { ApiError } from "@/lib/api/types";
 import {
   proxyUploadUrl,
+  slidesProxyUrl,
   uploadPdf,
   type SendRequest,
   type SendResult,
@@ -203,5 +204,78 @@ describe("uploadPdf — juda katta fayl", () => {
     const parts = api.completePdfUpload.mock.calls[0][1] as { part_number: number }[];
     expect(parts.map((p) => p.part_number)).toEqual(Array.from({ length: 640 }, (_, i) => i + 1));
     expect(progress.at(-1)).toBe(1);
+  });
+});
+
+describe("uploadPdf — bo'lim prezentatsiyasi (umumiy mexanizm)", () => {
+  it("proxy rejimida berilgan manzilga yuboradi", async () => {
+    const api = makeApi({ mode: "proxy", part_size: 0, part_urls: [], expires_in: 900 });
+    const send = vi.fn<Sender>().mockResolvedValue(ok(null, BOOK));
+
+    await uploadPdf({
+      api,
+      send,
+      bookId: "b1",
+      file: pdfFile(10),
+      proxyUrl: slidesProxyUrl("b1", "c9"),
+    });
+
+    expect(send.mock.calls[0][0].url).toBe(
+      "/api/backend/api/v1/admin/pdf-books/b1/chapters/c9/slides/upload",
+    );
+  });
+
+  it("direct rejimida yiqilsa tugallanmagan yuklash bekor qilinadi (asl xato saqlanadi)", async () => {
+    const plan: PdfUploadPlan = {
+      mode: "direct",
+      part_size: 4,
+      part_urls: ["https://r2/1", "https://r2/2"],
+      expires_in: 900,
+    };
+    const abort = vi.fn().mockRejectedValue(new Error("abort ham yiqildi"));
+    const api = { ...makeApi(plan), abortPdfUpload: abort };
+    const send: Sender = async () => ({ status: 503, etag: null, json: null });
+
+    await expect(
+      uploadPdf({ api, send, bookId: "b1", file: pdfFile(8), retries: 0, retryDelayMs: 0 }),
+    ).rejects.toMatchObject({ status: 503 });
+
+    expect(abort).toHaveBeenCalledWith("b1");
+    expect(api.completePdfUpload).not.toHaveBeenCalled();
+  });
+
+  it("bekor qilinganda (AbortSignal) ham abort chaqiriladi", async () => {
+    const plan: PdfUploadPlan = {
+      mode: "direct",
+      part_size: 4,
+      part_urls: ["https://r2/1"],
+      expires_in: 900,
+    };
+    const abort = vi.fn().mockResolvedValue(undefined);
+    const api = { ...makeApi(plan), abortPdfUpload: abort };
+    const controller = new AbortController();
+    controller.abort();
+
+    await expect(
+      uploadPdf({ api, send: vi.fn(), bookId: "b1", file: pdfFile(4), signal: controller.signal }),
+    ).rejects.toMatchObject({ name: "AbortError" });
+
+    expect(abort).toHaveBeenCalledTimes(1);
+  });
+
+  it("muvaffaqiyatli yuklashda abort chaqirilmaydi", async () => {
+    const plan: PdfUploadPlan = {
+      mode: "direct",
+      part_size: 4,
+      part_urls: ["https://r2/1"],
+      expires_in: 900,
+    };
+    const abort = vi.fn();
+    const api = { ...makeApi(plan), abortPdfUpload: abort };
+    const send: Sender = async () => ok('"e"');
+
+    await uploadPdf({ api, send, bookId: "b1", file: pdfFile(4) });
+
+    expect(abort).not.toHaveBeenCalled();
   });
 });

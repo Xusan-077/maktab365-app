@@ -992,6 +992,27 @@
         "added": "{count} rows added",
         "skipped": "{count} lines not recognised (no page number at the end)"
       }
+    },
+    "slides": {
+      "label": "Presentation",
+      "optional": "No presentation (optional)",
+      "add": "Add presentation",
+      "replace": "Replace",
+      "info": "{count} slides · {size}",
+      "uploading": "Uploading…",
+      "progress": "Presentation upload progress",
+      "cancel": "Cancel",
+      "retry": "Try again",
+      "saveBookFirst": "You can add a presentation after the book is saved, on its edit page.",
+      "saveRowFirst": "Save the table of contents first: a new section can get a presentation once it is saved.",
+      "uploaded": "Presentation uploaded",
+      "deleted": "Presentation deleted",
+      "deleteTitle": "Delete presentation",
+      "deleteDescription": "The presentation of “{title}” and its file will be deleted. This cannot be undone.",
+      "choose": "Choose a presentation file for section {n}",
+      "addFor": "Add a presentation to section {n}",
+      "replaceFor": "Replace the presentation of section {n}",
+      "removeFor": "Delete the presentation of section {n}"
     }
   },
   "pdfBooks": {
@@ -1058,6 +1079,26 @@
       "textbook": "TEXTBOOK",
       "grade": "GRADE",
       "pdf": "PDF"
+    },
+    "slides": {
+      "open": "Presentation",
+      "openLabel": "{title}: open presentation ({count} slides)",
+      "resume": "Continue: slide {slide}",
+      "resumeShort": "Continue",
+      "dialogLabel": "Presentation: {title}",
+      "back": "Back to the book",
+      "close": "Close",
+      "toolbar": "Slides",
+      "prev": "Previous slide",
+      "next": "Next slide",
+      "position": "Slide {slide} of {total}",
+      "slideLabel": "Slide {slide} of {total}",
+      "fullscreen": "Full screen",
+      "exitFullscreen": "Exit full screen",
+      "loading": "Loading the presentation",
+      "loadError": "Could not open the presentation. Check your connection and try again.",
+      "pageError": "Could not show the slide.",
+      "retry": "Try again"
     }
   },
   "library": {

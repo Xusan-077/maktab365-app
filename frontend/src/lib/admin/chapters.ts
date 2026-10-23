@@ -1,10 +1,12 @@
-import type { AdminChapter, AdminChapterInput } from "./types";
+import type { AdminChapter, AdminChapterInput, AdminSlides } from "./types";
 
 /** Mundarija muharriri holati: matn maydonlari qator-qator tahrirlanadi, yuborishda songa aylanadi. */
 export interface ChapterRow {
   key: string;
   title: string;
   page: string;
+  /** Saqlangan bo'lim id'si: yo'q bo'lsa qator hali saqlanmagan (prezentatsiya biriktirib bo'lmaydi). */
+  id?: string;
 }
 
 export interface ChapterDraft extends ChapterRow {
@@ -28,14 +30,26 @@ export const emptyDraft = (): ChapterDraft => ({ ...emptyRow(), children: [] });
 export function fromApi(chapters: readonly AdminChapter[]): ChapterDraft[] {
   return chapters.map((chapter) => ({
     key: newKey(),
+    id: chapter.id,
     title: chapter.title,
     page: String(chapter.page),
     children: (chapter.children ?? []).map((child) => ({
       key: newKey(),
+      id: child.id,
       title: child.title,
       page: String(child.page),
     })),
   }));
+}
+
+/** Bo'lim id'si → prezentatsiya (serverdagi mundarijadan; ichki bo'limlar ham). */
+export function slidesById(chapters: readonly AdminChapter[]): Map<string, AdminSlides | null> {
+  const map = new Map<string, AdminSlides | null>();
+  for (const chapter of chapters) {
+    map.set(chapter.id!, chapter.slides ?? null);
+    for (const child of chapter.children ?? []) map.set(child.id!, child.slides ?? null);
+  }
+  return map;
 }
 
 const isBlank = (row: ChapterRow) => !row.title.trim() && !row.page.trim();
@@ -48,11 +62,14 @@ export function withoutBlankRows(drafts: readonly ChapterDraft[]): ChapterDraft[
 }
 
 export function toPayload(drafts: readonly ChapterDraft[]): AdminChapterInput[] {
+  // `id` bilan yuborilgan bo'lim joyida yangilanadi: prezentatsiyasi saqlanadi.
   return withoutBlankRows(drafts).map((draft) => ({
+    ...(draft.id && { id: draft.id }),
     title: draft.title.trim(),
     page: Number(draft.page),
     ...(draft.children.length > 0 && {
       children: draft.children.map((child) => ({
+        ...(child.id && { id: child.id }),
         title: child.title.trim(),
         page: Number(child.page),
       })),

@@ -1065,6 +1065,185 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/admin/pdf-books/{id}/chapters/{chapter_id}/slides/:
+    delete:
+      operationId: admin_pdf_books_slides_delete
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      summary: Bo'lim prezentatsiyasini o'chirish (faqat admin)
+      parameters:
+      - in: path
+        name: chapter_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this pdf book.
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PdfBookAdmin'
+          description: ''
+  /api/v1/admin/pdf-books/{id}/chapters/{chapter_id}/slides/upload/:
+    post:
+      operationId: admin_pdf_books_slides_upload_file
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      summary: 'Lokal (dev) rejim: prezentatsiyani backend orqali yuklash'
+      parameters:
+      - in: path
+        name: chapter_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this pdf book.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PdfUploadFileRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PdfBookAdmin'
+          description: ''
+  /api/v1/admin/pdf-books/{id}/chapters/{chapter_id}/slides/upload-abort/:
+    post:
+      operationId: admin_pdf_books_slides_upload_abort
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      summary: Tugallanmagan prezentatsiya yuklashini bekor qilish
+      parameters:
+      - in: path
+        name: chapter_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this pdf book.
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/admin/pdf-books/{id}/chapters/{chapter_id}/slides/upload-complete/:
+    post:
+      operationId: admin_pdf_books_slides_upload_complete
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      summary: 'Prezentatsiya multipart yuklashini yakunlash: tekshiruv, slaydlar
+        soni'
+      parameters:
+      - in: path
+        name: chapter_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this pdf book.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PdfUploadCompleteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PdfUploadCompleteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PdfUploadCompleteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PdfBookAdmin'
+          description: ''
+  /api/v1/admin/pdf-books/{id}/chapters/{chapter_id}/slides/upload-init/:
+    post:
+      operationId: admin_pdf_books_slides_upload_init
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      summary: Bo'lim prezentatsiyasini yuklashni boshlash (yangi yoki almashtirish)
+      parameters:
+      - in: path
+        name: chapter_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this pdf book.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PdfUploadInitRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PdfUploadInitRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PdfUploadPlan'
+          description: ''
   /api/v1/admin/pdf-books/{id}/transition/:
     post:
       operationId: admin_pdf_books_transition
@@ -1308,6 +1487,37 @@ paths:
         o'rniga kesh ishlaydi.
       summary: Qisqa muddatli o'qish URL'i (keshlanmaydi)
       parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - content
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PdfFileUrl'
+          description: ''
+  /api/v1/pdf-books/{id}/chapters/{chapter_id}/slides/:
+    get:
+      operationId: pdf_books_chapter_slides_url
+      description: Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi
+        o'rniga kesh ishlaydi.
+      summary: Bo'lim prezentatsiyasining qisqa muddatli o'qish URL'i (keshlanmaydi)
+      parameters:
+      - in: path
+        name: chapter_id
+        schema:
+          type: string
+          format: uuid
+        required: true
       - in: path
         name: id
         schema:
@@ -1849,39 +2059,58 @@ components:
         id:
           type: string
           format: uuid
-          readOnly: true
         title:
           type: string
         page:
           type: integer
+        slides:
+          allOf:
+          - $ref: '#/components/schemas/SlidesAdmin'
+          readOnly: true
+          nullable: true
         children:
           type: array
           items:
             $ref: '#/components/schemas/ChapterLeaf'
       required:
-      - id
       - page
+      - slides
       - title
     ChapterLeaf:
       type: object
-      description: Mundarija qatori. Qiymatlar `pdf_services.chapter_errors` da tekshiriladi.
+      description: |-
+        Mundarija qatori. Qiymatlar `pdf_services.chapter_errors` da tekshiriladi.
+
+        `id` yozishda ixtiyoriy: berilsa shu bo'lim joyida yangilanadi (prezentatsiyasi saqlanadi),
+        berilmasa yangi bo'lim yaratiladi. `slides` faqat o'qiladi.
       properties:
         id:
           type: string
           format: uuid
-          readOnly: true
         title:
           type: string
         page:
           type: integer
+        slides:
+          allOf:
+          - $ref: '#/components/schemas/SlidesAdmin'
+          readOnly: true
+          nullable: true
       required:
-      - id
       - page
+      - slides
       - title
     ChapterLeafRequest:
       type: object
-      description: Mundarija qatori. Qiymatlar `pdf_services.chapter_errors` da tekshiriladi.
+      description: |-
+        Mundarija qatori. Qiymatlar `pdf_services.chapter_errors` da tekshiriladi.
+
+        `id` yozishda ixtiyoriy: berilsa shu bo'lim joyida yangilanadi (prezentatsiyasi saqlanadi),
+        berilmasa yangi bo'lim yaratiladi. `slides` faqat o'qiladi.
       properties:
+        id:
+          type: string
+          format: uuid
         title:
           type: string
         page:
@@ -1894,6 +2123,9 @@ components:
       description: 'Yuqori daraja; `children` — ichki bo''limlar (ular uchun `children`
         yo''q: 2 daraja).'
       properties:
+        id:
+          type: string
+          format: uuid
         title:
           type: string
         page:
@@ -2954,7 +3186,7 @@ components:
         chapters:
           type: array
           items:
-            $ref: '#/components/schemas/Chapter'
+            $ref: '#/components/schemas/PublicChapter'
       required:
       - chapters
       - cover
@@ -3081,6 +3313,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PdfUploadPartRequest'
+        filename:
+          type: string
+          description: 'Prezentatsiya uchun: asl fayl nomi (ko''rsatish uchun)'
+          maxLength: 255
       required:
       - parts
     PdfUploadFileRequest:
@@ -3197,6 +3433,49 @@ components:
         * `google` - Google
         * `telegram` - Telegram
         * `email_otp` - Email OTP
+    PublicChapter:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        page:
+          type: integer
+        slides:
+          allOf:
+          - $ref: '#/components/schemas/SlidesPublic'
+          nullable: true
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicChapterLeaf'
+      required:
+      - children
+      - id
+      - page
+      - slides
+      - title
+    PublicChapterLeaf:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        page:
+          type: integer
+        slides:
+          allOf:
+          - $ref: '#/components/schemas/SlidesPublic'
+          nullable: true
+      required:
+      - id
+      - page
+      - slides
+      - title
     ReadStatusEnum:
       enum:
       - in_progress
@@ -3288,6 +3567,59 @@ components:
         * `teacher` - Teacher
         * `editor` - Editor
         * `admin` - Admin
+    SlidesAdmin:
+      type: object
+      description: 'Bo''lim prezentatsiyasi (admin): fayl nomi, slaydlar soni, hajm.
+        Fayl kaliti chiqmaydi.'
+      properties:
+        name:
+          type: string
+        page_count:
+          type: integer
+        size_bytes:
+          type: integer
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - name
+      - page_count
+      - size_bytes
+      - updated_at
+    SlidesAdminRequest:
+      type: object
+      description: 'Bo''lim prezentatsiyasi (admin): fayl nomi, slaydlar soni, hajm.
+        Fayl kaliti chiqmaydi.'
+      properties:
+        name:
+          type: string
+          minLength: 1
+        page_count:
+          type: integer
+        size_bytes:
+          type: integer
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - name
+      - page_count
+      - size_bytes
+      - updated_at
+    SlidesPublic:
+      type: object
+      description: 'Ochiq API: faqat slaydlar soni va hajm (fayl URL''i alohida endpoint
+        orqali).'
+      properties:
+        page_count:
+          type: integer
+        size_bytes:
+          type: integer
+      required:
+      - page_count
+      - size_bytes
     Subject:
       type: object
       properties:

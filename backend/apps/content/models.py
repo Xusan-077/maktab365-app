@@ -77,8 +77,14 @@ class PdfBook(UUIDModel, TimeStampedModel):
                 "id": row.pk,
                 "title": row.title,
                 "page": row.page,
+                "slides": row.slides_info,
                 "children": [
-                    {"id": child.pk, "title": child.title, "page": child.page}
+                    {
+                        "id": child.pk,
+                        "title": child.title,
+                        "page": child.page,
+                        "slides": child.slides_info,
+                    }
                     for child in children.get(row.pk, [])
                 ],
             }
@@ -97,6 +103,16 @@ class PdfBookChapter(UUIDModel):
     title = models.CharField(max_length=CHAPTER_TITLE_MAX)
     page = models.PositiveIntegerField(validators=[MinValueValidator(1)])
     order = models.PositiveIntegerField(default=0)
+    # Ixtiyoriy prezentatsiya (PDF slaydlar): obyekt saqlashdagi kalit (`pdf-slides/<uuid>.pdf`).
+    # Kalit va upload id uzun bo'lishi mumkin (R2 UploadId > 255): TextField.
+    slides_file = models.TextField(blank=True, default="", editable=False)
+    slides_name = models.CharField(max_length=255, blank=True, default="", editable=False)
+    slides_page_count = models.PositiveIntegerField(default=0, editable=False)
+    slides_size_bytes = models.PositiveBigIntegerField(default=0, editable=False)
+    slides_updated_at = models.DateTimeField(null=True, blank=True, editable=False)
+    # Yuklash davom etayotganda (`activate`gacha eski fayl o'qilaveradi).
+    slides_pending_file = models.TextField(blank=True, default="", editable=False)
+    slides_pending_upload_id = models.TextField(blank=True, default="", editable=False)
 
     class Meta:
         ordering = ["order", "page"]
@@ -109,3 +125,19 @@ class PdfBookChapter(UUIDModel):
 
     def __str__(self):
         return f"{self.title} ({self.page})"
+
+    @property
+    def has_slides(self) -> bool:
+        return bool(self.slides_file)
+
+    @property
+    def slides_info(self) -> dict | None:
+        """Prezentatsiya haqida qisqa ma'lumot (fayl kaliti hech qachon chiqmaydi) yoki `None`."""
+        if not self.slides_file:
+            return None
+        return {
+            "name": self.slides_name,
+            "page_count": self.slides_page_count,
+            "size_bytes": self.slides_size_bytes,
+            "updated_at": self.slides_updated_at,
+        }

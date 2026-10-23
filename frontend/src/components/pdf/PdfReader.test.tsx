@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { NextIntlClientProvider } from "next-intl";
 import uz from "@/lib/i18n/messages/uz.json";
@@ -32,6 +32,7 @@ vi.mock("./PdfBookmarkButton", () => ({ PdfBookmarkButton: () => null }));
 vi.mock("@/components/support/ReportErrorLink", () => ({ ReportErrorLink: () => null }));
 vi.mock("./usePdfDocument", () => ({
   usePdfDocument: () => ({ doc: { numPages: 240 }, loading: false, error: null, reload: vi.fn() }),
+  useSlidesDocument: () => ({ doc: { numPages: 8 }, loading: false, error: null, reload: vi.fn() }),
 }));
 vi.mock("./PdfPageCanvas", () => ({
   PdfPageCanvas: ({ pageNumber }: { pageNumber: number }) => (
@@ -78,6 +79,7 @@ beforeEach(() => {
   };
   HTMLDialogElement.prototype.close = function close() {
     this.removeAttribute("open");
+    this.dispatchEvent(new Event("close")); // jsdom bermaydi; brauzerda Esc/close() shuni chiqaradi
   };
   progress.state = { ready: true, position: null, resume: 1, record: vi.fn() };
 });
@@ -281,5 +283,110 @@ describe("PdfReader: mundarija va tavsif", () => {
     setup("page=1", { description: "", chapters: [] });
     await currentPage();
     expect(screen.queryByTestId("pdf-description")).toBeNull();
+  });
+});
+
+const SLIDES_ID = "3f2b8c1e-5d4a-4c7e-9a10-0b6f1d2e3c4d";
+const NO_SLIDES_ID = "9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d";
+const SLIDES_CHAPTERS = [
+  {
+    id: SLIDES_ID,
+    title: "Kirish",
+    page: 12,
+    slides: { page_count: 8, size_bytes: 2048 },
+    children: [],
+  },
+  { id: NO_SLIDES_ID, title: "Algebra", page: 50, slides: null, children: [] },
+];
+
+describe("PdfReader: prezentatsiya", () => {
+  beforeEach(() => window.localStorage.clear());
+
+  it("?slides=<id>&slide=3 bo'yicha ko'rgich shu slaydda ochiladi, kitob sahifasi saqlanadi", async () => {
+    setup(`page=5&slides=${SLIDES_ID}&slide=3`, { description: "", chapters: SLIDES_CHAPTERS });
+
+    const viewer = await screen.findByTestId("slides-viewer");
+
+    expect(viewer.hasAttribute("open")).toBe(true);
+    expect(within(viewer).getByTestId("pdf-canvas").dataset.page).toBe("3");
+    expect(within(viewer).getByTestId("slides-position").textContent).toContain("3 / 8");
+    expect(nav.replace).not.toHaveBeenCalled(); // URL allaqachon to'g'ri
+  });
+
+  it("slayd ko'rsatilmagan havola oxirgi ko'rilgan slaydga (yoki 1 ga) to'ldiriladi", async () => {
+    window.localStorage.setItem(`maktab365-slides:${SLIDES_ID}`, "6");
+    setup(`page=5&slides=${SLIDES_ID}`, { description: "", chapters: SLIDES_CHAPTERS });
+
+    await waitFor(() =>
+      expect(nav.replace).toHaveBeenCalledWith(
+        `/darsliklar/book-1?page=5&slides=${SLIDES_ID}&slide=6`,
+        { scroll: false },
+      ),
+    );
+  });
+
+  it("slayd almashganda URL yangilanadi, ?page= va ?slides= saqlanadi", async () => {
+    setup(`page=5&slides=${SLIDES_ID}&slide=3`, { description: "", chapters: SLIDES_CHAPTERS });
+    const viewer = await screen.findByTestId("slides-viewer");
+
+    fireEvent.click(within(viewer).getByTestId("slides-next"));
+
+    expect(nav.replace).toHaveBeenCalledWith(
+      `/darsliklar/book-1?page=5&slides=${SLIDES_ID}&slide=4`,
+      { scroll: false },
+    );
+  });
+
+  it("«Kitobga qaytish» ko'rgichni yopadi va shu bo'limning kitobdagi betiga o'tadi", async () => {
+    setup(`page=5&slides=${SLIDES_ID}&slide=3`, { description: "", chapters: SLIDES_CHAPTERS });
+    const viewer = await screen.findByTestId("slides-viewer");
+
+    fireEvent.click(within(viewer).getByTestId("slides-back"));
+
+    expect(nav.replace).toHaveBeenCalledWith("/darsliklar/book-1?page=12", { scroll: false });
+  });
+
+  it("«Yopish» kitobdagi joriy sahifada qoladi", async () => {
+    setup(`page=5&slides=${SLIDES_ID}&slide=3`, { description: "", chapters: SLIDES_CHAPTERS });
+    const viewer = await screen.findByTestId("slides-viewer");
+
+    fireEvent.click(within(viewer).getByTestId("slides-close"));
+
+    expect(nav.replace).toHaveBeenCalledWith("/darsliklar/book-1?page=5", { scroll: false });
+  });
+
+  it("prezentatsiyasiz yoki noma'lum bo'lim id'si bo'lsa ko'rgich ochilmaydi va URL tozalanadi", async () => {
+    setup(`page=5&slides=${NO_SLIDES_ID}&slide=2`, { description: "", chapters: SLIDES_CHAPTERS });
+
+    await currentPage();
+    await waitFor(() =>
+      expect(nav.replace).toHaveBeenCalledWith("/darsliklar/book-1?page=5", { scroll: false }),
+    );
+    expect(screen.queryByTestId("slides-viewer")).toBeNull();
+  });
+
+  it("mundarijadagi belgi prezentatsiyani ochadi (URL'ga slides va slide yoziladi)", async () => {
+    setup("page=5", { description: "", chapters: SLIDES_CHAPTERS });
+    await currentPage();
+    fireEvent.click(await screen.findByTestId("pdf-toc-open"));
+
+    const buttons = await screen.findAllByTestId("pdf-toc-slides");
+
+    expect(buttons).toHaveLength(1); // prezentatsiyasiz bo'limda belgi yo'q
+    fireEvent.click(buttons[0]);
+    expect(nav.replace).toHaveBeenCalledWith(
+      `/darsliklar/book-1?page=5&slides=${SLIDES_ID}&slide=1`,
+      { scroll: false },
+    );
+  });
+
+  it("prezentatsiyasi yo'q kitob avvalgidek ishlaydi", async () => {
+    setup("page=5", { description: "", chapters: CHAPTERS });
+    await currentPage();
+    fireEvent.click(await screen.findByTestId("pdf-toc-open"));
+    await screen.findAllByTestId("pdf-toc-item");
+
+    expect(screen.queryByTestId("pdf-toc-slides")).toBeNull();
+    expect(screen.queryByTestId("slides-viewer")).toBeNull();
   });
 });

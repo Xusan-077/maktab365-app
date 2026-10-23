@@ -60,26 +60,50 @@ def chapter_errors(chapters: list[dict], page_count: int) -> list[str]:
     return sorted(codes)
 
 
+def _purge_chapter_slides(chapters) -> None:
+    """Bo'limlarning prezentatsiya fayllarini (va tugallanmagan yuklashlarini) qat'iy o'chiradi."""
+    for chapter in chapters:
+        storage.abort_upload(chapter.slides_pending_file, chapter.slides_pending_upload_id)
+        keys = (chapter.slides_file or "", chapter.slides_pending_file)
+        for key in dict.fromkeys(key for key in keys if key):
+            storage.delete_strict(key)
+
+
 @transaction.atomic
 def replace_chapters(book: PdfBook, chapters: list[dict]) -> None:
-    """Mundarijani butunlay almashtiradi (tartib — ro'yxat tartibi)."""
-    book.chapters.all().delete()
-    getattr(book, "_prefetched_objects_cache", {}).pop("chapters", None)  # javobda eskirmasin
+    """Mundarijani saqlaydi (tartib — ro'yxat tartibi).
+
+    Qatorda `id` bo'lsa shu bo'lim joyida yangilanadi (prezentatsiyasi saqlanadi); `id` siz qator
+    yangi bo'lim. Ro'yxatda yo'q bo'limlar o'chiriladi va ularning prezentatsiyasi saqlashdan qat'iy
+    o'chiriladi (xatoda `storage_error` va butun o'zgarish qaytadi).
+    """
+    candidates = {row.pk: row for row in PdfBookChapter.objects.filter(book=book)}
+    kept: set = set()
     order = 0
-    for item in chapters:
-        parent = PdfBookChapter.objects.create(
-            book=book, title=item["title"].strip(), page=item["page"], order=order
-        )
+
+    def upsert(item: dict, parent: PdfBookChapter | None) -> PdfBookChapter:
+        nonlocal order
+        row = candidates.pop(item.get("id"), None)
+        values = {"title": item["title"].strip(), "page": item["page"], "order": order}
+        if row is None:
+            row = PdfBookChapter.objects.create(book=book, parent=parent, **values)
+        else:
+            for name, value in {**values, "parent": parent}.items():
+                setattr(row, name, value)
+            row.save(update_fields=[*values, "parent"])
+        kept.add(row.pk)
         order += 1
+        return row
+
+    for item in chapters:
+        parent = upsert(item, None)
         for child in item.get("children", []):
-            PdfBookChapter.objects.create(
-                book=book,
-                parent=parent,
-                title=child["title"].strip(),
-                page=child["page"],
-                order=order,
-            )
-            order += 1
+            upsert(child, parent)
+
+    removed = list(PdfBookChapter.objects.filter(book=book).exclude(pk__in=kept))
+    _purge_chapter_slides(removed)
+    PdfBookChapter.objects.filter(book=book).exclude(pk__in=kept).delete()
+    getattr(book, "_prefetched_objects_cache", {}).pop("chapters", None)  # javobda eskirmasin
 
 
 # --- Nashr oqimi ---
@@ -110,14 +134,19 @@ def _too_large(size: int) -> bool:
     return bool(limit) and size > limit
 
 
-def validate_declared(filename: str, size: int, content_type: str) -> None:
-    """Yuklashni boshlashdan oldin mijoz aytganlarni tekshiradi (haqiqiy tekshiruv `activate`da)."""
+def validate_declared_pdf(filename: str, size: int, content_type: str) -> None:
+    """Mijoz aytgan tur va hajmni tekshiradi (hajm chegarasisiz; haqiqiy tekshiruv `activate`da)."""
     if os.path.splitext(filename or "")[1].lower() != ".pdf":
         raise UploadError("unsupported_type", 415)
     if (content_type or "").split(";")[0].strip().lower() != storage.PDF_MIME:
         raise UploadError("unsupported_type", 415)
     if size <= 0:
         raise UploadError("file_empty")
+
+
+def validate_declared(filename: str, size: int, content_type: str) -> None:
+    """Kitob PDF'i: `validate_declared_pdf` + ixtiyoriy `PDF_BOOK_MAX_BYTES` chegarasi."""
+    validate_declared_pdf(filename, size, content_type)
     if _too_large(size):
         raise UploadError("file_too_large", 413)
 
@@ -209,6 +238,7 @@ def delete_book(book: PdfBook) -> None:
     pending_key, pending_upload = book.pending_file, book.pending_upload_id
     storage.abort_upload(pending_key, pending_upload)
     keys.append(pending_key)
+    _purge_chapter_slides(PdfBookChapter.objects.filter(book=book))
     for key in dict.fromkeys(k for k in keys if k):
         storage.delete_strict(key)
     book.delete()

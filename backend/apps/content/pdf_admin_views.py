@@ -1,7 +1,9 @@
 from django.conf import settings
 from django.db import transaction
+from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
 from rest_framework.decorators import action
+from rest_framework.exceptions import NotFound
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 
@@ -10,9 +12,10 @@ from apps.core.throttling import PdfUploadThrottle
 
 from . import pdf_services as services
 from . import pdf_storage as storage
+from . import slides_services as slides
 from .admin_services import UploadError
-from .admin_views import TAG, AdminViewSet
-from .models import PdfBook
+from .admin_views import TAG, AdminViewSet, IsAdmin
+from .models import PdfBook, PdfBookChapter
 from .pdf_serializers import (
     PdfBookAdminSerializer,
     PdfTransitionSerializer,
@@ -21,6 +24,9 @@ from .pdf_serializers import (
     PdfUploadInitSerializer,
     PdfUploadPlanSerializer,
 )
+
+CHAPTER_PATH = r"chapters/(?P<chapter_id>[0-9a-fA-F-]{36})/slides"
+CHAPTER_PARAM = OpenApiParameter("chapter_id", OpenApiTypes.UUID, OpenApiParameter.PATH)
 
 
 @extend_schema_view(
@@ -54,6 +60,12 @@ class PdfBookAdminViewSet(AdminViewSet):
     search_fields = ["title__uz", "title__ru", "title__en"]
     ordering_fields = ["grade", "updated_at", "created_at", "page_count"]
     ordering = ["grade", "-created_at"]
+
+    def get_permissions(self):
+        # Prezentatsiyani olib tashlash kitobni o'chirish kabi — faqat admin.
+        if self.action == "slides_delete":
+            return [IsAdmin()]
+        return super().get_permissions()
 
     def label(self, instance) -> str:
         return (instance.title or {}).get("uz", str(instance.pk))
@@ -184,3 +196,162 @@ class PdfBookAdminViewSet(AdminViewSet):
         book = services.store_proxy(book, body.validated_data["file"])
         self.log("upload", book, before=before, after=self.snap(book))
         return Response(PdfBookAdminSerializer(book, context=self.get_serializer_context()).data)
+
+    # --- Bo'lim prezentatsiyalari (ixtiyoriy PDF slaydlar) ---
+
+    def _chapter(self, book: PdfBook, chapter_id) -> PdfBookChapter:
+        chapter = PdfBookChapter.objects.filter(book=book, pk=chapter_id).first()
+        if chapter is None:
+            raise NotFound("Bo'lim topilmadi.")
+        return chapter
+
+    def _slides_snapshot(self, chapter: PdfBookChapter) -> dict | None:
+        info = chapter.slides_info
+        if info is None:
+            return None
+        return {key: info[key] for key in ("name", "page_count", "size_bytes")}
+
+    def _slides_log(self, action_name, book, chapter, before, after):
+        audit.record(
+            self.request.user,
+            action_name,
+            "pdf_book_slides",
+            chapter.pk,
+            label=f"{self.label(book)} / {chapter.title}",
+            before={"book_id": str(book.pk), "slides": before},
+            after={"book_id": str(book.pk), "slides": after},
+            request=self.request,
+        )
+
+    def _book_response(self, book: PdfBook) -> Response:
+        fresh = self.get_queryset().get(pk=book.pk)
+        return Response(PdfBookAdminSerializer(fresh, context=self.get_serializer_context()).data)
+
+    @extend_schema(
+        operation_id="admin_pdf_books_slides_upload_init",
+        tags=TAG,
+        summary="Bo'lim prezentatsiyasini yuklashni boshlash (yangi yoki almashtirish)",
+        parameters=[CHAPTER_PARAM],
+        request=PdfUploadInitSerializer,
+        responses=PdfUploadPlanSerializer,
+    )
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path=f"{CHAPTER_PATH}/upload-init",
+        url_name="slides-upload-init",
+        throttle_classes=[PdfUploadThrottle],
+        parser_classes=[JSONParser, FormParser],
+    )
+    def slides_upload_init(self, request, pk=None, chapter_id=None):
+        chapter = self._chapter(self.get_object(), chapter_id)
+        body = PdfUploadInitSerializer(data=request.data)
+        body.is_valid(raise_exception=True)
+        data = body.validated_data
+        plan = slides.begin_upload(chapter, data["filename"], data["size"], data["content_type"])
+        return Response(
+            {
+                "mode": plan.mode,
+                "part_size": plan.part_size,
+                "part_urls": list(plan.part_urls),
+                "expires_in": settings.PDF_SIGNED_URL_SECONDS,
+            }
+        )
+
+    @extend_schema(
+        operation_id="admin_pdf_books_slides_upload_complete",
+        tags=TAG,
+        summary="Prezentatsiya multipart yuklashini yakunlash: tekshiruv, slaydlar soni",
+        parameters=[CHAPTER_PARAM],
+        request=PdfUploadCompleteSerializer,
+        responses=PdfBookAdminSerializer,
+    )
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path=f"{CHAPTER_PATH}/upload-complete",
+        url_name="slides-upload-complete",
+        throttle_classes=[PdfUploadThrottle],
+    )
+    def slides_upload_complete(self, request, pk=None, chapter_id=None):
+        book = self.get_object()
+        chapter = self._chapter(book, chapter_id)
+        body = PdfUploadCompleteSerializer(data=request.data)
+        body.is_valid(raise_exception=True)
+        before = self._slides_snapshot(chapter)
+        saved = slides.complete_direct(
+            chapter, body.validated_data["parts"], body.validated_data.get("filename", "")
+        )
+        self._slides_log("slides_upload", book, saved, before, self._slides_snapshot(saved))
+        return self._book_response(book)
+
+    @extend_schema(
+        operation_id="admin_pdf_books_slides_upload_file",
+        tags=TAG,
+        summary="Lokal (dev) rejim: prezentatsiyani backend orqali yuklash",
+        parameters=[CHAPTER_PARAM],
+        request={"multipart/form-data": PdfUploadFileSerializer},
+        responses=PdfBookAdminSerializer,
+    )
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path=f"{CHAPTER_PATH}/upload",
+        url_name="slides-upload",
+        throttle_classes=[PdfUploadThrottle],
+        parser_classes=[MultiPartParser],
+    )
+    def slides_upload(self, request, pk=None, chapter_id=None):
+        if storage.is_remote():
+            raise UploadError("direct_upload_required", 409)
+        book = self.get_object()
+        chapter = self._chapter(book, chapter_id)
+        body = PdfUploadFileSerializer(data=request.data)
+        body.is_valid(raise_exception=True)
+        before = self._slides_snapshot(chapter)
+        saved = slides.store_proxy(chapter, body.validated_data["file"])
+        self._slides_log("slides_upload", book, saved, before, self._slides_snapshot(saved))
+        return self._book_response(book)
+
+    @extend_schema(
+        operation_id="admin_pdf_books_slides_upload_abort",
+        tags=TAG,
+        summary="Tugallanmagan prezentatsiya yuklashini bekor qilish",
+        parameters=[CHAPTER_PARAM],
+        request=None,
+        responses={204: None},
+    )
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path=f"{CHAPTER_PATH}/upload-abort",
+        url_name="slides-upload-abort",
+        throttle_classes=[PdfUploadThrottle],
+    )
+    def slides_upload_abort(self, request, pk=None, chapter_id=None):
+        chapter = self._chapter(self.get_object(), chapter_id)
+        slides.abort(chapter)
+        return Response(status=204)
+
+    @extend_schema(
+        operation_id="admin_pdf_books_slides_delete",
+        tags=TAG,
+        summary="Bo'lim prezentatsiyasini o'chirish (faqat admin)",
+        parameters=[CHAPTER_PARAM],
+        responses={200: PdfBookAdminSerializer},
+    )
+    @action(
+        detail=True,
+        methods=["delete"],
+        url_path=CHAPTER_PATH,
+        url_name="slides-delete",
+    )
+    def slides_delete(self, request, pk=None, chapter_id=None):
+        book = self.get_object()
+        chapter = self._chapter(book, chapter_id)
+        before = self._slides_snapshot(chapter)
+        with transaction.atomic():
+            # Saqlash xatosida (`storage_error`) hech narsa o'zgarmaydi.
+            slides.remove(chapter)
+            self._slides_log("slides_delete", book, chapter, before, None)
+        return self._book_response(book)

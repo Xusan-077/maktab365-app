@@ -53,3 +53,29 @@ describe("currentTocItem", () => {
     expect(currentTocItem([], 1)).toBeNull();
   });
 });
+
+describe("flattenToc: prezentatsiya", () => {
+  it("bo'lim va ichki bo'limdagi prezentatsiya ma'lumoti saqlanadi, yo'q bo'lsa null", () => {
+    const slides = { page_count: 12, size_bytes: 2048 };
+    const items = flattenToc([
+      {
+        id: "a",
+        title: "Kirish",
+        page: 1,
+        slides,
+        children: [
+          { id: "a1", title: "Maqsad", page: 2, slides: null },
+          { id: "a2", title: "T", page: 3 },
+        ],
+      },
+      { id: "b", title: "Algebra", page: 5 },
+    ]);
+
+    expect(items.map((item) => [item.id, item.slides])).toEqual([
+      ["a", slides],
+      ["a1", null],
+      ["a2", null],
+      ["b", null],
+    ]);
+  });
+});

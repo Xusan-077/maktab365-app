@@ -143,6 +143,54 @@ export class AdminApi {
     return unwrap(result);
   }
 
+  // --- Bo'lim prezentatsiyalari (ixtiyoriy PDF slaydlar) ---
+
+  async initSlidesUpload(
+    bookId: string,
+    chapterId: string,
+    file: { name: string; size: number; type: string },
+  ): Promise<PdfUploadPlan> {
+    const result = await this.client.POST(
+      "/api/v1/admin/pdf-books/{id}/chapters/{chapter_id}/slides/upload-init/",
+      {
+        params: { path: { id: bookId, chapter_id: chapterId } },
+        body: { filename: file.name, size: file.size, content_type: file.type },
+      },
+    );
+    return unwrap(result);
+  }
+
+  async completeSlidesUpload(
+    bookId: string,
+    chapterId: string,
+    parts: PdfUploadPart[],
+    filename: string,
+  ): Promise<AdminPdfBook> {
+    const result = await this.client.POST(
+      "/api/v1/admin/pdf-books/{id}/chapters/{chapter_id}/slides/upload-complete/",
+      { params: { path: { id: bookId, chapter_id: chapterId } }, body: { parts, filename } },
+    );
+    return unwrap(result);
+  }
+
+  /** Tugallanmagan yuklashni bekor qiladi (joriy prezentatsiyaga tegmaydi). */
+  async abortSlidesUpload(bookId: string, chapterId: string): Promise<void> {
+    const result = await this.client.POST(
+      "/api/v1/admin/pdf-books/{id}/chapters/{chapter_id}/slides/upload-abort/",
+      { params: { path: { id: bookId, chapter_id: chapterId } } },
+    );
+    this.assertDeleted(result);
+  }
+
+  /** Prezentatsiyani olib tashlaydi (faqat admin); yangilangan kitobni qaytaradi. */
+  async deleteSlides(bookId: string, chapterId: string): Promise<AdminPdfBook> {
+    const result = await this.client.DELETE(
+      "/api/v1/admin/pdf-books/{id}/chapters/{chapter_id}/slides/",
+      { params: { path: { id: bookId, chapter_id: chapterId } } },
+    );
+    return unwrap(result);
+  }
+
   async users(params: UserListParams = {}): Promise<Page<AdminUser>> {
     const result = await this.client.GET("/api/v1/admin/users/", {
       params: {

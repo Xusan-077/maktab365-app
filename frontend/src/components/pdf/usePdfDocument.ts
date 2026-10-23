@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { resolveFileUrl } from "@/lib/pdf/file-url";
 import { loadPdfjs, type PDFDocumentLoadingTask, type PDFDocumentProxy } from "@/lib/pdf/pdfjs";
@@ -19,21 +19,22 @@ interface DocumentState {
  * PDF'ni qisqa muddatli URL bilan ochadi (pdf.js Range orqali kerakli bo'laklarni oladi;
  * `disableAutoFetch` — qolgan sahifalar oldindan yuklanmaydi). `reload` yangi imzolangan URL
  * oladi: URL muddati tugagach keyingi Range so'rovlari rad etilsa shu bilan tiklanadi.
+ * `sourceKey` o'zgarsa (boshqa fayl) hujjat qayta ochiladi.
  */
-export function usePdfDocument(bookId: string) {
-  const queryClient = useQueryClient();
+function usePdfFromUrl(sourceKey: string, fetchUrl: () => Promise<{ url: string }>) {
   const [state, setState] = useState<DocumentState>({ doc: null, loading: true, error: null });
   const [attempt, setAttempt] = useState(0);
+  const loader = useRef(fetchUrl);
+  useEffect(() => {
+    loader.current = fetchUrl;
+  });
 
   useEffect(() => {
     let cancelled = false;
     let task: PDFDocumentLoadingTask | undefined;
     void (async () => {
       try {
-        const [pdfjs, file] = await Promise.all([
-          loadPdfjs(),
-          queryClient.fetchQuery(pdfQueries.fileUrl(bookId)),
-        ]);
+        const [pdfjs, file] = await Promise.all([loadPdfjs(), loader.current()]);
         if (cancelled) return;
         task = pdfjs.getDocument({
           url: resolveFileUrl(file.url, window.location.origin),
@@ -54,7 +55,7 @@ export function usePdfDocument(bookId: string) {
       cancelled = true;
       void task?.destroy();
     };
-  }, [bookId, attempt, queryClient]);
+  }, [sourceKey, attempt]);
 
   const reload = useCallback(() => {
     setState((current) => ({ ...current, loading: true, error: null }));
@@ -62,4 +63,18 @@ export function usePdfDocument(bookId: string) {
   }, []);
 
   return { ...state, reload };
+}
+
+/** Kitob PDF'i. */
+export function usePdfDocument(bookId: string) {
+  const queryClient = useQueryClient();
+  return usePdfFromUrl(`book:${bookId}`, () => queryClient.fetchQuery(pdfQueries.fileUrl(bookId)));
+}
+
+/** Bo'lim prezentatsiyasi (PDF slaydlar): kitob PDF'i bilan bir xil mexanizm. */
+export function useSlidesDocument(bookId: string, chapterId: string) {
+  const queryClient = useQueryClient();
+  return usePdfFromUrl(`slides:${bookId}:${chapterId}`, () =>
+    queryClient.fetchQuery(pdfQueries.slidesUrl(bookId, chapterId)),
+  );
 }

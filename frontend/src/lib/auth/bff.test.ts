@@ -5,6 +5,7 @@ import {
   changesPublicContent,
   declaresTooLargeBody,
   isPdfFilePath,
+  isPdfUploadPath,
   isSameOrigin,
   MAX_BODY_BYTES,
   MAX_PDF_BODY_BYTES,
@@ -71,6 +72,19 @@ describe("BFF: tana hajmi chegarasi", () => {
     expect(isPdfFilePath(`/api/v1/pdf-books/${id}/file/`)).toBe(true);
     expect(isPdfFilePath(`/api/v1/pdf-books/${id}/file-url/`)).toBe(false);
     expect(isPdfFilePath(`/api/v1/pdf-books/${id}/`)).toBe(false);
+  });
+
+  it("bo'lim prezentatsiyasi yo'llari ham PDF yo'llari: fayl (Range) va dev yuklash", () => {
+    const id = "3f2b8c1e-5d4a-4c7e-9a10-0b6f1d2e3c4d";
+    const chapter = "9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d";
+    expect(isPdfFilePath(`/api/v1/pdf-books/${id}/chapters/${chapter}/slides/file/`)).toBe(true);
+    expect(isPdfFilePath(`/api/v1/pdf-books/${id}/chapters/${chapter}/slides/`)).toBe(false);
+    const upload = `/api/v1/admin/pdf-books/${id}/chapters/${chapter}/slides/upload/`;
+    expect(isPdfUploadPath(upload)).toBe(true);
+    expect(bodyLimitFor(upload)).toBe(MAX_PDF_BODY_BYTES); // katta PDF'ga chegara yo'q
+    // Boshqa slides amallari (JSON) oddiy chegarada.
+    expect(bodyLimitFor(upload.replace("upload/", "upload-init/"))).toBe(MAX_BODY_BYTES);
+    expect(isPdfUploadPath(`/api/v1/admin/pdf-books/${id}/chapters/x/slides/upload/`)).toBe(false);
   });
 
   it("e'lon qilingan Content-Length chegaradan oshsa rad etadi", () => {

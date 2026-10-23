@@ -13,6 +13,8 @@ export type UserRole = AdminUser["role"];
 export type UserStatus = "active" | "blocked";
 export type AdminChapter = Schemas["Chapter"];
 export type AdminChapterInput = Schemas["ChapterRequest"];
+/** Bo'lim prezentatsiyasi (PDF slaydlar): nom, slaydlar soni, hajm; yo'q bo'lsa `null`. */
+export type AdminSlides = NonNullable<AdminChapter["slides"]>;
 export type AdminDashboard = Schemas["AdminDashboard"];
 export type AuditEntry = Schemas["AuditEntry"];
 export type UploadResult = Schemas["UploadResult"];
