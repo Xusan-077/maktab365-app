@@ -59,10 +59,10 @@ export function toBffUrl(url: string): string {
 export const MAX_BODY_BYTES = 12 * 1024 * 1024;
 /**
  * Lokal (dev) PDF yuklash `POST …/admin/pdf-books/<id>/upload/` backend orqali ketadi; prod'da PDF
- * baytlari BFF'dan o'tmaydi (to'g'ridan-to'g'ri R2/S3), bu chegara faqat dev uchun. Backend
- * `PDF_BOOK_MAX_BYTES` (100 MB) + multipart ustamasi.
+ * baytlari BFF'dan o'tmaydi (to'g'ridan-to'g'ri R2/S3). Hajm chegarasini backend
+ * (`PDF_BOOK_MAX_BYTES`, ixtiyoriy) belgilaydi, BFF'da bu yo'l uchun chegara yo'q.
  */
-export const MAX_PDF_BODY_BYTES = 105 * 1024 * 1024;
+export const MAX_PDF_BODY_BYTES = Number.POSITIVE_INFINITY;
 const PDF_UPLOAD_PATH = /^\/api\/v1\/admin\/pdf-books\/[0-9a-f-]{36}\/upload\/$/;
 
 export const isPdfUploadPath = (path: string) => PDF_UPLOAD_PATH.test(path);

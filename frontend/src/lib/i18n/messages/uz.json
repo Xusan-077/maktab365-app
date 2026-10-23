@@ -828,10 +828,13 @@
     },
     "pdfUpload": {
       "none": "PDF tanlanmagan",
-      "hint": "Faqat PDF, 100 MB gacha",
+      "hint": "Faqat PDF fayl",
       "choose": "PDF tanlash",
       "replace": "Boshqa fayl tanlash",
       "progress": "Yuklash jarayoni",
+      "cancel": "Yuklashni bekor qilish",
+      "bytes": "{loaded} / {total}",
+      "largeHint": "Katta fayl bo'laklab yuklanmoqda. Oynani yopmang.",
       "phases": {
         "uploading": "Fayl yuklanmoqda…",
         "cover": "Muqova tayyorlanmoqda…"
@@ -839,7 +842,6 @@
       "problems": {
         "notPdf": "Faqat PDF fayl qabul qilinadi.",
         "empty": "Fayl bo'sh.",
-        "tooLarge": "Fayl juda katta (eng ko'pi 100 MB).",
         "missing": "PDF faylni tanlang."
       }
     },

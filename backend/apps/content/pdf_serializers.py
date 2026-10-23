@@ -105,7 +105,12 @@ class PdfUploadInitSerializer(serializers.Serializer):
 
 class PdfUploadPlanSerializer(serializers.Serializer):
     mode = serializers.ChoiceField(choices=["direct", "proxy"])
-    part_size = serializers.IntegerField(help_text="direct: har bo'lak hajmi (oxirgisidan boshqa)")
+    part_size = serializers.IntegerField(
+        help_text=(
+            "direct: har bo'lak hajmi (oxirgisidan boshqa); fayl hajmiga qarab hisoblanadi, "
+            "bo'laklar soni 10 000 dan oshmaydi"
+        )
+    )
     part_urls = serializers.ListField(
         child=serializers.CharField(), help_text="direct: har bo'lak uchun imzolangan PUT URL"
     )

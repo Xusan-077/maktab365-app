@@ -828,10 +828,13 @@
     },
     "pdfUpload": {
       "none": "No PDF selected",
-      "hint": "PDF only, up to 100 MB",
+      "hint": "PDF files only",
       "choose": "Choose PDF",
       "replace": "Choose another file",
       "progress": "Upload progress",
+      "cancel": "Cancel upload",
+      "bytes": "{loaded} / {total}",
+      "largeHint": "Large files are uploaded in parts. Keep this window open.",
       "phases": {
         "uploading": "Uploading file…",
         "cover": "Preparing cover…"
@@ -839,7 +842,6 @@
       "problems": {
         "notPdf": "Only PDF files are accepted.",
         "empty": "The file is empty.",
-        "tooLarge": "The file is too large (100 MB max).",
         "missing": "Choose a PDF file."
       }
     },

@@ -69,7 +69,7 @@ Majburiy:
 | `AWS_STORAGE_BUCKET_NAME`, `AWS_S3_ENDPOINT_URL`, `AWS_S3_REGION_NAME=auto`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` | R2                                                                                    |
 | `EMAIL_URL`, `DEFAULT_FROM_EMAIL`                                                                                         | SMTP (xat yuborish)                                                                   |
 
-Tavsiya/ixtiyoriy: `AWS_S3_CUSTOM_DOMAIN` (muqova rasmlari), `GOOGLE_CLIENT_ID`, `TELEGRAM_BOT_TOKEN`, `SUPPORT_NOTIFY_EMAILS`, `SENTRY_DSN` (+ `SENTRY_ENVIRONMENT=production`), `WEB_CONCURRENCY` (default 2), `SECURE_SSL_REDIRECT`, `SHOW_DRAFTS_PUBLICLY` (**qo'ymang**), qolganlari — `backend/.env.example`.
+Tavsiya/ixtiyoriy: `AWS_S3_CUSTOM_DOMAIN` (muqova rasmlari), `GOOGLE_CLIENT_ID`, `TELEGRAM_BOT_TOKEN`, `SUPPORT_NOTIFY_EMAILS`, `SENTRY_DSN` (+ `SENTRY_ENVIRONMENT=production`), `WEB_CONCURRENCY` (default 2), `SECURE_SSL_REDIRECT`, `SHOW_DRAFTS_PUBLICLY` (**qo'ymang**), `PDF_BOOK_MAX_BYTES` (ixtiyoriy PDF hajm chegarasi, bayt; **bo'sh yoki 0 = cheksiz**, default cheksiz; multipart bo'laklari katta faylga qarab avtomatik kattalashadi — 10 000 bo'lakgacha), qolganlari — `backend/.env.example`.
 
 ## Vercel (frontend)
 

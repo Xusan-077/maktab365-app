@@ -105,6 +105,11 @@ def transition_pdf_book(book: PdfBook, to: str, actor) -> PdfBook:
 # --- Yuklash ---
 
 
+def _too_large(size: int) -> bool:
+    limit = settings.PDF_BOOK_MAX_BYTES  # None/0 — chegara yo'q
+    return bool(limit) and size > limit
+
+
 def validate_declared(filename: str, size: int, content_type: str) -> None:
     """Yuklashni boshlashdan oldin mijoz aytganlarni tekshiradi (haqiqiy tekshiruv `activate`da)."""
     if os.path.splitext(filename or "")[1].lower() != ".pdf":
@@ -113,7 +118,7 @@ def validate_declared(filename: str, size: int, content_type: str) -> None:
         raise UploadError("unsupported_type", 415)
     if size <= 0:
         raise UploadError("file_empty")
-    if size > settings.PDF_BOOK_MAX_BYTES:
+    if _too_large(size):
         raise UploadError("file_too_large", 413)
 
 
@@ -145,7 +150,7 @@ def activate(book: PdfBook, key: str, upload_id: str = "") -> PdfBook:
         size = storage.stored_size(key)
         if size <= 0:
             raise UploadError("file_empty")
-        if size > settings.PDF_BOOK_MAX_BYTES:
+        if _too_large(size):
             raise UploadError("file_too_large", 413)
         if not storage.read_head(key, 8).startswith(storage.PDF_MAGIC):
             raise UploadError("unsupported_type", 415)

@@ -129,6 +129,7 @@ function ReplaceFile({ book }: { book: AdminPdfBook }) {
         file={file}
         problem={problem}
         upload={upload.state}
+        onCancel={upload.cancel}
         hasExisting={book.has_file}
         disabled={replace.isPending}
         onChange={(chosen, found) => {

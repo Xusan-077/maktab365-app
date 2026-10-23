@@ -301,6 +301,7 @@ export function PdfBookWizard() {
             file={file}
             problem={problem ?? (fileMissing ? "missing" : null)}
             upload={upload.state}
+            onCancel={upload.cancel}
             disabled={busy}
             onChange={(chosen, found) => {
               setFile(chosen);
@@ -331,6 +332,7 @@ export function PdfBookWizard() {
               label={t("pdfLabel")}
               file={file}
               upload={upload.state}
+              onCancel={upload.cancel}
               disabled
               onChange={() => {}}
             />

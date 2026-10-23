@@ -117,8 +117,12 @@ ADMIN_UPLOAD_MAX_IMAGE_BYTES = env.int("ADMIN_UPLOAD_MAX_IMAGE_BYTES", default=5
 ADMIN_UPLOAD_MAX_PDF_BYTES = env.int("ADMIN_UPLOAD_MAX_PDF_BYTES", default=50 * 1024 * 1024)
 
 # --- PDF darsliklar (apps/content/pdf_*.py) ---
-PDF_BOOK_MAX_BYTES = env.int("PDF_BOOK_MAX_BYTES", default=100 * 1024 * 1024)
-# Obyekt saqlashga to'g'ridan-to'g'ri multipart yuklash: har bo'lak (R2/S3 kamida 5 MiB).
+# Ixtiyoriy: o'rnatilmagan, bo'sh yoki 0 — ilova darajasida hajm chegarasi yo'q.
+PDF_BOOK_MAX_BYTES = int(env.str("PDF_BOOK_MAX_BYTES", default="").strip() or 0) or None
+# Obyekt saqlashga to'g'ridan-to'g'ri multipart yuklash: bo'lakning eng kichik hajmi (R2/S3 kamida
+# 5 MiB); katta faylda bo'lak 10 000 tadan oshmasligi uchun avtomatik kattalashadi
+# (pdf_storage.part_size_for).
+
 PDF_UPLOAD_PART_BYTES = env.int("PDF_UPLOAD_PART_BYTES", default=8 * 1024 * 1024)
 # Imzolangan o'qish/yuklash URL'lari muddati (soniya); 10–15 daqiqa tavsiya etiladi.
 PDF_SIGNED_URL_SECONDS = env.int("PDF_SIGNED_URL_SECONDS", default=15 * 60)

@@ -14,6 +14,7 @@ from apps.content.models import PdfBook
 
 from .test_admin_api import client_as
 
+MIB = 1024 * 1024
 BASE = "/api/v1/admin/pdf-books"
 PUBLIC = "/api/v1/pdf-books"
 
@@ -165,6 +166,20 @@ def test_upload_respects_size_limit(admin, algebra, settings):
     resp = upload(admin, book["id"])
 
     assert resp.status_code == 413 and resp.json()["code"] == "file_too_large"
+
+
+def test_upload_has_no_size_limit_by_default(admin, algebra, settings):
+    assert settings.PDF_BOOK_MAX_BYTES is None
+    book = create_book(admin)
+
+    assert upload(admin, book["id"]).status_code == 200
+
+
+def test_zero_limit_means_unlimited(admin, algebra, settings):
+    settings.PDF_BOOK_MAX_BYTES = 0
+    book = create_book(admin)
+
+    assert upload(admin, book["id"]).status_code == 200
 
 
 def test_replace_swaps_file_and_removes_the_old_one(
@@ -494,6 +509,60 @@ def test_direct_upload_rejects_oversize_and_wrong_declared_type(admin, algebra, 
 
     assert big.status_code == 413 and wrong.status_code == 415
     remote.create_multipart_upload.assert_not_called()
+
+
+def test_direct_upload_has_no_size_limit_without_env(admin, algebra, remote):
+    book = create_book(admin)
+    size = 5 * 1024**3  # 5 GB
+
+    plan = admin.post(
+        f"{BASE}/{book['id']}/upload-init/",
+        {"filename": "k.pdf", "size": size, "content_type": "application/pdf"},
+        "json",
+    )
+
+    assert plan.status_code == 200
+    assert plan.json()["part_size"] >= 100
+    assert len(plan.json()["part_urls"]) <= pdf_storage.MAX_PARTS
+
+
+@pytest.mark.parametrize(
+    ("size", "expected_part", "expected_parts"),
+    [
+        (1, 8 * MIB, 1),
+        (8 * MIB, 8 * MIB, 1),
+        (8 * MIB + 1, 8 * MIB, 2),
+        (5 * 1024**3, 8 * MIB, 640),  # 5 GB
+        (80_000 * MIB, 8 * MIB, 10_000),  # aynan chegara
+        (80_000 * MIB + 1, 9 * MIB, 8889),  # 10 000 dan oshardi: bo'lak kattalashadi
+        (100 * 1024**3, 11 * MIB, 9310),  # 100 GB
+    ],
+)
+def test_part_size_scales_with_file_size(size, expected_part, expected_parts):
+    part = pdf_storage.part_size_for(size, 8 * MIB)
+
+    assert part == expected_part
+    assert pdf_storage.part_count(size, part) == expected_parts
+    assert part >= 5 * MIB and expected_parts <= pdf_storage.MAX_PARTS
+
+
+def test_part_size_uses_setting_as_minimum(settings):
+    settings.PDF_UPLOAD_PART_BYTES = 16 * MIB
+
+    assert pdf_storage.part_size_for(MIB) == 16 * MIB
+
+
+def test_direct_upload_part_size_for_5gb(admin, algebra, remote, settings):
+    settings.PDF_UPLOAD_PART_BYTES = 8 * MIB
+    book = create_book(admin)
+
+    plan = admin.post(
+        f"{BASE}/{book['id']}/upload-init/",
+        {"filename": "k.pdf", "size": 5 * 1024**3, "content_type": "application/pdf"},
+        "json",
+    ).json()
+
+    assert plan["part_size"] == 8 * MIB and len(plan["part_urls"]) == 640
 
 
 def test_direct_complete_rejects_non_pdf_and_cleans_up(admin, algebra, remote):

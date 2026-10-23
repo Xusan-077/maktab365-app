@@ -43,8 +43,22 @@ def _bucket() -> str:
     return settings.AWS_STORAGE_BUCKET_NAME
 
 
-def part_count(size: int) -> int:
-    return max(1, math.ceil(size / settings.PDF_UPLOAD_PART_BYTES))
+MAX_PARTS = 10_000  # S3/R2: bir multipart yuklashda eng ko'pi bilan
+MIB = 1024 * 1024
+
+
+def part_size_for(size: int, min_part: int | None = None) -> int:
+    """Bo'lak hajmi: kamida `PDF_UPLOAD_PART_BYTES`; bo'laklar `MAX_PARTS` dan oshmasligi uchun
+    kattalashadi (butun MiB gacha yuqoriga). Frontend `lib/admin/pdf-parts.ts` bilan bir xil."""
+    floor = settings.PDF_UPLOAD_PART_BYTES if min_part is None else min_part
+    needed = math.ceil(size / MAX_PARTS)
+    if needed <= floor:
+        return floor
+    return math.ceil(needed / MIB) * MIB
+
+
+def part_count(size: int, part_size: int | None = None) -> int:
+    return max(1, math.ceil(size / (part_size or part_size_for(size))))
 
 
 @dataclass(frozen=True)
@@ -61,6 +75,7 @@ def start_upload(size: int) -> UploadPlan:
     if not is_remote():
         return UploadPlan("proxy", key)
     ttl = settings.PDF_SIGNED_URL_SECONDS
+    part_size = part_size_for(size)
     upload_id = _client().create_multipart_upload(Bucket=_bucket(), Key=key, ContentType=PDF_MIME)[
         "UploadId"
     ]
@@ -70,9 +85,9 @@ def start_upload(size: int) -> UploadPlan:
             Params={"Bucket": _bucket(), "Key": key, "UploadId": upload_id, "PartNumber": number},
             ExpiresIn=ttl,
         )
-        for number in range(1, part_count(size) + 1)
+        for number in range(1, part_count(size, part_size) + 1)
     )
-    return UploadPlan("direct", key, upload_id, settings.PDF_UPLOAD_PART_BYTES, urls)
+    return UploadPlan("direct", key, upload_id, part_size, urls)
 
 
 def abort_upload(key: str, upload_id: str) -> None:

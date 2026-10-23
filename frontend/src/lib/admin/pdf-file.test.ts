@@ -14,9 +14,8 @@ describe("pdfFileProblem", () => {
     expect(pdfFileProblem(file("a.pdf", 10, ""))).toBe("notPdf");
   });
 
-  it("bo'sh va juda katta faylni rad etadi", () => {
+  it("bo'sh faylni rad etadi, hajm bo'yicha chegara yo'q", () => {
     expect(pdfFileProblem(file("a.pdf", 0))).toBe("empty");
-    expect(pdfFileProblem(file("a.pdf", 101), 100)).toBe("tooLarge");
-    expect(pdfFileProblem(file("a.pdf", 100), 100)).toBeNull();
+    expect(pdfFileProblem(file("a.pdf", 5 * 1024 ** 3))).toBeNull();
   });
 });

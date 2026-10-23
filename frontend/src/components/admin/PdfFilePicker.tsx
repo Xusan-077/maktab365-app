@@ -9,6 +9,9 @@ import { pdfFileProblem, type PdfFileProblem } from "@/lib/admin/pdf-file";
 import { formatBytes } from "@/lib/utils/bytes";
 import type { PdfUploadState } from "./usePdfUpload";
 
+/** Shundan katta fayl uchun "oynani yopmang" eslatmasi ko'rsatiladi. */
+const LARGE_FILE_BYTES = 200 * 1024 * 1024;
+
 export interface PdfFilePickerProps {
   label: string;
   file: File | null;
@@ -19,6 +22,8 @@ export interface PdfFilePickerProps {
   disabled?: boolean;
   /** Mavjud fayl bo'lsa tugma "Almashtirish" deydi. */
   hasExisting?: boolean;
+  /** Berilsa, yuklash vaqtida "Bekor qilish" tugmasi ko'rinadi. */
+  onCancel?: () => void;
 }
 
 /** PDF tanlash va yuklash holati: tanlangan fayl, progress, bosqich (yuklash → muqova). */
@@ -30,6 +35,7 @@ export function PdfFilePicker({
   upload,
   disabled,
   hasExisting,
+  onCancel,
 }: PdfFilePickerProps) {
   const t = useTranslations("admin.pdfUpload");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -96,6 +102,22 @@ export function PdfFilePicker({
             label={t("progress")}
             showValue
           />
+          {upload.phase === "uploading" && file && (
+            <p className="text-muted text-xs" data-testid="pdf-upload-bytes">
+              {t("bytes", {
+                loaded: formatBytes(Math.round(upload.progress * file.size)),
+                total: formatBytes(file.size),
+              })}
+              {file.size >= LARGE_FILE_BYTES && ` · ${t("largeHint")}`}
+            </p>
+          )}
+          {upload.phase === "uploading" && onCancel && (
+            <div>
+              <Button variant="secondary" size="sm" onClick={onCancel}>
+                {t("cancel")}
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </div>

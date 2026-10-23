@@ -7,6 +7,7 @@ import {
   type SendResult,
   type Sender,
 } from "./pdf-upload";
+import { partCountFor, partSizeFor } from "./pdf-parts";
 import type { AdminPdfBook, PdfUploadPlan } from "./types";
 
 const BOOK = { id: "b1", page_count: 4 } as AdminPdfBook;
@@ -163,5 +164,44 @@ describe("uploadPdf — direct rejimi (R2/S3)", () => {
       }),
     ).rejects.toMatchObject({ name: "AbortError" });
     expect(api.completePdfUpload).not.toHaveBeenCalled();
+  });
+});
+
+describe("uploadPdf — juda katta fayl", () => {
+  it("5 GB faylni hisoblangan bo'laklar soni bilan yuboradi va yakunlaydi", async () => {
+    const size = 5 * 1024 ** 3;
+    const partSize = partSizeFor(size);
+    const count = partCountFor(size, partSize);
+    expect(count).toBe(640);
+    const plan: PdfUploadPlan = {
+      mode: "direct",
+      part_size: partSize,
+      part_urls: Array.from({ length: count }, (_, i) => `https://r2/${i + 1}`),
+      expires_in: 900,
+    };
+    // 5 GB xotirada ushlanmaydi: faqat `size` va `slice` kerak.
+    const file = {
+      name: "katta.pdf",
+      type: "application/pdf",
+      size,
+      slice: (start: number, end: number) => ({ size: end - start }),
+    } as unknown as File;
+    const api = makeApi(plan);
+    const sizes: number[] = [];
+    const send: Sender = async (request) => {
+      const blobSize = (request.body as Blob).size;
+      sizes.push(blobSize);
+      request.onProgress(blobSize);
+      return ok(`"e${request.url.split("/").at(-1)}"`);
+    };
+    const progress: number[] = [];
+
+    await uploadPdf({ api, send, bookId: "b1", file, onProgress: (f) => progress.push(f) });
+
+    expect(sizes).toHaveLength(640);
+    expect(sizes.reduce((a, b) => a + b, 0)).toBe(size);
+    const parts = api.completePdfUpload.mock.calls[0][1] as { part_number: number }[];
+    expect(parts.map((p) => p.part_number)).toEqual(Array.from({ length: 640 }, (_, i) => i + 1));
+    expect(progress.at(-1)).toBe(1);
   });
 });

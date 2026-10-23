@@ -79,7 +79,7 @@ Majburiy:
 Ixtiyoriy (default'lar `.env.example` da):
 
 `AWS_S3_CUSTOM_DOMAIN` (muqova rasmlari uchun ommaviy domen), `AWS_S3_SIGNATURE_VERSION` (`s3v4`),
-`PDF_BOOK_MAX_BYTES` (104857600), `PDF_UPLOAD_PART_BYTES` (8388608), `PDF_SIGNED_URL_SECONDS` (900; tavsiya 600–900),
+`PDF_BOOK_MAX_BYTES` (ixtiyoriy, bo'sh yoki 0 = cheksiz; berilsa chegara qo'llanadi), `PDF_UPLOAD_PART_BYTES` (8388608 — bo'lakning eng kichik hajmi; fayl katta bo'lsa bo'laklar 10 000 tadan oshmasligi uchun avtomatik kattalashadi), `PDF_SIGNED_URL_SECONDS` (900; tavsiya 600–900),
 `PDF_UPLOAD_THROTTLE_RATE` (60/hour), `ADMIN_UPLOAD_MAX_IMAGE_BYTES`, `ADMIN_UPLOAD_MAX_PDF_BYTES`,
 `SHOW_DRAFTS_PUBLICLY` (prod'da qo'ymang: default `false`), `CONTENT_CACHE_MAX_AGE` (60),
 `JWT_ACCESS_MINUTES`, `JWT_REFRESH_DAYS`, `REFRESH_REUSE_GRACE_SECONDS`, `AUTH_THROTTLE_RATE`, `AUTH_LOCKOUT_THRESHOLD`,

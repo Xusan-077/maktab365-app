@@ -1511,7 +1511,7 @@ export interface components {
         };
         PdfUploadPlan: {
             mode: components["schemas"]["ModeEnum"];
-            /** @description direct: har bo'lak hajmi (oxirgisidan boshqa) */
+            /** @description direct: har bo'lak hajmi (oxirgisidan boshqa); fayl hajmiga qarab hisoblanadi, bo'laklar soni 10 000 dan oshmaydi */
             part_size: number;
             /** @description direct: har bo'lak uchun imzolangan PUT URL */
             part_urls: string[];

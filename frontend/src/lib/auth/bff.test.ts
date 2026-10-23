@@ -83,7 +83,7 @@ describe("BFF: tana hajmi chegarasi", () => {
     expect(declaresTooLargeBody(withLength(MAX_BODY_BYTES + 1), "/api/v1/me/")).toBe(true);
     expect(declaresTooLargeBody(withLength(MAX_BODY_BYTES), "/api/v1/me/")).toBe(false);
     expect(declaresTooLargeBody(withLength(MAX_BODY_BYTES + 1), PDF_PATH)).toBe(false);
-    expect(declaresTooLargeBody(withLength(MAX_PDF_BODY_BYTES + 1), PDF_PATH)).toBe(true);
+    expect(declaresTooLargeBody(withLength(5 * 1024 ** 3), PDF_PATH)).toBe(false);
   });
 });
 
