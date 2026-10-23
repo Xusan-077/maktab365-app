@@ -1,7 +1,7 @@
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { Logo } from "./Logo";
 import { MainNav } from "./MainNav";
-import { SearchForm } from "./SearchForm";
+import { PanelSearch } from "./PanelSearch";
 import { TextSizeControl } from "./TextSizeControl";
 import { ThemeToggle } from "./ThemeToggle";
 import { UserMenu } from "./UserMenu";
@@ -13,7 +13,7 @@ export function SiteHeader() {
         <Logo />
         <MainNav />
         <div className="ml-auto flex items-center gap-2">
-          <SearchForm className="hidden w-64 lg:block xl:w-72" />
+          <PanelSearch className="hidden lg:inline-flex" />
           <LanguageSwitcher className="hidden lg:inline-flex" />
           <TextSizeControl className="hidden lg:inline-flex" />
           <ThemeToggle />

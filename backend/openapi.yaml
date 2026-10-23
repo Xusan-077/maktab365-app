@@ -1543,6 +1543,32 @@ paths:
                 items:
                   $ref: '#/components/schemas/Subject'
           description: ''
+  /api/v1/pdf-books/search/:
+    get:
+      operationId: pdf_books_chapter_search
+      description: Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi
+        o'rniga kesh ishlaydi.
+      summary: Mundarija bo'limlari bo'yicha qidiruv (ko'rinadigan kitoblarda)
+      parameters:
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Bo'lim nomi (2+ belgi)
+      tags:
+      - content
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChapterHit'
+          description: ''
   /api/v1/pdf-books/by-slug/{slug}/:
     get:
       operationId: pdf_books_retrieve_by_slug
@@ -2286,6 +2312,41 @@ components:
       required:
       - page
       - slides
+      - title
+    ChapterHit:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        page:
+          type: integer
+        book:
+          $ref: '#/components/schemas/ChapterHitBook'
+      required:
+      - book
+      - id
+      - page
+      - title
+    ChapterHitBook:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        slug:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        grade:
+          type: integer
+        title:
+          $ref: '#/components/schemas/LocalizedText'
+      required:
+      - grade
+      - id
+      - slug
       - title
     ChapterLeaf:
       type: object

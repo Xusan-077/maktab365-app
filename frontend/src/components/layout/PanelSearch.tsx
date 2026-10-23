@@ -12,8 +12,9 @@ import type { Locale } from "@/lib/i18n/config";
 import { getLocalized } from "@/lib/i18n/localized";
 import { Link, usePathname, useRouter } from "@/lib/i18n/navigation";
 import { pdfQueries, SEARCH_MIN_LENGTH } from "@/lib/pdf-books/queries";
+import { matchGrades, matchSubjects } from "@/lib/search/palette";
 import { cn } from "@/lib/utils/cn";
-import { pdfBookPath } from "@/lib/utils/routes";
+import { gradePath, pdfBookPath, readerPath, ROUTES } from "@/lib/utils/routes";
 
 const SEARCH_DEBOUNCE_MS = 200;
 const MAX_RESULTS = 8;
@@ -39,6 +40,11 @@ export function PanelSearch({ className }: { className?: string }) {
   const enabled = q.length >= SEARCH_MIN_LENGTH;
 
   const books = useQuery({ ...pdfQueries.list({ q }), enabled });
+  const chapters = useQuery({ ...pdfQueries.chapterSearch(q), enabled });
+  const subjects = useQuery({ ...pdfQueries.subjects(), enabled });
+  const grades = matchGrades(input);
+  const subjectHits = matchSubjects(subjects.data ?? [], q).slice(0, 4);
+  const sectionHits = chapters.data ?? [];
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -117,7 +123,23 @@ export function PanelSearch({ className }: { className?: string }) {
         </form>
 
         <div aria-live="polite" className="flex min-h-24 flex-col gap-4">
-          {!enabled && <p className="text-muted text-sm">{t("hint")}</p>}
+          {!enabled && grades.length === 0 && <p className="text-muted text-sm">{t("hint")}</p>}
+          {grades.length > 0 && (
+            <section aria-label={t("grades")}>
+              <h3 className="text-muted px-3 pb-1 text-xs font-semibold uppercase">
+                {t("grades")}
+              </h3>
+              <ul>
+                {grades.map((grade) => (
+                  <li key={grade}>
+                    <Link href={gradePath(grade)} className={itemClasses}>
+                      <span className="font-medium">{t("gradeItem", { grade })}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
           {pending && <Skeleton className="h-24 w-full" />}
           {failed && (
             <div role="alert" className="flex flex-col items-start gap-2">
@@ -127,8 +149,34 @@ export function PanelSearch({ className }: { className?: string }) {
               </Button>
             </div>
           )}
-          {enabled && !pending && !failed && hits.length === 0 && (
-            <p className="text-muted text-sm">{t("empty", { query: q })}</p>
+          {enabled &&
+            !pending &&
+            !failed &&
+            hits.length === 0 &&
+            grades.length === 0 &&
+            subjectHits.length === 0 &&
+            sectionHits.length === 0 && (
+              <p className="text-muted text-sm">{t("empty", { query: q })}</p>
+            )}
+
+          {subjectHits.length > 0 && (
+            <section aria-label={t("subjects")}>
+              <h3 className="text-muted px-3 pb-1 text-xs font-semibold uppercase">
+                {t("subjects")}
+              </h3>
+              <ul>
+                {subjectHits.map((subject) => (
+                  <li key={subject.slug}>
+                    <Link
+                      href={`${ROUTES.textbooks}?subject=${subject.slug}`}
+                      className={itemClasses}
+                    >
+                      <span className="font-medium">{getLocalized(subject.title, locale)}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
           )}
 
           {hits.length > 0 && (
@@ -143,6 +191,29 @@ export function PanelSearch({ className }: { className?: string }) {
                         {t("meta", {
                           grade: book.grade,
                           subject: getLocalized(book.subject_title, locale),
+                        })}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {sectionHits.length > 0 && (
+            <section aria-label={t("sections")}>
+              <h3 className="text-muted px-3 pb-1 text-xs font-semibold uppercase">
+                {t("sections")}
+              </h3>
+              <ul>
+                {sectionHits.map((hit) => (
+                  <li key={hit.id}>
+                    <Link href={readerPath(hit.book, hit.page)} className={itemClasses}>
+                      <span className="font-medium">{hit.title}</span>
+                      <span className="text-muted text-sm">
+                        {t("sectionMeta", {
+                          book: getLocalized(hit.book.title, locale),
+                          page: hit.page,
                         })}
                       </span>
                     </Link>

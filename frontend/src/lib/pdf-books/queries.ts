@@ -13,6 +13,7 @@ export const pdfKeys = {
   subjects: (grade?: number) => ["pdf-books", "subjects", grade ?? null] as const,
   book: (id: string) => ["pdf-books", "book", id] as const,
   bookBySlug: (slug: string) => ["pdf-books", "book-by-slug", slug] as const,
+  chapterSearch: (q: string) => ["pdf-books", "chapter-search", q] as const,
   fileUrl: (id: string) => ["pdf-books", "file-url", id] as const,
   slidesUrl: (bookId: string, chapterId: string) =>
     ["pdf-books", "slides-url", bookId, chapterId] as const,
@@ -44,6 +45,12 @@ export const pdfQueries = {
     queryOptions({
       queryKey: pdfKeys.book(id),
       queryFn: () => getPdfBooksApi().book(id),
+      staleTime: PUBLIC_STALE_MS,
+    }),
+  chapterSearch: (q: string) =>
+    queryOptions({
+      queryKey: pdfKeys.chapterSearch(q),
+      queryFn: () => getPdfBooksApi().searchChapters(q),
       staleTime: PUBLIC_STALE_MS,
     }),
   /** Slug bo'yicha (qoralamani staff ko'ra olishi uchun mijozda, BFF orqali). */

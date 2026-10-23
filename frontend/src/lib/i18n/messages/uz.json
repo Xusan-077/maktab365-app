@@ -407,12 +407,17 @@
     "search": {
       "open": "Qidiruvni ochish",
       "title": "Qidiruv",
-      "label": "Darslik qidirish",
-      "placeholder": "Darslik nomini qidirish",
-      "hint": "Kamida 2 ta harf kiriting. Tez ochish: Ctrl+K yoki /.",
+      "label": "Darslik, sinf, fan yoki bo'lim qidirish",
+      "placeholder": "Darslik, sinf, fan yoki bo'lim…",
+      "hint": "Kamida 2 ta harf yoki sinf raqamini kiriting. Tez ochish: Ctrl+K yoki /.",
       "empty": "«{query}» bo'yicha hech narsa topilmadi.",
       "books": "Darsliklar",
-      "meta": "{grade}-sinf · {subject}"
+      "meta": "{grade}-sinf · {subject}",
+      "grades": "Sinflar",
+      "gradeItem": "{grade}-sinf darsliklari",
+      "subjects": "Fanlar",
+      "sections": "Mundarija bo'limlari",
+      "sectionMeta": "{book} · {page}-bet"
     },
     "helpPage": {
       "title": "Yordam",

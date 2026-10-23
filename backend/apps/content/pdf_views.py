@@ -20,6 +20,7 @@ from . import pdf_storage as storage
 from .cache import public_cached
 from .models import PdfBook, PdfBookChapter, Subject
 from .pdf_serializers import (
+    ChapterHitSerializer,
     PdfBookDetailSerializer,
     PdfBookSerializer,
     PdfDownloadSerializer,
@@ -111,6 +112,32 @@ class PdfBookDetailView(PublicView, APIView):
     def get(self, request, pk):
         book = _visible_book_or_404(request, pk)
         return Response(PdfBookDetailSerializer(book, context={"request": request}).data)
+
+
+CHAPTER_HITS = 8
+
+
+class PdfChapterSearchView(PublicView, APIView):
+    @extend_schema(
+        operation_id="pdf_books_chapter_search",
+        parameters=[OpenApiParameter("q", OpenApiTypes.STR, description="Bo'lim nomi (2+ belgi)")],
+        responses=ChapterHitSerializer(many=True),
+        summary="Mundarija bo'limlari bo'yicha qidiruv (ko'rinadigan kitoblarda)",
+        tags=TAGS,
+    )
+    @public_cached
+    def get(self, request):
+        query = request.query_params.get("q", "").strip()
+        if len(query) < 2:
+            return Response([])
+        rows = (
+            PdfBookChapter.objects.filter(
+                book__in=visible_pdf_books(request), title__icontains=query
+            )
+            .select_related("book")
+            .order_by("book__grade", "book_id", "order")[:CHAPTER_HITS]
+        )
+        return Response(ChapterHitSerializer(rows, many=True).data)
 
 
 class PdfBookBySlugView(PublicView, APIView):

@@ -21,6 +21,7 @@ export type Goal = Schemas["Goal"];
 export type GoalInput = Schemas["GoalWriteRequest"];
 export type GoalPatch = Schemas["PatchedGoalWriteRequest"];
 export type PdfDownload = Schemas["PdfDownload"];
+export type ChapterHit = Schemas["ChapterHit"];
 export type ReadEvent = Schemas["EventKindEnum"];
 
 export const PDF_PAGE_SIZE = 24;
@@ -77,6 +78,11 @@ export class PdfBooksApi {
       params: { path: { id } },
       body: event,
     });
+  }
+
+  /** Mundarija bo'limlari bo'yicha qidiruv (ko'rinadigan kitoblarda). */
+  async searchChapters(q: string): Promise<ChapterHit[]> {
+    return unwrap(await this.client.GET("/api/v1/pdf-books/search/", { params: { query: { q } } }));
   }
 
   /** Kitob slug bo'yicha (`9-sinf-algebra`). */

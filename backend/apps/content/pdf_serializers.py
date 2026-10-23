@@ -228,6 +228,20 @@ class PdfBookDetailSerializer(PdfBookSerializer):
     chapters = PublicChapterSerializer(source="chapter_tree", many=True)
 
 
+class ChapterHitBookSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    slug = serializers.SlugField()
+    grade = serializers.IntegerField()
+    title = LocalizedField()
+
+
+class ChapterHitSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    title = serializers.CharField()
+    page = serializers.IntegerField()
+    book = ChapterHitBookSerializer()
+
+
 class PdfDownloadSerializer(serializers.Serializer):
     url = serializers.CharField(help_text="Qisqa muddatli URL; `Content-Disposition: attachment`")
     filename = serializers.CharField(help_text="Tavsiya etilgan fayl nomi")

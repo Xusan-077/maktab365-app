@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { NextIntlClientProvider } from "next-intl";
 import uz from "@/lib/i18n/messages/uz.json";
 
-const api = vi.hoisted(() => ({ list: vi.fn() }));
+const api = vi.hoisted(() => ({ list: vi.fn(), searchChapters: vi.fn(), subjects: vi.fn() }));
 const nav = vi.hoisted(() => ({ push: vi.fn() }));
 
 vi.mock("@/lib/i18n/navigation", () => ({
@@ -55,7 +55,11 @@ function setup() {
   return screen.getByLabelText(t.label);
 }
 
-beforeEach(() => vi.clearAllMocks());
+beforeEach(() => {
+  vi.clearAllMocks();
+  api.searchChapters.mockResolvedValue([]);
+  api.subjects.mockResolvedValue([]);
+});
 afterEach(cleanup);
 
 describe("PanelSearch", () => {
@@ -98,5 +102,36 @@ describe("PanelSearch", () => {
     fireEvent.change(input, { target: { value: "zzz" } });
 
     expect(await screen.findByText(t.empty.replace("{query}", "zzz"))).toBeTruthy();
+  });
+
+  it("sinf raqami bo'yicha sinf sahifasiga havola beradi (2 harfdan oldin ham)", () => {
+    const input = setup();
+    fireEvent.change(input, { target: { value: "9" } });
+    const link = screen.getByRole("link", { name: "9-sinf darsliklari" });
+    expect(link.getAttribute("href")).toBe("/darsliklar/9");
+    expect(api.list).not.toHaveBeenCalled();
+  });
+
+  it("fanlar va mundarija bo'limlarini ham topadi", async () => {
+    api.list.mockResolvedValue({ count: 0, results: [] });
+    api.subjects.mockResolvedValue([{ slug: "algebra", title: { uz: "Algebra" }, books_count: 1 }]);
+    api.searchChapters.mockResolvedValue([
+      {
+        id: "c1",
+        title: "Kvadrat tenglamalar",
+        page: 12,
+        book: { id: "b1", slug: "9-sinf-algebra", grade: 9, title: { uz: "Algebra 9" } },
+      },
+    ]);
+    const input = setup();
+    fireEvent.change(input, { target: { value: "alg" } });
+
+    const subject = await screen.findByRole("link", { name: "Algebra" });
+    expect(subject.getAttribute("href")).toBe("/darsliklar?subject=algebra");
+
+    fireEvent.change(input, { target: { value: "kvadrat" } });
+    const section = await screen.findByRole("link", { name: /Kvadrat tenglamalar/ });
+    expect(section.getAttribute("href")).toBe("/darsliklar/9/9-sinf-algebra/oqish?page=12");
+    expect(section.textContent).toContain("12-bet");
   });
 });

@@ -8,6 +8,7 @@ urlpatterns = [
     path(
         "pdf-books/subjects/", pdf_views.PdfBookSubjectListView.as_view(), name="pdf-book-subjects"
     ),
+    path("pdf-books/search/", pdf_views.PdfChapterSearchView.as_view(), name="pdf-chapter-search"),
     path(
         "pdf-books/by-slug/<slug:slug>/",
         pdf_views.PdfBookBySlugView.as_view(),

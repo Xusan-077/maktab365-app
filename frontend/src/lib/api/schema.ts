@@ -821,6 +821,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/pdf-books/search/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Mundarija bo'limlari bo'yicha qidiruv (ko'rinadigan kitoblarda)
+         * @description Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi o'rniga kesh ishlaydi.
+         */
+        get: operations["pdf_books_chapter_search"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/pdf-books/by-slug/{slug}/": {
         parameters: {
             query?: never;
@@ -1266,6 +1286,20 @@ export interface components {
             page: number;
             readonly slides: components["schemas"]["SlidesAdmin"] | null;
             children?: components["schemas"]["ChapterLeaf"][];
+        };
+        ChapterHit: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            page: number;
+            book: components["schemas"]["ChapterHitBook"];
+        };
+        ChapterHitBook: {
+            /** Format: uuid */
+            id: string;
+            slug: string;
+            grade: number;
+            title: components["schemas"]["LocalizedText"];
         };
         /**
          * @description Mundarija qatori. Qiymatlar `pdf_services.chapter_errors` da tekshiriladi.
@@ -3493,6 +3527,28 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Subject"][];
+                };
+            };
+        };
+    };
+    pdf_books_chapter_search: {
+        parameters: {
+            query?: {
+                /** @description Bo'lim nomi (2+ belgi) */
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChapterHit"][];
                 };
             };
         };

@@ -407,12 +407,17 @@
     "search": {
       "open": "Open search",
       "title": "Search",
-      "label": "Search textbooks",
-      "placeholder": "Search textbooks by title",
-      "hint": "Type at least 2 characters. Quick open: Ctrl+K or /.",
+      "label": "Search textbooks, grades, subjects or sections",
+      "placeholder": "Textbook, grade, subject or section…",
+      "hint": "Type at least 2 letters or a grade number. Quick open: Ctrl+K or /.",
       "empty": "Nothing found for “{query}”.",
       "books": "Textbooks",
-      "meta": "Grade {grade} · {subject}"
+      "meta": "Grade {grade} · {subject}",
+      "grades": "Grades",
+      "gradeItem": "Grade {grade} textbooks",
+      "subjects": "Subjects",
+      "sections": "Table of contents",
+      "sectionMeta": "{book} · page {page}"
     },
     "helpPage": {
       "title": "Help",

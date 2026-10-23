@@ -112,3 +112,22 @@ def test_admin_edits_subject_group_language_and_download_flag(catalog):
     assert resp.status_code == 200
     assert resp.json()["language"] == "ru" and resp.json()["allow_download"] is False
     assert PdfBook.objects.get(pk=book.pk).slug == "9-sinf-algebra"  # slug o'zgarmaydi
+
+
+def test_chapter_search_finds_sections_in_visible_books_only(catalog):
+    from apps.content.models import PdfBookChapter
+
+    algebra = catalog.subject("algebra")
+    shown = catalog.pdf_book(algebra, grade=9)
+    hidden = catalog.pdf_book(catalog.subject("fizika"), grade=9, status="draft")
+    PdfBookChapter.objects.create(book=shown, title="Kvadrat tenglamalar", page=12, order=0)
+    PdfBookChapter.objects.create(book=hidden, title="Kvadrat harakat", page=3, order=0)
+    api = APIClient()
+
+    hits = api.get(f"{PUBLIC}/search/", {"q": "kvadrat"}).json()
+    assert [(h["title"], h["page"], h["book"]["slug"]) for h in hits] == [
+        ("Kvadrat tenglamalar", 12, "9-sinf-algebra")
+    ]
+    assert hits[0]["book"]["grade"] == 9
+    assert api.get(f"{PUBLIC}/search/", {"q": "k"}).json() == []
+    assert api.get(f"{PUBLIC}/search/", {"q": "yoq"}).json() == []
