@@ -81,7 +81,7 @@ Yoki ildizdan: `make dev`. Boshqa buyruqlar: `make test`, `make lint`, `make sch
   oxirgi ochilganlar (`GET /me/library/`), "Saqlanganlar" (`GET|PUT|DELETE /me/pdf-bookmarks/{id}/`),
   oxirgi sahifa (`/me/pdf-progress/`). Mehmonning sahifalari va saqlangan kitoblari brauzerda turadi va
   kirgach `POST /me/merge-guest-data/` bilan akkauntga qo'shiladi (eski `maktab365-guest*` kalitlari bir marta tozalanadi).
-- **Admin:** `/admin/kitoblar` (PDF kitoblar), `/admin/fanlar` (fanlar: qo'shish, nom, o'chirish — PDF kitobi bor fan
+- **Admin:** `/admin/kitoblar` (PDF kitoblar), `/admin/fanlar` (fanlar: qo'shish, nom, o'tiladigan sinflar (1–11), o'chirish — PDF kitobi bor fan
   o'chmaydi), `/admin/foydalanuvchilar`. Fanlar: `python manage.py seed_subjects` (19 ta asosiy fan; idempotent,
   mavjudiga tegmaydi).
 - **Eski manzillar** 308 bilan yo'naltiriladi (`frontend/next.config.ts`): `/pdf-kitoblar*` → `/darsliklar*`,

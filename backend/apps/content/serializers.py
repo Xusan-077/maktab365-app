@@ -24,4 +24,5 @@ class SubjectSerializer(serializers.Serializer):
     icon = serializers.CharField()
     order = serializers.IntegerField()
     group = serializers.CharField()
+    grades = serializers.ListField(child=serializers.IntegerField())
     books_count = serializers.IntegerField()

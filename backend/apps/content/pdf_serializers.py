@@ -91,6 +91,15 @@ class PdfBookAdminSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
 
+    def _validate_subject_grade(self, attrs):
+        """Fan shu sinfda o'tilishi kerak (faqat sinf yoki fan o'zgarganda tekshiriladi)."""
+        if "subject" not in attrs and "grade" not in attrs:
+            return
+        subject = attrs.get("subject", getattr(self.instance, "subject", None))
+        grade = attrs.get("grade", getattr(self.instance, "grade", None))
+        if subject is not None and grade is not None and grade not in subject.grades:
+            raise serializers.ValidationError({"subject": ["subject_not_in_grade"]})
+
     def validate_chapters(self, value):
         page_count = self.instance.page_count if self.instance is not None else 0
         if codes := chapter_errors(value, page_count):
@@ -98,6 +107,7 @@ class PdfBookAdminSerializer(serializers.ModelSerializer):
         return value
 
     def validate(self, attrs):
+        self._validate_subject_grade(attrs)
         # Muqova rejimi va fayl izchil: `auto` — fayl yo'q, boshqa rejimda fayl majburiy.
         if "cover_mode" not in attrs and "cover" not in attrs:
             return attrs

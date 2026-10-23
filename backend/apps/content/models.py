@@ -1,3 +1,5 @@
+from django.contrib.postgres.fields import ArrayField
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxLengthValidator, MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
@@ -16,12 +18,33 @@ class SubjectGroup(models.TextChoices):
     ARTS = "arts", "Arts and applied"
 
 
+ALL_GRADES = list(range(1, 12))
+
+
+def default_grades() -> list[int]:
+    return list(ALL_GRADES)
+
+
+def validate_grades(value) -> None:
+    """Kamida bitta sinf, qiymatlar 1..11, takrorlanmasin."""
+    if not value:
+        raise ValidationError("grades_required", code="grades_required")
+    if any(not 1 <= grade <= 11 for grade in value):
+        raise ValidationError("grades_invalid", code="grades_invalid")
+    if len(set(value)) != len(value):
+        raise ValidationError("grades_duplicate", code="grades_duplicate")
+
+
 class Subject(UUIDModel, TimeStampedModel):
     slug = models.SlugField(unique=True)
     group = models.CharField(max_length=16, choices=SubjectGroup.choices, blank=True, default="")
     title = LocalizedTextField()
     icon = models.CharField(max_length=64, blank=True)
     order = models.PositiveIntegerField(default=0)
+    # Fan o'tiladigan sinflar (1..11, tartiblangan). Kitob faqat shu sinflardagi fanga qo'shiladi.
+    grades = ArrayField(
+        models.SmallIntegerField(), default=default_grades, validators=[validate_grades]
+    )
 
     class Meta:
         ordering = ["order", "slug"]

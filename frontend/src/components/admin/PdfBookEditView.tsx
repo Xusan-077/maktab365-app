@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
-import { Controller, useForm, type Resolver } from "react-hook-form";
+import { Controller, useForm, useWatch, type Resolver } from "react-hook-form";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { BookCover } from "@/components/pdf/BookCover";
 import { applyCover, coverImageProblem, type CoverChoice } from "@/lib/admin/cover";
@@ -19,6 +19,7 @@ import { getAdminApi } from "@/lib/admin/api";
 import type { PdfFileProblem } from "@/lib/admin/pdf-file";
 import { canDelete } from "@/lib/admin/permissions";
 import { ADMIN_ROOT_KEY, adminQueries } from "@/lib/admin/queries";
+import { subjectHasGrade } from "@/lib/admin/grades";
 import { ADMIN_ROUTES, adminPdfBookPath, adminPdfBookPreviewPath } from "@/lib/admin/routes";
 import type { AdminPdfBook, PdfBookStatus } from "@/lib/admin/types";
 import type { Locale } from "@/lib/i18n/config";
@@ -383,6 +384,7 @@ function PdfBookForm({ book }: { book: AdminPdfBook }) {
   const {
     control,
     handleSubmit,
+    setValue,
     formState: { errors, isDirty },
   } = useForm<FormValues>({
     resolver: yupResolver(schema) as unknown as Resolver<FormValues>,
@@ -418,10 +420,17 @@ function PdfBookForm({ book }: { book: AdminPdfBook }) {
     },
   });
 
-  const subjectOptions = (subjects ?? []).map((s) => ({
-    value: s.slug,
-    label: getLocalized(s.title, locale),
-  }));
+  const formGrade = useWatch({ control, name: "grade" });
+  const formSubject = useWatch({ control, name: "subject" });
+  const [resetFor, setResetFor] = useState<string | null>(null);
+  const subjectOptions = (subjects ?? [])
+    // Eski kitobning hozirgi fani (sinflar keyin o'zgargan bo'lsa ham) o'z sinfida qoladi.
+    .filter(
+      (s) =>
+        subjectHasGrade(s, Number(formGrade)) ||
+        (s.slug === book.subject && formGrade === String(book.grade)),
+    )
+    .map((s) => ({ value: s.slug, label: getLocalized(s.title, locale) }));
   const gradeOptions = GRADES.map((g) => ({
     value: String(g),
     label: tw("gradeOption", { grade: g }),
@@ -444,7 +453,17 @@ function PdfBookForm({ book }: { book: AdminPdfBook }) {
               <Select
                 label={tw("gradeLabel")}
                 value={field.value}
-                onChange={field.onChange}
+                onChange={(value) => {
+                  field.onChange(value);
+                  // Fan yangi sinfda o'tilmasa, tanlov tozalanadi va ogohlantiriladi.
+                  const current = (subjects ?? []).find((s) => s.slug === formSubject);
+                  if (current && !subjectHasGrade(current, Number(value))) {
+                    setValue("subject", "", { shouldDirty: true });
+                    setResetFor(value);
+                  } else {
+                    setResetFor(null);
+                  }
+                }}
                 options={gradeOptions}
                 searchable={false}
               />
@@ -463,6 +482,11 @@ function PdfBookForm({ book }: { book: AdminPdfBook }) {
             )}
           />
         </div>
+        {resetFor && !formSubject && (
+          <p role="status" className="text-danger text-sm" data-testid="subject-reset-warning">
+            {tw("subjectReset", { grade: resetFor })}
+          </p>
+        )}
         <Controller
           control={control}
           name="title"

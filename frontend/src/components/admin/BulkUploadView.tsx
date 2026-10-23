@@ -13,6 +13,7 @@ import { Select } from "@/components/ui/Select";
 import { getAdminApi } from "@/lib/admin/api";
 import { dedupeFiles, makeRow, rowProblem, type BulkRow } from "@/lib/admin/bulk";
 import { uploadPdf, xhrSender } from "@/lib/admin/pdf-upload";
+import { subjectHasGrade } from "@/lib/admin/grades";
 import { ADMIN_ROOT_KEY, adminQueries } from "@/lib/admin/queries";
 import { ADMIN_ROUTES } from "@/lib/admin/routes";
 import type { Locale } from "@/lib/i18n/config";
@@ -112,10 +113,11 @@ export function BulkUploadView() {
     value: String(g),
     label: tw("gradeOption", { grade: g }),
   }));
-  const subjectOptions = subjects.map((s) => ({
-    value: s.slug,
-    label: getLocalized(s.title, locale),
-  }));
+  // Qator sinfiga mos fanlar (sinf noma'lum bo'lsa — hammasi).
+  const subjectOptionsFor = (grade: number | null) =>
+    subjects
+      .filter((s) => grade === null || subjectHasGrade(s, grade))
+      .map((s) => ({ value: s.slug, label: getLocalized(s.title, locale) }));
 
   return (
     <>
@@ -228,13 +230,21 @@ export function BulkUploadView() {
                       disabled={locked}
                       searchable={false}
                       options={gradeOptions}
-                      onChange={(value) => update(row.key, { grade: Number(value) })}
+                      onChange={(value) => {
+                        const grade = Number(value);
+                        const current = subjects.find((s) => s.slug === row.subject);
+                        // Fan yangi sinfga mos kelmasa tozalanadi (qator "fan tanlang" deydi).
+                        update(row.key, {
+                          grade,
+                          subject: current && !subjectHasGrade(current, grade) ? null : row.subject,
+                        });
+                      }}
                     />
                     <Select
                       label={tw("subjectLabel")}
                       value={row.subject ?? ""}
                       disabled={locked}
-                      options={subjectOptions}
+                      options={subjectOptionsFor(row.grade)}
                       onChange={(value) => update(row.key, { subject: value })}
                     />
                   </div>

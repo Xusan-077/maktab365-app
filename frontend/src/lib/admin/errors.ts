@@ -28,6 +28,7 @@ export const KNOWN_ERROR_CODES = [
   "last_admin",
   "role_forbidden",
   "storage_error",
+  "grade_has_books",
 ] as const;
 
 export type KnownErrorCode = (typeof KNOWN_ERROR_CODES)[number];
@@ -55,4 +56,13 @@ export function fieldErrors(error: unknown): Record<string, string> {
     if (first) result[field] = first;
   }
   return result;
+}
+
+/** `grade_has_books` 409: `details.conflicts` = `["7:3"]` (sinf:kitoblar soni). */
+export function gradeConflicts(error: unknown): { grade: number; count: number }[] {
+  if (!(error instanceof ApiError) || error.code !== "grade_has_books") return [];
+  return (error.details?.conflicts ?? []).flatMap((item) => {
+    const [grade, count] = item.split(":").map(Number);
+    return Number.isFinite(grade) && Number.isFinite(count) ? [{ grade, count }] : [];
+  });
 }

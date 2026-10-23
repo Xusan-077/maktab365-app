@@ -19,6 +19,7 @@ from .admin_serializers import (
     UploadResultSerializer,
 )
 from .models import PdfBook, PdfBookStatus, Subject
+from .views import GRADE_PARAM, _int_param
 
 IsEditor = IsRole(Role.EDITOR, Role.ADMIN)
 IsAdmin = IsRole(Role.ADMIN)
@@ -86,7 +87,7 @@ class AdminViewSet(viewsets.ModelViewSet):
 
 
 @extend_schema_view(
-    list=extend_schema(operation_id="admin_subjects_list", tags=TAG),
+    list=extend_schema(operation_id="admin_subjects_list", tags=TAG, parameters=[GRADE_PARAM]),
     create=extend_schema(operation_id="admin_subjects_create", tags=TAG),
     retrieve=extend_schema(operation_id="admin_subjects_retrieve", tags=TAG),
     partial_update=extend_schema(operation_id="admin_subjects_update", tags=TAG),
@@ -94,7 +95,7 @@ class AdminViewSet(viewsets.ModelViewSet):
 )
 class SubjectAdminViewSet(AdminViewSet):
     target_type = "subject"
-    snapshot_fields = ("slug", "title", "icon", "order")
+    snapshot_fields = ("slug", "title", "icon", "order", "group", "grades")
     serializer_class = SubjectAdminSerializer
     http_method_names = ["get", "post", "patch", "delete", "head", "options"]
     search_fields = ["slug", "title__uz", "title__ru", "title__en"]
@@ -102,7 +103,10 @@ class SubjectAdminViewSet(AdminViewSet):
     ordering = ["order", "slug"]
 
     def get_queryset(self):
-        return Subject.objects.annotate(pdf_books_count=Count("pdf_books"))
+        subjects = Subject.objects.annotate(pdf_books_count=Count("pdf_books"))
+        if (grade := _int_param(self.request, "grade")) is not None:
+            subjects = subjects.filter(grades__contains=[grade])
+        return subjects
 
 
 class UploadView(APIView):

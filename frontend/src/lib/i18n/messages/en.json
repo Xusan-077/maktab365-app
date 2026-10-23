@@ -830,7 +830,8 @@
         "self_action_forbidden": "You cannot delete, block or demote yourself.",
         "last_admin": "The last active admin cannot be deleted, blocked or demoted.",
         "role_forbidden": "You are not allowed to assign this role.",
-        "storage_error": "The files could not be removed from storage, so the book was kept. Try again in a moment."
+        "storage_error": "The files could not be removed from storage, so the book was kept. Try again in a moment.",
+        "grade_has_books": "You can't remove a grade where the subject has books. Move or delete the books first."
       },
       "fields": {
         "invalid": "Invalid value",
@@ -848,8 +849,13 @@
         "chapter_page_invalid": "A contents page number is invalid",
         "chapter_title_required": "A contents row has no title",
         "chapter_title_too_long": "A contents title is too long",
-        "chapters_too_many": "Too many contents rows (500 max)"
-      }
+        "chapters_too_many": "Too many contents rows (500 max)",
+        "grades_required": "Select at least one grade",
+        "grades_invalid": "Grades must be from 1 to 11",
+        "grades_duplicate": "Grades must not repeat",
+        "subject_not_in_grade": "This subject is not taught in the selected grade"
+      },
+      "gradeHasBooks": "This subject has {count} book(s) in grade {grade}: move them to another subject or delete them first."
     },
     "pdfUpload": {
       "none": "No PDF selected",
@@ -880,7 +886,8 @@
         "name": "Name",
         "slug": "Slug",
         "books": "Books",
-        "actions": "Actions"
+        "actions": "Actions",
+        "grades": "Grades"
       },
       "createTitle": "New subject",
       "editTitle": "Edit subject",
@@ -896,7 +903,22 @@
       "deleted": "Subject deleted",
       "group": "Subject group",
       "groupHint": "Tabs on the grade page are built from this group.",
-      "groupNone": "No group"
+      "groupNone": "No group",
+      "gradesLabel": "Which grades",
+      "gradesHint": "Pick the grades this subject is taught in. Books can only be added to a subject of their grade.",
+      "gradesRequired": "Select at least one grade",
+      "gradesSelected": "Selected: {value}",
+      "presetAll": "All (1–11)",
+      "presetPrimary": "Primary (1–4)",
+      "presetMiddle": "Middle (5–9)",
+      "presetHigh": "Upper (10–11)",
+      "presetClear": "Clear",
+      "rangeLabel": "Range (e.g. 5–11)",
+      "rangeApply": "Apply",
+      "gradeChip": "Grade {grade}",
+      "gradeFilter": "By grade",
+      "allGrades": "All grades",
+      "emptyFiltered": "No subjects in this grade."
     },
     "pdfBooks": {
       "title": "Books (PDF)",
@@ -948,7 +970,10 @@
       "coverFailed": "The cover could not be created automatically. Try re-uploading the file later.",
       "detailsHeading": "Description and table of contents",
       "detailsHint": "Optional: you can skip this step and fill it in later on the book edit page.",
-      "skip": "Skip"
+      "skip": "Skip",
+      "noSubjects": "No subjects for this grade. Add the grade on the subjects page.",
+      "manageSubjects": "Go to subjects",
+      "subjectReset": "This subject is not taught in grade {grade}: the choice was cleared. Pick another subject."
     },
     "pdfEdit": {
       "editTitle": "Edit PDF book",

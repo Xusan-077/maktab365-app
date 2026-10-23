@@ -18,7 +18,12 @@ const upload = vi.hoisted(() => ({ uploadPdf: vi.fn() }));
 const cover = vi.hoisted(() => ({ renderCover: vi.fn(), renderCoverFile: vi.fn() }));
 
 vi.mock("@/lib/admin/api", () => ({ getAdminApi: () => api }));
-vi.mock("@/lib/i18n/navigation", () => ({ useRouter: () => router }));
+vi.mock("@/lib/i18n/navigation", () => ({
+  useRouter: () => router,
+  Link: ({ href, children }: { href: string; children: React.ReactNode }) => (
+    <a href={href}>{children}</a>
+  ),
+}));
 vi.mock("@/lib/admin/pdf-upload", () => ({ uploadPdf: upload.uploadPdf, xhrSender: vi.fn() }));
 vi.mock("@/lib/pdf/thumbnail", () => cover);
 
@@ -28,8 +33,13 @@ const t = uz.admin.pdfWizard;
 const td = uz.admin.toc;
 const BOOK = { id: "book-1", page_count: 3 } as AdminPdfBook;
 
+const SUBJECTS = [
+  { slug: "algebra", title: { uz: "Algebra" }, grades: [5, 6, 7] },
+  { slug: "fizika", title: { uz: "Fizika" }, grades: [7, 8] },
+];
+
 function setup() {
-  api.subjects.mockResolvedValue([{ slug: "algebra", title: { uz: "Algebra" } }]);
+  api.subjects.mockResolvedValue(SUBJECTS);
   api.createPdfBook.mockResolvedValue({ id: "book-1" });
   api.updatePdfBook.mockResolvedValue(BOOK);
   api.upload.mockResolvedValue({ path: "covers/c.jpg" });
@@ -96,6 +106,31 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe("PdfBookWizard", () => {
+  it("faqat tanlangan sinfga tegishli fanlar chiqadi; sinf almashsa fan tozalanadi", async () => {
+    setup();
+    fireEvent.click(screen.getByTestId("pdf-grade-5"));
+    fireEvent.click(screen.getByRole("button", { name: t.next }));
+    fireEvent.click(await screen.findByTestId("pdf-subject-algebra"));
+    expect(screen.queryByTestId("pdf-subject-fizika")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: t.back }));
+    fireEvent.click(screen.getByTestId("pdf-grade-8"));
+    fireEvent.click(screen.getByRole("button", { name: t.next }));
+    expect(await screen.findByTestId("pdf-subject-fizika")).toBeTruthy();
+    expect(screen.queryByTestId("pdf-subject-algebra")).toBeNull();
+    // eski tanlov tozalangan: «Davom etish» o'chiq
+    expect((screen.getByRole("button", { name: t.next }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it("sinfda fan yo'q bo'lsa tushuntirish va /admin/fanlar havolasi chiqadi", async () => {
+    setup();
+    fireEvent.click(screen.getByTestId("pdf-grade-1"));
+    fireEvent.click(screen.getByRole("button", { name: t.next }));
+    expect(await screen.findByText(t.noSubjects)).toBeTruthy();
+    expect(screen.getByRole("link", { name: t.manageSubjects }).getAttribute("href")).toBe(
+      "/admin/fanlar",
+    );
+  });
+
   it("sinf → fan → nom+PDF → o'tkazib yuborish: yozuv yaratadi, yuklaydi, muqovani PATCH qiladi", async () => {
     setup();
     await toDetailsStep(true);

@@ -4,6 +4,7 @@ import { pdfFileProblem, type PdfFileProblem } from "./pdf-file";
 export interface BulkSubject {
   slug: string;
   title: { uz: string; ru?: string; en?: string };
+  grades?: number[];
 }
 
 const GRADE_WORDS = "sinf|sinfi|klass|класс|кл|grade";
@@ -37,10 +38,16 @@ const normalize = (text: string) =>
     .trim();
 
 /** Fan: slug yoki istalgan tildagi nom fayl nomida uchrasa; eng uzun moslik yutadi. */
-export function guessSubject(filename: string, subjects: readonly BulkSubject[]): string | null {
+export function guessSubject(
+  filename: string,
+  subjects: readonly BulkSubject[],
+  grade: number | null = null,
+): string | null {
   const haystack = ` ${normalize(filename.replace(/\.pdf$/i, ""))} `;
   let best: { slug: string; length: number } | null = null;
   for (const subject of subjects) {
+    // Fan taxmin qilingan sinfda o'tilmasa, u nomzod emas.
+    if (grade !== null && subject.grades && !subject.grades.includes(grade)) continue;
     const candidates = [subject.slug.replaceAll("-", " "), ...Object.values(subject.title)];
     for (const candidate of candidates) {
       const needle = normalize(candidate ?? "");
@@ -76,12 +83,13 @@ let counter = 0;
 
 export function makeRow(file: File, subjects: readonly BulkSubject[]): BulkRow {
   counter += 1;
+  const grade = guessGrade(file.name);
   return {
     key: `${file.name}-${file.size}-${file.lastModified}-${counter}`,
     file,
     title: titleFromFilename(file.name),
-    grade: guessGrade(file.name),
-    subject: guessSubject(file.name, subjects),
+    grade,
+    subject: guessSubject(file.name, subjects, grade),
   };
 }
 

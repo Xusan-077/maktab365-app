@@ -52,7 +52,7 @@ def api_exception_handler(exc, context):
             "validation_error", "Validation failed.", _validation_details(exc.detail)
         )
     elif isinstance(exc, exceptions.APIException):
-        response.data = error_body(exc.default_code, str(exc.detail))
+        response.data = error_body(exc.default_code, str(exc.detail), getattr(exc, "details", None))
     return response
 
 

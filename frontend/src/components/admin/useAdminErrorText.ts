@@ -2,13 +2,17 @@
 
 import { useCallback } from "react";
 import { useTranslations } from "next-intl";
-import { fieldErrorCode, knownErrorCode } from "@/lib/admin/errors";
+import { fieldErrorCode, gradeConflicts, knownErrorCode } from "@/lib/admin/errors";
 
 /** Backend xatosi → admin matni: avval barqaror `code`, bo'lmasa umumiy xabar. */
 export function useAdminErrorText() {
   const t = useTranslations("admin.errors");
   return useCallback(
     (error: unknown): string => {
+      const conflicts = gradeConflicts(error);
+      if (conflicts.length > 0) {
+        return conflicts.map((c) => t("gradeHasBooks", c)).join(" ");
+      }
       const code = knownErrorCode(error);
       return code ? t(`codes.${code}`) : t("generic");
     },

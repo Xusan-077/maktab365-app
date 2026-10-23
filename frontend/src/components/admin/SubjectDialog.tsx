@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
@@ -11,10 +11,12 @@ import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { getAdminApi } from "@/lib/admin/api";
 import { ADMIN_ROOT_KEY } from "@/lib/admin/queries";
+import { GRADE_PRESETS } from "@/lib/admin/grades";
 import { slugify } from "@/lib/admin/slug";
 import type { AdminSubject } from "@/lib/admin/types";
 import { createSubjectSchema } from "@/lib/validation/admin";
 import type { LocalizedText } from "@/types/i18n";
+import { GradePicker } from "./GradePicker";
 import { LocalizedFields, toLocalized } from "./LocalizedFields";
 import { useAdminErrorText, useAdminFieldErrorText } from "./useAdminErrorText";
 
@@ -70,14 +72,16 @@ function SubjectFormBody({
     },
   });
 
+  const [grades, setGrades] = useState<number[]>(() => [...(subject?.grades ?? GRADE_PRESETS.all)]);
+
   const save = useMutation({
     mutationFn: (values: SubjectFormValues) => {
       const api = getAdminApi();
       const title = toLocalized(values.title);
       const group = (values.group === GROUP_NONE ? "" : values.group) as AdminSubject["group"];
       return subject
-        ? api.updateSubject(subject.id, { title, group })
-        : api.createSubject({ slug: values.slug, title, order: nextOrder, group });
+        ? api.updateSubject(subject.id, { title, group, grades })
+        : api.createSubject({ slug: values.slug, title, order: nextOrder, group, grades });
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ADMIN_ROOT_KEY });
@@ -140,7 +144,17 @@ function SubjectFormBody({
           />
         )}
       />
-      {save.isError && !slugError && (
+      <GradePicker
+        value={grades}
+        onChange={setGrades}
+        disabled={save.isPending}
+        error={
+          grades.length === 0
+            ? t("gradesRequired")
+            : (fieldErrorText(save.error, "grades") ?? undefined)
+        }
+      />
+      {save.isError && !slugError && !fieldErrorText(save.error, "grades") && (
         <p role="alert" className="text-danger text-sm">
           {errorText(save.error)}
         </p>
@@ -149,7 +163,7 @@ function SubjectFormBody({
         <Button variant="secondary" onClick={onDone}>
           {tc("cancel")}
         </Button>
-        <Button type="submit" loading={save.isPending}>
+        <Button type="submit" loading={save.isPending} disabled={grades.length === 0}>
           {subject ? tc("save") : tc("create")}
         </Button>
       </div>

@@ -1808,6 +1808,7 @@ export interface components {
             icon?: string;
             order?: number;
             group?: components["schemas"]["GroupEnum"] | components["schemas"]["BlankEnum"];
+            grades?: number[];
         };
         PatchedUserAdminUpdateRequest: {
             display_name?: string;
@@ -2115,6 +2116,7 @@ export interface components {
             icon: string;
             order: number;
             group: string;
+            grades: number[];
             books_count: number;
         };
         /** @description Slug yaratishda beriladi, keyin o'zgarmaydi (u kitob/fan identifikatorlariga kiradi). */
@@ -2126,6 +2128,7 @@ export interface components {
             icon?: string;
             order?: number;
             group?: components["schemas"]["GroupEnum"] | components["schemas"]["BlankEnum"];
+            grades?: number[];
             readonly pdf_books_count: number;
             /** Format: date-time */
             readonly created_at: string;
@@ -2139,6 +2142,7 @@ export interface components {
             icon?: string;
             order?: number;
             group?: components["schemas"]["GroupEnum"] | components["schemas"]["BlankEnum"];
+            grades?: number[];
         };
         SupportCreateRequest: {
             /** @default  */
@@ -2936,6 +2940,8 @@ export interface operations {
     admin_subjects_list: {
         parameters: {
             query?: {
+                /** @description Sinf (1–11) */
+                grade?: number;
                 /** @description Which field to use when ordering the results. */
                 ordering?: string;
                 /** @description A page number within the paginated result set. */

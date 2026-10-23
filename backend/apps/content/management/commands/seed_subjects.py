@@ -127,11 +127,47 @@ GROUPS: dict[str, str] = {
 }
 
 
+def _span(first: int, last: int) -> list[int]:
+    return list(range(first, last + 1))
+
+
+# Fan o'tiladigan sinflar (`Subject.grades`). Admin keyin `/admin/fanlar` da o'zgartiradi.
+GRADES: dict[str, list[int]] = {
+    "matematika": _span(1, 6),
+    "algebra": _span(7, 11),
+    "geometriya": _span(7, 11),
+    "informatika": _span(5, 11),
+    "fizika": _span(7, 11),
+    "chizmachilik": _span(8, 9),
+    "kimyo": _span(7, 11),
+    "biologiya": _span(5, 11),
+    "geografiya": _span(5, 11),
+    "tabiiy-fan": _span(1, 4),
+    "ona-tili": _span(1, 11),
+    "adabiyot": _span(1, 11),
+    "ingliz-tili": _span(1, 11),
+    "rus-tili": _span(1, 11),
+    "tarix": _span(5, 11),
+    "tasviriy-san-at": _span(1, 7),
+    "musiqa": _span(1, 7),
+    "texnologiya": _span(1, 9),
+    "jismoniy-tarbiya": _span(1, 11),
+}
+
+
 class Command(BaseCommand):
     help = (
         "Asosiy maktab fanlarini qo'shadi (idempotent). Mavjud fan (slug bo'yicha) "
-        "o'zgartirilmaydi: admin tahrirlari saqlanadi."
+        "o'zgartirilmaydi: admin tahrirlari saqlanadi (sinflar ham). "
+        "--force: mavjud fanlarning sinflarini ro'yxatdagi qiymatga qaytaradi."
     )
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--force",
+            action="store_true",
+            help="Mavjud fanlarning sinflarini (grades) ro'yxatdagi qiymat bilan almashtiradi.",
+        )
 
     @transaction.atomic
     def handle(self, *args, **options):
@@ -144,10 +180,14 @@ class Command(BaseCommand):
                     "icon": meta["icon"],
                     "order": meta["order"],
                     "group": GROUPS.get(slug, ""),
+                    "grades": GRADES[slug],
                 },
             )
             created += was_created
         # Guruhi hali berilmagan mavjud fanlarga guruh qo'yiladi (admin tanlaganiga tegilmaydi).
         for slug, group in GROUPS.items():
             Subject.objects.filter(slug=slug, group="").update(group=group)
+        if options["force"]:
+            for slug, grades in GRADES.items():
+                Subject.objects.filter(slug=slug).update(grades=grades)
         self.stdout.write(f"fan: {created} yangi, {len(SUBJECTS) - created} mavjud")

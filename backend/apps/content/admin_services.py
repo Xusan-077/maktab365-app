@@ -42,6 +42,20 @@ class HasDependents(APIException):
     default_detail = "Cannot delete: other records depend on this one."
 
 
+class GradeHasBooks(APIException):
+    """Fan sinfdan olib tashlanmoqda, lekin shu sinfda uning kitoblari bor."""
+
+    status_code = status.HTTP_409_CONFLICT
+    default_code = "grade_has_books"
+    default_detail = "The subject has books in the grades being removed."
+
+    def __init__(self, conflicts: dict[int, int]):
+        grades = ", ".join(f"{grade} ({count})" for grade, count in sorted(conflicts.items()))
+        super().__init__(f"{self.default_detail} Grades (books): {grades}.")
+        # `details.conflicts`: "sinf:soni" — frontend xabarni i18n bilan tuzadi.
+        self.details = {"conflicts": [f"{g}:{n}" for g, n in sorted(conflicts.items())]}
+
+
 EDITORS = ("editor", "admin")
 
 

@@ -22,16 +22,20 @@ vi.mock("@/hooks/useToast", () => ({ useToast: () => ({ toast: vi.fn() }) }));
 import { SubjectsView } from "./SubjectsView";
 
 const t = uz.admin.subjects;
-const subject = (slug: string, name: string, books: number, order: number) =>
+const subject = (slug: string, name: string, books: number, order: number, grades?: number[]) =>
   ({
     id: `id-${slug}`,
     slug,
     title: { uz: name },
     order,
     group: "exact",
+    grades: grades ?? [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
     pdf_books_count: books,
   }) as AdminSubject;
-const SUBJECTS = [subject("algebra", "Algebra", 2, 2), subject("fizika", "Fizika", 0, 9)];
+const SUBJECTS = [
+  subject("algebra", "Algebra", 2, 2, [7, 8, 9, 10, 11]),
+  subject("fizika", "Fizika", 0, 9),
+];
 
 function setup(role = "admin") {
   identity.role = role;
@@ -93,6 +97,7 @@ describe("SubjectsView", () => {
         title: { uz: "Ona tili" },
         order: 10,
         group: "",
+        grades: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
       }),
     );
   });
@@ -124,8 +129,58 @@ describe("SubjectsView", () => {
       expect(api.updateSubject).toHaveBeenCalledWith("id-fizika", {
         title: { uz: "Fizika 2" },
         group: "exact",
+        grades: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
       }),
     );
+  });
+
+  it("sinflar ixcham ko'rsatiladi va sinf bo'yicha filtrlanadi", async () => {
+    setup();
+    await screen.findByTestId("subjects-table");
+    const cells = screen.getAllByTestId("subject-grades").map((c) => c.textContent);
+    expect(cells).toEqual(["7–11", "1–11"]);
+  });
+
+  it("sinflar tezkor tugmalar bilan tanlanadi, bo'sh bo'lsa saqlash o'chiq", async () => {
+    setup();
+    await screen.findByTestId("subjects-table");
+    fireEvent.click(screen.getByRole("button", { name: label(t.editLabel, "Algebra") }));
+    await screen.findByTestId("grade-picker");
+    fireEvent.click(screen.getByTestId("grades-preset-clear"));
+    const save = screen.getByRole("button", { name: uz.admin.common.save }) as HTMLButtonElement;
+    expect(save.disabled).toBe(true);
+    expect(screen.getByText(t.gradesRequired)).toBeTruthy();
+    fireEvent.click(screen.getByTestId("grades-preset-primary"));
+    fireEvent.click(screen.getByTestId("grade-chip-7"));
+    expect(screen.getByText(t.gradesSelected.replace("{value}", "1–4, 7"))).toBeTruthy();
+    fireEvent.change(screen.getByTestId("grades-range"), { target: { value: "5-11" } });
+    fireEvent.click(screen.getByTestId("grades-range-apply"));
+    expect(screen.getByText(t.gradesSelected.replace("{value}", "5–11"))).toBeTruthy();
+    expect(save.disabled).toBe(false);
+    fireEvent.click(save);
+    await waitFor(() =>
+      expect(api.updateSubject).toHaveBeenCalledWith(
+        "id-algebra",
+        expect.objectContaining({ grades: [5, 6, 7, 8, 9, 10, 11] }),
+      ),
+    );
+  });
+
+  it("sinf olib tashlash 409 bo'lsa sinf va kitoblar soni bilan xabar chiqadi", async () => {
+    setup();
+    api.updateSubject.mockRejectedValue(
+      new ApiError("x", 409, { code: "grade_has_books", details: { conflicts: ["7:3"] } }),
+    );
+    await screen.findByTestId("subjects-table");
+    fireEvent.click(screen.getByRole("button", { name: label(t.editLabel, "Algebra") }));
+    await screen.findByTestId("grade-picker");
+    fireEvent.click(screen.getByTestId("grade-chip-7"));
+    fireEvent.click(screen.getByRole("button", { name: uz.admin.common.save }));
+    expect(
+      await screen.findByText(
+        uz.admin.errors.gradeHasBooks.replace("{grade}", "7").replace("{count}", "3"),
+      ),
+    ).toBeTruthy();
   });
 
   it("kitobi bor fanni o'chirib bo'lmaydi, kitobsizini tasdiqlagach o'chiradi", async () => {

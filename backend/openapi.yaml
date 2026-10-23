@@ -653,6 +653,11 @@ paths:
       description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
         — faqat admin.'
       parameters:
+      - in: query
+        name: grade
+        schema:
+          type: integer
+        description: Sinf (1–11)
       - name: ordering
         required: false
         in: query
@@ -3553,6 +3558,10 @@ components:
           oneOf:
           - $ref: '#/components/schemas/GroupEnum'
           - $ref: '#/components/schemas/BlankEnum'
+        grades:
+          type: array
+          items:
+            type: integer
     PatchedUserAdminUpdateRequest:
       type: object
       properties:
@@ -4368,10 +4377,15 @@ components:
           type: integer
         group:
           type: string
+        grades:
+          type: array
+          items:
+            type: integer
         books_count:
           type: integer
       required:
       - books_count
+      - grades
       - group
       - icon
       - order
@@ -4403,6 +4417,10 @@ components:
           oneOf:
           - $ref: '#/components/schemas/GroupEnum'
           - $ref: '#/components/schemas/BlankEnum'
+        grades:
+          type: array
+          items:
+            type: integer
         pdf_books_count:
           type: integer
           readOnly: true
@@ -4444,6 +4462,10 @@ components:
           oneOf:
           - $ref: '#/components/schemas/GroupEnum'
           - $ref: '#/components/schemas/BlankEnum'
+        grades:
+          type: array
+          items:
+            type: integer
       required:
       - slug
       - title

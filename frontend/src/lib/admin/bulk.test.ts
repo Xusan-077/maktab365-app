@@ -91,3 +91,14 @@ describe("dedupeFiles", () => {
     expect(kept.map((f) => f.name)).toEqual(["b.pdf"]);
   });
 });
+
+describe("guessSubject with grades", () => {
+  it("skips subjects not taught in the guessed grade", () => {
+    const subjects = [
+      { slug: "fizika", title: { uz: "Fizika" }, grades: [7, 8, 9, 10, 11] },
+      { slug: "algebra", title: { uz: "Algebra" }, grades: [7, 8, 9, 10, 11] },
+    ];
+    expect(guessSubject("fizika.pdf", subjects, 5)).toBeNull();
+    expect(guessSubject("fizika.pdf", subjects, 8)).toBe("fizika");
+  });
+});

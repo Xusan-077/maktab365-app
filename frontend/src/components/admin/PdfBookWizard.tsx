@@ -11,10 +11,11 @@ import { useToast } from "@/hooks/useToast";
 import { getAdminApi } from "@/lib/admin/api";
 import type { PdfFileProblem } from "@/lib/admin/pdf-file";
 import { ADMIN_ROOT_KEY, adminQueries } from "@/lib/admin/queries";
-import { adminPdfBookPath } from "@/lib/admin/routes";
+import { subjectHasGrade } from "@/lib/admin/grades";
+import { ADMIN_ROUTES, adminPdfBookPath } from "@/lib/admin/routes";
 import type { Locale } from "@/lib/i18n/config";
 import { getLocalized } from "@/lib/i18n/localized";
-import { useRouter } from "@/lib/i18n/navigation";
+import { Link, useRouter } from "@/lib/i18n/navigation";
 import { cn } from "@/lib/utils/cn";
 import { createPdfBookSchema } from "@/lib/validation/admin";
 import { GRADES } from "@/types/catalog";
@@ -219,10 +220,10 @@ export function PdfBookWizard() {
     value: String(g),
     label: t("gradeOption", { grade: g }),
   }));
-  const subjectOptions = (subjects ?? []).map((s) => ({
-    value: s.slug,
-    label: getLocalized(s.title, locale),
-  }));
+  // Faqat tanlangan sinfda o'tiladigan fanlar.
+  const subjectOptions = (subjects ?? [])
+    .filter((s) => subjectHasGrade(s, Number(grade)))
+    .map((s) => ({ value: s.slug, label: getLocalized(s.title, locale) }));
 
   return (
     <form
@@ -247,7 +248,11 @@ export function PdfBookWizard() {
             options={gradeOptions}
             value={grade}
             testId="pdf-grade"
-            onSelect={(value) => setValue("grade", value, { shouldValidate: true })}
+            onSelect={(value) => {
+              // Sinf almashsa, eski fan yangi sinfga mos kelmasligi mumkin.
+              if (value !== grade) setValue("subject", "");
+              setValue("grade", value, { shouldValidate: true });
+            }}
           />
           {errors.grade && (
             <p role="alert" className="text-danger text-sm">
@@ -267,13 +272,25 @@ export function PdfBookWizard() {
           <h2 id="pdf-step-subject" className="text-lg font-semibold">
             {t("subjectHeading", { grade })}
           </h2>
-          <ChoiceGrid
-            label={t("subjectHeading", { grade })}
-            options={subjectOptions}
-            value={subject}
-            testId="pdf-subject"
-            onSelect={(value) => setValue("subject", value, { shouldValidate: true })}
-          />
+          {subjects && subjectOptions.length === 0 ? (
+            <div className="flex flex-col items-start gap-2" data-testid="pdf-no-subjects">
+              <p className="text-muted text-sm">{t("noSubjects")}</p>
+              <Link
+                href={ADMIN_ROUTES.subjects}
+                className="text-link text-sm font-medium underline-offset-4 hover:underline"
+              >
+                {t("manageSubjects")}
+              </Link>
+            </div>
+          ) : (
+            <ChoiceGrid
+              label={t("subjectHeading", { grade })}
+              options={subjectOptions}
+              value={subject}
+              testId="pdf-subject"
+              onSelect={(value) => setValue("subject", value, { shouldValidate: true })}
+            />
+          )}
           <div className="flex gap-2">
             <Button variant="secondary" onClick={() => setStep("grade")}>
               {t("back")}

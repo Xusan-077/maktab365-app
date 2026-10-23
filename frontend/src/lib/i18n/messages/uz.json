@@ -830,7 +830,8 @@
         "self_action_forbidden": "O'zingizni o'chira, bloklay yoki rolingizni tushira olmaysiz.",
         "last_admin": "Oxirgi faol adminni o'chirib, bloklab yoki rolini tushirib bo'lmaydi.",
         "role_forbidden": "Bu rolni berishga ruxsatingiz yo'q.",
-        "storage_error": "Fayllar saqlashdan o'chirilmadi, kitob saqlanib qoldi. Birozdan keyin qayta urinib ko'ring."
+        "storage_error": "Fayllar saqlashdan o'chirilmadi, kitob saqlanib qoldi. Birozdan keyin qayta urinib ko'ring.",
+        "grade_has_books": "Fanning kitobi bor sinfni olib tashlab bo'lmaydi. Avval kitoblarni boshqa fanga ko'chiring yoki o'chiring."
       },
       "fields": {
         "invalid": "Noto'g'ri qiymat",
@@ -848,8 +849,13 @@
         "chapter_page_invalid": "Mundarijada bet raqami noto'g'ri",
         "chapter_title_required": "Mundarijada sarlavhasiz qator bor",
         "chapter_title_too_long": "Mundarijada sarlavha juda uzun",
-        "chapters_too_many": "Mundarijada qatorlar juda ko'p (500 tagacha)"
-      }
+        "chapters_too_many": "Mundarijada qatorlar juda ko'p (500 tagacha)",
+        "grades_required": "Kamida bitta sinfni tanlang",
+        "grades_invalid": "Sinflar 1 dan 11 gacha bo'lishi kerak",
+        "grades_duplicate": "Sinflar takrorlanmasin",
+        "subject_not_in_grade": "Bu fan tanlangan sinfda o'tilmaydi"
+      },
+      "gradeHasBooks": "Bu fanning {grade}-sinfda {count} ta kitobi bor, avval kitoblarni boshqa fanga ko'chiring yoki o'chiring."
     },
     "pdfUpload": {
       "none": "PDF tanlanmagan",
@@ -880,7 +886,8 @@
         "name": "Nomi",
         "slug": "Slug",
         "books": "Kitoblar",
-        "actions": "Amallar"
+        "actions": "Amallar",
+        "grades": "Sinflar"
       },
       "createTitle": "Yangi fan",
       "editTitle": "Fanni tahrirlash",
@@ -896,7 +903,22 @@
       "deleted": "Fan o'chirildi",
       "group": "Fan guruhi",
       "groupHint": "Sinf sahifasidagi tablar shu guruh bo'yicha tuziladi.",
-      "groupNone": "Guruhsiz"
+      "groupNone": "Guruhsiz",
+      "gradesLabel": "Qaysi sinflar",
+      "gradesHint": "Fan o'tiladigan sinflarni tanlang. Kitob faqat shu sinflardagi fanga qo'shiladi.",
+      "gradesRequired": "Kamida bitta sinfni tanlang",
+      "gradesSelected": "Tanlangan: {value}",
+      "presetAll": "Hammasi (1–11)",
+      "presetPrimary": "Boshlang'ich (1–4)",
+      "presetMiddle": "O'rta (5–9)",
+      "presetHigh": "Yuqori (10–11)",
+      "presetClear": "Tozalash",
+      "rangeLabel": "Oraliq (masalan, 5–11)",
+      "rangeApply": "Qo'llash",
+      "gradeChip": "{grade}-sinf",
+      "gradeFilter": "Sinf bo'yicha",
+      "allGrades": "Barcha sinflar",
+      "emptyFiltered": "Bu sinfda fan yo'q."
     },
     "pdfBooks": {
       "title": "Kitoblar (PDF)",
@@ -948,7 +970,10 @@
       "coverFailed": "Muqova avtomatik yaratilmadi. Keyinroq faylni qayta yuklab ko'ring.",
       "detailsHeading": "Tavsif va mundarija",
       "detailsHint": "Ixtiyoriy: bu qadamni o'tkazib yuborib, keyinroq kitobni tahrirlash sahifasida to'ldirishingiz mumkin.",
-      "skip": "O'tkazib yuborish"
+      "skip": "O'tkazib yuborish",
+      "noSubjects": "Bu sinf uchun fan yo'q. Fanlar sahifasida sinfni qo'shing.",
+      "manageSubjects": "Fanlar sahifasiga o'tish",
+      "subjectReset": "{grade}-sinfda bu fan o'tilmaydi: fan tanlovi tozalandi. Yangi fanni tanlang."
     },
     "pdfEdit": {
       "editTitle": "PDF kitobni tahrirlash",

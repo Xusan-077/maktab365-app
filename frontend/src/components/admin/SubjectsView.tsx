@@ -8,14 +8,17 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { cn } from "@/lib/utils/cn";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { Select } from "@/components/ui/Select";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useToast } from "@/hooks/useToast";
 import { getAdminApi } from "@/lib/admin/api";
 import { canDelete } from "@/lib/admin/permissions";
+import { formatGrades, subjectHasGrade } from "@/lib/admin/grades";
 import { ADMIN_ROOT_KEY, adminQueries } from "@/lib/admin/queries";
 import type { AdminSubject } from "@/lib/admin/types";
 import type { Locale } from "@/lib/i18n/config";
 import { getLocalized } from "@/lib/i18n/localized";
+import { GRADES } from "@/types/catalog";
 import { useAdminIdentity } from "./AdminRoleProvider";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { QueryError } from "./QueryError";
@@ -36,6 +39,10 @@ export function SubjectsView() {
   const { data, error, isPending, refetch } = useQuery(adminQueries.subjects());
   const [editing, setEditing] = useState<Editing>(null);
   const [deleting, setDeleting] = useState<AdminSubject | null>(null);
+  const [gradeFilter, setGradeFilter] = useState("");
+  const rows = (data ?? []).filter(
+    (subject) => !gradeFilter || subjectHasGrade(subject, Number(gradeFilter)),
+  );
 
   const remove = useMutation({
     mutationFn: (subject: AdminSubject) => getAdminApi().deleteSubject(subject.id),
@@ -71,75 +78,101 @@ export function SubjectsView() {
           {t("empty")}
         </EmptyState>
       ) : (
-        <div className="border-border bg-surface overflow-x-auto rounded-xl border">
-          <table className="w-full text-sm sm:min-w-[32rem]" data-testid="subjects-table">
-            <caption className="sr-only">{t("title")}</caption>
-            <thead className="bg-subtle text-muted">
-              <tr>
-                {(["name", "slug", "books"] as const).map((column) => (
-                  <th
-                    key={column}
-                    scope="col"
-                    className={cn(
-                      "px-4 py-2.5 text-left font-medium",
-                      column === "slug" && "hidden sm:table-cell",
-                    )}
-                  >
-                    {t(`columns.${column}`)}
-                  </th>
-                ))}
-                <th scope="col" className="px-4 py-2.5 text-right font-medium">
-                  <span className="sr-only">{t("columns.actions")}</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-border divide-y">
-              {data.map((subject) => {
-                const name = getLocalized(subject.title, locale);
-                const hasBooks = subject.pdf_books_count > 0;
-                return (
-                  <tr key={subject.id} className="hover:bg-subtle/60">
-                    <td className="px-4 py-3 font-medium">{name}</td>
-                    <td className="text-muted hidden px-4 py-3 sm:table-cell">{subject.slug}</td>
-                    <td className="px-4 py-3 tabular-nums">{subject.pdf_books_count}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          aria-label={t("editLabel", { name })}
-                          onClick={() => setEditing({ kind: "edit", subject })}
-                        >
-                          <Pencil className="size-4" aria-hidden />
-                        </Button>
-                        {canDelete(role) && (
-                          <Button
-                            variant="ghost"
-                            aria-label={
-                              hasBooks
-                                ? t("hasBooks", { count: subject.pdf_books_count })
-                                : t("deleteLabel", { name })
-                            }
-                            title={
-                              hasBooks
-                                ? t("hasBooks", { count: subject.pdf_books_count })
-                                : undefined
-                            }
-                            disabled={hasBooks}
-                            onClick={() => {
-                              remove.reset();
-                              setDeleting(subject);
-                            }}
-                          >
-                            <Trash2 className="size-4" aria-hidden />
-                          </Button>
+        <div className="flex flex-col gap-3">
+          <div className="max-w-xs" data-testid="subjects-grade-filter">
+            <Select
+              label={t("gradeFilter")}
+              value={gradeFilter}
+              onChange={setGradeFilter}
+              searchable={false}
+              options={[
+                { value: "", label: t("allGrades") },
+                ...GRADES.map((grade) => ({
+                  value: String(grade),
+                  label: t("gradeChip", { grade }),
+                })),
+              ]}
+            />
+          </div>
+          {rows.length === 0 ? (
+            <EmptyState icon={Library}>{t("emptyFiltered")}</EmptyState>
+          ) : (
+            <div className="border-border bg-surface overflow-x-auto rounded-xl border">
+              <table className="w-full text-sm sm:min-w-[32rem]" data-testid="subjects-table">
+                <caption className="sr-only">{t("title")}</caption>
+                <thead className="bg-subtle text-muted">
+                  <tr>
+                    {(["name", "slug", "grades", "books"] as const).map((column) => (
+                      <th
+                        key={column}
+                        scope="col"
+                        className={cn(
+                          "px-4 py-2.5 text-left font-medium",
+                          column === "slug" && "hidden sm:table-cell",
                         )}
-                      </div>
-                    </td>
+                      >
+                        {t(`columns.${column}`)}
+                      </th>
+                    ))}
+                    <th scope="col" className="px-4 py-2.5 text-right font-medium">
+                      <span className="sr-only">{t("columns.actions")}</span>
+                    </th>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                </thead>
+                <tbody className="divide-border divide-y">
+                  {rows.map((subject) => {
+                    const name = getLocalized(subject.title, locale);
+                    const hasBooks = subject.pdf_books_count > 0;
+                    return (
+                      <tr key={subject.id} className="hover:bg-subtle/60">
+                        <td className="px-4 py-3 font-medium">{name}</td>
+                        <td className="text-muted hidden px-4 py-3 sm:table-cell">
+                          {subject.slug}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap" data-testid="subject-grades">
+                          {formatGrades(subject.grades ?? [])}
+                        </td>
+                        <td className="px-4 py-3 tabular-nums">{subject.pdf_books_count}</td>
+                        <td className="px-4 py-3">
+                          <div className="flex justify-end gap-1">
+                            <Button
+                              variant="ghost"
+                              aria-label={t("editLabel", { name })}
+                              onClick={() => setEditing({ kind: "edit", subject })}
+                            >
+                              <Pencil className="size-4" aria-hidden />
+                            </Button>
+                            {canDelete(role) && (
+                              <Button
+                                variant="ghost"
+                                aria-label={
+                                  hasBooks
+                                    ? t("hasBooks", { count: subject.pdf_books_count })
+                                    : t("deleteLabel", { name })
+                                }
+                                title={
+                                  hasBooks
+                                    ? t("hasBooks", { count: subject.pdf_books_count })
+                                    : undefined
+                                }
+                                disabled={hasBooks}
+                                onClick={() => {
+                                  remove.reset();
+                                  setDeleting(subject);
+                                }}
+                              >
+                                <Trash2 className="size-4" aria-hidden />
+                              </Button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
 

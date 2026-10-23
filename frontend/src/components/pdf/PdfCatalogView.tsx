@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { FileText, Search, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -60,6 +60,18 @@ export function PdfCatalogView() {
     const query = serializePdfFilters(next);
     router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
   };
+
+  // Sinf almashganda tanlangan fan shu sinfda bo'lmasa — "Barcha fanlar"ga qaytadi.
+  const subjectList = subjects.data;
+  const subjectGone =
+    Boolean(filters.grade && filters.subject) &&
+    !subjects.isFetching &&
+    subjectList !== undefined &&
+    !subjectList.some((subject) => subject.slug === filters.subject);
+  useEffect(() => {
+    if (subjectGone) navigate({ ...filters, subject: undefined, page: undefined });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subjectGone]);
 
   const [search, setSearch] = useDebouncedSearch(filters.q, (q) =>
     navigate({ ...filters, q, page: undefined }),
