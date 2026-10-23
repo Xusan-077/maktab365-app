@@ -1,6 +1,7 @@
 export const ROUTES = {
   home: "/",
   textbooks: "/darsliklar",
+  subjects: "/fanlar",
   about: "/loyiha-haqida",
   login: "/kirish",
   register: "/royxatdan-otish",

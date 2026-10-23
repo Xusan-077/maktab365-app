@@ -8,9 +8,9 @@ import { useSearchParams } from "next/navigation";
 import { Pagination } from "@/components/admin/Pagination";
 import { useDebouncedSearch } from "@/components/admin/useDebouncedSearch";
 import { Button } from "@/components/ui/Button";
-import { Chip } from "@/components/ui/Chip";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { listItem, m } from "@/components/ui/motion";
+import { Select, type SelectOption } from "@/components/ui/Select";
 import { isBookRead, usePdfProgressMap } from "@/hooks/usePdfProgressMap";
 import type { Locale } from "@/lib/i18n/config";
 import { getLocalized } from "@/lib/i18n/localized";
@@ -76,6 +76,17 @@ export function PdfCatalogView() {
   const [search, setSearch] = useDebouncedSearch(filters.q, (q) =>
     navigate({ ...filters, q, page: undefined }),
   );
+  const gradeOptions: SelectOption[] = [
+    { value: "", label: t("allGrades") },
+    ...GRADES.map((grade) => ({ value: String(grade), label: t("gradeLabel", { grade }) })),
+  ];
+  const subjectOptions: SelectOption[] = [
+    { value: "", label: t("allSubjects") },
+    ...(subjectList ?? []).map((subject) => ({
+      value: subject.slug,
+      label: getLocalized(subject.title, locale),
+    })),
+  ];
   const filtered = Boolean(filters.grade || filters.subject || filters.q);
   const clearButton = (
     <Button variant="ghost" size="sm" data-testid="pdf-clear" onClick={() => navigate({})}>
@@ -102,59 +113,26 @@ export function PdfCatalogView() {
         />
       </div>
 
-      <section aria-labelledby="pdf-grades" className="flex flex-col gap-2">
-        <h2 id="pdf-grades" className="text-muted text-sm font-medium">
-          {t("gradeFilter")}
-        </h2>
-        <div className="flex flex-wrap gap-2">
-          <Chip
-            selected={!filters.grade}
-            data-testid="pdf-grade-all"
-            onClick={() => navigate({ q: filters.q })}
-          >
-            {t("allGrades")}
-          </Chip>
-          {GRADES.map((grade) => (
-            <Chip
-              key={grade}
-              selected={filters.grade === grade}
-              data-testid={`pdf-grade-${grade}`}
-              onClick={() => router.push(gradePath(grade))}
-            >
-              {t("gradeLabel", { grade })}
-            </Chip>
-          ))}
-        </div>
-      </section>
-
-      {(subjects.data?.length ?? 0) > 0 && (
-        <section aria-labelledby="pdf-subjects" className="flex flex-col gap-2">
-          <h2 id="pdf-subjects" className="text-muted text-sm font-medium">
-            {t("subjectFilter")}
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            <Chip
-              selected={!filters.subject}
-              data-testid="pdf-subject-all"
-              onClick={() => navigate({ grade: filters.grade, q: filters.q })}
-            >
-              {t("allSubjects")}
-            </Chip>
-            {subjects.data?.map((subject) => (
-              <Chip
-                key={subject.slug}
-                selected={filters.subject === subject.slug}
-                data-testid={`pdf-subject-${subject.slug}`}
-                onClick={() =>
-                  navigate({ grade: filters.grade, subject: subject.slug, q: filters.q })
-                }
-              >
-                {getLocalized(subject.title, locale)}
-              </Chip>
-            ))}
-          </div>
-        </section>
-      )}
+      <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
+        <Select
+          label={t("gradeFilter")}
+          value={filters.grade ? String(filters.grade) : ""}
+          options={gradeOptions}
+          searchable={false}
+          onChange={(value) =>
+            value ? router.push(gradePath(Number(value))) : navigate({ q: filters.q })
+          }
+        />
+        <Select
+          label={t("subjectFilter")}
+          value={filters.subject ?? ""}
+          options={subjectOptions}
+          disabled={subjectOptions.length <= 1}
+          onChange={(value) =>
+            navigate({ grade: filters.grade, subject: value || undefined, q: filters.q })
+          }
+        />
+      </div>
 
       {/* Ro'yxat balandligi zaxiralanadi: yuklanganda pastdagi kontent (footer) sakramasin. */}
       <div className="min-h-[34rem]">

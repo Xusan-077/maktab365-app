@@ -152,8 +152,10 @@ test.describe.serial("PDF darsliklar", () => {
     await register(page, studentEmail);
 
     await page.goto("/uz/darsliklar");
-    await page.getByTestId("pdf-grade-9").click();
-    await page.getByTestId("pdf-subject-algebra").click();
+    await page.getByRole("combobox", { name: "Sinf" }).click();
+    await page.getByRole("option", { name: "9-sinf" }).click();
+    await page.getByRole("combobox", { name: "Fan" }).click();
+    await page.getByRole("option", { name: "Algebra" }).click();
     const card = page.getByTestId("pdf-book-card").filter({ hasText: TITLE });
     await expect(card).toContainText(`${PAGES} bet`);
     await card.click();

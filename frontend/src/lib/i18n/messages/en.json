@@ -95,6 +95,16 @@
       "title": "Choose a grade and subject",
       "hint": "Find a textbook and start reading."
     },
+    "subjects": {
+      "title": "Subjects",
+      "hint": "Pick a subject to open its textbooks.",
+      "allGrades": "All grades",
+      "gradeLabel": "Grade {grade}",
+      "meta": "Grades {grades} · {count} textbooks",
+      "openGrade": "{subject}, grade {grade} textbooks",
+      "empty": "No subjects for this grade.",
+      "error": "Couldn't load subjects."
+    },
     "recent": {
       "title": "Pick up where you left off",
       "resumeLabel": "Continue reading",
@@ -121,6 +131,7 @@
   },
   "nav": {
     "textbooks": "Textbooks",
+    "subjects": "Subjects",
     "about": "About",
     "login": "Log in",
     "search": "Search",
@@ -1529,5 +1540,11 @@
     "meta": "Grade {grade} · {size}",
     "clearAll": "Remove all",
     "unsupported": "This browser does not support offline saving."
+  },
+  "subjectsPage": {
+    "title": "Subjects",
+    "description": "Pick a subject and open its textbooks by grade.",
+    "metaTitle": "Subjects",
+    "metaDescription": "Grade 1–11 subjects: find textbooks for each subject and read them online. Free."
   }
 }

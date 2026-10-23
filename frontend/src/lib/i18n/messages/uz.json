@@ -95,6 +95,16 @@
       "title": "Sinf va fanni tanlang",
       "hint": "Darslikni toping va o'qishni boshlang."
     },
+    "subjects": {
+      "title": "Fanlar",
+      "hint": "Fanni tanlang — shu fandagi darsliklar ochiladi.",
+      "allGrades": "Barcha sinflar",
+      "gradeLabel": "{grade}-sinf",
+      "meta": "{grades}-sinflar · {count} ta darslik",
+      "openGrade": "{subject}, {grade}-sinf darsliklari",
+      "empty": "Bu sinf uchun fan topilmadi.",
+      "error": "Fanlarni yuklab bo'lmadi."
+    },
     "recent": {
       "title": "Davom eting",
       "resumeLabel": "Davom ettirish",
@@ -121,6 +131,7 @@
   },
   "nav": {
     "textbooks": "Darsliklar",
+    "subjects": "Fanlar",
     "about": "Loyiha haqida",
     "login": "Kirish",
     "search": "Qidiruv",
@@ -1529,5 +1540,11 @@
     "meta": "{grade}-sinf · {size}",
     "clearAll": "Hammasini o'chirish",
     "unsupported": "Bu brauzer oflayn saqlashni qo'llab-quvvatlamaydi."
+  },
+  "subjectsPage": {
+    "title": "Fanlar",
+    "description": "Fanni tanlang va shu fandagi darsliklarni sinflar bo'yicha oching.",
+    "metaTitle": "Fanlar",
+    "metaDescription": "1–11-sinf fanlari: har bir fan bo'yicha darsliklarni toping va onlayn o'qing. Bepul."
   }
 }

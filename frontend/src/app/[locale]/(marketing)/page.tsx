@@ -9,6 +9,7 @@ import { CatalogSection } from "@/components/home/CatalogSection";
 import { HeroSection } from "@/components/home/HeroSection";
 import { HowItWorks } from "@/components/home/HowItWorks";
 import { RecentSection } from "@/components/home/RecentSection";
+import { SubjectsSection } from "@/components/home/SubjectsSection";
 import { SplashScreen } from "@/components/layout/SplashScreen";
 import { routing } from "@/lib/i18n/routing";
 import { getAlternates } from "@/lib/i18n/seo";
@@ -30,6 +31,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
       <SplashScreen />
       <HeroSection />
       <RecentSection />
+      <SubjectsSection />
       <CatalogSection />
       <AudienceSection />
       <HowItWorks />

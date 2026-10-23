@@ -26,6 +26,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const entries: Entry[] = [
     { path: ROUTES.home, priority: 1 },
     { path: ROUTES.textbooks, priority: 0.9 },
+    { path: ROUTES.subjects, priority: 0.8 },
     { path: ROUTES.about, priority: 0.3 },
     { path: ROUTES.help, priority: 0.3 },
     ...GRADES.map((grade) => ({ path: gradePath(grade), priority: 0.8 })),

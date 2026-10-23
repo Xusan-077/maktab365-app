@@ -22,7 +22,6 @@ const MOVED: { source: string; destination: string }[] = [
     source: `/${LOCALE}/darsliklar/:book((?![0-9]{1,2}/)[^/]+)/:topic`,
     destination: "/:locale/darsliklar",
   },
-  { source: `/${LOCALE}/fanlar`, destination: "/:locale/darsliklar" },
   { source: `/${LOCALE}/fanlar/:subject`, destination: "/:locale/darsliklar?subject=:subject" },
   // Panel ichidagi eski bo'limlar
   { source: `/${LOCALE}/kabinet/darsliklar/:path*`, destination: "/:locale/darsliklar" },
