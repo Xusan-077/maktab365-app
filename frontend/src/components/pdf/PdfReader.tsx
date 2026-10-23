@@ -28,6 +28,7 @@ import { BookCover } from "./BookCover";
 import { PdfBookDescription } from "./PdfBookDescription";
 import { RecordRecentBook } from "./RecordRecentBook";
 import { PdfBookmarkButton } from "./PdfBookmarkButton";
+import { PdfFindDialog } from "./PdfFindDialog";
 import { PdfPageCanvas } from "./PdfPageCanvas";
 import { PdfReaderControls } from "./PdfReaderControls";
 import { ReaderShortcutsDialog } from "./ReaderShortcutsDialog";
@@ -60,6 +61,7 @@ export function PdfReader({ bookId, backHref }: { bookId: string; backHref?: str
   const t = useTranslations("pdfBooks.reader");
   const tt = useTranslations("pdfBooks.toc");
   const tc = useTranslations("pdfBooks.card");
+  const tf = useTranslations("pdfBooks.find");
   const locale = useLocale() as Locale;
   const router = useRouter();
   const pathname = usePathname();
@@ -78,6 +80,8 @@ export function PdfReader({ bookId, backHref }: { bookId: string; backHref?: str
   const toggleFit = useReaderPrefsStore((state) => state.toggleFit);
   const [zoom, setZoom] = useState<ReaderZoom>(1);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [findOpen, setFindOpen] = useState(false);
+  const findTerm = (searchParams.get("find") ?? "").trim().slice(0, 80);
   const fullscreen = useFullscreen(stageRef);
   const toggleFullscreen = fullscreen.toggle;
 
@@ -161,6 +165,13 @@ export function PdfReader({ bookId, backHref }: { bookId: string; backHref?: str
   useEffect(() => {
     if (page === null) return;
     const onKey = (event: KeyboardEvent) => {
+      // Ctrl/⌘+F: sahifa canvas bo'lgani uchun brauzer qidiruvi foydasiz — kitob ichida qidirish ochiladi.
+      if ((event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === "f") {
+        if (window.document.querySelector("dialog[open]")) return;
+        event.preventDefault();
+        setFindOpen(true);
+        return;
+      }
       if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
       if (isTypingTarget(event.target)) return;
       if (event.key === "ArrowLeft" && page > 1) {
@@ -325,8 +336,25 @@ export function PdfReader({ bookId, backHref }: { bookId: string; backHref?: str
             onZoom={() => setZoom(nextZoom)}
             onFullscreen={toggleFullscreen}
             onShortcuts={() => setShortcutsOpen(true)}
+            onSearch={document.doc ? () => setFindOpen(true) : undefined}
           />
         </div>
+
+        {findTerm && (
+          <div
+            className="flex items-center justify-center gap-2 text-sm"
+            data-testid="pdf-find-chip"
+          >
+            <span className="text-muted">{tf("highlighted", { term: findTerm })}</span>
+            <button
+              type="button"
+              onClick={() => replaceQuery({ find: null })}
+              className="text-link min-h-11 underline underline-offset-4"
+            >
+              {tf("clear")}
+            </button>
+          </div>
+        )}
 
         <div
           className={cn(
@@ -374,6 +402,7 @@ export function PdfReader({ bookId, backHref }: { bookId: string; backHref?: str
                   pageNumber={page}
                   label={t("position", { page, total })}
                   fit={fit === "page" && zoom === 1 ? "contain" : "width"}
+                  highlight={findTerm || undefined}
                   onRendered={() => (reloads.current = 0)}
                   onError={onRenderError}
                 />
@@ -387,6 +416,17 @@ export function PdfReader({ bookId, backHref }: { bookId: string; backHref?: str
         </div>
       </div>
 
+      {findOpen && document.doc && (
+        <PdfFindDialog
+          doc={document.doc}
+          initialTerm={findTerm}
+          onOpenChange={setFindOpen}
+          onPick={(pickedPage, term) => {
+            setFindOpen(false);
+            replaceQuery({ page: pickedPage, find: term });
+          }}
+        />
+      )}
       {shortcutsOpen && <ReaderShortcutsDialog open onOpenChange={setShortcutsOpen} />}
 
       {chapters.length > 0 && page !== null && (

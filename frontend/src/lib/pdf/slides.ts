@@ -27,6 +27,8 @@ export interface ParamsPatch {
   page?: number | null;
   slides?: string | null;
   slide?: number | null;
+  /** Kitob ichida qidirilgan so'z (sahifada belgilanadi). */
+  find?: string | null;
 }
 
 /** Joriy query'ni saqlab (boshqa parametrlar tegilmaydi) `page`/`slides`/`slide` ni almashtiradi. */

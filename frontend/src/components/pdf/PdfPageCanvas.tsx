@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useEffectEvent, useRef, useState } from "react";
+import { matchRects, type NormalizedRect, type PositionedItem } from "@/lib/pdf/find";
 import type { PDFDocumentProxy, PDFPageProxy, RenderTask } from "@/lib/pdf/pdfjs";
 
 /** Fizik piksellar zichligi chegarasi: 3x ekranlarda xotira/vaqtni tejaydi. */
@@ -23,6 +24,8 @@ export interface PdfPageCanvasProps {
    * (en va bo'yi bo'yicha, o'rtada): prezentatsiya uchun; konteynerning balandligi aniq bo'lishi kerak.
    */
   fit?: "width" | "contain";
+  /** Qidiruv so'zi: sahifadagi moslashuvlar sariq bilan belgilanadi (matn qatlami bor PDF). */
+  highlight?: string;
 }
 
 /** Faqat berilgan bitta sahifani konteynerga moslab chizadi; sahifa o'zgarsa oldingisi bekor qilinadi. */
@@ -33,12 +36,17 @@ export function PdfPageCanvas({
   onRendered,
   onError,
   fit = "width",
+  highlight,
 }: PdfPageCanvasProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
   const { width, height } = size;
   const contain = fit === "contain";
+  const [marks, setMarks] = useState<{ key: string; rects: NormalizedRect[] }>({
+    key: "",
+    rects: [],
+  });
   const notifyRendered = useEffectEvent(() => onRendered?.());
   const notifyError = useEffectEvent((error: unknown) => onError(error));
 
@@ -104,19 +112,81 @@ export function PdfPageCanvas({
     };
   }, [doc, pageNumber, width, height, contain]);
 
+  // Qidiruv belgilari: matn bo'laklari joylashuvidan (render'dan mustaqil, bekor qilinadigan).
+  const markKey = `${pageNumber}|${highlight ?? ""}|${width}|${height}|${contain}`;
+  useEffect(() => {
+    if (!highlight || !width || (contain && !height)) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const page = await doc.getPage(pageNumber);
+        const natural = page.getViewport({ scale: 1 });
+        const scale = contain
+          ? Math.min(width / natural.width, height / natural.height)
+          : width / natural.width;
+        const viewport = page.getViewport({ scale });
+        const content = await page.getTextContent();
+        const items = content.items.filter(
+          (item): item is typeof item & PositionedItem => "str" in item && "transform" in item,
+        );
+        const rects = matchRects(
+          items,
+          highlight,
+          ([x1, y1, x2, y2]) => {
+            // PDF → viewport: [a b c d e f] matritsasi (aylanish va y o'qining teskarisi hisobga olingan).
+            const [a, b, c, d, e, f] = viewport.transform;
+            return [
+              a * x1 + c * y1 + e,
+              b * x1 + d * y1 + f,
+              a * x2 + c * y2 + e,
+              b * x2 + d * y2 + f,
+            ];
+          },
+          viewport.width,
+          viewport.height,
+        );
+        if (!cancelled) setMarks({ key: markKey, rects });
+      } catch {
+        if (!cancelled) setMarks({ key: markKey, rects: [] });
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [doc, pageNumber, width, height, contain, highlight, markKey]);
+  const rects = highlight && marks.key === markKey ? marks.rects : [];
+
   return (
     <div
       ref={wrapRef}
       className={contain ? "flex size-full items-center justify-center" : "w-full"}
     >
-      <canvas
-        ref={canvasRef}
-        role="img"
-        aria-label={label}
-        data-testid="pdf-canvas"
-        data-page={pageNumber}
-        className="bg-surface mx-auto block max-w-full rounded-sm shadow-md"
-      />
+      <div className="relative mx-auto w-fit max-w-full">
+        <canvas
+          ref={canvasRef}
+          role="img"
+          aria-label={label}
+          data-testid="pdf-canvas"
+          data-page={pageNumber}
+          className="bg-surface mx-auto block max-w-full rounded-sm shadow-md"
+        />
+        {rects.length > 0 && (
+          <div aria-hidden data-testid="pdf-marks" className="pointer-events-none absolute inset-0">
+            {rects.map((rect, index) => (
+              <span
+                key={index}
+                className="pdf-mark absolute rounded-[2px]"
+                style={{
+                  left: `${rect.x * 100}%`,
+                  top: `${rect.y * 100}%`,
+                  width: `${rect.w * 100}%`,
+                  height: `${rect.h * 100}%`,
+                }}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

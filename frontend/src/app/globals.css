@@ -493,3 +493,14 @@ dialog[open]::backdrop {
 .pdf-stage:fullscreen {
   background-color: var(--background);
 }
+
+/* Kitob ichida qidiruv natijalari: PDF sahifasi ustidagi yarim shaffof belgi. */
+.pdf-mark {
+  background-color: rgb(250 204 21 / 0.45);
+  outline: 1px solid rgb(202 138 4 / 0.55);
+  mix-blend-mode: multiply;
+}
+.pdf-stage[data-tone="dark"] .pdf-mark {
+  mix-blend-mode: normal;
+  background-color: rgb(250 204 21 / 0.35);
+}

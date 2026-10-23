@@ -1318,6 +1318,22 @@
       "zoom": "Kattalashtirish 1× / 2× (sahifani ikki marta bosish ham)",
       "find": "Kitobdan qidirish",
       "help": "Shu ro'yxat"
+    },
+    "find": {
+      "title": "Kitob ichidan qidirish",
+      "label": "Kitobdan qidirish",
+      "placeholder": "So'z yoki ibora…",
+      "search": "Qidirish",
+      "hint": "Kamida 2 ta harf kiriting va Enter bosing. Barcha betlar ketma-ket tekshiriladi.",
+      "searching": "{page} / {total}-bet tekshirilmoqda…",
+      "found": "{count} ta betda topildi",
+      "none": "«{term}» topilmadi.",
+      "page": "{page}-bet",
+      "times": "{count} marta",
+      "scanned": "Bu kitob skaner qilingan rasm ko'rinishida (matn qatlami yo'q), shuning uchun ichidan qidirib bo'lmaydi.",
+      "limit": "Faqat dastlabki {count} ta bet ko'rsatildi. So'zni aniqroq kiriting.",
+      "highlighted": "«{term}» belgilangan",
+      "clear": "Belgilarni olib tashlash"
     }
   },
   "library": {

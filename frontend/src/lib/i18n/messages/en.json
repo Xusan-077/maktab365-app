@@ -1318,6 +1318,22 @@
       "zoom": "Zoom 1× / 2× (double-tap the page too)",
       "find": "Search in book",
       "help": "This list"
+    },
+    "find": {
+      "title": "Search in book",
+      "label": "Search in book",
+      "placeholder": "Word or phrase…",
+      "search": "Search",
+      "hint": "Type at least 2 letters and press Enter. Pages are checked one by one.",
+      "searching": "Checking page {page} of {total}…",
+      "found": "Found on {count} pages",
+      "none": "“{term}” was not found.",
+      "page": "Page {page}",
+      "times": "{count} times",
+      "scanned": "This book is made of scanned images (no text layer), so it cannot be searched.",
+      "limit": "Only the first {count} pages are shown. Try a more specific term.",
+      "highlighted": "Highlighted: “{term}”",
+      "clear": "Clear highlight"
     }
   },
   "library": {
