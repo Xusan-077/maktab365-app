@@ -818,7 +818,12 @@
         "password_too_short": "Parol juda qisqa (kamida 8 ta belgi)",
         "password_too_common": "Parol juda oddiy",
         "password_entirely_numeric": "Parol faqat raqamlardan iborat bo'lmasin",
-        "password_too_similar": "Parol emailga juda o'xshash"
+        "password_too_similar": "Parol emailga juda o'xshash",
+        "chapter_page_exceeds": "Mundarijada bet raqami PDF betlaridan oshib ketgan",
+        "chapter_page_invalid": "Mundarijada bet raqami noto'g'ri",
+        "chapter_title_required": "Mundarijada sarlavhasiz qator bor",
+        "chapter_title_too_long": "Mundarijada sarlavha juda uzun",
+        "chapters_too_many": "Mundarijada qatorlar juda ko'p (500 tagacha)"
       }
     },
     "pdfUpload": {
@@ -890,7 +895,8 @@
         "label": "Qadamlar",
         "grade": "Sinf",
         "subject": "Fan",
-        "file": "Nom va PDF"
+        "file": "Nom va PDF",
+        "details": "Tavsif va mundarija"
       },
       "gradeHeading": "Qaysi sinf uchun?",
       "subjectHeading": "{grade}-sinf: qaysi fan?",
@@ -905,7 +911,10 @@
       "start": "Yuklash va saqlash",
       "retry": "Qayta urinish",
       "created": "PDF kitob yuklandi. Ko'rinishi uchun «Nashr qilish» tugmasini bosing.",
-      "coverFailed": "Muqova avtomatik yaratilmadi. Keyinroq faylni qayta yuklab ko'ring."
+      "coverFailed": "Muqova avtomatik yaratilmadi. Keyinroq faylni qayta yuklab ko'ring.",
+      "detailsHeading": "Tavsif va mundarija",
+      "detailsHint": "Ixtiyoriy: bu qadamni o'tkazib yuborib, keyinroq kitobni tahrirlash sahifasida to'ldirishingiz mumkin.",
+      "skip": "O'tkazib yuborish"
     },
     "pdfEdit": {
       "editTitle": "PDF kitobni tahrirlash",
@@ -932,6 +941,42 @@
       "deleted": "PDF kitob o'chirildi",
       "deleteTitle": "PDF kitobni o'chirish",
       "deleteDescription": "«{title}» va uning fayli o'chiriladi. Buni qaytarib bo'lmaydi."
+    },
+    "details": {
+      "heading": "Tavsif va mundarija",
+      "description": "Tavsif",
+      "descriptionHint": "Kitob haqida qisqa ma'lumot (ixtiyoriy). {count} / {max}",
+      "saved": "Tavsif va mundarija saqlandi"
+    },
+    "toc": {
+      "title": "Mundarija",
+      "hint": "Har qatorga bo'lim sarlavhasi va PDF dagi bet raqamini yozing (ixtiyoriy).",
+      "count": "{count} ta qator",
+      "empty": "Mundarija bo'sh. Qator qo'shing yoki «Ommaviy kiritish» dan foydalaning.",
+      "add": "Bo'lim qo'shish",
+      "addChild": "Ichki bo'lim qo'shish",
+      "addChildFor": "{n}-bo'lim ichiga bo'lim qo'shish",
+      "titleLabel": "{n}-qator sarlavhasi",
+      "pageLabel": "{n}-qator beti",
+      "titlePlaceholder": "Sarlavha",
+      "pagePlaceholder": "Bet",
+      "moveUp": "{n}-qatorni yuqoriga surish",
+      "moveDown": "{n}-qatorni pastga surish",
+      "remove": "{n}-qatorni o'chirish",
+      "problems": {
+        "titleRequired": "Sarlavhani yozing",
+        "titleTooLong": "Sarlavha juda uzun (200 belgigacha)",
+        "pageInvalid": "Bet raqami 1 yoki undan katta butun son bo'lsin",
+        "pageExceeds": "Bet raqami PDF betlaridan oshmasin ({pages} bet)"
+      },
+      "bulk": {
+        "title": "Ommaviy kiritish",
+        "hint": "Har qatorga bittadan: «1. Kirish ........ 5». Ichki bo'lim uchun qatorni chekinish (bo'shliq yoki Tab) bilan yoki «1.2» raqamlash bilan yozing.",
+        "placeholder": "1. Kirish ........ 5\n  Maqsad va vazifalar ... 6\n2. Algebra ........ 12",
+        "apply": "Jadvalga to'ldirish",
+        "added": "{count} qator qo'shildi",
+        "skipped": "{count} qator o'qilmadi (oxirida bet raqami yo'q)"
+      }
     }
   },
   "pdfBooks": {
@@ -980,6 +1025,15 @@
     "bookmark": {
       "save": "Saqlash",
       "saved": "Saqlangan"
+    },
+    "toc": {
+      "button": "Mundarija",
+      "title": "Mundarija",
+      "page": "{page}-bet"
+    },
+    "description": {
+      "more": "Batafsil",
+      "less": "Yig'ish"
     }
   },
   "library": {

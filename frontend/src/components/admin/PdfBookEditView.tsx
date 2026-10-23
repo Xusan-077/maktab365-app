@@ -23,13 +23,15 @@ import { formatBytes } from "@/lib/utils/bytes";
 import { createPdfBookSchema } from "@/lib/validation/admin";
 import { GRADES } from "@/types/catalog";
 import type { LocalizedText } from "@/types/i18n";
+import { chapterProblems, fromApi } from "@/lib/admin/chapters";
 import { useAdminIdentity } from "./AdminRoleProvider";
+import { BookDetailsFields, toDetailsPatch, type BookDetailsValue } from "./BookDetailsFields";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { LocalizedFields, toLocalized } from "./LocalizedFields";
 import { PdfFilePicker } from "./PdfFilePicker";
 import { QueryError } from "./QueryError";
 import { BookStatusBadge } from "./StatusBadge";
-import { useAdminErrorText } from "./useAdminErrorText";
+import { useAdminErrorText, useAdminFieldErrorText } from "./useAdminErrorText";
 import { usePdfUpload } from "./usePdfUpload";
 
 interface FormValues {
@@ -150,6 +152,74 @@ function ReplaceFile({ book }: { book: AdminPdfBook }) {
         </Button>
       </div>
     </section>
+  );
+}
+
+/** Tavsif va mundarija: asosiy ma'lumotlardan alohida saqlanadi (bet raqamlari PDF bo'yicha tekshiriladi). */
+function PdfBookDetailsForm({ book }: { book: AdminPdfBook }) {
+  const t = useTranslations("admin.details");
+  const tc = useTranslations("admin.common");
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const errorText = useAdminErrorText();
+  const fieldErrorText = useAdminFieldErrorText();
+  const initial = useMemo<BookDetailsValue>(
+    () => ({ description: book.description ?? "", chapters: fromApi(book.chapters ?? []) }),
+    [book],
+  );
+  const [value, setValue] = useState(initial);
+  const [showProblems, setShowProblems] = useState(false);
+  const pageCount = book.has_file ? book.page_count : undefined;
+
+  const patch = toDetailsPatch(value);
+  const dirty = JSON.stringify(patch) !== JSON.stringify(toDetailsPatch(initial));
+
+  const save = useMutation({
+    mutationFn: () => getAdminApi().updatePdfBook(book.id, patch),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ADMIN_ROOT_KEY });
+      toast({ variant: "success", title: t("saved") });
+    },
+  });
+  const chaptersError = save.isError
+    ? (fieldErrorText(save.error, "chapters") ?? errorText(save.error))
+    : undefined;
+
+  return (
+    <form
+      noValidate
+      className="flex flex-col gap-5"
+      aria-labelledby="pdf-details-heading"
+      data-testid="pdf-details-form"
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (chapterProblems(value.chapters, pageCount).size > 0) {
+          setShowProblems(true);
+          return;
+        }
+        save.mutate();
+      }}
+    >
+      <h2 id="pdf-details-heading" className="text-lg font-semibold">
+        {t("heading")}
+      </h2>
+      <BookDetailsFields
+        value={value}
+        onChange={(next) => {
+          setValue(next);
+          save.reset();
+        }}
+        pageCount={pageCount}
+        disabled={save.isPending}
+        showProblems={showProblems}
+        chaptersError={chaptersError}
+      />
+      <div>
+        <Button type="submit" loading={save.isPending} disabled={!dirty}>
+          {tc("save")}
+        </Button>
+      </div>
+    </form>
   );
 }
 
@@ -331,6 +401,7 @@ export function PdfBookEditView({ id }: { id: string }) {
         </div>
         <ReplaceFile key={book.updated_at} book={book} />
         <PdfBookForm key={`form-${book.updated_at}`} book={book} />
+        <PdfBookDetailsForm key={`details-${book.updated_at}`} book={book} />
       </div>
     </>
   );

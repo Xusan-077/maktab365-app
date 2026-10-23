@@ -4,6 +4,7 @@ import type { components } from "@/lib/api/schema";
 type Schemas = components["schemas"];
 
 export type PdfBook = Schemas["PdfBook"];
+export type PdfBookDetail = Schemas["PdfBookDetail"];
 export type PdfFileUrl = Schemas["PdfFileUrl"];
 export type PdfProgress = Schemas["PdfProgress"];
 export type PdfSubject = Schemas["Subject"];
@@ -62,7 +63,7 @@ export class PdfBooksApi {
     return unwrap(result);
   }
 
-  async book(id: string): Promise<PdfBook> {
+  async book(id: string): Promise<PdfBookDetail> {
     const result = await this.client.GET("/api/v1/pdf-books/{id}/", { params: { path: { id } } });
     return unwrap(result);
   }

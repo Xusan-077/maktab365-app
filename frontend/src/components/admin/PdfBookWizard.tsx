@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check } from "lucide-react";
@@ -19,10 +19,17 @@ import { cn } from "@/lib/utils/cn";
 import { createPdfBookSchema } from "@/lib/validation/admin";
 import { GRADES } from "@/types/catalog";
 import type { LocalizedText } from "@/types/i18n";
+import { chapterProblems } from "@/lib/admin/chapters";
+import {
+  BookDetailsFields,
+  hasDetails,
+  toDetailsPatch,
+  type BookDetailsValue,
+} from "./BookDetailsFields";
 import { LocalizedFields, toLocalized } from "./LocalizedFields";
 import { PdfFilePicker } from "./PdfFilePicker";
-import { useAdminErrorText } from "./useAdminErrorText";
-import { usePdfUpload } from "./usePdfUpload";
+import { useAdminErrorText, useAdminFieldErrorText } from "./useAdminErrorText";
+import { usePdfUpload, type PdfUploadResult } from "./usePdfUpload";
 
 interface WizardValues {
   grade: string;
@@ -30,7 +37,7 @@ interface WizardValues {
   title: LocalizedText;
 }
 
-const STEPS = ["grade", "subject", "file"] as const;
+const STEPS = ["grade", "subject", "file", "details"] as const;
 type Step = (typeof STEPS)[number];
 
 function Stepper({ current }: { current: Step }) {
@@ -99,7 +106,13 @@ function ChoiceGrid({
   );
 }
 
-/** Yangi PDF kitob: sinf → fan → nom va PDF fayl (ketma-ket qadamlar). */
+interface SubmitInput {
+  values: WizardValues;
+  /** `false` — "Tavsif va mundarija" qadami o'tkazib yuborildi. */
+  withDetails: boolean;
+}
+
+/** Yangi PDF kitob: sinf → fan → nom va PDF → tavsif va mundarija (ixtiyoriy). */
 export function PdfBookWizard() {
   const t = useTranslations("admin.pdfWizard");
   const tv = useTranslations("admin.validation");
@@ -108,20 +121,30 @@ export function PdfBookWizard() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const errorText = useAdminErrorText();
+  const fieldErrorText = useAdminFieldErrorText();
   const { data: subjects } = useQuery(adminQueries.subjects());
   const upload = usePdfUpload();
   const [step, setStep] = useState<Step>("grade");
   const [file, setFile] = useState<File | null>(null);
   const [problem, setProblem] = useState<PdfFileProblem | null>(null);
   const [fileMissing, setFileMissing] = useState(false);
-  // Yuklash yiqilsa yozuv qoladi: qayta urinish shu yozuvga yuklaydi (dublikat yaratmaydi).
-  const [createdId, setCreatedId] = useState<string | null>(null);
+  const [details, setDetails] = useState<BookDetailsValue>({ description: "", chapters: [] });
+  const [showProblems, setShowProblems] = useState(false);
+  // Yuklangach PDF betlari soni ma'lum bo'ladi: mundarija shunga qarab tekshiriladi.
+  const [uploadedPages, setUploadedPages] = useState<number | undefined>();
+  // Qadamlar yiqilsa yozuv va yuklangan fayl qoladi: qayta urinish faqat bajarilmaganini takrorlaydi
+  // (dublikat yaratmaydi, faylni qayta yuklamaydi).
+  const created = useRef<{ id: string | null; uploaded: PdfUploadResult | null }>({
+    id: null,
+    uploaded: null,
+  });
 
   const schema = useMemo(() => createPdfBookSchema(), []);
   const {
     control,
     handleSubmit,
     setValue,
+    trigger,
     formState: { errors },
   } = useForm<WizardValues>({
     resolver: yupResolver(schema) as unknown as Resolver<WizardValues>,
@@ -131,7 +154,7 @@ export function PdfBookWizard() {
   const subject = useWatch({ control, name: "subject" });
 
   const submit = useMutation({
-    mutationFn: async (values: WizardValues) => {
+    mutationFn: async ({ values, withDetails }: SubmitInput) => {
       if (!file) throw new Error("no file");
       const api = getAdminApi();
       const body = {
@@ -139,14 +162,19 @@ export function PdfBookWizard() {
         grade: Number(values.grade),
         subject: values.subject,
       };
-      let id = createdId;
-      if (id) {
-        await api.updatePdfBook(id, body);
+      const state = created.current;
+      if (state.id) {
+        await api.updatePdfBook(state.id, body);
       } else {
-        id = (await api.createPdfBook(body)).id;
-        setCreatedId(id);
+        state.id = (await api.createPdfBook(body)).id;
       }
-      return upload.run(id, file);
+      state.uploaded ??= await upload.run(state.id, file);
+      setUploadedPages(state.uploaded.book.page_count);
+      // Tavsif/mundarija fayl yuklangach saqlanadi: betlar soni PDF dan tekshiriladi.
+      if (withDetails && hasDetails(details)) {
+        await api.updatePdfBook(state.id, toDetailsPatch(details));
+      }
+      return state.uploaded;
     },
     onSuccess: async ({ book, coverFailed }) => {
       await queryClient.invalidateQueries({ queryKey: ADMIN_ROOT_KEY });
@@ -157,6 +185,28 @@ export function PdfBookWizard() {
   });
 
   const busy = submit.isPending;
+  const detailsInvalid = chapterProblems(details.chapters, uploadedPages).size > 0;
+
+  const goToDetails = async () => {
+    const valid = await trigger("title");
+    if (!valid) return;
+    if (!file || problem) {
+      setFileMissing(!file);
+      return;
+    }
+    setStep("details");
+  };
+  const detailsError = submit.isError
+    ? (fieldErrorText(submit.error, "chapters") ??
+      (uploadedPages !== undefined ? errorText(submit.error) : undefined))
+    : undefined;
+  const start = (values: WizardValues, withDetails: boolean) => {
+    if (withDetails && detailsInvalid) {
+      setShowProblems(true);
+      return;
+    }
+    submit.mutate({ values, withDetails });
+  };
   const gradeOptions = GRADES.map((g) => ({
     value: String(g),
     label: t("gradeOption", { grade: g }),
@@ -173,11 +223,8 @@ export function PdfBookWizard() {
       aria-label={t("createTitle")}
       data-testid="pdf-wizard"
       onSubmit={handleSubmit((values) => {
-        if (!file || problem) {
-          setFileMissing(!file);
-          return;
-        }
-        submit.mutate(values);
+        if (step === "file") void goToDetails();
+        else if (step === "details") start(values, true);
       })}
     >
       <Stepper current={step} />
@@ -262,15 +309,58 @@ export function PdfBookWizard() {
             }}
           />
 
-          {submit.isError && (
+          <div className="flex flex-wrap gap-2">
+            <Button variant="secondary" disabled={busy} onClick={() => setStep("subject")}>
+              {t("back")}
+            </Button>
+            <Button type="submit">{t("next")}</Button>
+          </div>
+        </section>
+      )}
+
+      {step === "details" && (
+        <section className="flex flex-col gap-5" aria-labelledby="pdf-step-details">
+          <div>
+            <h2 id="pdf-step-details" className="text-lg font-semibold">
+              {t("detailsHeading")}
+            </h2>
+            <p className="text-muted text-sm">{t("detailsHint")}</p>
+          </div>
+          {busy && (
+            <PdfFilePicker
+              label={t("pdfLabel")}
+              file={file}
+              upload={upload.state}
+              disabled
+              onChange={() => {}}
+            />
+          )}
+          <BookDetailsFields
+            value={details}
+            onChange={setDetails}
+            pageCount={uploadedPages}
+            disabled={busy}
+            showProblems={showProblems}
+            chaptersError={detailsError}
+          />
+
+          {submit.isError && !detailsError && (
             <p role="alert" className="text-danger text-sm">
               {errorText(submit.error)}
             </p>
           )}
 
           <div className="flex flex-wrap gap-2">
-            <Button variant="secondary" disabled={busy} onClick={() => setStep("subject")}>
+            <Button variant="secondary" disabled={busy} onClick={() => setStep("file")}>
               {t("back")}
+            </Button>
+            <Button
+              variant="ghost"
+              disabled={busy}
+              data-testid="pdf-skip-details"
+              onClick={handleSubmit((values) => start(values, false))}
+            >
+              {t("skip")}
             </Button>
             <Button type="submit" loading={busy}>
               {submit.isError ? t("retry") : t("start")}

@@ -191,6 +191,10 @@ dialog[data-placement="bottom"] {
   transform: translateY(100%);
   transition-duration: 0.22s;
 }
+dialog[data-placement="right"] {
+  transform: translateX(100%);
+  transition-duration: 0.22s;
+}
 dialog::backdrop {
   opacity: 0;
   transition:
@@ -208,6 +212,9 @@ dialog[open]::backdrop {
   }
   dialog[open][data-placement="bottom"] {
     transform: translateY(100%);
+  }
+  dialog[open][data-placement="right"] {
+    transform: translateX(100%);
   }
   dialog[open]::backdrop {
     opacity: 0;

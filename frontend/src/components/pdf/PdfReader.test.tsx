@@ -41,9 +41,10 @@ vi.mock("./PdfPageCanvas", () => ({
 
 import { PdfReader } from "./PdfReader";
 
-function setup(query = "") {
+function setup(query = "", extra: Record<string, unknown> = {}) {
   nav.params = new URLSearchParams(query);
   api.book.mockResolvedValue({
+    ...extra,
     id: "book-1",
     title: { uz: "Algebra 9" },
     page_count: 240,
@@ -65,6 +66,19 @@ const currentPage = async () => (await screen.findByTestId("pdf-canvas")).datase
 
 beforeEach(() => {
   vi.clearAllMocks();
+  // Mundarija paneli (useMediaQuery) uchun: jsdom'da matchMedia yo'q; <dialog> usullari ham.
+  window.matchMedia = ((query: string) => ({
+    matches: false,
+    media: query,
+    addEventListener: () => {},
+    removeEventListener: () => {},
+  })) as unknown as typeof window.matchMedia;
+  HTMLDialogElement.prototype.showModal = function showModal() {
+    this.setAttribute("open", "");
+  };
+  HTMLDialogElement.prototype.close = function close() {
+    this.removeAttribute("open");
+  };
   progress.state = { ready: true, position: null, resume: 1, record: vi.fn() };
 });
 afterEach(cleanup);
@@ -180,5 +194,92 @@ describe("PdfReader", () => {
       </NextIntlClientProvider>,
     );
     expect(await screen.findByText(uz.pdfBooks.reader.notFound)).toBeTruthy();
+  });
+});
+
+const CHAPTERS = [
+  {
+    id: "c1",
+    title: "Kirish",
+    page: 1,
+    children: [{ id: "c1a", title: "Maqsad", page: 10 }],
+  },
+  { id: "c2", title: "Algebra", page: 50 },
+];
+
+describe("PdfReader: mundarija va tavsif", () => {
+  it("mundarija bo'lmasa tugma ko'rinmaydi", async () => {
+    setup("page=5", { description: "", chapters: [] });
+    await currentPage();
+    expect(screen.queryByTestId("pdf-toc-open")).toBeNull();
+  });
+
+  it("tugma panelni ochadi; bo'limni bossa shu betga o'tadi va panel yopiladi", async () => {
+    setup("page=5", { description: "", chapters: CHAPTERS });
+    await currentPage();
+    fireEvent.click(await screen.findByTestId("pdf-toc-open"));
+
+    const items = await screen.findAllByTestId("pdf-toc-item");
+    expect(items.map((item) => item.textContent)).toEqual([
+      "Kirish1-bet",
+      "Maqsad10-bet",
+      "Algebra50-bet",
+    ]);
+    fireEvent.click(items[2]);
+    expect(nav.replace).toHaveBeenCalledWith("/darsliklar/book-1?page=50", { scroll: false });
+    await waitFor(() =>
+      expect(screen.getByRole("dialog", { hidden: true }).hasAttribute("open")).toBe(false),
+    );
+  });
+
+  it("joriy bo'lim ajratib ko'rsatiladi", async () => {
+    setup("page=12", { description: "", chapters: CHAPTERS });
+    await currentPage();
+    fireEvent.click(await screen.findByTestId("pdf-toc-open"));
+    const items = await screen.findAllByTestId("pdf-toc-item");
+    expect(items.map((item) => item.getAttribute("aria-current"))).toEqual([
+      null,
+      "location",
+      null,
+    ]);
+  });
+
+  it("bo'lim beti PDF dan katta bo'lsa oxirgi betga tuzatiladi", async () => {
+    setup("page=5", { description: "", chapters: [{ id: "x", title: "Oxiri", page: 999 }] });
+    await currentPage();
+    fireEvent.click(await screen.findByTestId("pdf-toc-open"));
+    fireEvent.click((await screen.findAllByTestId("pdf-toc-item"))[0]);
+    expect(nav.replace).toHaveBeenCalledWith("/darsliklar/book-1?page=240", { scroll: false });
+  });
+
+  it("qisqa tavsif to'liq ko'rinadi, uzuni «Batafsil» bilan kengayadi", async () => {
+    const long = "Uzun tavsif. ".repeat(30);
+    setup("page=1", { description: long, chapters: [] });
+    await currentPage();
+    const more = await screen.findByRole("button", { name: uz.pdfBooks.description.more });
+    expect(more.getAttribute("aria-expanded")).toBe("false");
+    expect(screen.getByTestId("pdf-description").querySelector("p")?.className).toContain(
+      "line-clamp-2",
+    );
+    fireEvent.click(more);
+    expect(
+      screen
+        .getByRole("button", { name: uz.pdfBooks.description.less })
+        .getAttribute("aria-expanded"),
+    ).toBe("true");
+    expect(screen.getByTestId("pdf-description").querySelector("p")?.className).not.toContain(
+      "line-clamp-2",
+    );
+  });
+
+  it("qisqa tavsifda «Batafsil» tugmasi yo'q; tavsif bo'lmasa blok yo'q", async () => {
+    setup("page=1", { description: "Qisqa tavsif", chapters: [] });
+    await currentPage();
+    expect(await screen.findByText("Qisqa tavsif")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: uz.pdfBooks.description.more })).toBeNull();
+    cleanup();
+    setup("page=1", { description: "", chapters: [] });
+    await currentPage();
+    expect(screen.queryByTestId("pdf-description")).toBeNull();
   });
 });

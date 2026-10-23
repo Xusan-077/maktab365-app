@@ -10,8 +10,8 @@ export interface DialogProps {
   onOpenChange: (open: boolean) => void;
   title: ReactNode;
   description?: ReactNode;
-  /** `bottom` — mobil pastki sheet. */
-  placement?: "center" | "bottom";
+  /** `bottom` — mobil pastki sheet, `right` — o'ng tomondagi panel (drawer). */
+  placement?: "center" | "bottom" | "right";
   children?: ReactNode;
   className?: string;
 }
@@ -50,13 +50,21 @@ export function Dialog({
       }}
       className={cn(
         "bg-surface text-foreground backdrop:bg-overlay p-0 shadow-lg",
-        placement === "center"
-          ? "border-border m-auto w-[calc(100%-2rem)] max-w-lg rounded-xl border"
-          : "border-border mx-0 mt-auto mb-0 w-full max-w-none rounded-t-2xl border-t",
+        placement === "center" &&
+          "border-border m-auto w-[calc(100%-2rem)] max-w-lg rounded-xl border",
+        placement === "bottom" &&
+          "border-border mx-0 mt-auto mb-0 w-full max-w-none rounded-t-2xl border-t",
+        placement === "right" &&
+          "border-border my-0 mr-0 ml-auto h-dvh max-h-none w-full max-w-sm rounded-l-2xl border-l",
         className,
       )}
     >
-      <div className="flex max-h-[85dvh] flex-col gap-4 overflow-y-auto p-5">
+      <div
+        className={cn(
+          "flex flex-col gap-4 overflow-y-auto p-5",
+          placement === "right" ? "h-full" : "max-h-[85dvh]",
+        )}
+      >
         <div className="flex items-start justify-between gap-4">
           <div>
             <h2 id={titleId} className="text-lg font-semibold">

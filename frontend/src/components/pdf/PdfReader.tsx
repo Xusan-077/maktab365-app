@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ListTree } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
@@ -17,9 +17,11 @@ import { swipeDirection } from "@/lib/pdf/swipe";
 import { pdfQueries } from "@/lib/pdf-books/queries";
 import { ROUTES } from "@/lib/utils/routes";
 import { ReportErrorLink } from "@/components/support/ReportErrorLink";
+import { PdfBookDescription } from "./PdfBookDescription";
 import { PdfBookmarkButton } from "./PdfBookmarkButton";
 import { PdfPageCanvas } from "./PdfPageCanvas";
 import { PdfToolbar } from "./PdfToolbar";
+import { PdfTocDrawer } from "./PdfTocDrawer";
 import { usePdfDocument } from "./usePdfDocument";
 
 const isTypingTarget = (target: EventTarget | null) =>
@@ -44,6 +46,7 @@ function ReaderMessage({ message, action }: { message: string; action?: React.Re
  */
 export function PdfReader({ bookId }: { bookId: string }) {
   const t = useTranslations("pdfBooks.reader");
+  const tt = useTranslations("pdfBooks.toc");
   const locale = useLocale() as Locale;
   const router = useRouter();
   const pathname = usePathname();
@@ -53,6 +56,7 @@ export function PdfReader({ bookId }: { bookId: string }) {
   const progress = usePdfProgress(bookId, total);
   const document = usePdfDocument(bookId);
   const [renderFailed, setRenderFailed] = useState(false);
+  const [tocOpen, setTocOpen] = useState(false);
   const reloads = useRef(0);
 
   const rawPage = searchParams.get("page");
@@ -154,6 +158,7 @@ export function PdfReader({ bookId }: { bookId: string }) {
   }
 
   const title = book.data ? getLocalized(book.data.title, locale) : "";
+  const chapters = book.data?.chapters ?? [];
 
   return (
     <div className="flex flex-col gap-3" data-testid="pdf-reader">
@@ -166,8 +171,15 @@ export function PdfReader({ bookId }: { bookId: string }) {
           {t("back")}
         </Link>
         {book.data && <h1 className="min-w-0 flex-1 truncate text-lg font-semibold">{title}</h1>}
+        {chapters.length > 0 && (
+          <Button variant="secondary" data-testid="pdf-toc-open" onClick={() => setTocOpen(true)}>
+            <ListTree className="size-4" aria-hidden />
+            {tt("button")}
+          </Button>
+        )}
         {book.data && <PdfBookmarkButton bookId={bookId} />}
       </div>
+      {book.data?.description && <PdfBookDescription text={book.data.description} />}
 
       <div className="bg-background/90 sticky top-0 z-10 -mx-4 px-4 py-2 backdrop-blur sm:-mx-6 sm:px-6">
         {page !== null && total > 0 ? (
@@ -215,6 +227,16 @@ export function PdfReader({ bookId }: { bookId: string }) {
           </div>
         )}
       </div>
+
+      {chapters.length > 0 && page !== null && (
+        <PdfTocDrawer
+          open={tocOpen}
+          onOpenChange={setTocOpen}
+          chapters={chapters}
+          page={page}
+          onGo={goTo}
+        />
+      )}
 
       {book.data && <ReportErrorLink topicId={bookId} />}
     </div>

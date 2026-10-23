@@ -818,7 +818,12 @@
         "password_too_short": "Password is too short (at least 8 characters)",
         "password_too_common": "Password is too common",
         "password_entirely_numeric": "Password cannot be only digits",
-        "password_too_similar": "Password is too similar to the email"
+        "password_too_similar": "Password is too similar to the email",
+        "chapter_page_exceeds": "A contents page number exceeds the PDF page count",
+        "chapter_page_invalid": "A contents page number is invalid",
+        "chapter_title_required": "A contents row has no title",
+        "chapter_title_too_long": "A contents title is too long",
+        "chapters_too_many": "Too many contents rows (500 max)"
       }
     },
     "pdfUpload": {
@@ -890,7 +895,8 @@
         "label": "Steps",
         "grade": "Grade",
         "subject": "Subject",
-        "file": "Title and PDF"
+        "file": "Title and PDF",
+        "details": "Description and contents"
       },
       "gradeHeading": "Which grade?",
       "subjectHeading": "Grade {grade}: which subject?",
@@ -905,7 +911,10 @@
       "start": "Upload and save",
       "retry": "Try again",
       "created": "PDF book uploaded. Press “Publish” to make it visible.",
-      "coverFailed": "The cover could not be created automatically. Try re-uploading the file later."
+      "coverFailed": "The cover could not be created automatically. Try re-uploading the file later.",
+      "detailsHeading": "Description and table of contents",
+      "detailsHint": "Optional: you can skip this step and fill it in later on the book edit page.",
+      "skip": "Skip"
     },
     "pdfEdit": {
       "editTitle": "Edit PDF book",
@@ -932,6 +941,42 @@
       "deleted": "PDF book deleted",
       "deleteTitle": "Delete PDF book",
       "deleteDescription": "“{title}” and its file will be deleted. This cannot be undone."
+    },
+    "details": {
+      "heading": "Description and table of contents",
+      "description": "Description",
+      "descriptionHint": "A short summary of the book (optional). {count} / {max}",
+      "saved": "Description and contents saved"
+    },
+    "toc": {
+      "title": "Table of contents",
+      "hint": "In each row, enter the section title and its page number in the PDF (optional).",
+      "count": "{count} rows",
+      "empty": "The table of contents is empty. Add a row or use “Bulk entry”.",
+      "add": "Add section",
+      "addChild": "Add subsection",
+      "addChildFor": "Add a subsection to section {n}",
+      "titleLabel": "Title of row {n}",
+      "pageLabel": "Page of row {n}",
+      "titlePlaceholder": "Title",
+      "pagePlaceholder": "Page",
+      "moveUp": "Move row {n} up",
+      "moveDown": "Move row {n} down",
+      "remove": "Remove row {n}",
+      "problems": {
+        "titleRequired": "Enter a title",
+        "titleTooLong": "Title is too long (200 characters max)",
+        "pageInvalid": "The page must be a whole number, 1 or more",
+        "pageExceeds": "The page cannot exceed the PDF page count ({pages})"
+      },
+      "bulk": {
+        "title": "Bulk entry",
+        "hint": "One per line: “1. Introduction ........ 5”. For a subsection, indent the line (spaces or Tab) or number it like “1.2”.",
+        "placeholder": "1. Introduction ........ 5\n  Goals and tasks ... 6\n2. Algebra ........ 12",
+        "apply": "Fill the table",
+        "added": "{count} rows added",
+        "skipped": "{count} lines not recognised (no page number at the end)"
+      }
     }
   },
   "pdfBooks": {
@@ -980,6 +1025,15 @@
     "bookmark": {
       "save": "Save",
       "saved": "Saved"
+    },
+    "toc": {
+      "button": "Contents",
+      "title": "Table of contents",
+      "page": "p. {page}"
+    },
+    "description": {
+      "more": "Read more",
+      "less": "Show less"
     }
   },
   "library": {
