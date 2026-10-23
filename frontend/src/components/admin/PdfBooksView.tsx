@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FileText, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { FileText, Files, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -148,10 +148,16 @@ export function PdfBooksView() {
   const update = (patch: Partial<BookListParams>) => navigate(withFilter(params, patch));
   const filtered = Boolean(params.search || params.grade || params.subject || params.status);
   const newLink = (
-    <Link href={ADMIN_ROUTES.newPdfBook} className={buttonVariants()}>
-      <Plus className="size-4" aria-hidden />
-      {t("new")}
-    </Link>
+    <div className="flex flex-wrap gap-2">
+      <Link href={ADMIN_ROUTES.bulkPdfBooks} className={buttonVariants({ variant: "secondary" })}>
+        <Files className="size-4" aria-hidden />
+        {t("bulk")}
+      </Link>
+      <Link href={ADMIN_ROUTES.newPdfBook} className={buttonVariants()}>
+        <Plus className="size-4" aria-hidden />
+        {t("new")}
+      </Link>
+    </div>
   );
 
   return (

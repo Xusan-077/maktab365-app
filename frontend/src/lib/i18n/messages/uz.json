@@ -918,7 +918,8 @@
         "actions": "Amallar"
       },
       "editLabel": "«{title}» kitobini tahrirlash",
-      "deleteLabel": "«{title}» kitobini o'chirish"
+      "deleteLabel": "«{title}» kitobini o'chirish",
+      "bulk": "Ommaviy yuklash"
     },
     "pdfWizard": {
       "createTitle": "Yangi PDF kitob",
@@ -1085,6 +1086,28 @@
       "page": "Bet",
       "views": "Ko'rishlar",
       "empty": "Bu davrda hali ma'lumot yo'q."
+    },
+    "bulk": {
+      "title": "Ommaviy yuklash",
+      "description": "Bir nechta PDF ni tashlang: sinf, fan va nom fayl nomidan taxmin qilinadi. Tekshirib, hammasini qoralama sifatida yarating.",
+      "back": "← PDF kitoblar ro'yxati",
+      "drop": "PDF fayllarni shu yerga tashlang yoki tanlang",
+      "choose": "Fayllarni tanlash",
+      "review": "Tekshirish: {count} ta fayl",
+      "summary": "{done} / {total} ta yaratildi",
+      "titleLabel": "Nom",
+      "ready": "Tayyor",
+      "created": "Yaratildi",
+      "problems": {
+        "title": "Nom kerak",
+        "grade": "Sinfni tanlang",
+        "subject": "Fanni tanlang"
+      },
+      "remove": "{name} ni ro'yxatdan olib tashlash",
+      "uploading": "{name} yuklanmoqda",
+      "createAll": "Hammasini yaratish ({count})",
+      "stop": "To'xtatish",
+      "toList": "Kitoblar ro'yxatiga"
     }
   },
   "pdfBooks": {

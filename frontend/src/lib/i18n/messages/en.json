@@ -918,7 +918,8 @@
         "actions": "Actions"
       },
       "editLabel": "Edit “{title}”",
-      "deleteLabel": "Delete “{title}”"
+      "deleteLabel": "Delete “{title}”",
+      "bulk": "Bulk upload"
     },
     "pdfWizard": {
       "createTitle": "New PDF book",
@@ -1085,6 +1086,28 @@
       "page": "Page",
       "views": "Views",
       "empty": "No data for this period yet."
+    },
+    "bulk": {
+      "title": "Bulk upload",
+      "description": "Drop several PDFs: grade, subject and title are guessed from the file name. Review them and create all as drafts.",
+      "back": "← PDF book list",
+      "drop": "Drop PDF files here or choose them",
+      "choose": "Choose files",
+      "review": "Review: {count} files",
+      "summary": "{done} of {total} created",
+      "titleLabel": "Title",
+      "ready": "Ready",
+      "created": "Created",
+      "problems": {
+        "title": "Title required",
+        "grade": "Choose a grade",
+        "subject": "Choose a subject"
+      },
+      "remove": "Remove {name} from the list",
+      "uploading": "Uploading {name}",
+      "createAll": "Create all ({count})",
+      "stop": "Stop",
+      "toList": "To the book list"
     }
   },
   "pdfBooks": {
