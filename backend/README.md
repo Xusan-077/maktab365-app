@@ -69,7 +69,7 @@ Majburiy:
 | `REDIS_URL` | Railway Redis (kesh va Celery) |
 | `FORWARDED_IP_SECRET` | Vercel'dagi `BACKEND_FORWARD_SECRET` bilan bir xil, kuchli qiymat |
 | `TRUSTED_PROXY_HOPS` | Railway proxy ortida: `1` |
-| `ADMIN_EMAIL`, `ADMIN_PASSWORD` | `python manage.py create_admin` uchun (faqat Railway env'da) |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD` | `create_admin` uchun va shu email/parol bilan login formasidan kirish (env admin, `/admin` ga tushadi); ikkalasi ham bo'sh bo'lsa env orqali kirish o'chiq. Faqat Railway env'da |
 | `AWS_STORAGE_BUCKET_NAME` | R2 bucket nomi |
 | `AWS_S3_ENDPOINT_URL` | `https://<account_id>.r2.cloudflarestorage.com` |
 | `AWS_S3_REGION_NAME` | `auto` |

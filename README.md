@@ -44,8 +44,29 @@ Yoki ildizdan: `make dev`. Boshqa buyruqlar: `make test`, `make lint`, `make sch
 **M11 (PDF darsliklar):** admin `/admin/kitoblar` — sinf → fan → nom va PDF (progress bilan yuklash, muqova 1-sahifadan adminning brauzerida pdf.js bilan), tahrirlash, faylni almashtirish, nashr/yashirish (yashirish va o'chirish faqat admin), audit. Ochiq: `/darsliklar` (sinf → fan → kitoblar) va `/darsliklar/<id>?page=N` (sahifa-sahifa o'qish: ◀ ▶, "12 / 240" maydoni, ←/→, mobilda swipe). Backend: `PdfBook` (`apps/content`), `PdfReadProgress` (`apps/learning`); admin `/api/v1/admin/pdf-books/…`, ochiq `/api/v1/pdf-books/…`, `me/pdf-progress/`; mehmon pozitsiyasi `merge-guest-data/` (`pdf_progress`) orqali birlashadi (qoida: `contracts/fixtures/merge-pdf-progress.json`).
 
 - **Saqlash:** prod'da S3-mos (Cloudflare R2): brauzer faylni multipart bilan **to'g'ridan-to'g'ri** R2'ga yuklaydi va imzolangan URL (`PDF_SIGNED_URL_SECONDS`, default 15 daq) bilan Range orqali o'qiydi — baytlar Vercel BFF'dan o'tmaydi (4.5 MB cheklov). Dev'da (`AWS_STORAGE_BUCKET_NAME` bo'sh) fayl backend orqali (`media/`, Range qo'llab-quvvatlanadi, BFF orqali).
-- **Admin:** `python manage.py create_admin` (`ADMIN_EMAIL`/`ADMIN_PASSWORD` env'dan; bo'sh bo'lsa xato; idempotent). Qiymatlar kodda/Git'da yo'q.
+- **Admin:** `python manage.py create_admin` (`ADMIN_EMAIL`/`ADMIN_PASSWORD` env'dan; bo'sh bo'lsa xato; idempotent). Qiymatlar kodda/Git'da yo'q. Shu juftlik bilan login formasidan ham kiriladi (M13).
 - **Env/R2 CORS:** `backend/.env.example` (PDF_* kalitlari) va `backend/README.md`.
+
+**M13 (env admin, foydalanuvchilar boshqaruvi, tavsif va mundarija):**
+
+- **Env admin:** Railway'dagi `ADMIN_EMAIL`/`ADMIN_PASSWORD` bilan oddiy login formasidan kirilsa, admin akkaunt bazada
+  bo'lmasa avtomatik yaratiladi (`role=admin`, `is_env_admin`) va foydalanuvchi to'g'ridan-to'g'ri `/admin` ga tushadi.
+  Email kichik harfga keltiriladi, parol `hmac.compare_digest` bilan solishtiriladi; env bo'sh bo'lsa bu yo'l butunlay o'chiq.
+  Bu email uchun faqat env paroli o'tadi: Railway'da parol almashsa, keyingi kirishda xesh yangilanadi, eskisi ishlamaydi.
+  Mavjud 429 bloklash va throttle shu yo'lga ham ishlaydi; xato doim bir xil (`invalid_credentials`). Env admin emailiga
+  ro'yxatdan o'tib bo'lmaydi. Parol hech qayerga (log, `AuthEvent`, `AuditLog`, javob) yozilmaydi.
+- **Admin faqat admin panelda:** `src/proxy.ts` (`lib/auth/redirects.ts`) admin rolidagi foydalanuvchini `/darsliklar`,
+  `/kabinet`, `/ustoz` va boshqa hamma sahifadan `/admin` ga qaytaradi; yon panelda «saytga o'tish» yo'q, faqat «Chiqish».
+  Backend ham o'quvchi API'larida (`/me/library/`, `pdf-progress`, `goals`…) admin uchun 403 beradi (`IsLearner`).
+- **Foydalanuvchilar** (`/admin/foydalanuvchilar`, `/api/v1/admin/users/`, faqat admin): jadval (ism, email, rol, sana, holat),
+  qidiruv, rol/holat filtri, sahifalash; qo'shish (parol yoki bir martalik vaqtinchalik parol), rolni o'zgartirish,
+  bloklash/blokdan chiqarish (sessiyalar tugatiladi), o'chirish — har amal tasdiqlanadi. Himoyalar backend'da:
+  `env_admin_protected`, `self_action_forbidden`, `last_admin`. Hammasi `AuditLog` ga yoziladi (parolsiz).
+- **Tavsif va mundarija:** `PdfBook.description` (≤ 2000) va `PdfBookChapter` (sarlavha, PDF beti ≥ 1, tartib, 2 darajali).
+  Wizard'da nom + PDF dan keyin ixtiyoriy «Tavsif va mundarija» qadami (qator qo'shish/o'chirish/surish, «Ommaviy kiritish»:
+  `1. Kirish ... 5`); tahrirlash sahifasida ham. Bet PDF betlaridan oshsa `chapter_page_exceeds`. Ochiq
+  `GET /pdf-books/{id}/` `description` va `chapters` beradi; o'qish oynasida «Mundarija» paneli (`?page=N`, joriy bo'lim
+  ajratiladi) va qisqa tavsif («Batafsil»). E2E: `frontend/e2e/admin-users.spec.ts`, `pdf-books.spec.ts`.
 
 **M12 (faqat PDF darsliklar):** mavzu tizimi (kitob/bob/mavzu, mashqlar, progress, natijalar, maqsadlar,
 `import_content`) olib tashlandi; platformada admin yuklagan PDF darsliklar (`PdfBook`) qoladi.

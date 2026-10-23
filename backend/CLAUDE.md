@@ -23,6 +23,8 @@ Bitta Django monolit: Python 3.12 · Django 5.2 · DRF · drf-spectacular · sim
 ## `apps/accounts`
 
 - Modellar: `User` (UUID pk, `AUTH_USER_MODEL`; email nullable va katta-kichik harfsiz unique; parol ixtiyoriy; `SoftDeleteModel`), `Profile` (OneToOne; `onboarded_at=null` — onboarding tugamagan), `Identity` (unique `provider+provider_uid`), `AuthEvent` (audit).
+- Env admin (M13): `settings.ADMIN_EMAIL/ADMIN_PASSWORD` bo'sh bo'lmasa `auth_services.authenticate_password` shu emailga faqat env parolini qabul qiladi (`hmac.compare_digest`), `admin_bootstrap.sync_env_admin` akkauntni yaratadi/yangilaydi (`User.is_env_admin`, parol xeshi faqat o'zgarganda), qolgan hammasi (lockout, throttle, audit) umumiy yo'l bilan. Shu emailga ro'yxatdan o'tib bo'lmaydi. Parolni hech qayerga yozmang.
+- Admin foydalanuvchilar (`/api/v1/admin/users/`, `admin_user_views.py`, `admin_user_services.py`, faqat admin): yaratish (parol yoki bir martalik `temporary_password`), rol, bloklash (`blacklist_all`), o'chirish (`delete_account`). Himoyalar servisda: `env_admin_protected`, `self_action_forbidden`, `last_admin`; `AuditLog` (`create|role_change|block|unblock|update|delete`, parolsiz). `is_staff`/`is_superuser` rolga moslanadi. Admin o'quvchi API'larida (`IsLearner`) 403.
 - Rolni **faqat** `services.change_role` o'zgartiradi: oddiy foydalanuvchi student↔teacher, editor/admin faqat admin tomonidan (`actor=`). Xato kodlari: `role_forbidden` (403), `invalid_role`.
 - `services.py` — onboarding, profil, `delete_account` (soft delete + anonimlashtirish: email/identity/profil tozalanadi, `is_active=False`, IP/UA o'chadi), `export_data`.
 - Endpoint'lar (`/api/v1/me/`): `GET/PATCH/DELETE`, `POST onboarding/`, `PATCH role/`, `GET export/`.
@@ -42,6 +44,7 @@ Bitta Django monolit: Python 3.12 · Django 5.2 · DRF · drf-spectacular · sim
   (`content 0004`, `learning 0004` — qaytarilmaydi).
 - Fanlar: `python manage.py seed_subjects` — asosiy maktab fanlari (`management/commands/seed_subjects.py`, ro'yxat shu faylda);
   idempotent, mavjud fanga tegmaydi (admin tahriri saqlanadi). Admin `/api/v1/admin/subjects/` orqali ham boshqaradi.
+- Tavsif va mundarija (M13): `PdfBook.description` (≤ 2000) va `PdfBookChapter` (`book`, `parent?`, `title` ≤ 200, `page` ≥ 1, `order`; 2 daraja). Admin serializer `chapters` ni to'liq almashtiradi (`pdf_services.replace_chapters`), xato kodlari `chapter_page_exceeds` (fayl yuklangan bo'lsa bet ≤ `page_count`), `chapter_page_invalid`, `chapter_title_required`, `chapter_title_too_long`, `chapters_too_many`. Ochiq `pdf-books/{id}/` `description` va `chapters` qaytaradi (ro'yxatda yo'q).
 - Ochiq API (`urls.py`): faqat `pdf-books/*` (`pdf_views.py`); `AllowAny`, kesh `cache.public_cached` (Redis, `content:version`
   `signals.py` da Subject/PdfBook o'zgarganda almashadi). `is_staff(user)` hamma statusni ko'radi (`private, no-store`).
 - `views.py` — faqat umumiy yordamchilar (`PublicView`, `_int_param`, `GRADE_PARAM`).

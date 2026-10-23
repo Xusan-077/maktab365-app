@@ -32,7 +32,7 @@ export async function signIn(page: Page, email: string, password: string) {
   }).toPass();
   await form.getByLabel("Parol", { exact: true }).fill(password);
   await form.getByRole("button", { name: "Kirish" }).click();
-  await expect(page).toHaveURL(/\/uz\/(kabinet|ustoz)$/);
+  await expect(page).toHaveURL(/\/uz\/(kabinet|ustoz|admin)$/);
 }
 
 /**
@@ -61,6 +61,7 @@ export async function publishBook(
     mimeType: "application/pdf",
     buffer: makePdf(options.pages),
   });
+  await next.click(); // Tavsif va mundarija qadami (ixtiyoriy)
   await page.getByRole("button", { name: "Yuklash va saqlash" }).click();
 
   await expect(page).toHaveURL(/\/uz\/admin\/kitoblar\/[0-9a-f-]{36}$/, { timeout: 60_000 });

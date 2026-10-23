@@ -18,6 +18,7 @@ const guestEmail = `e2e-pdf-guest-${stamp}@example.com`;
 const userPassword = randomPassword();
 const TITLE = `E2E PDF Algebra ${stamp}`;
 const PAGES = 8;
+const DESCRIPTION = `E2E tavsif ${stamp}`;
 
 let bookId = "";
 
@@ -50,7 +51,7 @@ async function signIn(page: Page, email: string, password: string) {
   }).toPass();
   await form.getByLabel("Parol", { exact: true }).fill(password);
   await form.getByRole("button", { name: "Kirish" }).click();
-  await expect(page).toHaveURL(/\/uz\/(kabinet|ustoz)$/);
+  await expect(page).toHaveURL(/\/uz\/(kabinet|ustoz|admin)$/);
 }
 
 /** Server tomonda saqlangan oxirgi sahifa (BFF orqali, sessiya cookie bilan). */
@@ -98,6 +99,17 @@ test.describe.serial("PDF darsliklar", () => {
       buffer: makePdf(PAGES),
     });
     await expect(page.getByTestId("pdf-selected")).toContainText("algebra.pdf");
+    await next.click();
+
+    // --- Tavsif va mundarija (ixtiyoriy qadam): tavsif, 2 ta bo'lim va ommaviy kiritish.
+    await page.getByTestId("pdf-description-input").fill(DESCRIPTION);
+    await page.getByTestId("toc-add").click();
+    await page.getByTestId("toc-title").nth(0).fill("Kirish");
+    await page.getByTestId("toc-page").nth(0).fill("1");
+    await page.getByTestId("toc-bulk").locator("summary").click();
+    await page.getByTestId("toc-bulk").getByRole("textbox").fill("2. Algebra ........ 3");
+    await page.getByRole("button", { name: "Jadvalga to'ldirish" }).click();
+    await expect(page.getByTestId("toc-title")).toHaveCount(2);
     await page.getByRole("button", { name: "Yuklash va saqlash" }).click();
 
     // --- Yuklangach kitob sahifasiga o'tadi: betlar soni aniqlangan, muqova 1-sahifadan.
@@ -105,6 +117,21 @@ test.describe.serial("PDF darsliklar", () => {
     bookId = new URL(page.url()).pathname.split("/").pop()!;
     await expect(page.getByRole("heading", { name: TITLE, level: 1 })).toBeVisible();
     await expect(page.getByTestId("pdf-details")).toContainText(String(PAGES));
+    // Tavsif va mundarija PDF yuklangach saqlangan: tahrirlash formasida turibdi.
+    const detailsForm = page.getByTestId("pdf-details-form");
+    await expect(detailsForm.getByTestId("pdf-description-input")).toHaveValue(DESCRIPTION);
+    await expect(detailsForm.getByTestId("toc-title")).toHaveCount(2);
+
+    // --- Bet PDF dan katta bo'lsa saqlanmaydi (mijoz tekshiruvi).
+    await detailsForm
+      .getByTestId("toc-page")
+      .nth(1)
+      .fill(String(PAGES + 1));
+    await detailsForm.getByRole("button", { name: "Saqlash" }).click();
+    await expect(detailsForm.getByText(`PDF betlaridan oshmasin (${PAGES} bet)`)).toBeVisible();
+    await detailsForm.getByTestId("toc-page").nth(1).fill("2");
+    await detailsForm.getByRole("button", { name: "Saqlash" }).click();
+    await expect(detailsForm.getByRole("button", { name: "Saqlash" })).toBeDisabled();
     await expect(page.getByTestId("pdf-cover")).toBeVisible();
     await expect
       .poll(() =>
@@ -135,6 +162,16 @@ test.describe.serial("PDF darsliklar", () => {
     await expect(page).toHaveURL(new RegExp(`/uz/darsliklar/${bookId}\\?page=1$`));
     await expect(page.getByTestId("pdf-canvas")).toBeVisible();
     await expect(page.getByTestId("pdf-page-total")).toHaveText(`/ ${PAGES}`);
+
+    // --- Tavsif ko'rinadi; mundarija paneli bo'limni bossa shu betga o'tkazadi.
+    await expect(page.getByTestId("pdf-description")).toContainText(DESCRIPTION);
+    await page.getByTestId("pdf-toc-open").click();
+    const items = page.getByTestId("pdf-toc-item");
+    await expect(items).toHaveCount(2);
+    await expect(items.nth(0)).toHaveAttribute("aria-current", "location");
+    await items.nth(1).click();
+    await expect(page).toHaveURL(/\?page=2$/);
+    await expect(page.getByTestId("pdf-canvas")).toHaveAttribute("data-page", "2");
 
     // --- Raqam kiritib 5-sahifaga o'tish.
     const input = page.getByTestId("pdf-page-input");

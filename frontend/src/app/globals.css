@@ -195,6 +195,11 @@ dialog[data-placement="right"] {
   transform: translateX(100%);
   transition-duration: 0.22s;
 }
+/* Ochiq holat yuqoridagi yopiq-holat transformidan ustun bo'lsin. */
+dialog[open][data-placement="bottom"],
+dialog[open][data-placement="right"] {
+  transform: none;
+}
 dialog::backdrop {
   opacity: 0;
   transition:
