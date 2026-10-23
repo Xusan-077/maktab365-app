@@ -48,15 +48,16 @@ export function BulkUploadView() {
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const abort = useRef<AbortController | null>(null);
-  const subjectRef = useRef(subjects);
-  subjectRef.current = subjects;
 
-  const addFiles = useCallback((files: File[]) => {
-    setRows((current) => [
-      ...current,
-      ...dedupeFiles(current, files).map((file) => makeRow(file, subjectRef.current)),
-    ]);
-  }, []);
+  const addFiles = useCallback(
+    (files: File[]) => {
+      setRows((current) => [
+        ...current,
+        ...dedupeFiles(current, files).map((file) => makeRow(file, subjects)),
+      ]);
+    },
+    [subjects],
+  );
 
   const onDrop = (event: DragEvent) => {
     event.preventDefault();
