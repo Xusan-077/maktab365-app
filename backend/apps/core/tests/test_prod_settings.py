@@ -20,6 +20,9 @@ print(json.dumps({
     "otp_dev_inbox": settings.OTP_DEV_INBOX,
     "eager": settings.CELERY_TASK_ALWAYS_EAGER,
     "routed": routed,
+    "hosts": settings.ALLOWED_HOSTS,
+    "whitenoise": "whitenoise.middleware.WhiteNoiseMiddleware" in settings.MIDDLEWARE,
+    "static": settings.STORAGES["staticfiles"]["BACKEND"],
 }))
 """
 
@@ -44,9 +47,17 @@ def probe_prod(**env_overrides) -> dict:
 
 
 def test_prod_disables_dev_otp_and_eager_celery():
-    assert probe_prod() == {"otp_dev_inbox": False, "eager": False, "routed": False}
+    probed = probe_prod()
+    assert (probed["otp_dev_inbox"], probed["eager"], probed["routed"]) == (False, False, False)
 
 
 def test_prod_ignores_env_that_enables_dev_conveniences():
     probed = probe_prod(CELERY_TASK_ALWAYS_EAGER="true", OTP_DEV_INBOX="true")
-    assert probed == {"otp_dev_inbox": False, "eager": False, "routed": False}
+    assert (probed["otp_dev_inbox"], probed["eager"], probed["routed"]) == (False, False, False)
+
+
+def test_prod_allows_railway_healthcheck_host_and_serves_static():
+    probed = probe_prod()
+    assert probed["hosts"] == ["testserver", "healthcheck.railway.app"]
+    assert probed["whitenoise"] is True
+    assert probed["static"] == "whitenoise.storage.CompressedStaticFilesStorage"

@@ -1144,6 +1144,7 @@ export interface components {
         Health: {
             status: components["schemas"]["HealthStatusEnum"];
             checks: components["schemas"]["HealthChecks"];
+            version: components["schemas"]["HealthVersion"];
         };
         HealthChecks: {
             database: components["schemas"]["CheckStatusEnum"];
@@ -1155,6 +1156,13 @@ export interface components {
          * @enum {string}
          */
         HealthStatusEnum: "ok" | "degraded";
+        HealthVersion: {
+            /** @description Qisqa git commit yoki `unknown` */
+            commit: string;
+            /** @description Frontend talab qiladigan API versiyasi */
+            api_revision: number;
+            environment: string;
+        };
         Identity: {
             /** Format: uuid */
             readonly id: string;

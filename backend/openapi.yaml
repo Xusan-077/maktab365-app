@@ -2212,9 +2212,12 @@ components:
           $ref: '#/components/schemas/HealthStatusEnum'
         checks:
           $ref: '#/components/schemas/HealthChecks'
+        version:
+          $ref: '#/components/schemas/HealthVersion'
       required:
       - checks
       - status
+      - version
     HealthChecks:
       type: object
       properties:
@@ -2233,6 +2236,21 @@ components:
       description: |-
         * `ok` - ok
         * `degraded` - degraded
+    HealthVersion:
+      type: object
+      properties:
+        commit:
+          type: string
+          description: Qisqa git commit yoki `unknown`
+        api_revision:
+          type: integer
+          description: Frontend talab qiladigan API versiyasi
+        environment:
+          type: string
+      required:
+      - api_revision
+      - commit
+      - environment
     Identity:
       type: object
       properties:

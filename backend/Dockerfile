@@ -15,7 +15,12 @@ RUN uv sync --frozen --no-install-project
 
 COPY . .
 
+# Django `/admin/` statik fayllari image ichiga yig'iladi (WhiteNoise beradi). Build vaqtida haqiqiy
+# sirlar kerak emas: faqat settings import bo'lishi uchun soxta qiymatlar.
+RUN SECRET_KEY=build-only DATABASE_URL=sqlite:////tmp/build.db DJANGO_SETTINGS_MODULE=config.settings.prod     python manage.py collectstatic --noinput
+
 EXPOSE 8000
 
-# Dev'da docker-compose `command` bilan runserver; prod'da gunicorn/uvicorn bilan almashtiriladi.
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Prod (Railway): gunicorn. Dev'da docker-compose `command` bilan runserver ishlatiladi.
+# Worker servisi `celery -A config worker -l info` bilan (Start Command) almashtiradi.
+CMD ["sh", "-c", "exec gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers ${WEB_CONCURRENCY:-2} --timeout 60 --access-logfile -"]

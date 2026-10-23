@@ -1,0 +1,4 @@
+{
+  "min": 2,
+  "comment": "Production build backend'ning api_revision >= min bo'lishini kutadi (backend/apps/core/version.py). Frontend yangi API'siz ishlamaydigan bo'lsa, ikkalasini birga oshiring."
+}

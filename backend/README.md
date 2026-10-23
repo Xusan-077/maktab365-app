@@ -87,8 +87,8 @@ Ixtiyoriy (default'lar `.env.example` da):
 `TELEGRAM_BOT_TOKEN`, `SUPPORT_NOTIFY_EMAILS`, `SUPPORT_THROTTLE_RATE`, `SENTRY_DSN`, `SENTRY_ENVIRONMENT`,
 `DB_CONN_MAX_AGE`, `SECURE_SSL_REDIRECT`, `SECURE_HSTS_SECONDS`.
 
-Deploy buyruqlari: `python manage.py migrate --noinput && python manage.py create_admin` (env bo'sh bo'lsa xato —
-birinchi deploydan keyin olib tashlash mumkin; jim variant: `ensure_admin`), keyin web va `celery -A config worker`.
+Deploy: `railway.json` pre-deploy'da `scripts/predeploy.sh` (`migrate` + `seed_subjects`), web — gunicorn (Dockerfile), worker —
+`railway.worker.json`. Admin env orqali login formasidan kiradi, `create_admin` shart emas. Tartib va to'liq ro'yxat: [`../DEPLOY.md`](../DEPLOY.md).
 
 ### Vercel env o'zgaruvchilari (frontend, Root Directory = `frontend`)
 

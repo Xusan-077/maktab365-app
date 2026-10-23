@@ -6,6 +6,7 @@ from rest_framework.test import APIClient
 from rest_framework.views import APIView
 
 from apps.core import views
+from apps.core.version import API_REVISION
 
 
 class Payload(serializers.Serializer):
@@ -50,7 +51,33 @@ def _redis_up(db, monkeypatch):
 def test_health_ok(client):
     response = client.get("/api/v1/health/")
     assert response.status_code == 200
-    assert response.json() == {"status": "ok", "checks": {"database": "ok", "redis": "ok"}}
+    body = response.json()
+    assert body["status"] == "ok"
+    assert body["checks"] == {"database": "ok", "redis": "ok"}
+    assert set(body["version"]) == {"commit", "api_revision", "environment"}
+
+
+def test_health_reports_deployed_version(client, monkeypatch):
+    monkeypatch.setenv("RAILWAY_GIT_COMMIT_SHA", "0123456789abcdef")
+    monkeypatch.setenv("RAILWAY_ENVIRONMENT_NAME", "production")
+    version = client.get("/api/v1/health/").json()["version"]
+    assert version == {
+        "commit": "0123456",
+        "api_revision": API_REVISION,
+        "environment": "production",
+    }
+
+
+def test_health_version_without_platform_env(client, monkeypatch):
+    for name in (
+        "RAILWAY_GIT_COMMIT_SHA",
+        "GIT_COMMIT_SHA",
+        "SOURCE_VERSION",
+        "RAILWAY_ENVIRONMENT_NAME",
+    ):
+        monkeypatch.delenv(name, raising=False)
+    version = client.get("/api/v1/health/").json()["version"]
+    assert version["commit"] == "unknown" and version["environment"] == "local"
 
 
 def test_health_degraded_when_redis_down(client, monkeypatch):

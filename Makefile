@@ -1,4 +1,4 @@
-.PHONY: dev test lint migrate schema types e2e smoke
+.PHONY: dev test lint migrate schema types e2e smoke deploy-check
 
 HAS_BACKEND := $(wildcard backend/manage.py)
 NO_BACKEND = @echo "backend hali sozlanmagan (backend/manage.py yo'q) — bu qadam o'tkazib yuborildi."
@@ -56,6 +56,12 @@ endif
 e2e:
 	docker compose up -d --wait
 	cd frontend && npx playwright test
+
+# Deploydan keyin: `make deploy-check FRONTEND_URL=https://sayt API_URL=https://api` (DEPLOY.md).
+deploy-check:
+	@test -n "$(FRONTEND_URL)" && test -n "$(API_URL)" || { echo "FRONTEND_URL va API_URL kerak"; exit 2; }
+	@echo "--- backend $(API_URL)/api/v1/health/"; curl -fsS "$(API_URL)/api/v1/health/"; echo
+	@echo "--- frontend $(FRONTEND_URL)/api/health"; curl -fsS "$(FRONTEND_URL)/api/health"; echo
 
 # Ishlab turgan stack (make dev) ni tekshiradi: backend /health/ va /dev/api-status.
 smoke:

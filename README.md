@@ -22,7 +22,10 @@ Yoki ildizdan: `make dev`. Boshqa buyruqlar: `make test`, `make lint`, `make sch
 
 ## Deploy
 
-- **Vercel:** Project Settings → General → **Root Directory = `frontend`**. Build/Install buyruqlari standart (`npm install`, `npm run build`).
+- **To'liq qo'llanma: [`DEPLOY.md`](DEPLOY.md)** — oqim (main = prod, PR → preview), tartib (backend → frontend), env ro'yxati, qo'lda sozlamalar va zaxira.
+- **Vercel:** Project Settings → General → **Root Directory = `frontend`**, Production Branch = `main`. Build buyrug'i avtomatik (`vercel-build`: avval backend tayyorligini kutadi, keyin `next build`).
+- **Railway:** servis Root Directory = `backend`; `backend/railway.json` (web: pre-deploy `migrate` + `seed_subjects`, health-check `/api/v1/health/`) va `backend/railway.worker.json` (Celery).
+- **Tekshiruv:** `GET /api/v1/health/` (backend) va `GET /api/health` (frontend) commit va `api_revision` ni ko'rsatadi; `make deploy-check`.
 - Muhit o'zgaruvchilari `frontend/.env.example` da keltirilgan.
 
 **M2 (foydalanuvchi va profil):** backend `/api/v1/me/*` (profil, onboarding, rol, o'chirish, eksport) va frontend `HttpApi` metodlari tayyor. Auth.js (Google) hali backend tokenlariga ulanmagan — http rejimidagi profil oqimi M3 (JWT) dan keyin to'liq ishlaydi; hozir u backend testlari (`cd backend && uv run pytest`) va mock rejimi bilan qoplangan.

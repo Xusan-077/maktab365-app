@@ -2,6 +2,20 @@ from .base import *  # noqa: F403
 from .base import env
 
 DEBUG = False
+
+# Railway health-check so'rovlari `Host: healthcheck.railway.app` bilan keladi.
+ALLOWED_HOSTS = [*ALLOWED_HOSTS, "healthcheck.railway.app"]  # noqa: F405
+
+# Django `/admin/` statik fayllari (collectstatic image ichida): WhiteNoise gunicorn dan beradi.
+MIDDLEWARE = [  # noqa: F405
+    MIDDLEWARE[0],  # noqa: F405
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    *MIDDLEWARE[1:],  # noqa: F405
+]
+STORAGES = {  # noqa: F405
+    **STORAGES,  # noqa: F405
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
+}
 ENABLE_API_DOCS = False
 # Dev/e2e qulayliklari prod'da env orqali ham yoqilmasin.
 OTP_DEV_INBOX = False

@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .exceptions import error_body
+from .version import version_info
 
 CHECK_STATUS_CHOICES = ["ok", "error"]
 
@@ -18,9 +19,16 @@ class HealthChecksSerializer(serializers.Serializer):
     redis = serializers.ChoiceField(choices=CHECK_STATUS_CHOICES)
 
 
+class HealthVersionSerializer(serializers.Serializer):
+    commit = serializers.CharField(help_text="Qisqa git commit yoki `unknown`")
+    api_revision = serializers.IntegerField(help_text="Frontend talab qiladigan API versiyasi")
+    environment = serializers.CharField()
+
+
 class HealthSerializer(serializers.Serializer):
     status = serializers.ChoiceField(choices=["ok", "degraded"])
     checks = HealthChecksSerializer()
+    version = HealthVersionSerializer()
 
 
 def check_database() -> bool:
@@ -60,7 +68,11 @@ class HealthView(APIView):
         }
         healthy = all(value == "ok" for value in checks.values())
         return Response(
-            {"status": "ok" if healthy else "degraded", "checks": checks},
+            {
+                "status": "ok" if healthy else "degraded",
+                "checks": checks,
+                "version": version_info(),
+            },
             status=status.HTTP_200_OK if healthy else status.HTTP_503_SERVICE_UNAVAILABLE,
         )
 

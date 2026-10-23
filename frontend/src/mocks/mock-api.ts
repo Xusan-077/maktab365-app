@@ -29,7 +29,11 @@ export class MockApi implements MaktabApi {
   constructor(private readonly options: MockApiOptions = {}) {}
 
   async health(): Promise<HealthStatus> {
-    return { status: "ok", checks: { database: "ok", redis: "ok" } };
+    return {
+      status: "ok",
+      checks: { database: "ok", redis: "ok" },
+      version: { commit: "mock", api_revision: 0, environment: "mock" },
+    };
   }
 
   private get storage(): MockStorage | undefined {
