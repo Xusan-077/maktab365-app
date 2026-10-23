@@ -8,23 +8,29 @@ import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useBookStats } from "@/hooks/useBookStats";
+import { useFullscreen } from "@/hooks/useFullscreen";
 import { usePdfProgress } from "@/hooks/usePdfProgress";
 import { ApiError } from "@/lib/api/types";
 import type { Locale } from "@/lib/i18n/config";
 import { getLocalized } from "@/lib/i18n/localized";
 import { Link, usePathname, useRouter } from "@/lib/i18n/navigation";
 import { clampPage, parsePageParam } from "@/lib/pdf/page-nav";
+import { isDoubleTap, nextZoom, type ReaderZoom, type TapPoint } from "@/lib/pdf/reader-prefs";
 import { parseSlidesParams, readSlidesProgress, withSlidesParams } from "@/lib/pdf/slides";
 import { flattenToc } from "@/lib/pdf/toc";
 import { swipeDirection } from "@/lib/pdf/swipe";
 import { pdfQueries } from "@/lib/pdf-books/queries";
+import { cn } from "@/lib/utils/cn";
 import { pdfBookPath, ROUTES } from "@/lib/utils/routes";
+import { useReaderPrefsStore } from "@/stores/reader-prefs.store";
 import { ReportErrorLink } from "@/components/support/ReportErrorLink";
 import { BookCover } from "./BookCover";
 import { PdfBookDescription } from "./PdfBookDescription";
 import { RecordRecentBook } from "./RecordRecentBook";
 import { PdfBookmarkButton } from "./PdfBookmarkButton";
 import { PdfPageCanvas } from "./PdfPageCanvas";
+import { PdfReaderControls } from "./PdfReaderControls";
+import { ReaderShortcutsDialog } from "./ReaderShortcutsDialog";
 import { PdfSlidesViewer } from "./PdfSlidesViewer";
 import { PdfToolbar } from "./PdfToolbar";
 import { PdfTocDrawer } from "./PdfTocDrawer";
@@ -65,6 +71,19 @@ export function PdfReader({ bookId, backHref }: { bookId: string; backHref?: str
   const [renderFailed, setRenderFailed] = useState(false);
   const [tocOpen, setTocOpen] = useState(false);
   const reloads = useRef(0);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const tone = useReaderPrefsStore((state) => state.tone);
+  const fit = useReaderPrefsStore((state) => state.fit);
+  const cycleTone = useReaderPrefsStore((state) => state.cycleTone);
+  const toggleFit = useReaderPrefsStore((state) => state.toggleFit);
+  const [zoom, setZoom] = useState<ReaderZoom>(1);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const fullscreen = useFullscreen(stageRef);
+  const toggleFullscreen = fullscreen.toggle;
+
+  useEffect(() => {
+    void useReaderPrefsStore.persist.rehydrate();
+  }, []);
 
   const rawPage = searchParams.get("page");
   const urlPage = total > 0 ? parsePageParam(rawPage, total) : null;
@@ -151,25 +170,56 @@ export function PdfReader({ bookId, backHref }: { bookId: string; backHref?: str
         event.preventDefault();
         goTo(page + 1);
       }
+      // Qolgan yorliqlar ochiq dialog (mundarija, prezentatsiya, yordam) ustida ishlamaydi.
+      if (window.document.querySelector("dialog[open]")) return;
+      const key = event.key.toLowerCase();
+      if (event.key === "Home" && page > 1) {
+        event.preventDefault();
+        goTo(1);
+      } else if (event.key === "End" && page < total) {
+        event.preventDefault();
+        goTo(total);
+      } else if (key === "f") {
+        event.preventDefault();
+        toggleFullscreen();
+      } else if (key === "t") {
+        cycleTone();
+      } else if (key === "z") {
+        setZoom(nextZoom);
+      } else if (event.key === "?") {
+        event.preventDefault();
+        setShortcutsOpen(true);
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [page, total, goTo]);
+  }, [page, total, goTo, toggleFullscreen, cycleTone]);
 
   const touch = useRef<{ x: number; y: number; at: number } | null>(null);
+  const lastTap = useRef<TapPoint | null>(null);
   const onPointerDown = (event: PointerEvent) => {
-    if (event.pointerType === "mouse") return;
     touch.current = { x: event.clientX, y: event.clientY, at: event.timeStamp };
   };
   const onPointerUp = (event: PointerEvent) => {
     const start = touch.current;
     touch.current = null;
     if (!start || page === null) return;
-    const direction = swipeDirection(
-      event.clientX - start.x,
-      event.clientY - start.y,
-      event.timeStamp - start.at,
-    );
+    const dx = event.clientX - start.x;
+    const dy = event.clientY - start.y;
+    // Ikki marta bosish (sichqoncha ham, barmoq ham) — zoom 1× ↔ 2×.
+    if (Math.hypot(dx, dy) < 10) {
+      const tap = { x: event.clientX, y: event.clientY, at: event.timeStamp };
+      if (isDoubleTap(lastTap.current, tap)) {
+        lastTap.current = null;
+        setZoom(nextZoom);
+      } else {
+        lastTap.current = tap;
+      }
+      return;
+    }
+    // Swipe faqat barmoq bilan va kattalashtirilmagan sahifada (kattalashganda surish — scroll).
+    if (event.pointerType === "mouse" || zoom > 1) return;
+    const direction = swipeDirection(dx, dy, event.timeStamp - start.at);
     if (direction === "next" && page < total) goTo(page + 1);
     if (direction === "prev" && page > 1) goTo(page - 1);
   };
@@ -252,52 +302,92 @@ export function PdfReader({ bookId, backHref }: { bookId: string; backHref?: str
       </div>
       {book.data?.description && <PdfBookDescription text={book.data.description} />}
 
-      <div className="bg-background sticky top-0 z-10 -mx-4 px-4 py-2 sm:-mx-6 sm:px-6">
-        {page !== null && total > 0 ? (
-          <PdfToolbar page={page} total={total} onGo={goTo} />
-        ) : (
-          <Skeleton className="mx-auto h-10 w-56" />
-        )}
+      <div
+        ref={stageRef}
+        data-tone={tone}
+        data-testid="pdf-stage"
+        className={cn("pdf-stage flex flex-col gap-3", fullscreen.active && "overflow-auto p-4")}
+      >
+        <div className="bg-background sticky top-0 z-10 -mx-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 px-4 py-2 sm:-mx-6 sm:px-6">
+          {page !== null && total > 0 ? (
+            <PdfToolbar page={page} total={total} onGo={goTo} />
+          ) : (
+            <Skeleton className="h-10 w-56" />
+          )}
+          <PdfReaderControls
+            tone={tone}
+            fit={fit}
+            zoom={zoom}
+            fullscreen={fullscreen.active}
+            fullscreenSupported={fullscreen.supported}
+            onTone={cycleTone}
+            onFit={toggleFit}
+            onZoom={() => setZoom(nextZoom)}
+            onFullscreen={toggleFullscreen}
+            onShortcuts={() => setShortcutsOpen(true)}
+          />
+        </div>
+
+        <div
+          className={cn(
+            "pdf-page-area select-none",
+            zoom > 1 ? "touch-pan-x touch-pan-y" : "touch-pan-y",
+          )}
+          onPointerDown={onPointerDown}
+          onPointerUp={onPointerUp}
+          onPointerCancel={() => (touch.current = null)}
+        >
+          {document.error && !document.doc ? (
+            <ReaderMessage
+              message={t("loadError")}
+              action={
+                <Button variant="secondary" onClick={retry}>
+                  {t("retry")}
+                </Button>
+              }
+            />
+          ) : renderFailed ? (
+            <ReaderMessage
+              message={t("pageError")}
+              action={
+                <Button variant="secondary" onClick={retry}>
+                  {t("retry")}
+                </Button>
+              }
+            />
+          ) : document.doc && page !== null ? (
+            <div className={cn(zoom > 1 && "overflow-x-auto")}>
+              <div
+                style={{
+                  width: `${zoom * 100}%`,
+                  height:
+                    fit === "page" && zoom === 1
+                      ? fullscreen.active
+                        ? "calc(100dvh - 7rem)"
+                        : "calc(100dvh - 9rem)"
+                      : undefined,
+                }}
+                className={cn(fit === "page" && zoom === 1 && "min-h-80")}
+              >
+                <PdfPageCanvas
+                  doc={document.doc}
+                  pageNumber={page}
+                  label={t("position", { page, total })}
+                  fit={fit === "page" && zoom === 1 ? "contain" : "width"}
+                  onRendered={() => (reloads.current = 0)}
+                  onError={onRenderError}
+                />
+              </div>
+            </div>
+          ) : (
+            <div role="status" aria-label={t("loading")}>
+              <Skeleton className="mx-auto aspect-[1/1.4] w-full max-w-3xl" />
+            </div>
+          )}
+        </div>
       </div>
 
-      <div
-        className="touch-pan-y select-none"
-        onPointerDown={onPointerDown}
-        onPointerUp={onPointerUp}
-        onPointerCancel={() => (touch.current = null)}
-      >
-        {document.error && !document.doc ? (
-          <ReaderMessage
-            message={t("loadError")}
-            action={
-              <Button variant="secondary" onClick={retry}>
-                {t("retry")}
-              </Button>
-            }
-          />
-        ) : renderFailed ? (
-          <ReaderMessage
-            message={t("pageError")}
-            action={
-              <Button variant="secondary" onClick={retry}>
-                {t("retry")}
-              </Button>
-            }
-          />
-        ) : document.doc && page !== null ? (
-          <PdfPageCanvas
-            doc={document.doc}
-            pageNumber={page}
-            label={t("position", { page, total })}
-            onRendered={() => (reloads.current = 0)}
-            onError={onRenderError}
-          />
-        ) : (
-          <div role="status" aria-label={t("loading")}>
-            <Skeleton className="mx-auto aspect-[1/1.4] w-full max-w-3xl" />
-          </div>
-        )}
-      </div>
+      {shortcutsOpen && <ReaderShortcutsDialog open onOpenChange={setShortcutsOpen} />}
 
       {chapters.length > 0 && page !== null && (
         <PdfTocDrawer

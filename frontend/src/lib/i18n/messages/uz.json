@@ -1291,6 +1291,33 @@
         "description": "{title}: {grade}-sinf, {subject}. PDF ({size}, {pages} bet) — onlayn o'qing yoki yuklab oling."
       },
       "shareMore": "Boshqa ilovalar…"
+    },
+    "controls": {
+      "label": "O'qish sozlamalari",
+      "find": "Kitobdan qidirish",
+      "tone": "Sahifa foni: {tone}. Almashtirish",
+      "tones": {
+        "light": "oddiy",
+        "sepia": "sepiya",
+        "dark": "qorong'i"
+      },
+      "fitPage": "Butun sahifani sig'dirish",
+      "fitWidth": "Kenglikka moslash",
+      "zoomIn": "Kattalashtirish (2×)",
+      "zoomOut": "Kichraytirish (1×)",
+      "fullscreen": "To'liq ekran",
+      "exitFullscreen": "To'liq ekrandan chiqish",
+      "shortcuts": "Klaviatura yorliqlari"
+    },
+    "shortcuts": {
+      "title": "Klaviatura yorliqlari",
+      "pages": "Oldingi / keyingi bet",
+      "ends": "Birinchi / oxirgi bet",
+      "fullscreen": "To'liq ekran",
+      "tone": "Sahifa foni (oddiy, sepiya, qorong'i)",
+      "zoom": "Kattalashtirish 1× / 2× (sahifani ikki marta bosish ham)",
+      "find": "Kitobdan qidirish",
+      "help": "Shu ro'yxat"
     }
   },
   "library": {

@@ -471,3 +471,25 @@ dialog[open]::backdrop {
     transform: translate(-50%, -46%) rotate(0deg) scale(0.92);
   }
 }
+
+/* O'qish oynasi: sahifa fon rejimlari (faqat sahifa maydoni va canvas filtri; boshqaruv paneli tema rangida qoladi). */
+.pdf-stage[data-tone="sepia"] .pdf-page-area {
+  background-color: #f2e8d0;
+}
+.pdf-stage[data-tone="dark"] .pdf-page-area {
+  background-color: #0f1623;
+}
+.pdf-stage[data-tone="sepia"] .pdf-page-area,
+.pdf-stage[data-tone="dark"] .pdf-page-area {
+  border-radius: var(--radius-lg);
+  padding: 0.75rem;
+}
+.pdf-stage[data-tone="sepia"] canvas {
+  filter: sepia(0.5) saturate(0.9) brightness(0.97) contrast(0.95);
+}
+.pdf-stage[data-tone="dark"] canvas {
+  filter: invert(0.9) hue-rotate(180deg) contrast(0.95);
+}
+.pdf-stage:fullscreen {
+  background-color: var(--background);
+}

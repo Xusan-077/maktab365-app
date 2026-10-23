@@ -1291,6 +1291,33 @@
         "description": "{title}: grade {grade}, {subject}. PDF ({size}, {pages} pages) — read online or download."
       },
       "shareMore": "More apps…"
+    },
+    "controls": {
+      "label": "Reading settings",
+      "find": "Search in book",
+      "tone": "Page background: {tone}. Change",
+      "tones": {
+        "light": "normal",
+        "sepia": "sepia",
+        "dark": "dark"
+      },
+      "fitPage": "Fit whole page",
+      "fitWidth": "Fit to width",
+      "zoomIn": "Zoom in (2×)",
+      "zoomOut": "Zoom out (1×)",
+      "fullscreen": "Full screen",
+      "exitFullscreen": "Exit full screen",
+      "shortcuts": "Keyboard shortcuts"
+    },
+    "shortcuts": {
+      "title": "Keyboard shortcuts",
+      "pages": "Previous / next page",
+      "ends": "First / last page",
+      "fullscreen": "Full screen",
+      "tone": "Page background (normal, sepia, dark)",
+      "zoom": "Zoom 1× / 2× (double-tap the page too)",
+      "find": "Search in book",
+      "help": "This list"
     }
   },
   "library": {
