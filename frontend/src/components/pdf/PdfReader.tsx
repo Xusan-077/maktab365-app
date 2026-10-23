@@ -9,11 +9,19 @@ import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useBookStats } from "@/hooks/useBookStats";
 import { useFullscreen } from "@/hooks/useFullscreen";
+import { usePdfAnnotations } from "@/hooks/usePdfAnnotations";
 import { usePdfProgress } from "@/hooks/usePdfProgress";
 import { ApiError } from "@/lib/api/types";
 import type { Locale } from "@/lib/i18n/config";
 import { getLocalized } from "@/lib/i18n/localized";
 import { Link, usePathname, useRouter } from "@/lib/i18n/navigation";
+import {
+  annotationsOnPage,
+  newAnnotation,
+  type Annotation,
+  type AnnotationColor,
+  type AnnotationRect,
+} from "@/lib/pdf/annotations";
 import { clampPage, parsePageParam } from "@/lib/pdf/page-nav";
 import { isDoubleTap, nextZoom, type ReaderZoom, type TapPoint } from "@/lib/pdf/reader-prefs";
 import { parseSlidesParams, readSlidesProgress, withSlidesParams } from "@/lib/pdf/slides";
@@ -28,6 +36,9 @@ import { BookCover } from "./BookCover";
 import { PdfBookDescription } from "./PdfBookDescription";
 import { RecordRecentBook } from "./RecordRecentBook";
 import { PdfBookmarkButton } from "./PdfBookmarkButton";
+import { AnnotationDialog } from "./AnnotationDialog";
+import { AnnotationLayer } from "./AnnotationLayer";
+import { AnnotationsListDialog } from "./AnnotationsListDialog";
 import { PdfFindDialog } from "./PdfFindDialog";
 import { PdfPageCanvas } from "./PdfPageCanvas";
 import { PdfReaderControls } from "./PdfReaderControls";
@@ -81,6 +92,14 @@ export function PdfReader({ bookId, backHref }: { bookId: string; backHref?: str
   const [zoom, setZoom] = useState<ReaderZoom>(1);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [findOpen, setFindOpen] = useState(false);
+  const annotations = usePdfAnnotations(bookId);
+  const [drawing, setDrawing] = useState(false);
+  const [listOpen, setListOpen] = useState(false);
+  // Dialog: yangi belgi (chizilgan to'rtburchak) yoki mavjudini tahrirlash.
+  const [draft, setDraft] = useState<
+    { kind: "new"; rect: AnnotationRect } | { kind: "edit"; annotation: Annotation } | null
+  >(null);
+  const [lastColor, setLastColor] = useState<AnnotationColor>("yellow");
   const findTerm = (searchParams.get("find") ?? "").trim().slice(0, 80);
   const fullscreen = useFullscreen(stageRef);
   const toggleFullscreen = fullscreen.toggle;
@@ -337,6 +356,10 @@ export function PdfReader({ bookId, backHref }: { bookId: string; backHref?: str
             onFullscreen={toggleFullscreen}
             onShortcuts={() => setShortcutsOpen(true)}
             onSearch={document.doc ? () => setFindOpen(true) : undefined}
+            drawing={drawing}
+            onDrawing={document.doc ? () => setDrawing((value) => !value) : undefined}
+            annotationCount={annotations.items.length}
+            onAnnotations={() => setListOpen(true)}
           />
         </div>
 
@@ -403,6 +426,14 @@ export function PdfReader({ bookId, backHref }: { bookId: string; backHref?: str
                   label={t("position", { page, total })}
                   fit={fit === "page" && zoom === 1 ? "contain" : "width"}
                   highlight={findTerm || undefined}
+                  overlay={
+                    <AnnotationLayer
+                      annotations={annotationsOnPage(annotations.items, page)}
+                      drawing={drawing}
+                      onDraw={(rect) => setDraft({ kind: "new", rect })}
+                      onSelect={(annotation) => setDraft({ kind: "edit", annotation })}
+                    />
+                  }
                   onRendered={() => (reloads.current = 0)}
                   onError={onRenderError}
                 />
@@ -416,6 +447,44 @@ export function PdfReader({ bookId, backHref }: { bookId: string; backHref?: str
         </div>
       </div>
 
+      {draft && page !== null && (
+        <AnnotationDialog
+          editing={draft.kind === "edit"}
+          initial={
+            draft.kind === "edit"
+              ? { color: draft.annotation.color, note: draft.annotation.note }
+              : { color: lastColor, note: "" }
+          }
+          onClose={() => setDraft(null)}
+          onSave={({ color, note }) => {
+            setLastColor(color);
+            annotations.save(
+              draft.kind === "edit"
+                ? { ...draft.annotation, color, note }
+                : newAnnotation({ bookId, page, color, note, rect: draft.rect }),
+            );
+            setDraft(null);
+          }}
+          onDelete={
+            draft.kind === "edit"
+              ? () => {
+                  annotations.remove(draft.annotation.id);
+                  setDraft(null);
+                }
+              : undefined
+          }
+        />
+      )}
+      {listOpen && (
+        <AnnotationsListDialog
+          items={annotations.items}
+          onClose={() => setListOpen(false)}
+          onPick={(annotation) => {
+            setListOpen(false);
+            goTo(annotation.page);
+          }}
+        />
+      )}
       {findOpen && document.doc && (
         <PdfFindDialog
           doc={document.doc}

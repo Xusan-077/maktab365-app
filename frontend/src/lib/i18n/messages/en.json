@@ -1307,7 +1307,10 @@
       "zoomOut": "Zoom out (1×)",
       "fullscreen": "Full screen",
       "exitFullscreen": "Exit full screen",
-      "shortcuts": "Keyboard shortcuts"
+      "shortcuts": "Keyboard shortcuts",
+      "highlightOn": "Turn on highlight mode (drag on the page)",
+      "highlightOff": "Turn off highlight mode",
+      "annotations": "Highlights and notes ({count})"
     },
     "shortcuts": {
       "title": "Keyboard shortcuts",
@@ -1334,6 +1337,27 @@
       "limit": "Only the first {count} pages are shown. Try a more specific term.",
       "highlighted": "Highlighted: “{term}”",
       "clear": "Clear highlight"
+    },
+    "annotations": {
+      "mark": "Highlight",
+      "markWithNote": "Highlight: {note}",
+      "newTitle": "New highlight",
+      "editTitle": "Edit highlight",
+      "color": "Colour",
+      "colors": {
+        "yellow": "Yellow",
+        "green": "Green",
+        "pink": "Pink"
+      },
+      "note": "Short note (optional)",
+      "notePlaceholder": "For example: asked in the exam",
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "listTitle": "Highlights and notes",
+      "empty": "No highlights yet. Turn on highlight mode and drag over the part of the page you want.",
+      "page": "Page {page}",
+      "noNote": "No note"
     }
   },
   "library": {

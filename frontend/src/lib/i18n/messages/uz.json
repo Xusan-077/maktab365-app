@@ -1307,7 +1307,10 @@
       "zoomOut": "Kichraytirish (1×)",
       "fullscreen": "To'liq ekran",
       "exitFullscreen": "To'liq ekrandan chiqish",
-      "shortcuts": "Klaviatura yorliqlari"
+      "shortcuts": "Klaviatura yorliqlari",
+      "highlightOn": "Belgilash rejimini yoqish (sahifada sudrab belgilang)",
+      "highlightOff": "Belgilash rejimini o'chirish",
+      "annotations": "Belgilar va eslatmalar ({count})"
     },
     "shortcuts": {
       "title": "Klaviatura yorliqlari",
@@ -1334,6 +1337,27 @@
       "limit": "Faqat dastlabki {count} ta bet ko'rsatildi. So'zni aniqroq kiriting.",
       "highlighted": "«{term}» belgilangan",
       "clear": "Belgilarni olib tashlash"
+    },
+    "annotations": {
+      "mark": "Belgi",
+      "markWithNote": "Belgi: {note}",
+      "newTitle": "Yangi belgi",
+      "editTitle": "Belgini tahrirlash",
+      "color": "Rang",
+      "colors": {
+        "yellow": "Sariq",
+        "green": "Yashil",
+        "pink": "Pushti"
+      },
+      "note": "Qisqa eslatma (ixtiyoriy)",
+      "notePlaceholder": "Masalan: imtihonda so'raladi",
+      "save": "Saqlash",
+      "cancel": "Bekor qilish",
+      "delete": "O'chirish",
+      "listTitle": "Belgilar va eslatmalar",
+      "empty": "Hozircha belgi yo'q. Belgilash tugmasini bosib, sahifada kerakli joyni sudrab belgilang.",
+      "page": "{page}-bet",
+      "noNote": "Eslatmasiz"
     }
   },
   "library": {

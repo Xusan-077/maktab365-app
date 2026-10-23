@@ -504,3 +504,47 @@ dialog[open]::backdrop {
   mix-blend-mode: normal;
   background-color: rgb(250 204 21 / 0.35);
 }
+
+/* Sahifa belgilari (highlight): 3 rang, yarim shaffof. */
+.pdf-note,
+.pdf-note-draft,
+.pdf-note-swatch {
+  --note-rgb: 250 204 21;
+}
+.pdf-note[data-color="green"],
+.pdf-note-swatch[data-color="green"] {
+  --note-rgb: 74 222 128;
+}
+.pdf-note[data-color="pink"],
+.pdf-note-swatch[data-color="pink"] {
+  --note-rgb: 244 114 182;
+}
+.pdf-note {
+  background-color: rgb(var(--note-rgb) / 0.4);
+  mix-blend-mode: multiply;
+  cursor: pointer;
+}
+.pdf-note:hover,
+.pdf-note:focus-visible {
+  background-color: rgb(var(--note-rgb) / 0.55);
+}
+.pdf-stage[data-tone="dark"] .pdf-note {
+  mix-blend-mode: normal;
+  background-color: rgb(var(--note-rgb) / 0.35);
+}
+.pdf-note-draft {
+  background-color: rgb(var(--note-rgb) / 0.3);
+  outline: 2px dashed rgb(var(--note-rgb) / 0.9);
+}
+.pdf-note-swatch {
+  background-color: rgb(var(--note-rgb) / 0.55);
+}
+.pdf-note-flag {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background-color: var(--foreground);
+}

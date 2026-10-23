@@ -1,4 +1,4 @@
-import type { GuestPdfProgress } from "@/lib/pdf-books/api";
+import type { GuestAnnotation, GuestPdfProgress } from "@/lib/pdf-books/api";
 import type { PdfPosition } from "./progress";
 
 export type PdfMergeOutcome = "empty" | "merged" | "failed";
@@ -8,6 +8,8 @@ export interface GuestPdfData {
   positions: Record<string, PdfPosition>;
   /** Saqlangan kitob id'lari. */
   bookmarks: string[];
+  /** Sahifa belgilari (highlight + eslatma). */
+  annotations?: GuestAnnotation[];
 }
 
 export interface PdfMergeOptions {
@@ -15,7 +17,13 @@ export interface PdfMergeOptions {
     mergeGuest(data: {
       progress?: GuestPdfProgress[];
       bookmarks?: string[];
-    }): Promise<{ pdf_progress: number; pdf_bookmarks: number; failed: string[] }>;
+      annotations?: GuestAnnotation[];
+    }): Promise<{
+      pdf_progress: number;
+      pdf_bookmarks: number;
+      pdf_annotations?: number;
+      failed: string[];
+    }>;
   };
   /** Mehmon ma'lumoti (store rehydrate qilingan). */
   load: () => Promise<GuestPdfData>;
@@ -47,16 +55,19 @@ export function toGuestItems(positions: Record<string, PdfPosition>): GuestPdfPr
  * `merge` ni qayta ishga tushiradi).
  */
 export async function mergePdfGuestData(options: PdfMergeOptions): Promise<PdfMergeOutcome> {
-  const { positions, bookmarks } = await options.load();
+  const { positions, bookmarks, annotations = [] } = await options.load();
   const items = toGuestItems(positions);
-  if (items.length === 0 && bookmarks.length === 0) return "empty";
+  if (items.length === 0 && bookmarks.length === 0 && annotations.length === 0) return "empty";
   try {
-    const chunks = Math.ceil(Math.max(items.length, bookmarks.length) / PDF_MERGE_CHUNK);
+    const chunks = Math.ceil(
+      Math.max(items.length, bookmarks.length, annotations.length) / PDF_MERGE_CHUNK,
+    );
     for (let index = 0; index < chunks; index += 1) {
       const start = index * PDF_MERGE_CHUNK;
       await options.api.mergeGuest({
         progress: items.slice(start, start + PDF_MERGE_CHUNK),
         bookmarks: bookmarks.slice(start, start + PDF_MERGE_CHUNK),
+        annotations: annotations.slice(start, start + PDF_MERGE_CHUNK),
       });
     }
   } catch {

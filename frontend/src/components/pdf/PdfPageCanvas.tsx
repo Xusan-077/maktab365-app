@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useEffectEvent, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState, type ReactNode } from "react";
 import { matchRects, type NormalizedRect, type PositionedItem } from "@/lib/pdf/find";
 import type { PDFDocumentProxy, PDFPageProxy, RenderTask } from "@/lib/pdf/pdfjs";
 
@@ -26,6 +26,8 @@ export interface PdfPageCanvasProps {
   fit?: "width" | "contain";
   /** Qidiruv so'zi: sahifadagi moslashuvlar sariq bilan belgilanadi (matn qatlami bor PDF). */
   highlight?: string;
+  /** Canvas ustidagi qatlam (belgilar): canvas bilan bir xil o'lchamli quti ichida. */
+  overlay?: ReactNode;
 }
 
 /** Faqat berilgan bitta sahifani konteynerga moslab chizadi; sahifa o'zgarsa oldingisi bekor qilinadi. */
@@ -37,6 +39,7 @@ export function PdfPageCanvas({
   onError,
   fit = "width",
   highlight,
+  overlay,
 }: PdfPageCanvasProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -170,6 +173,7 @@ export function PdfPageCanvas({
           data-page={pageNumber}
           className="bg-surface mx-auto block max-w-full rounded-sm shadow-md"
         />
+        {overlay}
         {rects.length > 0 && (
           <div aria-hidden data-testid="pdf-marks" className="pointer-events-none absolute inset-0">
             {rects.map((rect, index) => (

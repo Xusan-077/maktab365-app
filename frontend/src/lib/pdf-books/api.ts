@@ -22,6 +22,7 @@ export type GoalInput = Schemas["GoalWriteRequest"];
 export type GoalPatch = Schemas["PatchedGoalWriteRequest"];
 export type PdfDownload = Schemas["PdfDownload"];
 export type ChapterHit = Schemas["ChapterHit"];
+export type GuestAnnotation = Schemas["GuestAnnotationRequest"];
 export type ReadEvent = Schemas["EventKindEnum"];
 
 export const PDF_PAGE_SIZE = 24;
@@ -219,16 +220,62 @@ export class PdfBooksApi {
   async mergeGuest(data: {
     progress?: GuestPdfProgress[];
     bookmarks?: string[];
-  }): Promise<{ pdf_progress: number; pdf_bookmarks: number; failed: string[] }> {
+    annotations?: GuestAnnotation[];
+  }): Promise<{
+    pdf_progress: number;
+    pdf_bookmarks: number;
+    pdf_annotations: number;
+    failed: string[];
+  }> {
     const result = await this.client.POST("/api/v1/me/merge-guest-data/", {
-      body: { pdf_progress: data.progress ?? [], pdf_bookmarks: data.bookmarks ?? [] },
+      body: {
+        pdf_progress: data.progress ?? [],
+        pdf_bookmarks: data.bookmarks ?? [],
+        pdf_annotations: data.annotations ?? [],
+      },
     });
     const merged = unwrap(result);
     return {
       pdf_progress: merged.pdf_progress,
       pdf_bookmarks: merged.pdf_bookmarks,
+      pdf_annotations: merged.pdf_annotations,
       failed: merged.failed,
     };
+  }
+
+  /** Kitobdagi mening belgilarim. */
+  async listAnnotations(bookId: string) {
+    return unwrap(
+      await this.client.GET("/api/v1/me/pdf-annotations/", {
+        params: { query: { pdf_book: bookId } },
+      }),
+    );
+  }
+
+  /** Idempotent: `id` mijozda yaratilgan UUID. */
+  async saveAnnotation(annotation: {
+    id: string;
+    pdf_book_id: string;
+    page: number;
+    color: "yellow" | "green" | "pink";
+    rects: { x: number; y: number; w: number; h: number }[];
+    note: string;
+  }) {
+    const { id, ...body } = annotation;
+    return unwrap(
+      await this.client.PUT("/api/v1/me/pdf-annotations/{annotation_id}/", {
+        params: { path: { annotation_id: id } },
+        body,
+      }),
+    );
+  }
+
+  /** Idempotent. */
+  async deleteAnnotation(id: string): Promise<void> {
+    const result = await this.client.DELETE("/api/v1/me/pdf-annotations/{annotation_id}/", {
+      params: { path: { annotation_id: id } },
+    });
+    if (result.response.status >= 400) throw toApiError(result.response, result.error);
   }
 }
 

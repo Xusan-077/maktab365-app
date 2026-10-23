@@ -1,6 +1,17 @@
 "use client";
 
-import { Keyboard, Maximize, Minimize, Moon, ScanSearch, Search, Sun, Sunrise } from "lucide-react";
+import {
+  Highlighter,
+  Keyboard,
+  Maximize,
+  Minimize,
+  Moon,
+  NotebookPen,
+  ScanSearch,
+  Search,
+  Sun,
+  Sunrise,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
@@ -20,6 +31,11 @@ export interface PdfReaderControlsProps {
   onFullscreen: () => void;
   onShortcuts: () => void;
   onSearch?: () => void;
+  /** Belgilash rejimi (highlight) va barcha belgilar ro'yxati. */
+  drawing?: boolean;
+  onDrawing?: () => void;
+  annotationCount?: number;
+  onAnnotations?: () => void;
 }
 
 /** Sahifa fon rejimi, moslash, zoom, to'liq ekran, qidiruv va yorliqlar: har biri ikonka tugma. */
@@ -35,6 +51,10 @@ export function PdfReaderControls({
   onFullscreen,
   onShortcuts,
   onSearch,
+  drawing = false,
+  onDrawing,
+  annotationCount = 0,
+  onAnnotations,
 }: PdfReaderControlsProps) {
   const t = useTranslations("pdfBooks.controls");
   const ToneIcon = TONE_ICON[tone];
@@ -50,6 +70,29 @@ export function PdfReaderControls({
           onClick={onSearch}
         >
           <Search className="size-5" aria-hidden />
+        </Button>
+      )}
+      {onDrawing && (
+        <Button
+          variant={drawing ? "secondary" : "ghost"}
+          size="icon"
+          data-testid="pdf-highlight"
+          aria-pressed={drawing}
+          aria-label={t(drawing ? "highlightOff" : "highlightOn")}
+          onClick={onDrawing}
+        >
+          <Highlighter className="size-5" aria-hidden />
+        </Button>
+      )}
+      {onAnnotations && annotationCount > 0 && (
+        <Button
+          variant="ghost"
+          size="icon"
+          data-testid="pdf-annotations-open"
+          aria-label={t("annotations", { count: annotationCount })}
+          onClick={onAnnotations}
+        >
+          <NotebookPen className="size-5" aria-hidden />
         </Button>
       )}
       <Button

@@ -8,7 +8,7 @@ import {
 } from "./guest-merge";
 
 const position = (page: number) => ({ page, updatedAt: "2026-01-02T10:00:00.000Z" });
-const merged = { pdf_progress: 1, pdf_bookmarks: 1, failed: [] };
+const merged = { pdf_progress: 1, pdf_bookmarks: 1, pdf_annotations: 0, failed: [] };
 
 describe("mergePdfGuestData", () => {
   it("pozitsiya va xatcho'plarni merge-guest-data formatida yuboradi va tozalaydi", async () => {
@@ -25,6 +25,7 @@ describe("mergePdfGuestData", () => {
     expect(api.mergeGuest).toHaveBeenCalledWith({
       progress: [{ pdf_book_id: "book-1", last_page: 7, updated_at: "2026-01-02T10:00:00.000Z" }],
       bookmarks: ["book-2"],
+      annotations: [],
     });
     expect(onMerged).toHaveBeenCalledTimes(1);
   });
@@ -39,7 +40,11 @@ describe("mergePdfGuestData", () => {
     });
 
     expect(outcome).toBe("merged");
-    expect(api.mergeGuest).toHaveBeenCalledWith({ progress: [], bookmarks: ["b"] });
+    expect(api.mergeGuest).toHaveBeenCalledWith({
+      progress: [],
+      bookmarks: ["b"],
+      annotations: [],
+    });
   });
 
   it("ma'lumot yo'q bo'lsa so'rov yubormaydi", async () => {
@@ -130,5 +135,45 @@ describe("mergeRetryDelay", () => {
   it("oraliq oshib boradi va 5 daqiqadan oshmaydi", () => {
     expect([1, 2, 3].map(mergeRetryDelay)).toEqual([5_000, 15_000, 45_000]);
     expect(mergeRetryDelay(50)).toBe(MERGE_RETRY_MAX_MS);
+  });
+});
+
+describe("mergePdfGuestData: belgilar", () => {
+  const note = {
+    id: "4f2a8f0e-8f4f-4a54-9d6a-0b5f2f5b1c11",
+    pdf_book_id: "book-1",
+    page: 3,
+    color: "green" as const,
+    rects: [{ x: 0.1, y: 0.1, w: 0.2, h: 0.05 }],
+    note: "Muhim",
+  };
+
+  it("faqat belgi bo'lsa ham yuboradi va muvaffaqiyatda tozalashga chaqiradi", async () => {
+    const api = { mergeGuest: vi.fn().mockResolvedValue({ ...merged, pdf_annotations: 1 }) };
+    const onMerged = vi.fn();
+    const outcome = await mergePdfGuestData({
+      api,
+      load: async () => ({ positions: {}, bookmarks: [], annotations: [note] }),
+      onMerged,
+    });
+    expect(outcome).toBe("merged");
+    expect(api.mergeGuest).toHaveBeenCalledWith({
+      progress: [],
+      bookmarks: [],
+      annotations: [note],
+    });
+    expect(onMerged).toHaveBeenCalledTimes(1);
+  });
+
+  it("xatoda belgilar saqlanadi", async () => {
+    const api = { mergeGuest: vi.fn().mockRejectedValue(new Error("offline")) };
+    const onMerged = vi.fn();
+    const outcome = await mergePdfGuestData({
+      api,
+      load: async () => ({ positions: {}, bookmarks: [], annotations: [note] }),
+      onMerged,
+    });
+    expect(outcome).toBe("failed");
+    expect(onMerged).not.toHaveBeenCalled();
   });
 });
