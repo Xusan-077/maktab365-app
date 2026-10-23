@@ -106,6 +106,38 @@ def replace_chapters(book: PdfBook, chapters: list[dict]) -> None:
     getattr(book, "_prefetched_objects_cache", {}).pop("chapters", None)  # javobda eskirmasin
 
 
+@transaction.atomic
+def duplicate_book(book: PdfBook) -> PdfBook:
+    """Kitobning qoralama nusxasi: nom (uz oxiriga « (nusxa)»), tavsif, sinf, fan, til va mundarija.
+
+    PDF fayl, muqova va prezentatsiyalar ko'chirilmaydi (katta fayllarni saqlashda ikkilantirmaslik
+    uchun): yangi nashr/versiya uchun fayl nusxadan keyin yuklanadi.
+    """
+    title = dict(book.title or {})
+    title["uz"] = f"{title.get('uz', '')} (nusxa)".strip()
+    copy = PdfBook.objects.create(
+        title=title,
+        description=book.description,
+        grade=book.grade,
+        subject=book.subject,
+        language=book.language,
+        allow_download=book.allow_download,
+        status="draft",
+    )
+    tree = [
+        {
+            "title": chapter["title"],
+            "page": chapter["page"],
+            "children": [
+                {"title": child["title"], "page": child["page"]} for child in chapter["children"]
+            ],
+        }
+        for chapter in book.chapter_tree
+    ]
+    replace_chapters(copy, tree)
+    return copy
+
+
 # --- Nashr oqimi ---
 
 

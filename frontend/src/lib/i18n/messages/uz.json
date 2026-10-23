@@ -971,7 +971,12 @@
       "language": "Kitob tili",
       "allowDownload": "Yuklab olishga ruxsat",
       "allowDownloadHint": "O'chirilsa, kitob faqat onlayn o'qiladi (mualliflik huquqi).",
-      "downloads": "Yuklab olishlar soni: {count}"
+      "downloads": "Yuklab olishlar soni: {count}",
+      "duplicate": "Nusxalash",
+      "duplicated": "Nusxa qoralama sifatida yaratildi",
+      "preview": "O'quvchi ko'rinishida ko'rish",
+      "previewBanner": "Oldindan ko'rish: o'quvchi shu ko'rinishni ko'radi. Statistika va oxirgi ko'rilganlarga yozilmaydi.",
+      "previewBack": "Tahrirlashga qaytish"
     },
     "details": {
       "heading": "Tavsif va mundarija",

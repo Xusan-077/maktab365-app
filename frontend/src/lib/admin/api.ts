@@ -121,6 +121,14 @@ export class AdminApi {
     );
   }
 
+  /** Qoralama nusxa: tavsif va mundarija ko'chadi, PDF fayl yo'q. */
+  async duplicatePdfBook(id: string): Promise<AdminPdfBook> {
+    const result = await this.client.POST("/api/v1/admin/pdf-books/{id}/duplicate/", {
+      params: { path: { id } },
+    });
+    return unwrap(result);
+  }
+
   async transitionPdfBook(id: string, to: PdfBookStatus): Promise<AdminPdfBook> {
     const result = await this.client.POST("/api/v1/admin/pdf-books/{id}/transition/", {
       params: { path: { id } },

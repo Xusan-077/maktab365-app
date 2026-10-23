@@ -567,6 +567,26 @@ export interface paths {
         patch: operations["admin_pdf_books_update"];
         trace?: never;
     };
+    "/api/v1/admin/pdf-books/{id}/duplicate/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Nusxalash: mundarija va tavsif bilan yangi qoralama (fayl ko'chirilmaydi)
+         * @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin.
+         */
+        post: operations["admin_pdf_books_duplicate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/pdf-books/{id}/chapters/{chapter_id}/slides/": {
         parameters: {
             query?: never;
@@ -3129,6 +3149,28 @@ export interface operations {
         };
         responses: {
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PdfBookAdmin"];
+                };
+            };
+        };
+    };
+    admin_pdf_books_duplicate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this pdf book. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -1087,6 +1087,31 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/admin/pdf-books/{id}/duplicate/:
+    post:
+      operationId: admin_pdf_books_duplicate
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      summary: 'Nusxalash: mundarija va tavsif bilan yangi qoralama (fayl ko''chirilmaydi)'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this pdf book.
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PdfBookAdmin'
+          description: ''
   /api/v1/admin/pdf-books/{id}/chapters/{chapter_id}/slides/:
     delete:
       operationId: admin_pdf_books_slides_delete

@@ -50,7 +50,7 @@ function ReaderMessage({ message, action }: { message: string; action?: React.Re
  * PDF darslik o'qish oynasi: bir vaqtda faqat ko'rinayotgan sahifa chiziladi. Sahifa URL'da
  * (`?page=12`), tugmalar/raqam maydoni/←→/swipe bilan o'tiladi, oxirgi sahifa eslab qolinadi.
  */
-export function PdfReader({ bookId }: { bookId: string }) {
+export function PdfReader({ bookId, backHref }: { bookId: string; backHref?: string }) {
   const t = useTranslations("pdfBooks.reader");
   const tt = useTranslations("pdfBooks.toc");
   const tc = useTranslations("pdfBooks.card");
@@ -70,7 +70,9 @@ export function PdfReader({ bookId }: { bookId: string }) {
   const urlPage = total > 0 ? parsePageParam(rawPage, total) : null;
   // URL > saqlangan pozitsiya > 1. Pozitsiya aniqlanguncha `null`.
   const page = total === 0 ? null : (urlPage ?? (progress.ready ? progress.resume : null));
-  useBookStats(book.data && !book.data.unverified ? bookId : undefined, page);
+  // Admin oldindan ko'rishi (`backHref`) statistika va "oxirgi ko'rilganlar"ga yozilmaydi.
+  const counted = book.data && !book.data.unverified && !backHref;
+  useBookStats(counted ? bookId : undefined, page);
 
   // Boshqa parametrlar (`slides`, `slide`) saqlanadi: sahifa almashganda ko'rgich yopilmaydi.
   const replaceQuery = useCallback(
@@ -211,10 +213,10 @@ export function PdfReader({ bookId }: { bookId: string }) {
 
   return (
     <div className="flex flex-col gap-3" data-testid="pdf-reader">
-      <RecordRecentBook book={book.data && !book.data.unverified ? book.data : undefined} />
+      <RecordRecentBook book={counted ? book.data : undefined} />
       <div className="flex flex-wrap items-center gap-3">
         <Link
-          href={book.data ? pdfBookPath(book.data) : ROUTES.textbooks}
+          href={backHref ?? (book.data ? pdfBookPath(book.data) : ROUTES.textbooks)}
           className="text-link inline-flex items-center gap-1 text-sm font-medium underline-offset-4 hover:underline"
         >
           <ArrowLeft className="size-4" aria-hidden />

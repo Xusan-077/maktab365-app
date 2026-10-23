@@ -123,6 +123,32 @@ class PdfBookAdminViewSet(AdminViewSet):
         return Response(PdfBookAdminSerializer(book, context=self.get_serializer_context()).data)
 
     @extend_schema(
+        operation_id="admin_pdf_books_duplicate",
+        tags=TAG,
+        summary="Nusxalash: mundarija va tavsif bilan yangi qoralama (fayl ko'chirilmaydi)",
+        request=None,
+        responses={201: PdfBookAdminSerializer},
+    )
+    @action(detail=True, methods=["post"])
+    def duplicate(self, request, pk=None):
+        source = self.get_object()
+        with transaction.atomic():
+            copy = services.duplicate_book(source)
+            audit.record(
+                request.user,
+                "duplicate",
+                self.target_type,
+                copy.pk,
+                label=self.label(copy),
+                before={"source_id": str(source.pk)},
+                after=self.snap(copy),
+                request=request,
+            )
+        fresh = self.get_queryset().get(pk=copy.pk)
+        data = PdfBookAdminSerializer(fresh, context=self.get_serializer_context()).data
+        return Response(data, status=201)
+
+    @extend_schema(
         operation_id="admin_pdf_books_upload_init",
         tags=TAG,
         summary="Yuklashni boshlash (yangi fayl yoki almashtirish)",

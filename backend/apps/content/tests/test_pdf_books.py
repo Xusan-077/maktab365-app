@@ -762,3 +762,42 @@ def test_cover_mode_requires_file_for_image_modes(admin, uploaded):
     resp = admin.patch(url, {"cover_mode": "custom"}, "json")
     assert resp.status_code == 400 and resp.json()["details"]["cover"] == ["cover_required"]
     assert admin.patch(url, {"cover_mode": "bogus"}, "json").status_code == 400
+
+
+# --- Nusxalash ---
+
+
+def test_duplicate_creates_draft_with_toc_but_without_file(admin, editor, uploaded):
+    url = f"{BASE}/{uploaded['id']}/"
+    admin.patch(
+        url,
+        {
+            "description": "Tavsif",
+            "language": "ru",
+            "chapters": [
+                {"title": "1-bob", "page": 1, "children": [{"title": "1.1", "page": 2}]},
+                {"title": "2-bob", "page": 3},
+            ],
+        },
+        "json",
+    )
+    admin.post(f"{url}transition/", {"to": "published"}, "json")
+
+    resp = editor.post(f"{url}duplicate/")
+    assert resp.status_code == 201
+    copy = resp.json()
+    assert copy["id"] != uploaded["id"] and copy["status"] == "draft"
+    assert copy["title"]["uz"].endswith("(nusxa)")
+    assert copy["slug"] != uploaded["slug"]
+    assert copy["description"] == "Tavsif" and copy["language"] == "ru"
+    assert copy["has_file"] is False and copy["cover"] == ""
+    assert [c["title"] for c in copy["chapters"]] == ["1-bob", "2-bob"]
+    assert copy["chapters"][0]["children"][0]["title"] == "1.1"
+    assert AuditLog.objects.filter(target_id=copy["id"], action="duplicate").exists()
+    # Asl kitob o'zgarmadi
+    assert admin.get(url).json()["status"] == "published"
+
+
+def test_duplicate_requires_staff(uploaded):
+    anon = APIClient()
+    assert anon.post(f"{BASE}/{uploaded['id']}/duplicate/").status_code in (401, 403)

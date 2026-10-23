@@ -16,20 +16,22 @@ const PdfReader = dynamic(() => import("./PdfReader").then((module) => module.Pd
  * Kitob serverda topilmaganda (qoralama: faqat staff ko'radi) slug mijozda, BFF orqali (sessiya
  * bilan) aniqlanadi; topilmasa o'qish oynasi o'zi "topilmadi" xabarini ko'rsatadi.
  */
-function PdfReaderBySlug({ slug }: { slug: string }) {
+function PdfReaderBySlug({ slug, backHref }: { slug: string; backHref?: string }) {
   const book = useQuery(pdfQueries.bookBySlug(slug));
   if (book.isPending) return <Skeleton className="h-96" />;
-  return <PdfReader bookId={book.data?.id ?? slug} />;
+  return <PdfReader bookId={book.data?.id ?? slug} backHref={backHref} />;
 }
 
 /** Server sahifa uchun client chegarasi: `useSearchParams` Suspense talab qiladi. */
-export function PdfReaderLoader(props: { bookId: string } | { slug: string }) {
+export function PdfReaderLoader(
+  props: ({ bookId: string } | { slug: string }) & { backHref?: string },
+) {
   return (
     <Suspense fallback={<Skeleton className="h-96" />}>
       {"bookId" in props ? (
-        <PdfReader bookId={props.bookId} />
+        <PdfReader bookId={props.bookId} backHref={props.backHref} />
       ) : (
-        <PdfReaderBySlug slug={props.slug} />
+        <PdfReaderBySlug slug={props.slug} backHref={props.backHref} />
       )}
     </Suspense>
   );

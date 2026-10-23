@@ -14,14 +14,16 @@ const api = vi.hoisted(() => ({
   updatePdfBook: vi.fn(),
   deletePdfBook: vi.fn(),
   transitionPdfBook: vi.fn(),
+  duplicatePdfBook: vi.fn(),
 }));
+const router = vi.hoisted(() => ({ push: vi.fn() }));
 const identity = vi.hoisted(() => ({ role: "admin", email: "a@example.com" }));
 
 vi.mock("@/lib/admin/api", () => ({ getAdminApi: () => api }));
 vi.mock("./AdminRoleProvider", () => ({ useAdminIdentity: () => identity }));
 vi.mock("@/hooks/useToast", () => ({ useToast: () => ({ toast: vi.fn() }) }));
 vi.mock("@/lib/i18n/navigation", () => ({
-  useRouter: () => ({ push: vi.fn() }),
+  useRouter: () => router,
   Link: ({ href, children }: { href: string; children: ReactNode }) => (
     <a href={href}>{children}</a>
   ),
@@ -211,5 +213,25 @@ describe("PdfBookEditView: tavsif va mundarija", () => {
     fireEvent.change(within(root).getAllByTestId("toc-page")[0], { target: { value: "500" } });
     fireEvent.click(save(root));
     await waitFor(() => expect(api.updatePdfBook).toHaveBeenCalled());
+  });
+});
+
+describe("PdfBookEditView: nusxalash va oldindan ko'rish", () => {
+  it("«Nusxalash» qoralama yaratadi va uning sahifasiga o'tadi", async () => {
+    api.duplicatePdfBook.mockResolvedValue({ id: "copy-1" });
+    setup();
+    fireEvent.click(await screen.findByRole("button", { name: uz.admin.pdfEdit.duplicate }));
+    await waitFor(() => expect(api.duplicatePdfBook).toHaveBeenCalledWith("book-1"));
+    await waitFor(() => expect(router.push).toHaveBeenCalledWith("/admin/kitoblar/copy-1"));
+  });
+
+  it("fayli bor kitobda o'quvchi ko'rinishiga havola bor, fayli yo'qda yo'q", async () => {
+    setup();
+    const link = await screen.findByRole("link", { name: uz.admin.pdfEdit.preview });
+    expect(link.getAttribute("href")).toBe("/admin/kitoblar/book-1/korish");
+    cleanup();
+    setup({ has_file: false });
+    await screen.findByRole("button", { name: uz.admin.pdfEdit.duplicate });
+    expect(screen.queryByRole("link", { name: uz.admin.pdfEdit.preview })).toBeNull();
   });
 });

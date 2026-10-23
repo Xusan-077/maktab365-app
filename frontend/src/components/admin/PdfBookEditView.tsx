@@ -10,7 +10,8 @@ import { BookCover } from "@/components/pdf/BookCover";
 import { applyCover, coverImageProblem, type CoverChoice } from "@/lib/admin/cover";
 import { resolveFileUrl } from "@/lib/pdf/file-url";
 import { getPdfBooksApi } from "@/lib/pdf-books/api";
-import { Button } from "@/components/ui/Button";
+import { Copy, Eye } from "lucide-react";
+import { Button, buttonVariants } from "@/components/ui/Button";
 import { Select } from "@/components/ui/Select";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useToast } from "@/hooks/useToast";
@@ -18,7 +19,7 @@ import { getAdminApi } from "@/lib/admin/api";
 import type { PdfFileProblem } from "@/lib/admin/pdf-file";
 import { canDelete } from "@/lib/admin/permissions";
 import { ADMIN_ROOT_KEY, adminQueries } from "@/lib/admin/queries";
-import { ADMIN_ROUTES } from "@/lib/admin/routes";
+import { ADMIN_ROUTES, adminPdfBookPath, adminPdfBookPreviewPath } from "@/lib/admin/routes";
 import type { AdminPdfBook, PdfBookStatus } from "@/lib/admin/types";
 import type { Locale } from "@/lib/i18n/config";
 import { getLocalized } from "@/lib/i18n/localized";
@@ -106,6 +107,41 @@ function PublishActions({ book }: { book: AdminPdfBook }) {
       {!book.has_file && book.status === "draft" && (
         <p className="text-muted text-sm">{t("publishNeedsFile")}</p>
       )}
+    </div>
+  );
+}
+
+/** Nusxalash va o'quvchi ko'rinishida oldindan ko'rish. */
+function BookTools({ book }: { book: AdminPdfBook }) {
+  const t = useTranslations("admin.pdfEdit");
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const errorText = useAdminErrorText();
+  const duplicate = useMutation({
+    mutationFn: () => getAdminApi().duplicatePdfBook(book.id),
+    onSuccess: async (copy) => {
+      await queryClient.invalidateQueries({ queryKey: ADMIN_ROOT_KEY });
+      toast({ variant: "success", title: t("duplicated") });
+      router.push(adminPdfBookPath(copy.id));
+    },
+    onError: (error) => toast({ variant: "error", title: errorText(error) }),
+  });
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      {book.has_file && (
+        <Link
+          href={adminPdfBookPreviewPath(book.id)}
+          className={buttonVariants({ variant: "secondary" })}
+        >
+          <Eye className="size-4" aria-hidden />
+          {t("preview")}
+        </Link>
+      )}
+      <Button variant="secondary" loading={duplicate.isPending} onClick={() => duplicate.mutate()}>
+        <Copy className="size-4" aria-hidden />
+        {t("duplicate")}
+      </Button>
     </div>
   );
 }
@@ -540,6 +576,7 @@ export function PdfBookEditView({ id }: { id: string }) {
         <div className="flex min-w-0 flex-col gap-4">
           <Details book={book} />
           <PublishActions book={book} />
+          <BookTools book={book} />
         </div>
         <CoverSection key={`cover-${book.updated_at}`} book={book} subjectTitle={subjectTitle} />
         <ReplaceFile key={book.updated_at} book={book} />

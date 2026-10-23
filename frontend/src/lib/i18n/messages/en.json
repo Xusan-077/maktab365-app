@@ -971,7 +971,12 @@
       "language": "Book language",
       "allowDownload": "Allow download",
       "allowDownloadHint": "When off, the book can only be read online (copyright).",
-      "downloads": "Downloads: {count}"
+      "downloads": "Downloads: {count}",
+      "duplicate": "Duplicate",
+      "duplicated": "Copy created as a draft",
+      "preview": "View as a reader",
+      "previewBanner": "Preview: readers will see exactly this. It is not recorded in statistics or recent books.",
+      "previewBack": "Back to editing"
     },
     "details": {
       "heading": "Description and table of contents",

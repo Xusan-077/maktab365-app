@@ -11,3 +11,5 @@ export const ADMIN_ROUTES = {
 } as const;
 
 export const adminPdfBookPath = (id: string) => `${ADMIN_ROUTES.pdfBooks}/${id}`;
+/** Qoralamani o'quvchi ko'rinishida oldindan ko'rish (admin qobig'ida). */
+export const adminPdfBookPreviewPath = (id: string) => `${adminPdfBookPath(id)}/korish`;
