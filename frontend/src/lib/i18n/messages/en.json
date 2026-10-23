@@ -1471,5 +1471,30 @@
         "empty": "No textbooks in progress."
       }
     }
+  },
+  "offline": {
+    "title": "Offline books",
+    "description": "Textbooks saved on your device for reading without internet. The save button is on the book page.",
+    "save": "Save offline",
+    "saveSize": "Save offline ({size})",
+    "saving": "Saving",
+    "stop": "Stop",
+    "saved": "Saved offline",
+    "remove": "Remove",
+    "removeBook": "Remove {title} from offline storage",
+    "error": "Could not save.",
+    "retry": "Try again",
+    "confirmTitle": "Confirm saving",
+    "continue": "Continue",
+    "cancel": "Cancel",
+    "warnLarge": "The file is large ({size}). Wi-Fi is recommended.",
+    "warnSpace": "Your device may not have enough free space.",
+    "empty": "No books saved offline yet.",
+    "toCatalog": "Go to textbooks",
+    "usage": "{count} books · {size}",
+    "quota": "storage: {used} / {total}",
+    "meta": "Grade {grade} · {size}",
+    "clearAll": "Remove all",
+    "unsupported": "This browser does not support offline saving."
   }
 }

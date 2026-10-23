@@ -1471,5 +1471,30 @@
         "empty": "Boshlangan darslik yo'q."
       }
     }
+  },
+  "offline": {
+    "title": "Oflayn kitoblar",
+    "description": "Internetsiz o'qish uchun qurilmangizga saqlangan darsliklar. Saqlash tugmasi kitob sahifasida.",
+    "save": "Oflayn saqlash",
+    "saveSize": "Oflayn saqlash ({size})",
+    "saving": "Saqlanmoqda",
+    "stop": "To'xtatish",
+    "saved": "Oflayn saqlangan",
+    "remove": "O'chirish",
+    "removeBook": "{title} ni oflayn xotiradan o'chirish",
+    "error": "Saqlab bo'lmadi.",
+    "retry": "Qayta urinish",
+    "confirmTitle": "Saqlashni tasdiqlang",
+    "continue": "Davom etish",
+    "cancel": "Bekor qilish",
+    "warnLarge": "Fayl katta ({size}). Wi-Fi ulangan bo'lsa yaxshi.",
+    "warnSpace": "Qurilmada bo'sh joy yetmasligi mumkin.",
+    "empty": "Hozircha oflayn saqlangan kitob yo'q.",
+    "toCatalog": "Darsliklarga o'tish",
+    "usage": "{count} ta kitob · {size}",
+    "quota": "xotira: {used} / {total}",
+    "meta": "{grade}-sinf · {size}",
+    "clearAll": "Hammasini o'chirish",
+    "unsupported": "Bu brauzer oflayn saqlashni qo'llab-quvvatlamaydi."
   }
 }

@@ -33,6 +33,7 @@ import { pdfBookPath, ROUTES } from "@/lib/utils/routes";
 import { useReaderPrefsStore } from "@/stores/reader-prefs.store";
 import { ReportErrorLink } from "@/components/support/ReportErrorLink";
 import { BookCover } from "./BookCover";
+import { OfflineButton } from "./OfflineButton";
 import { PdfBookDescription } from "./PdfBookDescription";
 import { RecordRecentBook } from "./RecordRecentBook";
 import { PdfBookmarkButton } from "./PdfBookmarkButton";
@@ -331,6 +332,17 @@ export function PdfReader({ bookId, backHref }: { bookId: string; backHref?: str
         {book.data && <PdfBookmarkButton bookId={bookId} />}
       </div>
       {book.data?.description && <PdfBookDescription text={book.data.description} />}
+      {book.data && !backHref && (
+        <OfflineButton
+          book={{
+            id: bookId,
+            slug: book.data.slug,
+            grade: book.data.grade,
+            title: book.data.title,
+            sizeBytes: book.data.size_bytes,
+          }}
+        />
+      )}
 
       <div
         ref={stageRef}

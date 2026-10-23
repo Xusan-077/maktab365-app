@@ -6,6 +6,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { AuthProvider } from "@/components/layout/AuthProvider";
 import { PreferencesProvider } from "@/components/layout/PreferencesProvider";
 import { QueryProvider } from "@/components/layout/QueryProvider";
+import { ServiceWorkerRegister } from "@/components/layout/ServiceWorkerRegister";
 import { SkipLink } from "@/components/layout/SkipLink";
 import { MotionProvider } from "@/components/ui/motion";
 import { Toaster } from "@/components/ui/Toast";
@@ -60,6 +61,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[lo
               <MotionProvider>
                 <PreferencesProvider />
                 <SkipLink />
+                <ServiceWorkerRegister />
                 {children}
                 <Toaster />
               </MotionProvider>

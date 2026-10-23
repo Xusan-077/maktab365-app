@@ -1,5 +1,29 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "ignoreCommand": "if [ \"$VERCEL_ENV\" != \"production\" ]; then exit 1; fi; git diff --quiet HEAD^ HEAD -- . ../contracts"
+  "ignoreCommand": "if [ \"$VERCEL_ENV\" != \"production\" ]; then exit 1; fi; git diff --quiet HEAD^ HEAD -- . ../contracts",
+  "headers": [
+    {
+      "source": "/sw.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        },
+        {
+          "key": "Service-Worker-Allowed",
+          "value": "/"
+        }
+      ]
+    },
+    {
+      "source": "/offline.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
+    }
+  ]
 }

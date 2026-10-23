@@ -8,6 +8,7 @@ import { JsonLd } from "@/components/pdf/JsonLd";
 import { RecordRecentBook } from "@/components/pdf/RecordRecentBook";
 import { BookCover } from "@/components/pdf/BookCover";
 import { BookActions } from "@/components/pdf/book/BookActions";
+import { OfflineButton } from "@/components/pdf/OfflineButton";
 import { BookPreview } from "@/components/pdf/book/BookPreview";
 import { BookPassport, BookToc, SimilarBooks } from "@/components/pdf/book/BookSections";
 import { AllGrades } from "@/components/pdf/grade/GradeParts";
@@ -129,6 +130,15 @@ export default async function BookPage({
             title={title}
             sizeBytes={book.size_bytes}
             allowDownload={book.allow_download}
+          />
+          <OfflineButton
+            book={{
+              id: book.id,
+              slug: book.slug,
+              grade: book.grade,
+              title: book.title,
+              sizeBytes: book.size_bytes,
+            }}
           />
         </div>
       </header>

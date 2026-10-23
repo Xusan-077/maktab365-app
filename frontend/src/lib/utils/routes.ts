@@ -22,6 +22,7 @@ export const ROUTES = {
   search: "/qidiruv",
   help: "/yordam",
   contact: "/aloqa",
+  offline: "/oflayn",
 } as const;
 
 /** Faqat shu yo'llar (va ichkilari) sessiya talab qiladi; qolgan hamma sahifa ochiq. */

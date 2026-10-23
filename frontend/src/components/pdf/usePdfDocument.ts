@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { loadOfflinePdf } from "@/lib/offline/pdf-cache";
 import { resolveFileUrl } from "@/lib/pdf/file-url";
 import { loadPdfjs, type PDFDocumentLoadingTask, type PDFDocumentProxy } from "@/lib/pdf/pdfjs";
 import { pdfQueries } from "@/lib/pdf-books/queries";
@@ -21,12 +22,15 @@ interface DocumentState {
  * oladi: URL muddati tugagach keyingi Range so'rovlari rad etilsa shu bilan tiklanadi.
  * `sourceKey` o'zgarsa (boshqa fayl) hujjat qayta ochiladi.
  */
-function usePdfFromUrl(sourceKey: string, fetchUrl: () => Promise<{ url: string }>) {
+function usePdfFromUrl(
+  sourceKey: string,
+  fetchSource: () => Promise<{ url: string } | { data: Uint8Array }>,
+) {
   const [state, setState] = useState<DocumentState>({ doc: null, loading: true, error: null });
   const [attempt, setAttempt] = useState(0);
-  const loader = useRef(fetchUrl);
+  const loader = useRef(fetchSource);
   useEffect(() => {
-    loader.current = fetchUrl;
+    loader.current = fetchSource;
   });
 
   useEffect(() => {
@@ -36,11 +40,15 @@ function usePdfFromUrl(sourceKey: string, fetchUrl: () => Promise<{ url: string 
       try {
         const [pdfjs, file] = await Promise.all([loadPdfjs(), loader.current()]);
         if (cancelled) return;
-        task = pdfjs.getDocument({
-          url: resolveFileUrl(file.url, window.location.origin),
-          rangeChunkSize: RANGE_CHUNK_BYTES,
-          disableAutoFetch: true,
-        });
+        // Oflayn saqlangan nusxa (butun fayl xotirada) yoki imzolangan URL (Range bilan bo'laklab).
+        task =
+          "data" in file
+            ? pdfjs.getDocument({ data: file.data })
+            : pdfjs.getDocument({
+                url: resolveFileUrl(file.url, window.location.origin),
+                rangeChunkSize: RANGE_CHUNK_BYTES,
+                disableAutoFetch: true,
+              });
         const doc = await task.promise;
         if (cancelled) {
           void task.destroy();
@@ -68,7 +76,12 @@ function usePdfFromUrl(sourceKey: string, fetchUrl: () => Promise<{ url: string 
 /** Kitob PDF'i. */
 export function usePdfDocument(bookId: string) {
   const queryClient = useQueryClient();
-  return usePdfFromUrl(`book:${bookId}`, () => queryClient.fetchQuery(pdfQueries.fileUrl(bookId)));
+  return usePdfFromUrl(`book:${bookId}`, async () => {
+    // Oflayn saqlangan bo'lsa tarmoqsiz va trafiksiz shu nusxa ochiladi.
+    const saved = await loadOfflinePdf(bookId);
+    if (saved) return { data: saved };
+    return queryClient.fetchQuery(pdfQueries.fileUrl(bookId));
+  });
 }
 
 /** Bo'lim prezentatsiyasi (PDF slaydlar): kitob PDF'i bilan bir xil mexanizm. */
