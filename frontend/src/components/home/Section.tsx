@@ -18,10 +18,7 @@ export function Section({ id, title, description, children, className }: Section
       className={cn("mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:py-16", className)}
     >
       <div className="mb-6 max-w-2xl sm:mb-8">
-        <h2
-          id={`${id}-title`}
-          className="text-2xl font-bold tracking-tight text-balance sm:text-3xl"
-        >
+        <h2 id={`${id}-title`} className="text-title font-bold text-balance">
           {title}
         </h2>
         {description && <p className="text-muted mt-2 text-base">{description}</p>}

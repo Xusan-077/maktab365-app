@@ -141,6 +141,20 @@ def delete(key: str) -> None:
             logger.warning("pdf_delete_failed", key=key)
 
 
+def delete_strict(key: str) -> None:
+    """Obyektni o'chiradi; saqlash xatosi bo'lsa `storage_error` (502) ko'taradi.
+
+    Yo'q obyekt xato emas (S3 `DeleteObject` idempotent, lokal saqlash ham indamaydi).
+    """
+    if not key:
+        return
+    try:
+        default_storage.delete(key)
+    except Exception as exc:  # noqa: BLE001 — boto/OS xatolari turli; mijozga bitta kod
+        logger.warning("pdf_delete_failed", key=key)
+        raise PdfError("storage_error", 502) from exc
+
+
 def _pages_of(handle) -> int:
     from pypdf import PdfReader
     from pypdf.errors import PyPdfError

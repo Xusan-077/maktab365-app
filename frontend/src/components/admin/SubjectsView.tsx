@@ -114,8 +114,16 @@ export function SubjectsView() {
                         {canDelete(role) && (
                           <Button
                             variant="ghost"
-                            aria-label={t("deleteLabel", { name })}
-                            title={hasBooks ? t("hasBooks") : undefined}
+                            aria-label={
+                              hasBooks
+                                ? t("hasBooks", { count: subject.pdf_books_count })
+                                : t("deleteLabel", { name })
+                            }
+                            title={
+                              hasBooks
+                                ? t("hasBooks", { count: subject.pdf_books_count })
+                                : undefined
+                            }
                             disabled={hasBooks}
                             onClick={() => {
                               remove.reset();

@@ -17,6 +17,7 @@ import { swipeDirection } from "@/lib/pdf/swipe";
 import { pdfQueries } from "@/lib/pdf-books/queries";
 import { ROUTES } from "@/lib/utils/routes";
 import { ReportErrorLink } from "@/components/support/ReportErrorLink";
+import { BookCover } from "./BookCover";
 import { PdfBookDescription } from "./PdfBookDescription";
 import { PdfBookmarkButton } from "./PdfBookmarkButton";
 import { PdfPageCanvas } from "./PdfPageCanvas";
@@ -47,6 +48,7 @@ function ReaderMessage({ message, action }: { message: string; action?: React.Re
 export function PdfReader({ bookId }: { bookId: string }) {
   const t = useTranslations("pdfBooks.reader");
   const tt = useTranslations("pdfBooks.toc");
+  const tc = useTranslations("pdfBooks.card");
   const locale = useLocale() as Locale;
   const router = useRouter();
   const pathname = usePathname();
@@ -170,7 +172,26 @@ export function PdfReader({ bookId }: { bookId: string }) {
           <ArrowLeft className="size-4" aria-hidden />
           {t("back")}
         </Link>
-        {book.data && <h1 className="min-w-0 flex-1 truncate text-lg font-semibold">{title}</h1>}
+        {book.data && (
+          <div className="flex min-w-0 flex-1 items-center gap-3">
+            <BookCover
+              src={book.data.cover}
+              grade={book.data.grade}
+              subject={book.data.subject}
+              subjectTitle={getLocalized(book.data.subject_title, locale)}
+              className="hidden w-9 sm:block"
+            />
+            <div className="min-w-0">
+              <h1 className="truncate text-lg leading-tight font-semibold">{title}</h1>
+              <p className="text-muted truncate text-sm">
+                {tc("meta", {
+                  grade: book.data.grade,
+                  subject: getLocalized(book.data.subject_title, locale),
+                })}
+              </p>
+            </div>
+          </div>
+        )}
         {chapters.length > 0 && (
           <Button variant="secondary" data-testid="pdf-toc-open" onClick={() => setTocOpen(true)}>
             <ListTree className="size-4" aria-hidden />

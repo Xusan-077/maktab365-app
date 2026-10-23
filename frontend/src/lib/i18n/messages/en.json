@@ -11,8 +11,16 @@
     "hero": {
       "title": "School textbooks — in one place, free.",
       "subtitle": "Find grade 1–11 textbooks by grade and subject and read them online page by page. The page where you stopped is remembered.",
-      "cta": "Browse textbooks",
-      "how": "How does it work?"
+      "how": "How does it work?",
+      "searchLabel": "Search textbooks by title",
+      "searchPlaceholder": "For example: Algebra 9",
+      "search": "Search",
+      "gradesLabel": "Pick a grade",
+      "samples": {
+        "algebra": "Algebra",
+        "biologiya": "Biology",
+        "tarix": "History"
+      }
     },
     "audience": {
       "title": "For students and teachers",
@@ -629,7 +637,8 @@
       "pageOf": "Page {page} of {pages}",
       "prev": "Previous",
       "next": "Next",
-      "done": "Done"
+      "done": "Done",
+      "edit": "Edit"
     },
     "bookStatus": {
       "draft": "Hidden",
@@ -805,7 +814,8 @@
         "env_admin_protected": "The main admin cannot be deleted, blocked or demoted.",
         "self_action_forbidden": "You cannot delete, block or demote yourself.",
         "last_admin": "The last active admin cannot be deleted, blocked or demoted.",
-        "role_forbidden": "You are not allowed to assign this role."
+        "role_forbidden": "You are not allowed to assign this role.",
+        "storage_error": "The files could not be removed from storage, so the book was kept. Try again in a moment."
       },
       "fields": {
         "invalid": "Invalid value",
@@ -865,7 +875,7 @@
       "slugLocked": "The slug is fixed.",
       "editLabel": "Edit subject {name}",
       "deleteLabel": "Delete subject {name}",
-      "hasBooks": "A subject that has books cannot be deleted.",
+      "hasBooks": "This subject has {count} book(s), so it can’t be deleted. Move or delete the books first.",
       "deleteTitle": "Delete this subject?",
       "deleteDescription": "The subject “{name}” will be deleted. This cannot be undone.",
       "deleted": "Subject deleted"
@@ -887,8 +897,11 @@
         "pages": "Pages",
         "size": "Size",
         "status": "Status",
-        "updated": "Updated"
-      }
+        "updated": "Updated",
+        "actions": "Actions"
+      },
+      "editLabel": "Edit “{title}”",
+      "deleteLabel": "Delete “{title}”"
     },
     "pdfWizard": {
       "createTitle": "New PDF book",
@@ -942,7 +955,7 @@
       "saved": "Saved",
       "deleted": "PDF book deleted",
       "deleteTitle": "Delete PDF book",
-      "deleteDescription": "“{title}” and its file will be deleted. This cannot be undone."
+      "deleteDescription": "“{title}”, its PDF file, table of contents and readers’ progress will be deleted. This cannot be undone."
     },
     "details": {
       "heading": "Description and table of contents",
@@ -1002,14 +1015,18 @@
       "error": "Could not load the textbooks.",
       "retry": "Try again",
       "searchLabel": "Search textbooks by title",
-      "searchPlaceholder": "Textbook title…"
+      "searchPlaceholder": "Textbook title…",
+      "count": "{count} textbook(s)",
+      "clear": "Clear filters"
     },
     "card": {
       "meta": "Grade {grade} · {subject}",
       "pages": "{count} pages",
-      "resume": "Continue from page {page}",
+      "resume": "Continue: page {page}",
       "unverified": "Not reviewed yet",
-      "read": "Read"
+      "read": "Read",
+      "progress": "Read {page} of {total} pages",
+      "info": "{size} · {pages} pages"
     },
     "reader": {
       "back": "Textbooks",
@@ -1036,6 +1053,11 @@
     "description": {
       "more": "Read more",
       "less": "Show less"
+    },
+    "cover": {
+      "textbook": "TEXTBOOK",
+      "grade": "GRADE",
+      "pdf": "PDF"
     }
   },
   "library": {

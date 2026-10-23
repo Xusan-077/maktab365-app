@@ -4,7 +4,8 @@ import { ROUTES } from "@/lib/utils/routes";
 import { Logo } from "./Logo";
 import { NAV_ITEMS } from "./nav-items";
 
-const linkClasses = "rounded-md text-sm text-muted transition-colors hover:text-foreground";
+const linkClasses =
+  "inline-flex min-h-11 items-center rounded-md text-sm text-muted transition-colors hover:text-foreground";
 
 export function SiteFooter() {
   const t = useTranslations();
@@ -19,7 +20,7 @@ export function SiteFooter() {
           <h2 id="footer-platform" className="mb-3 text-sm font-semibold">
             {t("footer.platform")}
           </h2>
-          <ul className="flex flex-col gap-2">
+          <ul className="flex flex-col">
             {NAV_ITEMS.map(({ key, href }) => (
               <li key={key}>
                 <Link href={href} className={linkClasses}>
@@ -33,7 +34,7 @@ export function SiteFooter() {
           <h2 id="footer-help" className="mb-3 text-sm font-semibold">
             {t("footer.help")}
           </h2>
-          <ul className="flex flex-col gap-2">
+          <ul className="flex flex-col">
             <li>
               <Link href={ROUTES.help} className={linkClasses}>
                 {t("footer.helpCenter")}

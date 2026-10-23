@@ -217,6 +217,59 @@ def test_delete_removes_files_and_writes_audit(admin, uploaded, django_capture_o
     assert entry.target_id == uploaded["id"]
 
 
+def test_delete_cleans_cover_and_related_records(
+    admin, uploaded, django_capture_on_commit_callbacks
+):
+    from apps.accounts.models import User
+    from apps.learning.models import PdfBookmark, PdfReadProgress, StudyGoal
+
+    book = PdfBook.objects.get(pk=uploaded["id"])
+    default_storage.save("covers/c-1.png", ContentFile(b"png"))
+    book.cover = "covers/c-1.png"
+    book.save()
+    pdf_key = book.file.name
+    reader = User.objects.create_user(email="reader@example.com", password="x-Pass-12345")
+    PdfReadProgress.objects.create(user=reader, pdf_book=book, last_page=2)
+    PdfBookmark.objects.create(user=reader, pdf_book=book)
+    goal = StudyGoal.objects.create(user=reader, title="Algebra", pdf_book=book)
+    admin.patch(
+        f"{BASE}/{book.pk}/", {"chapters": [{"title": "I bob", "page": 1, "children": []}]}, "json"
+    )
+
+    with django_capture_on_commit_callbacks(execute=True):
+        assert admin.delete(f"{BASE}/{book.pk}/").status_code == 204
+
+    assert not default_storage.exists(pdf_key) and not default_storage.exists("covers/c-1.png")
+    assert not PdfReadProgress.objects.exists() and not PdfBookmark.objects.exists()
+    assert not PdfBook.objects.exists()
+    goal.refresh_from_db()
+    assert goal.pdf_book is None  # reja foydalanuvchiniki: kitobsiz qoladi
+
+
+def test_delete_keeps_book_when_storage_fails(admin, uploaded, monkeypatch):
+    book_id = uploaded["id"]
+    key = PdfBook.objects.get(pk=book_id).file.name
+    broken = MagicMock()
+    broken.delete.side_effect = OSError("r2 down")
+    monkeypatch.setattr(pdf_storage, "default_storage", broken)
+
+    resp = admin.delete(f"{BASE}/{book_id}/")
+
+    assert resp.status_code == 502 and resp.json()["code"] == "storage_error"
+    assert PdfBook.objects.filter(pk=book_id).exists()  # qator o'chmadi
+    assert not AuditLog.objects.filter(action="delete", target_type="pdf_book").exists()
+    monkeypatch.undo()
+    assert default_storage.exists(key)
+
+    assert admin.delete(f"{BASE}/{book_id}/").status_code == 204  # qayta urinish ishlaydi
+    assert not default_storage.exists(key)
+
+
+def test_editor_cannot_delete_book(editor, admin, uploaded):
+    assert editor.delete(f"{BASE}/{uploaded['id']}/").status_code == 403
+    assert PdfBook.objects.filter(pk=uploaded["id"]).exists()
+
+
 def test_upload_and_publish_are_audited(admin, uploaded):
     admin.post(f"{BASE}/{uploaded['id']}/transition/", {"to": "published"}, "json")
 

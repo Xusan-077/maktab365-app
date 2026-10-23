@@ -77,11 +77,10 @@ class PdfBookAdminViewSet(AdminViewSet):
 
     def perform_destroy(self, instance):
         before, label = self.snap(instance), self.label(instance)
-        keys = (instance.file.name if instance.file else "", instance.pending_file)
-        pending_key, pending_upload = instance.pending_file, instance.pending_upload_id
         with transaction.atomic():
             pk = instance.pk
-            instance.delete()
+            # Saqlash xatosida (`storage_error`) tranzaksiya qaytadi: kitob va audit saqlanmaydi.
+            services.delete_book(instance)
             audit.record(
                 self.request.user,
                 "delete",
@@ -91,8 +90,6 @@ class PdfBookAdminViewSet(AdminViewSet):
                 before=before,
                 request=self.request,
             )
-            transaction.on_commit(lambda: storage.abort_upload(pending_key, pending_upload))
-            transaction.on_commit(lambda: services.purge_files(*keys))
 
     @extend_schema(
         operation_id="admin_pdf_books_transition",

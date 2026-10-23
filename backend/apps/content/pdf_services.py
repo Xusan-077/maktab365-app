@@ -198,6 +198,22 @@ def store_proxy(book: PdfBook, file) -> PdfBook:
     return activate(book, key)
 
 
+def delete_book(book: PdfBook) -> None:
+    """Kitob qatorini va saqlashdagi fayllarini (PDF, muqova, tugallanmagan yuklash) o'chiradi.
+
+    Fayllar qator bilan bir tranzaksiyada o'chiriladi: saqlash xatosida (`storage_error`, 502)
+    tranzaksiya qaytadi va kitob saqlanib qoladi. Progress, xatcho'p va mundarija `CASCADE` bilan
+    ketadi; rejalar (`StudyGoal`) kitobsiz qoladi.
+    """
+    keys = [book.file.name if book.file else "", book.cover.name if book.cover else ""]
+    pending_key, pending_upload = book.pending_file, book.pending_upload_id
+    storage.abort_upload(pending_key, pending_upload)
+    keys.append(pending_key)
+    for key in dict.fromkeys(k for k in keys if k):
+        storage.delete_strict(key)
+    book.delete()
+
+
 def purge_files(*keys: str) -> None:
     for key in keys:
         storage.delete(key)

@@ -23,7 +23,13 @@ export function ContinueCard({ item }: { item: PdfLibraryItem }) {
       data-testid="continue-card"
       className="border-border bg-surface flex flex-col gap-4 rounded-xl border p-6 sm:flex-row"
     >
-      <BookCover src={book.cover} className="w-28" />
+      <BookCover
+        src={book.cover}
+        grade={book.grade}
+        subject={book.subject}
+        subjectTitle={getLocalized(book.subject_title, locale)}
+        className="w-28"
+      />
       <div className="flex min-w-0 flex-col items-start gap-3">
         <div className="flex flex-col gap-1.5">
           <h2 id="continue-title" className="text-2xl font-semibold tracking-tight text-balance">

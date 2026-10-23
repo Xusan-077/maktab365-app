@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { FileText, Search } from "lucide-react";
+import { FileText, Search, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { Pagination } from "@/components/admin/Pagination";
@@ -62,6 +62,13 @@ export function PdfCatalogView() {
 
   const [search, setSearch] = useDebouncedSearch(filters.q, (q) =>
     navigate({ ...filters, q, page: undefined }),
+  );
+  const filtered = Boolean(filters.grade || filters.subject || filters.q);
+  const clearButton = (
+    <Button variant="ghost" size="sm" data-testid="pdf-clear" onClick={() => navigate({})}>
+      <X className="size-4" aria-hidden />
+      {t("clear")}
+    </Button>
   );
 
   return (
@@ -154,11 +161,17 @@ export function PdfCatalogView() {
           ))}
         </div>
       ) : books.data.results.length === 0 ? (
-        <EmptyState icon={FileText}>
-          {filters.grade || filters.subject || filters.q ? t("emptyFiltered") : t("empty")}
+        <EmptyState icon={FileText} action={filtered && clearButton}>
+          {filtered ? t("emptyFiltered") : t("empty")}
         </EmptyState>
       ) : (
         <div className="flex flex-col gap-4">
+          <div className="flex min-h-9 items-center justify-between gap-3">
+            <p className="text-muted text-sm tabular-nums" aria-live="polite">
+              {t("count", { count: books.data.count })}
+            </p>
+            {filtered && clearButton}
+          </div>
           <ul
             className={cn(
               "grid grid-cols-2 gap-3 transition-opacity duration-200 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4",

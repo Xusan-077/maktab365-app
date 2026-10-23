@@ -27,6 +27,7 @@ export const KNOWN_ERROR_CODES = [
   "self_action_forbidden",
   "last_admin",
   "role_forbidden",
+  "storage_error",
 ] as const;
 
 export type KnownErrorCode = (typeof KNOWN_ERROR_CODES)[number];

@@ -1,31 +1,40 @@
 "use client";
 
-import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { FileText, Plus, Search } from "lucide-react";
+import { useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { FileText, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { buttonVariants } from "@/components/ui/Button";
+import { BookCover } from "@/components/pdf/BookCover";
+import { Button, buttonVariants } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Select, type SelectOption } from "@/components/ui/Select";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { useToast } from "@/hooks/useToast";
+import { getAdminApi } from "@/lib/admin/api";
 import { parseBookParams, serializeBookParams, withFilter } from "@/lib/admin/list-params";
-import { adminQueries } from "@/lib/admin/queries";
+import { canDelete } from "@/lib/admin/permissions";
+import { ADMIN_ROOT_KEY, adminQueries } from "@/lib/admin/queries";
 import { ADMIN_ROUTES, adminPdfBookPath } from "@/lib/admin/routes";
-import { PAGE_SIZE, type BookListParams } from "@/lib/admin/types";
+import { PAGE_SIZE, type AdminPdfBook, type BookListParams } from "@/lib/admin/types";
 import type { Locale } from "@/lib/i18n/config";
 import { getLocalized } from "@/lib/i18n/localized";
 import { Link, usePathname, useRouter } from "@/lib/i18n/navigation";
 import { formatBytes } from "@/lib/utils/bytes";
 import { cn } from "@/lib/utils/cn";
 import { GRADES } from "@/types/catalog";
+import { useAdminIdentity } from "./AdminRoleProvider";
+import { ConfirmDialog } from "./ConfirmDialog";
 import { Pagination } from "./Pagination";
 import { QueryError } from "./QueryError";
 import { BookStatusBadge } from "./StatusBadge";
+import { useAdminErrorText } from "./useAdminErrorText";
 import { useDebouncedSearch } from "./useDebouncedSearch";
 
 const ALL = "all";
+/** Tor ekranda yashiriladigan ustunlar (jadval gorizontal siljimasin). */
+const HIDDEN_ON_SMALL: readonly string[] = ["pages", "size", "updated"];
 
 function Filters({
   params,
@@ -103,7 +112,27 @@ function Filters({
 export function PdfBooksView() {
   const t = useTranslations("admin.pdfBooks");
   const tg = useTranslations("admin.books");
+  const te = useTranslations("admin.pdfEdit");
+  const tc = useTranslations("admin.common");
   const locale = useLocale() as Locale;
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const { role } = useAdminIdentity();
+  const errorText = useAdminErrorText();
+  const { data: subjects } = useQuery(adminQueries.subjects());
+  const [deleting, setDeleting] = useState<AdminPdfBook | null>(null);
+  const remove = useMutation({
+    mutationFn: (book: AdminPdfBook) => getAdminApi().deletePdfBook(book.id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ADMIN_ROOT_KEY });
+      toast({ variant: "success", title: te("deleted") });
+      setDeleting(null);
+    },
+  });
+  const subjectTitles = useMemo(
+    () => new Map((subjects ?? []).map((s) => [s.slug, getLocalized(s.title, locale)])),
+    [subjects, locale],
+  );
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -150,45 +179,94 @@ export function PdfBooksView() {
               isPlaceholderData && "opacity-60",
             )}
           >
-            <table className="w-full min-w-[40rem] text-sm" data-testid="pdf-books-table">
+            <table className="w-full min-w-[34rem] text-sm" data-testid="pdf-books-table">
               <caption className="sr-only">{t("title")}</caption>
               <thead className="bg-subtle text-muted">
                 <tr>
                   {(
                     ["title", "grade", "subject", "pages", "size", "status", "updated"] as const
                   ).map((column) => (
-                    <th key={column} scope="col" className="px-4 py-2.5 text-left font-medium">
+                    <th
+                      key={column}
+                      scope="col"
+                      className={cn(
+                        "px-4 py-2.5 text-left font-medium",
+                        HIDDEN_ON_SMALL.includes(column) && "hidden md:table-cell",
+                      )}
+                    >
                       {t(`columns.${column}`)}
                     </th>
                   ))}
+                  <th scope="col" className="px-4 py-2.5 text-right font-medium">
+                    <span className="sr-only">{t("columns.actions")}</span>
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-border divide-y">
                 {data.results.map((book) => (
                   <tr key={book.id} className="hover:bg-subtle/60">
                     <td className="px-4 py-3">
-                      <Link
-                        href={adminPdfBookPath(book.id)}
-                        className="text-link font-medium underline-offset-4 hover:underline"
-                      >
-                        {getLocalized(book.title, locale)}
-                      </Link>
+                      <div className="flex items-center gap-3">
+                        <BookCover
+                          src={book.cover_url}
+                          grade={book.grade}
+                          subject={book.subject}
+                          subjectTitle={subjectTitles.get(book.subject) ?? book.subject}
+                          className="w-9"
+                        />
+                        <Link
+                          href={adminPdfBookPath(book.id)}
+                          className="text-link font-medium underline-offset-4 hover:underline"
+                        >
+                          {getLocalized(book.title, locale)}
+                        </Link>
+                      </div>
                     </td>
-                    <td className="px-4 py-3">{tg("gradeLabel", { grade: book.grade })}</td>
-                    <td className="px-4 py-3">{book.subject}</td>
-                    <td className="px-4 py-3 tabular-nums">
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      {tg("gradeLabel", { grade: book.grade })}
+                    </td>
+                    <td className="px-4 py-3">{subjectTitles.get(book.subject) ?? book.subject}</td>
+                    <td className="hidden px-4 py-3 tabular-nums md:table-cell">
                       {book.has_file ? book.page_count : "—"}
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap tabular-nums">
+                    <td className="hidden px-4 py-3 whitespace-nowrap tabular-nums md:table-cell">
                       {book.has_file ? formatBytes(book.size_bytes) : "—"}
                     </td>
                     <td className="px-4 py-3">
                       <BookStatusBadge published={book.status === "published"} />
                     </td>
-                    <td className="text-muted px-4 py-3 whitespace-nowrap">
+                    <td className="text-muted hidden px-4 py-3 whitespace-nowrap md:table-cell">
                       <time dateTime={book.updated_at}>
                         {new Date(book.updated_at).toLocaleDateString(locale)}
                       </time>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex justify-end gap-1">
+                        <Link
+                          href={adminPdfBookPath(book.id)}
+                          aria-label={t("editLabel", { title: getLocalized(book.title, locale) })}
+                          title={tc("edit")}
+                          className={buttonVariants({ variant: "ghost", size: "icon" })}
+                        >
+                          <Pencil className="size-4" aria-hidden />
+                        </Link>
+                        {canDelete(role) && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-label={t("deleteLabel", {
+                              title: getLocalized(book.title, locale),
+                            })}
+                            title={tc("delete")}
+                            onClick={() => {
+                              remove.reset();
+                              setDeleting(book);
+                            }}
+                          >
+                            <Trash2 className="size-4" aria-hidden />
+                          </Button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -203,6 +281,19 @@ export function PdfBooksView() {
           />
         </div>
       )}
+
+      <ConfirmDialog
+        open={deleting !== null}
+        onOpenChange={(open) => !open && setDeleting(null)}
+        title={te("deleteTitle")}
+        description={te("deleteDescription", {
+          title: deleting ? getLocalized(deleting.title, locale) : "",
+        })}
+        confirmLabel={tc("delete")}
+        pending={remove.isPending}
+        error={remove.isError ? errorText(remove.error) : undefined}
+        onConfirm={() => deleting && remove.mutate(deleting)}
+      />
     </>
   );
 }

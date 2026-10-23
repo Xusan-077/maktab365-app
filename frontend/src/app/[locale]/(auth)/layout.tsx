@@ -12,7 +12,10 @@ export default async function AuthLayout({ children, params }: LayoutProps<"/[lo
   setRequestLocale(locale);
 
   return (
-    <div data-layout="auth" className="flex min-h-dvh flex-col items-center gap-2 px-4 py-10">
+    <div
+      data-layout="auth"
+      className="hero-bg flex min-h-dvh flex-col items-center gap-2 px-4 py-10"
+    >
       <Logo height={36} />
       <main id={MAIN_CONTENT_ID} tabIndex={-1} className="w-full max-w-xl focus:outline-none">
         {children}

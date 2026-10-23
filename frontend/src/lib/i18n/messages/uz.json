@@ -11,8 +11,16 @@
     "hero": {
       "title": "Maktab darsliklari — bir joyda, bepul.",
       "subtitle": "1–11-sinf darsliklarini sinf va fan bo'yicha toping va sahifa-sahifa onlayn o'qing. Qayerda to'xtaganingiz eslab qolinadi.",
-      "cta": "Darsliklarni ko'rish",
-      "how": "Qanday ishlaydi?"
+      "how": "Qanday ishlaydi?",
+      "searchLabel": "Darslik nomi bo'yicha qidirish",
+      "searchPlaceholder": "Masalan: Algebra 9",
+      "search": "Qidirish",
+      "gradesLabel": "Sinfni tanlang",
+      "samples": {
+        "algebra": "Algebra",
+        "biologiya": "Biologiya",
+        "tarix": "Tarix"
+      }
     },
     "audience": {
       "title": "O'quvchilar va o'qituvchilar uchun",
@@ -629,7 +637,8 @@
       "pageOf": "{page} / {pages}-sahifa",
       "prev": "Oldingi",
       "next": "Keyingi",
-      "done": "Tayyor"
+      "done": "Tayyor",
+      "edit": "Tahrirlash"
     },
     "bookStatus": {
       "draft": "Yashirin",
@@ -805,7 +814,8 @@
         "env_admin_protected": "Asosiy adminni o'chirib, bloklab yoki rolini tushirib bo'lmaydi.",
         "self_action_forbidden": "O'zingizni o'chira, bloklay yoki rolingizni tushira olmaysiz.",
         "last_admin": "Oxirgi faol adminni o'chirib, bloklab yoki rolini tushirib bo'lmaydi.",
-        "role_forbidden": "Bu rolni berishga ruxsatingiz yo'q."
+        "role_forbidden": "Bu rolni berishga ruxsatingiz yo'q.",
+        "storage_error": "Fayllar saqlashdan o'chirilmadi, kitob saqlanib qoldi. Birozdan keyin qayta urinib ko'ring."
       },
       "fields": {
         "invalid": "Noto'g'ri qiymat",
@@ -865,7 +875,7 @@
       "slugLocked": "Slug o'zgarmaydi.",
       "editLabel": "{name} fanini tahrirlash",
       "deleteLabel": "{name} fanini o'chirish",
-      "hasBooks": "Kitobi bor fanni o'chirib bo'lmaydi.",
+      "hasBooks": "Bu fanda {count} ta kitob bor, shuning uchun o'chirib bo'lmaydi. Avval kitoblarni boshqa fanga o'tkazing yoki o'chiring.",
       "deleteTitle": "Fanni o'chirasizmi?",
       "deleteDescription": "«{name}» fani o'chiriladi. Bu amalni qaytarib bo'lmaydi.",
       "deleted": "Fan o'chirildi"
@@ -887,8 +897,11 @@
         "pages": "Betlar",
         "size": "Hajmi",
         "status": "Holat",
-        "updated": "Yangilangan"
-      }
+        "updated": "Yangilangan",
+        "actions": "Amallar"
+      },
+      "editLabel": "«{title}» kitobini tahrirlash",
+      "deleteLabel": "«{title}» kitobini o'chirish"
     },
     "pdfWizard": {
       "createTitle": "Yangi PDF kitob",
@@ -942,7 +955,7 @@
       "saved": "Saqlandi",
       "deleted": "PDF kitob o'chirildi",
       "deleteTitle": "PDF kitobni o'chirish",
-      "deleteDescription": "«{title}» va uning fayli o'chiriladi. Buni qaytarib bo'lmaydi."
+      "deleteDescription": "«{title}», uning PDF fayli, mundarijasi va o'quvchilarning shu kitob bo'yicha o'qish holati o'chiriladi. Buni qaytarib bo'lmaydi."
     },
     "details": {
       "heading": "Tavsif va mundarija",
@@ -1002,14 +1015,18 @@
       "error": "Darsliklarni yuklab bo'lmadi.",
       "retry": "Qayta urinish",
       "searchLabel": "Darslik nomi bo'yicha qidirish",
-      "searchPlaceholder": "Darslik nomi…"
+      "searchPlaceholder": "Darslik nomi…",
+      "count": "{count} ta darslik",
+      "clear": "Filtrlarni tozalash"
     },
     "card": {
       "meta": "{grade}-sinf · {subject}",
       "pages": "{count} bet",
-      "resume": "{page}-betdan davom etish",
+      "resume": "Davom ettirish: {page}-bet",
       "unverified": "Tekshiruvdan o'tmagan",
-      "read": "O'qilgan"
+      "read": "O'qilgan",
+      "progress": "{page} / {total}-bet o'qilgan",
+      "info": "{size} · {pages} bet"
     },
     "reader": {
       "back": "Darsliklar",
@@ -1036,6 +1053,11 @@
     "description": {
       "more": "Batafsil",
       "less": "Yig'ish"
+    },
+    "cover": {
+      "textbook": "DARSLIK",
+      "grade": "SINF",
+      "pdf": "PDF"
     }
   },
   "library": {

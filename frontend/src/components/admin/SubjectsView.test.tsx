@@ -113,7 +113,7 @@ describe("SubjectsView", () => {
   it("kitobi bor fanni o'chirib bo'lmaydi, kitobsizini tasdiqlagach o'chiradi", async () => {
     setup();
     await screen.findByTestId("subjects-table");
-    const withBooks = screen.getByRole("button", { name: label(t.deleteLabel, "Algebra") });
+    const withBooks = screen.getByRole("button", { name: t.hasBooks.replace("{count}", "2") });
     expect((withBooks as HTMLButtonElement).disabled).toBe(true);
 
     fireEvent.click(screen.getByRole("button", { name: label(t.deleteLabel, "Fizika") }));
