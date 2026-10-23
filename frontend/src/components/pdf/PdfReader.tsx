@@ -7,6 +7,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { useBookStats } from "@/hooks/useBookStats";
 import { usePdfProgress } from "@/hooks/usePdfProgress";
 import { ApiError } from "@/lib/api/types";
 import type { Locale } from "@/lib/i18n/config";
@@ -69,6 +70,7 @@ export function PdfReader({ bookId }: { bookId: string }) {
   const urlPage = total > 0 ? parsePageParam(rawPage, total) : null;
   // URL > saqlangan pozitsiya > 1. Pozitsiya aniqlanguncha `null`.
   const page = total === 0 ? null : (urlPage ?? (progress.ready ? progress.resume : null));
+  useBookStats(book.data && !book.data.unverified ? bookId : undefined, page);
 
   // Boshqa parametrlar (`slides`, `slide`) saqlanadi: sahifa almashganda ko'rgich yopilmaydi.
   const replaceQuery = useCallback(

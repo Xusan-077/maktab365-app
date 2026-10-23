@@ -24,6 +24,7 @@ vi.mock("@/lib/i18n/navigation", () => ({
   ),
 }));
 vi.mock("@/hooks/usePdfProgress", () => ({ usePdfProgress: () => progress.state }));
+vi.mock("@/hooks/useBookStats", () => ({ useBookStats: vi.fn() }));
 vi.mock("@/lib/pdf-books/api", () => ({
   getPdfBooksApi: () => api,
   PDF_PAGE_SIZE: 24,

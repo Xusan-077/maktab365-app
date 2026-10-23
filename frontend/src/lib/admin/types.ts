@@ -17,6 +17,7 @@ export type AdminChapterInput = Schemas["ChapterRequest"];
 export type AdminSlides = NonNullable<AdminChapter["slides"]>;
 export type AdminDashboard = Schemas["AdminDashboard"];
 export type AuditEntry = Schemas["AuditEntry"];
+export type AdminStats = Schemas["StatsSummary"];
 export type UploadResult = Schemas["UploadResult"];
 export type UploadKind = Schemas["UploadRequestKindEnum"];
 export type AdminPdfBook = Schemas["PdfBookAdmin"];

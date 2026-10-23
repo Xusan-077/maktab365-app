@@ -6,6 +6,7 @@ export const ADMIN_ROUTES = {
   pdfBooks: `${ROUTES.admin}/kitoblar`,
   newPdfBook: `${ROUTES.admin}/kitoblar/yangi`,
   subjects: `${ROUTES.admin}/fanlar`,
+  stats: `${ROUTES.admin}/statistika`,
   users: `${ROUTES.admin}/foydalanuvchilar`,
 } as const;
 

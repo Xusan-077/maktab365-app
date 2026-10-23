@@ -4,6 +4,7 @@ import {
   type AdminDashboard,
   type AdminPdfBook,
   type AdminPdfBookInput,
+  type AdminStats,
   type AdminPdfBookPatch,
   type AdminSubject,
   type AdminSubjectInput,
@@ -32,6 +33,11 @@ export class AdminApi {
 
   async dashboard(): Promise<AdminDashboard> {
     return unwrap(await this.client.GET("/api/v1/admin/dashboard/"));
+  }
+
+  /** Anonim sonlar: oxirgi `days` (7 yoki 30) kun. */
+  async stats(days: 7 | 30): Promise<AdminStats> {
+    return unwrap(await this.client.GET("/api/v1/admin/stats/", { params: { query: { days } } }));
   }
 
   async subjects(): Promise<AdminSubject[]> {

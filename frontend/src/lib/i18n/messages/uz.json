@@ -622,7 +622,8 @@
       "books": "Kitoblar",
       "users": "Foydalanuvchilar",
       "signOut": "Chiqish",
-      "subjects": "Fanlar"
+      "subjects": "Fanlar",
+      "stats": "Statistika"
     },
     "roles": {
       "student": "O'quvchi",
@@ -1057,6 +1058,23 @@
       "saved": "Muqova saqlandi",
       "needImage": "Avval rasm tanlang.",
       "needFile": "Birinchi bet uchun avval PDF yuklang."
+    },
+    "stats": {
+      "title": "Statistika",
+      "description": "Kitoblar bo'yicha ochilish va yuklab olishlar soni. Faqat son — shaxsiy ma'lumot yig'ilmaydi.",
+      "period": "Davr",
+      "lastDays": "Oxirgi {days} kun",
+      "opens": "Ochilishlar",
+      "downloads": "Yuklab olishlar",
+      "daily": "Kunlik ochilishlar",
+      "dailyLabel": "Oxirgi {days} kundagi kunlik ochilishlar grafigi",
+      "books": "Kitoblar",
+      "book": "Kitob",
+      "grade": "{grade}-sinf",
+      "topPages": "Eng ko'p o'qilgan betlar",
+      "page": "Bet",
+      "views": "Ko'rishlar",
+      "empty": "Bu davrda hali ma'lumot yo'q."
     }
   },
   "pdfBooks": {

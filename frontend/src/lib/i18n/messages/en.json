@@ -622,7 +622,8 @@
       "books": "Books",
       "users": "Users",
       "signOut": "Sign out",
-      "subjects": "Subjects"
+      "subjects": "Subjects",
+      "stats": "Statistics"
     },
     "roles": {
       "student": "Student",
@@ -1057,6 +1058,23 @@
       "saved": "Cover saved",
       "needImage": "Choose an image first.",
       "needFile": "Upload a PDF first to use its first page."
+    },
+    "stats": {
+      "title": "Statistics",
+      "description": "Opens and downloads per book. Counts only — no personal data is collected.",
+      "period": "Period",
+      "lastDays": "Last {days} days",
+      "opens": "Opens",
+      "downloads": "Downloads",
+      "daily": "Daily opens",
+      "dailyLabel": "Chart of daily opens for the last {days} days",
+      "books": "Books",
+      "book": "Book",
+      "grade": "Grade {grade}",
+      "topPages": "Most read pages",
+      "page": "Page",
+      "views": "Views",
+      "empty": "No data for this period yet."
     }
   },
   "pdfBooks": {

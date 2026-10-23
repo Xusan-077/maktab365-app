@@ -71,6 +71,14 @@ export class PdfBooksApi {
     return unwrap(result);
   }
 
+  /** Anonim statistika hodisasi (ochilish yoki sahifa); javobsiz, xato bo'lsa jim. */
+  async recordStat(id: string, event: { kind: "open" } | { kind: "page"; page: number }) {
+    await this.client.POST("/api/v1/pdf-books/{id}/stats/", {
+      params: { path: { id } },
+      body: event,
+    });
+  }
+
   /** Kitob slug bo'yicha (`9-sinf-algebra`). */
   async bookBySlug(slug: string): Promise<PdfBookDetail> {
     const result = await this.client.GET("/api/v1/pdf-books/by-slug/{slug}/", {
