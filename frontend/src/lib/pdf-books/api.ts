@@ -60,10 +60,10 @@ export class PdfBooksApi {
     return unwrap(result);
   }
 
-  /** PDF darsligi bor fanlar (`books_count` — PDF soni). */
-  async subjects(grade?: number): Promise<PdfSubject[]> {
+  /** PDF darsligi bor fanlar (`books_count` — PDF soni); `includeEmpty` — admin paneldagi barcha fanlar. */
+  async subjects(grade?: number, includeEmpty = false): Promise<PdfSubject[]> {
     const result = await this.client.GET("/api/v1/pdf-books/subjects/", {
-      params: { query: { grade } },
+      params: { query: { grade, include_empty: includeEmpty || undefined } },
     });
     return unwrap(result);
   }

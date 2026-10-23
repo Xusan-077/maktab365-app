@@ -2,7 +2,9 @@ import { Link } from "@/lib/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { ROUTES } from "@/lib/utils/routes";
 import { Logo } from "./Logo";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 import { NAV_ITEMS } from "./nav-items";
+import { TextSizeControl } from "./TextSizeControl";
 
 const linkClasses =
   "inline-flex min-h-11 items-center rounded-md text-sm text-muted transition-colors hover:text-foreground";
@@ -52,6 +54,11 @@ export function SiteFooter() {
             </li>
           </ul>
         </nav>
+        {/* Mobilda sarlavhada til va matn hajmi yo'q — shu yerda */}
+        <div className="flex flex-wrap items-center gap-3 md:col-span-3 lg:hidden">
+          <LanguageSwitcher />
+          <TextSizeControl />
+        </div>
       </div>
       <div className="border-border border-t">
         <p className="text-muted mx-auto max-w-6xl px-4 py-4 text-sm sm:px-6">

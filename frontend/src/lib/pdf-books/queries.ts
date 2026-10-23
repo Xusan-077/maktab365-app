@@ -10,7 +10,8 @@ const PUBLIC_STALE_MS = 60_000;
 export const pdfKeys = {
   root: ["pdf-books"] as const,
   list: (filters: PdfBookFilters) => ["pdf-books", "list", filters] as const,
-  subjects: (grade?: number) => ["pdf-books", "subjects", grade ?? null] as const,
+  subjects: (grade?: number, includeEmpty = false) =>
+    ["pdf-books", "subjects", grade ?? null, includeEmpty] as const,
   book: (id: string) => ["pdf-books", "book", id] as const,
   bookBySlug: (slug: string) => ["pdf-books", "book-by-slug", slug] as const,
   chapterSearch: (q: string) => ["pdf-books", "chapter-search", q] as const,
@@ -35,10 +36,10 @@ export const pdfQueries = {
       staleTime: PUBLIC_STALE_MS,
       placeholderData: (previous) => previous,
     }),
-  subjects: (grade?: number) =>
+  subjects: (grade?: number, includeEmpty = false) =>
     queryOptions({
-      queryKey: pdfKeys.subjects(grade),
-      queryFn: () => getPdfBooksApi().subjects(grade),
+      queryKey: pdfKeys.subjects(grade, includeEmpty),
+      queryFn: () => getPdfBooksApi().subjects(grade, includeEmpty),
       staleTime: PUBLIC_STALE_MS,
     }),
   book: (id: string) =>

@@ -72,15 +72,26 @@ class PdfBookListView(PublicView, generics.ListAPIView):
 class PdfBookSubjectListView(PublicView, APIView):
     @extend_schema(
         operation_id="pdf_books_subjects_list",
-        parameters=[GRADE_PARAM],
+        parameters=[
+            GRADE_PARAM,
+            OpenApiParameter(
+                "include_empty",
+                OpenApiTypes.BOOL,
+                description="true — kitobi yo'q fanlar ham qaytadi (admin paneldagi barcha fanlar)",
+            ),
+        ],
         responses=SubjectSerializer(many=True),
-        summary="PDF darsligi bor fanlar (ixtiyoriy: sinf bo'yicha), `books_count` — PDF soni",
+        summary=(
+            "PDF darsligi bor fanlar (ixtiyoriy: sinf bo'yicha), `books_count` — PDF soni; "
+            "`include_empty=true` — admin paneldagi barcha fanlar"
+        ),
         tags=TAGS,
     )
     @public_cached
     def get(self, request):
         visible = visible_pdf_books(request)
-        if (grade := _int_param(request, "grade")) is not None:
+        grade = _int_param(request, "grade")
+        if grade is not None:
             visible = visible.filter(grade=grade)
         counts = dict(
             visible.order_by()
@@ -88,9 +99,15 @@ class PdfBookSubjectListView(PublicView, APIView):
             .annotate(n=Count("pk"))
             .values_list("subject_id", "n")
         )
-        subjects = [s for s in Subject.objects.order_by("order", "slug") if s.pk in counts]
+        subjects = Subject.objects.order_by("order", "slug")
+        if request.query_params.get("include_empty") == "true":
+            if grade is not None:
+                subjects = subjects.filter(grades__contains=[grade])
+        else:
+            subjects = [s for s in subjects if s.pk in counts]
+        subjects = list(subjects)
         for subject in subjects:
-            subject.books_count = counts[subject.pk]
+            subject.books_count = counts.get(subject.pk, 0)
         return Response(SubjectSerializer(subjects, many=True).data)
 
 

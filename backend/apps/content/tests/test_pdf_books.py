@@ -406,6 +406,24 @@ def test_subjects_with_pdf_books(catalog, anon, algebra):
     assert {s["slug"] for s in everything} == {"algebra", "geometriya"}
 
 
+def test_subjects_include_empty_lists_all_admin_subjects(catalog, anon, algebra):
+    geometry = catalog.subject("geometriya")
+    catalog.pdf_book(algebra, 9)
+    geometry.grades = [8]
+    geometry.save()
+
+    everything = anon.get(f"{PUBLIC}/subjects/", {"include_empty": "true"}).json()
+    nine = anon.get(f"{PUBLIC}/subjects/", {"include_empty": "true", "grade": 9}).json()
+    eight = anon.get(f"{PUBLIC}/subjects/", {"include_empty": "true", "grade": 8}).json()
+
+    assert {(s["slug"], s["books_count"]) for s in everything} == {
+        ("algebra", 1),
+        ("geometriya", 0),
+    }
+    assert [s["slug"] for s in nine] == ["algebra"]
+    assert {(s["slug"], s["books_count"]) for s in eight} == {("algebra", 0), ("geometriya", 0)}
+
+
 def test_list_searches_titles_and_hides_drafts(catalog, anon, algebra):
     catalog.pdf_book(algebra, 9, title={"uz": "Matematika darsligi"})
     catalog.pdf_book(algebra, 9, "draft", title={"uz": "Matematika qoralama"})

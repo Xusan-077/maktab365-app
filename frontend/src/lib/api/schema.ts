@@ -809,7 +809,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * PDF darsligi bor fanlar (ixtiyoriy: sinf bo'yicha), `books_count` — PDF soni
+         * PDF darsligi bor fanlar (ixtiyoriy: sinf bo'yicha), `books_count` — PDF soni; `include_empty=true` — admin paneldagi barcha fanlar
          * @description Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi o'rniga kesh ishlaydi.
          */
         get: operations["pdf_books_subjects_list"];
@@ -3617,6 +3617,8 @@ export interface operations {
             query?: {
                 /** @description Sinf (1–11) */
                 grade?: number;
+                /** @description true — kitobi yo'q fanlar ham qaytadi (admin paneldagi barcha fanlar) */
+                include_empty?: boolean;
             };
             header?: never;
             path?: never;

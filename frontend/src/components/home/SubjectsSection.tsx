@@ -49,7 +49,7 @@ export function SubjectsGrid() {
   const t = useTranslations("home.subjects");
   const locale = useLocale() as Locale;
   const [grade, setGrade] = useState<number | undefined>();
-  const subjects = useQuery(pdfQueries.subjects(grade));
+  const subjects = useQuery(pdfQueries.subjects(grade, true));
 
   return (
     <>

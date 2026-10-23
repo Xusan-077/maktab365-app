@@ -1527,13 +1527,19 @@ paths:
       description: Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi
         o'rniga kesh ishlaydi.
       summary: 'PDF darsligi bor fanlar (ixtiyoriy: sinf bo''yicha), `books_count`
-        — PDF soni'
+        — PDF soni; `include_empty=true` — admin paneldagi barcha fanlar'
       parameters:
       - in: query
         name: grade
         schema:
           type: integer
         description: Sinf (1–11)
+      - in: query
+        name: include_empty
+        schema:
+          type: boolean
+        description: true — kitobi yo'q fanlar ham qaytadi (admin paneldagi barcha
+          fanlar)
       tags:
       - content
       security:
