@@ -160,7 +160,8 @@
     "help": "Yordam va aloqa",
     "helpCenter": "Yordam markazi",
     "contact": "Biz bilan aloqa",
-    "note": "Barcha darsliklar bepul."
+    "note": "Barcha darsliklar bepul.",
+    "offline": "Oflayn kitoblar"
   },
   "devApi": {
     "title": "API holati",

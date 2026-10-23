@@ -8,7 +8,7 @@ Bitta Django monolit: Python 3.12 · Django 5.2 · DRF · drf-spectacular · sim
 
 - `config/settings/{base,dev,prod,test}.py` — barcha sozlama env orqali (`django-environ`, `.env`). `dev` default (`manage.py`), `prod` — wsgi/asgi, `test` — pytest.
 - `config/{urls,celery,asgi,wsgi}.py`.
-- `apps/core` — qayta ishlatiladigan poydevor (quyida). `apps/accounts` — foydalanuvchi va profil (quyida). `apps/content` — kontent (quyida). `apps/learning` — o'qish jarayoni (quyida). `apps/support` — murojaatlar. `apps/analytics` — hozircha bo'sh.
+- `apps/core` — qayta ishlatiladigan poydevor (quyida). `apps/accounts` — foydalanuvchi va profil (quyida). `apps/content` — kontent (quyida). `apps/learning` — o'qish jarayoni (quyida). `apps/support` — murojaatlar. `apps/analytics` — kitob/sahifa kunlik sanagichlari (anonim, faqat son): `BookDailyStat`, `PageDailyStat`, `POST pdf-books/{id}/stats/` (throttle `STATS_THROTTLE_RATE`), admin `GET /admin/stats/?days=7|30`, `manage.py purge_stats`.
 
 ## `apps/core` poydevori
 
@@ -112,3 +112,4 @@ Bitta Django monolit: Python 3.12 · Django 5.2 · DRF · drf-spectacular · sim
 - Yuklab olish: `GET pdf-books/{id}/download/` → `{url, filename, expires_in}` (S3: `ResponseContentDisposition: attachment` bilan imzolangan URL; dev: `file/?token=…&download=<nom>`), `PdfBook.allow_download=False` bo'lsa 403 `download_disabled` (o'qish ochiq qoladi). `download_count` har so'rovda `F()+1` (kesh versiyasiga tegmaydi). Fayl nomi `pdf_storage.download_filename`.
 - `PdfReadProgress` (`apps/learning`): oxirgi sahifa; qat'iy yangiroq mijoz vaqti yutadi (idempotent), merge `pdf_progress`.
 - `create_admin` (qat'iy, env bo'sh bo'lsa xato) va `ensure_admin` (jim) umumiy mantiq: `accounts/admin_bootstrap.py`.
+- Qo'shimcha (M14): `POST /admin/pdf-books/{id}/duplicate/` (qoralama nusxa: tavsif + mundarija, fayl ko'chirilmaydi), `GET pdf-books/search/?q=` (mundarija bo'limlari), `apps/learning` `PdfAnnotation` (`me/pdf-annotations/`, `services/annotations.py`, merge `pdf_annotations`), `content/bot_views.py` — `GET /api/v1/bot/books/` (`BOT_API_TOKEN` bo'sh bo'lsa 404, `X-Bot-Token`).

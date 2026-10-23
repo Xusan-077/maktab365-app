@@ -160,7 +160,8 @@
     "help": "Help and contact",
     "helpCenter": "Help centre",
     "contact": "Contact us",
-    "note": "All textbooks are free."
+    "note": "All textbooks are free.",
+    "offline": "Offline books"
   },
   "devApi": {
     "title": "API status",

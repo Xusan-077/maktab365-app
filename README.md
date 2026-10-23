@@ -95,6 +95,30 @@ Yoki ildizdan: `make dev`. Boshqa buyruqlar: `make test`, `make lint`, `make sch
   yuqoriroq `AUTH_THROTTLE_RATE` / `SUPPORT_THROTTLE_RATE` bilan (alohida baza, masalan `maktab365_e2e`). Global
   setup `seed_subjects` ni o'zi bajaradi (`E2E_SKIP_SEED=1` — o'tkazib yuborish).
 
+**M14 (sinf va kitob sahifalari, muqova, o'qish qulayliklari, PWA):**
+
+- **Manzillar:** `/darsliklar` (katalog), `/darsliklar/{sinf}` (1–11; sarlavha, ko'rsatkichlar, fan guruhi tablari,
+  qidiruv, `?guruh=aniq|tabiiy|tillar|ijtimoiy|sanat&q=`), `/darsliklar/{sinf}/{slug}` (kitob sahifasi: pasport, mundarija,
+  namuna, o'xshash kitoblar, yuklab olish, ulashish) va `/darsliklar/{sinf}/{slug}/oqish?page=N` (o'qish oynasi). Eski
+  `?grade=N` va `/darsliklar/<uuid>[?page=N]` havolalari `src/proxy.ts` da 308 bilan yangi manzilga o'tadi. SEO:
+  `generateMetadata`, OpenGraph, JSON-LD (BreadcrumbList, ItemList, Book), `sitemap.xml`, `robots.txt`.
+- **Muqova:** admin kitob qo'shish/tahrirlashda `Avtomatik | PDF ning 1-beti | O'z rasmi` (`cover_mode`); rasm ~600px WebP/JPEG
+  ga siqiladi, almashtirilgan eski rasm R2 dan tozalanadi, audit yoziladi; rasm yuklanmasa generativ muqova zaxirada.
+- **Backend:** `PdfBook.slug/language/allow_download/download_count`, `Subject.group`; `GET pdf-books/by-slug/{slug}/`,
+  `GET pdf-books/{id}/download/` (imzolangan `attachment`, kitobda o'chirib qo'yish mumkin), `GET pdf-books/search/`
+  (mundarija bo'limlari), anonim sanagich `POST pdf-books/{id}/stats/` va admin `GET /admin/stats/` (faqat son),
+  `POST /admin/pdf-books/{id}/duplicate/`, belgilar `me/pdf-annotations/`, Telegram bot API `GET /bot/books/`
+  (`BOT_API_TOKEN` bilan yoqiladi, `backend/README.md`). Migratsiyalar faqat qo'shuvchi (`content 0008–0011`,
+  `analytics 0001`, `learning 0006`); predeploy da `migrate` avtomatik.
+- **O'qish oynasi:** sahifa foni (oddiy/sepiya/qorong'i), butun sahifa/kenglikka moslash, ikki marta bosib zoom, to'liq
+  ekran, klaviatura yorliqlari (`?`), kitob ichida qidiruv (Ctrl+F; matn qatlami yo'q skaner PDF uchun aniq xabar),
+  3 rangli belgilar va qisqa eslatma (mehmonda brauzerda, kirganda serverda; kirgach birlashadi).
+- **Boshqa:** bosh sahifada «Davom ettirish» va «Oxirgi ko'rilganlar» (mehmon ham), global qidiruv (Ctrl+K: kitob, sinf, fan,
+  mundarija bo'limi) sayt sarlavhasida ham, admin: statistika (`/admin/statistika`), ommaviy yuklash
+  (`/admin/kitoblar/ommaviy`), nusxalash va qoralamani o'quvchi ko'rinishida ko'rish (`/admin/kitoblar/{id}/korish`).
+- **PWA:** `public/sw.js` (faqat production): o'tgan sahifalar va ochiq kitob ma'lumoti keshi, `offline.html`;
+  «Oflayn saqlash» butun PDF ni Cache Storage ga yozadi (hajm/xotira ogohlantirishi), boshqaruv `/oflayn`.
+
 **M8 (o'qish jarayoni, PDF darsliklar uchun):** mavzu tizimi olib tashlangani uchun M8 matni (mavzu/mashq progressi)
 PDF kitoblarga moslab bajarildi. Backend `apps/learning` (hammasi login talab qiladi, `/api/v1/me/`):
 

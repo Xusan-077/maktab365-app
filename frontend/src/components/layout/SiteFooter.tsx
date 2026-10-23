@@ -28,6 +28,11 @@ export function SiteFooter() {
                 </Link>
               </li>
             ))}
+            <li>
+              <Link href={ROUTES.offline} className={linkClasses}>
+                {t("footer.offline")}
+              </Link>
+            </li>
           </ul>
         </nav>
         <nav aria-labelledby="footer-help">
