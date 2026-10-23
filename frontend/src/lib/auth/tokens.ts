@@ -51,7 +51,8 @@ export function toAccountState(me: Me): AccountState {
   return {
     role: me.role === "student" ? "student" : "teacher",
     staff: staffRoleOf(me.role),
-    onboarded: Boolean(me.profile.onboarded_at),
+    // Admin faqat admin panel bilan ishlaydi: o'quvchi/o'qituvchi onboarding'i unga kerak emas.
+    onboarded: me.role === "admin" || Boolean(me.profile.onboarded_at),
     emailVerified: me.email_verified,
   };
 }

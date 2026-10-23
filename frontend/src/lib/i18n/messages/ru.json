@@ -605,7 +605,6 @@
       "dashboard": "Dashboard",
       "books": "Книги",
       "users": "Users",
-      "site": "Go to site",
       "signOut": "Sign out",
       "subjects": "Предметы"
     },
@@ -629,7 +628,8 @@
       "pagination": "Pagination",
       "pageOf": "Page {page} of {pages}",
       "prev": "Previous",
-      "next": "Next"
+      "next": "Next",
+      "done": "Готово"
     },
     "bookStatus": {
       "draft": "Hidden",
@@ -657,14 +657,19 @@
         "delete": "deleted",
         "transition": "changed the status of",
         "reorder": "reordered",
-        "upload": "uploaded"
+        "upload": "uploaded",
+        "block": "заблокировал:",
+        "unblock": "разблокировал:",
+        "role_change": "изменил роль:"
       },
       "targets": {
         "book": "book",
         "chapter": "chapter",
         "topic": "topic",
         "subject": "subject",
-        "file": "file"
+        "file": "file",
+        "user": "пользователь",
+        "pdf_book": "PDF-книга"
       }
     },
     "books": {
@@ -684,26 +689,94 @@
       "en": "English"
     },
     "users": {
-      "title": "Users",
-      "description": "Registered users (read-only).",
-      "search": "Search by email",
-      "loading": "Loading users",
-      "empty": "No users found.",
-      "noEmail": "No email",
-      "active": "Active",
-      "inactive": "Inactive",
+      "title": "Пользователи",
+      "description": "Добавляйте пользователей, меняйте роли, блокируйте и удаляйте их.",
+      "search": "Поиск по имени или email",
+      "loading": "Загрузка пользователей",
+      "empty": "Пользователей пока нет.",
+      "emptyFiltered": "По этим фильтрам пользователей не найдено.",
+      "noEmail": "Нет email",
+      "new": "Добавить пользователя",
+      "envBadge": "Главный админ",
+      "selfBadge": "Вы",
+      "filters": {
+        "role": "Роль",
+        "status": "Статус",
+        "allRoles": "Все роли",
+        "allStatuses": "Все статусы"
+      },
+      "status": {
+        "active": "Активен",
+        "blocked": "Заблокирован"
+      },
       "columns": {
+        "user": "Пользователь",
+        "role": "Роль",
+        "joined": "Зарегистрирован",
+        "status": "Статус",
+        "actions": "Действия"
+      },
+      "actions": {
+        "role": "Изменить роль",
+        "roleFor": "Изменить роль: {name}",
+        "block": "Заблокировать",
+        "blockFor": "Заблокировать: {name}",
+        "unblock": "Разблокировать",
+        "unblockFor": "Разблокировать: {name}",
+        "delete": "Удалить",
+        "deleteFor": "Удалить: {name}"
+      },
+      "protected": {
+        "env": "Главного админа изменить нельзя (он задаётся через env в Railway).",
+        "self": "Нельзя изменять самого себя."
+      },
+      "blockDialog": {
+        "title": "Заблокировать пользователя?",
+        "description": "{email} не сможет войти, все его сессии будут завершены. Позже можно разблокировать."
+      },
+      "unblockDialog": {
+        "title": "Разблокировать?",
+        "description": "{email} снова сможет войти в систему."
+      },
+      "deleteDialog": {
+        "title": "Удалить пользователя?",
+        "description": "Аккаунт {email} и его личные данные будут удалены. Это действие необратимо."
+      },
+      "toast": {
+        "blocked": "Пользователь заблокирован",
+        "unblocked": "Пользователь разблокирован",
+        "deleted": "Пользователь удалён"
+      },
+      "create": {
+        "title": "Новый пользователь",
         "email": "Email",
-        "role": "Role",
-        "status": "Status",
-        "joined": "Joined"
+        "name": "Имя (необязательно)",
+        "password": "Пароль (необязательно)",
+        "passwordHint": "Если оставить пустым, будет создан временный пароль и показан один раз.",
+        "role": "Роль",
+        "createdTitle": "Пользователь создан",
+        "createdText": "Аккаунт {email} создан.",
+        "temporaryPassword": "Временный пароль",
+        "temporaryPasswordNote": "Пароль показывается только сейчас. Скопируйте его и безопасно передайте пользователю.",
+        "copy": "Копировать",
+        "copied": "Скопировано"
+      },
+      "role": {
+        "title": "Изменение роли",
+        "description": "Текущая роль {email}: {role}.",
+        "label": "Новая роль",
+        "confirm": "Сменить роль на «{role}»"
       }
     },
     "validation": {
       "required": "Required field",
       "slugInvalid": "Lowercase Latin letters, digits and hyphens only (e.g. vietas-theorem)",
       "yearInvalid": "Enter a year between 1990 and 2100",
-      "blocksInvalid": "Blocks must be a valid JSON array"
+      "blocksInvalid": "Blocks must be a valid JSON array",
+      "emailInvalid": "Неверный email",
+      "passwordTooShort": "Пароль — не менее 8 символов",
+      "passwordTooLong": "Пароль слишком длинный",
+      "nameTooLong": "Имя слишком длинное (до 60 символов)"
     },
     "errors": {
       "generic": "The action failed. Please try again.",
@@ -728,7 +801,11 @@
         "upload_incomplete": "Файл загружен не полностью. Попробуйте ещё раз.",
         "direct_upload_required": "В этой среде файлы идут напрямую в хранилище. Обновите страницу.",
         "invalid_parts": "Загруженные части некорректны. Попробуйте ещё раз.",
-        "upload_failed": "Не удалось загрузить файл. Проверьте соединение и попробуйте ещё раз."
+        "upload_failed": "Не удалось загрузить файл. Проверьте соединение и попробуйте ещё раз.",
+        "env_admin_protected": "Главного админа нельзя удалить, заблокировать или понизить.",
+        "self_action_forbidden": "Нельзя удалить, заблокировать или понизить самого себя.",
+        "last_admin": "Последнего активного админа нельзя удалить, заблокировать или понизить.",
+        "role_forbidden": "У вас нет права назначать эту роль."
       },
       "fields": {
         "invalid": "Invalid value",
@@ -736,7 +813,12 @@
         "slug_taken": "This slug is already taken",
         "slug_immutable": "The slug cannot be changed",
         "book_immutable": "The book cannot be changed",
-        "invalid_file": "File not found, upload it again"
+        "invalid_file": "File not found, upload it again",
+        "email_taken": "Этот email уже занят",
+        "password_too_short": "Пароль слишком короткий (не менее 8 символов)",
+        "password_too_common": "Слишком простой пароль",
+        "password_entirely_numeric": "Пароль не должен состоять только из цифр",
+        "password_too_similar": "Пароль слишком похож на email"
       }
     },
     "pdfUpload": {

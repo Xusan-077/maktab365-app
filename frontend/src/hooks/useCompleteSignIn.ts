@@ -15,11 +15,16 @@ export function useCompleteSignIn() {
   return useCallback(
     async (callbackUrl?: string | null) => {
       const user = (await getSession())?.user;
+      const callback = safeCallbackPath(callbackUrl);
       const target =
-        user?.onboarded === false
-          ? `/${locale}${ROUTES.onboarding}`
-          : (safeCallbackPath(callbackUrl) ??
-            `/${locale}${dashboardPath(user?.role ?? "student")}`);
+        user?.staff === "admin"
+          ? // Admin faqat admin panelda: boshqa `callbackUrl` e'tiborsiz (proxy baribir qaytaradi).
+            callback?.startsWith(`/${locale}${ROUTES.admin}`)
+            ? callback
+            : `/${locale}${ROUTES.admin}`
+          : user?.onboarded === false
+            ? `/${locale}${ROUTES.onboarding}`
+            : (callback ?? `/${locale}${dashboardPath(user?.role ?? "student")}`);
       router.replace(target);
       router.refresh();
     },

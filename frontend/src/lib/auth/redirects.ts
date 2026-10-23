@@ -19,6 +19,8 @@ const isProtected = (path: string) => PROTECTED_ROUTES.some((route) => isUnder(p
 /**
  * Proxy yo'naltirishi (til prefiksisiz natija yoki `null`):
  * - kirmagan: himoyalangan sahifa va onboarding → `/kirish?callbackUrl=…`;
+ * - admin (`staff: "admin"`): faqat `/admin` — qolgan hamma sahifa (sayt, kabinet, ustoz, kirish,
+ *   onboarding) → `/admin`;
  * - sessiya (`onboarded`/`role` sessiyada): onboarding tugamagan → `/onboarding`;
  *   tugagan → kirish/kod/onboarding sahifasidan va boshqa rol paneli → o'z paneli (`/kabinet` | `/ustoz`).
  */
@@ -31,6 +33,7 @@ export function resolveAuthRedirect({ path, returnTo, session }: RedirectInput):
   }
 
   const user = session.user;
+  if (user?.staff === "admin") return isUnder(path, ROUTES.admin) ? null : ROUTES.admin;
   if (typeof user?.onboarded !== "boolean" || !user.role) return null;
   const onAuthPage =
     isUnder(path, ROUTES.login) || isUnder(path, ROUTES.register) || isUnder(path, ROUTES.otp);

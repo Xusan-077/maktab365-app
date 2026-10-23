@@ -58,6 +58,37 @@ describe("resolveAuthRedirect", () => {
     expect(go("/kabinet", { user: {} })).toBeNull();
   });
 
+  it("admin: faqat /admin — sayt, kabinet, ustoz va kirish sahifalaridan /admin ga qaytadi", () => {
+    const admin: RedirectSession = { user: { role: "teacher", staff: "admin", onboarded: true } };
+    for (const path of [
+      "/",
+      "/darsliklar",
+      "/darsliklar/abc",
+      "/kabinet",
+      "/kabinet/fanlar",
+      "/ustoz",
+      "/sozlamalar",
+      "/kirish",
+      "/onboarding",
+      "/yordam",
+    ]) {
+      expect(go(path, admin)).toBe("/admin");
+    }
+    for (const path of ["/admin", "/admin/kitoblar", "/admin/foydalanuvchilar"]) {
+      expect(go(path, admin)).toBeNull();
+    }
+    // Admin onboarding'dan o'tmaydi (hatto `onboarded` false bo'lsa ham)
+    const fresh: RedirectSession = { user: { role: "teacher", staff: "admin", onboarded: false } };
+    expect(go("/admin", fresh)).toBeNull();
+    expect(go("/kabinet", fresh)).toBe("/admin");
+  });
+
+  it("editor admin emas: sayt va panellarga kirishda cheklanmaydi", () => {
+    const editor: RedirectSession = { user: { role: "teacher", staff: "editor", onboarded: true } };
+    expect(go("/darsliklar", editor)).toBeNull();
+    expect(go("/ustoz", editor)).toBeNull();
+  });
+
   it("/admin: kirmagan → kirish; editor/admin o'z joyida, panel redirect'i tegmaydi", () => {
     expect(go("/admin/kitoblar", null)).toBe("/kirish?callbackUrl=%2Fuz%2Fadmin%2Fkitoblar");
     const editor: RedirectSession = { user: { role: "teacher", staff: "editor", onboarded: true } };

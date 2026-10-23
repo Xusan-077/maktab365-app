@@ -1,4 +1,5 @@
 import { boolean, number, object, string } from "yup";
+import { PASSWORD_MAX, PASSWORD_MIN } from "./auth";
 
 /** Kitob/bob/mavzu slug'i: kichik lotin harflari, raqamlar va tire. */
 export const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -74,5 +75,22 @@ export function createPdfBookSchema() {
     subject: string().required("required"),
     grade: string().required("required"),
     title: localized(),
+  });
+}
+
+export const USER_NAME_MAX = 60;
+
+/** Admin yaratadigan foydalanuvchi: parol bo'sh bo'lsa backend vaqtinchalik parol yaratadi. */
+export function createUserSchema() {
+  return object({
+    email: string().trim().required("required").email("emailInvalid").max(254, "emailInvalid"),
+    display_name: string().trim().max(USER_NAME_MAX, "nameTooLong").default(""),
+    password: string()
+      .default("")
+      .test("min", "passwordTooShort", (value) => !value || value.length >= PASSWORD_MIN)
+      .max(PASSWORD_MAX, "passwordTooLong"),
+    role: string()
+      .oneOf(["student", "teacher", "editor", "admin"], "required")
+      .required("required"),
   });
 }

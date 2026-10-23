@@ -6,6 +6,13 @@ export type AdminSubject = Schemas["SubjectAdmin"];
 export type AdminSubjectInput = Schemas["SubjectAdminRequest"];
 export type AdminSubjectPatch = Schemas["PatchedSubjectAdminRequest"];
 export type AdminUser = Schemas["UserAdmin"];
+export type AdminUserCreated = Schemas["UserAdminCreated"];
+export type AdminUserInput = Schemas["UserAdminCreateRequest"];
+export type AdminUserPatch = Schemas["PatchedUserAdminUpdateRequest"];
+export type UserRole = AdminUser["role"];
+export type UserStatus = "active" | "blocked";
+export type AdminChapter = Schemas["Chapter"];
+export type AdminChapterInput = Schemas["ChapterRequest"];
 export type AdminDashboard = Schemas["AdminDashboard"];
 export type AuditEntry = Schemas["AuditEntry"];
 export type UploadResult = Schemas["UploadResult"];
@@ -31,6 +38,14 @@ export interface BookListParams {
   subject?: string;
   status?: BookStatus;
   ordering?: string;
+}
+
+/** Foydalanuvchilar ro'yxati so'rovi (URL search params bilan bir xil shakl, `user-params.ts`). */
+export interface UserListParams {
+  page?: number;
+  search?: string;
+  role?: UserRole;
+  status?: UserStatus;
 }
 
 export const PAGE_SIZE = 20;

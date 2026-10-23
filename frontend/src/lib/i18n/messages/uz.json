@@ -605,7 +605,6 @@
       "dashboard": "Bosh sahifa",
       "books": "Kitoblar",
       "users": "Foydalanuvchilar",
-      "site": "Saytga o'tish",
       "signOut": "Chiqish",
       "subjects": "Fanlar"
     },
@@ -629,7 +628,8 @@
       "pagination": "Sahifalash",
       "pageOf": "{page} / {pages}-sahifa",
       "prev": "Oldingi",
-      "next": "Keyingi"
+      "next": "Keyingi",
+      "done": "Tayyor"
     },
     "bookStatus": {
       "draft": "Yashirin",
@@ -657,14 +657,19 @@
         "delete": "o'chirdi:",
         "transition": "holatini o'zgartirdi:",
         "reorder": "tartibini o'zgartirdi:",
-        "upload": "yukladi:"
+        "upload": "yukladi:",
+        "block": "blokladi:",
+        "unblock": "blokdan chiqardi:",
+        "role_change": "rolini o'zgartirdi:"
       },
       "targets": {
         "book": "kitob",
         "chapter": "bob",
         "topic": "mavzu",
         "subject": "fan",
-        "file": "fayl"
+        "file": "fayl",
+        "user": "foydalanuvchi",
+        "pdf_book": "PDF kitob"
       }
     },
     "books": {
@@ -685,25 +690,93 @@
     },
     "users": {
       "title": "Foydalanuvchilar",
-      "description": "Ro'yxatdan o'tgan foydalanuvchilar (faqat ko'rish).",
-      "search": "Email bo'yicha qidirish",
+      "description": "Foydalanuvchilarni qo'shing, rolini o'zgartiring, bloklang yoki o'chiring.",
+      "search": "Ism yoki email bo'yicha qidirish",
       "loading": "Foydalanuvchilar yuklanmoqda",
-      "empty": "Foydalanuvchi topilmadi.",
+      "empty": "Hali foydalanuvchi yo'q.",
+      "emptyFiltered": "Bu filtrlar bo'yicha foydalanuvchi topilmadi.",
       "noEmail": "Email yo'q",
-      "active": "Faol",
-      "inactive": "Nofaol",
-      "columns": {
-        "email": "Email",
+      "new": "Foydalanuvchi qo'shish",
+      "envBadge": "Asosiy admin",
+      "selfBadge": "Siz",
+      "filters": {
         "role": "Rol",
         "status": "Holat",
-        "joined": "Ro'yxatdan o'tgan"
+        "allRoles": "Barcha rollar",
+        "allStatuses": "Barcha holatlar"
+      },
+      "status": {
+        "active": "Faol",
+        "blocked": "Bloklangan"
+      },
+      "columns": {
+        "user": "Foydalanuvchi",
+        "role": "Rol",
+        "joined": "Ro'yxatdan o'tgan",
+        "status": "Holat",
+        "actions": "Amallar"
+      },
+      "actions": {
+        "role": "Rolni o'zgartirish",
+        "roleFor": "{name} rolini o'zgartirish",
+        "block": "Bloklash",
+        "blockFor": "{name} ni bloklash",
+        "unblock": "Blokdan chiqarish",
+        "unblockFor": "{name} ni blokdan chiqarish",
+        "delete": "O'chirish",
+        "deleteFor": "{name} ni o'chirish"
+      },
+      "protected": {
+        "env": "Asosiy adminni o'zgartirib bo'lmaydi (Railway env orqali boshqariladi).",
+        "self": "O'zingizni o'zgartira olmaysiz."
+      },
+      "blockDialog": {
+        "title": "Foydalanuvchini bloklaysizmi?",
+        "description": "{email} tizimga kira olmaydi va barcha sessiyalari tugatiladi. Keyin blokdan chiqarish mumkin."
+      },
+      "unblockDialog": {
+        "title": "Blokdan chiqarasizmi?",
+        "description": "{email} yana tizimga kira oladi."
+      },
+      "deleteDialog": {
+        "title": "Foydalanuvchini o'chirasizmi?",
+        "description": "{email} akkaunti va shaxsiy ma'lumotlari o'chiriladi. Bu amalni qaytarib bo'lmaydi."
+      },
+      "toast": {
+        "blocked": "Foydalanuvchi bloklandi",
+        "unblocked": "Foydalanuvchi blokdan chiqarildi",
+        "deleted": "Foydalanuvchi o'chirildi"
+      },
+      "create": {
+        "title": "Yangi foydalanuvchi",
+        "email": "Email",
+        "name": "Ism (ixtiyoriy)",
+        "password": "Parol (ixtiyoriy)",
+        "passwordHint": "Bo'sh qoldirsangiz, vaqtinchalik parol yaratiladi va bir marta ko'rsatiladi.",
+        "role": "Rol",
+        "createdTitle": "Foydalanuvchi yaratildi",
+        "createdText": "{email} akkaunti yaratildi.",
+        "temporaryPassword": "Vaqtinchalik parol",
+        "temporaryPasswordNote": "Parol faqat hozir ko'rsatiladi. Uni nusxalab foydalanuvchiga xavfsiz yuboring.",
+        "copy": "Nusxalash",
+        "copied": "Nusxalandi"
+      },
+      "role": {
+        "title": "Rolni o'zgartirish",
+        "description": "{email} hozirgi roli: {role}.",
+        "label": "Yangi rol",
+        "confirm": "Rolni «{role}» ga o'zgartirish"
       }
     },
     "validation": {
       "required": "Majburiy maydon",
       "slugInvalid": "Faqat kichik lotin harflari, raqamlar va tire (masalan, viyet-teoremasi)",
       "yearInvalid": "1990 dan 2100 gacha yil kiriting",
-      "blocksInvalid": "Bloklar to'g'ri JSON massiv bo'lishi kerak"
+      "blocksInvalid": "Bloklar to'g'ri JSON massiv bo'lishi kerak",
+      "emailInvalid": "Email noto'g'ri",
+      "passwordTooShort": "Parol kamida 8 ta belgi bo'lsin",
+      "passwordTooLong": "Parol juda uzun",
+      "nameTooLong": "Ism juda uzun (60 belgigacha)"
     },
     "errors": {
       "generic": "Amalni bajarib bo'lmadi. Qayta urinib ko'ring.",
@@ -728,7 +801,11 @@
         "upload_incomplete": "Fayl to'liq yuklanmadi. Qayta urinib ko'ring.",
         "direct_upload_required": "Bu muhitda fayl to'g'ridan-to'g'ri saqlashga yuklanadi. Sahifani yangilang.",
         "invalid_parts": "Yuklangan bo'laklar noto'g'ri. Qayta urinib ko'ring.",
-        "upload_failed": "Faylni yuklab bo'lmadi. Internetni tekshirib, qayta urinib ko'ring."
+        "upload_failed": "Faylni yuklab bo'lmadi. Internetni tekshirib, qayta urinib ko'ring.",
+        "env_admin_protected": "Asosiy adminni o'chirib, bloklab yoki rolini tushirib bo'lmaydi.",
+        "self_action_forbidden": "O'zingizni o'chira, bloklay yoki rolingizni tushira olmaysiz.",
+        "last_admin": "Oxirgi faol adminni o'chirib, bloklab yoki rolini tushirib bo'lmaydi.",
+        "role_forbidden": "Bu rolni berishga ruxsatingiz yo'q."
       },
       "fields": {
         "invalid": "Noto'g'ri qiymat",
@@ -736,7 +813,12 @@
         "slug_taken": "Bu slug band",
         "slug_immutable": "Slugni o'zgartirib bo'lmaydi",
         "book_immutable": "Kitobni o'zgartirib bo'lmaydi",
-        "invalid_file": "Fayl topilmadi, qayta yuklang"
+        "invalid_file": "Fayl topilmadi, qayta yuklang",
+        "email_taken": "Bu email band",
+        "password_too_short": "Parol juda qisqa (kamida 8 ta belgi)",
+        "password_too_common": "Parol juda oddiy",
+        "password_entirely_numeric": "Parol faqat raqamlardan iborat bo'lmasin",
+        "password_too_similar": "Parol emailga juda o'xshash"
       }
     },
     "pdfUpload": {

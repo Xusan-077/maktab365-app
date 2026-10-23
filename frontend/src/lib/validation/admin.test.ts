@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createBookSchema, createTopicSchema } from "./admin";
+import { createBookSchema, createTopicSchema, createUserSchema } from "./admin";
 
 const validBook = {
   slug: "fizika-7",
@@ -34,5 +34,31 @@ describe("admin validation", () => {
     await expect(createTopicSchema().validate({ ...base, blocks: "[]" })).resolves.toBeDefined();
     await expect(createTopicSchema().validate({ ...base, blocks: "{}" })).rejects.toThrow();
     await expect(createTopicSchema().validate({ ...base, blocks: "[" })).rejects.toThrow();
+  });
+});
+
+describe("createUserSchema", () => {
+  const valid = { email: " Ali@Example.com ", display_name: "", password: "", role: "teacher" };
+
+  it("parolsiz yaratishga ruxsat beradi va emailni qirqadi", async () => {
+    const value = await createUserSchema().validate(valid);
+    expect(value.email).toBe("Ali@Example.com");
+    expect(value.password).toBe("");
+  });
+
+  it.each([
+    ["email", "emas"],
+    ["email", ""],
+    ["password", "qisqa"],
+    ["role", "root"],
+    ["display_name", "x".repeat(61)],
+  ])("%s=%j ni rad etadi", async (field, value) => {
+    await expect(createUserSchema().validate({ ...valid, [field]: value })).rejects.toThrow();
+  });
+
+  it("8+ belgili parolni qabul qiladi", async () => {
+    await expect(
+      createUserSchema().validate({ ...valid, password: "12345678" }),
+    ).resolves.toBeDefined();
   });
 });

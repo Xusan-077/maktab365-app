@@ -9,6 +9,9 @@ import {
   type AdminSubjectInput,
   type AdminSubjectPatch,
   type AdminUser,
+  type AdminUserCreated,
+  type AdminUserInput,
+  type AdminUserPatch,
   type BookListParams,
   type Page,
   type PdfBookStatus,
@@ -16,6 +19,7 @@ import {
   type PdfUploadPlan,
   type UploadKind,
   type UploadResult,
+  type UserListParams,
 } from "./types";
 
 const MAX_PAGE_SIZE = 100;
@@ -139,13 +143,37 @@ export class AdminApi {
     return unwrap(result);
   }
 
-  async users(params: { page?: number; search?: string } = {}): Promise<Page<AdminUser>> {
+  async users(params: UserListParams = {}): Promise<Page<AdminUser>> {
     const result = await this.client.GET("/api/v1/admin/users/", {
       params: {
-        query: { page: params.page, page_size: PAGE_SIZE, search: params.search || undefined },
+        query: {
+          page: params.page,
+          page_size: PAGE_SIZE,
+          search: params.search || undefined,
+          role: params.role,
+          status: params.status,
+        },
       },
     });
     return unwrap(result);
+  }
+
+  async createUser(input: AdminUserInput): Promise<AdminUserCreated> {
+    return unwrap(await this.client.POST("/api/v1/admin/users/", { body: input }));
+  }
+
+  async updateUser(id: string, patch: AdminUserPatch): Promise<AdminUser> {
+    const result = await this.client.PATCH("/api/v1/admin/users/{id}/", {
+      params: { path: { id } },
+      body: patch,
+    });
+    return unwrap(result);
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    this.assertDeleted(
+      await this.client.DELETE("/api/v1/admin/users/{id}/", { params: { path: { id } } }),
+    );
   }
 
   private assertDeleted(result: Deleted): void {

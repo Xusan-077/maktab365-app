@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent, type ReactNode } from "react";
-import { ExternalLink, LogOut, Search } from "lucide-react";
+import { LogOut, Search } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
@@ -12,7 +12,6 @@ import { Avatar } from "@/components/layout/UserMenu";
 import { ADMIN_ROUTES } from "@/lib/admin/routes";
 import { Link, usePathname, useRouter } from "@/lib/i18n/navigation";
 import { cn } from "@/lib/utils/cn";
-import { ROUTES } from "@/lib/utils/routes";
 import { useAdminIdentity } from "./AdminRoleProvider";
 import { adminNavFor } from "./admin-nav";
 
@@ -55,10 +54,6 @@ function AdminSidebar() {
       </nav>
 
       <div className="border-border flex flex-col gap-1 border-t pt-3">
-        <Link href={ROUTES.home} className={cn(linkClasses, idleClasses)}>
-          <ExternalLink className="size-5 shrink-0" aria-hidden />
-          {t("nav.site")}
-        </Link>
         <div className="mt-2 flex items-center gap-3 px-2">
           <Avatar name={email ?? ""} />
           <div className="min-w-0 flex-1">

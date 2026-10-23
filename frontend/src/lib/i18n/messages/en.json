@@ -605,7 +605,6 @@
       "dashboard": "Dashboard",
       "books": "Books",
       "users": "Users",
-      "site": "Go to site",
       "signOut": "Sign out",
       "subjects": "Subjects"
     },
@@ -629,7 +628,8 @@
       "pagination": "Pagination",
       "pageOf": "Page {page} of {pages}",
       "prev": "Previous",
-      "next": "Next"
+      "next": "Next",
+      "done": "Done"
     },
     "bookStatus": {
       "draft": "Hidden",
@@ -657,14 +657,19 @@
         "delete": "deleted",
         "transition": "changed the status of",
         "reorder": "reordered",
-        "upload": "uploaded"
+        "upload": "uploaded",
+        "block": "blocked:",
+        "unblock": "unblocked:",
+        "role_change": "changed the role of:"
       },
       "targets": {
         "book": "book",
         "chapter": "chapter",
         "topic": "topic",
         "subject": "subject",
-        "file": "file"
+        "file": "file",
+        "user": "user",
+        "pdf_book": "PDF book"
       }
     },
     "books": {
@@ -685,25 +690,93 @@
     },
     "users": {
       "title": "Users",
-      "description": "Registered users (read-only).",
-      "search": "Search by email",
+      "description": "Add users, change their roles, block or delete them.",
+      "search": "Search by name or email",
       "loading": "Loading users",
-      "empty": "No users found.",
+      "empty": "No users yet.",
+      "emptyFiltered": "No users match these filters.",
       "noEmail": "No email",
-      "active": "Active",
-      "inactive": "Inactive",
-      "columns": {
-        "email": "Email",
+      "new": "Add user",
+      "envBadge": "Main admin",
+      "selfBadge": "You",
+      "filters": {
         "role": "Role",
         "status": "Status",
-        "joined": "Joined"
+        "allRoles": "All roles",
+        "allStatuses": "All statuses"
+      },
+      "status": {
+        "active": "Active",
+        "blocked": "Blocked"
+      },
+      "columns": {
+        "user": "User",
+        "role": "Role",
+        "joined": "Joined",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "actions": {
+        "role": "Change role",
+        "roleFor": "Change role of {name}",
+        "block": "Block",
+        "blockFor": "Block {name}",
+        "unblock": "Unblock",
+        "unblockFor": "Unblock {name}",
+        "delete": "Delete",
+        "deleteFor": "Delete {name}"
+      },
+      "protected": {
+        "env": "The main admin cannot be changed (it is managed through Railway env).",
+        "self": "You cannot change yourself."
+      },
+      "blockDialog": {
+        "title": "Block this user?",
+        "description": "{email} will not be able to sign in and all their sessions will end. You can unblock them later."
+      },
+      "unblockDialog": {
+        "title": "Unblock this user?",
+        "description": "{email} will be able to sign in again."
+      },
+      "deleteDialog": {
+        "title": "Delete this user?",
+        "description": "The account {email} and its personal data will be deleted. This cannot be undone."
+      },
+      "toast": {
+        "blocked": "User blocked",
+        "unblocked": "User unblocked",
+        "deleted": "User deleted"
+      },
+      "create": {
+        "title": "New user",
+        "email": "Email",
+        "name": "Name (optional)",
+        "password": "Password (optional)",
+        "passwordHint": "If left empty, a temporary password is created and shown once.",
+        "role": "Role",
+        "createdTitle": "User created",
+        "createdText": "The account {email} was created.",
+        "temporaryPassword": "Temporary password",
+        "temporaryPasswordNote": "The password is shown only now. Copy it and send it to the user securely.",
+        "copy": "Copy",
+        "copied": "Copied"
+      },
+      "role": {
+        "title": "Change role",
+        "description": "Current role of {email}: {role}.",
+        "label": "New role",
+        "confirm": "Change role to “{role}”"
       }
     },
     "validation": {
       "required": "Required field",
       "slugInvalid": "Lowercase Latin letters, digits and hyphens only (e.g. vietas-theorem)",
       "yearInvalid": "Enter a year between 1990 and 2100",
-      "blocksInvalid": "Blocks must be a valid JSON array"
+      "blocksInvalid": "Blocks must be a valid JSON array",
+      "emailInvalid": "Invalid email",
+      "passwordTooShort": "Password must be at least 8 characters",
+      "passwordTooLong": "Password is too long",
+      "nameTooLong": "Name is too long (60 characters max)"
     },
     "errors": {
       "generic": "The action failed. Please try again.",
@@ -728,7 +801,11 @@
         "upload_incomplete": "The file was not fully uploaded. Try again.",
         "direct_upload_required": "In this environment files go straight to storage. Reload the page.",
         "invalid_parts": "The uploaded parts are invalid. Try again.",
-        "upload_failed": "Could not upload the file. Check your connection and try again."
+        "upload_failed": "Could not upload the file. Check your connection and try again.",
+        "env_admin_protected": "The main admin cannot be deleted, blocked or demoted.",
+        "self_action_forbidden": "You cannot delete, block or demote yourself.",
+        "last_admin": "The last active admin cannot be deleted, blocked or demoted.",
+        "role_forbidden": "You are not allowed to assign this role."
       },
       "fields": {
         "invalid": "Invalid value",
@@ -736,7 +813,12 @@
         "slug_taken": "This slug is already taken",
         "slug_immutable": "The slug cannot be changed",
         "book_immutable": "The book cannot be changed",
-        "invalid_file": "File not found, upload it again"
+        "invalid_file": "File not found, upload it again",
+        "email_taken": "This email is already taken",
+        "password_too_short": "Password is too short (at least 8 characters)",
+        "password_too_common": "Password is too common",
+        "password_entirely_numeric": "Password cannot be only digits",
+        "password_too_similar": "Password is too similar to the email"
       }
     },
     "pdfUpload": {

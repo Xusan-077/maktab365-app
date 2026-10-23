@@ -23,6 +23,10 @@ export const KNOWN_ERROR_CODES = [
   "permission_denied",
   "not_found",
   "throttled",
+  "env_admin_protected",
+  "self_action_forbidden",
+  "last_admin",
+  "role_forbidden",
 ] as const;
 
 export type KnownErrorCode = (typeof KNOWN_ERROR_CODES)[number];
