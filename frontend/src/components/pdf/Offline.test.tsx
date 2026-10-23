@@ -5,6 +5,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { NextIntlClientProvider } from "next-intl";
 import uz from "@/lib/i18n/messages/uz.json";
+import type * as PdfCache from "@/lib/offline/pdf-cache";
 import type { OfflineBook } from "@/lib/offline/pdf-cache";
 
 const cache = vi.hoisted(() => ({
@@ -18,11 +19,10 @@ const cache = vi.hoisted(() => ({
 }));
 const api = vi.hoisted(() => ({ fileUrl: vi.fn() }));
 
-vi.mock("@/lib/offline/pdf-cache", async () => {
-  const actual =
-    await vi.importActual<typeof import("@/lib/offline/pdf-cache")>("@/lib/offline/pdf-cache");
-  return { ...actual, ...cache };
-});
+vi.mock("@/lib/offline/pdf-cache", async (importOriginal) => ({
+  ...(await importOriginal<typeof PdfCache>()),
+  ...cache,
+}));
 vi.mock("@/lib/pdf-books/api", () => ({ getPdfBooksApi: () => api, PDF_PAGE_SIZE: 24 }));
 vi.mock("@/lib/i18n/navigation", () => ({
   Link: ({ href, children }: { href: string; children: ReactNode }) => (
