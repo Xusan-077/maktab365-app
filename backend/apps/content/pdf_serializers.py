@@ -57,8 +57,12 @@ class PdfBookAdminSerializer(serializers.ModelSerializer):
         model = PdfBook
         fields = [
             "id",
+            "slug",
             "title",
             "description",
+            "language",
+            "allow_download",
+            "download_count",
             "chapters",
             "grade",
             "subject",
@@ -77,6 +81,8 @@ class PdfBookAdminSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = [
             "id",
+            "slug",
+            "download_count",
             "size_bytes",
             "page_count",
             "status",
@@ -188,10 +194,12 @@ class PdfUploadFileSerializer(serializers.Serializer):
 
 class PdfBookSerializer(serializers.Serializer):
     id = serializers.UUIDField()
+    slug = serializers.SlugField()
     title = LocalizedField()
     grade = serializers.IntegerField()
     subject = serializers.SlugField(source="subject.slug")
     subject_title = LocalizedField(source="subject.title")
+    subject_group = serializers.CharField(source="subject.group")
     page_count = serializers.IntegerField()
     size_bytes = serializers.IntegerField()
     cover = serializers.FileField(source="public_cover", use_url=True, allow_null=True)
@@ -215,7 +223,15 @@ class PublicChapterSerializer(PublicChapterLeafSerializer):
 
 class PdfBookDetailSerializer(PdfBookSerializer):
     description = serializers.CharField()
+    language = serializers.CharField()
+    allow_download = serializers.BooleanField()
     chapters = PublicChapterSerializer(source="chapter_tree", many=True)
+
+
+class PdfDownloadSerializer(serializers.Serializer):
+    url = serializers.CharField(help_text="Qisqa muddatli URL; `Content-Disposition: attachment`")
+    filename = serializers.CharField(help_text="Tavsiya etilgan fayl nomi")
+    expires_in = serializers.IntegerField()
 
 
 class PdfFileUrlSerializer(serializers.Serializer):

@@ -9,9 +9,11 @@ Ikki rejim, `default_storage` ga qarab:
 """
 
 import math
+import re
 import tempfile
 import uuid
 from dataclasses import dataclass
+from urllib.parse import quote, urlencode
 
 import structlog
 from django.conf import settings
@@ -192,8 +194,11 @@ def count_pages(key: str) -> int:
         return _pages_of(tmp)
 
 
-def _read_url(key: str, owner: str, local_path: str) -> dict:
-    """S3'da imzolangan GET, lokalda imzolangan backend yo'li (token: egasi + kalit)."""
+def _read_url(key: str, owner: str, local_path: str, filename: str | None = None) -> dict:
+    """S3'da imzolangan GET, lokalda imzolangan backend yo'li (token: egasi + kalit).
+
+    `filename` berilsa `Content-Disposition: attachment` (yuklab olish), aks holda `inline`.
+    """
     ttl = settings.PDF_SIGNED_URL_SECONDS
     if is_remote():
         url = _client().generate_presigned_url(
@@ -202,14 +207,40 @@ def _read_url(key: str, owner: str, local_path: str) -> dict:
                 "Bucket": _bucket(),
                 "Key": key,
                 "ResponseContentType": PDF_MIME,
-                "ResponseContentDisposition": "inline",
+                "ResponseContentDisposition": content_disposition(filename),
             },
             ExpiresIn=ttl,
         )
     else:
         token = signing.dumps({"book": owner, "key": key}, salt=FILE_TOKEN_SALT)
         url = f"{local_path}?token={token}"
+        if filename:
+            url += f"&{urlencode({'download': filename})}"
     return {"url": url, "expires_in": ttl}
+
+
+def content_disposition(filename: str | None) -> str:
+    """`inline` yoki `attachment` (ASCII zaxira + RFC 5987 `filename*` — o'zbekcha harflar)."""
+    if not filename:
+        return "inline"
+    ascii_name = re.sub(r"[^A-Za-z0-9._ -]+", "_", filename).strip() or "book.pdf"
+    return f"attachment; filename=\"{ascii_name}\"; filename*=UTF-8''{quote(filename)}"
+
+
+def download_filename(book) -> str:
+    """Chiroyli fayl nomi: «Algebra - 9-sinf - Maktab365.pdf» (yo'l belgilarisiz)."""
+    title = (book.title or {}).get("uz") or book.slug
+    title = re.sub(r'[\\/:*?"<>|\s]+', " ", title).strip()[:80]
+    return f"{title} - {book.grade}-sinf - Maktab365.pdf"
+
+
+def download_url(book) -> dict:
+    """Kitob PDF'ini yuklab olish URL'i (`attachment`, chiroyli nom)."""
+    name = download_filename(book)
+    result = _read_url(
+        book.file.name, str(book.pk), f"/api/v1/pdf-books/{book.pk}/file/", filename=name
+    )
+    return {**result, "filename": name}
 
 
 def read_url(book) -> dict:

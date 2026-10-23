@@ -103,6 +103,30 @@ SUBJECTS: dict[str, dict] = {
 }
 
 
+# Katalog tablari uchun fan guruhi (`Subject.group`); admin keyin `/admin/fanlar` da o'zgartiradi.
+GROUPS: dict[str, str] = {
+    "matematika": "exact",
+    "algebra": "exact",
+    "geometriya": "exact",
+    "informatika": "exact",
+    "fizika": "exact",
+    "chizmachilik": "exact",
+    "kimyo": "natural",
+    "biologiya": "natural",
+    "geografiya": "natural",
+    "tabiiy-fan": "natural",
+    "ona-tili": "language",
+    "adabiyot": "language",
+    "ingliz-tili": "language",
+    "rus-tili": "language",
+    "tarix": "social",
+    "tasviriy-san-at": "arts",
+    "musiqa": "arts",
+    "texnologiya": "arts",
+    "jismoniy-tarbiya": "arts",
+}
+
+
 class Command(BaseCommand):
     help = (
         "Asosiy maktab fanlarini qo'shadi (idempotent). Mavjud fan (slug bo'yicha) "
@@ -115,7 +139,15 @@ class Command(BaseCommand):
         for slug, meta in SUBJECTS.items():
             _, was_created = Subject.objects.get_or_create(
                 slug=slug,
-                defaults={"title": meta["title"], "icon": meta["icon"], "order": meta["order"]},
+                defaults={
+                    "title": meta["title"],
+                    "icon": meta["icon"],
+                    "order": meta["order"],
+                    "group": GROUPS.get(slug, ""),
+                },
             )
             created += was_created
+        # Guruhi hali berilmagan mavjud fanlarga guruh qo'yiladi (admin tanlaganiga tegilmaydi).
+        for slug, group in GROUPS.items():
+            Subject.objects.filter(slug=slug, group="").update(group=group)
         self.stdout.write(f"fan: {created} yangi, {len(SUBJECTS) - created} mavjud")

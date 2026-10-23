@@ -1455,6 +1455,30 @@ paths:
                 items:
                   $ref: '#/components/schemas/Subject'
           description: ''
+  /api/v1/pdf-books/by-slug/{slug}/:
+    get:
+      operationId: pdf_books_retrieve_by_slug
+      description: Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi
+        o'rniga kesh ishlaydi.
+      summary: 'PDF darslik (slug bo''yicha: `9-sinf-algebra`)'
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - content
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PdfBookDetail'
+          description: ''
   /api/v1/pdf-books/{id}/:
     get:
       operationId: pdf_books_retrieve
@@ -1479,6 +1503,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PdfBookDetail'
+          description: ''
+  /api/v1/pdf-books/{id}/download/:
+    get:
+      operationId: pdf_books_download
+      description: Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi
+        o'rniga kesh ishlaydi.
+      summary: Yuklab olish URL'i (`attachment`, chiroyli nom); yuklab olishlar soni
+        oshadi
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - content
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PdfDownload'
           description: ''
   /api/v1/pdf-books/{id}/file-url/:
     get:
@@ -2038,6 +2088,9 @@ components:
       required:
       - access
       - refresh
+    BlankEnum:
+      enum:
+      - ''
     BookCounts:
       type: object
       properties:
@@ -2428,6 +2481,20 @@ components:
           maxLength: 4096
       required:
       - id_token
+    GroupEnum:
+      enum:
+      - exact
+      - natural
+      - language
+      - social
+      - arts
+      type: string
+      description: |-
+        * `exact` - Exact sciences
+        * `natural` - Natural sciences
+        * `language` - Languages and literature
+        * `social` - Social and historical
+        * `arts` - Arts and applied
     GuestPdfProgressRequest:
       type: object
       description: 'PUT: PDF darslikda oxirgi sahifa. `updated_at` — mijozdagi yozuv
@@ -2533,6 +2600,16 @@ components:
       required:
       - has_password
       - identities
+    LanguageEnum:
+      enum:
+      - uz
+      - ru
+      - en
+      type: string
+      description: |-
+        * `uz` - Uzbek
+        * `ru` - Russian
+        * `en` - English
     LinkIdentityRequestRequest:
       oneOf:
       - $ref: '#/components/schemas/GoogleAuthRequest'
@@ -2927,6 +3004,10 @@ components:
         description:
           type: string
           maxLength: 2000
+        language:
+          $ref: '#/components/schemas/LanguageEnum'
+        allow_download:
+          type: boolean
         chapters:
           type: array
           items:
@@ -3001,6 +3082,10 @@ components:
           type: integer
           maximum: 2147483647
           minimum: 0
+        group:
+          oneOf:
+          - $ref: '#/components/schemas/GroupEnum'
+          - $ref: '#/components/schemas/BlankEnum'
     PatchedUserAdminUpdateRequest:
       type: object
       properties:
@@ -3017,6 +3102,9 @@ components:
         id:
           type: string
           format: uuid
+        slug:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
         title:
           $ref: '#/components/schemas/LocalizedText'
         grade:
@@ -3026,6 +3114,8 @@ components:
           pattern: ^[-a-zA-Z0-9_]+$
         subject_title:
           $ref: '#/components/schemas/LocalizedText'
+        subject_group:
+          type: string
         page_count:
           type: integer
         size_bytes:
@@ -3048,7 +3138,9 @@ components:
       - page_count
       - published_at
       - size_bytes
+      - slug
       - subject
+      - subject_group
       - subject_title
       - title
       - unverified
@@ -3059,11 +3151,22 @@ components:
           type: string
           format: uuid
           readOnly: true
+        slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
         title:
           $ref: '#/components/schemas/LocalizedText'
         description:
           type: string
           maxLength: 2000
+        language:
+          $ref: '#/components/schemas/LanguageEnum'
+        allow_download:
+          type: boolean
+        download_count:
+          type: integer
+          readOnly: true
         chapters:
           type: array
           items:
@@ -3121,12 +3224,14 @@ components:
       - allowed_transitions
       - cover_url
       - created_at
+      - download_count
       - grade
       - has_file
       - id
       - page_count
       - published_at
       - size_bytes
+      - slug
       - status
       - subject
       - title
@@ -3140,6 +3245,10 @@ components:
         description:
           type: string
           maxLength: 2000
+        language:
+          $ref: '#/components/schemas/LanguageEnum'
+        allow_download:
+          type: boolean
         chapters:
           type: array
           items:
@@ -3173,6 +3282,9 @@ components:
         id:
           type: string
           format: uuid
+        slug:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
         title:
           $ref: '#/components/schemas/LocalizedText'
         grade:
@@ -3182,6 +3294,8 @@ components:
           pattern: ^[-a-zA-Z0-9_]+$
         subject_title:
           $ref: '#/components/schemas/LocalizedText'
+        subject_group:
+          type: string
         page_count:
           type: integer
         size_bytes:
@@ -3199,20 +3313,28 @@ components:
           nullable: true
         description:
           type: string
+        language:
+          type: string
+        allow_download:
+          type: boolean
         chapters:
           type: array
           items:
             $ref: '#/components/schemas/PublicChapter'
       required:
+      - allow_download
       - chapters
       - cover
       - description
       - grade
       - id
+      - language
       - page_count
       - published_at
       - size_bytes
+      - slug
       - subject
+      - subject_group
       - subject_title
       - title
       - unverified
@@ -3228,6 +3350,21 @@ components:
       required:
       - book
       - created_at
+    PdfDownload:
+      type: object
+      properties:
+        url:
+          type: string
+          description: 'Qisqa muddatli URL; `Content-Disposition: attachment`'
+        filename:
+          type: string
+          description: Tavsiya etilgan fayl nomi
+        expires_in:
+          type: integer
+      required:
+      - expires_in
+      - filename
+      - url
     PdfFileUrl:
       type: object
       properties:
@@ -3648,10 +3785,13 @@ components:
           type: string
         order:
           type: integer
+        group:
+          type: string
         books_count:
           type: integer
       required:
       - books_count
+      - group
       - icon
       - order
       - slug
@@ -3678,6 +3818,10 @@ components:
           type: integer
           maximum: 2147483647
           minimum: 0
+        group:
+          oneOf:
+          - $ref: '#/components/schemas/GroupEnum'
+          - $ref: '#/components/schemas/BlankEnum'
         pdf_books_count:
           type: integer
           readOnly: true
@@ -3715,6 +3859,10 @@ components:
           type: integer
           maximum: 2147483647
           minimum: 0
+        group:
+          oneOf:
+          - $ref: '#/components/schemas/GroupEnum'
+          - $ref: '#/components/schemas/BlankEnum'
       required:
       - slug
       - title

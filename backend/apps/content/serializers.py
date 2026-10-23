@@ -23,4 +23,5 @@ class SubjectSerializer(serializers.Serializer):
     title = LocalizedField()
     icon = serializers.CharField()
     order = serializers.IntegerField()
+    group = serializers.CharField()
     books_count = serializers.IntegerField()

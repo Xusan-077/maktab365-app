@@ -4,20 +4,25 @@ import re
 from email.utils import formatdate
 
 from django.core.files.storage import default_storage
-from django.db.models import Count, Q
+from django.db.models import Count, F, Q
 from django.http import HttpResponse, StreamingHttpResponse
 from django.utils import timezone
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import generics
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import APIException, NotFound
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from . import pdf_storage as storage
 from .cache import public_cached
 from .models import PdfBook, PdfBookChapter, Subject
-from .pdf_serializers import PdfBookDetailSerializer, PdfBookSerializer, PdfFileUrlSerializer
+from .pdf_serializers import (
+    PdfBookDetailSerializer,
+    PdfBookSerializer,
+    PdfDownloadSerializer,
+    PdfFileUrlSerializer,
+)
 from .pdf_services import visible_pdf_books
 from .serializers import SubjectSerializer
 from .views import GRADE_PARAM, SUBJECT_PARAM, PublicView, _int_param
@@ -106,6 +111,47 @@ class PdfBookDetailView(PublicView, APIView):
         return Response(PdfBookDetailSerializer(book, context={"request": request}).data)
 
 
+class PdfBookBySlugView(PublicView, APIView):
+    @extend_schema(
+        operation_id="pdf_books_retrieve_by_slug",
+        responses=PdfBookDetailSerializer,
+        summary="PDF darslik (slug bo'yicha: `9-sinf-algebra`)",
+        tags=TAGS,
+    )
+    @public_cached
+    def get(self, request, slug):
+        book = visible_pdf_books(request).filter(slug=slug).first()
+        if book is None:
+            raise NotFound("Kitob topilmadi.")
+        return Response(PdfBookDetailSerializer(book, context={"request": request}).data)
+
+
+class DownloadDisabled(APIException):
+    status_code = 403
+    default_code = "download_disabled"
+    default_detail = "Download is disabled for this book."
+
+
+class PdfDownloadView(PublicView, APIView):
+    throttle_classes = APIView.throttle_classes  # imzo berish: umumiy tezlik chegarasida
+
+    @extend_schema(
+        operation_id="pdf_books_download",
+        responses=PdfDownloadSerializer,
+        summary="Yuklab olish URL'i (`attachment`, chiroyli nom); yuklab olishlar soni oshadi",
+        tags=TAGS,
+    )
+    def get(self, request, pk):
+        book = _visible_book_or_404(request, pk)
+        if not book.allow_download:
+            raise DownloadDisabled()
+        # `update()` — `updated_at` va ochiq kesh versiyasiga tegmaydi.
+        PdfBook.objects.filter(pk=book.pk).update(download_count=F("download_count") + 1)
+        response = Response(PdfDownloadSerializer(storage.download_url(book)).data)
+        response["Cache-Control"] = "private, no-store"
+        return response
+
+
 class PdfFileUrlView(PublicView, APIView):
     throttle_classes = APIView.throttle_classes  # imzo berish: umumiy tezlik chegarasida
 
@@ -154,7 +200,7 @@ def _iterate(key: str, start: int, end: int):
             yield chunk
 
 
-def _serve_ranged(request, key: str, etag_seed: str, modified: float):
+def _serve_ranged(request, key: str, etag_seed: str, modified: float, filename: str = ""):
     """Lokal saqlashdagi faylni HTTP Range (206/416) va ETag (304) bilan beradi."""
     size = default_storage.size(key)
     etag = f'"{etag_seed}-{size}"'
@@ -162,7 +208,7 @@ def _serve_ranged(request, key: str, etag_seed: str, modified: float):
         "Accept-Ranges": "bytes",
         "ETag": etag,
         "Cache-Control": "private, max-age=600",
-        "Content-Disposition": "inline",
+        "Content-Disposition": storage.content_disposition(filename or None),
         "Last-Modified": formatdate(modified, usegmt=True),
     }
     if request.META.get("HTTP_IF_NONE_MATCH") == etag:
@@ -211,7 +257,13 @@ class PdfFileView(APIView):
         token = request.query_params.get("token", "")
         if book is None or not storage.check_file_token(token, book):
             raise NotFound()
-        return _serve_ranged(request, book.file.name, book.pk.hex, book.updated_at.timestamp())
+        return _serve_ranged(
+            request,
+            book.file.name,
+            book.pk.hex,
+            book.updated_at.timestamp(),
+            filename=request.query_params.get("download", "")[:200],
+        )
 
 
 def _chapter_with_slides_or_404(request, pk, chapter_id) -> tuple[PdfBook, PdfBookChapter]:

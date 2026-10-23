@@ -7,7 +7,17 @@ urlpatterns = [
     path(
         "pdf-books/subjects/", pdf_views.PdfBookSubjectListView.as_view(), name="pdf-book-subjects"
     ),
+    path(
+        "pdf-books/by-slug/<slug:slug>/",
+        pdf_views.PdfBookBySlugView.as_view(),
+        name="pdf-book-by-slug",
+    ),
     path("pdf-books/<uuid:pk>/", pdf_views.PdfBookDetailView.as_view(), name="pdf-book"),
+    path(
+        "pdf-books/<uuid:pk>/download/",
+        pdf_views.PdfDownloadView.as_view(),
+        name="pdf-book-download",
+    ),
     path(
         "pdf-books/<uuid:pk>/file-url/",
         pdf_views.PdfFileUrlView.as_view(),

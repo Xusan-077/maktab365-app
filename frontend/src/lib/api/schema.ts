@@ -768,6 +768,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/pdf-books/by-slug/{slug}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * PDF darslik (slug bo'yicha: `9-sinf-algebra`)
+         * @description Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi o'rniga kesh ishlaydi.
+         */
+        get: operations["pdf_books_retrieve_by_slug"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/pdf-books/{id}/": {
         parameters: {
             query?: never;
@@ -780,6 +800,26 @@ export interface paths {
          * @description Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi o'rniga kesh ishlaydi.
          */
         get: operations["pdf_books_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pdf-books/{id}/download/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Yuklab olish URL'i (`attachment`, chiroyli nom); yuklab olishlar soni oshadi
+         * @description Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi o'rniga kesh ishlaydi.
+         */
+        get: operations["pdf_books_download"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1116,6 +1156,8 @@ export interface components {
             access: string;
             refresh: string;
         };
+        /** @enum {unknown} */
+        BlankEnum: "";
         BookCounts: {
             total: number;
             draft: number;
@@ -1277,6 +1319,15 @@ export interface components {
             locale?: components["schemas"]["LocaleEnum"];
             id_token: string;
         };
+        /**
+         * @description * `exact` - Exact sciences
+         *     * `natural` - Natural sciences
+         *     * `language` - Languages and literature
+         *     * `social` - Social and historical
+         *     * `arts` - Arts and applied
+         * @enum {string}
+         */
+        GroupEnum: "exact" | "natural" | "language" | "social" | "arts";
         /** @description PUT: PDF darslikda oxirgi sahifa. `updated_at` — mijozdagi yozuv vaqti. */
         GuestPdfProgressRequest: {
             last_page: number;
@@ -1320,6 +1371,13 @@ export interface components {
             identities: components["schemas"]["Identity"][];
             has_password: boolean;
         };
+        /**
+         * @description * `uz` - Uzbek
+         *     * `ru` - Russian
+         *     * `en` - English
+         * @enum {string}
+         */
+        LanguageEnum: "uz" | "ru" | "en";
         LinkIdentityRequestRequest: components["schemas"]["GoogleAuthRequest"] | components["schemas"]["TelegramAuthRequest"] | components["schemas"]["OtpVerifyRequest"];
         /**
          * @description * `uz` - Uzbek (Latin)
@@ -1498,6 +1556,8 @@ export interface components {
         PatchedPdfBookAdminRequest: {
             title?: components["schemas"]["LocalizedTextRequest"];
             description?: string;
+            language?: components["schemas"]["LanguageEnum"];
+            allow_download?: boolean;
             chapters?: components["schemas"]["ChapterRequest"][];
             grade?: number;
             subject?: string;
@@ -1521,6 +1581,7 @@ export interface components {
             title?: components["schemas"]["LocalizedTextRequest"];
             icon?: string;
             order?: number;
+            group?: components["schemas"]["GroupEnum"] | components["schemas"]["BlankEnum"];
         };
         PatchedUserAdminUpdateRequest: {
             display_name?: string;
@@ -1530,10 +1591,12 @@ export interface components {
         PdfBook: {
             /** Format: uuid */
             id: string;
+            slug: string;
             title: components["schemas"]["LocalizedText"];
             grade: number;
             subject: string;
             subject_title: components["schemas"]["LocalizedText"];
+            subject_group: string;
             page_count: number;
             size_bytes: number;
             /** Format: uri */
@@ -1545,8 +1608,12 @@ export interface components {
         PdfBookAdmin: {
             /** Format: uuid */
             readonly id: string;
+            readonly slug: string;
             title: components["schemas"]["LocalizedText"];
             description?: string;
+            language?: components["schemas"]["LanguageEnum"];
+            allow_download?: boolean;
+            readonly download_count: number;
             chapters?: components["schemas"]["Chapter"][];
             grade: number;
             subject: string;
@@ -1570,6 +1637,8 @@ export interface components {
         PdfBookAdminRequest: {
             title: components["schemas"]["LocalizedTextRequest"];
             description?: string;
+            language?: components["schemas"]["LanguageEnum"];
+            allow_download?: boolean;
             chapters?: components["schemas"]["ChapterRequest"][];
             grade: number;
             subject: string;
@@ -1585,10 +1654,12 @@ export interface components {
         PdfBookDetail: {
             /** Format: uuid */
             id: string;
+            slug: string;
             title: components["schemas"]["LocalizedText"];
             grade: number;
             subject: string;
             subject_title: components["schemas"]["LocalizedText"];
+            subject_group: string;
             page_count: number;
             size_bytes: number;
             /** Format: uri */
@@ -1597,12 +1668,21 @@ export interface components {
             /** Format: date-time */
             published_at: string | null;
             description: string;
+            language: string;
+            allow_download: boolean;
             chapters: components["schemas"]["PublicChapter"][];
         };
         PdfBookmark: {
             book: components["schemas"]["PdfBook"];
             /** Format: date-time */
             readonly created_at: string;
+        };
+        PdfDownload: {
+            /** @description Qisqa muddatli URL; `Content-Disposition: attachment` */
+            url: string;
+            /** @description Tavsiya etilgan fayl nomi */
+            filename: string;
+            expires_in: number;
         };
         PdfFileUrl: {
             /** @description Qisqa muddatli URL (S3: imzolangan; dev: backend yo'li) */
@@ -1763,6 +1843,7 @@ export interface components {
             title: components["schemas"]["LocalizedText"];
             icon: string;
             order: number;
+            group: string;
             books_count: number;
         };
         /** @description Slug yaratishda beriladi, keyin o'zgarmaydi (u kitob/fan identifikatorlariga kiradi). */
@@ -1773,6 +1854,7 @@ export interface components {
             title: components["schemas"]["LocalizedText"];
             icon?: string;
             order?: number;
+            group?: components["schemas"]["GroupEnum"] | components["schemas"]["BlankEnum"];
             readonly pdf_books_count: number;
             /** Format: date-time */
             readonly created_at: string;
@@ -1785,6 +1867,7 @@ export interface components {
             title: components["schemas"]["LocalizedTextRequest"];
             icon?: string;
             order?: number;
+            group?: components["schemas"]["GroupEnum"] | components["schemas"]["BlankEnum"];
         };
         SupportCreateRequest: {
             /** @default  */
@@ -3204,6 +3287,27 @@ export interface operations {
             };
         };
     };
+    pdf_books_retrieve_by_slug: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PdfBookDetail"];
+                };
+            };
+        };
+    };
     pdf_books_retrieve: {
         parameters: {
             query?: never;
@@ -3221,6 +3325,27 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PdfBookDetail"];
+                };
+            };
+        };
+    };
+    pdf_books_download: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PdfDownload"];
                 };
             };
         };

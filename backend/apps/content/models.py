@@ -6,8 +6,19 @@ from apps.core.fields import LocalizedTextField
 from apps.core.models import TimeStampedModel, UUIDModel
 
 
+class SubjectGroup(models.TextChoices):
+    """Katalog tablari uchun fan guruhi (bo'sh — guruhsiz: faqat «Hammasi» da)."""
+
+    EXACT = "exact", "Exact sciences"
+    NATURAL = "natural", "Natural sciences"
+    LANGUAGE = "language", "Languages and literature"
+    SOCIAL = "social", "Social and historical"
+    ARTS = "arts", "Arts and applied"
+
+
 class Subject(UUIDModel, TimeStampedModel):
     slug = models.SlugField(unique=True)
+    group = models.CharField(max_length=16, choices=SubjectGroup.choices, blank=True, default="")
     title = LocalizedTextField()
     icon = models.CharField(max_length=64, blank=True)
     order = models.PositiveIntegerField(default=0)
@@ -34,11 +45,41 @@ class CoverMode(models.TextChoices):
     CUSTOM = "custom", "Custom image"
 
 
+SLUG_MAX = 120
+
+
+class BookLanguage(models.TextChoices):
+    UZ = "uz", "Uzbek"
+    RU = "ru", "Russian"
+    EN = "en", "English"
+
+
+def unique_book_slug(grade: int, subject_slug: str, exclude_pk=None) -> str:
+    """`9-sinf-algebra`; band bo'lsa `9-sinf-algebra-2`, `-3`… (kitob slug'i URL'ga kiradi)."""
+    base = f"{grade}-sinf-{subject_slug}"[: SLUG_MAX - 6]
+    taken = set(
+        PdfBook.objects.filter(slug__startswith=base)
+        .exclude(pk=exclude_pk)
+        .values_list("slug", flat=True)
+    )
+    slug, n = base, 1
+    while slug in taken:
+        n += 1
+        slug = f"{base}-{n}"
+    return slug
+
+
 class PdfBook(UUIDModel, TimeStampedModel):
     """PDF darslik: fayl obyekt saqlashda (DB'da emas), o'quvchi sahifa-sahifa o'qiydi."""
 
     title = LocalizedTextField()
+    # URL manzili (`/darsliklar/<sinf>/<slug>`): yaratilganda beriladi va keyin o'zgarmaydi.
+    slug = models.SlugField(max_length=SLUG_MAX, unique=True, blank=True)
     description = models.TextField(blank=True, validators=[MaxLengthValidator(DESCRIPTION_MAX)])
+    language = models.CharField(max_length=8, choices=BookLanguage.choices, default=BookLanguage.UZ)
+    # Mualliflik huquqi sababli kitobni yuklab olishni o'chirish mumkin (o'qish ochiq qoladi).
+    allow_download = models.BooleanField(default=True)
+    download_count = models.PositiveIntegerField(default=0, editable=False)
     grade = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(11)], db_index=True
     )
@@ -70,6 +111,8 @@ class PdfBook(UUIDModel, TimeStampedModel):
     def save(self, *args, **kwargs):
         if self.status == PdfBookStatus.PUBLISHED and self.published_at is None:
             self.published_at = timezone.now()
+        if not self.slug:
+            self.slug = unique_book_slug(self.grade, self.subject.slug, self.pk)
         super().save(*args, **kwargs)
 
     @property

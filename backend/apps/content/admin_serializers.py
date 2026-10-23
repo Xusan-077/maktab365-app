@@ -65,6 +65,7 @@ class SubjectAdminSerializer(ImmutableSlugMixin, serializers.ModelSerializer):
             "title",
             "icon",
             "order",
+            "group",
             "pdf_books_count",
             "created_at",
             "updated_at",
