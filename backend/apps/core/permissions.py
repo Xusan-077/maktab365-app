@@ -14,6 +14,15 @@ def IsRole(*roles: str) -> type[BasePermission]:  # noqa: N802 — permission si
     return _IsRole
 
 
+class IsLearner(BasePermission):
+    """Kirgan foydalanuvchi, admin emas: o'qish jarayoni (`/me/pdf-*`, `goals`…) o'quvchi/o'qituvchi
+    uchun. Admin faqat admin panel bilan ishlaydi — bu API'larda 403."""
+
+    def has_permission(self, request, view):
+        user = request.user
+        return bool(user and user.is_authenticated and getattr(user, "role", None) != "admin")
+
+
 class IsOwner(BasePermission):
     """Obyekt egasi. Egalik maydoni nomi `view.owner_field` (default: `user`)."""
 

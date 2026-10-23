@@ -178,6 +178,10 @@ AUTH_RESEND_COOLDOWN_SECONDS = env.int("AUTH_RESEND_COOLDOWN_SECONDS", default=6
 # Ketma-ket shuncha noto'g'ri parol (email bo'yicha) — vaqtinchalik bloklash (cache/Redis).
 AUTH_LOCKOUT_THRESHOLD = env.int("AUTH_LOCKOUT_THRESHOLD", default=5)
 AUTH_LOCKOUT_SECONDS = env.int("AUTH_LOCKOUT_SECONDS", default=15 * 60)
+# Env admin: shu email/parol bilan login formasidan kirilsa admin akkaunt yaratiladi/yangilanadi.
+# Ikkalasi ham to'ldirilmasa bu yo'l butunlay o'chiq. Parol hech qayerga yozilmaydi.
+ADMIN_EMAIL = env("ADMIN_EMAIL", default="").strip().lower()
+ADMIN_PASSWORD = env("ADMIN_PASSWORD", default="")
 
 # --- Kirish usullari: Google, Telegram, email OTP ---
 # Google OAuth client ID (id_token `aud`); frontend GOOGLE_CLIENT_ID bilan bir xil. Bo'sh — o'chiq.

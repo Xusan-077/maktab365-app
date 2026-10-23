@@ -1,13 +1,13 @@
 from django.db import transaction
 from django.db.models import Count, ProtectedError, Q
-from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
-from rest_framework import generics, serializers, viewsets
+from drf_spectacular.utils import extend_schema, extend_schema_view
+from rest_framework import serializers, viewsets
 from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.accounts import audit
-from apps.accounts.models import AuditLog, Role, User
+from apps.accounts.models import AuditLog, Role
 from apps.core.permissions import IsRole
 from apps.support.models import Status as SupportStatus
 from apps.support.models import SupportMessage
@@ -186,34 +186,3 @@ class DashboardView(APIView):
             "recent_activity": AuditLog.objects.order_by("-created_at")[:10],
         }
         return Response(AdminDashboardSerializer(data).data)
-
-
-class UserAdminSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ["id", "email", "role", "is_active", "date_joined"]
-        read_only_fields = fields
-
-
-class UserAdminListView(generics.ListAPIView):
-    """Foydalanuvchilar ro'yxati — faqat admin (faqat o'qish)."""
-
-    permission_classes = [IsAdmin]
-    serializer_class = UserAdminSerializer
-    search_fields = ["email"]
-    ordering_fields = ["date_joined", "email", "role"]
-    ordering = ["-date_joined"]
-
-    def get_queryset(self):
-        qs = User.objects.all()
-        if self.request.query_params.get("role") in Role.values:
-            qs = qs.filter(role=self.request.query_params["role"])
-        return qs
-
-    @extend_schema(
-        operation_id="admin_users_list",
-        tags=TAG,
-        parameters=[OpenApiParameter("role", str, enum=list(Role.values))],
-    )
-    def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)

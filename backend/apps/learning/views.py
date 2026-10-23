@@ -4,11 +4,10 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.exceptions import NotFound
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.core.permissions import IsRole
+from apps.core.permissions import IsLearner, IsRole
 
 from .models import PdfReadProgress
 from .serializers import (
@@ -48,7 +47,7 @@ def _pdf_progress_qs(user):
 
 
 class PdfProgressListView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsLearner]
 
     @extend_schema(
         operation_id="me_pdf_progress_list",
@@ -62,7 +61,7 @@ class PdfProgressListView(APIView):
 
 
 class PdfProgressDetailView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsLearner]
 
     @extend_schema(
         operation_id="me_pdf_progress_retrieve",
@@ -95,7 +94,7 @@ class PdfProgressDetailView(APIView):
 
 
 class PdfBookmarkListView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsLearner]
 
     @extend_schema(
         operation_id="me_pdf_bookmarks_list",
@@ -109,7 +108,7 @@ class PdfBookmarkListView(APIView):
 
 
 class PdfBookmarkDetailView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsLearner]
 
     @extend_schema(
         operation_id="me_pdf_bookmarks_update",
@@ -136,7 +135,7 @@ class PdfBookmarkDetailView(APIView):
 
 
 class LibraryView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsLearner]
 
     @extend_schema(
         operation_id="me_library",
@@ -149,7 +148,7 @@ class LibraryView(APIView):
 
 
 class MergeGuestDataView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsLearner]
 
     @extend_schema(
         operation_id="me_merge_guest_data",
@@ -169,7 +168,7 @@ class MergeGuestDataView(APIView):
 
 
 class EventView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsLearner]
 
     @extend_schema(
         operation_id="me_events_create",
@@ -189,7 +188,7 @@ class EventView(APIView):
 
 
 class RecentView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsLearner]
 
     @extend_schema(
         operation_id="me_recent",
@@ -203,7 +202,7 @@ class RecentView(APIView):
 
 
 class DashboardView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsLearner]
 
     @extend_schema(
         operation_id="me_dashboard",
@@ -217,7 +216,7 @@ class DashboardView(APIView):
 
 
 class ResultsView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsLearner]
 
     @extend_schema(
         operation_id="me_results",
@@ -244,7 +243,7 @@ class TeacherDashboardView(APIView):
 
 
 class GoalListView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsLearner]
 
     @extend_schema(
         operation_id="me_goals_list",
@@ -277,7 +276,7 @@ class GoalListView(APIView):
 
 
 class GoalDetailView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsLearner]
 
     def _goal(self, request, goal_id):
         # Faqat o'zining rejasi: begonaniki 404 (mavjudligi oshkor bo'lmaydi).

@@ -70,6 +70,8 @@ class User(UUIDModel, SoftDeleteModel, AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     role = models.CharField(max_length=16, choices=Role.choices, default=Role.STUDENT)
+    # Railway env'dagi ADMIN_EMAIL akkaunti: o'chirilmaydi, bloklanmaydi, roli tushirilmaydi.
+    is_env_admin = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
 
     objects = UserManager()

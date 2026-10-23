@@ -8,6 +8,7 @@ Xavfsizlik qoidalari:
 """
 
 import hashlib
+import hmac
 import math
 import secrets
 import time
@@ -26,6 +27,7 @@ from rest_framework_simplejwt.settings import api_settings as jwt_settings
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from .admin_bootstrap import sync_env_admin
 from .models import (
     AuthEvent,
     AuthEventType,
@@ -264,16 +266,33 @@ def clear_failures(email: str) -> None:
 # --- kirish va ro'yxatdan o'tish ---
 
 
+def _is_env_admin_email(email: str) -> bool:
+    return bool(settings.ADMIN_EMAIL and settings.ADMIN_PASSWORD and email == settings.ADMIN_EMAIL)
+
+
+def _env_password_matches(password: str) -> bool:
+    # Doimiy vaqtli solishtirish; baytlar bilan (compare_digest ASCII bo'lmagan matnni olmaydi).
+    return hmac.compare_digest(password.encode(), settings.ADMIN_PASSWORD.encode())
+
+
 def authenticate_password(email: str, password: str, request=None) -> User:
     email = normalize_email(email)
     ensure_not_locked(email)
-    user = User.objects.filter(email=email).first()
-    if user is None or not user.has_usable_password():
-        # Vaqt farqidan himoya: akkaunt yo'q bo'lsa ham xesh hisoblanadi.
-        User().set_password(password)
-        valid = False
+    if _is_env_admin_email(email):
+        # Env admin faqat env paroli bilan kiradi (bazadagi eski xesh hisobga olinmaydi).
+        # Xato bo'lsa umumiy yo'ldagi kabi sanaladi: bloklash va audit shu yerda ham ishlaydi.
+        valid = _env_password_matches(password)
+        user = sync_env_admin(email, settings.ADMIN_PASSWORD) if valid else None
+        if not valid:
+            User().set_password(password)  # vaqt farqidan himoya
     else:
-        valid = user.check_password(password) and user.is_active
+        user = User.objects.filter(email=email).first()
+        if user is None or not user.has_usable_password():
+            # Vaqt farqidan himoya: akkaunt yo'q bo'lsa ham xesh hisoblanadi.
+            User().set_password(password)
+            valid = False
+        else:
+            valid = user.check_password(password) and user.is_active
     if not valid:
         _record_failure(email, user, request)
         raise InvalidCredentials()
@@ -289,7 +308,8 @@ def register(
     email = normalize_email(email)
     _check_password_strength(password, User(email=email), "password")
     email_taken = serializers.ValidationError({"email": ["email_taken"]})
-    if User.objects.filter(email=email).exists():
+    # Env admin manzilini oldindan olib, keyin admin sessiyasiga ega bo'lib bo'lmasin.
+    if _is_env_admin_email(email) or User.objects.filter(email=email).exists():
         raise email_taken
     try:
         with transaction.atomic():
