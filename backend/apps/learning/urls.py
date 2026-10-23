@@ -15,6 +15,12 @@ urlpatterns = [
         views.PdfBookmarkDetailView.as_view(),
         name="me-pdf-bookmark",
     ),
+    path("me/pdf-annotations/", views.AnnotationListView.as_view(), name="me-pdf-annotations"),
+    path(
+        "me/pdf-annotations/<uuid:annotation_id>/",
+        views.AnnotationDetailView.as_view(),
+        name="me-pdf-annotation",
+    ),
     path("me/events/", views.EventView.as_view(), name="me-events"),
     path("me/recent/", views.RecentView.as_view(), name="me-recent"),
     path("me/dashboard/", views.DashboardView.as_view(), name="me-dashboard"),

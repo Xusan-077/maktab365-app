@@ -1823,6 +1823,80 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/me/pdf-annotations/:
+    get:
+      operationId: me_pdf_annotations_list
+      summary: Kitobdagi mening belgilarim va eslatmalarim
+      parameters:
+      - in: query
+        name: pdf_book
+        schema:
+          type: string
+        description: Kitob id'si (majburiy)
+      tags:
+      - learning
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Annotation'
+          description: ''
+  /api/v1/me/pdf-annotations/{annotation_id}/:
+    put:
+      operationId: me_pdf_annotations_update
+      summary: Belgini yozish (idempotent; id mijozda yaratilgan UUID)
+      parameters:
+      - in: path
+        name: annotation_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - learning
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnnotationWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AnnotationWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AnnotationWriteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Annotation'
+          description: ''
+    delete:
+      operationId: me_pdf_annotations_delete
+      summary: Belgini o'chirish (idempotent)
+      parameters:
+      - in: path
+        name: annotation_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - learning
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/v1/me/events/:
     post:
       operationId: me_events_create
@@ -2173,6 +2247,127 @@ components:
       - recent_activity
       - recent_messages
       - subjects_count
+    Annotation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        pdf_book_id:
+          type: string
+          format: uuid
+          readOnly: true
+        page:
+          type: integer
+          readOnly: true
+        color:
+          allOf:
+          - $ref: '#/components/schemas/ColorEnum'
+          readOnly: true
+        rects:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnnotationRect'
+          readOnly: true
+        note:
+          type: string
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - color
+      - id
+      - note
+      - page
+      - pdf_book_id
+      - rects
+      - updated_at
+    AnnotationRect:
+      type: object
+      properties:
+        x:
+          type: number
+          format: double
+          maximum: 1
+          minimum: 0
+        y:
+          type: number
+          format: double
+          maximum: 1
+          minimum: 0
+        w:
+          type: number
+          format: double
+          maximum: 1
+          minimum: 0
+        h:
+          type: number
+          format: double
+          maximum: 1
+          minimum: 0
+      required:
+      - h
+      - w
+      - x
+      - y
+    AnnotationRectRequest:
+      type: object
+      properties:
+        x:
+          type: number
+          format: double
+          maximum: 1
+          minimum: 0
+        y:
+          type: number
+          format: double
+          maximum: 1
+          minimum: 0
+        w:
+          type: number
+          format: double
+          maximum: 1
+          minimum: 0
+        h:
+          type: number
+          format: double
+          maximum: 1
+          minimum: 0
+      required:
+      - h
+      - w
+      - x
+      - y
+    AnnotationWriteRequest:
+      type: object
+      description: 'PUT: belgi (`id` yo''lda, mijozda yaratilgan UUID).'
+      properties:
+        pdf_book_id:
+          type: string
+          minLength: 1
+          maxLength: 64
+        page:
+          type: integer
+          maximum: 100000
+          minimum: 1
+        color:
+          $ref: '#/components/schemas/ColorEnum'
+        rects:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnnotationRectRequest'
+        note:
+          type: string
+          default: ''
+          maxLength: 200
+      required:
+      - color
+      - page
+      - pdf_book_id
+      - rects
     AuditEntry:
       type: object
       properties:
@@ -2417,6 +2612,16 @@ components:
       description: |-
         * `ok` - ok
         * `error` - error
+    ColorEnum:
+      enum:
+      - yellow
+      - green
+      - pink
+      type: string
+      description: |-
+        * `yellow` - Yellow
+        * `green` - Green
+        * `pink` - Pink
     CoverModeEnum:
       enum:
       - auto
@@ -2589,12 +2794,17 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PdfBookmark'
+        pdf_annotations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Annotation'
         goals:
           type: array
           items:
             $ref: '#/components/schemas/Goal'
       required:
       - goals
+      - pdf_annotations
       - pdf_bookmarks
       - pdf_progress
     ExportUser:
@@ -2714,6 +2924,37 @@ components:
         * `language` - Languages and literature
         * `social` - Social and historical
         * `arts` - Arts and applied
+    GuestAnnotationRequest:
+      type: object
+      description: 'PUT: belgi (`id` yo''lda, mijozda yaratilgan UUID).'
+      properties:
+        pdf_book_id:
+          type: string
+          minLength: 1
+          maxLength: 64
+        page:
+          type: integer
+          maximum: 100000
+          minimum: 1
+        color:
+          $ref: '#/components/schemas/ColorEnum'
+        rects:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnnotationRectRequest'
+        note:
+          type: string
+          default: ''
+          maxLength: 200
+        id:
+          type: string
+          format: uuid
+      required:
+      - color
+      - id
+      - page
+      - pdf_book_id
+      - rects
     GuestPdfProgressRequest:
       type: object
       description: 'PUT: PDF darslikda oxirgi sahifa. `updated_at` — mijozdagi yozuv
@@ -2939,6 +3180,10 @@ components:
             minLength: 1
             maxLength: 64
           maxItems: 500
+        pdf_annotations:
+          type: array
+          items:
+            $ref: '#/components/schemas/GuestAnnotationRequest'
     MergeResult:
       type: object
       properties:
@@ -2946,12 +3191,15 @@ components:
           type: integer
         pdf_bookmarks:
           type: integer
+        pdf_annotations:
+          type: integer
         failed:
           type: array
           items:
             type: string
       required:
       - failed
+      - pdf_annotations
       - pdf_bookmarks
       - pdf_progress
     ModeEnum:

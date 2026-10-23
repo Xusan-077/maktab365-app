@@ -77,3 +77,38 @@ class StudyGoal(UUIDModel, TimeStampedModel):
 
     def __str__(self):
         return f"{self.user_id}/{self.title}"
+
+
+class AnnotationColor(models.TextChoices):
+    YELLOW = "yellow", "Yellow"
+    GREEN = "green", "Green"
+    PINK = "pink", "Pink"
+
+
+class PdfAnnotation(TimeStampedModel):
+    """Sahifadagi belgi: bir yoki bir necha to'rtburchak (0..1 nisbatda), 3 rang va qisqa eslatma.
+
+    `id` mijozda yaratiladi (UUID): takror yozish va mehmon ma'lumotini qo'shish idempotent.
+    """
+
+    id = models.UUIDField(primary_key=True, editable=False)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="pdf_annotations"
+    )
+    pdf_book = models.ForeignKey("content.PdfBook", on_delete=models.CASCADE, related_name="+")
+    page = models.PositiveIntegerField()
+    color = models.CharField(
+        max_length=8, choices=AnnotationColor.choices, default=AnnotationColor.YELLOW
+    )
+    rects = models.JSONField(default=list)
+    note = models.CharField(max_length=200, blank=True)
+
+    class Meta:
+        ordering = ["page", "created_at"]
+        indexes = [models.Index(fields=["user", "pdf_book", "page"])]
+        constraints = [
+            models.CheckConstraint(condition=Q(page__gte=1), name="pdf_annotation_page_min_1")
+        ]
+
+    def __str__(self):
+        return f"{self.user_id}/{self.pdf_book_id}/{self.page}"

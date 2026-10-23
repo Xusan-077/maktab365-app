@@ -1,7 +1,7 @@
 import contextlib
 
 from django.core.exceptions import ValidationError as DjangoValidationError
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
@@ -9,8 +9,10 @@ from rest_framework.views import APIView
 
 from apps.core.permissions import IsLearner, IsRole
 
-from .models import PdfReadProgress
+from .models import PdfAnnotation, PdfReadProgress
 from .serializers import (
+    AnnotationSerializer,
+    AnnotationWriteSerializer,
     DashboardSerializer,
     EventSerializer,
     GoalSerializer,
@@ -26,6 +28,7 @@ from .serializers import (
     TeacherDashboardSerializer,
 )
 from .services import dashboard as dashboard_service
+from .services.annotations import save_annotation
 from .services.events import record_event
 from .services.goals import create_goal, user_goals
 from .services.merge import merge_guest_data
@@ -147,6 +150,59 @@ class LibraryView(APIView):
         return Response(PdfLibrarySerializer(pdf_library(request, request.user)).data)
 
 
+class AnnotationListView(APIView):
+    permission_classes = [IsLearner]
+
+    @extend_schema(
+        operation_id="me_pdf_annotations_list",
+        tags=TAGS,
+        parameters=[OpenApiParameter("pdf_book", str, description="Kitob id'si (majburiy)")],
+        summary="Kitobdagi mening belgilarim va eslatmalarim",
+        responses=AnnotationSerializer(many=True),
+    )
+    def get(self, request):
+        book = resolve_pdf_book(request, request.query_params.get("pdf_book", ""))
+        rows = PdfAnnotation.objects.filter(user=request.user, pdf_book=book)
+        return Response(AnnotationSerializer(rows, many=True).data)
+
+
+class AnnotationDetailView(APIView):
+    permission_classes = [IsLearner]
+
+    @extend_schema(
+        operation_id="me_pdf_annotations_update",
+        tags=TAGS,
+        summary="Belgini yozish (idempotent; id mijozda yaratilgan UUID)",
+        request=AnnotationWriteSerializer,
+        responses=AnnotationSerializer,
+    )
+    def put(self, request, annotation_id):
+        serializer = AnnotationWriteSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        book = resolve_pdf_book(request, data["pdf_book_id"])
+        row, _created = save_annotation(
+            request.user,
+            book,
+            annotation_id,
+            page=data["page"],
+            color=data["color"],
+            rects=data["rects"],
+            note=data["note"],
+        )
+        return Response(AnnotationSerializer(row).data)
+
+    @extend_schema(
+        operation_id="me_pdf_annotations_delete",
+        tags=TAGS,
+        summary="Belgini o'chirish (idempotent)",
+        responses={204: None},
+    )
+    def delete(self, request, annotation_id):
+        PdfAnnotation.objects.filter(user=request.user, pk=annotation_id).delete()
+        return Response(status=204)
+
+
 class MergeGuestDataView(APIView):
     permission_classes = [IsLearner]
 
@@ -162,7 +218,10 @@ class MergeGuestDataView(APIView):
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
         result = merge_guest_data(
-            request, data.get("pdf_progress", []), data.get("pdf_bookmarks", [])
+            request,
+            data.get("pdf_progress", []),
+            data.get("pdf_bookmarks", []),
+            data.get("pdf_annotations", []),
         )
         return Response(MergeResultSerializer(result).data)
 

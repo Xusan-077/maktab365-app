@@ -5,19 +5,23 @@ Oxirgi sahifa qoidasi frontend `lib/pdf/progress.ts` (`mergePdfPosition`) bilan 
 """
 
 from django.db import transaction
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, ValidationError
 
+from .annotations import save_annotation
 from .pdf import add_pdf_bookmark, apply_pdf_progress, clamp_page, resolve_pdf_book
 
 MERGE_LIMIT = 500
 
 
 def merge_guest_data(
-    request, pdf_progress: list[dict] | None = None, pdf_bookmarks: list[str] | None = None
+    request,
+    pdf_progress: list[dict] | None = None,
+    pdf_bookmarks: list[str] | None = None,
+    pdf_annotations: list[dict] | None = None,
 ) -> dict:
-    """`{pdf_progress, pdf_bookmarks, failed}`: o'zgargan yozuvlar soni va qo'shilmagan id'lar."""
+    """O'zgargan yozuvlar soni (progress, bookmarks, annotations) va qo'shilmagan id'lar."""
     user = request.user
-    result = {"pdf_progress": 0, "pdf_bookmarks": 0, "failed": []}
+    result = {"pdf_progress": 0, "pdf_bookmarks": 0, "pdf_annotations": 0, "failed": []}
     with transaction.atomic():
         for item in pdf_progress or []:
             try:
@@ -36,5 +40,21 @@ def merge_guest_data(
                 continue
             if add_pdf_bookmark(user, book)[1]:
                 result["pdf_bookmarks"] += 1
+    for item in pdf_annotations or []:
+        try:
+            book = resolve_pdf_book(request, item["pdf_book_id"])
+            _, created = save_annotation(
+                user,
+                book,
+                item["id"],
+                page=item["page"],
+                color=item["color"],
+                rects=item["rects"],
+                note=item.get("note", ""),
+            )
+        except (NotFound, ValidationError):
+            result["failed"].append(item["pdf_book_id"])
+            continue
+        result["pdf_annotations"] += int(created)
     result["failed"] = list(dict.fromkeys(result["failed"]))
     return result

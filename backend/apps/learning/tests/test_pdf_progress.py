@@ -183,6 +183,7 @@ def test_merge_without_pdf_progress_still_works(api):
     assert api.post(MERGE, {}, "json").json() == {
         "pdf_progress": 0,
         "pdf_bookmarks": 0,
+        "pdf_annotations": 0,
         "failed": [],
     }
 

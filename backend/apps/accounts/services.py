@@ -113,6 +113,7 @@ def delete_account(user: User, request=None) -> None:
     # O'qish ma'lumotlari (oxirgi sahifalar, saqlangan kitoblar) butunlay o'chadi.
     user.pdf_progress.all().delete()
     user.pdf_bookmarks.all().delete()
+    user.pdf_annotations.all().delete()
     user.study_goals.all().delete()
     Profile.objects.filter(user=user).update(
         display_name="",
@@ -179,6 +180,7 @@ def export_data(user: User, request=None) -> dict:
         "learning": {
             "pdf_progress": user.pdf_progress.select_related("pdf_book"),
             "pdf_bookmarks": user.pdf_bookmarks.select_related("pdf_book"),
+            "pdf_annotations": user.pdf_annotations.all(),
             "goals": user.study_goals.all(),
         },
     }

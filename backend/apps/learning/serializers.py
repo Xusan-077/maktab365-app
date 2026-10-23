@@ -4,7 +4,7 @@ from apps.content.models import PdfBook
 from apps.content.pdf_serializers import PdfBookSerializer
 from apps.content.serializers import LocalizedField
 
-from .models import PdfBookmark, PdfReadProgress, StudyGoal
+from .models import AnnotationColor, PdfAnnotation, PdfBookmark, PdfReadProgress, StudyGoal
 from .services.events import EVENT_KINDS
 from .services.goals import set_done
 from .services.merge import MERGE_LIMIT
@@ -61,6 +61,40 @@ class PdfBookmarkSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
+# --- belgilar (highlight + eslatma) ---
+
+
+class AnnotationRectSerializer(serializers.Serializer):
+    x = serializers.FloatField(min_value=0, max_value=1)
+    y = serializers.FloatField(min_value=0, max_value=1)
+    w = serializers.FloatField(min_value=0, max_value=1)
+    h = serializers.FloatField(min_value=0, max_value=1)
+
+
+class AnnotationWriteSerializer(serializers.Serializer):
+    """PUT: belgi (`id` yo'lda, mijozda yaratilgan UUID)."""
+
+    pdf_book_id = serializers.CharField(max_length=64)
+    page = serializers.IntegerField(min_value=1, max_value=100000)
+    color = serializers.ChoiceField(choices=AnnotationColor.choices)
+    rects = AnnotationRectSerializer(many=True, allow_empty=False, max_length=24)
+    note = serializers.CharField(max_length=200, allow_blank=True, required=False, default="")
+
+
+class AnnotationSerializer(serializers.ModelSerializer):
+    pdf_book_id = serializers.UUIDField(read_only=True)
+    rects = AnnotationRectSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = PdfAnnotation
+        fields = ["id", "pdf_book_id", "page", "color", "rects", "note", "updated_at"]
+        read_only_fields = fields
+
+
+class GuestAnnotationSerializer(AnnotationWriteSerializer):
+    id = serializers.UUIDField()
+
+
 # --- mehmon ma'lumotini qo'shish ---
 
 
@@ -73,11 +107,13 @@ class MergeRequestSerializer(serializers.Serializer):
     pdf_bookmarks = serializers.ListField(
         child=serializers.CharField(max_length=64), required=False, max_length=MERGE_LIMIT
     )
+    pdf_annotations = GuestAnnotationSerializer(many=True, required=False, max_length=MERGE_LIMIT)
 
 
 class MergeResultSerializer(serializers.Serializer):
     pdf_progress = serializers.IntegerField()
     pdf_bookmarks = serializers.IntegerField()
+    pdf_annotations = serializers.IntegerField()
     failed = serializers.ListField(child=serializers.CharField())
 
 

@@ -1010,6 +1010,41 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/pdf-annotations/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Kitobdagi mening belgilarim va eslatmalarim */
+        get: operations["me_pdf_annotations_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/pdf-annotations/{annotation_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Belgini yozish (idempotent; id mijozda yaratilgan UUID) */
+        put: operations["me_pdf_annotations_update"];
+        post?: never;
+        /** Belgini o'chirish (idempotent) */
+        delete: operations["me_pdf_annotations_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/events/": {
         parameters: {
             query?: never;
@@ -1226,6 +1261,47 @@ export interface components {
             recent_messages: components["schemas"]["RecentMessage"][];
             recent_activity: components["schemas"]["AuditEntry"][];
         };
+        Annotation: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly pdf_book_id: string;
+            readonly page: number;
+            readonly color: components["schemas"]["ColorEnum"];
+            readonly rects: components["schemas"]["AnnotationRect"][];
+            readonly note: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        AnnotationRect: {
+            /** Format: double */
+            x: number;
+            /** Format: double */
+            y: number;
+            /** Format: double */
+            w: number;
+            /** Format: double */
+            h: number;
+        };
+        AnnotationRectRequest: {
+            /** Format: double */
+            x: number;
+            /** Format: double */
+            y: number;
+            /** Format: double */
+            w: number;
+            /** Format: double */
+            h: number;
+        };
+        /** @description PUT: belgi (`id` yo'lda, mijozda yaratilgan UUID). */
+        AnnotationWriteRequest: {
+            pdf_book_id: string;
+            page: number;
+            color: components["schemas"]["ColorEnum"];
+            rects: components["schemas"]["AnnotationRectRequest"][];
+            /** @default  */
+            note: string;
+        };
         AuditEntry: {
             /** Format: uuid */
             readonly id: string;
@@ -1341,6 +1417,13 @@ export interface components {
          */
         CheckStatusEnum: "ok" | "error";
         /**
+         * @description * `yellow` - Yellow
+         *     * `green` - Green
+         *     * `pink` - Pink
+         * @enum {string}
+         */
+        ColorEnum: "yellow" | "green" | "pink";
+        /**
          * @description * `auto` - Generated
          *     * `first_page` - First page
          *     * `custom` - Custom image
@@ -1408,6 +1491,7 @@ export interface components {
         ExportLearning: {
             pdf_progress: components["schemas"]["PdfProgress"][];
             pdf_bookmarks: components["schemas"]["PdfBookmark"][];
+            pdf_annotations: components["schemas"]["Annotation"][];
             goals: components["schemas"]["Goal"][];
         };
         ExportUser: {
@@ -1457,6 +1541,17 @@ export interface components {
          * @enum {string}
          */
         GroupEnum: "exact" | "natural" | "language" | "social" | "arts";
+        /** @description PUT: belgi (`id` yo'lda, mijozda yaratilgan UUID). */
+        GuestAnnotationRequest: {
+            pdf_book_id: string;
+            page: number;
+            color: components["schemas"]["ColorEnum"];
+            rects: components["schemas"]["AnnotationRectRequest"][];
+            /** @default  */
+            note: string;
+            /** Format: uuid */
+            id: string;
+        };
         /** @description PUT: PDF darslikda oxirgi sahifa. `updated_at` — mijozdagi yozuv vaqti. */
         GuestPdfProgressRequest: {
             last_page: number;
@@ -1547,10 +1642,12 @@ export interface components {
         MergeRequestRequest: {
             pdf_progress?: components["schemas"]["GuestPdfProgressRequest"][];
             pdf_bookmarks?: string[];
+            pdf_annotations?: components["schemas"]["GuestAnnotationRequest"][];
         };
         MergeResult: {
             pdf_progress: number;
             pdf_bookmarks: number;
+            pdf_annotations: number;
             failed: string[];
         };
         /**
@@ -3772,6 +3869,75 @@ export interface operations {
             header?: never;
             path: {
                 pdf_book_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    me_pdf_annotations_list: {
+        parameters: {
+            query?: {
+                /** @description Kitob id'si (majburiy) */
+                pdf_book?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Annotation"][];
+                };
+            };
+        };
+    };
+    me_pdf_annotations_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                annotation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnnotationWriteRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["AnnotationWriteRequest"];
+                "multipart/form-data": components["schemas"]["AnnotationWriteRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Annotation"];
+                };
+            };
+        };
+    };
+    me_pdf_annotations_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                annotation_id: string;
             };
             cookie?: never;
         };
