@@ -12,7 +12,7 @@ import {
   type Ref,
 } from "react";
 import { createPortal } from "react-dom";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, m, useReducedMotion } from "framer-motion";
 import { Check, ChevronDown, Search, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
@@ -295,7 +295,7 @@ function SelectPopup({
   if (sheet) {
     return (
       <div className="fixed inset-0 z-[60]">
-        <motion.div
+        <m.div
           aria-hidden
           className="bg-overlay absolute inset-0"
           initial={{ opacity: 0 }}
@@ -304,7 +304,7 @@ function SelectPopup({
           transition={{ duration }}
           onClick={() => onClose(true)}
         />
-        <motion.div
+        <m.div
           ref={popupRef}
           role="dialog"
           aria-modal="true"
@@ -339,13 +339,13 @@ function SelectPopup({
               </button>
             </div>
           )}
-        </motion.div>
+        </m.div>
       </div>
     );
   }
 
   return (
-    <motion.div
+    <m.div
       ref={popupRef}
       style={{
         position: "fixed",
@@ -364,7 +364,7 @@ function SelectPopup({
     >
       {search}
       {list}
-    </motion.div>
+    </m.div>
   );
 }
 
