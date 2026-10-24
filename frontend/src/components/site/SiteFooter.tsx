@@ -12,6 +12,8 @@ const linkClasses =
   "text-muted hover:text-foreground flex min-h-8 items-center rounded-md text-[0.9375rem] transition-colors";
 
 /** `full` — bosh sahifa (logo, tagline, 2 ustun havolalar); `compact` — qolgan sahifalar (logo + ©). */
+const legalLink = "hover:text-foreground flex min-h-11 items-center rounded-md transition-colors";
+
 export function SiteFooter({ variant = "compact" }: { variant?: "full" | "compact" }) {
   const t = useTranslations("site.footer");
   const telegramHref = TELEGRAM_BOT_USERNAME ? `https://t.me/${TELEGRAM_BOT_USERNAME}` : null;
@@ -22,6 +24,14 @@ export function SiteFooter({ variant = "compact" }: { variant?: "full" | "compac
       <footer className="border-border bg-footer-bg present:hidden border-t print:hidden">
         <div className="max-w-site text-faint mx-auto flex flex-wrap items-center justify-between gap-4 px-4 py-7 text-sm sm:px-8">
           <Logo height={24} />
+          <nav aria-label={t("legal")} className="flex flex-wrap gap-x-5">
+            <Link href={ROUTES.terms} className={legalLink}>
+              {t("terms")}
+            </Link>
+            <Link href={ROUTES.privacy} className={legalLink}>
+              {t("privacy")}
+            </Link>
+          </nav>
           <span>{copyright}</span>
         </div>
       </footer>
@@ -47,6 +57,9 @@ export function SiteFooter({ variant = "compact" }: { variant?: "full" | "compac
           <Link href={ROUTES.textbooks} className={linkClasses}>
             {t("textbooks")}
           </Link>
+          <Link href={ROUTES.about} className={linkClasses}>
+            {t("about")}
+          </Link>
           {telegramHref && (
             <a
               href={telegramHref}
@@ -68,8 +81,11 @@ export function SiteFooter({ variant = "compact" }: { variant?: "full" | "compac
           <Link href={ROUTES.help} className={linkClasses}>
             {t("helpCenter")}
           </Link>
-          <Link href={ROUTES.about} className={linkClasses}>
-            {t("about")}
+          <Link href={ROUTES.terms} className={linkClasses}>
+            {t("terms")}
+          </Link>
+          <Link href={ROUTES.privacy} className={linkClasses}>
+            {t("privacy")}
           </Link>
         </nav>
       </div>

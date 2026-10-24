@@ -20,53 +20,64 @@ export function Pagination({ page, pageCount, hrefFor, className }: PaginationPr
   const items = pageWindow(page, pageCount);
   if (items.length === 0) return null;
 
+  const arrow = (target: number, kind: "previous" | "next") => (
+    <Link
+      href={hrefFor(target)}
+      rel={kind === "previous" ? "prev" : "next"}
+      aria-label={t(kind)}
+      className={cn(box, outlined)}
+    >
+      {kind === "previous" ? (
+        <ChevronLeft className="size-[1.125rem]" aria-hidden />
+      ) : (
+        <ChevronRight className="size-[1.125rem]" aria-hidden />
+      )}
+    </Link>
+  );
+
   return (
-    <nav aria-label={t("label")} className={cn("flex flex-wrap justify-center gap-1.5", className)}>
-      {page > 1 && (
-        <Link
-          href={hrefFor(page - 1)}
-          rel="prev"
-          aria-label={t("previous")}
-          className={cn(box, outlined)}
+    <nav aria-label={t("label")} className={className}>
+      {/* <640px: ‹ 5 / 10 › — tugmalar 44px, raqamlar qatori sig'maydi */}
+      <div className="flex items-center justify-center gap-2 sm:hidden">
+        {page > 1 ? arrow(page - 1, "previous") : <span aria-hidden className="size-11" />}
+        <span
+          aria-current="page"
+          aria-label={t("pageOf", { page, total: pageCount })}
+          className="flex h-11 min-w-20 items-center justify-center px-2 text-base font-semibold tabular-nums"
         >
-          <ChevronLeft className="size-[1.125rem]" aria-hidden />
-        </Link>
-      )}
-      {items.map((item, index) =>
-        item === "gap" ? (
-          <span key={`gap-${index}`} aria-hidden className={cn(box, "text-faint")}>
-            …
-          </span>
-        ) : item === page ? (
-          <span
-            key={item}
-            aria-current="page"
-            aria-label={t("page", { page: item })}
-            className={cn(box, "bg-navy text-background")}
-          >
-            {item}
-          </span>
-        ) : (
-          <Link
-            key={item}
-            href={hrefFor(item)}
-            aria-label={t("page", { page: item })}
-            className={cn(box, outlined)}
-          >
-            {item}
-          </Link>
-        ),
-      )}
-      {page < pageCount && (
-        <Link
-          href={hrefFor(page + 1)}
-          rel="next"
-          aria-label={t("next")}
-          className={cn(box, outlined)}
-        >
-          <ChevronRight className="size-[1.125rem]" aria-hidden />
-        </Link>
-      )}
+          {page} / {pageCount}
+        </span>
+        {page < pageCount ? arrow(page + 1, "next") : <span aria-hidden className="size-11" />}
+      </div>
+      <div className="hidden flex-wrap justify-center gap-1.5 sm:flex">
+        {page > 1 && arrow(page - 1, "previous")}
+        {items.map((item, index) =>
+          item === "gap" ? (
+            <span key={`gap-${index}`} aria-hidden className={cn(box, "text-faint")}>
+              …
+            </span>
+          ) : item === page ? (
+            <span
+              key={item}
+              aria-current="page"
+              aria-label={t("page", { page: item })}
+              className={cn(box, "bg-navy text-background")}
+            >
+              {item}
+            </span>
+          ) : (
+            <Link
+              key={item}
+              href={hrefFor(item)}
+              aria-label={t("page", { page: item })}
+              className={cn(box, outlined)}
+            >
+              {item}
+            </Link>
+          ),
+        )}
+        {page < pageCount && arrow(page + 1, "next")}
+      </div>
     </nav>
   );
 }

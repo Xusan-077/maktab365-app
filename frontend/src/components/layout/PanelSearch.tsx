@@ -27,7 +27,14 @@ const isEditable = (target: EventTarget | null) =>
  * Panel qidiruvi: topbar'dagi tugma yoki ⌘K / Ctrl+K / "/" bilan ochiladi. Darsliklar nomi
  * bo'yicha qidiriladi, natija o'qish sahifasiga olib boradi.
  */
-export function PanelSearch({ className }: { className?: string }) {
+export function PanelSearch({
+  className,
+  variant = "field",
+}: {
+  className?: string;
+  /** `field` — kirish maydoni ko'rinishidagi tugma (panel); `icon` — ikonka tugma, keng ekranda "Ctrl K" belgisi bilan (sayt sarlavhasi). */
+  variant?: "field" | "icon";
+}) {
   const t = useTranslations("panel.search");
   const tErrors = useTranslations("errors");
   const locale = useLocale() as Locale;
@@ -95,13 +102,21 @@ export function PanelSearch({ className }: { className?: string }) {
         aria-label={t("open")}
         aria-keyshortcuts="Control+K Meta+K /"
         className={cn(
-          "border-border bg-surface text-muted hover:border-primary-300 hover:text-foreground inline-flex h-10 items-center gap-2 rounded-lg border px-3 text-sm shadow-xs transition-colors max-lg:w-10 max-lg:justify-center max-lg:border-transparent max-lg:px-0 max-lg:shadow-none lg:w-72",
+          variant === "icon"
+            ? "border-border bg-surface text-foreground hover:bg-surface-2 inline-flex h-11 min-w-11 items-center justify-center gap-2 rounded-xl border text-sm transition-colors md:px-3"
+            : "border-border bg-surface text-muted hover:border-primary-300 hover:text-foreground inline-flex h-10 items-center gap-2 rounded-lg border px-3 text-sm shadow-xs transition-colors max-lg:w-10 max-lg:justify-center max-lg:border-transparent max-lg:px-0 max-lg:shadow-none lg:w-72",
           className,
         )}
       >
         <Search className="size-4 shrink-0" aria-hidden />
-        <span className="hidden flex-1 text-left lg:inline">{t("placeholder")}</span>
-        <kbd className="bg-subtle hidden rounded px-1.5 py-0.5 text-xs lg:inline">⌘K</kbd>
+        {variant === "icon" ? (
+          <kbd className="text-faint hidden font-sans text-xs font-medium md:inline">Ctrl K</kbd>
+        ) : (
+          <>
+            <span className="hidden flex-1 text-left lg:inline">{t("placeholder")}</span>
+            <kbd className="bg-subtle hidden rounded px-1.5 py-0.5 text-xs lg:inline">⌘K</kbd>
+          </>
+        )}
       </button>
 
       <Dialog open={open} onOpenChange={setOpen} title={t("title")} className="sm:max-w-xl">

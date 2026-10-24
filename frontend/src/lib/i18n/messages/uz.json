@@ -1678,7 +1678,8 @@
       "label": "Sahifalar",
       "previous": "Oldingi sahifa",
       "next": "Keyingi sahifa",
-      "page": "{page}-sahifa"
+      "page": "{page}-sahifa",
+      "pageOf": "{total} sahifadan {page}-sahifa"
     },
     "footer": {
       "tagline": "1–11-sinf maktab darsliklari — bepul va hamma uchun ochiq.",
@@ -1690,7 +1691,10 @@
       "contact": "Bog'lanish",
       "helpCenter": "Yordam markazi",
       "about": "Loyiha haqida",
-      "copyright": "© {year} darslik365"
+      "copyright": "© {year} darslik365",
+      "terms": "Foydalanish shartlari",
+      "privacy": "Maxfiylik siyosati",
+      "legal": "Huquqiy ma'lumot"
     },
     "showcase": {
       "title": "Sayt komponentlari",
@@ -1706,6 +1710,18 @@
       "uz-Cyrl": "ЎЗ",
       "ru": "RU",
       "en": "EN"
+    }
+  },
+  "legal": {
+    "terms": {
+      "title": "Foydalanish shartlari",
+      "description": "darslik365 dan foydalanish shartlari.",
+      "body": "[TO'LDIRILADI]"
+    },
+    "privacy": {
+      "title": "Maxfiylik siyosati",
+      "description": "darslik365 foydalanuvchi ma'lumotlarini qanday qayta ishlashi haqida.",
+      "body": "[TO'LDIRILADI]"
     }
   }
 }

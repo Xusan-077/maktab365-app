@@ -1678,7 +1678,8 @@
       "label": "Pages",
       "previous": "Previous page",
       "next": "Next page",
-      "page": "Page {page}"
+      "page": "Page {page}",
+      "pageOf": "Page {page} of {total}"
     },
     "footer": {
       "tagline": "Grade 1–11 school textbooks — free and open to everyone.",
@@ -1690,7 +1691,10 @@
       "contact": "Contact us",
       "helpCenter": "Help center",
       "about": "About",
-      "copyright": "© {year} darslik365"
+      "copyright": "© {year} darslik365",
+      "terms": "Terms of use",
+      "privacy": "Privacy policy",
+      "legal": "Legal"
     },
     "showcase": {
       "title": "Site components",
@@ -1706,6 +1710,18 @@
       "uz-Cyrl": "ЎЗ",
       "ru": "RU",
       "en": "EN"
+    }
+  },
+  "legal": {
+    "terms": {
+      "title": "Terms of use",
+      "description": "Terms of use for darslik365.",
+      "body": "[TO'LDIRILADI]"
+    },
+    "privacy": {
+      "title": "Privacy policy",
+      "description": "How darslik365 handles user data.",
+      "body": "[TO'LDIRILADI]"
     }
   }
 }

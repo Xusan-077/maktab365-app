@@ -23,6 +23,8 @@ export const ROUTES = {
   search: "/qidiruv",
   help: "/yordam",
   contact: "/aloqa",
+  terms: "/shartlar",
+  privacy: "/maxfiylik",
   offline: "/oflayn",
 } as const;
 

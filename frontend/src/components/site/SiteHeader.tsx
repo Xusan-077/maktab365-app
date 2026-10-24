@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Menu } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Logo } from "@/components/layout/Logo";
+import { PanelSearch } from "@/components/layout/PanelSearch";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { UserMenu } from "@/components/layout/UserMenu";
 import { Dialog } from "@/components/ui/Dialog";
@@ -20,9 +21,12 @@ export function SiteHeader() {
   return (
     <header className="border-border bg-background present:hidden sticky top-0 z-40 border-b print:hidden">
       <div className="max-w-site mx-auto flex items-center gap-3 px-4 py-3.5 sm:px-8 md:gap-7">
-        <Logo height={30} />
+        {/* Tor ekranda (375px) belgi: logo + qidiruv + "Kirish" + menyu bir qatorga sig'adi */}
+        <Logo height={30} className="max-[400px]:hidden" />
+        <Logo variant="mark" height={30} className="min-[401px]:hidden" />
         <SiteNav className="hidden md:block" />
         <div className="ml-auto flex items-center gap-2">
+          <PanelSearch variant="icon" />
           <SiteLocaleMenu className="hidden md:block" />
           <ThemeToggle className={`${iconButton} hidden md:inline-flex`} />
           <UserMenu signInClassName="h-11 rounded-xl px-[1.125rem] text-[0.9375rem] font-semibold" />
