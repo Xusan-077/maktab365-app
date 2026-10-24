@@ -3603,6 +3603,10 @@ export interface operations {
             query?: {
                 /** @description Sinf (1–11) */
                 grade?: number;
+                /** @description Fan guruhi: `exact|natural|language|social|arts`; bir nechta bo'lsa vergul bilan */
+                group?: string;
+                /** @description Kitob tili */
+                language?: "en" | "ru" | "uz";
                 /** @description `newest` — so'nggi qo'shilganlar birinchi (standart: sinf va fan bo'yicha) */
                 ordering?: "newest";
                 /** @description A page number within the paginated result set. */
