@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { randomPassword } from "./credentials";
+import { register as registerUser, signIn } from "./helpers";
 import { manage } from "./manage";
 import { makePdf } from "./pdf-fixture";
 
@@ -22,38 +23,6 @@ const DESCRIPTION = `E2E tavsif ${stamp}`;
 
 let bookId = "";
 
-async function register(page: Page, email: string) {
-  await page.goto("/uz/royxatdan-otish");
-  const form = page.getByTestId("register-form");
-  await form.getByLabel("Email").fill(email);
-  await form.getByLabel("Parol", { exact: true }).fill(userPassword);
-  await form.getByLabel("Parolni takrorlang").fill(userPassword);
-  await form.getByRole("button", { name: "Ro'yxatdan o'tish" }).click();
-
-  await expect(page).toHaveURL(/\/uz\/onboarding$/);
-  await page.getByLabel("Ismingiz").fill("E2E O'quvchi");
-  await page.getByRole("combobox", { name: "Sinfingiz" }).click();
-  await page.getByRole("option", { name: "9-sinf" }).click();
-  await page.getByRole("button", { name: "Davom etish" }).click();
-  await expect(page).toHaveURL(/\/uz\/kabinet$/);
-}
-
-async function signIn(page: Page, email: string, password: string) {
-  await page.goto("/uz/kirish");
-  const form = page.getByTestId("login-form");
-  const step = page.getByTestId("email-step");
-  // Gidratsiyadan oldingi bosish yo'qolishi mumkin — ikkinchi qadam chiqquncha takrorlanadi.
-  await expect(async () => {
-    if (await form.isVisible()) return;
-    await step.getByLabel("Email").fill(email);
-    await step.getByRole("button", { name: "Davom etish" }).click();
-    await expect(form).toBeVisible({ timeout: 2_000 });
-  }).toPass();
-  await form.getByLabel("Parol", { exact: true }).fill(password);
-  await form.getByRole("button", { name: "Kirish" }).click();
-  await expect(page).toHaveURL(/\/uz\/(kabinet|ustoz|admin)$/);
-}
-
 /** Server tomonda saqlangan oxirgi sahifa (BFF orqali, sessiya cookie bilan). */
 async function savedPage(page: Page): Promise<number | null> {
   const response = await page.request.get(`/api/backend/api/v1/me/pdf-progress/${bookId}`);
@@ -74,7 +43,7 @@ test.describe.serial("PDF darsliklar", () => {
   }) => {
     // Akkaunt onboarding'dan o'tadi, so'ng `create_admin` unga admin rolini beradi va parolni
     // (tasodifiy, env orqali) o'rnatadi; eski sessiyada rol yo'q — qayta kiriladi.
-    await register(page, adminEmail);
+    await registerUser(page, adminEmail, userPassword);
     manage(["create_admin"], { ADMIN_EMAIL: adminEmail, ADMIN_PASSWORD: adminPassword });
     await context.clearCookies();
     await signIn(page, adminEmail, adminPassword);
@@ -132,12 +101,10 @@ test.describe.serial("PDF darsliklar", () => {
     await detailsForm.getByTestId("toc-page").nth(1).fill("2");
     await detailsForm.getByRole("button", { name: "Saqlash" }).click();
     await expect(detailsForm.getByRole("button", { name: "Saqlash" })).toBeDisabled();
-    await expect(page.getByTestId("pdf-cover")).toBeVisible();
-    await expect
-      .poll(() =>
-        page.getByTestId("pdf-cover").evaluate((img: HTMLImageElement) => img.naturalWidth),
-      )
-      .toBeGreaterThan(0);
+    // Yangi kitob "avtomatik" muqova rejimida: tayyor (CSS) muqova, rasm yo'q.
+    await expect(
+      page.getByTestId("cover-section").getByRole("radio", { name: /Avtomatik/ }),
+    ).toBeChecked();
 
     // --- Nashr: yashirin → ochiq.
     await page.getByRole("button", { name: "Nashr qilish" }).click();
@@ -149,19 +116,21 @@ test.describe.serial("PDF darsliklar", () => {
   test("o'quvchi: katalogdan topadi, 5-sahifaga o'tadi, sahifa URL va progressda saqlanadi", async ({
     page,
   }) => {
-    await register(page, studentEmail);
+    await registerUser(page, studentEmail, userPassword);
 
-    await page.goto("/uz/darsliklar");
-    await page.getByRole("combobox", { name: "Sinf" }).click();
-    await page.getByRole("option", { name: "9-sinf" }).click();
-    await page.getByRole("combobox", { name: "Fan" }).click();
-    await page.getByRole("option", { name: "Algebra" }).click();
-    const card = page.getByTestId("pdf-book-card").filter({ hasText: TITLE });
-    await expect(card).toContainText(`${PAGES} bet`);
+    await page.goto("/uz/darsliklar?sinf=9&fan=algebra");
+    const card = page
+      .getByTestId("pdf-book-card")
+      .filter({ hasText: TITLE })
+      .filter({ visible: true });
     await card.click();
 
+    // --- Kitob sahifasidan o'qish oynasiga o'tadi.
+    await expect(page).toHaveURL(/\/uz\/darsliklar\/9\/[^/]+$/);
+    await page.getByRole("link", { name: "Onlayn o'qish" }).click();
+
     // --- Ochilganda 1-sahifa, URL'da ?page=1, «1 / 8».
-    await expect(page).toHaveURL(new RegExp(`/uz/darsliklar/${bookId}\\?page=1$`));
+    await expect(page).toHaveURL(/\/oqish\?page=1$/);
     await expect(page.getByTestId("pdf-canvas")).toBeVisible();
     await expect(page.getByTestId("pdf-page-total")).toHaveText(`/ ${PAGES}`);
 
@@ -225,7 +194,7 @@ test.describe.serial("PDF darsliklar", () => {
     await expect(page.getByTestId("pdf-bookmark")).toHaveAttribute("aria-pressed", "true");
 
     // Ro'yxatdan o'tgach guest merge pozitsiyani va saqlangan kitobni akkauntga yozadi.
-    await register(page, guestEmail);
+    await registerUser(page, guestEmail, userPassword);
     await expect.poll(() => savedPage(page), { timeout: 20_000 }).toBe(4);
     await expect.poll(() => savedBookIds(page), { timeout: 20_000 }).toContain(bookId);
     await expect
@@ -254,7 +223,7 @@ test.describe.serial("PDF darsliklar", () => {
     await expect(card).toContainText(TITLE);
     await expect(card).toContainText(`3 / ${PAGES}`);
     await card.getByRole("link", { name: "Davom ettirish" }).click();
-    await expect(page).toHaveURL(new RegExp(`/uz/darsliklar/${bookId}\\?page=3$`));
+    await expect(page).toHaveURL(/\/oqish\?page=3$/);
 
     // Saqlanganlar; o'quvchi menyusi: Bosh sahifa, Darsliklar, Fanlarim, Natijalar, Saqlanganlar.
     await page.goto("/uz/kabinet/saqlanganlar");
@@ -278,7 +247,7 @@ test.describe.serial("PDF darsliklar", () => {
 
   test("qidiruv: katalogda nom bo'yicha va Ctrl+K orqali", async ({ page }) => {
     await page.goto(`/uz/darsliklar?q=${encodeURIComponent(TITLE)}`);
-    await expect(page.getByRole("link", { name: TITLE })).toHaveCount(1);
+    await expect(page.getByTestId("pdf-book-card").filter({ hasText: TITLE })).toHaveCount(1);
     await expect(page.getByRole("searchbox", { name: "Darslik qidirish" })).toHaveValue(TITLE);
 
     await page.goto("/uz/darsliklar?q=mavjud-bo'lmagan-kitob");
@@ -286,12 +255,12 @@ test.describe.serial("PDF darsliklar", () => {
 
     await signIn(page, studentEmail, userPassword);
     await page.keyboard.press("Control+k");
-    await page.getByLabel("Darslik qidirish").fill(TITLE);
+    await page.getByRole("dialog").getByRole("searchbox").fill(TITLE);
     await page
       .getByRole("dialog")
       .getByRole("link", { name: new RegExp(TITLE) })
       .click();
-    await expect(page).toHaveURL(new RegExp(`/uz/darsliklar/${bookId}`));
+    await expect(page).toHaveURL(/\/uz\/darsliklar\/\d+\/[^/]+(\/oqish)?$/);
   });
 
   test("viewer'dan xato yuboriladi va yordam sahifasida ko'rinadi", async ({ page }) => {
@@ -309,9 +278,9 @@ test.describe.serial("PDF darsliklar", () => {
 
   test("eski manzillar yangi joyga yo'naltiriladi", async ({ page }) => {
     await page.goto(`/uz/pdf-kitoblar/${bookId}`);
-    await expect(page).toHaveURL(new RegExp(`/uz/darsliklar/${bookId}`));
+    await expect(page).toHaveURL(/\/uz\/darsliklar\/\d+\/[^/]+\/oqish$/);
     await page.goto("/uz/fanlar/algebra");
-    await expect(page).toHaveURL(/\/uz\/darsliklar\?subject=algebra$/);
+    await expect(page).toHaveURL(/\/uz\/darsliklar\?fan=algebra$/);
     await page.goto("/uz/darsliklar/algebra-9/diskriminant");
     await expect(page).toHaveURL(/\/uz\/darsliklar$/);
     await page.goto("/uz/darsliklar/algebra-9");

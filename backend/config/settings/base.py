@@ -154,7 +154,7 @@ REST_FRAMEWORK = {
         "user": "240/min",
         # Kirish/ro'yxatdan o'tish/parol tiklash: IP va email bo'yicha alohida.
         "auth": env("AUTH_THROTTLE_RATE", default="10/min"),  # e2e uchun env bilan oshiriladi
-        "auth_email": "5/min",
+        "auth_email": env("AUTH_EMAIL_THROTTLE_RATE", default="5/min"),  # e2e uchun env bilan oshiriladi
         # Yordam murojaatlari: IP bo'yicha soatiga 5 ta (e2e uchun env bilan oshiriladi).
         "support": env("SUPPORT_THROTTLE_RATE", default="5/hour"),
         "pdf_upload": PDF_UPLOAD_THROTTLE_RATE,

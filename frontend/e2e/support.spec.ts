@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { randomPassword } from "./credentials";
+import { register } from "./helpers";
 
 /** Har ishga tushirishda yangi akkaunt — backend bazasi tozalanmasa ham to'qnashuv yo'q. */
 const email = `e2e-support-${Date.now()}@example.com`;
@@ -35,19 +36,7 @@ test.describe("yordam va aloqa", () => {
   test("kirgan foydalanuvchi: darslikdagi xatoni yuboradi va panelda holatini ko'radi", async ({
     page,
   }) => {
-    await page.goto("/uz/royxatdan-otish");
-    const register = page.getByTestId("register-form");
-    await register.getByLabel("Email").fill(email);
-    await register.getByLabel("Parol", { exact: true }).fill(password);
-    await register.getByLabel("Parolni takrorlang").fill(password);
-    await register.getByRole("button", { name: "Ro'yxatdan o'tish" }).click();
-
-    await expect(page).toHaveURL(/\/uz\/onboarding$/);
-    await page.getByLabel("Ismingiz").fill("E2E Yordam");
-    await page.getByRole("combobox", { name: "Sinfingiz" }).click();
-    await page.getByRole("option", { name: "9-sinf" }).click();
-    await page.getByRole("button", { name: "Davom etish" }).click();
-    await expect(page).toHaveURL(/\/uz\/kabinet$/);
+    await register(page, email, password, "E2E Yordam");
 
     await page.goto("/uz/kabinet/yordam");
     // Kirgan foydalanuvchidan email so'ralmaydi.

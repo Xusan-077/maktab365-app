@@ -76,7 +76,7 @@ test.describe.serial("O'qish jarayoni", () => {
       await expect(card).toContainText(TITLE);
       await card.getByRole("link", { name: "Davom ettirish" }).click();
 
-      await expect(other).toHaveURL(new RegExp(`/uz/darsliklar/${bookId}\\?page=4$`));
+      await expect(other).toHaveURL(/\/uz\/darsliklar\/\d+\/[^/]+\/oqish\?page=4$/);
       await expect(other.getByTestId("pdf-canvas")).toHaveAttribute("data-page", "4");
 
       // Saqlanganlar ham shu akkauntda.

@@ -34,10 +34,10 @@ test.describe("email kodi bilan kirish", () => {
 
     await expect(page).toHaveURL(/\/uz\/kod\?email=/);
     await expect(page.getByText(`${email} manziliga`)).toBeVisible();
-    // Birinchi katakka avtomatik fokus; qayta yuborish taymer tugamaguncha o'chiq.
+    // Birinchi katakka avtomatik fokus; taymer tugamaguncha "Qayta yuborish" tugmasi o'rnida hisoblagich.
     const cells = page.getByRole("group", { name: "Tasdiqlash kodi" }).getByRole("textbox");
     await expect(cells.first()).toBeFocused();
-    await expect(page.getByRole("button", { name: /Qayta yuborish: \d+ soniya/ })).toBeDisabled();
+    await expect(page.getByTestId("resend-timer")).toContainText(/Qayta yuborish/);
 
     // Noto'g'ri kod: xabar, kataklar tozalanadi.
     const code = await codeFor(request, email);

@@ -27,7 +27,7 @@ const MOVED: { source: string; destination: string }[] = [
     source: `/${LOCALE}/darsliklar/:sinf([0-9]{1,2})`,
     destination: "/:locale/darsliklar?sinf=:sinf",
   },
-  { source: `/${LOCALE}/fanlar/:subject`, destination: "/:locale/darsliklar?subject=:subject" },
+  { source: `/${LOCALE}/fanlar/:subject`, destination: "/:locale/darsliklar?fan=:subject" },
   // Panel ichidagi eski bo'limlar
   { source: `/${LOCALE}/kabinet/darsliklar/:path*`, destination: "/:locale/darsliklar" },
   // `/kabinet/fanlar` va `/kabinet/natijalar` — yana haqiqiy sahifalar (Fanlarim, Natijalar); eski ichki yo'llar (`/fanlar/<slug>`) yo'naltiriladi
@@ -54,6 +54,14 @@ const nextConfig: NextConfig = {
     },
   },
   redirects: async () => MOVED.map((rule) => ({ ...rule, permanent: true })),
+  // Kirish sahifalari brauzer keshida turmasin: kirgan foydalanuvchini proxy har safar o'z paneliga
+  // yo'naltiradi (aks holda `s-maxage`/`stale-while-revalidate` bilan eski "kirish" sahifasi ko'rinib qoladi).
+  headers: async () => [
+    {
+      source: `/${LOCALE}/:page(kirish|kod|onboarding)`,
+      headers: [{ key: "Cache-Control", value: "private, no-cache, no-store, max-age=0" }],
+    },
+  ],
 };
 
 export default withNextIntl(nextConfig);

@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { randomPassword } from "./credentials";
+import { register as registerUser } from "./helpers";
 import { manage } from "./manage";
 
 /**
@@ -14,22 +15,6 @@ const studentEmail = `e2e-nonstaff-${stamp}@example.com`;
 const SUBJECT_SLUG = `e2e-fan-${stamp}`;
 const SUBJECT_TITLE = `E2E fan ${stamp}`;
 const RENAMED = `E2E fan (yangi nom) ${stamp}`;
-
-async function register(page: Page, email: string) {
-  await page.goto("/uz/royxatdan-otish");
-  const form = page.getByTestId("register-form");
-  await form.getByLabel("Email").fill(email);
-  await form.getByLabel("Parol", { exact: true }).fill(password);
-  await form.getByLabel("Parolni takrorlang").fill(password);
-  await form.getByRole("button", { name: "Ro'yxatdan o'tish" }).click();
-
-  await expect(page).toHaveURL(/\/uz\/onboarding$/);
-  await page.getByLabel("Ismingiz").fill("E2E Muharrir");
-  await page.getByRole("combobox", { name: "Sinfingiz" }).click();
-  await page.getByRole("option", { name: "9-sinf" }).click();
-  await page.getByRole("button", { name: "Davom etish" }).click();
-  await expect(page).toHaveURL(/\/uz\/kabinet$/);
-}
 
 async function signIn(page: Page, email: string) {
   await page.goto("/uz/kirish");
@@ -56,7 +41,7 @@ function promoteToEditor(email: string) {
 }
 
 test("oddiy foydalanuvchi uchun /admin mavjud emas (404)", async ({ page }) => {
-  await register(page, studentEmail);
+  await registerUser(page, studentEmail, password, "E2E Muharrir");
   await page.goto("/uz/admin");
   await expect(page.getByRole("heading", { name: "Sahifa topilmadi" })).toBeVisible();
   await page.goto("/uz/admin/fanlar");
@@ -69,7 +54,7 @@ test("editor: qobiq, fan qo'shadi va nomini o'zgartiradi (o'chira olmaydi)", asy
   page,
   context,
 }) => {
-  await register(page, editorEmail);
+  await registerUser(page, editorEmail, password, "E2E Muharrir");
   promoteToEditor(editorEmail);
   // Eski sessiyada rol yo'q (student): yangi sessiya editor sifatida.
   await context.clearCookies();
