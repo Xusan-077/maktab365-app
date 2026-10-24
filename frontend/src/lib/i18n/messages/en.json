@@ -1681,6 +1681,10 @@
     "cover": {
       "grade": "Grade {grade}"
     },
+    "bookCard": {
+      "page": "page {page}",
+      "read": "Read"
+    },
     "groupName": {
       "exact": "Exact sciences",
       "natural": "Natural sciences",

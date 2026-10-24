@@ -1681,6 +1681,10 @@
     "cover": {
       "grade": "{grade}-синф"
     },
+    "bookCard": {
+      "page": "{page}-бет",
+      "read": "Ўқилган"
+    },
     "groupName": {
       "exact": "Аниқ фанлар",
       "natural": "Табиий фанлар",

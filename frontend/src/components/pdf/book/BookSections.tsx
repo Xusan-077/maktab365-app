@@ -9,7 +9,7 @@ import type { PdfBook, PdfBookDetail } from "@/lib/pdf-books/api";
 import { formatBytes } from "@/lib/utils/bytes";
 import { cn } from "@/lib/utils/cn";
 import { gradePath, readerPath } from "@/lib/utils/routes";
-import { PdfBookCard } from "../PdfBookCard";
+import { BookCard } from "@/components/site/BookCard";
 
 /** Kitob pasporti: faqat haqiqiy maydonlar (narx — platforma bepul). */
 export function BookPassport({
@@ -139,7 +139,7 @@ export function SimilarBooks({
         <ul className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-4 sm:gap-x-4">
           {others.map((book) => (
             <li key={book.id}>
-              <PdfBookCard book={book} />
+              <BookCard book={book} />
             </li>
           ))}
         </ul>

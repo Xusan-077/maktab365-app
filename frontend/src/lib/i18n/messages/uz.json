@@ -1681,6 +1681,10 @@
     "cover": {
       "grade": "{grade}-sinf"
     },
+    "bookCard": {
+      "page": "{page}-bet",
+      "read": "O'qilgan"
+    },
     "groupName": {
       "exact": "Aniq fanlar",
       "natural": "Tabiiy fanlar",

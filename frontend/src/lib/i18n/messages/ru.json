@@ -1681,6 +1681,10 @@
     "cover": {
       "grade": "{grade} класс"
     },
+    "bookCard": {
+      "page": "стр. {page}",
+      "read": "Прочитано"
+    },
     "groupName": {
       "exact": "Точные науки",
       "natural": "Естественные науки",
