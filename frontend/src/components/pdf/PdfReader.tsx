@@ -2,11 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ListTree } from "lucide-react";
+import { ArrowLeft, PanelLeft, Search } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { Dialog } from "@/components/ui/Dialog";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useBookStats } from "@/hooks/useBookStats";
 import { useFullscreen } from "@/hooks/useFullscreen";
 import { usePdfAnnotations } from "@/hooks/usePdfAnnotations";
@@ -25,7 +27,7 @@ import {
 import { clampPage, parsePageParam } from "@/lib/pdf/page-nav";
 import { isDoubleTap, nextZoom, type ReaderZoom, type TapPoint } from "@/lib/pdf/reader-prefs";
 import { parseSlidesParams, readSlidesProgress, withSlidesParams } from "@/lib/pdf/slides";
-import { flattenToc } from "@/lib/pdf/toc";
+import { currentTocItem, flattenToc } from "@/lib/pdf/toc";
 import { swipeDirection } from "@/lib/pdf/swipe";
 import { pdfQueries } from "@/lib/pdf-books/queries";
 import { cn } from "@/lib/utils/cn";
@@ -34,7 +36,6 @@ import { useReaderPrefsStore } from "@/stores/reader-prefs.store";
 import { ReportErrorLink } from "@/components/support/ReportErrorLink";
 import { BookCover } from "./BookCover";
 import { OfflineButton } from "./OfflineButton";
-import { PdfBookDescription } from "./PdfBookDescription";
 import { RecordRecentBook } from "./RecordRecentBook";
 import { PdfBookmarkButton } from "./PdfBookmarkButton";
 import { AnnotationDialog } from "./AnnotationDialog";
@@ -46,7 +47,8 @@ import { PdfReaderControls } from "./PdfReaderControls";
 import { ReaderShortcutsDialog } from "./ReaderShortcutsDialog";
 import { PdfSlidesViewer } from "./PdfSlidesViewer";
 import { PdfToolbar } from "./PdfToolbar";
-import { PdfTocDrawer } from "./PdfTocDrawer";
+import { ReaderBottomBar } from "./reader/ReaderBottomBar";
+import { ReaderPanel } from "./reader/ReaderPanel";
 import { resolveFileUrl } from "@/lib/pdf/file-url";
 import { usePdfDocument } from "./usePdfDocument";
 
@@ -107,7 +109,12 @@ export function PdfReader({ bookId, backHref }: { bookId: string; backHref?: str
   const progress = usePdfProgress(bookId, total);
   const document = usePdfDocument(bookId);
   const [renderFailed, setRenderFailed] = useState(false);
+  const tcontrols = useTranslations("pdfBooks.controls");
+  const desktop = useMediaQuery("(min-width: 1024px)");
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [tocOpen, setTocOpen] = useState(false);
+  const [viewOpen, setViewOpen] = useState(false);
+  const [offlineOpen, setOfflineOpen] = useState(false);
   const reloads = useRef(0);
   const stageRef = useRef<HTMLDivElement>(null);
   const tone = useReaderPrefsStore((state) => state.tone);
@@ -314,180 +321,300 @@ export function PdfReader({ bookId, backHref }: { bookId: string; backHref?: str
   }
 
   const title = book.data ? getLocalized(book.data.title, locale) : "";
+  const subjectTitle = book.data ? getLocalized(book.data.subject_title, locale) : "";
   const chapters = book.data?.chapters ?? [];
+  const currentChapter =
+    page !== null ? currentTocItem(flattenToc(chapters), page)?.title : undefined;
+  const subtitle = book.data
+    ? [tc("meta", { grade: book.data.grade, subject: subjectTitle }), currentChapter]
+        .filter(Boolean)
+        .join(" · ")
+    : "";
+  const percent = page !== null && total > 0 ? Math.max(1, Math.round((page / total) * 100)) : 0;
+  const backLink = backHref ?? (book.data ? pdfBookPath(book.data) : ROUTES.textbooks);
+  const toolbar =
+    page !== null && total > 0 ? (
+      <PdfToolbar page={page} total={total} onGo={goTo} />
+    ) : (
+      <Skeleton className="h-11 w-56" />
+    );
+  const controlProps = {
+    tone,
+    fit,
+    zoom,
+    fullscreen: fullscreen.active,
+    fullscreenSupported: fullscreen.supported,
+    onTone: cycleTone,
+    onFit: toggleFit,
+    onZoom: () => setZoom(nextZoom),
+    onFullscreen: toggleFullscreen,
+    onShortcuts: () => setShortcutsOpen(true),
+    onSearch: document.doc ? () => setFindOpen(true) : undefined,
+    drawing,
+    onDrawing: document.doc ? () => setDrawing((value) => !value) : undefined,
+    annotationCount: annotations.items.length,
+    onAnnotations: () => setListOpen(true),
+  };
+  const share = () => {
+    const url = window.location.href;
+    if (typeof navigator.share === "function") {
+      void navigator.share({ title, url }).catch(() => undefined);
+    } else {
+      void navigator.clipboard?.writeText(url).catch(() => undefined);
+    }
+  };
+  const panel = (onPick?: () => void, scrollOnMount?: boolean) =>
+    page !== null && (
+      <ReaderPanel
+        chapters={chapters}
+        page={page}
+        description={book.data?.description ?? ""}
+        annotations={annotations.items}
+        onGo={goTo}
+        onOpenSlides={openSlides}
+        onPickAnnotation={(annotation) => goTo(annotation.page)}
+        onPick={onPick}
+        scrollOnMount={scrollOnMount}
+      />
+    );
+  const offlineBook =
+    book.data && !backHref
+      ? {
+          id: bookId,
+          slug: book.data.slug,
+          grade: book.data.grade,
+          title: book.data.title,
+          sizeBytes: book.data.size_bytes,
+        }
+      : null;
 
   return (
-    <div className="flex flex-col gap-3" data-testid="pdf-reader">
+    <div
+      ref={stageRef}
+      data-tone={tone}
+      data-testid="pdf-reader"
+      className={cn(
+        "pdf-stage bg-reader-bg flex min-h-dvh flex-col",
+        fullscreen.active && "overflow-auto",
+      )}
+    >
       <RecordRecentBook book={counted ? book.data : undefined} />
-      <div className="flex flex-wrap items-center gap-3">
-        <Link
-          href={backHref ?? (book.data ? pdfBookPath(book.data) : ROUTES.textbooks)}
-          className="text-link inline-flex items-center gap-1 text-sm font-medium underline-offset-4 hover:underline"
-        >
-          <ArrowLeft className="size-4" aria-hidden />
-          {t("back")}
-        </Link>
-        {book.data && (
-          <div className="flex min-w-0 flex-1 items-center gap-3">
-            <BookCover
-              grade={book.data.grade}
-              subject={book.data.subject}
-              subjectTitle={getLocalized(book.data.subject_title, locale)}
-              src={book.data.cover}
-              className="hidden w-9 sm:block"
-            />
+
+      <header className="border-border bg-surface sticky top-0 z-20 border-b">
+        <div className="flex h-[3.75rem] items-center gap-1 px-2 lg:h-auto lg:flex-wrap lg:gap-4 lg:px-5 lg:py-2.5">
+          <div className="flex min-w-0 flex-1 items-center gap-1 lg:gap-3">
+            <Link
+              href={backLink}
+              aria-label={t("back")}
+              className="text-foreground lg:border-border inline-flex size-11 shrink-0 items-center justify-center rounded-xl lg:border"
+            >
+              <ArrowLeft className="size-5" aria-hidden />
+            </Link>
+            {desktop && (
+              <button
+                type="button"
+                aria-label={t("panelToggle")}
+                aria-pressed={sidebarOpen}
+                data-testid="pdf-sidebar-toggle"
+                onClick={() => setSidebarOpen((value) => !value)}
+                className={cn(
+                  "inline-flex size-11 shrink-0 items-center justify-center rounded-xl border",
+                  sidebarOpen
+                    ? "border-brand-soft bg-brand-soft text-brand-text"
+                    : "border-border text-foreground",
+                )}
+              >
+                <PanelLeft className="size-5" aria-hidden />
+              </button>
+            )}
+            {book.data && (
+              <BookCover
+                grade={book.data.grade}
+                subject={book.data.subject}
+                subjectTitle={subjectTitle}
+                src={book.data.cover}
+                className="hidden w-8 shrink-0 lg:block"
+              />
+            )}
             <div className="min-w-0">
-              <h1 className="truncate text-lg leading-tight font-semibold">{title}</h1>
-              <p className="text-muted truncate text-sm">
-                {tc("meta", {
-                  grade: book.data.grade,
-                  subject: getLocalized(book.data.subject_title, locale),
-                })}
-              </p>
+              <h1 className="truncate text-base leading-tight font-bold">{title}</h1>
+              <p className="text-muted truncate text-xs lg:text-[0.8125rem]">{subtitle}</p>
             </div>
           </div>
+
+          {desktop && toolbar}
+
+          <div className="flex shrink-0 items-center justify-end gap-0.5 lg:flex-1">
+            {controlProps.onSearch && !desktop && (
+              <button
+                type="button"
+                data-testid="pdf-find-open"
+                aria-label={tcontrols("find")}
+                onClick={controlProps.onSearch}
+                className="text-foreground inline-flex size-11 items-center justify-center"
+              >
+                <Search className="size-5" aria-hidden />
+              </button>
+            )}
+            {desktop && <PdfReaderControls {...controlProps} />}
+            {book.data && <PdfBookmarkButton bookId={bookId} compact />}
+          </div>
+        </div>
+        <div aria-hidden className="bg-brand-soft h-[3px]">
+          <div className="bg-brand h-[3px]" style={{ width: `${percent}%` }} />
+        </div>
+      </header>
+
+      <div className="flex flex-1 items-stretch">
+        {desktop && sidebarOpen && page !== null && (
+          <aside
+            aria-label={tt("title")}
+            className="border-border bg-surface sticky top-[calc(3.75rem+3px)] h-[calc(100dvh-4rem)] w-80 shrink-0 overflow-y-auto border-r p-4"
+          >
+            {panel()}
+            {offlineBook && (
+              <div className="border-border mt-4 border-t pt-4">
+                <OfflineButton book={offlineBook} />
+              </div>
+            )}
+          </aside>
         )}
-        {chapters.length > 0 && (
-          <Button variant="secondary" data-testid="pdf-toc-open" onClick={() => setTocOpen(true)}>
-            <ListTree className="size-4" aria-hidden />
-            {tt("button")}
-          </Button>
-        )}
-        {book.data && <PdfBookmarkButton bookId={bookId} />}
+
+        <div className="min-w-0 flex-1 px-2.5 pt-4 pb-40 lg:px-6 lg:pt-8 lg:pb-12">
+          {findTerm && (
+            <div
+              className="mb-3 flex items-center justify-center gap-2 text-sm"
+              data-testid="pdf-find-chip"
+            >
+              <span className="text-muted">{tf("highlighted", { term: findTerm })}</span>
+              <button
+                type="button"
+                onClick={() => replaceQuery({ find: null })}
+                className="text-link min-h-11 underline underline-offset-4"
+              >
+                {tf("clear")}
+              </button>
+            </div>
+          )}
+
+          <div
+            className={cn(
+              "pdf-page-area mx-auto max-w-[53.75rem] select-none",
+              zoom > 1 ? "touch-pan-x touch-pan-y" : "touch-pan-y",
+            )}
+            onPointerDown={onPointerDown}
+            onPointerUp={onPointerUp}
+            onPointerCancel={() => (touch.current = null)}
+          >
+            {document.error && !document.doc ? (
+              <ReaderMessage
+                message={t("loadError")}
+                action={
+                  <>
+                    <Button variant="secondary" onClick={retry}>
+                      {t("retry")}
+                    </Button>
+                    <OpenInNewWindowButton bookId={bookId} label={t("openInNewWindow")} />
+                  </>
+                }
+              />
+            ) : renderFailed ? (
+              <ReaderMessage
+                message={t("pageError")}
+                action={
+                  <>
+                    <Button variant="secondary" onClick={retry}>
+                      {t("retry")}
+                    </Button>
+                    <OpenInNewWindowButton bookId={bookId} label={t("openInNewWindow")} />
+                  </>
+                }
+              />
+            ) : document.doc && page !== null ? (
+              <div className={cn("bg-surface rounded-md shadow-lg", zoom > 1 && "overflow-x-auto")}>
+                <div
+                  style={{
+                    width: `${zoom * 100}%`,
+                    height:
+                      fit === "page" && zoom === 1
+                        ? fullscreen.active
+                          ? "calc(100dvh - 7rem)"
+                          : "calc(100dvh - 9rem)"
+                        : undefined,
+                  }}
+                  className={cn(fit === "page" && zoom === 1 && "min-h-80")}
+                >
+                  <PdfPageCanvas
+                    doc={document.doc}
+                    pageNumber={page}
+                    label={t("position", { page, total })}
+                    fit={fit === "page" && zoom === 1 ? "contain" : "width"}
+                    highlight={findTerm || undefined}
+                    overlay={
+                      <AnnotationLayer
+                        annotations={annotationsOnPage(annotations.items, page)}
+                        drawing={drawing}
+                        onDraw={(rect) => setDraft({ kind: "new", rect })}
+                        onSelect={(annotation) => setDraft({ kind: "edit", annotation })}
+                      />
+                    }
+                    onRendered={() => (reloads.current = 0)}
+                    onError={onRenderError}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div role="status" aria-label={t("loading")}>
+                <Skeleton className="mx-auto aspect-[1/1.4] w-full max-w-3xl" />
+              </div>
+            )}
+          </div>
+
+          {book.data && (
+            <div className="mx-auto mt-6 max-w-[53.75rem]">
+              <ReportErrorLink topicId={bookId} />
+            </div>
+          )}
+        </div>
       </div>
-      {book.data?.description && <PdfBookDescription text={book.data.description} />}
-      {book.data && !backHref && (
-        <OfflineButton
-          book={{
-            id: bookId,
-            slug: book.data.slug,
-            grade: book.data.grade,
-            title: book.data.title,
-            sizeBytes: book.data.size_bytes,
-          }}
+
+      {!desktop && page !== null && total > 0 && (
+        <ReaderBottomBar
+          page={page}
+          total={total}
+          onGo={goTo}
+          onPanel={() => setTocOpen(true)}
+          onView={() => setViewOpen(true)}
+          onOffline={offlineBook ? () => setOfflineOpen(true) : undefined}
+          onShare={share}
         />
       )}
 
-      <div
-        ref={stageRef}
-        data-tone={tone}
-        data-testid="pdf-stage"
-        className={cn("pdf-stage flex flex-col gap-3", fullscreen.active && "overflow-auto p-4")}
-      >
-        <div className="bg-background sticky top-0 z-10 -mx-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 px-4 py-2 sm:-mx-6 sm:px-6">
-          {page !== null && total > 0 ? (
-            <PdfToolbar page={page} total={total} onGo={goTo} />
-          ) : (
-            <Skeleton className="h-10 w-56" />
-          )}
-          <PdfReaderControls
-            tone={tone}
-            fit={fit}
-            zoom={zoom}
-            fullscreen={fullscreen.active}
-            fullscreenSupported={fullscreen.supported}
-            onTone={cycleTone}
-            onFit={toggleFit}
-            onZoom={() => setZoom(nextZoom)}
-            onFullscreen={toggleFullscreen}
-            onShortcuts={() => setShortcutsOpen(true)}
-            onSearch={document.doc ? () => setFindOpen(true) : undefined}
-            drawing={drawing}
-            onDrawing={document.doc ? () => setDrawing((value) => !value) : undefined}
-            annotationCount={annotations.items.length}
-            onAnnotations={() => setListOpen(true)}
-          />
-        </div>
-
-        {findTerm && (
-          <div
-            className="flex items-center justify-center gap-2 text-sm"
-            data-testid="pdf-find-chip"
-          >
-            <span className="text-muted">{tf("highlighted", { term: findTerm })}</span>
-            <button
-              type="button"
-              onClick={() => replaceQuery({ find: null })}
-              className="text-link min-h-11 underline underline-offset-4"
+      {!desktop && (
+        <>
+          <Dialog open={tocOpen} onOpenChange={setTocOpen} title={tt("title")} placement="bottom">
+            {panel(() => setTocOpen(false), tocOpen)}
+          </Dialog>
+          <Dialog open={viewOpen} onOpenChange={setViewOpen} title={t("view")} placement="bottom">
+            <PdfReaderControls
+              {...controlProps}
+              labels
+              only="view"
+              onAfter={() => setViewOpen(false)}
+            />
+          </Dialog>
+          {offlineBook && (
+            <Dialog
+              open={offlineOpen}
+              onOpenChange={setOfflineOpen}
+              title={t("offline")}
+              placement="bottom"
             >
-              {tf("clear")}
-            </button>
-          </div>
-        )}
-
-        <div
-          className={cn(
-            "pdf-page-area select-none",
-            zoom > 1 ? "touch-pan-x touch-pan-y" : "touch-pan-y",
+              <OfflineButton book={offlineBook} />
+            </Dialog>
           )}
-          onPointerDown={onPointerDown}
-          onPointerUp={onPointerUp}
-          onPointerCancel={() => (touch.current = null)}
-        >
-          {document.error && !document.doc ? (
-            <ReaderMessage
-              message={t("loadError")}
-              action={
-                <>
-                  <Button variant="secondary" onClick={retry}>
-                    {t("retry")}
-                  </Button>
-                  <OpenInNewWindowButton bookId={bookId} label={t("openInNewWindow")} />
-                </>
-              }
-            />
-          ) : renderFailed ? (
-            <ReaderMessage
-              message={t("pageError")}
-              action={
-                <>
-                  <Button variant="secondary" onClick={retry}>
-                    {t("retry")}
-                  </Button>
-                  <OpenInNewWindowButton bookId={bookId} label={t("openInNewWindow")} />
-                </>
-              }
-            />
-          ) : document.doc && page !== null ? (
-            <div className={cn(zoom > 1 && "overflow-x-auto")}>
-              <div
-                style={{
-                  width: `${zoom * 100}%`,
-                  height:
-                    fit === "page" && zoom === 1
-                      ? fullscreen.active
-                        ? "calc(100dvh - 7rem)"
-                        : "calc(100dvh - 9rem)"
-                      : undefined,
-                }}
-                className={cn(fit === "page" && zoom === 1 && "min-h-80")}
-              >
-                <PdfPageCanvas
-                  doc={document.doc}
-                  pageNumber={page}
-                  label={t("position", { page, total })}
-                  fit={fit === "page" && zoom === 1 ? "contain" : "width"}
-                  highlight={findTerm || undefined}
-                  overlay={
-                    <AnnotationLayer
-                      annotations={annotationsOnPage(annotations.items, page)}
-                      drawing={drawing}
-                      onDraw={(rect) => setDraft({ kind: "new", rect })}
-                      onSelect={(annotation) => setDraft({ kind: "edit", annotation })}
-                    />
-                  }
-                  onRendered={() => (reloads.current = 0)}
-                  onError={onRenderError}
-                />
-              </div>
-            </div>
-          ) : (
-            <div role="status" aria-label={t("loading")}>
-              <Skeleton className="mx-auto aspect-[1/1.4] w-full max-w-3xl" />
-            </div>
-          )}
-        </div>
-      </div>
+        </>
+      )}
 
       {draft && page !== null && (
         <AnnotationDialog
@@ -540,17 +667,6 @@ export function PdfReader({ bookId, backHref }: { bookId: string; backHref?: str
       )}
       {shortcutsOpen && <ReaderShortcutsDialog open onOpenChange={setShortcutsOpen} />}
 
-      {chapters.length > 0 && page !== null && (
-        <PdfTocDrawer
-          open={tocOpen}
-          onOpenChange={setTocOpen}
-          chapters={chapters}
-          page={page}
-          onGo={goTo}
-          onOpenSlides={openSlides}
-        />
-      )}
-
       {slidesItem?.slides && slidesParams.chapterId && slideNumber !== null && (
         <PdfSlidesViewer
           key={slidesParams.chapterId}
@@ -564,8 +680,6 @@ export function PdfReader({ bookId, backHref }: { bookId: string; backHref?: str
           onBackToBook={backToBook}
         />
       )}
-
-      {book.data && <ReportErrorLink topicId={bookId} />}
     </div>
   );
 }

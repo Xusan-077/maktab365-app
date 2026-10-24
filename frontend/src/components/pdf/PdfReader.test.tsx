@@ -69,6 +69,12 @@ function setup(query = "", extra: Record<string, unknown> = {}) {
   );
 }
 
+/** Panelni ochib «Tavsif» yorlig'iga o'tadi. */
+const openAbout = async () => {
+  fireEvent.click(await screen.findByTestId("pdf-toc-open"));
+  fireEvent.click(await screen.findByTestId("reader-tab-about"));
+};
+
 const currentPage = async () => (await screen.findByTestId("pdf-canvas")).dataset.page;
 
 beforeEach(() => {
@@ -216,10 +222,12 @@ const CHAPTERS = [
 ];
 
 describe("PdfReader: mundarija va tavsif", () => {
-  it("mundarija bo'lmasa tugma ko'rinmaydi", async () => {
+  it("mundarija bo'lmasa panelda «Mundarija» yorlig'i yo'q", async () => {
     setup("page=5", { description: "", chapters: [] });
     await currentPage();
-    expect(screen.queryByTestId("pdf-toc-open")).toBeNull();
+    fireEvent.click(await screen.findByTestId("pdf-toc-open"));
+    expect(screen.queryByTestId("reader-tab-toc")).toBeNull();
+    expect(screen.queryByTestId("pdf-toc")).toBeNull();
   });
 
   it("tugma panelni ochadi; bo'limni bossa shu betga o'tadi va panel yopiladi", async () => {
@@ -228,6 +236,7 @@ describe("PdfReader: mundarija va tavsif", () => {
     fireEvent.click(await screen.findByTestId("pdf-toc-open"));
 
     const items = await screen.findAllByTestId("pdf-toc-item");
+    const toc = screen.getByTestId("pdf-toc");
     expect(items.map((item) => item.textContent)).toEqual([
       "Kirish1-bet",
       "Maqsad10-bet",
@@ -235,9 +244,7 @@ describe("PdfReader: mundarija va tavsif", () => {
     ]);
     fireEvent.click(items[2]);
     expect(nav.replace).toHaveBeenCalledWith("/darsliklar/book-1?page=50", { scroll: false });
-    await waitFor(() =>
-      expect(screen.getByRole("dialog", { hidden: true }).hasAttribute("open")).toBe(false),
-    );
+    await waitFor(() => expect(toc.closest("dialog")?.hasAttribute("open")).toBe(false));
   });
 
   it("joriy bo'lim ajratib ko'rsatiladi", async () => {
@@ -264,6 +271,7 @@ describe("PdfReader: mundarija va tavsif", () => {
     const long = "Uzun tavsif. ".repeat(30);
     setup("page=1", { description: long, chapters: [] });
     await currentPage();
+    await openAbout();
     const more = await screen.findByRole("button", { name: uz.pdfBooks.description.more });
     expect(more.getAttribute("aria-expanded")).toBe("false");
     expect(screen.getByTestId("pdf-description").querySelector("p")?.className).toContain(
@@ -283,12 +291,14 @@ describe("PdfReader: mundarija va tavsif", () => {
   it("qisqa tavsifda «Batafsil» tugmasi yo'q; tavsif bo'lmasa blok yo'q", async () => {
     setup("page=1", { description: "Qisqa tavsif", chapters: [] });
     await currentPage();
+    await openAbout();
     expect(await screen.findByText("Qisqa tavsif")).toBeTruthy();
     expect(screen.queryByRole("button", { name: uz.pdfBooks.description.more })).toBeNull();
     cleanup();
     setup("page=1", { description: "", chapters: [] });
     await currentPage();
-    expect(screen.queryByTestId("pdf-description")).toBeNull();
+    fireEvent.click(await screen.findByTestId("pdf-toc-open"));
+    expect(screen.queryByTestId("reader-tab-about")).toBeNull();
   });
 });
 

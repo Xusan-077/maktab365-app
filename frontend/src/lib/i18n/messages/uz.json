@@ -1260,7 +1260,18 @@
       "pageError": "Sahifani ko'rsatib bo'lmadi.",
       "openInNewWindow": "PDFni yangi oynada ochish",
       "notFound": "Bunday darslik topilmadi yoki u hali nashr qilinmagan.",
-      "retry": "Qayta urinish"
+      "retry": "Qayta urinish",
+      "panel": "Mundarija",
+      "view": "Ko'rinish",
+      "offline": "Oflayn",
+      "share": "Ulashish",
+      "panelToggle": "Mundarijani ko'rsatish yoki yashirish",
+      "tabs": {
+        "label": "Yon panel",
+        "toc": "Mundarija",
+        "marks": "Belgilar",
+        "about": "Tavsif"
+      }
     },
     "bookmark": {
       "save": "Saqlash",

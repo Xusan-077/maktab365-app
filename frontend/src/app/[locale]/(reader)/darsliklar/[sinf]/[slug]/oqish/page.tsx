@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { MARKETING_CONTAINER } from "@/components/layout/containers";
 import { PageSkeleton } from "@/components/layout/PageSkeleton";
 import { PdfReaderLoader } from "@/components/pdf/PdfReaderLoader";
 import { getLocalized } from "@/lib/i18n/localized";
@@ -41,13 +40,7 @@ type Props = PageProps<"/[locale]/darsliklar/[sinf]/[slug]/oqish">;
 /** `params` faqat `<Suspense>` ichidagi `ReaderContent` da o'qiladi (App Shell bitta kitobga bog'lanmasin). */
 export default function PdfReaderPage({ params }: Props) {
   return (
-    <Suspense
-      fallback={
-        <div className={`${MARKETING_CONTAINER} py-4`}>
-          <PageSkeleton variant="reading" />
-        </div>
-      }
-    >
+    <Suspense fallback={<PageSkeleton variant="reading" />}>
       <ReaderContent params={params} />
     </Suspense>
   );
@@ -63,16 +56,8 @@ async function ReaderContent({ params }: Pick<Props, "params">) {
   const book = await getBookBySlug(slug);
   // Nashr qilinmagan (qoralama) kitobni staff mijozda ochadi; boshqalarga "topilmadi" ko'rinadi.
   if (!book) {
-    return (
-      <div className={`${MARKETING_CONTAINER} py-4`}>
-        <PdfReaderLoader slug={slug} />
-      </div>
-    );
+    return <PdfReaderLoader slug={slug} />;
   }
   if (book.grade !== grade) permanentRedirect(`/${locale}${readerPath(book)}`);
-  return (
-    <div className={`${MARKETING_CONTAINER} py-4`}>
-      <PdfReaderLoader bookId={book.id} />
-    </div>
-  );
+  return <PdfReaderLoader bookId={book.id} />;
 }

@@ -3,19 +3,25 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/Button";
 import { parsePageInput } from "@/lib/pdf/page-nav";
+import { cn } from "@/lib/utils/cn";
 
 export interface PdfToolbarProps {
   page: number;
   total: number;
   onGo: (page: number) => void;
   disabled?: boolean;
+  /** `inline` — yuqori panel (desktop); `bar` — mobil pastki panel (keyingi tugma to'ldirilgan). */
+  variant?: "inline" | "bar";
 }
 
+const NAV_BUTTON =
+  "text-foreground inline-flex size-11 shrink-0 items-center justify-center rounded-xl transition-colors disabled:pointer-events-none disabled:opacity-40";
+
 /** Oldingi/keyingi tugmalari va sahifa raqami maydoni ("12 / 240"). Enter yoki fokus ketganda o'tadi. */
-export function PdfToolbar({ page, total, onGo, disabled }: PdfToolbarProps) {
+export function PdfToolbar({ page, total, onGo, disabled, variant = "inline" }: PdfToolbarProps) {
   const t = useTranslations("pdfBooks.reader");
+  const bar = variant === "bar";
   // `null` — maydon joriy sahifani ko'rsatadi; tahrir paytida foydalanuvchi matni.
   const [draft, setDraft] = useState<string | null>(null);
 
@@ -30,21 +36,26 @@ export function PdfToolbar({ page, total, onGo, disabled }: PdfToolbarProps) {
     <div
       role="toolbar"
       aria-label={t("toolbar")}
-      className="flex items-center justify-center gap-2"
+      className={cn("flex items-center gap-1.5", bar ? "w-full" : "justify-center")}
       data-testid="pdf-toolbar"
     >
-      <Button
-        variant="secondary"
-        size="icon"
+      <button
+        type="button"
         aria-label={t("prev")}
         data-testid="pdf-prev"
         disabled={disabled || page <= 1}
         onClick={() => onGo(page - 1)}
+        className={cn(NAV_BUTTON, bar ? "bg-surface-2" : "border-border bg-surface border")}
       >
         <ChevronLeft className="size-5" aria-hidden />
-      </Button>
+      </button>
 
-      <div className="flex items-center gap-1.5 text-sm tabular-nums">
+      <div
+        className={cn(
+          "flex items-center justify-center gap-1.5 text-[0.9375rem] tabular-nums",
+          bar ? "h-11 flex-1" : "bg-surface-2 h-11 rounded-xl px-3",
+        )}
+      >
         <input
           type="text"
           inputMode="numeric"
@@ -55,7 +66,7 @@ export function PdfToolbar({ page, total, onGo, disabled }: PdfToolbarProps) {
           value={draft ?? String(page)}
           disabled={disabled}
           style={{ width: `${String(total).length + 2}ch` }}
-          className="border-border bg-surface text-foreground focus-visible:ring-ring h-11 rounded-lg border px-1 text-center sm:h-10"
+          className="border-input-border bg-surface text-foreground focus-visible:ring-ring h-8 rounded-lg border px-1 text-center font-bold"
           onFocus={(event) => event.currentTarget.select()}
           onChange={(event) => setDraft(event.target.value)}
           onBlur={commit}
@@ -78,16 +89,16 @@ export function PdfToolbar({ page, total, onGo, disabled }: PdfToolbarProps) {
         </span>
       </div>
 
-      <Button
-        variant="secondary"
-        size="icon"
+      <button
+        type="button"
         aria-label={t("next")}
         data-testid="pdf-next"
         disabled={disabled || page >= total}
         onClick={() => onGo(page + 1)}
+        className={cn(NAV_BUTTON, bar ? "bg-brand text-white" : "border-border bg-surface border")}
       >
         <ChevronRight className="size-5" aria-hidden />
-      </Button>
+      </button>
     </div>
   );
 }

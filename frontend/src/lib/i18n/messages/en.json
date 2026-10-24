@@ -1260,7 +1260,18 @@
       "pageError": "Could not show the page.",
       "openInNewWindow": "Open PDF in a new window",
       "notFound": "This textbook was not found or is not published yet.",
-      "retry": "Try again"
+      "retry": "Try again",
+      "panel": "Contents",
+      "view": "View",
+      "offline": "Offline",
+      "share": "Share",
+      "panelToggle": "Show or hide contents",
+      "tabs": {
+        "label": "Side panel",
+        "toc": "Contents",
+        "marks": "Marks",
+        "about": "About"
+      }
     },
     "bookmark": {
       "save": "Save",

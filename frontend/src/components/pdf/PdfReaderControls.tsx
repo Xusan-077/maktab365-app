@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import {
   Highlighter,
   Keyboard,
@@ -14,7 +15,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/Button";
+import { cn } from "@/lib/utils/cn";
 import type { ReaderFit, ReaderTone, ReaderZoom } from "@/lib/pdf/reader-prefs";
 
 const TONE_ICON: Record<ReaderTone, LucideIcon> = { light: Sun, sepia: Sunrise, dark: Moon };
@@ -36,6 +37,50 @@ export interface PdfReaderControlsProps {
   onDrawing?: () => void;
   annotationCount?: number;
   onAnnotations?: () => void;
+  /** Ikonka yonida matn ham ko'rsatiladi (mobil "Ko'rinish" sheet'i); default — faqat ikonka. */
+  labels?: boolean;
+  /** Dialog ochadigan yoki rejimni o'zgartirgan tugma bosilgach (sheet'ni yopish uchun). */
+  onAfter?: () => void;
+  /** Ko'rinadigan tugmalar to'plami: `view` — ko'rinish sozlamalari; `tools` — qidiruv, belgilar. */
+  only?: "view" | "tools";
+  className?: string;
+}
+
+function Control({
+  label,
+  showLabel,
+  pressed,
+  testId,
+  shortcut,
+  onClick,
+  children,
+}: {
+  label: string;
+  showLabel: boolean;
+  pressed?: boolean;
+  testId: string;
+  shortcut?: string;
+  onClick: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      data-testid={testId}
+      aria-label={showLabel ? undefined : label}
+      aria-pressed={pressed}
+      aria-keyshortcuts={shortcut}
+      onClick={onClick}
+      className={cn(
+        "text-foreground hover:bg-subtle inline-flex items-center rounded-xl text-sm font-semibold transition-colors",
+        showLabel ? "min-h-12 w-full justify-start gap-3 px-3" : "size-11 justify-center",
+        pressed && "bg-brand-soft text-brand-text",
+      )}
+    >
+      {children}
+      {showLabel && <span className="min-w-0 flex-1 text-left">{label}</span>}
+    </button>
+  );
 }
 
 /** Sahifa fon rejimi, moslash, zoom, to'liq ekran, qidiruv va yorliqlar: har biri ikonka tugma. */
@@ -55,106 +100,119 @@ export function PdfReaderControls({
   onDrawing,
   annotationCount = 0,
   onAnnotations,
+  labels = false,
+  onAfter,
+  only,
+  className,
 }: PdfReaderControlsProps) {
   const t = useTranslations("pdfBooks.controls");
   const ToneIcon = TONE_ICON[tone];
+  const after = (action: () => void) => () => {
+    action();
+    onAfter?.();
+  };
+  const tools = only !== "view";
+  const view = only !== "tools";
   return (
-    <div role="group" aria-label={t("label")} className="flex flex-wrap items-center gap-1">
-      {onSearch && (
-        <Button
-          variant="ghost"
-          size="icon"
-          data-testid="pdf-find-open"
-          aria-label={t("find")}
-          aria-keyshortcuts="Control+F"
-          onClick={onSearch}
+    <div
+      role="group"
+      aria-label={t("label")}
+      className={cn(
+        labels ? "flex flex-col gap-1" : "flex flex-wrap items-center gap-0.5",
+        className,
+      )}
+    >
+      {tools && onSearch && (
+        <Control
+          label={t("find")}
+          showLabel={labels}
+          testId="pdf-find-open"
+          shortcut="Control+F"
+          onClick={after(onSearch)}
         >
           <Search className="size-5" aria-hidden />
-        </Button>
+        </Control>
       )}
-      {onDrawing && (
-        <Button
-          variant={drawing ? "secondary" : "ghost"}
-          size="icon"
-          data-testid="pdf-highlight"
-          aria-pressed={drawing}
-          aria-label={t(drawing ? "highlightOff" : "highlightOn")}
-          onClick={onDrawing}
+      {tools && onDrawing && (
+        <Control
+          label={t(drawing ? "highlightOff" : "highlightOn")}
+          showLabel={labels}
+          pressed={drawing}
+          testId="pdf-highlight"
+          onClick={after(onDrawing)}
         >
           <Highlighter className="size-5" aria-hidden />
-        </Button>
+        </Control>
       )}
-      {onAnnotations && annotationCount > 0 && (
-        <Button
-          variant="ghost"
-          size="icon"
-          data-testid="pdf-annotations-open"
-          aria-label={t("annotations", { count: annotationCount })}
-          onClick={onAnnotations}
+      {tools && onAnnotations && annotationCount > 0 && (
+        <Control
+          label={t("annotations", { count: annotationCount })}
+          showLabel={labels}
+          testId="pdf-annotations-open"
+          onClick={after(onAnnotations)}
         >
           <NotebookPen className="size-5" aria-hidden />
-        </Button>
+        </Control>
       )}
-      <Button
-        variant="ghost"
-        size="icon"
-        data-testid="pdf-tone"
-        aria-label={t("tone", { tone: t(`tones.${tone}`) })}
-        aria-keyshortcuts="T"
-        onClick={onTone}
-      >
-        <ToneIcon className="size-5" aria-hidden />
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        data-testid="pdf-fit"
-        aria-pressed={fit === "page"}
-        aria-label={t(fit === "page" ? "fitWidth" : "fitPage")}
-        onClick={onFit}
-      >
-        <ScanSearch className="size-5" aria-hidden />
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        data-testid="pdf-zoom"
-        aria-pressed={zoom > 1}
-        aria-label={t(zoom > 1 ? "zoomOut" : "zoomIn")}
-        aria-keyshortcuts="Z"
-        onClick={onZoom}
-      >
-        <span aria-hidden className="text-sm font-semibold tabular-nums">
-          {zoom}×
-        </span>
-      </Button>
-      {fullscreenSupported && (
-        <Button
-          variant="ghost"
-          size="icon"
-          data-testid="pdf-fullscreen"
-          aria-pressed={fullscreen}
-          aria-label={t(fullscreen ? "exitFullscreen" : "fullscreen")}
-          aria-keyshortcuts="F"
-          onClick={onFullscreen}
-        >
-          {fullscreen ? (
-            <Minimize className="size-5" aria-hidden />
-          ) : (
-            <Maximize className="size-5" aria-hidden />
+      {view && (
+        <>
+          <Control
+            label={t("tone", { tone: t(`tones.${tone}`) })}
+            showLabel={labels}
+            testId="pdf-tone"
+            shortcut="T"
+            onClick={onTone}
+          >
+            <ToneIcon className="size-5" aria-hidden />
+          </Control>
+          <Control
+            label={t(fit === "page" ? "fitWidth" : "fitPage")}
+            showLabel={labels}
+            pressed={fit === "page"}
+            testId="pdf-fit"
+            onClick={onFit}
+          >
+            <ScanSearch className="size-5" aria-hidden />
+          </Control>
+          <Control
+            label={t(zoom > 1 ? "zoomOut" : "zoomIn")}
+            showLabel={labels}
+            pressed={zoom > 1}
+            testId="pdf-zoom"
+            shortcut="Z"
+            onClick={onZoom}
+          >
+            <span aria-hidden className="grid size-5 place-items-center text-sm tabular-nums">
+              {zoom}×
+            </span>
+          </Control>
+          {fullscreenSupported && (
+            <Control
+              label={t(fullscreen ? "exitFullscreen" : "fullscreen")}
+              showLabel={labels}
+              pressed={fullscreen}
+              testId="pdf-fullscreen"
+              shortcut="F"
+              onClick={after(onFullscreen)}
+            >
+              {fullscreen ? (
+                <Minimize className="size-5" aria-hidden />
+              ) : (
+                <Maximize className="size-5" aria-hidden />
+              )}
+            </Control>
           )}
-        </Button>
+          <Control
+            label={t("shortcuts")}
+            showLabel={labels}
+            testId="pdf-shortcuts"
+            shortcut="?"
+            onClick={after(onShortcuts)}
+          >
+            <Keyboard className="size-5" aria-hidden />
+          </Control>
+        </>
       )}
-      <Button
-        variant="ghost"
-        size="icon"
-        data-testid="pdf-shortcuts"
-        aria-label={t("shortcuts")}
-        aria-keyshortcuts="?"
-        onClick={onShortcuts}
-      >
-        <Keyboard className="size-5" aria-hidden />
-      </Button>
     </div>
   );
 }
