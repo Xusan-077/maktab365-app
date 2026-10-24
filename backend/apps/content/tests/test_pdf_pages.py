@@ -57,7 +57,7 @@ def test_download_returns_attachment_url_and_counts(catalog):
     resp = api.get(f"{PUBLIC}/{book.pk}/download/")
     assert resp.status_code == 200
     data = resp.json()
-    assert data["filename"] == "Algebra 9 sinf - 9-sinf - Maktab365.pdf"
+    assert data["filename"] == "Algebra 9 sinf - 9-sinf - Darslik365.pdf"
     assert "download=" in data["url"] and data["url"].startswith(f"{PUBLIC}/{book.pk}/file/")
     assert resp["Cache-Control"] == "private, no-store"
     book.refresh_from_db()

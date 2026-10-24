@@ -206,14 +206,14 @@ OTP_DEV_INBOX = False
 # --- Email: dev — konsol, prod — SMTP (Resend ham SMTP orqali), EMAIL_URL bilan ---
 # Masalan: EMAIL_URL=smtp+tls://resend:re_xxx@smtp.resend.com:587
 vars().update(env.email_url("EMAIL_URL", default="consolemail://"))
-DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="maktab365 <no-reply@maktab365.uz>")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="darslik365 <no-reply@maktab365.uz>")
 
 # Yangi murojaatlar haqida xabar oladigan staff email'lari (vergul bilan); bo'sh — xat yo'q.
 SUPPORT_NOTIFY_EMAILS = env.list("SUPPORT_NOTIFY_EMAILS", default=[])
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "Maktab365 API",
-    "DESCRIPTION": "Maktab365 platformasi API'si.",
+    "TITLE": "Darslik365 API",
+    "DESCRIPTION": "Darslik365 platformasi API'si.",
     "VERSION": "0.1.0",
     "SERVE_INCLUDE_SCHEMA": False,
     "SCHEMA_PATH_PREFIX": r"/api/v1",

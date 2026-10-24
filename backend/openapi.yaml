@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
-  title: Maktab365 API
+  title: Darslik365 API
   version: 0.1.0
-  description: Maktab365 platformasi API'si.
+  description: Darslik365 platformasi API'si.
 paths:
   /api/v1/me/:
     get:

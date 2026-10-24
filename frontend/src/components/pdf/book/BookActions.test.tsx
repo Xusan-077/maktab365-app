@@ -49,7 +49,7 @@ describe("BookActions", () => {
   it("yuklab olish: URL olinadi va fayl nomi bilan yuklash boshlanadi", async () => {
     api.download.mockResolvedValue({
       url: "https://r2.test/book.pdf?sig=1",
-      filename: "Algebra - 9-sinf - Maktab365.pdf",
+      filename: "Algebra - 9-sinf - Darslik365.pdf",
       expires_in: 600,
     });
     const click = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});

@@ -38,7 +38,7 @@ def notify_staff(message_id: str) -> None:
         ]
     )
     send_mail(
-        subject=f"[maktab365 support] {msg.kind}: {_one_line(msg.message, 60)}",
+        subject=f"[darslik365 support] {msg.kind}: {_one_line(msg.message, 60)}",
         message=body,
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=list(recipients),

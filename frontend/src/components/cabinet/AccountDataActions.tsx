@@ -21,7 +21,7 @@ export function AccountDataActions() {
 
   const exportData = useMutation({
     mutationFn: () => getApi().exportData(),
-    onSuccess: (data) => downloadJson("maktab365-data.json", data),
+    onSuccess: (data) => downloadJson("darslik365-data.json", data),
     onError: () => toast({ variant: "error", title: t("exportFailed") }),
   });
 

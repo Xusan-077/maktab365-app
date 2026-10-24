@@ -1,10 +1,10 @@
 {
   "meta": {
-    "title": "maktab365 — 1–11-sinf darsliklari",
+    "title": "darslik365 — 1–11-sinf darsliklari",
     "description": "1–11-sinf darsliklarini sahifa-sahifa onlayn o'qing. Bepul, o'quvchi va o'qituvchi uchun."
   },
   "brand": {
-    "name": "maktab365",
+    "name": "darslik365",
     "tagline": "1–11-sinf darsliklari — onlayn o'qing, bepul, o'quvchi va o'qituvchi uchun."
   },
   "home": {
@@ -284,7 +284,7 @@
   },
   "auth": {
     "signInGoogle": "Google bilan kirish",
-    "loginTitle": "maktab365 ga kirish",
+    "loginTitle": "darslik365 ga kirish",
     "loginText": "Kirish ixtiyoriy: darsliklarni hisobsiz ham o'qiy olasiz. Kirsangiz, oxirgi sahifa va saqlangan darsliklar akkauntda saqlanadi.",
     "continueAsGuest": "Kirmasdan davom etish",
     "loading": "Yuklanmoqda…",
@@ -297,7 +297,7 @@
     "guestMergedHint": "Oxirgi sahifalar va saqlangan darsliklaringiz endi akkauntingizda."
   },
   "onboarding": {
-    "title": "maktab365'dan qanday foydalanasiz?",
+    "title": "darslik365'dan qanday foydalanasiz?",
     "text": "Bu bir marta so'raladi. Keyin sozlamalarda o'zgartirishingiz mumkin.",
     "roleLegend": "Siz kimsiz?",
     "roleStudent": "O'quvchiman",
@@ -336,7 +336,7 @@
     "signOut": "Akkauntdan chiqish",
     "about": {
       "title": "Loyiha haqida",
-      "text": "maktab365 — 1–11-sinf darsliklarini onlayn o'qish uchun bepul platforma.",
+      "text": "darslik365 — 1–11-sinf darsliklarini onlayn o'qish uchun bepul platforma.",
       "free": "Barcha darsliklar bepul.",
       "topics": "Sinf va fan bo'yicha toping, sahifa-sahifa o'qing: oxirgi sahifa eslab qolinadi.",
       "languages": "O'zbek (lotin va kirill), rus va ingliz tillarida."
@@ -454,7 +454,7 @@
   },
   "aboutPage": {
     "title": "Loyiha haqida",
-    "lead": "maktab365 — 1–11-sinf darsliklari onlayn, bepul, o'quvchi va o'qituvchi uchun.",
+    "lead": "darslik365 — 1–11-sinf darsliklari onlayn, bepul, o'quvchi va o'qituvchi uchun.",
     "points": {
       "free": {
         "title": "Hammasi bepul",
@@ -592,7 +592,7 @@
     "registerLink": "Ro'yxatdan o'ting",
     "haveAccount": "Hisobingiz bormi?",
     "loginLink": "Kiring",
-    "registerTitle": "maktab365 da ro'yxatdan o'tish",
+    "registerTitle": "darslik365 da ro'yxatdan o'tish",
     "registerText": "Akkaunt oxirgi sahifa va saqlangan darsliklarni saqlaydi. Bepul."
   },
   "support": {

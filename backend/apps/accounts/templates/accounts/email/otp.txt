@@ -8,5 +8,5 @@
 
 {{ ignore }}
 
-— maktab365
+— darslik365
 {% endautoescape %}

@@ -12,27 +12,27 @@ EMAIL_LANGUAGES = ("uz", "ru", "en")
 COPY = {
     TokenPurpose.EMAIL_VERIFY: {
         "uz": {
-            "subject": "maktab365: emailingizni tasdiqlang",
+            "subject": "darslik365: emailingizni tasdiqlang",
             "greeting": "Assalomu alaykum!",
-            "text": "maktab365 da ro'yxatdan o'tganingiz uchun rahmat. "
+            "text": "darslik365 da ro'yxatdan o'tganingiz uchun rahmat. "
             "Email manzilingizni tasdiqlash uchun quyidagi tugmani bosing.",
             "button": "Emailni tasdiqlash",
             "expires": "Havola 24 soat amal qiladi.",
             "ignore": "Agar siz ro'yxatdan o'tmagan bo'lsangiz, bu xatga e'tibor bermang.",
         },
         "ru": {
-            "subject": "maktab365: подтвердите email",
+            "subject": "darslik365: подтвердите email",
             "greeting": "Здравствуйте!",
-            "text": "Спасибо за регистрацию в maktab365. "
+            "text": "Спасибо за регистрацию в darslik365. "
             "Чтобы подтвердить адрес электронной почты, нажмите на кнопку ниже.",
             "button": "Подтвердить email",
             "expires": "Ссылка действует 24 часа.",
             "ignore": "Если вы не регистрировались, просто проигнорируйте это письмо.",
         },
         "en": {
-            "subject": "maktab365: confirm your email",
+            "subject": "darslik365: confirm your email",
             "greeting": "Hello!",
-            "text": "Thanks for signing up for maktab365. "
+            "text": "Thanks for signing up for darslik365. "
             "Press the button below to confirm your email address.",
             "button": "Confirm email",
             "expires": "The link is valid for 24 hours.",
@@ -41,7 +41,7 @@ COPY = {
     },
     TokenPurpose.PASSWORD_RESET: {
         "uz": {
-            "subject": "maktab365: parolni tiklash",
+            "subject": "darslik365: parolni tiklash",
             "greeting": "Assalomu alaykum!",
             "text": "Akkauntingiz uchun parolni tiklash so'raldi. "
             "Yangi parol o'rnatish uchun quyidagi tugmani bosing.",
@@ -51,7 +51,7 @@ COPY = {
             "parolingiz o'zgarmaydi.",
         },
         "ru": {
-            "subject": "maktab365: восстановление пароля",
+            "subject": "darslik365: восстановление пароля",
             "greeting": "Здравствуйте!",
             "text": "Для вашего аккаунта запрошено восстановление пароля. "
             "Нажмите на кнопку ниже, чтобы задать новый пароль.",
@@ -61,7 +61,7 @@ COPY = {
             "пароль не изменится.",
         },
         "en": {
-            "subject": "maktab365: reset your password",
+            "subject": "darslik365: reset your password",
             "greeting": "Hello!",
             "text": "A password reset was requested for your account. "
             "Press the button below to set a new password.",
@@ -74,23 +74,23 @@ COPY = {
 
 OTP_COPY = {
     "uz": {
-        "subject": "maktab365: kirish kodi",
+        "subject": "darslik365: kirish kodi",
         "greeting": "Assalomu alaykum!",
-        "text": "maktab365 ga kirish uchun quyidagi koddan foydalaning.",
+        "text": "darslik365 ga kirish uchun quyidagi koddan foydalaning.",
         "expires": "Kod 10 daqiqa amal qiladi va faqat bir marta ishlaydi.",
         "ignore": "Kod so'ramagan bo'lsangiz, xatga e'tibor bermang. Kodni hech kimga bermang.",
     },
     "ru": {
-        "subject": "maktab365: код для входа",
+        "subject": "darslik365: код для входа",
         "greeting": "Здравствуйте!",
-        "text": "Используйте этот код, чтобы войти в maktab365.",
+        "text": "Используйте этот код, чтобы войти в darslik365.",
         "expires": "Код действует 10 минут и срабатывает только один раз.",
         "ignore": "Если вы не запрашивали код, проигнорируйте письмо. Никому не сообщайте код.",
     },
     "en": {
-        "subject": "maktab365: your sign-in code",
+        "subject": "darslik365: your sign-in code",
         "greeting": "Hello!",
-        "text": "Use this code to sign in to maktab365.",
+        "text": "Use this code to sign in to darslik365.",
         "expires": "The code is valid for 10 minutes and works only once.",
         "ignore": "If you didn't request a code, ignore this email. Never share the code.",
     },

@@ -595,7 +595,7 @@ class TestEmails:
     def test_language_follows_profile_locale(self, client):
         register(client, locale="ru")
         message = mail.outbox[0]
-        assert message.subject == "maktab365: подтвердите email"
+        assert message.subject == "darslik365: подтвердите email"
         assert "http://frontend.test/ru/email-tasdiqlash?token=" in message.body
         html, mimetype = message.alternatives[0]
         assert mimetype == "text/html"
@@ -604,7 +604,7 @@ class TestEmails:
     def test_cyrillic_uzbek_gets_uzbek_text_and_own_path(self, client):
         register(client, locale="uz-Cyrl")
         message = mail.outbox[0]
-        assert message.subject == "maktab365: emailingizni tasdiqlang"
+        assert message.subject == "darslik365: emailingizni tasdiqlang"
         assert "/uz-Cyrl/email-tasdiqlash?token=" in message.body
 
     def test_reset_email_english(self, client):
@@ -612,7 +612,7 @@ class TestEmails:
         Profile.objects.create(user=user, locale="en")
         client.post("password/forgot/", {"email": "EN@example.com"})
         message = mail.outbox[0]
-        assert message.subject == "maktab365: reset your password"
+        assert message.subject == "darslik365: reset your password"
         assert "/en/parolni-tiklash?token=" in message.body
 
 

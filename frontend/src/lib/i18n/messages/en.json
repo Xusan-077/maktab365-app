@@ -1,10 +1,10 @@
 {
   "meta": {
-    "title": "maktab365 — textbooks for grades 1–11",
+    "title": "darslik365 — textbooks for grades 1–11",
     "description": "Read grade 1–11 textbooks online, page by page. Free, for students and teachers."
   },
   "brand": {
-    "name": "maktab365",
+    "name": "darslik365",
     "tagline": "Grade 1–11 textbooks — read online, free, for students and teachers."
   },
   "home": {
@@ -284,7 +284,7 @@
   },
   "auth": {
     "signInGoogle": "Sign in with Google",
-    "loginTitle": "Sign in to maktab365",
+    "loginTitle": "Sign in to darslik365",
     "loginText": "Signing in is optional: you can read textbooks without an account. If you sign in, your last page and saved textbooks are kept in your account.",
     "continueAsGuest": "Continue without signing in",
     "loading": "Loading…",
@@ -297,7 +297,7 @@
     "guestMergedHint": "Your last pages and saved textbooks are now in your account."
   },
   "onboarding": {
-    "title": "How will you use maktab365?",
+    "title": "How will you use darslik365?",
     "text": "We ask this once. You can change it later in settings.",
     "roleLegend": "Who are you?",
     "roleStudent": "I am a student",
@@ -336,7 +336,7 @@
     "signOut": "Sign out of account",
     "about": {
       "title": "About the project",
-      "text": "maktab365 is a free platform for reading grade 1–11 textbooks online.",
+      "text": "darslik365 is a free platform for reading grade 1–11 textbooks online.",
       "free": "All textbooks are free.",
       "topics": "Find by grade and subject and read page by page: your last page is remembered.",
       "languages": "In Uzbek (Latin and Cyrillic), Russian and English."
@@ -454,7 +454,7 @@
   },
   "aboutPage": {
     "title": "About the project",
-    "lead": "maktab365 — grade 1–11 textbooks online, free, for students and teachers.",
+    "lead": "darslik365 — grade 1–11 textbooks online, free, for students and teachers.",
     "points": {
       "free": {
         "title": "Everything is free",
@@ -592,7 +592,7 @@
     "registerLink": "Sign up",
     "haveAccount": "Already have an account?",
     "loginLink": "Sign in",
-    "registerTitle": "Sign up for maktab365",
+    "registerTitle": "Sign up for darslik365",
     "registerText": "An account keeps your last page and saved textbooks. Free."
   },
   "support": {

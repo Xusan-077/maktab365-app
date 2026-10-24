@@ -85,5 +85,5 @@ class ExportView(APIView):
     def get(self, request):
         data = ExportSerializer(services.export_data(request.user, request)).data
         response = Response(data)
-        response["Content-Disposition"] = 'attachment; filename="maktab365-data.json"'
+        response["Content-Disposition"] = 'attachment; filename="darslik365-data.json"'
         return response

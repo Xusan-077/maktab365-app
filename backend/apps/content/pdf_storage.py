@@ -228,10 +228,10 @@ def content_disposition(filename: str | None) -> str:
 
 
 def download_filename(book) -> str:
-    """Chiroyli fayl nomi: «Algebra - 9-sinf - Maktab365.pdf» (yo'l belgilarisiz)."""
+    """Chiroyli fayl nomi: «Algebra - 9-sinf - Darslik365.pdf» (yo'l belgilarisiz)."""
     title = (book.title or {}).get("uz") or book.slug
     title = re.sub(r'[\\/:*?"<>|\s]+', " ", title).strip()[:80]
-    return f"{title} - {book.grade}-sinf - Maktab365.pdf"
+    return f"{title} - {book.grade}-sinf - Darslik365.pdf"
 
 
 def download_url(book) -> dict:
