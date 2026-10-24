@@ -165,21 +165,27 @@ def upload(client, name, content, ctype, kind):
 
 
 def test_upload_accepts_valid_and_sanitizes_name(editor, tmp_path, settings):
+    private, public = tmp_path / "private", tmp_path / "public"
     settings.STORAGES = {
         **settings.STORAGES,
         "default": {
             "BACKEND": "django.core.files.storage.FileSystemStorage",
-            "OPTIONS": {"location": str(tmp_path), "base_url": "/m/"},
+            "OPTIONS": {"location": str(private), "base_url": "/p/"},
+        },
+        # Muqova va rasmlar ommaviy `covers` saqlashga, PDF shaxsiy `default` ga tushadi.
+        "covers": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+            "OPTIONS": {"location": str(public), "base_url": "/m/"},
         },
     }
     resp = upload(editor, "../../Muqova Ä! 1.PNG", PNG, "image/png", "cover")
     assert resp.status_code == 201, resp.data
     assert resp.data["path"].startswith("covers/muqova-") and resp.data["path"].endswith(".png")
     assert ".." not in resp.data["path"] and resp.data["url"].startswith("/m/covers/")
-    assert (tmp_path / resp.data["path"]).read_bytes() == PNG
-    assert (
-        upload(editor, "kitob.pdf", PDF, "application/pdf", "pdf").data["path"].startswith("pdf/")
-    )
+    assert (public / resp.data["path"]).read_bytes() == PNG
+    assert not (private / resp.data["path"]).exists()
+    pdf = upload(editor, "kitob.pdf", PDF, "application/pdf", "pdf").data
+    assert pdf["path"].startswith("pdf/") and (private / pdf["path"]).exists()
     assert AuditLog.objects.filter(action="upload").count() == 2
 
 

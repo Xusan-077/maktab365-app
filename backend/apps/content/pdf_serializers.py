@@ -6,6 +6,7 @@ from .admin_serializers import LocalizedInput, StoredPathField
 from .models import CoverMode, PdfBook, Subject
 from .pdf_services import allowed_transitions, chapter_errors, replace_chapters
 from .serializers import LocalizedField
+from .storage import covers_storage
 from .tasks import generate_cover_variants
 
 
@@ -48,7 +49,7 @@ class PdfBookAdminSerializer(serializers.ModelSerializer):
     subject = serializers.SlugRelatedField(slug_field="slug", queryset=Subject.objects.all())
     title = LocalizedInput()
     chapters = ChapterSerializer(source="chapter_tree", many=True, required=False)
-    cover = StoredPathField("covers", required=False)
+    cover = StoredPathField("covers", storage=covers_storage, required=False)
     cover_url = serializers.FileField(source="cover", use_url=True, read_only=True, allow_null=True)
     has_file = serializers.SerializerMethodField()
     upload_pending = serializers.SerializerMethodField()
@@ -143,7 +144,7 @@ class PdfBookAdminSerializer(serializers.ModelSerializer):
         new_cover = book.cover.name if book.cover else ""
         if old_cover and old_cover != new_cover:
             # Almashtirilgan/olib tashlangan eski rasm tranzaksiyadan keyin saqlashdan tozalanadi.
-            transaction.on_commit(lambda: storage.delete(old_cover))
+            transaction.on_commit(lambda: storage.delete(old_cover, covers_storage()))
         if old_cover != new_cover or old_mode != book.cover_mode:
             # Variantlar asl rasmga ergashadi: almashsa qayta yaratiladi, olib tashlansa tozalanadi.
             self._schedule_cover_variants(book)

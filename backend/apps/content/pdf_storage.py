@@ -139,15 +139,16 @@ def exists(key: str) -> bool:
     return bool(key) and default_storage.exists(key)
 
 
-def delete(key: str) -> None:
+def delete(key: str, store=None) -> None:
+    """`store` — boshqa saqlash (muqova uchun `covers_storage()`); berilmasa shaxsiy `default`."""
     if key:
         try:
-            default_storage.delete(key)
+            (store or default_storage).delete(key)
         except Exception:  # noqa: BLE001 — yetim fayl yozuvni o'chirishga to'sqinlik qilmasin
             logger.warning("pdf_delete_failed", key=key)
 
 
-def delete_strict(key: str) -> None:
+def delete_strict(key: str, store=None) -> None:
     """Obyektni o'chiradi; saqlash xatosi bo'lsa `storage_error` (502) ko'taradi.
 
     Yo'q obyekt xato emas (S3 `DeleteObject` idempotent, lokal saqlash ham indamaydi).
@@ -155,7 +156,7 @@ def delete_strict(key: str) -> None:
     if not key:
         return
     try:
-        default_storage.delete(key)
+        (store or default_storage).delete(key)
     except Exception as exc:  # noqa: BLE001 — boto/OS xatolari turli; mijozga bitta kod
         logger.warning("pdf_delete_failed", key=key)
         raise PdfError("storage_error", 502) from exc

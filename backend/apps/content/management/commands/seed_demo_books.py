@@ -20,6 +20,7 @@ from PIL import Image, ImageDraw, ImageFont
 from apps.content import cover_variants
 from apps.content.models import BookLanguage, CoverMode, PdfBook, PdfBookStatus, Subject
 from apps.content.pdf_services import delete_book
+from apps.content.storage import covers_storage
 
 DEMO_MARKER = "demo-seed"
 PAGES = 12
@@ -141,7 +142,7 @@ class Command(BaseCommand):
             status=PdfBookStatus.PUBLISHED,
         )
         if demo.cover:
-            book.cover = default_storage.save(
+            book.cover = covers_storage().save(
                 f"covers/{uuid.uuid4()}.png", ContentFile(_cover_png(title, demo.grade, demo.cover))
             )
             book.cover_mode = CoverMode.CUSTOM

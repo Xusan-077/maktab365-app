@@ -20,9 +20,15 @@ class LocalizedInput(serializers.JSONField):
 class StoredPathField(serializers.CharField):
     """Saqlangan fayl yo'li (`POST uploads/` natijasi): prefiks va mavjudligi tekshiriladi."""
 
-    def __init__(self, prefix: str, **kwargs):
+    def __init__(self, prefix: str, storage=None, **kwargs):
         self.prefix = prefix
+        # Callable (`covers_storage`) yoki `Storage`; berilmasa shaxsiy `default`.
+        self.storage = storage
         super().__init__(allow_blank=True, **kwargs)
+
+    def _storage(self):
+        storage = self.storage if self.storage is not None else default_storage
+        return storage() if callable(storage) else storage
 
     def to_representation(self, value):
         return value.name if value else ""
@@ -35,7 +41,7 @@ class StoredPathField(serializers.CharField):
             not path.startswith(f"{self.prefix}/")
             or ".." in path.split("/")
             or "\\" in path
-            or not default_storage.exists(path)
+            or not (self._storage().exists(path))
         ):
             raise serializers.ValidationError("invalid_file")
         return path
