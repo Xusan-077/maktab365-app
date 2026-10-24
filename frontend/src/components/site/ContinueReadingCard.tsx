@@ -3,13 +3,13 @@ import { useLocale, useTranslations } from "next-intl";
 import type { Locale } from "@/lib/i18n/config";
 import { getLocalized } from "@/lib/i18n/localized";
 import { Link } from "@/lib/i18n/navigation";
-import type { PdfBook } from "@/lib/pdf-books/api";
+import type { RecentBook } from "@/lib/pdf/recent";
 import { readerPath } from "@/lib/utils/routes";
 import { BookCover } from "./BookCover";
 import { readPercent } from "./page-window";
 
 export interface ContinueReadingCardProps {
-  book: PdfBook;
+  book: RecentBook;
   /** Oxirgi o'qilgan bet (1 dan). */
   lastPage: number;
 }

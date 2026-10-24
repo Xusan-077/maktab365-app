@@ -9,11 +9,11 @@
   },
   "home": {
     "hero": {
-      "title": "School textbooks — in one place, free.",
-      "subtitle": "Find grade 1–11 textbooks by grade and subject and read them online page by page. The page where you stopped is remembered.",
+      "title": "All school textbooks in one place",
+      "subtitle": "Read the official grade 1–11 textbooks on your phone or computer. The site remembers the page you stopped at.",
       "how": "How does it work?",
       "searchLabel": "Search textbooks by title",
-      "searchPlaceholder": "For example: Algebra 9",
+      "searchPlaceholder": "For example: grade 9 algebra",
       "searchExamples": {
         "a": "Algebra 9",
         "b": "Biology 7",
@@ -27,7 +27,8 @@
         "algebra": "Algebra",
         "biologiya": "Biology",
         "tarix": "History"
-      }
+      },
+      "badge": "Free · No sign-up"
     },
     "audience": {
       "title": "For students and teachers",
@@ -113,6 +114,28 @@
       "resume": "Continue",
       "recent": "Recently viewed",
       "clear": "Clear"
+    },
+    "continue": {
+      "title": "Continue reading",
+      "cardLabel": "Continue"
+    },
+    "grades": {
+      "title": "By grade"
+    },
+    "groups": {
+      "title": "Subject areas",
+      "all": "All subjects →"
+    },
+    "latest": {
+      "title": "Recently added textbooks",
+      "all": "View all →",
+      "error": "Couldn't load textbooks. Please try again later.",
+      "empty": "No textbooks yet."
+    },
+    "telegram": {
+      "title": "Find textbooks on Telegram too",
+      "text": "Message the bot a subject and grade — the textbook link arrives right away.",
+      "cta": "Open the bot"
     }
   },
   "ui": {

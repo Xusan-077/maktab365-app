@@ -1,6 +1,6 @@
 import { cacheLife, cacheTag } from "next/cache";
 import { ApiError } from "@/lib/api/types";
-import { PdfBooksApi, type PdfBook, type PdfBookDetail } from "./api";
+import { PdfBooksApi, type PdfBook, type PdfBookDetail, type PdfSubject } from "./api";
 
 /** Backend chegarasi (`max_page_size`): bir so'rovda shuncha kitob. */
 const SERVER_PAGE_SIZE = 100;
@@ -66,4 +66,11 @@ export async function getAllBooks(): Promise<PdfBook[]> {
     books.push(...chunk.results);
     if (books.length >= chunk.count || chunk.results.length === 0) return books;
   }
+}
+
+/** PDF darsligi bor fanlar (bosh sahifa: sinf va yo'nalish bo'yicha fanlar soni). */
+export async function getSubjects(): Promise<PdfSubject[]> {
+  "use cache";
+  lifetime();
+  return new PdfBooksApi().subjects();
 }

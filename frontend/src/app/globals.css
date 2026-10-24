@@ -109,6 +109,7 @@
   --color-reader-bg: var(--reader-bg);
   --color-warm-soft: var(--warm-soft);
   --color-on-group: var(--on-group);
+  --color-telegram: var(--telegram);
   --color-group-exact: var(--group-exact);
   --color-group-exact-soft: var(--group-exact-soft);
   --color-group-natural: var(--group-natural);
@@ -175,6 +176,7 @@
   --reader-bg: #eef1f6;
   --warm-soft: #fff7ed;
   --on-group: #ffffff; /* yo'nalish rangi ustidagi matn */
+  --telegram: #229ed9; /* Telegram brend rangi (ikkala temada bir xil) */
 
   /* Fan yo'nalishlari (backend SubjectGroup) va ularning och tint'lari */
   --group-exact: #1554d1;

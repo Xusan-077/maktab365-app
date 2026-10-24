@@ -9,11 +9,11 @@
   },
   "home": {
     "hero": {
-      "title": "Maktab darsliklari — bir joyda, bepul.",
-      "subtitle": "1–11-sinf darsliklarini sinf va fan bo'yicha toping va sahifa-sahifa onlayn o'qing. Qayerda to'xtaganingiz eslab qolinadi.",
+      "title": "Barcha maktab darsliklari bitta joyda",
+      "subtitle": "1–11-sinf rasmiy darsliklarini telefonda yoki kompyuterda o'qing. Qaysi betda qolganingizni sayt o'zi eslab qoladi.",
       "how": "Qanday ishlaydi?",
       "searchLabel": "Darslik nomi bo'yicha qidirish",
-      "searchPlaceholder": "Masalan: Algebra 9",
+      "searchPlaceholder": "Masalan: 9-sinf algebra",
       "searchExamples": {
         "a": "Algebra 9",
         "b": "Biologiya 7",
@@ -27,7 +27,8 @@
         "algebra": "Algebra",
         "biologiya": "Biologiya",
         "tarix": "Tarix"
-      }
+      },
+      "badge": "Bepul · Ro'yxatdan o'tmasdan"
     },
     "audience": {
       "title": "O'quvchilar va o'qituvchilar uchun",
@@ -113,6 +114,28 @@
       "resume": "Davom ettirish",
       "recent": "Oxirgi ko'rilganlar",
       "clear": "Tozalash"
+    },
+    "continue": {
+      "title": "O'qishni davom ettiring",
+      "cardLabel": "Davom ettirish"
+    },
+    "grades": {
+      "title": "Sinf bo'yicha"
+    },
+    "groups": {
+      "title": "Fan yo'nalishlari",
+      "all": "Barcha fanlar →"
+    },
+    "latest": {
+      "title": "Yangi qo'shilgan darsliklar",
+      "all": "Barchasi →",
+      "error": "Darsliklarni yuklab bo'lmadi. Keyinroq qayta urinib ko'ring.",
+      "empty": "Hozircha darsliklar yo'q."
+    },
+    "telegram": {
+      "title": "Darsliklarni Telegram'da ham toping",
+      "text": "Botga fan va sinfni yozing — darslik havolasi darhol keladi.",
+      "cta": "Botni ochish"
     }
   },
   "ui": {
