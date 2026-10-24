@@ -33,6 +33,8 @@ const book = (id: string, title: string, group: PdfBook["subject_group"]): PdfBo
   page_count: 100,
   size_bytes: 1024,
   cover: null,
+  cover_small: null,
+  language: "uz",
   unverified: false,
   published_at: null,
 });

@@ -35,7 +35,7 @@ export function SiteShowcase() {
         <Breadcrumbs items={[{ label: ts("title"), href: "/" }, { label: ts("cards") }]} />
         <div className="grid grid-cols-[repeat(auto-fill,minmax(10rem,1fr))] gap-x-5 gap-y-6">
           {SHOWCASE_BOOKS.map((book, index) => (
-            <BookCard key={book.id} book={book} language="uz" priority={index < 2} />
+            <BookCard key={book.id} book={book} priority={index < 2} />
           ))}
         </div>
         <div className="grid grid-cols-[repeat(auto-fill,minmax(21rem,1fr))] gap-4">

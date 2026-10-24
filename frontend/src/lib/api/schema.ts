@@ -1828,6 +1828,12 @@ export interface components {
             size_bytes: number;
             /** Format: uri */
             cover: string | null;
+            /**
+             * Format: uri
+             * @description 300px WebP (ro'yxat kartalari); null bo'lsa `cover` ishlatiladi
+             */
+            cover_small: string | null;
+            language: string;
             readonly unverified: boolean;
             /** Format: date-time */
             published_at: string | null;
@@ -1891,11 +1897,21 @@ export interface components {
             size_bytes: number;
             /** Format: uri */
             cover: string | null;
+            /**
+             * Format: uri
+             * @description 300px WebP (ro'yxat kartalari); null bo'lsa `cover` ishlatiladi
+             */
+            cover_small: string | null;
+            language: string;
             readonly unverified: boolean;
             /** Format: date-time */
             published_at: string | null;
             description: string;
-            language: string;
+            /**
+             * Format: uri
+             * @description 600px WebP (kitob sahifasi); null bo'lsa `cover` ishlatiladi
+             */
+            cover_large: string | null;
             allow_download: boolean;
             chapters: components["schemas"]["PublicChapter"][];
         };

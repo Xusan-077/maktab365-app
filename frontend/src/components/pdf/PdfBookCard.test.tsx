@@ -27,6 +27,8 @@ const book = (over: Partial<PdfBook> = {}): PdfBook => ({
   page_count: 200,
   size_bytes: 12 * 1024 * 1024,
   cover: null,
+  cover_small: null,
+  language: "uz",
   unverified: false,
   published_at: null,
   ...over,

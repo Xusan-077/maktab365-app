@@ -5,6 +5,8 @@ const base = {
   published_at: "2026-09-01T00:00:00Z",
   size_bytes: 24_000_000,
   cover: null,
+  cover_small: null,
+  language: "uz",
 } satisfies Partial<PdfBook>;
 
 /** `/dev/site` namunasi uchun: har yo'nalishdan bittadan kitob (muqovasiz → guruh rangidagi zaxira). */

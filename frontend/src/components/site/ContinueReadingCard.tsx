@@ -31,6 +31,7 @@ export function ContinueReadingCard({ book, lastPage }: ContinueReadingCardProps
           title={getLocalized(book.subject_title, locale)}
           group={book.subject_group}
           src={book.cover}
+          srcSmall={book.cover_small}
           size="sm"
           sizes="72px"
           className="shadow-none"

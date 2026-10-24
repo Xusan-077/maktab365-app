@@ -266,7 +266,12 @@ def delete_book(book: PdfBook) -> None:
     tranzaksiya qaytadi va kitob saqlanib qoladi. Progress, xatcho'p va mundarija `CASCADE` bilan
     ketadi; rejalar (`StudyGoal`) kitobsiz qoladi.
     """
-    keys = [book.file.name if book.file else "", book.cover.name if book.cover else ""]
+    keys = [
+        book.file.name if book.file else "",
+        book.cover.name if book.cover else "",
+        book.cover_small.name if book.cover_small else "",
+        book.cover_large.name if book.cover_large else "",
+    ]
     pending_key, pending_upload = book.pending_file, book.pending_upload_id
     storage.abort_upload(pending_key, pending_upload)
     keys.append(pending_key)

@@ -18,7 +18,9 @@ export type RecentBook = Pick<
   | "cover"
   | "unverified"
   | "published_at"
->;
+> &
+  // Yangi maydonlar: eski saqlangan yozuvlarda yo'q bo'lishi mumkin
+  Partial<Pick<PdfBook, "cover_small" | "language">>;
 
 export function toRecent(book: RecentBook): RecentBook {
   return {
@@ -32,6 +34,8 @@ export function toRecent(book: RecentBook): RecentBook {
     page_count: book.page_count,
     size_bytes: book.size_bytes,
     cover: book.cover,
+    cover_small: book.cover_small,
+    language: book.language,
     unverified: book.unverified,
     published_at: book.published_at,
   };

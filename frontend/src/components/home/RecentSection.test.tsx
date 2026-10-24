@@ -34,6 +34,8 @@ const book = (id: string, pages = 100): RecentBook => ({
   page_count: pages,
   size_bytes: 1024,
   cover: null,
+  cover_small: null,
+  language: "uz",
   unverified: false,
   published_at: null,
 });

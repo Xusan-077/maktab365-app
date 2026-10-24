@@ -6,6 +6,7 @@ from .admin_serializers import LocalizedInput, StoredPathField
 from .models import CoverMode, PdfBook, Subject
 from .pdf_services import allowed_transitions, chapter_errors, replace_chapters
 from .serializers import LocalizedField
+from .tasks import generate_cover_variants
 
 
 class SlidesAdminSerializer(serializers.Serializer):
@@ -130,19 +131,29 @@ class PdfBookAdminSerializer(serializers.ModelSerializer):
         book = super().create(validated_data)
         if chapters is not None:
             replace_chapters(book, chapters)
+        if book.cover:
+            self._schedule_cover_variants(book)
         return book
 
     def update(self, instance, validated_data):
         chapters = validated_data.pop("chapter_tree", None)
         old_cover = instance.cover.name if instance.cover else ""
+        old_mode = instance.cover_mode
         book = super().update(instance, validated_data)
         new_cover = book.cover.name if book.cover else ""
         if old_cover and old_cover != new_cover:
             # Almashtirilgan/olib tashlangan eski rasm tranzaksiyadan keyin saqlashdan tozalanadi.
             transaction.on_commit(lambda: storage.delete(old_cover))
+        if old_cover != new_cover or old_mode != book.cover_mode:
+            # Variantlar asl rasmga ergashadi: almashsa qayta yaratiladi, olib tashlansa tozalanadi.
+            self._schedule_cover_variants(book)
         if chapters is not None:
             replace_chapters(book, chapters)
         return book
+
+    @staticmethod
+    def _schedule_cover_variants(book) -> None:
+        transaction.on_commit(lambda: generate_cover_variants.delay(str(book.pk)))
 
     def get_has_file(self, book) -> bool:
         return bool(book.file)
@@ -213,6 +224,13 @@ class PdfBookSerializer(serializers.Serializer):
     page_count = serializers.IntegerField()
     size_bytes = serializers.IntegerField()
     cover = serializers.FileField(source="public_cover", use_url=True, allow_null=True)
+    cover_small = serializers.FileField(
+        source="public_cover_small",
+        use_url=True,
+        allow_null=True,
+        help_text="300px WebP (ro'yxat kartalari); null bo'lsa `cover` ishlatiladi",
+    )
+    language = serializers.CharField()
     unverified = serializers.SerializerMethodField()
     published_at = serializers.DateTimeField(allow_null=True)
 
@@ -233,7 +251,12 @@ class PublicChapterSerializer(PublicChapterLeafSerializer):
 
 class PdfBookDetailSerializer(PdfBookSerializer):
     description = serializers.CharField()
-    language = serializers.CharField()
+    cover_large = serializers.FileField(
+        source="public_cover_large",
+        use_url=True,
+        allow_null=True,
+        help_text="600px WebP (kitob sahifasi); null bo'lsa `cover` ishlatiladi",
+    )
     allow_download = serializers.BooleanField()
     chapters = PublicChapterSerializer(source="chapter_tree", many=True)
 

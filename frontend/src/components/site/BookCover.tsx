@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
+import Image, { type ImageLoaderProps } from "next/image";
 import { useTranslations } from "next-intl";
 import { groupColor } from "@/lib/subject-colors";
 import { cn } from "@/lib/utils/cn";
@@ -12,8 +12,12 @@ export interface BookCoverProps {
   title: string;
   /** Backend `subject_group`; noma'lum bo'lsa brend ko'ki. */
   group?: string | null;
-  /** Admin tanlagan muqova (R2 URL); bo'lmasa yoki yuklanmasa — guruh rangidagi zaxira. */
+  /** Asl muqova (R2 URL, zaxira); hech biri bo'lmasa yoki yuklanmasa — guruh rangidagi zaxira. */
   src?: string | null;
+  /** 300px WebP (ro'yxat API'si `cover_small`): kichik ko'rsatishlarda tanlanadi. */
+  srcSmall?: string | null;
+  /** 600px WebP (detail API'si `cover_large`): katta ko'rsatishlar va retina ekranlar uchun. */
+  srcLarge?: string | null;
   /** `sm` — 72×96 kabi kichik muqova (matn kichrayadi). */
   size?: "sm" | "md";
   /** Birinchi ekrandagi muqova (LCP): darrov yuklanadi. */
@@ -21,6 +25,9 @@ export interface BookCoverProps {
   sizes?: string;
   className?: string;
 }
+
+/** Brauzer so'ragan kenglik shundan oshmasa 300px variant yetarli (160px karta @2x = 320). */
+const SMALL_MAX_WIDTH = 320;
 
 /**
  * Darslik muqovasi, nisbat 3:4. Zaxira (guruh rangi, tepada "9-SINF", pastda fan nomi) rasm ostida
@@ -31,6 +38,8 @@ export function BookCover({
   title,
   group,
   src,
+  srcSmall,
+  srcLarge,
   size = "md",
   priority = false,
   sizes = "(min-width: 768px) 200px, 45vw",
@@ -38,7 +47,13 @@ export function BookCover({
 }: BookCoverProps) {
   const t = useTranslations("site.cover");
   const [failedSrc, setFailedSrc] = useState<string | null>(null);
-  const showImage = Boolean(src) && failedSrc !== src;
+  // Asl rasm — eng ishonchli zaxira; variantlar yo'q (eski kitoblar) bo'lsa shu ishlatiladi.
+  const primary = srcLarge ?? src ?? srcSmall ?? null;
+  const showImage = primary !== null && failedSrc !== primary;
+  // `sizes` bo'yicha Next srcset tuzadi, bu yerda har kenglik mos variantga bog'lanadi.
+  const loader = ({ width }: ImageLoaderProps) =>
+    (width <= SMALL_MAX_WIDTH ? (srcSmall ?? src ?? srcLarge) : (srcLarge ?? src ?? srcSmall)) ??
+    "";
   const small = size === "sm";
 
   return (
@@ -72,15 +87,15 @@ export function BookCover({
           {title}
         </span>
       </div>
-      {showImage && src && (
+      {showImage && primary && (
         <Image
-          src={src}
+          src={primary}
+          loader={loader}
           alt=""
           fill
-          unoptimized
           priority={priority}
           sizes={sizes}
-          onError={() => setFailedSrc(src)}
+          onError={() => setFailedSrc(primary)}
           className="object-cover"
         />
       )}

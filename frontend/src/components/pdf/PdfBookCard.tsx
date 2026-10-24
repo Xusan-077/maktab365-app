@@ -7,14 +7,14 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import type { Locale } from "@/lib/i18n/config";
 import { getLocalized } from "@/lib/i18n/localized";
 import { Link } from "@/lib/i18n/navigation";
-import type { PdfBook } from "@/lib/pdf-books/api";
+import type { RecentBook } from "@/lib/pdf/recent";
 import { formatBytes } from "@/lib/utils/bytes";
 import { cn } from "@/lib/utils/cn";
 import { pdfBookPath } from "@/lib/utils/routes";
 import { BookCover } from "./BookCover";
 
 export interface PdfBookCardProps {
-  book: PdfBook;
+  book: RecentBook;
   /** Oxirgi o'qilgan sahifa (bo'lsa "davom etish" belgisi va progress chizig'i). */
   resumePage?: number;
   /** Kitob oxirigacha o'qilgan ("O'qilgan" belgisi). */

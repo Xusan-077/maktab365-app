@@ -43,6 +43,8 @@ const book = (id: string, title: string, pages = 100) => ({
   page_count: pages,
   size_bytes: 1,
   cover: null,
+  cover_small: null,
+  language: "uz",
   unverified: false,
   published_at: null,
 });

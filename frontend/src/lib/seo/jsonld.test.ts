@@ -14,6 +14,8 @@ const item = (over: Partial<PdfBook> = {}): PdfBook => ({
   page_count: 240,
   size_bytes: 1000,
   cover: null,
+  cover_small: null,
+  language: "uz",
   unverified: false,
   published_at: "2026-10-22T00:00:00Z",
   ...over,
@@ -21,7 +23,7 @@ const item = (over: Partial<PdfBook> = {}): PdfBook => ({
 const detail = (over: Partial<PdfBookDetail> = {}): PdfBookDetail => ({
   ...item(),
   description: "",
-  language: "uz",
+  cover_large: null,
   allow_download: true,
   chapters: [],
   ...over,

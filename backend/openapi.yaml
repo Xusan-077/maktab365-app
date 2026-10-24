@@ -3614,6 +3614,13 @@ components:
           type: string
           format: uri
           nullable: true
+        cover_small:
+          type: string
+          format: uri
+          nullable: true
+          description: 300px WebP (ro'yxat kartalari); null bo'lsa `cover` ishlatiladi
+        language:
+          type: string
         unverified:
           type: boolean
           readOnly: true
@@ -3623,8 +3630,10 @@ components:
           nullable: true
       required:
       - cover
+      - cover_small
       - grade
       - id
+      - language
       - page_count
       - published_at
       - size_bytes
@@ -3794,6 +3803,13 @@ components:
           type: string
           format: uri
           nullable: true
+        cover_small:
+          type: string
+          format: uri
+          nullable: true
+          description: 300px WebP (ro'yxat kartalari); null bo'lsa `cover` ishlatiladi
+        language:
+          type: string
         unverified:
           type: boolean
           readOnly: true
@@ -3803,8 +3819,11 @@ components:
           nullable: true
         description:
           type: string
-        language:
+        cover_large:
           type: string
+          format: uri
+          nullable: true
+          description: 600px WebP (kitob sahifasi); null bo'lsa `cover` ishlatiladi
         allow_download:
           type: boolean
         chapters:
@@ -3815,6 +3834,8 @@ components:
       - allow_download
       - chapters
       - cover
+      - cover_large
+      - cover_small
       - description
       - grade
       - id

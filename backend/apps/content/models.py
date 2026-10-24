@@ -112,6 +112,10 @@ class PdfBook(UUIDModel, TimeStampedModel):
     size_bytes = models.PositiveBigIntegerField(default=0)
     page_count = models.PositiveIntegerField(default=0)
     cover = models.FileField(upload_to="covers/", blank=True)
+    # `cover` dan hosil qilingan WebP variantlar (`cover_variants.py`): ro'yxat uchun 300px,
+    # tafsilot uchun 600px. Bo'sh bo'lsa ochiq API `cover` ga qaytadi (zaxira).
+    cover_small = models.FileField(upload_to="covers/", blank=True, editable=False)
+    cover_large = models.FileField(upload_to="covers/", blank=True, editable=False)
     # `auto` — generativ muqova (`cover` bo'sh); `first_page`/`custom` — `cover` rasmi ko'rsatiladi.
     cover_mode = models.CharField(max_length=16, choices=CoverMode.choices, default=CoverMode.AUTO)
     status = models.CharField(
@@ -144,6 +148,16 @@ class PdfBook(UUIDModel, TimeStampedModel):
         if self.cover_mode != CoverMode.AUTO and self.cover:
             return self.cover
         return None
+
+    @property
+    def public_cover_small(self):
+        """Ro'yxat uchun 300px variant (ochiq `cover` qoidasi bilan: faqat `auto` bo'lmaganda)."""
+        return self.cover_small if self.public_cover and self.cover_small else None
+
+    @property
+    def public_cover_large(self):
+        """Tafsilot uchun 600px variant."""
+        return self.cover_large if self.public_cover and self.cover_large else None
 
     @property
     def chapter_tree(self) -> list[dict]:
