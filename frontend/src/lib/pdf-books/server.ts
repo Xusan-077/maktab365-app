@@ -1,6 +1,13 @@
 import { cacheLife, cacheTag } from "next/cache";
 import { ApiError } from "@/lib/api/types";
-import { PdfBooksApi, type PdfBook, type PdfBookDetail, type PdfSubject } from "./api";
+import {
+  PdfBooksApi,
+  type PdfBook,
+  type PdfBookDetail,
+  type PdfBookFilters,
+  type PdfBookPage,
+  type PdfSubject,
+} from "./api";
 
 /** Backend chegarasi (`max_page_size`): bir so'rovda shuncha kitob. */
 const SERVER_PAGE_SIZE = 100;
@@ -73,4 +80,11 @@ export async function getSubjects(): Promise<PdfSubject[]> {
   "use cache";
   lifetime();
   return new PdfBooksApi().subjects();
+}
+
+/** Katalog sahifasi (`/darsliklar`): filtrlar URL'dan, natija har filtr kombinatsiyasi uchun alohida keshlanadi. */
+export async function getCatalogPage(filters: PdfBookFilters): Promise<PdfBookPage> {
+  "use cache";
+  lifetime();
+  return new PdfBooksApi().list(filters);
 }

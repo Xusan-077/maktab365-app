@@ -1751,5 +1751,31 @@
       "description": "darslik365 foydalanuvchi ma'lumotlarini qanday qayta ishlashi haqida.",
       "body": "[TO'LDIRILADI]"
     }
+  },
+  "catalogPage": {
+    "title": "Darsliklar",
+    "metaTitle": "Darsliklar",
+    "metaDescription": "1–11-sinf darsliklari: sinf, yo'nalish va til bo'yicha toping, onlayn o'qing. Bepul.",
+    "searchLabel": "Darslik qidirish",
+    "searchPlaceholder": "Darslik qidirish",
+    "filters": "Filtrlar",
+    "filtersWithCount": "Filtrlar ({count})",
+    "grade": "Sinf",
+    "allGrades": "Hammasi",
+    "group": "Yo'nalish",
+    "language": "Ta'lim tili",
+    "allLanguages": "Barchasi",
+    "count": "{count, plural, other {# ta darslik}}",
+    "sort": "Saralash",
+    "sortGrade": "Sinf bo'yicha",
+    "sortNewest": "Yangi qo'shilgan",
+    "show": "Natijalarni ko'rsatish",
+    "reset": "Filtrlarni tozalash",
+    "results": "Natijalar",
+    "emptyTitle": "Darslik topilmadi",
+    "emptyText": "Filtrlarni o'zgartirib ko'ring yoki barchasini tozalang.",
+    "errorText": "Darsliklarni yuklab bo'lmadi. Keyinroq qayta urinib ko'ring.",
+    "retry": "Qayta urinish",
+    "subjectChip": "Fan: {name}"
   }
 }

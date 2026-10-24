@@ -280,11 +280,11 @@ test.describe.serial("PDF darsliklar", () => {
 
   test("qidiruv: katalogda nom bo'yicha va Ctrl+K orqali", async ({ page }) => {
     await page.goto(`/uz/darsliklar?q=${encodeURIComponent(TITLE)}`);
-    await expect(page.getByTestId("pdf-book-card")).toHaveCount(1);
-    await expect(page.getByTestId("pdf-search")).toHaveValue(TITLE);
+    await expect(page.getByRole("link", { name: TITLE })).toHaveCount(1);
+    await expect(page.getByRole("searchbox", { name: "Darslik qidirish" })).toHaveValue(TITLE);
 
     await page.goto("/uz/darsliklar?q=mavjud-bo'lmagan-kitob");
-    await expect(page.getByTestId("pdf-book-card")).toHaveCount(0);
+    await expect(page.getByRole("status")).toContainText("Darslik topilmadi");
 
     await signIn(page, studentEmail, userPassword);
     await page.keyboard.press("Control+k");

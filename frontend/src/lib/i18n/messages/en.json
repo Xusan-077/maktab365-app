@@ -1751,5 +1751,31 @@
       "description": "How darslik365 handles user data.",
       "body": "[TO'LDIRILADI]"
     }
+  },
+  "catalogPage": {
+    "title": "Textbooks",
+    "metaTitle": "Textbooks",
+    "metaDescription": "Grade 1–11 textbooks: find them by grade, subject area and language, and read online. Free.",
+    "searchLabel": "Search textbooks",
+    "searchPlaceholder": "Search textbooks",
+    "filters": "Filters",
+    "filtersWithCount": "Filters ({count})",
+    "grade": "Grade",
+    "allGrades": "All",
+    "group": "Subject area",
+    "language": "Language of instruction",
+    "allLanguages": "All",
+    "count": "{count, plural, one {# textbook} other {# textbooks}}",
+    "sort": "Sort by",
+    "sortGrade": "By grade",
+    "sortNewest": "Recently added",
+    "show": "Show results",
+    "reset": "Clear filters",
+    "results": "Results",
+    "emptyTitle": "No textbooks found",
+    "emptyText": "Try changing the filters or clear them all.",
+    "errorText": "Couldn't load textbooks. Please try again later.",
+    "retry": "Try again",
+    "subjectChip": "Subject: {name}"
   }
 }

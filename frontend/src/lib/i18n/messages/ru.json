@@ -1751,5 +1751,31 @@
       "description": "Как darslik365 обрабатывает данные пользователей.",
       "body": "[TO'LDIRILADI]"
     }
+  },
+  "catalogPage": {
+    "title": "Учебники",
+    "metaTitle": "Учебники",
+    "metaDescription": "Учебники 1–11 классов: ищите по классу, направлению и языку, читайте онлайн. Бесплатно.",
+    "searchLabel": "Поиск учебника",
+    "searchPlaceholder": "Поиск учебника",
+    "filters": "Фильтры",
+    "filtersWithCount": "Фильтры ({count})",
+    "grade": "Класс",
+    "allGrades": "Все",
+    "group": "Направление",
+    "language": "Язык обучения",
+    "allLanguages": "Все",
+    "count": "{count, plural, one {# учебник} few {# учебника} many {# учебников} other {# учебника}}",
+    "sort": "Сортировка",
+    "sortGrade": "По классу",
+    "sortNewest": "Недавно добавленные",
+    "show": "Показать результаты",
+    "reset": "Сбросить фильтры",
+    "results": "Результаты",
+    "emptyTitle": "Учебники не найдены",
+    "emptyText": "Измените фильтры или сбросьте их все.",
+    "errorText": "Не удалось загрузить учебники. Попробуйте позже.",
+    "retry": "Повторить",
+    "subjectChip": "Предмет: {name}"
   }
 }

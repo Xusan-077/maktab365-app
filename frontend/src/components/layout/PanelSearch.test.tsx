@@ -127,7 +127,7 @@ describe("PanelSearch", () => {
     fireEvent.change(input, { target: { value: "alg" } });
 
     const subject = await screen.findByRole("link", { name: "Algebra" });
-    expect(subject.getAttribute("href")).toBe("/darsliklar?subject=algebra");
+    expect(subject.getAttribute("href")).toBe("/darsliklar?fan=algebra");
 
     fireEvent.change(input, { target: { value: "kvadrat" } });
     const section = await screen.findByRole("link", { name: /Kvadrat tenglamalar/ });

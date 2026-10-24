@@ -183,7 +183,7 @@ export function PanelSearch({
                 {subjectHits.map((subject) => (
                   <li key={subject.slug}>
                     <Link
-                      href={`${ROUTES.textbooks}?subject=${subject.slug}`}
+                      href={`${ROUTES.textbooks}?fan=${subject.slug}`}
                       className={itemClasses}
                     >
                       <span className="font-medium">{getLocalized(subject.title, locale)}</span>

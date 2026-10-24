@@ -105,7 +105,7 @@ export function SubjectsExplorer({ subjects }: { subjects: PdfSubject[] }) {
                   return (
                     <li key={subject.slug}>
                       <Link
-                        href={`${ROUTES.textbooks}?subject=${encodeURIComponent(subject.slug)}`}
+                        href={`${ROUTES.textbooks}?fan=${encodeURIComponent(subject.slug)}`}
                         className="border-border bg-surface text-foreground flex items-center gap-3.5 rounded-2xl border p-4 transition-shadow hover:shadow-md"
                       >
                         <span
