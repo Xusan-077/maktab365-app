@@ -38,4 +38,24 @@ describe("BookCover", () => {
     const img = container.querySelector("img");
     expect(`${img?.getAttribute("src")}${img?.getAttribute("srcset")}`).toContain("orig.png");
   });
+
+  it("variantlar yo'q — asl URL kenglik parametri bilan beriladi (har kenglikka alohida URL)", () => {
+    const { container } = renderCover({ src: "https://cdn.test/covers/orig.png", sizes: "200px" });
+    const srcSet = container.querySelector("img")?.getAttribute("srcset") ?? "";
+    expect(srcSet).toMatch(/orig\.png\?w=\d+/);
+    expect(
+      new Set(srcSet.split(",").map((part) => part.trim().split(" ")[0])).size,
+    ).toBeGreaterThan(1);
+  });
+
+  it("faqat bitta variant bor — boshqa kenglikda ham ishlaydi", () => {
+    const { container } = renderCover({
+      src: "https://cdn.test/covers/orig.png",
+      srcSmall: "https://cdn.test/covers/a-300.webp",
+      sizes: "200px",
+    });
+    const srcSet = container.querySelector("img")?.getAttribute("srcset") ?? "";
+    expect(srcSet).toContain("a-300.webp");
+    expect(srcSet).toContain("orig.png?w=");
+  });
 });

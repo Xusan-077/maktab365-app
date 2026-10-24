@@ -50,10 +50,14 @@ export function BookCover({
   // Asl rasm — eng ishonchli zaxira; variantlar yo'q (eski kitoblar) bo'lsa shu ishlatiladi.
   const primary = srcLarge ?? src ?? srcSmall ?? null;
   const showImage = primary !== null && failedSrc !== primary;
-  // `sizes` bo'yicha Next srcset tuzadi, bu yerda har kenglik mos variantga bog'lanadi.
-  const loader = ({ width }: ImageLoaderProps) =>
-    (width <= SMALL_MAX_WIDTH ? (srcSmall ?? src ?? srcLarge) : (srcLarge ?? src ?? srcSmall)) ??
-    "";
+  // `sizes` bo'yicha Next srcset tuzadi, bu yerda har kenglik mos variantga bog'lanadi. Variant yo'q
+  // bo'lsa asl URL qaytadi; Next har kenglik uchun boshqa URL kutadi, shuning uchun `?w=` qo'shiladi.
+  const loader = ({ width }: ImageLoaderProps) => {
+    const variant = width <= SMALL_MAX_WIDTH ? srcSmall : srcLarge;
+    if (variant) return variant;
+    const original = src ?? srcLarge ?? srcSmall ?? "";
+    return `${original}${original.includes("?") ? "&" : "?"}w=${width}`;
+  };
   const small = size === "sm";
 
   return (
