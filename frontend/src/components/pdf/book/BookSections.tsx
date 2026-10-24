@@ -1,78 +1,14 @@
-import { ChevronRight, Presentation } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { BookCard } from "@/components/site/BookCard";
-import { Badge } from "@/components/ui/Badge";
 import type { Locale } from "@/lib/i18n/config";
 import { getLocalized } from "@/lib/i18n/localized";
 import { Link } from "@/lib/i18n/navigation";
-import { flattenToc } from "@/lib/pdf/toc";
 import type { PdfBook, PdfBookDetail } from "@/lib/pdf-books/api";
-import { cn } from "@/lib/utils/cn";
-import { gradePath, pdfBookPath, readerPath } from "@/lib/utils/routes";
+import { gradePath, pdfBookPath } from "@/lib/utils/routes";
+import { sectionHeading } from "./book-styles";
 
-export const sectionHeading = "text-[1.625rem] font-extrabold tracking-[-0.02em]";
-
-/** Mundarija: har qator o'qish oynasida shu betga ochadi; prezentatsiyasi borlarga belgi. */
-export function BookToc({ book }: { book: PdfBookDetail }) {
-  const t = useTranslations("pdfBooks.page");
-  const items = flattenToc(book.chapters ?? []);
-  if (items.length === 0) return null;
-  let top = 0;
-  return (
-    <section aria-labelledby="book-toc" className="flex min-w-0 flex-col gap-4">
-      <h2 id="book-toc" className={sectionHeading}>
-        {t("toc")}
-      </h2>
-      <ol
-        data-testid="book-toc"
-        className="border-border divide-border overflow-hidden rounded-[1.125rem] border"
-      >
-        {items.map((item) => {
-          const number = item.level === 0 ? ++top : null;
-          return (
-            <li key={item.id}>
-              <Link
-                href={readerPath(book, item.page)}
-                className={cn(
-                  "hover:bg-surface-2 flex min-h-11 items-center gap-4 px-5 py-3.5 transition-colors",
-                  item.level === 1 && "pl-14",
-                  item.id !== items[0].id && "border-border border-t",
-                )}
-              >
-                {number !== null ? (
-                  <span
-                    aria-hidden
-                    className="bg-surface-2 text-brand-text flex size-9 shrink-0 items-center justify-center rounded-[0.625rem] text-[0.9375rem] font-extrabold"
-                  >
-                    {number}
-                  </span>
-                ) : null}
-                <span
-                  className={cn(
-                    "min-w-0 flex-1 text-base",
-                    item.level === 0 ? "font-semibold" : "text-muted",
-                  )}
-                >
-                  {item.title}
-                </span>
-                {item.slides && (
-                  <Badge variant="accent" className="shrink-0 gap-1">
-                    <Presentation className="size-3" aria-hidden />
-                    {t("tocPresentation")}
-                  </Badge>
-                )}
-                <span className="text-muted shrink-0 text-sm tabular-nums">
-                  {t("tocPage", { page: item.page })}
-                </span>
-                <ChevronRight className="text-faint size-[1.125rem] shrink-0" aria-hidden />
-              </Link>
-            </li>
-          );
-        })}
-      </ol>
-    </section>
-  );
-}
+export { sectionHeading };
+export { BookToc } from "./BookToc";
 
 /** "Algebra boshqa sinflarda": shu fanning boshqa sinflardagi kitoblari (sinf raqami plitkalari). */
 export function OtherGrades({
@@ -118,6 +54,59 @@ export function OtherGrades({
   );
 }
 
+/** Joriysidan tashqari shu sinf kitoblari: shu fan bir xillari birinchi. */
+function sameGradeBooks(current: PdfBookDetail, gradeBooks: PdfBook[]): PdfBook[] {
+  return gradeBooks
+    .filter((book) => book.id !== current.id)
+    .sort((a, b) => Number(b.subject === current.subject) - Number(a.subject === current.subject));
+}
+
+/** O'ng ustun (md+): shu sinfning boshqa darsliklari — ixcham ro'yxat va katalogga havola. */
+export function SameGradeList({
+  current,
+  gradeBooks,
+  limit = 4,
+}: {
+  current: PdfBookDetail;
+  gradeBooks: PdfBook[];
+  limit?: number;
+}) {
+  const t = useTranslations("pdfBooks.page");
+  const locale = useLocale() as Locale;
+  const books = sameGradeBooks(current, gradeBooks).slice(0, limit);
+  if (books.length === 0) return null;
+  return (
+    <section
+      aria-labelledby="book-same-grade"
+      data-testid="book-same-grade"
+      className="border-border flex flex-col gap-3 rounded-[1.125rem] border p-5"
+    >
+      <h2 id="book-same-grade" className="text-base font-extrabold">
+        {t("sameGrade", { grade: current.grade })}
+      </h2>
+      <ul className="flex flex-col">
+        {books.map((book) => (
+          <li key={book.id}>
+            <Link
+              href={pdfBookPath(book)}
+              className="hover:bg-surface-2 -mx-2 flex min-h-11 flex-col justify-center rounded-lg px-2 py-1.5"
+            >
+              <span className="font-semibold">{getLocalized(book.title, locale)}</span>
+              <span className="text-muted text-sm">{getLocalized(book.subject_title, locale)}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+      <Link
+        href={gradePath(current.grade)}
+        className="text-link text-sm font-semibold hover:underline"
+      >
+        {t("all")} →
+      </Link>
+    </section>
+  );
+}
+
 /** Shu sinfning boshqa kitoblari (joriysidan tashqari, fan bir xillari birinchi) va katalogga havola. */
 export function SimilarBooks({
   current,
@@ -127,10 +116,7 @@ export function SimilarBooks({
   gradeBooks: PdfBook[];
 }) {
   const t = useTranslations("pdfBooks.page");
-  const others = gradeBooks
-    .filter((book) => book.id !== current.id)
-    .sort((a, b) => Number(b.subject === current.subject) - Number(a.subject === current.subject))
-    .slice(0, 6);
+  const others = sameGradeBooks(current, gradeBooks).slice(0, 6);
   if (others.length === 0) return null;
   return (
     <section aria-labelledby="book-similar" className="flex flex-col gap-6">

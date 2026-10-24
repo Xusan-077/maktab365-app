@@ -314,7 +314,8 @@
     "settings": "Settings",
     "signOut": "Sign out",
     "guestMerged": "Guest data added to your account",
-    "guestMergedHint": "Your last pages and saved textbooks are now in your account."
+    "guestMergedHint": "Your last pages and saved textbooks are now in your account.",
+    "adminPanel": "Admin panel"
   },
   "onboarding": {
     "title": "How will you use darslik365?",
@@ -640,7 +641,8 @@
       "messageTooShort": "The message must be at least {min} characters",
       "messageTooLong": "The message must not exceed {max} characters",
       "throttled": "Too many messages sent. Please try again a little later.",
-      "sendFailed": "Could not send. Please try again later."
+      "sendFailed": "Could not send. Please try again later.",
+      "messageMeaningless": "Please describe it more clearly: what is wrong and where, in a sentence or two."
     },
     "statuses": {
       "new": "New",
@@ -669,7 +671,10 @@
       "users": "Users",
       "signOut": "Sign out",
       "subjects": "Subjects",
-      "stats": "Statistics"
+      "stats": "Statistics",
+      "messages": "Messages",
+      "openSite": "Open site",
+      "newMessages": "{count, plural, one {# new message} other {# new messages}}"
     },
     "roles": {
       "student": "Student",
@@ -731,8 +736,9 @@
       "shareValue": "{percent}% published",
       "openBooks": "Open books list",
       "openSubjects": "Open subjects list",
-      "openMessages": "View messages",
-      "viewAllActivity": "All books"
+      "openMessages": "Open messages",
+      "viewAllActivity": "All books",
+      "allMessages": "All →"
     },
     "audit": {
       "actions": {
@@ -744,7 +750,8 @@
         "upload": "uploaded",
         "block": "blocked:",
         "unblock": "unblocked:",
-        "role_change": "changed the role of:"
+        "role_change": "changed the role of:",
+        "ocr_request": "requested OCR for"
       },
       "targets": {
         "book": "book",
@@ -753,7 +760,8 @@
         "subject": "subject",
         "file": "file",
         "user": "user",
-        "pdf_book": "PDF book"
+        "pdf_book": "PDF book",
+        "support_message": "message"
       }
     },
     "books": {
@@ -891,7 +899,10 @@
         "last_admin": "The last active admin cannot be deleted, blocked or demoted.",
         "role_forbidden": "You are not allowed to assign this role.",
         "storage_error": "The files could not be removed from storage, so the book was kept. Try again in a moment.",
-        "grade_has_books": "You can't remove a grade where the subject has books. Move or delete the books first."
+        "grade_has_books": "You can't remove a grade where the subject has books. Move or delete the books first.",
+        "ocr_disabled": "OCR is not enabled on the server yet.",
+        "ocr_not_needed": "This book already has a text layer — OCR is not needed.",
+        "ocr_in_progress": "OCR is already queued or running."
       },
       "fields": {
         "invalid": "Invalid value",
@@ -913,7 +924,8 @@
         "grades_required": "Select at least one grade",
         "grades_invalid": "Grades must be from 1 to 11",
         "grades_duplicate": "Grades must not repeat",
-        "subject_not_in_grade": "This subject is not taught in the selected grade"
+        "subject_not_in_grade": "This subject is not taught in the selected grade",
+        "chapter_page_order": "Contents page numbers are out of order: a row can't be lower than the previous one"
       },
       "gradeHasBooks": "This subject has {count} book(s) in grade {grade}: move them to another subject or delete them first."
     },
@@ -1113,16 +1125,21 @@
         "titleRequired": "Enter a title",
         "titleTooLong": "Title is too long (200 characters max)",
         "pageInvalid": "The page must be a whole number, 1 or more",
-        "pageExceeds": "The page cannot exceed the PDF page count ({pages})"
+        "pageExceeds": "The page cannot exceed the PDF page count ({pages})",
+        "pageOrder": "The page number can't be lower than in the previous row"
       },
       "bulk": {
         "title": "Bulk entry",
-        "hint": "One per line: “1. Introduction ........ 5”. For a subsection, indent the line (spaces or Tab) or number it like “1.2”.",
+        "hint": "One per line: “1. Introduction ........ 5”. Lines starting with “I bob …” are chapters, the lines after them are sections of that chapter. Without chapters, mark a nested section with indentation (space or Tab) or “1.2” numbering.",
         "placeholder": "1. Introduction ........ 5\n  Goals and tasks ... 6\n2. Algebra ........ 12",
         "apply": "Fill the table",
         "added": "{count} rows added",
         "skipped": "{count} lines not recognised (no page number at the end)"
-      }
+      },
+      "indent": "Make row {n} a section of the previous chapter",
+      "indentHint": "Make a section (of the previous chapter)",
+      "outdent": "Make row {n} a chapter",
+      "outdentHint": "Make a chapter"
     },
     "slides": {
       "label": "Presentation",
@@ -1212,6 +1229,57 @@
       "createAll": "Create all ({count})",
       "stop": "Stop",
       "toList": "To the book list"
+    },
+    "ocr": {
+      "title": "Text layer and OCR",
+      "textLayer": {
+        "yes": "Text layer found — in-book search works.",
+        "no": "No text layer (scanned book) — the search button is hidden for students.",
+        "unknown": "Text layer not checked yet: it is detected a few minutes after the file upload."
+      },
+      "status": {
+        "queued": "Queued",
+        "processing": "OCR in progress…",
+        "done": "OCR done",
+        "failed": "OCR failed"
+      },
+      "errors": {
+        "ocr_not_implemented": "OCR is not running yet (in development).",
+        "ocr_failed": "An error occurred during OCR.",
+        "no_file": "The book has no PDF file.",
+        "generic": "Unknown error."
+      },
+      "action": "Run OCR",
+      "retry": "Run OCR again",
+      "unavailable": "OCR is not enabled on the server yet.",
+      "queued": "OCR queued"
+    },
+    "messages": {
+      "title": "Messages",
+      "description": "Messages from users: textbook errors, questions and suggestions.",
+      "filters": {
+        "status": "Status",
+        "kind": "Type",
+        "bookLabel": "Textbook",
+        "allStatuses": "All statuses (no spam)",
+        "allKinds": "All types",
+        "allBooks": "All textbooks",
+        "book": "{title}, grade {grade} · {count}"
+      },
+      "statuses": {
+        "new": "New",
+        "in_progress": "Seen",
+        "resolved": "Resolved",
+        "spam": "Spam"
+      },
+      "bookAtPage": "{title}, grade {grade} · page {page}",
+      "bookOnly": "{title}, grade {grade}",
+      "statusLabel": "Status",
+      "noteLabel": "Staff note",
+      "notePlaceholder": "Internal note (not visible to the user)",
+      "saveNote": "Save note",
+      "noteSaved": "Note saved",
+      "empty": "No messages for this filter."
     }
   },
   "pdfBooks": {
@@ -1271,7 +1339,9 @@
         "toc": "Contents",
         "marks": "Marks",
         "about": "About"
-      }
+      },
+      "zoom": "Zoom",
+      "more": "More"
     },
     "bookmark": {
       "save": "Save",
@@ -1280,7 +1350,12 @@
     "toc": {
       "button": "Contents",
       "title": "Table of contents",
-      "page": "p. {page}"
+      "page": "p. {page}",
+      "searchLabel": "Search the contents",
+      "searchPlaceholder": "Search the contents…",
+      "searchEmpty": "No sections match “{query}”",
+      "expand": "Expand sections of “{title}”",
+      "collapse": "Collapse sections of “{title}”"
     },
     "description": {
       "more": "Read more",
@@ -1438,7 +1513,8 @@
       "reportText": "Report a bad scan or a missing page.",
       "sameGrade": "More textbooks for grade {grade}",
       "all": "All",
-      "shareMore": "More apps…"
+      "shareMore": "More apps…",
+      "quickActions": "Quick actions"
     },
     "controls": {
       "label": "Reading settings",
@@ -1451,14 +1527,14 @@
       },
       "fitPage": "Fit whole page",
       "fitWidth": "Fit to width",
-      "zoomIn": "Zoom in (2×)",
-      "zoomOut": "Zoom out (1×)",
       "fullscreen": "Full screen",
       "exitFullscreen": "Exit full screen",
       "shortcuts": "Keyboard shortcuts",
       "highlightOn": "Turn on highlight mode (drag on the page)",
       "highlightOff": "Turn off highlight mode",
-      "annotations": "Highlights and notes ({count})"
+      "annotations": "Highlights and notes ({count})",
+      "zoomLevel": "Zoom: {level}",
+      "more": "More tools"
     },
     "shortcuts": {
       "title": "Keyboard shortcuts",
@@ -1702,8 +1778,8 @@
       "grade": "Grade {grade}"
     },
     "bookCard": {
-      "page": "page {page}",
-      "read": "Read"
+      "read": "Read",
+      "progress": "{page}/{total} · {percent}%"
     },
     "groupName": {
       "exact": "Exact sciences",
@@ -1718,13 +1794,6 @@
       "language": "L",
       "social": "S",
       "arts": "A"
-    },
-    "groupSample": {
-      "exact": "Mathematics, Algebra, Geometry, Informatics",
-      "natural": "Physics, Chemistry, Biology, Geography",
-      "language": "Native language, Literature, Russian, Foreign language",
-      "social": "History of Uzbekistan, World history, Law",
-      "arts": "Music, Fine arts, Technology"
     },
     "pagination": {
       "label": "Pages",
@@ -1762,7 +1831,11 @@
       "uz-Cyrl": "ЎЗ",
       "ru": "RU",
       "en": "EN"
-    }
+    },
+    "bookCount": "{count, plural, one {# textbook} other {# textbooks}}",
+    "comingSoon": "Coming soon",
+    "subjectsMore": "{list} and {count} more",
+    "adminPanel": "Admin panel"
   },
   "legal": {
     "terms": {

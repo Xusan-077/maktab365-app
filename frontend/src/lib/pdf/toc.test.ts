@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { currentTocItem, flattenToc, type TocChapter } from "./toc";
+import {
+  currentTocItem,
+  currentTocGroupId,
+  filterTocGroups,
+  flattenToc,
+  groupToc,
+  tocRowCount,
+  type TocChapter,
+  type TocGroup,
+} from "./toc";
 
 const chapters: TocChapter[] = [
   {
@@ -77,5 +86,73 @@ describe("flattenToc: prezentatsiya", () => {
       ["a2", null],
       ["b", null],
     ]);
+  });
+});
+
+const BOOK: TocChapter[] = [
+  { id: "intro", title: "Kirish", page: 3 },
+  {
+    id: "b1",
+    title: "I bob. Algebraik ifodalar",
+    page: 5,
+    children: [
+      { id: "s1", title: "1-§. Ko'phadlar", page: 6 },
+      { id: "s2", title: "2-§. Kasrlar", page: 12 },
+    ],
+  },
+  {
+    id: "b2",
+    title: "II bob. Funksiyalar",
+    page: 20,
+    children: [{ id: "s3", title: "3-§. Chiziqli funksiya", page: 21 }],
+  },
+];
+
+describe("groupToc", () => {
+  it("boblar bo'yicha guruhlaydi (bo'limsiz bob — bo'sh guruh)", () => {
+    const groups = groupToc(BOOK);
+    expect(groups.map((g) => [g.chapter.title, g.sections.map((s) => s.id)])).toEqual([
+      ["Kirish", []],
+      ["I bob. Algebraik ifodalar", ["s1", "s2"]],
+      ["II bob. Funksiyalar", ["s3"]],
+    ]);
+    expect(groups[1].sections[0].level).toBe(1);
+    expect(tocRowCount(groups)).toBe(6);
+  });
+});
+
+describe("currentTocGroupId", () => {
+  it("joriy bo'lim joylashgan bob", () => {
+    const groups = groupToc(BOOK);
+    expect(currentTocGroupId(groups, 13)).toBe("b1");
+    expect(currentTocGroupId(groups, 5)).toBe("b1");
+    expect(currentTocGroupId(groups, 25)).toBe("b2");
+    expect(currentTocGroupId(groups, 3)).toBe("intro");
+    expect(currentTocGroupId(groups, 1)).toBeNull();
+    expect(currentTocGroupId(groups, null)).toBeNull();
+  });
+});
+
+describe("filterTocGroups", () => {
+  const groups = groupToc(BOOK);
+  const shape = (list: readonly TocGroup[]) =>
+    list.map((g) => [g.chapter.id, g.sections.map((s) => s.id)]);
+
+  it("bo'lim topilsa — shu bob va faqat mos bo'limlar", () => {
+    expect(shape(filterTocGroups(groups, "kasr"))).toEqual([["b1", ["s2"]]]);
+  });
+
+  it("bob nomi mos kelsa — butun bob", () => {
+    expect(shape(filterTocGroups(groups, "funksiyalar"))).toEqual([["b2", ["s3"]]]);
+  });
+
+  it("katta-kichik harf, tutuq belgisi va kirill yozuvi farq qilmaydi", () => {
+    expect(shape(filterTocGroups(groups, "KOPHAD"))).toEqual([["b1", ["s1"]]]);
+    expect(shape(filterTocGroups(groups, "кўпҳад"))).toEqual([["b1", ["s1"]]]);
+  });
+
+  it("bo'sh so'rov — hammasi, mos kelmasa — bo'sh", () => {
+    expect(filterTocGroups(groups, "  ")).toBe(groups);
+    expect(filterTocGroups(groups, "geometriya")).toEqual([]);
   });
 });

@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Presentation } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Dialog } from "@/components/ui/Dialog";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { cn } from "@/lib/utils/cn";
 import { readSlidesProgress } from "@/lib/pdf/slides";
-import { currentTocItem, flattenToc, type TocChapter } from "@/lib/pdf/toc";
+import type { TocChapter } from "@/lib/pdf/toc";
+import { TocTree } from "./TocTree";
 
 export interface PdfTocDrawerProps {
   open: boolean;
@@ -22,7 +23,10 @@ export interface PdfTocDrawerProps {
 
 const MOBILE_QUERY = "(max-width: 639px)";
 
-/** Mundarija ro'yxati (yon panel va sheet uchun umumiy): joriy bo'lim ajratiladi, bosilsa shu betga o'tadi. */
+/**
+ * Mundarija ro'yxati (yon panel va sheet uchun umumiy): boblar bo'yicha guruhlangan (`TocTree`),
+ * joriy bob ochiq va bo'lim ajratiladi, bosilsa shu betga o'tadi.
+ */
 export function PdfTocList({
   chapters,
   page,
@@ -42,8 +46,6 @@ export function PdfTocList({
 }) {
   const t = useTranslations("pdfBooks.toc");
   const ts = useTranslations("pdfBooks.slides");
-  const items = useMemo(() => flattenToc(chapters), [chapters]);
-  const current = currentTocItem(items, page);
   const currentRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -52,14 +54,16 @@ export function PdfTocList({
 
   return (
     <nav aria-label={t("title")}>
-      <ol className="flex flex-col gap-0.5" data-testid="pdf-toc">
-        {items.map((item) => {
-          const active = item.id === current?.id;
+      <TocTree
+        chapters={chapters}
+        page={page}
+        testId="pdf-toc"
+        renderItem={(item, { active }) => {
           const slides = onOpenSlides ? item.slides : null;
           const saved = slides ? readSlidesProgress(item.id) : null;
           const resume = saved && slides && saved > 1 && saved <= slides.page_count ? saved : 1;
           return (
-            <li key={item.id} className="flex items-stretch gap-1">
+            <div className="flex items-stretch gap-1">
               <button
                 type="button"
                 ref={active ? currentRef : undefined}
@@ -71,7 +75,7 @@ export function PdfTocList({
                 }}
                 className={cn(
                   "flex min-h-11 min-w-0 flex-1 items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors",
-                  item.level === 1 && "pl-8",
+                  item.level === 0 ? "font-medium" : "text-muted pl-8",
                   active ? "bg-brand-soft text-brand-text font-semibold" : "hover:bg-subtle",
                 )}
               >
@@ -98,10 +102,10 @@ export function PdfTocList({
                   </span>
                 </button>
               )}
-            </li>
+            </div>
           );
-        })}
-      </ol>
+        }}
+      />
     </nav>
   );
 }

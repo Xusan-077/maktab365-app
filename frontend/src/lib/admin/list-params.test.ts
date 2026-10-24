@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { parseBookParams, serializeBookParams, withFilter } from "./list-params";
+import {
+  parseBookParams,
+  parseSupportParams,
+  serializeBookParams,
+  serializeSupportParams,
+  withFilter,
+} from "./list-params";
 
 const parse = (query: string) => parseBookParams(new URLSearchParams(query));
 
@@ -39,5 +45,32 @@ describe("book list params", () => {
       page: undefined,
       grade: 6,
     });
+  });
+});
+
+describe("parseSupportParams / serializeSupportParams", () => {
+  const BOOK = "3f2b8c1e-5d4a-4c7e-9a10-0b6f1d2e3c4d";
+
+  it("yaroqli filtrlar o'qiladi, yaroqsizlari tashlanadi", () => {
+    const params = new URLSearchParams(`holat=resolved&tur=content_error&kitob=${BOOK}&page=3`);
+    expect(parseSupportParams(params)).toEqual({
+      page: 3,
+      status: "resolved",
+      kind: "content_error",
+      pdfBook: BOOK,
+    });
+    expect(parseSupportParams(new URLSearchParams("holat=x&tur=y&kitob=z&page=0"))).toEqual({
+      page: undefined,
+      status: undefined,
+      kind: undefined,
+      pdfBook: undefined,
+    });
+  });
+
+  it("qaytib URL'ga (1-sahifa yozilmaydi)", () => {
+    expect(serializeSupportParams({ status: "new", pdfBook: BOOK, page: 1 })).toBe(
+      `holat=new&kitob=${BOOK}`,
+    );
+    expect(serializeSupportParams({})).toBe("");
   });
 });

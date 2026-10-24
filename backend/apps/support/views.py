@@ -1,3 +1,6 @@
+import uuid
+from urllib.parse import parse_qs, urlparse
+
 import structlog
 from django.db import transaction
 from drf_spectacular.utils import extend_schema
@@ -6,7 +9,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.core.throttling import SupportRateThrottle
+from apps.content.models import PdfBook
+from apps.core.throttling import SupportBurstThrottle, SupportRateThrottle
 
 from .models import Status, SupportMessage
 from .serializers import (
@@ -19,10 +23,29 @@ from .tasks import notify_staff
 
 log = structlog.get_logger()
 
+MAX_PAGE = 100_000
+
+
+def _book_and_page(data) -> tuple[PdfBook | None, int | None]:
+    """Kitob: `pdf_book` yoki (eski klient) `topic` id; bet: `page` yoki `page_url` `?page=`."""
+    book_id = data.get("pdf_book")
+    if book_id is None:
+        try:
+            book_id = uuid.UUID(data.get("topic") or "")
+        except ValueError:
+            book_id = None
+    book = PdfBook.objects.filter(pk=book_id).first() if book_id else None
+    page = data.get("page")
+    if page is None:
+        raw = parse_qs(urlparse(data.get("page_url") or "").query).get("page", [""])[0]
+        page = int(raw) if raw.isdigit() and 0 < int(raw) <= MAX_PAGE else None
+    return book, page
+
 
 class SupportCreateView(APIView):
     permission_classes = [AllowAny]
-    throttle_classes = [SupportRateThrottle]
+    # Soatiga 5 ta va ketma-ket (daqiqada 2 ta) — ikkalasi ham IP bo'yicha.
+    throttle_classes = [SupportBurstThrottle, SupportRateThrottle]
 
     @extend_schema(
         operation_id="support_create",
@@ -42,6 +65,7 @@ class SupportCreateView(APIView):
 
         user = request.user if request.user.is_authenticated else None
         spam = is_spam(data["message"], data["name"])
+        book, page = _book_and_page(data)
         with transaction.atomic():
             msg = SupportMessage.objects.create(
                 user=user,
@@ -51,6 +75,8 @@ class SupportCreateView(APIView):
                 message=data["message"],
                 page_url=data["page_url"],
                 topic=data["topic"],
+                pdf_book=book,
+                page=page,
                 user_agent=request.META.get("HTTP_USER_AGENT", "")[:300],
                 status=Status.SPAM if spam else Status.NEW,
             )

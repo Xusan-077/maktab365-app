@@ -37,8 +37,6 @@ services:
       FRONTEND_ORIGINS: http://localhost:3000
       # Dev/e2e: frontend `BACKEND_FORWARD_SECRET` bilan bir xil (prod'da env orqali, kuchli qiymat).
       FORWARDED_IP_SECRET: ${FORWARDED_IP_SECRET:-dev-forward-secret}
-      # Dev/e2e: import qilingan draft kontent ochiq API'da "unverified" belgisi bilan ko'rinadi.
-      SHOW_DRAFTS_PUBLICLY: ${SHOW_DRAFTS_PUBLICLY:-true}
       # Bo'sh bo'lsa ensure_admin hech narsa qilmaydi.
       ADMIN_EMAIL: ${ADMIN_EMAIL:-}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}

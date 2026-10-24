@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, type FormEvent, type ReactNode } from "react";
-import { LogOut, Search } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { ExternalLink, LogOut, Search } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
@@ -9,7 +10,9 @@ import { Logo } from "@/components/layout/Logo";
 import { MAIN_CONTENT_ID } from "@/components/layout/SkipLink";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { Avatar } from "@/components/layout/UserMenu";
+import { adminQueries } from "@/lib/admin/queries";
 import { ADMIN_ROUTES } from "@/lib/admin/routes";
+import { ROUTES } from "@/lib/utils/routes";
 import { Link, usePathname, useRouter } from "@/lib/i18n/navigation";
 import { cn } from "@/lib/utils/cn";
 import { useAdminIdentity } from "./AdminRoleProvider";
@@ -20,11 +23,38 @@ const linkClasses =
 const idleClasses = "text-muted hover:bg-subtle hover:text-foreground";
 const activeClasses = "bg-primary-soft text-primary-soft-foreground";
 
+/** Yangi (ko'rilmagan) xabarlar soni: sidebar va mobil menyudagi "Xabarlar" belgisi. */
+function useNewMessages(): number {
+  const { data } = useQuery(adminQueries.supportSummary());
+  return data?.new ?? 0;
+}
+
+function NewBadge({ count, compact = false }: { count: number; compact?: boolean }) {
+  const t = useTranslations("admin.nav");
+  if (count <= 0) return null;
+  const label = count > 99 ? "99+" : String(count);
+  return (
+    <span
+      data-testid="admin-messages-badge"
+      aria-label={t("newMessages", { count })}
+      className={cn(
+        "bg-danger rounded-pill inline-flex min-w-5 items-center justify-center px-1.5 text-xs leading-5 font-bold text-white tabular-nums",
+        compact
+          ? "absolute -top-1 left-1/2 ml-1.5 h-4 min-w-4 px-1 text-[0.625rem] leading-4"
+          : "ml-auto",
+      )}
+    >
+      {label}
+    </span>
+  );
+}
+
 function AdminSidebar() {
   const t = useTranslations("admin");
   const locale = useLocale();
   const pathname = usePathname();
   const { role, email } = useAdminIdentity();
+  const newMessages = useNewMessages();
 
   return (
     <aside
@@ -48,10 +78,24 @@ function AdminSidebar() {
             >
               <Icon className="size-5 shrink-0" aria-hidden />
               {t(`nav.${key}`)}
+              {key === "messages" && <NewBadge count={newMessages} />}
             </Link>
           );
         })}
       </nav>
+
+      {/* Admin saytni oddiy foydalanuvchidek ko'radi: yangi oynada ochiq sayt. */}
+      <Link
+        href={ROUTES.home}
+        target="_blank"
+        rel="noopener noreferrer"
+        data-testid="admin-open-site"
+        className={cn(linkClasses, idleClasses)}
+      >
+        <ExternalLink className="size-5 shrink-0" aria-hidden />
+        {t("nav.openSite")}
+        <span aria-hidden>↗</span>
+      </Link>
 
       <div className="border-border flex flex-col gap-1 border-t pt-3">
         <div className="mt-2 flex items-center gap-3 px-2">
@@ -106,6 +150,7 @@ function AdminSearch() {
 }
 
 function AdminTopbar() {
+  const t = useTranslations("admin.nav");
   return (
     <header
       data-admin-topbar
@@ -114,6 +159,15 @@ function AdminTopbar() {
       <Logo variant="mark" height={22} href={ADMIN_ROUTES.home} className="lg:hidden" />
       <AdminSearch />
       <div className="ml-auto flex items-center gap-2">
+        <Link
+          href={ROUTES.home}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={t("openSite")}
+          className="text-foreground hover:bg-subtle inline-flex size-10 items-center justify-center rounded-lg lg:hidden"
+        >
+          <ExternalLink className="size-5" aria-hidden />
+        </Link>
         <LanguageSwitcher className="hidden sm:inline-flex" />
         <ThemeToggle />
       </div>
@@ -125,6 +179,7 @@ function AdminMobileNav() {
   const t = useTranslations("admin.nav");
   const pathname = usePathname();
   const { role } = useAdminIdentity();
+  const newMessages = useNewMessages();
 
   return (
     <nav
@@ -143,7 +198,10 @@ function AdminMobileNav() {
               active ? "text-link" : "text-muted hover:text-foreground",
             )}
           >
-            <Icon className="size-5" aria-hidden />
+            <span className="relative">
+              <Icon className="size-5" aria-hidden />
+              {key === "messages" && <NewBadge count={newMessages} compact />}
+            </span>
             <span className="max-w-full truncate">{t(key)}</span>
           </Link>
         );

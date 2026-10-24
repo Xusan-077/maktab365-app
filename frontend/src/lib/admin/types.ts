@@ -26,6 +26,11 @@ export type AdminPdfBookPatch = Schemas["PatchedPdfBookAdminRequest"];
 export type PdfUploadPlan = Schemas["PdfUploadPlan"];
 export type PdfUploadPart = Schemas["PdfUploadPartRequest"];
 export type PdfBookStatus = Schemas["PdfBookAdminStatusEnum"];
+export type AdminSupportMessage = Schemas["SupportAdmin"];
+export type AdminSupportPatch = Schemas["PatchedSupportAdminRequest"];
+export type AdminSupportSummary = Schemas["SupportSummary"];
+export type SupportStatus = AdminSupportMessage["status"];
+export type SupportMessageKind = AdminSupportMessage["kind"];
 export type BookStatus = "published" | "draft";
 
 export interface Page<T> {
@@ -52,3 +57,11 @@ export interface UserListParams {
 }
 
 export const PAGE_SIZE = 20;
+
+/** "Xabarlar" filtrlari (URL'da: `?holat=&tur=&kitob=&bet=`). `status` berilmasa — spam'siz hammasi. */
+export interface SupportListParams {
+  page?: number;
+  status?: SupportStatus;
+  kind?: SupportMessageKind;
+  pdfBook?: string;
+}

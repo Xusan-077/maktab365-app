@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useMe } from "@/hooks/useMe";
 import { Link } from "@/lib/i18n/navigation";
 import { cn } from "@/lib/utils/cn";
+import { ADMIN_ROUTES } from "@/lib/admin/routes";
 import { dashboardPath, helpPath, ROUTES } from "@/lib/utils/routes";
 import { SignInButton } from "./SignInButton";
 
@@ -141,6 +142,9 @@ export function UserMenu({
   const close = () => closeMenu(false);
 
   const panel = variant === "panel";
+  const staff = sessionUser.staff;
+  // Admin o'quvchi/ustoz panelidan foydalanmaydi (u yerdan /admin ga qaytariladi).
+  const learner = staff !== "admin";
 
   return (
     <div ref={rootRef} className="relative flex items-center gap-2">
@@ -184,7 +188,18 @@ export function UserMenu({
               )}
             </div>
             <div className="border-border border-t pt-1">
-              {!panel && me && (
+              {!panel && staff && (
+                <Link
+                  role="menuitem"
+                  href={ADMIN_ROUTES.home}
+                  onClick={close}
+                  className={itemClasses}
+                >
+                  <LayoutDashboard className="size-4" aria-hidden />
+                  {t("adminPanel")}
+                </Link>
+              )}
+              {!panel && me && learner && (
                 <Link
                   role="menuitem"
                   href={dashboardPath(me.role)}
@@ -201,10 +216,17 @@ export function UserMenu({
                   {tp("help")}
                 </Link>
               )}
-              <Link role="menuitem" href={ROUTES.settings} onClick={close} className={itemClasses}>
-                <Settings className="size-4" aria-hidden />
-                {t("settings")}
-              </Link>
+              {learner && (
+                <Link
+                  role="menuitem"
+                  href={ROUTES.settings}
+                  onClick={close}
+                  className={itemClasses}
+                >
+                  <Settings className="size-4" aria-hidden />
+                  {t("settings")}
+                </Link>
+              )}
               <button
                 type="button"
                 role="menuitem"

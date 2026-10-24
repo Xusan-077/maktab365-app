@@ -13,6 +13,7 @@ class Kind(models.TextChoices):
 
 class Status(models.TextChoices):
     NEW = "new", "New"
+    # Adminda "Ko'rildi": xodim ko'rdi, hali hal qilinmagan.
     IN_PROGRESS = "in_progress", "In progress"
     RESOLVED = "resolved", "Resolved"
     SPAM = "spam", "Spam"
@@ -33,13 +34,25 @@ class SupportMessage(UUIDModel, TimeStampedModel):
     page_url = models.URLField(max_length=500, blank=True)
     # Mavzu identifikatori (mavzu sahifasidagi "Xato topdingizmi?" havolasidan).
     topic = models.CharField(max_length=100, blank=True)
+    # "Xato topdingizmi?" kitob/o'qish oynasidan: qaysi kitob va bet (admin shu betni ochadi).
+    pdf_book = models.ForeignKey(
+        "content.PdfBook",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="support_messages",
+    )
+    page = models.PositiveIntegerField(null=True, blank=True)
     user_agent = models.CharField(max_length=300, blank=True)
     status = models.CharField(max_length=16, choices=Status.choices, default=Status.NEW)
     staff_note = models.TextField(blank=True)
 
     class Meta:
         ordering = ["-created_at"]
-        indexes = [models.Index(fields=["user", "-created_at"])]
+        indexes = [
+            models.Index(fields=["user", "-created_at"]),
+            models.Index(fields=["status", "-created_at"]),
+        ]
 
     def __str__(self) -> str:
         return f"{self.kind}: {self.message[:40]}"

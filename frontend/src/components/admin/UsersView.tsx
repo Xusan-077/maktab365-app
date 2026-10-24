@@ -23,8 +23,10 @@ import {
   USER_STATUSES,
   withUserFilter,
 } from "@/lib/admin/user-params";
+import type { Locale } from "@/lib/i18n/config";
 import { usePathname, useRouter } from "@/lib/i18n/navigation";
 import { cn } from "@/lib/utils/cn";
+import { formatDate } from "@/lib/utils/format-date";
 import { useAdminIdentity } from "./AdminRoleProvider";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { Pagination } from "./Pagination";
@@ -112,7 +114,7 @@ function UserRow({
 }) {
   const t = useTranslations("admin.users");
   const tr = useTranslations("admin.roles");
-  const locale = useLocale();
+  const locale = useLocale() as Locale;
   const label = user.display_name || user.email || "";
   const envProtected = user.is_env_admin;
   const lockedReason = envProtected ? t("protected.env") : isSelf ? t("protected.self") : undefined;
@@ -140,7 +142,7 @@ function UserRow({
         </div>
       </td>
       <td className="text-muted px-4 py-3 whitespace-nowrap">
-        {new Date(user.date_joined).toLocaleDateString(locale)}
+        {formatDate(user.date_joined, locale, "date")}
       </td>
       <td className="px-4 py-3">
         <Badge variant={user.is_active ? "success" : "danger"}>

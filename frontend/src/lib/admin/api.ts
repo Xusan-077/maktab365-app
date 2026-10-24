@@ -21,6 +21,10 @@ import {
   type UploadKind,
   type UploadResult,
   type UserListParams,
+  type AdminSupportMessage,
+  type AdminSupportPatch,
+  type AdminSupportSummary,
+  type SupportListParams,
 } from "./types";
 
 const MAX_PAGE_SIZE = 100;
@@ -121,6 +125,14 @@ export class AdminApi {
     );
   }
 
+  /** Matn qatlami yo'q kitobni OCR'ga yuborish (202): holat `ocr_status` da kuzatiladi. */
+  async requestOcr(id: string): Promise<AdminPdfBook> {
+    const result = await this.client.POST("/api/v1/admin/pdf-books/{id}/ocr/", {
+      params: { path: { id } },
+    });
+    return unwrap(result);
+  }
+
   /** Qoralama nusxa: tavsif va mundarija ko'chadi, PDF fayl yo'q. */
   async duplicatePdfBook(id: string): Promise<AdminPdfBook> {
     const result = await this.client.POST("/api/v1/admin/pdf-books/{id}/duplicate/", {
@@ -203,6 +215,35 @@ export class AdminApi {
       { params: { path: { id: bookId, chapter_id: chapterId } } },
     );
     return unwrap(result);
+  }
+
+  /** Foydalanuvchi xabarlari (eng yangisi birinchi); `status` siz — spam'dan boshqa hammasi. */
+  async supportMessages(params: SupportListParams = {}): Promise<Page<AdminSupportMessage>> {
+    const result = await this.client.GET("/api/v1/admin/support/", {
+      params: {
+        query: {
+          page: params.page,
+          page_size: PAGE_SIZE,
+          status: params.status,
+          kind: params.kind,
+          pdf_book: params.pdfBook,
+        },
+      },
+    });
+    return unwrap(result);
+  }
+
+  async updateSupportMessage(id: string, patch: AdminSupportPatch): Promise<AdminSupportMessage> {
+    const result = await this.client.PATCH("/api/v1/admin/support/{id}/", {
+      params: { path: { id } },
+      body: patch,
+    });
+    return unwrap(result);
+  }
+
+  /** Yangi xabarlar soni (sidebar) va xabari bor kitoblar (filtr). */
+  async supportSummary(): Promise<AdminSupportSummary> {
+    return unwrap(await this.client.GET("/api/v1/admin/support/summary/"));
   }
 
   async users(params: UserListParams = {}): Promise<Page<AdminUser>> {

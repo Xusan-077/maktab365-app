@@ -37,12 +37,12 @@ const saved = (page: number) => ({
 
 let client: QueryClient;
 
-function setup(pageCount = 20) {
-  client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+function setup(pageCount = 20, options?: Parameters<typeof usePdfProgress>[2], retry = false) {
+  client = new QueryClient({ defaultOptions: retry ? {} : { queries: { retry: false } } });
   const wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={client}>{children}</QueryClientProvider>
   );
-  return renderHook(() => usePdfProgress("b1", pageCount), { wrapper });
+  return renderHook(() => usePdfProgress("b1", pageCount, options), { wrapper });
 }
 
 const flushDebounce = () => act(() => vi.advanceTimersByTimeAsync(800));
@@ -152,5 +152,32 @@ describe("usePdfProgress (mehmon)", () => {
     expect(usePdfGuestStore.getState().positions["b1"]?.page).toBe(6);
     expect(api.saveProgress).not.toHaveBeenCalled();
     expect(api.recordEvent).not.toHaveBeenCalled();
+  });
+});
+
+describe("usePdfProgress (xatolar va oldindan ko'rish)", () => {
+  it("server 403 qaytarsa qayta urinmasdan tayyor bo'ladi (o'qish oynasi kutib qolmaydi)", async () => {
+    api.myProgress.mockRejectedValue(
+      new ApiError("Ruxsat yo'q", 403, { code: "permission_denied" }),
+    );
+    const { result } = setup(20, undefined, true);
+
+    await waitFor(() => expect(result.current.ready).toBe(true));
+    expect(api.myProgress).toHaveBeenCalledTimes(1);
+    expect(result.current.resume).toBe(1);
+  });
+
+  it("preview: progress so'ralmaydi va yuborilmaydi, 'book_opened' ham yo'q", async () => {
+    const { result } = setup(20, { track: false });
+
+    expect(result.current.ready).toBe(true);
+    expect(result.current.resume).toBe(1);
+    act(() => result.current.record(6));
+    await flushDebounce();
+
+    expect(api.myProgress).not.toHaveBeenCalled();
+    expect(api.saveProgress).not.toHaveBeenCalled();
+    expect(api.recordEvent).not.toHaveBeenCalled();
+    expect(usePdfGuestStore.getState().positions["b1"]).toBeUndefined();
   });
 });

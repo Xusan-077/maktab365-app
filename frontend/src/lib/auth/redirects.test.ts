@@ -58,28 +58,39 @@ describe("resolveAuthRedirect", () => {
     expect(go("/kabinet", { user: {} })).toBeNull();
   });
 
-  it("admin: faqat /admin — sayt, kabinet, ustoz va kirish sahifalaridan /admin ga qaytadi", () => {
+  it("admin: ochiq saytni oddiy foydalanuvchidek ko'radi (yo'naltirilmaydi)", () => {
     const admin: RedirectSession = { user: { role: "teacher", staff: "admin", onboarded: true } };
     for (const path of [
       "/",
       "/darsliklar",
-      "/darsliklar/abc",
+      "/darsliklar/9/9-sinf-algebra",
+      "/darsliklar/9/9-sinf-algebra/oqish",
+      "/fanlar",
+      "/yordam",
+      "/admin",
+      "/admin/kitoblar",
+      "/admin/xabarlar",
+    ]) {
+      expect(go(path, admin), path).toBeNull();
+    }
+  });
+
+  it("admin: o'quvchi/ustoz panellari, kirish va onboarding → /admin (onboarding'siz)", () => {
+    const admin: RedirectSession = { user: { role: "teacher", staff: "admin", onboarded: true } };
+    for (const path of [
       "/kabinet",
       "/kabinet/fanlar",
       "/ustoz",
       "/sozlamalar",
       "/kirish",
       "/onboarding",
-      "/yordam",
     ]) {
-      expect(go(path, admin)).toBe("/admin");
+      expect(go(path, admin), path).toBe("/admin");
     }
-    for (const path of ["/admin", "/admin/kitoblar", "/admin/foydalanuvchilar"]) {
-      expect(go(path, admin)).toBeNull();
-    }
-    // Admin onboarding'dan o'tmaydi (hatto `onboarded` false bo'lsa ham)
+    // `onboarded` false bo'lsa ham onboarding'ga yuborilmaydi; ochiq sayt ochiq.
     const fresh: RedirectSession = { user: { role: "teacher", staff: "admin", onboarded: false } };
     expect(go("/admin", fresh)).toBeNull();
+    expect(go("/darsliklar", fresh)).toBeNull();
     expect(go("/kabinet", fresh)).toBe("/admin");
   });
 

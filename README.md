@@ -92,7 +92,7 @@ Yoki ildizdan: `make dev`. Boshqa buyruqlar: `make test`, `make lint`, `make sch
   zaxirasini oling.
 - E2E lokal backend bilan: `E2E_MANAGE_CWD=<backend papkasi> E2E_API_URL=http://localhost:8001 npx playwright test`;
   backend `config.settings.dev`, `CELERY_TASK_ALWAYS_EAGER=true`, `FORWARDED_IP_SECRET=dev-forward-secret` va
-  yuqoriroq `AUTH_THROTTLE_RATE` / `SUPPORT_THROTTLE_RATE` bilan (alohida baza, masalan `maktab365_e2e`). Global
+  yuqoriroq `AUTH_THROTTLE_RATE` / `SUPPORT_THROTTLE_RATE` / `SUPPORT_BURST_THROTTLE_RATE` bilan (alohida baza, masalan `maktab365_e2e`). Global
   setup `seed_subjects` ni o'zi bajaradi (`E2E_SKIP_SEED=1` — o'tkazib yuborish).
 
 **M14 (sinf va kitob sahifalari, muqova, o'qish qulayliklari, PWA):**

@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { BarChart3, BookOpen, Files, Inbox, Layers, Library, Plus, RefreshCw } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button, buttonVariants } from "@/components/ui/Button";
 import { Card, CardTitle } from "@/components/ui/Card";
@@ -12,8 +12,10 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { adminQueries } from "@/lib/admin/queries";
 import { ADMIN_ROUTES } from "@/lib/admin/routes";
 import type { AdminDashboard } from "@/lib/admin/types";
+import type { Locale } from "@/lib/i18n/config";
 import { Link } from "@/lib/i18n/navigation";
 import { cn } from "@/lib/utils/cn";
+import { formatDate } from "@/lib/utils/format-date";
 import { QueryError } from "./QueryError";
 
 function Stat({
@@ -103,7 +105,12 @@ function Counts({ data }: { data: AdminDashboard }) {
           {t("messages")}
         </CardTitle>
         <dl className="mt-4">
-          <Stat label={t("newMessages")} value={data.new_messages} />
+          <Stat
+            label={t("newMessages")}
+            value={data.new_messages}
+            hint={t("openMessages")}
+            href={ADMIN_ROUTES.messages}
+          />
         </dl>
       </Card>
     </div>
@@ -142,7 +149,15 @@ function RecentMessages({ data }: { data: AdminDashboard }) {
   const tk = useTranslations("support.kinds");
   return (
     <Card>
-      <CardTitle>{t("recentMessages")}</CardTitle>
+      <CardTitle className="flex items-baseline justify-between gap-3">
+        {t("recentMessages")}
+        <Link
+          href={ADMIN_ROUTES.messages}
+          className="text-link text-sm font-medium hover:underline"
+        >
+          {t("allMessages")}
+        </Link>
+      </CardTitle>
       {data.recent_messages.length === 0 ? (
         <p className="text-muted mt-3 text-sm">{t("noMessages")}</p>
       ) : (
@@ -162,7 +177,7 @@ function RecentMessages({ data }: { data: AdminDashboard }) {
 function RecentActivity({ data }: { data: AdminDashboard }) {
   const t = useTranslations("admin.dashboard");
   const ta = useTranslations("admin.audit");
-  const format = useFormatter();
+  const locale = useLocale() as Locale;
   return (
     <Card>
       <CardTitle>{t("recentActivity")}</CardTitle>
@@ -185,10 +200,7 @@ function RecentActivity({ data }: { data: AdminDashboard }) {
                 <span className="font-medium">{entry.target_label}</span>
               </p>
               <time className="text-muted text-xs" dateTime={entry.created_at}>
-                {format.dateTime(new Date(entry.created_at), {
-                  dateStyle: "medium",
-                  timeStyle: "short",
-                })}
+                {formatDate(entry.created_at, locale, "dateTime")}
               </time>
             </li>
           ))}

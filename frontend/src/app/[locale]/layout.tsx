@@ -29,8 +29,11 @@ const inter = Inter({
   display: "swap",
 });
 
-/** Brend ko'k rangi: brauzer interfeysi va PWA manifest uchun. */
-export const viewport: Viewport = { themeColor: "#1554D1" };
+/**
+ * Brend ko'k rangi: brauzer interfeysi va PWA manifest uchun. `viewportFit: "cover"` — iOS'da
+ * `env(safe-area-inset-*)` qiymat oladi (pastki panellar "home indicator" ustida turadi).
+ */
+export const viewport: Viewport = { themeColor: "#1554D1", viewportFit: "cover" };
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));

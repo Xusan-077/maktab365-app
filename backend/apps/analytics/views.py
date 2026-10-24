@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.accounts.models import Role
-from apps.content.pdf_services import visible_pdf_books
+from apps.content.pdf_services import public_pdf_books
 from apps.core.permissions import IsRole
 from apps.core.throttling import StatsThrottle
 
@@ -30,7 +30,7 @@ class BookStatEventView(APIView):
         body = StatEventSerializer(data=request.data)
         body.is_valid(raise_exception=True)
         # Qoralama va noma'lum kitoblar hisoblanmaydi (jim 204: mavjudlik oshkor bo'lmasin).
-        book = visible_pdf_books(request).filter(pk=pk, status="published").first()
+        book = public_pdf_books().filter(pk=pk).first()
         if book is not None:
             if body.validated_data["kind"] == "open":
                 services.record_open(book.pk)

@@ -10,6 +10,7 @@ import {
   setBookmarkOverride,
   type BookmarkOverrides,
 } from "@/lib/pdf-books/cache";
+import { retryUnlessClientError } from "@/lib/api/retry";
 import { pdfQueries } from "@/lib/pdf-books/queries";
 import { usePdfGuestStore } from "@/stores/pdf-guest.store";
 import { useAuth } from "./useAuth";
@@ -27,7 +28,11 @@ export function usePdfBookmarks() {
   const queue = useWriteQueue();
   const queryClient = useQueryClient();
   const guest = usePdfGuestStore((state) => state.bookmarks);
-  const account = useQuery({ ...pdfQueries.bookmarks(), enabled: signedIn });
+  const account = useQuery({
+    ...pdfQueries.bookmarks(),
+    enabled: signedIn,
+    retry: retryUnlessClientError,
+  });
   const { data: overrides = {} } = useQuery<BookmarkOverrides>({
     queryKey: bookmarkOverridesKey(),
     queryFn: () => getBookmarkOverrides(queryClient),

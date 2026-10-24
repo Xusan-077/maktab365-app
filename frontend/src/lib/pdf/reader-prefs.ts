@@ -1,13 +1,10 @@
-/** O'qish oynasi qulayliklari: sahifa fon rejimi, moslash, zoom, qisqa tugmalar (sof mantiq). */
+/** O'qish oynasi qulayliklari: sahifa fon rejimi, moslash, qisqa tugmalar (sof mantiq; zoom — `zoom.ts`). */
 
 export const READER_TONES = ["light", "sepia", "dark"] as const;
 export type ReaderTone = (typeof READER_TONES)[number];
 
 export const READER_FITS = ["width", "page"] as const;
 export type ReaderFit = (typeof READER_FITS)[number];
-
-export const ZOOM_LEVELS = [1, 2] as const;
-export type ReaderZoom = (typeof ZOOM_LEVELS)[number];
 
 export interface ReaderPrefs {
   tone: ReaderTone;
@@ -21,7 +18,6 @@ export function nextTone(tone: ReaderTone): ReaderTone {
 }
 
 export const nextFit = (fit: ReaderFit): ReaderFit => (fit === "width" ? "page" : "width");
-export const nextZoom = (zoom: ReaderZoom): ReaderZoom => (zoom === 1 ? 2 : 1);
 
 /** Xotiradan o'qilgan qiymatlardan faqat yaroqlilari. */
 export function sanitizePrefs(value: unknown): ReaderPrefs {

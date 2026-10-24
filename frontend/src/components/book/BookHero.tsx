@@ -9,6 +9,7 @@ import type { PdfBookDetail } from "@/lib/pdf-books/api";
 import { catalogHref, EMPTY_FILTERS } from "@/lib/pdf/catalog-filters";
 import { SUBJECT_GROUPS, type SubjectGroup } from "@/lib/pdf/grade-groups";
 import { formatBytes } from "@/lib/utils/bytes";
+import { formatDate } from "@/lib/utils/format-date";
 import { ROUTES } from "@/lib/utils/routes";
 import { BookHeroProgress } from "./BookHeroProgress";
 
@@ -17,9 +18,9 @@ const isGroup = (value: string): value is SubjectGroup =>
 
 function Fact({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-surface flex flex-col gap-1 px-4 py-3.5">
+    <div className="bg-surface flex min-w-0 flex-col gap-1 px-3.5 py-3 sm:px-4 sm:py-3.5">
       <dt className="text-faint text-[0.8125rem]">{label}</dt>
-      <dd className="text-[0.9375rem] font-semibold">{value}</dd>
+      <dd className="text-[0.9375rem] font-semibold break-words">{value}</dd>
     </div>
   );
 }
@@ -45,13 +46,7 @@ export function BookHero({
   const group = isGroup(book.subject_group) ? book.subject_group : null;
   const language = (book.language ?? "uz") as "uz" | "ru" | "en";
   const languageLabel = ts.has(`language.${language}`) ? ts(`language.${language}`) : null;
-  const added = book.published_at
-    ? new Date(book.published_at).toLocaleDateString(locale, {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : null;
+  const added = book.published_at ? formatDate(book.published_at, locale, "date") : null;
 
   return (
     <section className="bg-hero-bg border-border border-b">
@@ -94,7 +89,11 @@ export function BookHero({
               </p>
             </div>
 
-            <dl className="bg-border border-border grid max-w-[38.75rem] grid-cols-[repeat(auto-fill,minmax(11.25rem,1fr))] gap-px overflow-hidden rounded-2xl border">
+            {/* Mobilda 2 ustun (6 fakt — 3×2; toq bo'lsa oxirgisi to'liq qator), kengroq ekranda sig'ganicha. */}
+            <dl
+              data-testid="book-facts"
+              className="bg-border border-border grid max-w-[38.75rem] grid-cols-2 gap-px overflow-hidden rounded-2xl border sm:grid-cols-[repeat(auto-fill,minmax(11.25rem,1fr))] max-sm:[&>*:last-child:nth-child(odd)]:col-span-2"
+            >
               <Fact
                 label={t("passport.grade")}
                 value={t("passport.gradeValue", { grade: book.grade })}

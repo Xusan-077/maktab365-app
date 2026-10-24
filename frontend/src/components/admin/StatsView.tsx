@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { BarChart3 } from "lucide-react";
-import { useFormatter, useLocale, useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Chip } from "@/components/ui/Chip";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -14,6 +14,7 @@ import type { AdminStats } from "@/lib/admin/types";
 import type { Locale } from "@/lib/i18n/config";
 import { getLocalized } from "@/lib/i18n/localized";
 import { Link } from "@/lib/i18n/navigation";
+import { formatDate } from "@/lib/utils/format-date";
 import { QueryError } from "./QueryError";
 
 const PERIODS = [7, 30] as const;
@@ -39,7 +40,7 @@ function Totals({ data }: { data: AdminStats }) {
 /** Kunlik ochilishlar: ustunlar balandligi eng katta qiymatga nisbatan (jadval ekran o'qigichlar uchun). */
 function DailyBars({ data }: { data: AdminStats }) {
   const t = useTranslations("admin.stats");
-  const format = useFormatter();
+  const locale = useLocale() as Locale;
   const max = Math.max(1, ...data.daily.map((day) => day.opens));
   return (
     <section aria-labelledby="stats-daily" className="flex flex-col gap-3">
@@ -54,7 +55,7 @@ function DailyBars({ data }: { data: AdminStats }) {
         {data.daily.map((day) => (
           <div
             key={day.day}
-            title={`${format.dateTime(new Date(day.day), { day: "numeric", month: "short" })}: ${day.opens}`}
+            title={`${formatDate(day.day, locale, "dayMonth")}: ${day.opens}`}
             className="bg-primary-600 min-h-px flex-1 rounded-t"
             style={{ height: `${(day.opens / max) * 100}%` }}
           />

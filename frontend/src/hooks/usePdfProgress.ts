@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useSyncExternalStore } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { retryUnlessClientError } from "@/lib/api/retry";
 import { mergePdfPosition, resumePage, type PdfPosition } from "@/lib/pdf/progress";
 import type { PdfProgress } from "@/lib/pdf-books/api";
 import { invalidateReadingData } from "@/lib/pdf-books/cache";
@@ -23,14 +24,25 @@ const isHydrated = () => usePdfGuestStore.persist.hasHydrated();
  *
  * Yozuv avval keshda ko'rinadi (optimistic), so'ng yozuvlar navbati orqali yuboriladi: internet
  * yo'q/sekin bo'lsa navbatda qoladi va qayta uriniladi; doimiy rad etilsa kesh qaytariladi.
+ * Server xatosi o'qishni to'xtatmaydi: pozitsiya so'rovi 4xx'da qayta urinmaydi, sahifa 1-betdan.
+ *
+ * `track: false` (admin oldindan ko'rishi): hech narsa so'ralmaydi, yozilmaydi va yuborilmaydi.
  */
-export function usePdfProgress(bookId: string, pageCount: number) {
+export function usePdfProgress(
+  bookId: string,
+  pageCount: number,
+  { track = true }: { track?: boolean } = {},
+) {
   const { status, signedIn } = useAuth();
   const queue = useWriteQueue();
   const queryClient = useQueryClient();
   const hydrated = useSyncExternalStore(subscribeHydration, isHydrated, () => false);
   const guest = usePdfGuestStore((state) => state.positions[bookId]);
-  const account = useQuery({ ...pdfQueries.progress(bookId), enabled: signedIn });
+  const account = useQuery({
+    ...pdfQueries.progress(bookId),
+    enabled: signedIn && track,
+    retry: retryUnlessClientError,
+  });
 
   useEffect(() => {
     void usePdfGuestStore.persist.rehydrate();
@@ -66,7 +78,7 @@ export function usePdfProgress(bookId: string, pageCount: number) {
   // Kitob ochilishi serverga bildiriladi (idempotent): sahifa o'zgarmasa ham "oxirgi ochilganlar"da chiqadi.
   const opened = useRef<string | null>(null);
   useEffect(() => {
-    if (!queue || opened.current === bookId) return;
+    if (!track || !queue || opened.current === bookId) return;
     opened.current = bookId;
     queue.run({ kind: "event", bookId, event: "book_opened" }).then(
       (outcome) => {
@@ -74,13 +86,13 @@ export function usePdfProgress(bookId: string, pageCount: number) {
       },
       () => undefined,
     );
-  }, [queue, bookId, queryClient]);
+  }, [track, queue, bookId, queryClient]);
 
   const accountPosition: PdfPosition | null = account.data
     ? { page: account.data.last_page, updatedAt: account.data.updated_at }
     : null;
-  const position = mergePdfPosition(accountPosition, guest);
-  const ready = status !== "loading" && hydrated && (!signedIn || !account.isPending);
+  const position = track ? mergePdfPosition(accountPosition, guest) : null;
+  const ready = !track || (status !== "loading" && hydrated && (!signedIn || !account.isPending));
 
   const pending = useRef<number | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -97,6 +109,7 @@ export function usePdfProgress(bookId: string, pageCount: number) {
   /** Joriy sahifani eslab qoladi. */
   const record = useCallback(
     (page: number) => {
+      if (!track) return;
       if (!signedIn) {
         usePdfGuestStore.getState().record(bookId, page);
         return;
@@ -105,7 +118,7 @@ export function usePdfProgress(bookId: string, pageCount: number) {
       clearTimeout(timer.current);
       timer.current = setTimeout(flush, SAVE_DEBOUNCE_MS);
     },
-    [signedIn, bookId, flush],
+    [track, signedIn, bookId, flush],
   );
 
   // Sahifadan chiqishda yoki yopishda kutayotgan yozuv yuboriladi.

@@ -54,8 +54,9 @@ class TestWrite:
         )
 
     def test_order_follows_list_order(self, admin, book):
-        flipped = [TOC[1], TOC[0]]
-        body = patch(admin, book["id"], {"chapters": flipped}).json()
+        # Bir betda bir nechta bo'lim bo'lishi mumkin: tartib ro'yxat tartibi.
+        rows = [{"title": "Algebra", "page": 1}, {"title": "Kirish", "page": 1}]
+        body = patch(admin, book["id"], {"chapters": rows}).json()
         assert [c["title"] for c in body["chapters"]] == ["Algebra", "Kirish"]
 
     def test_replace_and_clear(self, admin, book):
@@ -140,6 +141,30 @@ class TestValidation:
             "chapter_page_invalid",
             "chapter_title_required",
         ]
+
+    def test_pages_must_not_decrease(self, admin, book):
+        # 3 → 1: keyingi qator oldingisidan kichik.
+        rows = [{"title": "A", "page": 3}, {"title": "B", "page": 1}]
+        assert self.codes(admin, book, rows) == ["chapter_page_order"]
+
+    def test_order_is_checked_in_document_order_across_levels(self, admin, book):
+        # Bob (2) → uning bo'limi (1): ichki bo'lim bobdan oldin bo'lmasin.
+        child_before = [{"title": "I bob", "page": 2, "children": [{"title": "1-§", "page": 1}]}]
+        assert self.codes(admin, book, child_before) == ["chapter_page_order"]
+        # Bo'lim (3) → keyingi bob (2).
+        next_before = [
+            {"title": "I bob", "page": 1, "children": [{"title": "1-§", "page": 3}]},
+            {"title": "II bob", "page": 2},
+        ]
+        assert self.codes(admin, book, next_before) == ["chapter_page_order"]
+
+    def test_equal_and_increasing_pages_are_valid(self, admin, book):
+        rows = [
+            {"title": "I bob", "page": 1, "children": [{"title": "1-§", "page": 1}]},
+            {"title": "2-§", "page": 2},
+            {"title": "II bob", "page": 3, "children": [{"title": "3-§", "page": 3}]},
+        ]
+        assert patch(admin, book["id"], {"chapters": rows}).status_code == 200
 
     def test_invalid_patch_changes_nothing(self, admin, book):
         patch(admin, book["id"], {"chapters": TOC})

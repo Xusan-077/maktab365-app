@@ -24,12 +24,21 @@ function PdfReaderBySlug({ slug, backHref }: { slug: string; backHref?: string }
 
 /** Server sahifa uchun client chegarasi: `useSearchParams` Suspense talab qiladi. */
 export function PdfReaderLoader(
-  props: ({ bookId: string } | { slug: string }) & { backHref?: string },
+  props: ({ bookId: string } | { slug: string }) & {
+    backHref?: string;
+    preview?: boolean;
+    cover?: string | null;
+  },
 ) {
   return (
     <Suspense fallback={<Skeleton className="h-96" />}>
       {"bookId" in props ? (
-        <PdfReader bookId={props.bookId} backHref={props.backHref} />
+        <PdfReader
+          bookId={props.bookId}
+          backHref={props.backHref}
+          preview={props.preview}
+          cover={props.cover}
+        />
       ) : (
         <PdfReaderBySlug slug={props.slug} backHref={props.backHref} />
       )}

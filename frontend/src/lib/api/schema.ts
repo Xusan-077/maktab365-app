@@ -587,6 +587,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/pdf-books/{id}/ocr/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * OCR so'rash (matn qatlami yo'q kitob): holat `ocr_status` da. Xatolar: `ocr_disabled` (503), `no_file`, `ocr_not_needed`, `ocr_in_progress` (409)
+         * @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin.
+         */
+        post: operations["admin_pdf_books_ocr"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/pdf-books/{id}/chapters/{chapter_id}/slides/": {
         parameters: {
             query?: never;
@@ -762,6 +782,64 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/support/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Editor va admin: ko'radi, holat va izohni o'zgartiradi (audit bilan). O'chirish yo'q. */
+        get: operations["admin_support_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/support/summary/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Yangi xabarlar soni (sidebar) va xabari bor kitoblar (filtr)
+         * @description Editor va admin: ko'radi, holat va izohni o'zgartiradi (audit bilan). O'chirish yo'q.
+         */
+        get: operations["admin_support_summary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/support/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Editor va admin: ko'radi, holat va izohni o'zgartiradi (audit bilan). O'chirish yo'q. */
+        get: operations["admin_support_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Holat (`new` — yangi, `in_progress` — ko'rildi, `resolved` — hal qilindi, `spam`) va izoh
+         * @description Editor va admin: ko'radi, holat va izohni o'zgartiradi (audit bilan). O'chirish yo'q.
+         */
+        patch: operations["admin_support_update"];
         trace?: never;
     };
     "/api/v1/bot/books/": {
@@ -1656,6 +1734,15 @@ export interface components {
          * @enum {string}
          */
         ModeEnum: "direct" | "proxy";
+        /**
+         * @description * `none` - Not requested
+         *     * `queued` - Queued
+         *     * `processing` - Processing
+         *     * `done` - Done
+         *     * `failed` - Failed
+         * @enum {string}
+         */
+        OcrStatusEnum: "none" | "queued" | "processing" | "done" | "failed";
         Ok: {
             ok: boolean;
         };
@@ -1728,6 +1815,21 @@ export interface components {
              */
             previous?: string | null;
             results: components["schemas"]["SubjectAdmin"][];
+        };
+        PaginatedSupportAdminList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["SupportAdmin"][];
         };
         PaginatedSupportMessageList: {
             /** @example 123 */
@@ -1810,6 +1912,11 @@ export interface components {
             group?: components["schemas"]["GroupEnum"] | components["schemas"]["BlankEnum"];
             grades?: number[];
         };
+        /** @description Admin "Xabarlar": o'qish + `status` va `staff_note` ni o'zgartirish. */
+        PatchedSupportAdminRequest: {
+            status?: components["schemas"]["SupportStatusEnum"];
+            staff_note?: string;
+        };
         PatchedUserAdminUpdateRequest: {
             display_name?: string;
             role?: components["schemas"]["RoleEnum"];
@@ -1862,6 +1969,14 @@ export interface components {
             readonly published_at: string | null;
             readonly upload_pending: boolean;
             readonly allowed_transitions: string[];
+            /** @description Matn qatlami (kitob ichidan qidiruv); null — hali tekshirilmagan */
+            readonly has_text_layer: boolean | null;
+            readonly ocr_status: components["schemas"]["OcrStatusEnum"];
+            readonly ocr_error: string;
+            /** Format: date-time */
+            readonly ocr_updated_at: string | null;
+            /** @description OCR serverda yoqilganmi (`OCR_ENABLED`) */
+            readonly ocr_available: boolean;
             /** Format: date-time */
             readonly created_at: string;
             /** Format: date-time */
@@ -1913,6 +2028,8 @@ export interface components {
              */
             cover_large: string | null;
             allow_download: boolean;
+            /** @description false — matn qatlami yo'q (skan), qidiruv ishlamaydi; null — noma'lum */
+            has_text_layer: boolean | null;
             chapters: components["schemas"]["PublicChapter"][];
         };
         PdfBookmark: {
@@ -2160,6 +2277,48 @@ export interface components {
             group?: components["schemas"]["GroupEnum"] | components["schemas"]["BlankEnum"];
             grades?: number[];
         };
+        /** @description Admin "Xabarlar": o'qish + `status` va `staff_note` ni o'zgartirish. */
+        SupportAdmin: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly kind: components["schemas"]["SupportKindEnum"];
+            readonly message: string;
+            status: components["schemas"]["SupportStatusEnum"];
+            staff_note?: string;
+            readonly name: string;
+            /** Format: email */
+            readonly email: string;
+            readonly user_email: string | null;
+            readonly pdf_book: components["schemas"]["SupportAdminBook"] | null;
+            readonly page: number | null;
+            /** Format: uri */
+            readonly page_url: string;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        SupportAdminBook: {
+            /** Format: uuid */
+            id: string;
+            slug: string;
+            grade: number;
+            title: unknown;
+        };
+        SupportAdminBookRequest: {
+            /** Format: uuid */
+            id: string;
+            slug: string;
+            grade: number;
+            title: unknown;
+        };
+        SupportBookCount: {
+            /** Format: uuid */
+            id: string;
+            title: unknown;
+            grade: number;
+            count: number;
+        };
         SupportCreateRequest: {
             /** @default  */
             name: string;
@@ -2170,6 +2329,9 @@ export interface components {
             page_url?: string;
             /** @default  */
             topic: string;
+            /** Format: uuid */
+            pdf_book?: string | null;
+            page?: number | null;
             /** @default  */
             website: string;
         };
@@ -2204,6 +2366,12 @@ export interface components {
          * @enum {string}
          */
         SupportStatusEnum: "new" | "in_progress" | "resolved" | "spam";
+        SupportSummary: {
+            /** @description Yangi (ko'rilmagan) xabarlar soni — sidebar badge */
+            new: number;
+            /** @description Xabari bor kitoblar (filtr uchun) */
+            books: components["schemas"]["SupportBookCount"][];
+        };
         TeacherDashboard: {
             continue: components["schemas"]["PdfLibraryItem"] | null;
             subjects: components["schemas"]["DashboardSubject"][];
@@ -3333,6 +3501,28 @@ export interface operations {
             };
         };
     };
+    admin_pdf_books_ocr: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this pdf book. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PdfBookAdmin"];
+                };
+            };
+        };
+    };
     admin_pdf_books_slides_delete: {
         parameters: {
             query?: never;
@@ -3567,6 +3757,104 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PdfUploadPlan"];
+                };
+            };
+        };
+    };
+    admin_support_list: {
+        parameters: {
+            query?: {
+                kind?: "bug" | "content_error" | "question" | "suggestion";
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /** @description Kitob id */
+                pdf_book?: string;
+                /** @description Holat; berilmasa spam'dan boshqa hammasi */
+                status?: "in_progress" | "new" | "resolved" | "spam";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedSupportAdminList"];
+                };
+            };
+        };
+    };
+    admin_support_summary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SupportSummary"];
+                };
+            };
+        };
+    };
+    admin_support_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this support message. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SupportAdmin"];
+                };
+            };
+        };
+    };
+    admin_support_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this support message. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedSupportAdminRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedSupportAdminRequest"];
+                "multipart/form-data": components["schemas"]["PatchedSupportAdminRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SupportAdmin"];
                 };
             };
         };

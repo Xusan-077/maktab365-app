@@ -9,6 +9,7 @@ export const ADMIN_ROUTES = {
   subjects: `${ROUTES.admin}/fanlar`,
   stats: `${ROUTES.admin}/statistika`,
   users: `${ROUTES.admin}/foydalanuvchilar`,
+  messages: `${ROUTES.admin}/xabarlar`,
 } as const;
 
 export const adminPdfBookPath = (id: string) => `${ADMIN_ROUTES.pdfBooks}/${id}`;

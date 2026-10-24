@@ -25,6 +25,7 @@ const detail = (over: Partial<PdfBookDetail> = {}): PdfBookDetail => ({
   description: "",
   cover_large: null,
   allow_download: true,
+  has_text_layer: true,
   chapters: [],
   ...over,
 });

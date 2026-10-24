@@ -314,7 +314,8 @@
     "settings": "Sozlamalar",
     "signOut": "Chiqish",
     "guestMerged": "Mehmon ma'lumotlari akkauntga qo'shildi",
-    "guestMergedHint": "Oxirgi sahifalar va saqlangan darsliklaringiz endi akkauntingizda."
+    "guestMergedHint": "Oxirgi sahifalar va saqlangan darsliklaringiz endi akkauntingizda.",
+    "adminPanel": "Boshqaruv paneli"
   },
   "onboarding": {
     "title": "darslik365'dan qanday foydalanasiz?",
@@ -640,7 +641,8 @@
       "messageTooShort": "Xabar kamida {min} ta belgidan iborat bo'lsin",
       "messageTooLong": "Xabar {max} ta belgidan oshmasin",
       "throttled": "Juda ko'p xabar yuborildi. Birozdan keyin qayta urinib ko'ring.",
-      "sendFailed": "Yuborib bo'lmadi. Keyinroq qayta urinib ko'ring."
+      "sendFailed": "Yuborib bo'lmadi. Keyinroq qayta urinib ko'ring.",
+      "messageMeaningless": "Xabarni aniqroq yozing: nima va qayerda xato ekanini bir-ikki gap bilan tushuntiring."
     },
     "statuses": {
       "new": "Yangi",
@@ -669,7 +671,10 @@
       "users": "Foydalanuvchilar",
       "signOut": "Chiqish",
       "subjects": "Fanlar",
-      "stats": "Statistika"
+      "stats": "Statistika",
+      "messages": "Xabarlar",
+      "openSite": "Saytni ochish",
+      "newMessages": "{count} ta yangi xabar"
     },
     "roles": {
       "student": "O'quvchi",
@@ -731,8 +736,9 @@
       "shareValue": "{percent}% nashr qilingan",
       "openBooks": "Kitoblar ro'yxatini ochish",
       "openSubjects": "Fanlar ro'yxatini ochish",
-      "openMessages": "Murojaatlarni ko'rish",
-      "viewAllActivity": "Hamma kitoblar"
+      "openMessages": "Xabarlarni ochish",
+      "viewAllActivity": "Hamma kitoblar",
+      "allMessages": "Hammasi →"
     },
     "audit": {
       "actions": {
@@ -744,7 +750,8 @@
         "upload": "yukladi:",
         "block": "blokladi:",
         "unblock": "blokdan chiqardi:",
-        "role_change": "rolini o'zgartirdi:"
+        "role_change": "rolini o'zgartirdi:",
+        "ocr_request": "OCR so'radi:"
       },
       "targets": {
         "book": "kitob",
@@ -753,7 +760,8 @@
         "subject": "fan",
         "file": "fayl",
         "user": "foydalanuvchi",
-        "pdf_book": "PDF kitob"
+        "pdf_book": "PDF kitob",
+        "support_message": "xabar"
       }
     },
     "books": {
@@ -891,7 +899,10 @@
         "last_admin": "Oxirgi faol adminni o'chirib, bloklab yoki rolini tushirib bo'lmaydi.",
         "role_forbidden": "Bu rolni berishga ruxsatingiz yo'q.",
         "storage_error": "Fayllar saqlashdan o'chirilmadi, kitob saqlanib qoldi. Birozdan keyin qayta urinib ko'ring.",
-        "grade_has_books": "Fanning kitobi bor sinfni olib tashlab bo'lmaydi. Avval kitoblarni boshqa fanga ko'chiring yoki o'chiring."
+        "grade_has_books": "Fanning kitobi bor sinfni olib tashlab bo'lmaydi. Avval kitoblarni boshqa fanga ko'chiring yoki o'chiring.",
+        "ocr_disabled": "OCR serverda hali yoqilmagan.",
+        "ocr_not_needed": "Bu kitobda matn qatlami bor — OCR kerak emas.",
+        "ocr_in_progress": "OCR allaqachon navbatda yoki bajarilmoqda."
       },
       "fields": {
         "invalid": "Noto'g'ri qiymat",
@@ -913,7 +924,8 @@
         "grades_required": "Kamida bitta sinfni tanlang",
         "grades_invalid": "Sinflar 1 dan 11 gacha bo'lishi kerak",
         "grades_duplicate": "Sinflar takrorlanmasin",
-        "subject_not_in_grade": "Bu fan tanlangan sinfda o'tilmaydi"
+        "subject_not_in_grade": "Bu fan tanlangan sinfda o'tilmaydi",
+        "chapter_page_order": "Mundarijada bet raqamlari tartibsiz: keyingi qator oldingisidan kichik bo'lmasin"
       },
       "gradeHasBooks": "Bu fanning {grade}-sinfda {count} ta kitobi bor, avval kitoblarni boshqa fanga ko'chiring yoki o'chiring."
     },
@@ -1113,16 +1125,21 @@
         "titleRequired": "Sarlavhani yozing",
         "titleTooLong": "Sarlavha juda uzun (200 belgigacha)",
         "pageInvalid": "Bet raqami 1 yoki undan katta butun son bo'lsin",
-        "pageExceeds": "Bet raqami PDF betlaridan oshmasin ({pages} bet)"
+        "pageExceeds": "Bet raqami PDF betlaridan oshmasin ({pages} bet)",
+        "pageOrder": "Bet raqami oldingi qatordan kichik bo'lmasin"
       },
       "bulk": {
         "title": "Ommaviy kiritish",
-        "hint": "Har qatorga bittadan: «1. Kirish ........ 5». Ichki bo'lim uchun qatorni chekinish (bo'shliq yoki Tab) bilan yoki «1.2» raqamlash bilan yozing.",
+        "hint": "Har qatorga bittadan: «1. Kirish ........ 5». «I bob …» bilan boshlangan qatorlar — bob, keyingilari shu bob ichidagi bo'lim. Boblar bo'lmasa ichki bo'limni chekinish (bo'shliq yoki Tab) yoki «1.2» raqamlash bilan yozing.",
         "placeholder": "1. Kirish ........ 5\n  Maqsad va vazifalar ... 6\n2. Algebra ........ 12",
         "apply": "Jadvalga to'ldirish",
         "added": "{count} qator qo'shildi",
         "skipped": "{count} qator o'qilmadi (oxirida bet raqami yo'q)"
-      }
+      },
+      "indent": "{n}-qatorni oldingi bob ichiga bo'lim qilish",
+      "indentHint": "Bo'limga aylantirish (oldingi bob ichiga)",
+      "outdent": "{n}-qatorni bob qilish",
+      "outdentHint": "Bobga aylantirish"
     },
     "slides": {
       "label": "Prezentatsiya",
@@ -1212,6 +1229,57 @@
       "createAll": "Hammasini yaratish ({count})",
       "stop": "To'xtatish",
       "toList": "Kitoblar ro'yxatiga"
+    },
+    "ocr": {
+      "title": "Matn qatlami va OCR",
+      "textLayer": {
+        "yes": "Matn qatlami bor — kitob ichidan qidiruv ishlaydi.",
+        "no": "Matn qatlami yo'q (skanerlangan kitob) — o'quvchilarda qidiruv tugmasi ko'rinmaydi.",
+        "unknown": "Matn qatlami hali tekshirilmagan: fayl yuklangach bir necha daqiqada aniqlanadi."
+      },
+      "status": {
+        "queued": "Navbatda",
+        "processing": "OCR qilinmoqda…",
+        "done": "OCR tayyor",
+        "failed": "OCR muvaffaqiyatsiz"
+      },
+      "errors": {
+        "ocr_not_implemented": "OCR hali ishga tushirilmagan (tayyorlanmoqda).",
+        "ocr_failed": "OCR jarayonida xato yuz berdi.",
+        "no_file": "Kitobda PDF fayl yo'q.",
+        "generic": "Noma'lum xato."
+      },
+      "action": "OCR qilish",
+      "retry": "Qayta OCR qilish",
+      "unavailable": "OCR serverda hali yoqilmagan.",
+      "queued": "OCR navbatga qo'yildi"
+    },
+    "messages": {
+      "title": "Xabarlar",
+      "description": "Foydalanuvchilar yuborgan xabarlar: darslikdagi xatolar, savollar va takliflar.",
+      "filters": {
+        "status": "Holat",
+        "kind": "Tur",
+        "bookLabel": "Kitob",
+        "allStatuses": "Barcha holatlar (spam'siz)",
+        "allKinds": "Barcha turlar",
+        "allBooks": "Barcha kitoblar",
+        "book": "{title}, {grade}-sinf · {count}"
+      },
+      "statuses": {
+        "new": "Yangi",
+        "in_progress": "Ko'rildi",
+        "resolved": "Hal qilindi",
+        "spam": "Spam"
+      },
+      "bookAtPage": "{title}, {grade}-sinf · {page}-bet",
+      "bookOnly": "{title}, {grade}-sinf",
+      "statusLabel": "Holat",
+      "noteLabel": "Xodim izohi",
+      "notePlaceholder": "Ichki izoh (foydalanuvchiga ko'rinmaydi)",
+      "saveNote": "Izohni saqlash",
+      "noteSaved": "Izoh saqlandi",
+      "empty": "Bu filtr bo'yicha xabar yo'q."
     }
   },
   "pdfBooks": {
@@ -1271,7 +1339,9 @@
         "toc": "Mundarija",
         "marks": "Belgilar",
         "about": "Tavsif"
-      }
+      },
+      "zoom": "Zoom",
+      "more": "Yana"
     },
     "bookmark": {
       "save": "Saqlash",
@@ -1280,7 +1350,12 @@
     "toc": {
       "button": "Mundarija",
       "title": "Mundarija",
-      "page": "{page}-bet"
+      "page": "{page}-bet",
+      "searchLabel": "Mundarijadan qidirish",
+      "searchPlaceholder": "Mundarijadan qidirish…",
+      "searchEmpty": "«{query}» bo'yicha bo'lim topilmadi",
+      "expand": "«{title}» bo'limlarini ochish",
+      "collapse": "«{title}» bo'limlarini yopish"
     },
     "description": {
       "more": "Batafsil",
@@ -1438,7 +1513,8 @@
       "reportText": "Yomon skan yoki yetishmayotgan bet haqida xabar bering.",
       "sameGrade": "{grade}-sinf uchun boshqa darsliklar",
       "all": "Barchasi",
-      "shareMore": "Boshqa ilovalar…"
+      "shareMore": "Boshqa ilovalar…",
+      "quickActions": "Tezkor harakatlar"
     },
     "controls": {
       "label": "O'qish sozlamalari",
@@ -1451,14 +1527,14 @@
       },
       "fitPage": "Butun sahifani sig'dirish",
       "fitWidth": "Kenglikka moslash",
-      "zoomIn": "Kattalashtirish (2×)",
-      "zoomOut": "Kichraytirish (1×)",
       "fullscreen": "To'liq ekran",
       "exitFullscreen": "To'liq ekrandan chiqish",
       "shortcuts": "Klaviatura yorliqlari",
       "highlightOn": "Belgilash rejimini yoqish (sahifada sudrab belgilang)",
       "highlightOff": "Belgilash rejimini o'chirish",
-      "annotations": "Belgilar va eslatmalar ({count})"
+      "annotations": "Belgilar va eslatmalar ({count})",
+      "zoomLevel": "Kattalashtirish: {level}",
+      "more": "Boshqa asboblar"
     },
     "shortcuts": {
       "title": "Klaviatura yorliqlari",
@@ -1702,8 +1778,8 @@
       "grade": "{grade}-sinf"
     },
     "bookCard": {
-      "page": "{page}-bet",
-      "read": "O'qilgan"
+      "read": "O'qilgan",
+      "progress": "{page}/{total} · {percent}%"
     },
     "groupName": {
       "exact": "Aniq fanlar",
@@ -1718,13 +1794,6 @@
       "language": "Ti",
       "social": "I",
       "arts": "S"
-    },
-    "groupSample": {
-      "exact": "Matematika, Algebra, Geometriya, Informatika",
-      "natural": "Fizika, Kimyo, Biologiya, Geografiya",
-      "language": "Ona tili, Adabiyot, Rus tili, Chet tili",
-      "social": "O'zbekiston tarixi, Jahon tarixi, Huquq",
-      "arts": "Musiqa, Tasviriy san'at, Texnologiya"
     },
     "pagination": {
       "label": "Sahifalar",
@@ -1762,7 +1831,11 @@
       "uz-Cyrl": "ЎЗ",
       "ru": "RU",
       "en": "EN"
-    }
+    },
+    "bookCount": "{count} ta kitob",
+    "comingSoon": "Tez orada",
+    "subjectsMore": "{list} va yana {count} ta",
+    "adminPanel": "Boshqaruv paneli"
   },
   "legal": {
     "terms": {

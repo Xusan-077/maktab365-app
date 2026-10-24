@@ -11,10 +11,17 @@ import { routing } from "@/lib/i18n/routing";
 export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Promise<Metadata> {
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
-  const t = await getTranslations({ locale, namespace: "admin" });
+  const [t, brand] = await Promise.all([
+    getTranslations({ locale, namespace: "admin" }),
+    getTranslations({ locale, namespace: "brand" }),
+  ]);
+  // Tab: "Boshqaruv paneli · darslik365", ichki sahifa — "Kitoblar · Boshqaruv paneli · darslik365".
   // Admin panel qidiruv tizimlariga kerak emas
   return {
-    title: { default: t("brand"), template: `%s — ${t("brand")}` },
+    title: {
+      default: `${t("brand")} · ${brand("name")}`,
+      template: `%s · ${t("brand")} · ${brand("name")}`,
+    },
     robots: { index: false, follow: false },
   };
 }

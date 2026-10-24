@@ -39,15 +39,15 @@ describe("createSupportSchema (mehmon)", () => {
   });
 
   it("xabar uzunligi chegaralari (bo'sh joylar hisobga olinmaydi)", async () => {
-    const short = "x".repeat(SUPPORT_MESSAGE_MIN - 1);
+    // Haqiqiy so'zlar (ma'nosiz matn tekshiruvi alohida — support-quality.test.ts).
+    const words = (length: number) => "Kitobda xato bor ".repeat(200).slice(0, length);
+    const short = words(SUPPORT_MESSAGE_MIN - 1).trim();
     expect(await errors(schema, { ...valid, message: `   ${short}   ` })).toEqual([
       "messageTooShort",
     ]);
-    expect(await errors(schema, { ...valid, message: "x".repeat(SUPPORT_MESSAGE_MIN) })).toEqual(
-      [],
-    );
+    expect(await errors(schema, { ...valid, message: words(SUPPORT_MESSAGE_MIN + 2) })).toEqual([]);
     expect(
-      await errors(schema, { ...valid, message: "x".repeat(SUPPORT_MESSAGE_MAX + 1) }),
+      await errors(schema, { ...valid, message: `${words(SUPPORT_MESSAGE_MAX)}xato bor` }),
     ).toEqual(["messageTooLong"]);
   });
 });

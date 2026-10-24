@@ -210,7 +210,10 @@ describe("PdfBookEditView: tavsif va mundarija", () => {
   it("fayl yuklanmagan kitobda bet chegarasi tekshirilmaydi", async () => {
     setup({ has_file: false, page_count: 0 });
     const root = await form();
-    fireEvent.change(within(root).getAllByTestId("toc-page")[0], { target: { value: "500" } });
+    // Oxirgi qator: bet tartibi buzilmaydi, faqat yuqori chegara (yo'q) tekshiriladi.
+    fireEvent.change(within(root).getAllByTestId("toc-page").at(-1)!, {
+      target: { value: "500" },
+    });
     fireEvent.click(save(root));
     await waitFor(() => expect(api.updatePdfBook).toHaveBeenCalled());
   });

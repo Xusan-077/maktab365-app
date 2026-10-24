@@ -86,7 +86,10 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LANGUAGE_CODE = "uz"
-TIME_ZONE = "Asia/Tashkent"
+# Vaqt bazada va API'da UTC (DRF: `2026-10-24T18:03:10Z`); foydalanuvchiga ko'rsatish — frontend
+# `formatDate` (Asia/Tashkent). Mahalliy kun (kunlik sanagichlar) — `LOCAL_TIME_ZONE`.
+TIME_ZONE = "UTC"
+LOCAL_TIME_ZONE = "Asia/Tashkent"
 USE_I18N = True
 USE_TZ = True
 
@@ -150,13 +153,16 @@ PDF_BOOK_MAX_BYTES = int(env.str("PDF_BOOK_MAX_BYTES", default="").strip() or 0)
 PDF_UPLOAD_PART_BYTES = env.int("PDF_UPLOAD_PART_BYTES", default=8 * 1024 * 1024)
 # Imzolangan o'qish/yuklash URL'lari muddati (soniya); 10–15 daqiqa tavsiya etiladi.
 PDF_SIGNED_URL_SECONDS = env.int("PDF_SIGNED_URL_SECONDS", default=15 * 60)
+# OCR (matn qatlami yo'q kitoblar, `apps/content/ocr.py`): hozircha skelet — yoqilmaguncha admin
+# tugmasi o'chiq. Yoqilganda alohida `ocr` navbatini o'qiydigan worker kerak (ocrmypdf + tesseract).
+OCR_ENABLED = env.bool("OCR_ENABLED", default=False)
+OCR_LANGUAGES = env("OCR_LANGUAGES", default="uzb+rus")  # tesseract: uzb, uzb_cyrl, rus
 # Admin yuklash endpointlari (init/upload/complete): foydalanuvchi bo'yicha.
 PDF_UPLOAD_THROTTLE_RATE = env("PDF_UPLOAD_THROTTLE_RATE", default="60/hour")
 
 # --- Ochiq kontent API ---
-# true bo'lsa draft/reviewed mavzular ochiq API'da `unverified: true` bilan chiqadi. Default false
-# (faqat published); dev'da `dev.py` uni yoqadi, prod'da faqat env bilan ongli ravishda.
-SHOW_DRAFTS_PUBLICLY = env.bool("SHOW_DRAFTS_PUBLICLY", default=False)
+# Ochiq ro'yxatlar doim faqat nashr qilingan kitoblar (`PdfBook.objects.published()`); draft'ni
+# ochiq ko'rsatish sozlamasi yo'q (avvalgi `SHOW_DRAFTS_PUBLICLY` olib tashlangan).
 CONTENT_CACHE_MAX_AGE = env.int("CONTENT_CACHE_MAX_AGE", default=60)
 # Telegram bot API (`/api/v1/bot/books/`): bo'sh bo'lsa o'chiq (404); sarlavha `X-Bot-Token`.
 BOT_API_TOKEN = env("BOT_API_TOKEN", default="")
@@ -178,9 +184,12 @@ REST_FRAMEWORK = {
         "user": "240/min",
         # Kirish/ro'yxatdan o'tish/parol tiklash: IP va email bo'yicha alohida.
         "auth": env("AUTH_THROTTLE_RATE", default="10/min"),  # e2e uchun env bilan oshiriladi
-        "auth_email": env("AUTH_EMAIL_THROTTLE_RATE", default="5/min"),  # e2e uchun env bilan oshiriladi
+        # e2e uchun env bilan oshiriladi
+        "auth_email": env("AUTH_EMAIL_THROTTLE_RATE", default="5/min"),
         # Yordam murojaatlari: IP bo'yicha soatiga 5 ta (e2e uchun env bilan oshiriladi).
         "support": env("SUPPORT_THROTTLE_RATE", default="5/hour"),
+        # Ketma-ket yuborish (bir daqiqada 2 tadan ko'p emas); e2e uchun env bilan oshiriladi.
+        "support_burst": env("SUPPORT_BURST_THROTTLE_RATE", default="2/min"),
         "pdf_upload": PDF_UPLOAD_THROTTLE_RATE,
         "stats": env("STATS_THROTTLE_RATE", default="600/hour"),
     },
@@ -275,6 +284,8 @@ CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default=REDIS_URL)
 # Worker'siz lokal ishga tushirish (va e2e) uchun: CELERY_TASK_ALWAYS_EAGER=true
 CELERY_TASK_ALWAYS_EAGER = env.bool("CELERY_TASK_ALWAYS_EAGER", default=False)
 CELERY_TASK_TIME_LIMIT = 60 * 5
+# OCR uzoq va og'ir: alohida navbat (`celery -A config worker -Q ocr`), asosiy worker bo'shroq.
+CELERY_TASK_ROUTES = {"apps.content.tasks.ocr_pdf_book": {"queue": "ocr"}}
 
 # --- Sentry ---
 SENTRY_DSN = env("SENTRY_DSN", default="")

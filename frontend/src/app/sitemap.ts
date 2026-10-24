@@ -31,11 +31,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: ROUTES.help, priority: 0.3 },
     // Sinf sahifasi yo'q — kanonik manzil katalog filtri (`/darsliklar?sinf=N`).
     ...GRADES.map((grade) => ({ path: gradePath(grade), priority: 0.8 })),
-    ...books.map((book) => ({
-      path: pdfBookPath(book),
-      lastModified: book.published_at ?? undefined,
-      priority: 0.7,
-    })),
+    // Backend ro'yxati faqat nashr qilinganlarni beradi; yashirin kitob baribir kirmasin.
+    ...books
+      .filter((book) => !book.unverified)
+      .map((book) => ({
+        path: pdfBookPath(book),
+        lastModified: book.published_at ?? undefined,
+        priority: 0.7,
+      })),
   ];
   return entries.flatMap(localized);
 }

@@ -12,6 +12,7 @@ import math
 import re
 import tempfile
 import uuid
+from contextlib import contextmanager
 from dataclasses import dataclass
 from urllib.parse import quote, urlencode
 
@@ -180,19 +181,39 @@ def _pages_of(handle) -> int:
     return pages
 
 
-def count_pages(key: str) -> int:
-    """Sahifalar soni (pypdf). Shifrlangan/buzuq PDF rad etiladi.
-
-    Fayl RAM'ga to'liq o'qilmaydi: S3'dan bo'laklab vaqtinchalik faylga oqiladi (u `with` tugashi
-    bilan, xatoda ham, o'chadi); lokal saqlashda fayl joyida ochiladi (nusxa kerak emas).
-    """
+@contextmanager
+def opened(key: str):
+    """Saqlangan PDF'ni o'qish uchun ochadi (`with`). Fayl RAM'ga to'liq o'qilmaydi: S3'dan
+    bo'laklab vaqtinchalik faylga oqiladi (u `with` tugashi bilan, xatoda ham, o'chadi); lokal
+    saqlashda fayl joyida ochiladi (nusxa kerak emas)."""
     if not is_remote():
         with default_storage.open(key, "rb") as handle:
-            return _pages_of(handle)
+            yield handle
+        return
     with tempfile.TemporaryFile() as tmp:
         _client().download_fileobj(Bucket=_bucket(), Key=key, Fileobj=tmp)
         tmp.seek(0)
-        return _pages_of(tmp)
+        yield tmp
+
+
+def save_local_file(key: str, path: str) -> None:
+    """Diskdagi tayyor PDF'ni saqlashga `key` nomi bilan yozadi (S3: `upload_file`, bo'laklab)."""
+    if is_remote():
+        _client().upload_file(path, _bucket(), key, ExtraArgs={"ContentType": PDF_MIME})
+        return
+    from django.core.files import File
+
+    with open(path, "rb") as handle:
+        saved = default_storage.save(key, File(handle))
+    if saved != key:  # yangi uuid kalit band bo'lmaydi; bo'lsa — noto'g'ri holat
+        default_storage.delete(saved)
+        raise PdfError("storage_error", 502)
+
+
+def count_pages(key: str) -> int:
+    """Sahifalar soni (pypdf). Shifrlangan/buzuq PDF rad etiladi."""
+    with opened(key) as handle:
+        return _pages_of(handle)
 
 
 def _read_url(key: str, owner: str, local_path: str, filename: str | None = None) -> dict:
@@ -235,11 +256,16 @@ def download_filename(book) -> str:
     return f"{title} - {book.grade}-sinf - Darslik365.pdf"
 
 
+def download_key(book) -> str:
+    """Yuklab olinadigan fayl: watermark'li nusxa, tayyor bo'lmasa — asl fayl."""
+    return book.download_file.name if book.download_file else book.file.name
+
+
 def download_url(book) -> dict:
-    """Kitob PDF'ini yuklab olish URL'i (`attachment`, chiroyli nom)."""
+    """Kitob PDF'ini yuklab olish URL'i (`attachment`, chiroyli nom, watermark'li nusxa)."""
     name = download_filename(book)
     result = _read_url(
-        book.file.name, str(book.pk), f"/api/v1/pdf-books/{book.pk}/file/", filename=name
+        download_key(book), str(book.pk), f"/api/v1/pdf-books/{book.pk}/file/", filename=name
     )
     return {**result, "filename": name}
 
@@ -268,3 +294,9 @@ def check_key_token(token: str, book_id, key: str) -> bool:
 
 def check_file_token(token: str, book) -> bool:
     return check_key_token(token, book.pk, book.file.name)
+
+
+def file_token_key(token: str, book) -> str | None:
+    """Lokal `file/`: token berilgan fayl (o'qish yoki yuklab olish nusxasi) kaliti yoki None."""
+    keys = [book.file.name, book.download_file.name if book.download_file else ""]
+    return next((key for key in keys if key and check_key_token(token, book.pk, key)), None)

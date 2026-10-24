@@ -1,17 +1,13 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { readFraction } from "@/components/pdf/PdfBookCard";
-import { isBookRead, usePdfProgressMap } from "@/hooks/usePdfProgressMap";
+import { useBookResume } from "@/hooks/useBookResume";
 
 /** "Siz 45-betda to'xtagansiz · 28%" va progress chizig'i; o'qishni boshlamagan foydalanuvchiga ko'rinmaydi. */
 export function BookHeroProgress({ bookId, pageCount }: { bookId: string; pageCount: number }) {
   const t = useTranslations("pdfBooks.page");
-  const entry = usePdfProgressMap()[bookId];
-  const read = isBookRead(entry, pageCount);
-  const fraction = readFraction(entry?.page, pageCount, read);
+  const { entry, read, fraction, percent } = useBookResume(bookId, pageCount);
   if (!entry || fraction <= 0) return null;
-  const percent = Math.round(fraction * 100);
   const label = read ? t("progressDone") : t("progressAt", { page: entry.page });
 
   return (

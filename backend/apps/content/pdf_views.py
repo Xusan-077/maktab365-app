@@ -26,7 +26,7 @@ from .pdf_serializers import (
     PdfDownloadSerializer,
     PdfFileUrlSerializer,
 )
-from .pdf_services import visible_pdf_books
+from .pdf_services import public_pdf_books, visible_pdf_books
 from .serializers import SubjectSerializer
 from .views import GRADE_PARAM, SUBJECT_PARAM, PublicView, _int_param
 
@@ -54,7 +54,7 @@ class PdfBookListView(PublicView, generics.ListAPIView):
 
     def get_queryset(self):
         request = self.request
-        books = visible_pdf_books(request)
+        books = public_pdf_books()
         if (grade := _int_param(request, "grade")) is not None:
             books = books.filter(grade=grade)
         if subject := request.query_params.get("subject"):
@@ -130,7 +130,7 @@ class PdfBookSubjectListView(PublicView, APIView):
     )
     @public_cached
     def get(self, request):
-        visible = visible_pdf_books(request)
+        visible = public_pdf_books()
         grade = _int_param(request, "grade")
         if grade is not None:
             visible = visible.filter(grade=grade)
@@ -189,9 +189,7 @@ class PdfChapterSearchView(PublicView, APIView):
         if len(query) < 2:
             return Response([])
         rows = (
-            PdfBookChapter.objects.filter(
-                book__in=visible_pdf_books(request), title__icontains=query
-            )
+            PdfBookChapter.objects.filter(book__in=public_pdf_books(), title__icontains=query)
             .select_related("book")
             .order_by("book__grade", "book_id", "order")[:CHAPTER_HITS]
         )
@@ -343,11 +341,12 @@ class PdfFileView(APIView):
             raise NotFound()
         book = PdfBook.objects.filter(pk=pk).exclude(file="").first()
         token = request.query_params.get("token", "")
-        if book is None or not storage.check_file_token(token, book):
+        key = storage.file_token_key(token, book) if book is not None else None
+        if key is None:
             raise NotFound()
         return _serve_ranged(
             request,
-            book.file.name,
+            key,
             book.pk.hex,
             book.updated_at.timestamp(),
             filename=request.query_params.get("download", "")[:200],

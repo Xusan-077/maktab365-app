@@ -64,6 +64,14 @@ class PdfBookStatus(models.TextChoices):
     PUBLISHED = "published", "Published"
 
 
+class OcrStatus(models.TextChoices):
+    NONE = "none", "Not requested"
+    QUEUED = "queued", "Queued"
+    PROCESSING = "processing", "Processing"
+    DONE = "done", "Done"
+    FAILED = "failed", "Failed"
+
+
 class CoverMode(models.TextChoices):
     AUTO = "auto", "Generated"
     FIRST_PAGE = "first_page", "First page"
@@ -94,8 +102,16 @@ def unique_book_slug(grade: int, subject_slug: str, exclude_pk=None) -> str:
     return slug
 
 
+class PdfBookQuerySet(models.QuerySet):
+    def published(self):
+        """Ochiq saytda ko'rinadiganlar: nashr qilingan va fayli bor (yashirin/draft — yo'q)."""
+        return self.filter(status=PdfBookStatus.PUBLISHED).exclude(file="")
+
+
 class PdfBook(UUIDModel, TimeStampedModel):
     """PDF darslik: fayl obyekt saqlashda (DB'da emas), o'quvchi sahifa-sahifa o'qiydi."""
+
+    objects = PdfBookQuerySet.as_manager()
 
     title = LocalizedTextField()
     # URL manzili (`/darsliklar/<sinf>/<slug>`): yaratilganda beriladi va keyin o'zgarmaydi.
@@ -111,6 +127,9 @@ class PdfBook(UUIDModel, TimeStampedModel):
     subject = models.ForeignKey(Subject, on_delete=models.PROTECT, related_name="pdf_books")
     # Saqlash kaliti `pdf-books/<uuid>.pdf`: foydalanuvchi nomi hech qachon yo'lga tushmaydi.
     file = models.FileField(upload_to="pdf-books/", blank=True)
+    # Yuklab olish nusxasi: `file` + pastki o'ng burchakda kichik "darslik365.uz" (`pdf_stamp.py`,
+    # Celery `prepare_pdf_files`). Bo'sh bo'lsa (hali tayyorlanmagan) yuklab olish `file` ni beradi.
+    download_file = models.FileField(upload_to="pdf-books/", blank=True, editable=False)
     size_bytes = models.PositiveBigIntegerField(default=0)
     page_count = models.PositiveIntegerField(default=0)
     cover = models.FileField(upload_to="covers/", blank=True, storage=covers_storage)
@@ -133,6 +152,15 @@ class PdfBook(UUIDModel, TimeStampedModel):
     pending_file = models.CharField(max_length=1024, blank=True, editable=False)
     # R2/S3 UploadId 255 belgidan uzun bo'lishi mumkin: TextField (uzunlik chegarasi yo'q).
     pending_upload_id = models.TextField(blank=True, editable=False)
+    # Matn qatlami (kitob ichidan qidiruv): fayl yuklanganda Celery `prepare_pdf_files` yozadi;
+    # `None` — hali tekshirilmagan. Mavjud kitoblar: `manage.py detect_text_layers`.
+    has_text_layer = models.BooleanField(null=True, blank=True, editable=False)
+    # Matn qatlami yo'q kitobni OCR qilish (`ocr.py`); `ocr_error` — mashina o'qiydigan kod.
+    ocr_status = models.CharField(
+        max_length=16, choices=OcrStatus.choices, default=OcrStatus.NONE, editable=False
+    )
+    ocr_error = models.CharField(max_length=64, blank=True, editable=False)
+    ocr_updated_at = models.DateTimeField(null=True, blank=True, editable=False)
 
     class Meta:
         ordering = ["grade", "-created_at"]

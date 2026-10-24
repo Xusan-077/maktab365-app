@@ -8,6 +8,7 @@ import {
   upsertAnnotation,
   type Annotation,
 } from "@/lib/pdf/annotations";
+import { retryUnlessClientError } from "@/lib/api/retry";
 import { getPdfBooksApi } from "@/lib/pdf-books/api";
 import { usePdfAnnotationsGuestStore } from "@/stores/pdf-annotations-guest.store";
 import { useAuth } from "./useAuth";
@@ -32,6 +33,7 @@ export function usePdfAnnotations(bookId: string) {
     queryFn: async () => sanitizeAnnotations(await getPdfBooksApi().listAnnotations(bookId)),
     enabled: signedIn,
     staleTime: 60_000,
+    retry: retryUnlessClientError,
   });
 
   const items = useMemo(

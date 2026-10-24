@@ -15,6 +15,9 @@ export type SupportInput = {
   topic?: string;
   /** Xato topilgan sahifaning to'liq manzili. */
   pageUrl?: string;
+  /** Kitob id va bet ("Xato topdingizmi?" kitob sahifasi / o'qish oynasidan) — admin shu betni ochadi. */
+  pdfBook?: string;
+  page?: number;
   /** Honeypot: odam to'ldirmaydi (qarang `lib/support/request.ts`). */
   website?: string;
 };

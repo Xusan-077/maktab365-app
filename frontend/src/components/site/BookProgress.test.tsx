@@ -32,15 +32,25 @@ function setup(entries: Record<string, PdfProgressEntry>) {
 afterEach(cleanup);
 
 describe("BookProgress", () => {
+  it("foiz butun songa yaxlitlanadi: 32/240 · 13%", () => {
+    map = { b1: { page: 32, status: null } };
+    render(
+      <NextIntlClientProvider locale="uz" messages={uz}>
+        <BookMetaProgress bookId="b1" pageCount={240} />
+      </NextIntlClientProvider>,
+    );
+    expect(screen.getByText("· 32/240 · 13%")).toBeTruthy();
+  });
+
   it("o'qilmagan kitobda hech narsa chiqmaydi", () => {
     setup({});
     expect(screen.getByTestId("root").textContent).toBe("");
     expect(screen.getByTestId("root").querySelector("span")).toBeNull();
   });
 
-  it("boshlangan kitobda chiziq (ulush) va bet raqami", () => {
+  it("boshlangan kitobda chiziq (ulush) va «bet/jami · foiz»", () => {
     setup({ b1: { page: 90, status: null } });
-    expect(screen.getByText(/90-bet/)).toBeTruthy();
+    expect(screen.getByText("· 90/200 · 45%")).toBeTruthy();
     const bar = screen.getByTestId("root").querySelector("span > span") as HTMLElement;
     expect(bar.style.width).toBe("45%");
   });
@@ -48,6 +58,6 @@ describe("BookProgress", () => {
   it("o'qilgan kitobda ✓ O'qilgan", () => {
     setup({ b1: { page: 10, status: "read" } });
     expect(screen.getByText(/O'qilgan/)).toBeTruthy();
-    expect(screen.queryByText(/-bet/)).toBeNull();
+    expect(screen.queryByText(/%/)).toBeNull();
   });
 });

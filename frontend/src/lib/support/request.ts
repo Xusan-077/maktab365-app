@@ -11,6 +11,8 @@ export type SupportFormValues = {
 export type SupportContext = {
   topic?: string;
   pageUrl?: string;
+  pdfBook?: string;
+  page?: number;
 };
 
 const PAGE_URL_MAX = 500;
@@ -31,5 +33,7 @@ export function buildSupportInput(
     ...(email && { email }),
     ...(context.topic && { topic: context.topic }),
     ...(context.pageUrl && { pageUrl: context.pageUrl.slice(0, PAGE_URL_MAX) }),
+    ...(context.pdfBook && { pdfBook: context.pdfBook }),
+    ...(context.page && context.page > 0 && { page: context.page }),
   };
 }

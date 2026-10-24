@@ -37,7 +37,7 @@ make types      # frontend/src/lib/api/schema.ts ni yangilaydi
 
 ## Muhit o'zgaruvchilari
 
-`.env.example` ga qarang. Muhimlari: `SECRET_KEY`, `DATABASE_URL`, `REDIS_URL`, `FRONTEND_ORIGINS` (CORS faqat shu origin'lar), `SENTRY_DSN` (ixtiyoriy), `SUPPORT_NOTIFY_EMAILS` (yordam murojaatlari haqida xabar oladigan staff email'lari, vergul bilan; bo'sh bo'lsa xat yuborilmaydi), `SUPPORT_THROTTLE_RATE` (default `5/hour`, IP bo'yicha). Production: `DJANGO_SETTINGS_MODULE=config.settings.prod`, `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`.
+`.env.example` ga qarang. Muhimlari: `SECRET_KEY`, `DATABASE_URL`, `REDIS_URL`, `FRONTEND_ORIGINS` (CORS faqat shu origin'lar), `SENTRY_DSN` (ixtiyoriy), `SUPPORT_NOTIFY_EMAILS` (yordam murojaatlari haqida xabar oladigan staff email'lari, vergul bilan; bo'sh bo'lsa xat yuborilmaydi), `SUPPORT_THROTTLE_RATE` (default `5/hour`, IP bo'yicha), `SUPPORT_BURST_THROTTLE_RATE` (default `2/min`, ketma-ket yuborishga qarshi). Production: `DJANGO_SETTINGS_MODULE=config.settings.prod`, `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`.
 
 ## Xavfsizlik qarorlari
 
@@ -81,7 +81,7 @@ Ixtiyoriy (default'lar `.env.example` da):
 `AWS_S3_CUSTOM_DOMAIN` (muqova rasmlari uchun ommaviy domen), `AWS_S3_SIGNATURE_VERSION` (`s3v4`),
 `PDF_BOOK_MAX_BYTES` (ixtiyoriy, bo'sh yoki 0 = cheksiz; berilsa chegara qo'llanadi), `PDF_UPLOAD_PART_BYTES` (8388608 — bo'lakning eng kichik hajmi; fayl katta bo'lsa bo'laklar 10 000 tadan oshmasligi uchun avtomatik kattalashadi), `PDF_SIGNED_URL_SECONDS` (900; tavsiya 600–900),
 `PDF_UPLOAD_THROTTLE_RATE` (60/hour), `ADMIN_UPLOAD_MAX_IMAGE_BYTES`, `ADMIN_UPLOAD_MAX_PDF_BYTES`,
-`SHOW_DRAFTS_PUBLICLY` (prod'da qo'ymang: default `false`), `CONTENT_CACHE_MAX_AGE` (60),
+`CONTENT_CACHE_MAX_AGE` (60), `OCR_ENABLED` (false — OCR skelet, alohida `-Q ocr` worker tayyor bo'lmaguncha yoqmang), `OCR_LANGUAGES` (`uzb+rus`),
 `JWT_ACCESS_MINUTES`, `JWT_REFRESH_DAYS`, `REFRESH_REUSE_GRACE_SECONDS`, `AUTH_THROTTLE_RATE`, `AUTH_LOCKOUT_THRESHOLD`,
 `AUTH_LOCKOUT_SECONDS`, `OTP_TTL_MINUTES`, `OTP_MAX_ATTEMPTS`, `OTP_RESEND_COOLDOWN_SECONDS`, `GOOGLE_CLIENT_ID`,
 `TELEGRAM_BOT_TOKEN`, `SUPPORT_NOTIFY_EMAILS`, `SUPPORT_THROTTLE_RATE`, `SENTRY_DSN`, `SENTRY_ENVIRONMENT`,

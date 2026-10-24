@@ -16,7 +16,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .pdf_services import visible_pdf_books
+from .pdf_services import public_pdf_books
 
 LANGUAGES = ("uz", "ru", "en")
 DEFAULT_LIMIT = 5
@@ -70,7 +70,7 @@ class BotSearchView(APIView):
         raw_limit = params.get("limit", "")
         limit = min(max(int(raw_limit), 1), MAX_LIMIT) if raw_limit.isdigit() else DEFAULT_LIMIT
 
-        books = visible_pdf_books(request).filter(status="published")
+        books = public_pdf_books()
         if params.get("grade", "").isdigit():
             books = books.filter(grade=int(params["grade"]))
         query = params.get("q", "").strip()
