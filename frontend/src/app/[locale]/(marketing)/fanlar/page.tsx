@@ -1,9 +1,11 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { SubjectsExplorer } from "@/components/subjects/SubjectsExplorer";
+import { SubjectsSkeleton } from "@/components/subjects/SubjectsSkeleton";
 import { routing } from "@/lib/i18n/routing";
 import { getAlternates } from "@/lib/i18n/seo";
 import { getSubjects } from "@/lib/pdf-books/server";
@@ -22,7 +24,19 @@ export async function generateMetadata({
   };
 }
 
-export default async function SubjectsPage({ params }: PageProps<"/[locale]/fanlar">) {
+/**
+ * `params` faqat `SubjectsContent` ichida o'qiladi va u `<Suspense>` ichida: aks holda App Shell
+ * bitta URL'ga bog'lanib qoladi (Next "URL data outside of Suspense" xatosi, partialPrefetching).
+ */
+export default function SubjectsPage({ params }: PageProps<"/[locale]/fanlar">) {
+  return (
+    <Suspense fallback={<SubjectsSkeleton />}>
+      <SubjectsContent params={params} />
+    </Suspense>
+  );
+}
+
+async function SubjectsContent({ params }: Pick<PageProps<"/[locale]/fanlar">, "params">) {
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
