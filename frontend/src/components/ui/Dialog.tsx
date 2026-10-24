@@ -80,7 +80,7 @@ export function Dialog({
             type="button"
             onClick={() => onOpenChange(false)}
             aria-label={t("close")}
-            className="text-muted hover:bg-subtle hover:text-foreground -m-2 inline-flex size-10 shrink-0 items-center justify-center rounded-lg transition-colors"
+            className="text-muted hover:bg-subtle hover:text-foreground -m-2 inline-flex size-11 shrink-0 items-center justify-center rounded-lg transition-colors"
           >
             <X className="size-5" aria-hidden />
           </button>

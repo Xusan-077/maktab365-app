@@ -1633,5 +1633,79 @@
       "submit": "Kirish",
       "missingEmail": "Email ko'rsatilmagan. Kirish sahifasidan kod so'rang."
     }
+  },
+  "site": {
+    "menu": "Menyu",
+    "openMenu": "Menyuni ochish",
+    "breadcrumb": "Yo'l",
+    "gradeLabel": "{grade}-sinf",
+    "gradeWord": "sinf",
+    "gradesRange": "{range}-sinf",
+    "subjectCount": "{count} ta fan",
+    "stoppedAt": "{grade}-sinf · {page}-betda to'xtagansiz",
+    "progressLabel": "O'qish jarayoni",
+    "removeFilter": "{label} filtrini olib tashlash",
+    "language": {
+      "uz": "O'zbekcha",
+      "ru": "Ruscha",
+      "en": "Inglizcha"
+    },
+    "cover": {
+      "grade": "{grade}-sinf"
+    },
+    "groupName": {
+      "exact": "Aniq fanlar",
+      "natural": "Tabiiy fanlar",
+      "language": "Tillar va adabiyot",
+      "social": "Ijtimoiy-tarixiy",
+      "arts": "San'at va amaliy"
+    },
+    "groupLetter": {
+      "exact": "A",
+      "natural": "T",
+      "language": "Ti",
+      "social": "I",
+      "arts": "S"
+    },
+    "groupSample": {
+      "exact": "Matematika, Algebra, Geometriya, Informatika",
+      "natural": "Fizika, Kimyo, Biologiya, Geografiya",
+      "language": "Ona tili, Adabiyot, Rus tili, Chet tili",
+      "social": "O'zbekiston tarixi, Jahon tarixi, Huquq",
+      "arts": "Musiqa, Tasviriy san'at, Texnologiya"
+    },
+    "pagination": {
+      "label": "Sahifalar",
+      "previous": "Oldingi sahifa",
+      "next": "Keyingi sahifa",
+      "page": "{page}-sahifa"
+    },
+    "footer": {
+      "tagline": "1–11-sinf maktab darsliklari — bepul va hamma uchun ochiq.",
+      "pages": "Sahifalar",
+      "subjects": "Fanlar",
+      "textbooks": "Darsliklar",
+      "telegram": "Telegram bot",
+      "help": "Yordam",
+      "contact": "Bog'lanish",
+      "helpCenter": "Yordam markazi",
+      "about": "Loyiha haqida",
+      "copyright": "© {year} darslik365"
+    },
+    "showcase": {
+      "title": "Sayt komponentlari",
+      "header": "Sarlavha",
+      "footerFull": "Footer (to'liq)",
+      "footerCompact": "Footer (ixcham)",
+      "cards": "Kartochkalar",
+      "chips": "Filtr chiplari va sahifalash",
+      "loading": "Skeleton"
+    },
+    "localeShort": {
+      "uz": "UZ",
+      "uz-Cyrl": "ЎЗ",
+      "ru": "RU",
+      "en": "EN"
+    }
   }
 }

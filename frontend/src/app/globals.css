@@ -39,6 +39,8 @@
   --radius-button-lg: 0.875rem;
   --radius-cover: 0.75rem;
   --radius-pill: 999px;
+  --container-site: 77.5rem; /* 1240px */
+  --shadow-cover: 0 10px 24px rgb(7 22 51 / 0.12);
 
   --shadow-xs: 0 1px 2px 0 rgb(15 23 42 / 0.05);
   --shadow-sm: 0 1px 3px 0 rgb(15 23 42 / 0.07), 0 1px 2px -1px rgb(15 23 42 / 0.05);
@@ -105,6 +107,8 @@
   --color-hero-bg: var(--hero-bg);
   --color-footer-bg: var(--footer-bg);
   --color-reader-bg: var(--reader-bg);
+  --color-warm-soft: var(--warm-soft);
+  --color-on-group: var(--on-group);
   --color-group-exact: var(--group-exact);
   --color-group-exact-soft: var(--group-exact-soft);
   --color-group-natural: var(--group-natural);
@@ -169,6 +173,8 @@
   --hero-bg: #f5f8fe;
   --footer-bg: #f8fafd;
   --reader-bg: #eef1f6;
+  --warm-soft: #fff7ed;
+  --on-group: #ffffff; /* yo'nalish rangi ustidagi matn */
 
   /* Fan yo'nalishlari (backend SubjectGroup) va ularning och tint'lari */
   --group-exact: #1554d1;
@@ -228,6 +234,8 @@
   --hero-bg: #0e1830;
   --footer-bg: #0e1628;
   --reader-bg: #0a101e;
+  --warm-soft: #2a1d14;
+  --on-group: #0b1220;
 
   /* Qorong'i fonda yo'nalish ranglari yorqinroq, tint'lari to'qroq */
   --group-exact: #8db4ff;

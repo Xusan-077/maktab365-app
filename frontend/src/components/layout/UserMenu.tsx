@@ -65,7 +65,14 @@ export function Avatar({
  * Marketing headerida: "Kirish" yoki avatar menyusi (kabinet/ustoz paneliga o'tish menyuning birinchi bandi).
  * Panel topbar'ida (`variant="panel"`): avatar menyusi (sozlamalar, yordam, chiqish).
  */
-export function UserMenu({ variant = "site" }: { variant?: "site" | "panel" }) {
+export function UserMenu({
+  variant = "site",
+  signInClassName,
+}: {
+  variant?: "site" | "panel";
+  /** "Kirish" tugmasi uchun qo'shimcha klasslar (redesign sarlavhasi o'lchamlari). */
+  signInClassName?: string;
+}) {
   const t = useTranslations("auth");
   const tn = useTranslations("nav");
   const tp = useTranslations("panel");
@@ -128,7 +135,7 @@ export function UserMenu({ variant = "site" }: { variant?: "site" | "panel" }) {
   }, [open]);
 
   if (status === "loading") return <Skeleton className="h-10 w-24" />;
-  if (!sessionUser) return <SignInButton>{tn("login")}</SignInButton>;
+  if (!sessionUser) return <SignInButton className={signInClassName}>{tn("login")}</SignInButton>;
 
   const name = me?.name || sessionUser.name || sessionUser.email || "";
   const close = () => closeMenu(false);
