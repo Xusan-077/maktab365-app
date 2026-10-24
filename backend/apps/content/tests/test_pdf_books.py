@@ -11,6 +11,7 @@ from rest_framework.test import APIClient
 from apps.accounts.models import AuditLog
 from apps.content import pdf_storage
 from apps.content.models import PdfBook
+from apps.content.storage import covers_storage
 
 from .test_admin_api import client_as
 
@@ -224,7 +225,7 @@ def test_delete_cleans_cover_and_related_records(
     from apps.learning.models import PdfBookmark, PdfReadProgress, StudyGoal
 
     book = PdfBook.objects.get(pk=uploaded["id"])
-    default_storage.save("covers/c-1.png", ContentFile(b"png"))
+    covers_storage().save("covers/c-1.png", ContentFile(b"png"))
     book.cover = "covers/c-1.png"
     book.save()
     pdf_key = book.file.name
@@ -239,7 +240,7 @@ def test_delete_cleans_cover_and_related_records(
     with django_capture_on_commit_callbacks(execute=True):
         assert admin.delete(f"{BASE}/{book.pk}/").status_code == 204
 
-    assert not default_storage.exists(pdf_key) and not default_storage.exists("covers/c-1.png")
+    assert not default_storage.exists(pdf_key) and not covers_storage().exists("covers/c-1.png")
     assert not PdfReadProgress.objects.exists() and not PdfBookmark.objects.exists()
     assert not PdfBook.objects.exists()
     goal.refresh_from_db()

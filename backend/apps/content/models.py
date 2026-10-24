@@ -7,6 +7,8 @@ from django.utils import timezone
 from apps.core.fields import LocalizedTextField
 from apps.core.models import TimeStampedModel, UUIDModel
 
+from .storage import covers_storage
+
 
 class SubjectGroup(models.TextChoices):
     """Katalog tablari uchun fan guruhi (bo'sh — guruhsiz: faqat «Hammasi» da)."""
@@ -111,11 +113,15 @@ class PdfBook(UUIDModel, TimeStampedModel):
     file = models.FileField(upload_to="pdf-books/", blank=True)
     size_bytes = models.PositiveBigIntegerField(default=0)
     page_count = models.PositiveIntegerField(default=0)
-    cover = models.FileField(upload_to="covers/", blank=True)
+    cover = models.FileField(upload_to="covers/", blank=True, storage=covers_storage)
     # `cover` dan hosil qilingan WebP variantlar (`cover_variants.py`): ro'yxat uchun 300px,
     # tafsilot uchun 600px. Bo'sh bo'lsa ochiq API `cover` ga qaytadi (zaxira).
-    cover_small = models.FileField(upload_to="covers/", blank=True, editable=False)
-    cover_large = models.FileField(upload_to="covers/", blank=True, editable=False)
+    cover_small = models.FileField(
+        upload_to="covers/", blank=True, editable=False, storage=covers_storage
+    )
+    cover_large = models.FileField(
+        upload_to="covers/", blank=True, editable=False, storage=covers_storage
+    )
     # `auto` — generativ muqova (`cover` bo'sh); `first_page`/`custom` — `cover` rasmi ko'rsatiladi.
     cover_mode = models.CharField(max_length=16, choices=CoverMode.choices, default=CoverMode.AUTO)
     status = models.CharField(

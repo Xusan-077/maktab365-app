@@ -11,6 +11,7 @@ from . import pdf_storage as storage
 from .admin_services import EDITORS, InvalidTransition, TransitionForbidden, UploadError
 from .cache import is_staff, show_drafts
 from .models import CHAPTER_TITLE_MAX, PdfBook, PdfBookChapter, PdfBookStatus
+from .storage import covers_storage
 
 TRANSITIONS: dict[tuple[str, str], tuple[str, ...]] = {
     (PdfBookStatus.DRAFT, PdfBookStatus.PUBLISHED): EDITORS,
@@ -266,8 +267,9 @@ def delete_book(book: PdfBook) -> None:
     tranzaksiya qaytadi va kitob saqlanib qoladi. Progress, xatcho'p va mundarija `CASCADE` bilan
     ketadi; rejalar (`StudyGoal`) kitobsiz qoladi.
     """
-    keys = [
-        book.file.name if book.file else "",
+    keys = [book.file.name if book.file else ""]
+    # Muqova va variantlari ommaviy `covers` saqlashda (PDF'dan alohida bucket).
+    cover_keys = [
         book.cover.name if book.cover else "",
         book.cover_small.name if book.cover_small else "",
         book.cover_large.name if book.cover_large else "",
@@ -278,6 +280,8 @@ def delete_book(book: PdfBook) -> None:
     _purge_chapter_slides(PdfBookChapter.objects.filter(book=book))
     for key in dict.fromkeys(k for k in keys if k):
         storage.delete_strict(key)
+    for key in dict.fromkeys(k for k in cover_keys if k):
+        storage.delete_strict(key, covers_storage())
     book.delete()
 
 

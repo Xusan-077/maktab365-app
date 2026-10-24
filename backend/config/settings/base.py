@@ -112,6 +112,30 @@ if env("AWS_STORAGE_BUCKET_NAME", default=""):
     AWS_S3_SIGNATURE_VERSION = env("AWS_S3_SIGNATURE_VERSION", default="s3v4")
     AWS_S3_MAX_MEMORY_SIZE = 16 * 1024 * 1024
 
+# Muqova va rasmlar (`covers/`, `images/`): PDF'lardan alohida, ommaviy bucket va domen. Bo'sh
+# bo'lsa `default` dan foydalanadi (dev/test). `AWS_S3_CUSTOM_DOMAIN` ni bu yerda ishlatmang:
+# u `default` (PDF) saqlashga ham tushadi.
+STORAGES["covers"] = STORAGES["default"]
+if env("COVERS_BUCKET_NAME", default=""):
+    STORAGES["covers"] = {
+        "BACKEND": "storages.backends.s3.S3Storage",
+        "OPTIONS": {
+            "bucket_name": env("COVERS_BUCKET_NAME"),
+            "endpoint_url": env("COVERS_S3_ENDPOINT_URL", default=None)
+            or env("AWS_S3_ENDPOINT_URL", default=None),
+            "region_name": env("AWS_S3_REGION_NAME", default=None),
+            "custom_domain": env("COVERS_S3_CUSTOM_DOMAIN"),
+            # Faqat shu bucket'ga ruxsatli alohida token (PDF bucket'iga kirish yo'q).
+            "access_key": env("COVERS_ACCESS_KEY_ID"),
+            "secret_key": env("COVERS_SECRET_ACCESS_KEY"),
+            "querystring_auth": False,
+            "default_acl": None,
+            "signature_version": env("AWS_S3_SIGNATURE_VERSION", default="s3v4"),
+            # Kalitlar uuid bilan noyob (almashtirilganda yangi kalit): uzoq kesh xavfsiz.
+            "object_parameters": {"CacheControl": "public, max-age=31536000, immutable"},
+        },
+    }
+
 # --- Admin yuklashlari (apps/content/admin_services.py) ---
 ADMIN_UPLOAD_MAX_IMAGE_BYTES = env.int("ADMIN_UPLOAD_MAX_IMAGE_BYTES", default=5 * 1024 * 1024)
 ADMIN_UPLOAD_MAX_PDF_BYTES = env.int("ADMIN_UPLOAD_MAX_PDF_BYTES", default=50 * 1024 * 1024)

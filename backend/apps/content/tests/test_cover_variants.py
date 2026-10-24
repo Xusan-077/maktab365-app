@@ -2,7 +2,6 @@ import io
 
 import pytest
 from django.core.files.base import ContentFile
-from django.core.files.storage import default_storage
 from django.core.management import call_command
 from PIL import Image
 from rest_framework.test import APIClient
@@ -10,6 +9,7 @@ from rest_framework.test import APIClient
 from apps.content import cover_variants
 from apps.content.models import CoverMode, PdfBook
 from apps.content.pdf_services import delete_book
+from apps.content.storage import covers_storage
 
 from .test_admin_api import client_as
 
@@ -30,11 +30,11 @@ def image_bytes(width=800, height=1000, fmt="PNG", mode="RGB") -> bytes:
 
 
 def stored_image(key: str, **kwargs) -> str:
-    return default_storage.save(key, ContentFile(image_bytes(**kwargs)))
+    return covers_storage().save(key, ContentFile(image_bytes(**kwargs)))
 
 
 def size_of(key: str) -> tuple[int, int]:
-    with default_storage.open(key, "rb") as handle:
+    with covers_storage().open(key, "rb") as handle:
         image = Image.open(handle)
         assert image.format == "WEBP"
         return image.size
@@ -76,7 +76,7 @@ def test_transparent_and_palette_images_are_supported(book):
 
 
 def test_unreadable_cover_keeps_fallback_without_error(book):
-    book.cover = default_storage.save("covers/bad.png", ContentFile(b"not an image"))
+    book.cover = covers_storage().save("covers/bad.png", ContentFile(b"not an image"))
     book.save()
 
     assert cover_variants.generate_variants(book) is False
@@ -98,7 +98,7 @@ def test_regenerating_replaces_and_deletes_old_variants(book):
 
     book.refresh_from_db()
     assert book.cover_small.name not in old and book.cover_large.name not in old
-    assert not any(default_storage.exists(key) for key in old)
+    assert not any(covers_storage().exists(key) for key in old)
 
 
 def test_auto_mode_clears_variants(book):
@@ -115,7 +115,7 @@ def test_auto_mode_clears_variants(book):
 
     book.refresh_from_db()
     assert not book.cover_small and not book.cover_large
-    assert not any(default_storage.exists(key) for key in keys)
+    assert not any(covers_storage().exists(key) for key in keys)
 
 
 def test_public_api_list_small_detail_large_and_language(book):
@@ -179,7 +179,7 @@ def test_delete_book_removes_variants(book):
 
     delete_book(book)
 
-    assert not any(default_storage.exists(key) for key in keys)
+    assert not any(covers_storage().exists(key) for key in keys)
 
 
 def test_command_missing_only_skips_books_with_variants(catalog):

@@ -10,6 +10,8 @@ from django.utils.text import slugify
 from rest_framework import status
 from rest_framework.exceptions import APIException
 
+from .storage import covers_storage
+
 # --- Xatolar ---
 
 
@@ -67,11 +69,13 @@ class UploadKind:
     folder: str
     types: tuple[str, ...]
     max_setting: str
+    # Ommaviy rasmlar (muqova, rasm) `covers` saqlashga, PDF shaxsiy `default` ga tushadi.
+    public: bool = False
 
 
 KINDS = {
-    "cover": UploadKind("covers", ("image/jpeg", "image/png", "image/webp"), "IMAGE"),
-    "image": UploadKind("images", ("image/jpeg", "image/png", "image/webp"), "IMAGE"),
+    "cover": UploadKind("covers", ("image/jpeg", "image/png", "image/webp"), "IMAGE", public=True),
+    "image": UploadKind("images", ("image/jpeg", "image/png", "image/webp"), "IMAGE", public=True),
     "pdf": UploadKind("pdf", ("application/pdf",), "PDF"),
 }
 EXTENSIONS = {
@@ -118,10 +122,11 @@ def store_upload(file, kind: str) -> dict:
     if mime not in spec.types or declared != mime:
         raise UploadError("unsupported_type", 415)
 
-    path = default_storage.save(f"{spec.folder}/{clean_name(file.name or '', mime)}", file)
+    storage = covers_storage() if spec.public else default_storage
+    path = storage.save(f"{spec.folder}/{clean_name(file.name or '', mime)}", file)
     return {
         "path": path,
-        "url": default_storage.url(path),
+        "url": storage.url(path),
         "name": path.rsplit("/", 1)[-1],
         "size": file.size,
         "content_type": mime,

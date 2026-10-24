@@ -33,29 +33,23 @@ describe("BookCover", () => {
     expect(srcSet).not.toContain("orig.png");
   });
 
-  it("variantlar yo'q (eski kitob) — asl rasm ishlatiladi", () => {
-    const { container } = renderCover({ src: "https://cdn.test/covers/orig.png" });
-    const img = container.querySelector("img");
-    expect(`${img?.getAttribute("src")}${img?.getAttribute("srcset")}`).toContain("orig.png");
-  });
-
-  it("variantlar yo'q — asl URL kenglik parametri bilan beriladi (har kenglikka alohida URL)", () => {
+  it("variantlar yo'q (eski kitob) — asl URL o'zgarishsiz, srcset va kenglik parametri yo'q", () => {
     const { container } = renderCover({ src: "https://cdn.test/covers/orig.png", sizes: "200px" });
-    const srcSet = container.querySelector("img")?.getAttribute("srcset") ?? "";
-    expect(srcSet).toMatch(/orig\.png\?w=\d+/);
-    expect(
-      new Set(srcSet.split(",").map((part) => part.trim().split(" ")[0])).size,
-    ).toBeGreaterThan(1);
+    const img = container.querySelector("img");
+    expect(img?.getAttribute("src")).toBe("https://cdn.test/covers/orig.png");
+    expect(img?.hasAttribute("srcset")).toBe(false);
+    expect(img?.outerHTML).not.toContain("?w=");
   });
 
-  it("faqat bitta variant bor — boshqa kenglikda ham ishlaydi", () => {
+  it("faqat bitta variant bor — asl rasm o'zgarishsiz (srcset yo'q, kenglik parametri yo'q)", () => {
     const { container } = renderCover({
       src: "https://cdn.test/covers/orig.png",
       srcSmall: "https://cdn.test/covers/a-300.webp",
       sizes: "200px",
     });
-    const srcSet = container.querySelector("img")?.getAttribute("srcset") ?? "";
-    expect(srcSet).toContain("a-300.webp");
-    expect(srcSet).toContain("orig.png?w=");
+    const img = container.querySelector("img");
+    expect(img?.getAttribute("src")).toBe("https://cdn.test/covers/orig.png");
+    expect(img?.hasAttribute("srcset")).toBe(false);
+    expect(img?.outerHTML).not.toContain("?w=");
   });
 });

@@ -50,14 +50,12 @@ export function BookCover({
   // Asl rasm — eng ishonchli zaxira; variantlar yo'q (eski kitoblar) bo'lsa shu ishlatiladi.
   const primary = srcLarge ?? src ?? srcSmall ?? null;
   const showImage = primary !== null && failedSrc !== primary;
-  // `sizes` bo'yicha Next srcset tuzadi, bu yerda har kenglik mos variantga bog'lanadi. Variant yo'q
-  // bo'lsa asl URL qaytadi; Next har kenglik uchun boshqa URL kutadi, shuning uchun `?w=` qo'shiladi.
-  const loader = ({ width }: ImageLoaderProps) => {
-    const variant = width <= SMALL_MAX_WIDTH ? srcSmall : srcLarge;
-    if (variant) return variant;
-    const original = src ?? srcLarge ?? srcSmall ?? "";
-    return `${original}${original.includes("?") ? "&" : "?"}w=${width}`;
-  };
+  // Ikkala variant (300px / 600px WebP) bor bo'lsa Next `sizes` bo'yicha srcset tuzadi, har kenglik
+  // mos variantga bog'lanadi. Aks holda bitta URL: `unoptimized` — srcset ham, kenglik parametri
+  // ham yo'q (R2/CDN uni baribir e'tiborsiz qoldiradi, faqat kesh kalitini bo'laklaydi).
+  const hasVariants = Boolean(srcSmall && srcLarge);
+  const loader = ({ width }: ImageLoaderProps) =>
+    (width <= SMALL_MAX_WIDTH ? srcSmall : srcLarge) ?? primary ?? "";
   const small = size === "sm";
 
   return (
@@ -94,7 +92,7 @@ export function BookCover({
       {showImage && primary && (
         <Image
           src={primary}
-          loader={loader}
+          {...(hasVariants ? { loader } : { unoptimized: true })}
           alt=""
           fill
           priority={priority}

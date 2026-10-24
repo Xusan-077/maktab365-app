@@ -10,10 +10,10 @@ import uuid
 
 import structlog
 from django.core.files.base import ContentFile
-from django.core.files.storage import default_storage
 from PIL import Image, ImageOps, UnidentifiedImageError
 
 from .models import CoverMode, PdfBook
+from .storage import covers_storage
 
 logger = structlog.get_logger(__name__)
 
@@ -36,7 +36,7 @@ def _resized_webp(source: Image.Image, width: int) -> bytes:
 
 
 def _open(key: str) -> Image.Image:
-    with default_storage.open(key, "rb") as handle:
+    with covers_storage().open(key, "rb") as handle:
         image = Image.open(handle)
         image.load()
     image = ImageOps.exif_transpose(image)
@@ -75,10 +75,11 @@ def generate_variants(book: PdfBook) -> bool:
         return False
 
     token = uuid.uuid4()
-    small = default_storage.save(
+    storage = covers_storage()
+    small = storage.save(
         f"covers/{token}-{SMALL_WIDTH}.webp", ContentFile(_resized_webp(source, SMALL_WIDTH))
     )
-    large = default_storage.save(
+    large = storage.save(
         f"covers/{token}-{LARGE_WIDTH}.webp", ContentFile(_resized_webp(source, LARGE_WIDTH))
     )
     old = clear_variants(book)
@@ -91,6 +92,6 @@ def generate_variants(book: PdfBook) -> bool:
 def _delete(keys: list[str]) -> None:
     for key in keys:
         try:
-            default_storage.delete(key)
+            covers_storage().delete(key)
         except Exception:  # noqa: BLE001 — yetim fayl asosiy oqimni to'xtatmasin
             logger.warning("cover_variants_delete_failed", key=key)
