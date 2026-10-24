@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, PanelLeft, Search } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp, PanelLeft, Search } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
@@ -27,10 +27,17 @@ import {
 } from "@/lib/pdf/annotations";
 import { clampPage, parsePageParam } from "@/lib/pdf/page-nav";
 import { isDoubleTap, type TapPoint } from "@/lib/pdf/reader-prefs";
+import {
+  nextSpread,
+  parseModeParam,
+  prevSpread,
+  resolveMode,
+  type ReadingMode,
+} from "@/lib/pdf/reading-mode";
 import { parseSlidesParams, readSlidesProgress, withSlidesParams } from "@/lib/pdf/slides";
 import { currentTocItem, flattenToc } from "@/lib/pdf/toc";
 import { swipeDirection } from "@/lib/pdf/swipe";
-import { MIN_ZOOM } from "@/lib/pdf/zoom";
+import { DEFAULT_ZOOM } from "@/lib/pdf/zoom";
 import { pdfQueries } from "@/lib/pdf-books/queries";
 import { cn } from "@/lib/utils/cn";
 import { pdfBookPath, ROUTES } from "@/lib/utils/routes";
@@ -49,14 +56,39 @@ import { PdfReaderControls } from "./PdfReaderControls";
 import { ReaderShortcutsDialog } from "./ReaderShortcutsDialog";
 import { PdfSlidesViewer } from "./PdfSlidesViewer";
 import { PdfToolbar } from "./PdfToolbar";
+import { HorizontalView, type RenderPageOptions } from "./reader/HorizontalView";
 import { ReaderBottomBar } from "./reader/ReaderBottomBar";
 import { ReaderPanel } from "./reader/ReaderPanel";
+import { ReadingModeToggle } from "./reader/ReadingModeToggle";
+import { ThumbnailStrip } from "./reader/ThumbnailStrip";
+import { VerticalView } from "./reader/VerticalView";
 import { resolveFileUrl } from "@/lib/pdf/file-url";
 import { usePdfDocument } from "./usePdfDocument";
 
 const isTypingTarget = (target: EventTarget | null) =>
   target instanceof HTMLElement &&
   (target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName));
+/** Space fokusdagi tugma/havolani bosadi — varaqlash emas. */
+const isPressable = (target: EventTarget | null) =>
+  target instanceof HTMLElement && ["BUTTON", "A", "SUMMARY"].includes(target.tagName);
+
+/**
+ * Gorizontal ko'rinish balandligi (bet ekranga to'liq sig'adi): ekrandan sarlavha, chekinishlar,
+ * mobil pastki panel yoki desktop "Sahifalar" paneli (ochiq bo'lsa lenta ham) va qidiruv chipi
+ * egallagan joy (rem) ayriladi.
+ */
+function horizontalHeight({
+  desktop,
+  thumbs,
+  findChip,
+}: {
+  desktop: boolean;
+  thumbs: boolean;
+  findChip: boolean;
+}) {
+  const reserved = (desktop ? (thumbs ? 15.75 : 9.25) : 14.5) + (findChip ? 3.5 : 0);
+  return `calc(100dvh - ${reserved}rem)`;
+}
 
 /** Imzolangan URL muddati tugagach birinchi xatoda yangi URL bilan hujjat qayta ochiladi. */
 const MAX_AUTO_RELOADS = 1;
@@ -94,8 +126,10 @@ function OpenInNewWindowButton({ bookId, label }: { bookId: string; label: strin
 }
 
 /**
- * PDF darslik o'qish oynasi: bir vaqtda faqat ko'rinayotgan sahifa chiziladi. Sahifa URL'da
- * (`?page=12`), tugmalar/raqam maydoni/←→/swipe bilan o'tiladi, oxirgi sahifa eslab qolinadi.
+ * PDF darslik o'qish oynasi, ikki rejim (`?mode=h|v`, tanlov `localStorage` da ham):
+ * gorizontal — bet yoki 2 betlik yoyma ekranga sig'adi, ←→/PgUp/PgDn/Space/swipe bilan
+ * varaqlanadi, qo'shni yoymalar oldindan chiziladi; vertikal — uzluksiz scroll, virtualizatsiya
+ * (canvas faqat ko'rinayotgan bet ±2 da). Sahifa URL'da (`?page=12`), oxirgi sahifa eslab qolinadi.
  */
 export function PdfReader({
   bookId,
@@ -125,24 +159,32 @@ export function PdfReader({
   const [renderFailed, setRenderFailed] = useState(false);
   const tcontrols = useTranslations("pdfBooks.controls");
   const desktop = useMediaQuery("(min-width: 1024px)");
+  // Yoyma faqat keng landshaft ekranda; planshet/mobil va portretda — bitta bet.
+  const wide = useMediaQuery("(min-width: 1024px) and (orientation: landscape)");
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [thumbsOpen, setThumbsOpen] = useState(false);
+  const [pagesSheetOpen, setPagesSheetOpen] = useState(false);
   const [tocOpen, setTocOpen] = useState(false);
   const [viewOpen, setViewOpen] = useState(false);
   const [offlineOpen, setOfflineOpen] = useState(false);
   const reloads = useRef(0);
   const stageRef = useRef<HTMLDivElement>(null);
   const tone = useReaderPrefsStore((state) => state.tone);
-  const fit = useReaderPrefsStore((state) => state.fit);
+  const storedMode = useReaderPrefsStore((state) => state.mode);
   const cycleTone = useReaderPrefsStore((state) => state.cycleTone);
-  const toggleFit = useReaderPrefsStore((state) => state.toggleFit);
+  const setStoredMode = useReaderPrefsStore((state) => state.setMode);
+  // Saqlangan rejim o'qilguncha ko'rinish chizilmaydi (desktopda vertikal "miltillamasin").
+  const [prefsReady, setPrefsReady] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [findOpen, setFindOpen] = useState(false);
   const annotations = usePdfAnnotations(bookId);
   const [drawing, setDrawing] = useState(false);
   const [listOpen, setListOpen] = useState(false);
-  // Dialog: yangi belgi (chizilgan to'rtburchak) yoki mavjudini tahrirlash.
+  // Dialog: yangi belgi (chizilgan to'rtburchak va uning beti) yoki mavjudini tahrirlash.
   const [draft, setDraft] = useState<
-    { kind: "new"; rect: AnnotationRect } | { kind: "edit"; annotation: Annotation } | null
+    | { kind: "new"; rect: AnnotationRect; page: number }
+    | { kind: "edit"; annotation: Annotation }
+    | null
   >(null);
   const [lastColor, setLastColor] = useState<AnnotationColor>("yellow");
   const findTerm = (searchParams.get("find") ?? "").trim().slice(0, 80);
@@ -153,13 +195,28 @@ export function PdfReader({
   const toggleFullscreen = fullscreen.toggle;
 
   useEffect(() => {
-    void useReaderPrefsStore.persist.rehydrate();
+    void Promise.resolve(useReaderPrefsStore.persist.rehydrate()).finally(() =>
+      setPrefsReady(true),
+    );
   }, []);
+
+  const mode: ReadingMode = resolveMode(
+    parseModeParam(searchParams.get("mode")),
+    storedMode,
+    desktop,
+  );
+  const horizontal = mode === "h";
+  const spread = horizontal && wide;
 
   const rawPage = searchParams.get("page");
   const urlPage = total > 0 ? parsePageParam(rawPage, total) : null;
-  // URL > saqlangan pozitsiya > 1. Pozitsiya aniqlanguncha `null`.
-  const page = total === 0 ? null : (urlPage ?? (progress.ready ? progress.resume : null));
+  // Tez varaqlashda (klaviatura, swipe) URL yangilanishi (`router.replace`) kechikadi: so'ralgan bet
+  // URL unga yetguncha darhol ko'rsatiladi, keyingi bosish shu betdan hisoblanadi — bosish yo'qolmaydi.
+  const [pendingPage, setPendingPage] = useState<number | null>(null);
+  if (pendingPage !== null && urlPage === pendingPage) setPendingPage(null);
+  // So'ralgan bet > URL > saqlangan pozitsiya > 1. Pozitsiya aniqlanguncha `null`.
+  const page =
+    total === 0 ? null : (pendingPage ?? urlPage ?? (progress.ready ? progress.resume : null));
 
   const {
     zoom,
@@ -172,20 +229,34 @@ export function PdfReader({
     areaRef: pageAreaRef,
     scrollerRef: zoomScrollerRef,
     contentRef: zoomContentRef,
-  } = useReaderZoom({ stageRef, fullscreen: fullscreen.active });
+  } = useReaderZoom({
+    stageRef,
+    fullscreen: fullscreen.active,
+    panY: horizontal ? "scroller" : "page",
+  });
 
-  // Yangi sahifa (mundarija, tugmalar, swipe…) doim boshidan ochiladi: oldingi sahifada pastga
-  // surilgan bo'lsa ham sarlavha ekranning yuqorisida. Birinchi ochilishda scroll'ga tegilmaydi.
+  // Gorizontal: yangi sahifa (mundarija, tugmalar, swipe…) doim boshidan ochiladi — oldingi sahifada
+  // pastga surilgan bo'lsa ham sarlavha ekranning yuqorisida. Birinchi ochilishda scroll'ga
+  // tegilmaydi. Vertikalda scroll'ni `VerticalView` o'zi boshqaradi.
   const shownPage = useRef<number | null>(null);
   useEffect(() => {
     if (page === null) return;
     const previous = shownPage.current;
     shownPage.current = page;
-    if (previous === null || previous === page) return;
+    if (!horizontal || previous === null || previous === page) return;
     const scroller = fullscreen.active ? stageRef.current : window;
     scroller?.scrollTo?.({ top: 0 });
     resetPan();
-  }, [page, fullscreen.active, resetPan]);
+  }, [page, horizontal, fullscreen.active, resetPan]);
+
+  // Vertikaldan gorizontalga o'tilganda ro'yxat bo'yicha surilgan scroll boshiga qaytadi.
+  const shownMode = useRef(mode);
+  useEffect(() => {
+    const previous = shownMode.current;
+    shownMode.current = mode;
+    if (previous === mode || mode !== "h") return;
+    (fullscreen.active ? stageRef.current : window)?.scrollTo?.({ top: 0 });
+  }, [mode, fullscreen.active]);
 
   // Admin oldindan ko'rishi statistika va "oxirgi ko'rilganlar"ga yozilmaydi.
   const counted = book.data && !book.data.unverified && !preview;
@@ -197,7 +268,13 @@ export function PdfReader({
       router.replace(`${pathname}?${withSlidesParams(searchParams, patch)}`, { scroll: false }),
     [router, pathname, searchParams],
   );
-  const setPageInUrl = useCallback((next: number) => replaceQuery({ page: next }), [replaceQuery]);
+  const setPageInUrl = useCallback(
+    (next: number) => {
+      setPendingPage(next);
+      replaceQuery({ page: next });
+    },
+    [replaceQuery],
+  );
 
   // Prezentatsiya: `?slides=<bo'lim id>&slide=N`; faqat prezentatsiyasi bor bo'lim ochiladi.
   const slidesParams = parseSlidesParams(searchParams);
@@ -239,8 +316,10 @@ export function PdfReader({
 
   // URL'ni haqiqiy sahifaga keltiradi (saqlangan pozitsiya, 1..N ga tuzatilgan qiymat).
   useEffect(() => {
-    if (page !== null && rawPage !== String(page)) setPageInUrl(page);
-  }, [page, rawPage, setPageInUrl]);
+    if (page !== null && pendingPage === null && rawPage !== String(page)) {
+      replaceQuery({ page });
+    }
+  }, [page, pendingPage, rawPage, replaceQuery]);
 
   // Joriy sahifani eslab qoladi (saqlangan bilan bir xil bo'lsa qayta yozilmaydi).
   const savedPage = progress.position?.page;
@@ -255,6 +334,17 @@ export function PdfReader({
     },
     [total, setPageInUrl],
   );
+  // Oldingi/keyingi: gorizontal yoymada 2 bet, aks holda 1 bet; chegarada `null`.
+  const prevPage = page === null ? null : prevSpread(page, spread);
+  const nextPage = page === null ? null : nextSpread(page, total, spread);
+
+  const changeMode = useCallback(
+    (next: ReadingMode) => {
+      setStoredMode(next);
+      replaceQuery({ mode: next });
+    },
+    [setStoredMode, replaceQuery],
+  );
 
   useEffect(() => {
     if (page === null) return;
@@ -268,12 +358,24 @@ export function PdfReader({
       }
       if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
       if (isTypingTarget(event.target)) return;
-      if (event.key === "ArrowLeft" && page > 1) {
-        event.preventDefault();
-        goTo(page - 1);
-      } else if (event.key === "ArrowRight" && page < total) {
-        event.preventDefault();
-        goTo(page + 1);
+      // Gorizontalda varaqlash: ← → PgUp PgDn Space (Shift+Space — orqaga). Vertikalda ←/→ —
+      // qo'shni betga scroll; PgUp/PgDn/Space brauzerning odatiy scroll'i.
+      const space = event.key === " " && !isPressable(event.target);
+      const back =
+        event.key === "ArrowLeft" ||
+        (horizontal && (event.key === "PageUp" || (space && event.shiftKey)));
+      const forward =
+        event.key === "ArrowRight" ||
+        (horizontal && (event.key === "PageDown" || (space && !event.shiftKey)));
+      if (back || forward) {
+        // Gorizontalda chegarada ham oyna surilmasin (bet ekranga sig'gan).
+        if (horizontal) event.preventDefault();
+        const target = back ? prevPage : nextPage;
+        if (target !== null) {
+          event.preventDefault();
+          goTo(target);
+        }
+        return;
       }
       // Qolgan yorliqlar ochiq dialog (mundarija, prezentatsiya, yordam) ustida ishlamaydi.
       if (window.document.querySelector("dialog[open]")) return;
@@ -298,7 +400,18 @@ export function PdfReader({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [page, total, goTo, toggleFullscreen, cycleTone, searchable, stepZoom]);
+  }, [
+    page,
+    total,
+    goTo,
+    horizontal,
+    prevPage,
+    nextPage,
+    toggleFullscreen,
+    cycleTone,
+    searchable,
+    stepZoom,
+  ]);
 
   const touch = useRef<{ x: number; y: number; at: number } | null>(null);
   const lastTap = useRef<TapPoint | null>(null);
@@ -314,8 +427,10 @@ export function PdfReader({
     if (!start || page === null || wasPinch()) return;
     const dx = event.clientX - start.x;
     const dy = event.clientY - start.y;
-    // Ikki marta bosish (sichqoncha ham, barmoq ham) — zoom 1× ↔ 2× (bosilgan joy markazda qoladi).
+    // Ikki marta bosish (sichqoncha ham, barmoq ham) — zoom 100% ↔ 200% (bosilgan joy markazda
+    // qoladi). Sichqoncha bilan matn belgilangan bo'lsa (so'zni ikki marta bosish) — zoom emas.
     if (Math.hypot(dx, dy) < 10) {
+      if (event.pointerType === "mouse" && window.getSelection?.()?.isCollapsed === false) return;
       const tap = { x: event.clientX, y: event.clientY, at: event.timeStamp };
       if (isDoubleTap(lastTap.current, tap)) {
         lastTap.current = null;
@@ -325,11 +440,12 @@ export function PdfReader({
       }
       return;
     }
-    // Swipe faqat barmoq bilan va kattalashtirilmagan sahifada (kattalashganda surish — scroll).
-    if (event.pointerType === "mouse" || zoom > MIN_ZOOM) return;
+    // Swipe faqat gorizontal rejimda, barmoq bilan va kattalashtirilmagan sahifada
+    // (kattalashganda surish — pan; vertikalda — oddiy scroll).
+    if (!horizontal || event.pointerType === "mouse" || zoom > DEFAULT_ZOOM) return;
     const direction = swipeDirection(dx, dy, event.timeStamp - start.at);
-    if (direction === "next" && page < total) goTo(page + 1);
-    if (direction === "prev" && page > 1) goTo(page - 1);
+    if (direction === "next" && nextPage !== null) goTo(nextPage);
+    if (direction === "prev" && prevPage !== null) goTo(prevPage);
   };
 
   const retry = () => {
@@ -337,6 +453,7 @@ export function PdfReader({
     setRenderFailed(false);
     document.reload();
   };
+  const ignoreRenderError = () => undefined;
   const onRenderError = () => {
     if (reloads.current < MAX_AUTO_RELOADS) {
       reloads.current += 1;
@@ -380,18 +497,16 @@ export function PdfReader({
   const backLink = backHref ?? (book.data ? pdfBookPath(book.data) : ROUTES.textbooks);
   const toolbar =
     page !== null && total > 0 ? (
-      <PdfToolbar page={page} total={total} onGo={goTo} />
+      <PdfToolbar page={page} total={total} onGo={goTo} prevPage={prevPage} nextPage={nextPage} />
     ) : (
       <Skeleton className="h-11 w-56" />
     );
   const controlProps = {
     tone,
-    fit,
     zoom,
     fullscreen: fullscreen.active,
     fullscreenSupported: fullscreen.supported,
     onTone: cycleTone,
-    onFit: toggleFit,
     onZoom: stepZoom,
     onFullscreen: toggleFullscreen,
     onShortcuts: () => setShortcutsOpen(true),
@@ -401,6 +516,35 @@ export function PdfReader({
     annotationCount: annotations.items.length,
     onAnnotations: () => setListOpen(true),
   };
+  // Matnli kitobda (backend `has_text_layer` — `false` emas) betlar ustida tanlanadigan matn qatlami.
+  const textLayer = book.data?.has_text_layer !== false;
+  const renderPage = (
+    pageNumber: number,
+    options: { current: boolean } & Partial<Omit<RenderPageOptions, "current">>,
+  ) =>
+    document.doc && (
+      <PdfPageCanvas
+        doc={document.doc}
+        pageNumber={pageNumber}
+        label={t("position", { page: pageNumber, total })}
+        fit={horizontal ? "contain" : "width"}
+        align={options.align}
+        current={options.current}
+        textLayer={textLayer}
+        highlight={findTerm || undefined}
+        overlay={
+          <AnnotationLayer
+            annotations={annotationsOnPage(annotations.items, pageNumber)}
+            drawing={drawing}
+            onDraw={(rect) => setDraft({ kind: "new", rect, page: pageNumber })}
+            onSelect={(annotation) => setDraft({ kind: "edit", annotation })}
+          />
+        }
+        onRendered={() => (reloads.current = 0)}
+        // Ko'rinmas prefetch beti xatosi e'tiborsiz: bet ko'ringanda qayta chiziladi va o'shanda aytiladi.
+        onError={options.prefetch ? ignoreRenderError : onRenderError}
+      />
+    );
   const share = () => {
     const url = window.location.href;
     if (typeof navigator.share === "function") {
@@ -488,7 +632,12 @@ export function PdfReader({
             </div>
           </div>
 
-          {desktop && toolbar}
+          {desktop && (
+            <div className="flex shrink-0 items-center gap-2">
+              {toolbar}
+              {prefsReady && <ReadingModeToggle mode={mode} onChange={changeMode} />}
+            </div>
+          )}
 
           <div className="flex shrink-0 items-center justify-end gap-0.5 lg:min-w-0 lg:flex-1">
             {controlProps.onSearch && !desktop && (
@@ -526,7 +675,7 @@ export function PdfReader({
           </aside>
         )}
 
-        <div className="min-w-0 flex-1 px-2.5 pt-4 pb-40 lg:px-6 lg:pt-8 lg:pb-12">
+        <div className="min-w-0 flex-1 px-2.5 pt-4 pb-40 lg:px-6 lg:pb-0">
           {findTerm && (
             <div
               className="mb-3 flex items-center justify-center gap-2 text-sm"
@@ -546,9 +695,10 @@ export function PdfReader({
           <div
             ref={pageAreaRef}
             data-testid="pdf-page-area"
+            data-mode={prefsReady ? mode : undefined}
             className={cn(
-              "pdf-page-area mx-auto max-w-[53.75rem] select-none",
-              zoom > MIN_ZOOM ? "touch-pan-x touch-pan-y" : "touch-pan-y",
+              "pdf-page-area mx-auto w-full select-none",
+              zoom > DEFAULT_ZOOM ? "touch-pan-x touch-pan-y" : "touch-pan-y",
             )}
             onPointerDown={onPointerDown}
             onPointerUp={onPointerUp}
@@ -578,52 +728,39 @@ export function PdfReader({
                   </>
                 }
               />
-            ) : document.doc && page !== null ? (
-              <div
-                ref={zoomScrollerRef}
-                className={cn(
-                  "bg-surface rounded-md shadow-lg",
-                  (zoom > MIN_ZOOM || liveZoom) && "overflow-x-auto",
-                )}
-              >
-                <div
-                  ref={zoomContentRef}
-                  data-testid="pdf-zoom-content"
-                  data-zoom={zoom}
-                  style={{
-                    width: `${zoom * 100}%`,
-                    ...(liveZoom && {
-                      transform: `scale(${liveZoom.scale})`,
-                      transformOrigin: liveZoom.origin,
-                    }),
-                    height:
-                      fit === "page" && zoom === MIN_ZOOM
-                        ? fullscreen.active
-                          ? "calc(100dvh - 7rem)"
-                          : "calc(100dvh - 9rem)"
-                        : undefined,
-                  }}
-                  className={cn(fit === "page" && zoom === MIN_ZOOM && "min-h-80")}
-                >
-                  <PdfPageCanvas
-                    doc={document.doc}
-                    pageNumber={page}
-                    label={t("position", { page, total })}
-                    fit={fit === "page" && zoom === MIN_ZOOM ? "contain" : "width"}
-                    highlight={findTerm || undefined}
-                    overlay={
-                      <AnnotationLayer
-                        annotations={annotationsOnPage(annotations.items, page)}
-                        drawing={drawing}
-                        onDraw={(rect) => setDraft({ kind: "new", rect })}
-                        onSelect={(annotation) => setDraft({ kind: "edit", annotation })}
-                      />
-                    }
-                    onRendered={() => (reloads.current = 0)}
-                    onError={onRenderError}
-                  />
-                </div>
-              </div>
+            ) : document.doc && page !== null && prefsReady ? (
+              horizontal ? (
+                <HorizontalView
+                  page={page}
+                  total={total}
+                  spread={spread}
+                  zoom={zoom}
+                  live={liveZoom}
+                  height={horizontalHeight({
+                    desktop,
+                    thumbs: thumbsOpen,
+                    findChip: Boolean(findTerm),
+                  })}
+                  scrollerRef={zoomScrollerRef}
+                  contentRef={zoomContentRef}
+                  onGo={goTo}
+                  renderPage={renderPage}
+                />
+              ) : (
+                <VerticalView
+                  doc={document.doc}
+                  page={page}
+                  total={total}
+                  zoom={zoom}
+                  live={liveZoom}
+                  fullscreen={fullscreen.active}
+                  stageRef={stageRef}
+                  scrollerRef={zoomScrollerRef}
+                  contentRef={zoomContentRef}
+                  onPageChange={setPageInUrl}
+                  renderPage={renderPage}
+                />
+              )
             ) : (
               <div role="status" aria-label={t("loading")}>
                 <Skeleton className="mx-auto aspect-[1/1.4] w-full max-w-3xl" />
@@ -631,8 +768,31 @@ export function PdfReader({
             )}
           </div>
 
+          {desktop && document.doc && page !== null && total > 0 && (
+            <div className="border-border bg-surface sticky bottom-0 z-10 -mx-6 mt-4 border-t print:hidden">
+              <button
+                type="button"
+                aria-expanded={thumbsOpen}
+                aria-label={t("pagesToggle")}
+                data-testid="pdf-thumbs-toggle"
+                onClick={() => setThumbsOpen((value) => !value)}
+                className="text-foreground hover:bg-subtle flex h-10 w-full items-center justify-center gap-1.5 text-sm font-semibold"
+              >
+                {thumbsOpen ? (
+                  <ChevronDown className="size-4" aria-hidden />
+                ) : (
+                  <ChevronUp className="size-4" aria-hidden />
+                )}
+                {t("pages")}
+              </button>
+              {thumbsOpen && (
+                <ThumbnailStrip doc={document.doc} page={page} total={total} onGo={goTo} />
+              )}
+            </div>
+          )}
+
           {book.data && (
-            <div className="mx-auto mt-6 max-w-[53.75rem]">
+            <div className="mx-auto mt-6 max-w-[53.75rem] lg:pb-12">
               <ReportErrorLink topicId={bookId} page={page ?? undefined} />
             </div>
           )}
@@ -644,10 +804,13 @@ export function PdfReader({
           page={page}
           total={total}
           onGo={goTo}
+          prevPage={prevPage}
+          nextPage={nextPage}
           onPanel={() => setTocOpen(true)}
           onView={() => setViewOpen(true)}
           zoom={zoom}
           onZoom={stepZoom}
+          onPages={document.doc ? () => setPagesSheetOpen(true) : undefined}
           onOffline={offlineBook ? () => setOfflineOpen(true) : undefined}
           onShare={share}
         />
@@ -659,13 +822,44 @@ export function PdfReader({
             {panel(() => setTocOpen(false), tocOpen)}
           </Dialog>
           <Dialog open={viewOpen} onOpenChange={setViewOpen} title={t("view")} placement="bottom">
-            <PdfReaderControls
-              {...controlProps}
-              labels
-              only="view"
-              onAfter={() => setViewOpen(false)}
-            />
+            <div className="flex flex-col gap-3">
+              <ReadingModeToggle
+                mode={mode}
+                labels
+                onChange={(next) => {
+                  changeMode(next);
+                  setViewOpen(false);
+                }}
+              />
+              <PdfReaderControls
+                {...controlProps}
+                labels
+                only="view"
+                onAfter={() => setViewOpen(false)}
+              />
+            </div>
           </Dialog>
+          {document.doc && page !== null && (
+            <Dialog
+              open={pagesSheetOpen}
+              onOpenChange={setPagesSheetOpen}
+              title={t("pages")}
+              placement="bottom"
+            >
+              {pagesSheetOpen && (
+                <ThumbnailStrip
+                  doc={document.doc}
+                  page={page}
+                  total={total}
+                  className="-mx-3"
+                  onGo={(next) => {
+                    setPagesSheetOpen(false);
+                    goTo(next);
+                  }}
+                />
+              )}
+            </Dialog>
+          )}
           {offlineBook && (
             <Dialog
               open={offlineOpen}
@@ -679,7 +873,7 @@ export function PdfReader({
         </>
       )}
 
-      {draft && page !== null && (
+      {draft && (
         <AnnotationDialog
           editing={draft.kind === "edit"}
           initial={
@@ -693,7 +887,7 @@ export function PdfReader({
             annotations.save(
               draft.kind === "edit"
                 ? { ...draft.annotation, color, note }
-                : newAnnotation({ bookId, page, color, note, rect: draft.rect }),
+                : newAnnotation({ bookId, page: draft.page, color, note, rect: draft.rect }),
             );
             setDraft(null);
           }}

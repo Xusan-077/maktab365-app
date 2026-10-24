@@ -120,3 +120,9 @@ export async function apiGet<T>(page: Page, path: string): Promise<T | null> {
   const response = await page.request.get(`/api/backend/api/v1${path}`);
   return response.ok() ? ((await response.json()) as T) : null;
 }
+
+/**
+ * O'qish oynasidagi joriy (URL'dagi) bet canvas'i: gorizontal rejimda qo'shni betlar oldindan
+ * (ko'rinmas) chiziladi, vertikalda ±2 bet — shuning uchun `pdf-canvas` bitta emas.
+ */
+export const CURRENT_PAGE = '[data-testid="pdf-canvas"][data-current]';

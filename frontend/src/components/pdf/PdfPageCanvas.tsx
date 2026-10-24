@@ -1,8 +1,16 @@
 "use client";
 
 import { useEffect, useEffectEvent, useRef, useState, type ReactNode } from "react";
+import { cn } from "@/lib/utils/cn";
 import { matchRects, type NormalizedRect, type PositionedItem } from "@/lib/pdf/find";
-import type { PDFDocumentProxy, PDFPageProxy, RenderTask } from "@/lib/pdf/pdfjs";
+import {
+  loadPdfjs,
+  type PDFDocumentProxy,
+  type PDFPageProxy,
+  type RenderTask,
+} from "@/lib/pdf/pdfjs";
+
+const JUSTIFY = { start: "justify-start", center: "justify-center", end: "justify-end" } as const;
 
 /** Fizik piksellar zichligi chegarasi: 3x ekranlarda xotira/vaqtni tejaydi. */
 const MAX_PIXEL_RATIO = 2;
@@ -28,6 +36,22 @@ export interface PdfPageCanvasProps {
   highlight?: string;
   /** Canvas ustidagi qatlam (belgilar): canvas bilan bir xil o'lchamli quti ichida. */
   overlay?: ReactNode;
+  /** Tanlanadigan matn qatlami (pdf.js `TextLayer`): matnli (skanerlanmagan) kitoblarda. */
+  textLayer?: boolean;
+  /** `contain` da gorizontal joylashuv: yoymada chap bet umurtqaga (o'ngga), o'ng bet chapga. */
+  align?: "start" | "center" | "end";
+  /** Joriy (URL'dagi) bet: bir nechta bet chizilganda testlar va e2e uchun `data-current`. */
+  current?: boolean;
+}
+
+/** Canvas o'lchami bilan bir xil masshtab (CSS px): sahifa eni/bo'yi konteynerga moslanadi. */
+function fitScale(
+  natural: { width: number; height: number },
+  width: number,
+  height: number,
+  contain: boolean,
+) {
+  return contain ? Math.min(width / natural.width, height / natural.height) : width / natural.width;
 }
 
 /** Faqat berilgan bitta sahifani konteynerga moslab chizadi; sahifa o'zgarsa oldingisi bekor qilinadi. */
@@ -40,9 +64,13 @@ export function PdfPageCanvas({
   fit = "width",
   highlight,
   overlay,
+  textLayer = false,
+  align = "center",
+  current,
 }: PdfPageCanvasProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const textRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
   const { width, height } = size;
   const contain = fit === "contain";
@@ -71,15 +99,13 @@ export function PdfPageCanvas({
     let cancelled = false;
     let task: RenderTask | undefined;
     let page: PDFPageProxy | undefined;
+    const target = canvasRef.current;
     void (async () => {
       try {
         page = await doc.getPage(pageNumber);
         if (cancelled) return;
         const ratio = Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO);
-        const natural = page.getViewport({ scale: 1 });
-        const scale = contain
-          ? Math.min(width / natural.width, height / natural.height)
-          : width / natural.width;
+        const scale = fitScale(page.getViewport({ scale: 1 }), width, height, contain);
         const viewport = page.getViewport({ scale: scale * ratio });
         // Sahifa ekrandan tashqari canvas'da chiziladi: tayyor bo'lgach bir zumda almashadi
         // (joriy sahifa bo'sh oq kadrsiz turadi, o'lcham sakramaydi).
@@ -115,8 +141,47 @@ export function PdfPageCanvas({
       cancelled = true;
       task?.cancel();
       page?.cleanup();
+      // Canvas xotirasi darhol bo'shaydi (virtualizatsiyada bet ro'yxatdan chiqqanda).
+      if (target && !target.isConnected) {
+        target.width = 0;
+        target.height = 0;
+      }
     };
   }, [doc, pageNumber, width, height, contain]);
+
+  // Matn qatlami: shaffof span'lar canvas ustida (belgilash/nusxa olish), canvas'dan mustaqil.
+  useEffect(() => {
+    const container = textRef.current;
+    if (!textLayer || !container || !width || (contain && !height)) return;
+    let cancelled = false;
+    let layer: { cancel(): void } | undefined;
+    void (async () => {
+      try {
+        const [pdfjs, page] = await Promise.all([loadPdfjs(), doc.getPage(pageNumber)]);
+        if (cancelled) return;
+        const scale = fitScale(page.getViewport({ scale: 1 }), width, height, contain);
+        const viewport = page.getViewport({ scale });
+        container.replaceChildren();
+        container.style.setProperty("--scale-factor", String(scale));
+        container.style.setProperty("--total-scale-factor", String(scale));
+        const textLayerTask = new pdfjs.TextLayer({
+          textContentSource: page.streamTextContent(),
+          container,
+          viewport,
+        });
+        layer = textLayerTask;
+        await textLayerTask.render();
+      } catch (error) {
+        // Matn qatlami ixtiyoriy: xatosi sahifa ko'rinishiga ta'sir qilmaydi.
+        if (!cancelled) console.warn(`[pdf] ${pageNumber}-bet matn qatlami chizilmadi`, error);
+      }
+    })();
+    return () => {
+      cancelled = true;
+      layer?.cancel();
+      container.replaceChildren();
+    };
+  }, [doc, pageNumber, width, height, contain, textLayer]);
 
   // Qidiruv belgilari: matn bo'laklari joylashuvidan (render'dan mustaqil, bekor qilinadigan).
   const markKey = `${pageNumber}|${highlight ?? ""}|${width}|${height}|${contain}`;
@@ -126,10 +191,7 @@ export function PdfPageCanvas({
     void (async () => {
       try {
         const page = await doc.getPage(pageNumber);
-        const natural = page.getViewport({ scale: 1 });
-        const scale = contain
-          ? Math.min(width / natural.width, height / natural.height)
-          : width / natural.width;
+        const scale = fitScale(page.getViewport({ scale: 1 }), width, height, contain);
         const viewport = page.getViewport({ scale });
         const content = await page.getTextContent();
         const items = content.items.filter(
@@ -165,17 +227,21 @@ export function PdfPageCanvas({
   return (
     <div
       ref={wrapRef}
-      className={contain ? "flex size-full items-center justify-center" : "w-full"}
+      className={cn(contain ? "flex size-full items-center" : "w-full", contain && JUSTIFY[align])}
     >
-      <div className="relative mx-auto w-fit max-w-full">
+      <div
+        className={cn("relative w-fit max-w-full", (!contain || align === "center") && "mx-auto")}
+      >
         <canvas
           ref={canvasRef}
           role="img"
           aria-label={label}
           data-testid="pdf-canvas"
           data-page={pageNumber}
+          data-current={current || undefined}
           className="bg-surface mx-auto block max-w-full rounded-sm shadow-md"
         />
+        {textLayer && <div ref={textRef} className="textLayer" data-testid="pdf-text-layer" />}
         {overlay}
         {rects.length > 0 && (
           <div aria-hidden data-testid="pdf-marks" className="pointer-events-none absolute inset-0">

@@ -1,10 +1,10 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { CloudDownload, ListTree, Share2, Type, ZoomIn } from "lucide-react";
+import { CloudDownload, GalleryHorizontal, ListTree, Share2, Type, ZoomIn } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { OverflowMenu, type OverflowMenuItem } from "@/components/ui/OverflowMenu";
-import { formatZoom, MIN_ZOOM } from "@/lib/pdf/zoom";
+import { DEFAULT_ZOOM, formatZoom } from "@/lib/pdf/zoom";
 import { cn } from "@/lib/utils/cn";
 import { PdfToolbar } from "../PdfToolbar";
 
@@ -42,32 +42,50 @@ export interface ReaderBottomBarProps {
   page: number;
   total: number;
   onGo: (page: number) => void;
+  prevPage?: number | null;
+  nextPage?: number | null;
   onPanel: () => void;
   onView: () => void;
-  /** Joriy zoom (1×–3×) va keyingi pog'onaga o'tish. */
+  /** Joriy zoom (50%–300%) va keyingi pog'onaga o'tish. */
   zoom: number;
   onZoom: () => void;
+  /** "Sahifalar" (thumbnail'lar) sheet'i. */
+  onPages?: () => void;
   onOffline?: () => void;
   onShare: () => void;
 }
 
 /**
  * Mobil pastki panel (suzuvchi): sahifa tugmalari va «Mundarija / Ko'rinish / Zoom / ⋯». Kamroq
- * ishlatiladiganlari («Oflayn», «Ulashish») — «⋯» menyusida.
+ * ishlatiladiganlari («Sahifalar», «Oflayn», «Ulashish») — «⋯» menyusida.
  */
 export function ReaderBottomBar({
   page,
   total,
   onGo,
+  prevPage,
+  nextPage,
   onPanel,
   onView,
   zoom,
   onZoom,
+  onPages,
   onOffline,
   onShare,
 }: ReaderBottomBarProps) {
   const t = useTranslations("pdfBooks.reader");
   const more: OverflowMenuItem[] = [
+    ...(onPages
+      ? [
+          {
+            id: "pages",
+            label: t("pages"),
+            icon: <GalleryHorizontal className="size-5" aria-hidden />,
+            testId: "pdf-pages-open",
+            onSelect: onPages,
+          },
+        ]
+      : []),
     ...(onOffline
       ? [
           {
@@ -90,7 +108,14 @@ export function ReaderBottomBar({
   return (
     <div className="fixed inset-x-3 bottom-[max(1rem,env(safe-area-inset-bottom))] z-20 lg:hidden print:hidden">
       <div className="bg-surface flex flex-col gap-1.5 rounded-[1.25rem] p-2 shadow-2xl">
-        <PdfToolbar page={page} total={total} onGo={onGo} variant="bar" />
+        <PdfToolbar
+          page={page}
+          total={total}
+          onGo={onGo}
+          prevPage={prevPage}
+          nextPage={nextPage}
+          variant="bar"
+        />
         <div className="border-border grid grid-cols-4 gap-1 border-t pt-1.5">
           <Action label={t("panel")} testId="pdf-toc-open" onClick={onPanel}>
             <ListTree className="size-5" aria-hidden />
@@ -99,9 +124,9 @@ export function ReaderBottomBar({
             <Type className="size-5" aria-hidden />
           </Action>
           <Action
-            label={zoom > MIN_ZOOM ? formatZoom(zoom) : t("zoom")}
+            label={zoom !== DEFAULT_ZOOM ? formatZoom(zoom) : t("zoom")}
             testId="pdf-zoom-bar"
-            pressed={zoom > MIN_ZOOM}
+            pressed={zoom !== DEFAULT_ZOOM}
             onClick={onZoom}
           >
             <ZoomIn className="size-5" aria-hidden />

@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { randomPassword } from "./credentials";
-import { apiGet, publishBook, register, signIn } from "./helpers";
+import { apiGet, CURRENT_PAGE, publishBook, register, signIn } from "./helpers";
 
 /**
  * O'qish jarayoni (M8): mehmon o'qiydi va saqlaydi → ro'yxatdan o'tadi → ma'lumot akkauntda;
@@ -35,7 +35,7 @@ test.describe.serial("O'qish jarayoni", () => {
 
   test("mehmon o'qiydi va saqlaydi → kirgach ma'lumot akkauntda", async ({ page }) => {
     await page.goto(`/uz/darsliklar/${bookId}?page=4`);
-    await expect(page.getByTestId("pdf-canvas")).toHaveAttribute("data-page", "4");
+    await expect(page.locator(CURRENT_PAGE)).toHaveAttribute("data-page", "4");
     await page.getByTestId("pdf-bookmark").click();
     await expect(page.getByTestId("pdf-bookmark")).toHaveAttribute("aria-pressed", "true");
     await expect
@@ -77,7 +77,7 @@ test.describe.serial("O'qish jarayoni", () => {
       await card.getByRole("link", { name: "Davom ettirish" }).click();
 
       await expect(other).toHaveURL(/\/uz\/darsliklar\/\d+\/[^/]+\/oqish\?page=4$/);
-      await expect(other.getByTestId("pdf-canvas")).toHaveAttribute("data-page", "4");
+      await expect(other.locator(CURRENT_PAGE)).toHaveAttribute("data-page", "4");
 
       // Saqlanganlar ham shu akkauntda.
       await other.goto("/uz/kabinet/saqlanganlar");
@@ -90,9 +90,9 @@ test.describe.serial("O'qish jarayoni", () => {
   test("oxirigacha o'qish: natijalarda va katalogda 'O'qilgan'", async ({ page }) => {
     await signIn(page, readerEmail, password);
     await page.goto(`/uz/darsliklar/${bookId}?page=${PAGES - 1}`);
-    await expect(page.getByTestId("pdf-canvas")).toHaveAttribute("data-page", String(PAGES - 1));
+    await expect(page.locator(CURRENT_PAGE)).toHaveAttribute("data-page", String(PAGES - 1));
     await page.getByTestId("pdf-next").click();
-    await expect(page.getByTestId("pdf-canvas")).toHaveAttribute("data-page", String(PAGES));
+    await expect(page.locator(CURRENT_PAGE)).toHaveAttribute("data-page", String(PAGES));
 
     await expect
       .poll(
@@ -102,9 +102,9 @@ test.describe.serial("O'qish jarayoni", () => {
       )
       .toBe("read");
 
-    // Holat monoton: orqaga qaytsa ham "o'qilgan" qoladi.
+    // Holat monoton: orqaga qaytsa ham "o'qilgan" qoladi (yoymada orqaga 2 bet).
     await page.getByTestId("pdf-prev").click();
-    await expect.poll(() => savedPage(page), { timeout: 15_000 }).toBe(PAGES - 1);
+    await expect.poll(() => savedPage(page), { timeout: 15_000 }).toBe(PAGES - 2);
     expect(
       (await apiGet<{ read_status: string }>(page, `/me/pdf-progress/${bookId}`))?.read_status,
     ).toBe("read");
@@ -157,12 +157,12 @@ test.describe.serial("O'qish jarayoni", () => {
   }) => {
     await signIn(page, readerEmail, password);
     await page.goto(`/uz/darsliklar/${bookId}?page=2`);
-    await expect(page.getByTestId("pdf-canvas")).toHaveAttribute("data-page", "2");
+    await expect(page.locator(CURRENT_PAGE)).toHaveAttribute("data-page", "2");
     await expect.poll(() => savedPage(page), { timeout: 15_000 }).toBe(2);
 
     await context.setOffline(true);
-    await page.getByTestId("pdf-next").click(); // 3-bet
-    await expect(page.getByTestId("pdf-canvas")).toHaveAttribute("data-page", "3");
+    await page.getByTestId("pdf-next").click(); // yoyma 2–3 → 4–5
+    await expect(page.locator(CURRENT_PAGE)).toHaveAttribute("data-page", "4");
     await expect
       .poll(() =>
         page.evaluate(() =>
@@ -172,11 +172,11 @@ test.describe.serial("O'qish jarayoni", () => {
             .join(""),
         ),
       )
-      .toContain('"page":3');
+      .toContain('"page":4');
 
     await context.setOffline(false);
     await page.evaluate(() => window.dispatchEvent(new Event("online")));
-    await expect.poll(() => savedPage(page), { timeout: 20_000 }).toBe(3);
+    await expect.poll(() => savedPage(page), { timeout: 20_000 }).toBe(4);
     await expect
       .poll(() =>
         page.evaluate(

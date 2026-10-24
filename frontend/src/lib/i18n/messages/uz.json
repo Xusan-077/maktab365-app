@@ -1341,7 +1341,13 @@
         "about": "Tavsif"
       },
       "zoom": "Zoom",
-      "more": "Yana"
+      "more": "Yana",
+      "modeLabel": "O'qish rejimi",
+      "modeH": "Gorizontal: varaqlash",
+      "modeV": "Vertikal: uzluksiz scroll",
+      "pages": "Sahifalar",
+      "pagesToggle": "Sahifalar panelini ko'rsatish yoki yashirish",
+      "thumb": "{page}-bet"
     },
     "bookmark": {
       "save": "Saqlash",
@@ -1525,8 +1531,6 @@
         "sepia": "sepiya",
         "dark": "qorong'i"
       },
-      "fitPage": "Butun sahifani sig'dirish",
-      "fitWidth": "Kenglikka moslash",
       "fullscreen": "To'liq ekran",
       "exitFullscreen": "To'liq ekrandan chiqish",
       "shortcuts": "Klaviatura yorliqlari",
@@ -1539,10 +1543,11 @@
     "shortcuts": {
       "title": "Klaviatura yorliqlari",
       "pages": "Oldingi / keyingi bet",
+      "pagesAlt": "Varaqlash (gorizontal rejim)",
       "ends": "Birinchi / oxirgi bet",
       "fullscreen": "To'liq ekran",
       "tone": "Sahifa foni (oddiy, sepiya, qorong'i)",
-      "zoom": "Kattalashtirish 1× / 2× (sahifani ikki marta bosish ham)",
+      "zoom": "Kattalashtirish 50–300% (Ctrl + g'ildirak, ikki marta bosish)",
       "find": "Kitobdan qidirish",
       "help": "Shu ro'yxat"
     },

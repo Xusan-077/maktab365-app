@@ -9,6 +9,8 @@ describe("swipeDirection", () => {
 
   it("qisqa harakat swipe emas", () => {
     expect(swipeDirection(-30, 0, 100)).toBeNull();
+    expect(swipeDirection(-49, 0, 100)).toBeNull();
+    expect(swipeDirection(-50, 0, 100)).toBe("next"); // 50px chegarasi
   });
 
   it("asosan tikka harakat (scroll) swipe emas", () => {
