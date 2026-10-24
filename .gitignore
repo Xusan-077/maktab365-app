@@ -38,3 +38,5 @@ media/
 
 # docker
 docker-compose.override.yml
+
+design-ref/
