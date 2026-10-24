@@ -1604,9 +1604,18 @@
   },
   "subjectsPage": {
     "title": "Fanlar",
-    "description": "Fanni tanlang va shu fandagi darsliklarni sinflar bo'yicha oching.",
+    "description": "Maktab dasturidagi barcha fanlar — yo'nalish bo'yicha guruhlangan.",
     "metaTitle": "Fanlar",
-    "metaDescription": "1–11-sinf fanlari: har bir fan bo'yicha darsliklarni toping va onlayn o'qing. Bepul."
+    "metaDescription": "1–11-sinf fanlari: har bir fan bo'yicha darsliklarni toping va onlayn o'qing. Bepul.",
+    "searchLabel": "Fan qidirish",
+    "searchPlaceholder": "Fan nomini yozing",
+    "tabsLabel": "Yo'nalishlar",
+    "all": "Barchasi",
+    "other": "Boshqa fanlar",
+    "empty": "Hozircha fanlar yo'q.",
+    "error": "Fanlarni yuklab bo'lmadi. Keyinroq qayta urinib ko'ring.",
+    "noResults": "«{query}» bo'yicha fan topilmadi.",
+    "clear": "Filtrlarni tozalash"
   },
   "login": {
     "pageTitle": "Kirish",

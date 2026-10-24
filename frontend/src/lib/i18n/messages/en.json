@@ -1604,9 +1604,18 @@
   },
   "subjectsPage": {
     "title": "Subjects",
-    "description": "Pick a subject and open its textbooks by grade.",
+    "description": "All school subjects, grouped by area.",
     "metaTitle": "Subjects",
-    "metaDescription": "Grade 1–11 subjects: find textbooks for each subject and read them online. Free."
+    "metaDescription": "Grade 1–11 subjects: find textbooks for each subject and read them online. Free.",
+    "searchLabel": "Search subjects",
+    "searchPlaceholder": "Type a subject name",
+    "tabsLabel": "Subject areas",
+    "all": "All",
+    "other": "Other subjects",
+    "empty": "No subjects yet.",
+    "error": "Couldn't load subjects. Please try again later.",
+    "noResults": "No subjects found for “{query}”.",
+    "clear": "Clear filters"
   },
   "login": {
     "pageTitle": "Sign in",
