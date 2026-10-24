@@ -30,6 +30,8 @@ const MOVED: { source: string; destination: string }[] = [
   { source: `/${LOCALE}/ustoz/darsliklar/:path*`, destination: "/:locale/darsliklar" },
   { source: `/${LOCALE}/ustoz/fanlar/:path*`, destination: "/:locale/darsliklar" },
   { source: `/${LOCALE}/ustoz/mavzular`, destination: "/:locale/ustoz" },
+  // Alohida ro'yxatdan o'tish yo'q: email kodi bilan kirganda akkaunt o'zi yaratiladi
+  { source: `/${LOCALE}/royxatdan-otish`, destination: "/:locale/kirish" },
   // Admin: PDF kitoblar `/admin/kitoblar` ga ko'chdi, mavzu sahifalari yo'q
   { source: `/${LOCALE}/admin/pdf-kitoblar/:path*`, destination: "/:locale/admin/kitoblar/:path*" },
   { source: `/${LOCALE}/admin/mavzular/:path*`, destination: "/:locale/admin/kitoblar" },

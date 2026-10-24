@@ -1487,6 +1487,14 @@ paths:
         schema:
           type: integer
         description: Sinf (1–11)
+      - in: query
+        name: ordering
+        schema:
+          type: string
+          enum:
+          - newest
+        description: '`newest` — so''nggi qo''shilganlar birinchi (standart: sinf
+          va fan bo''yicha)'
       - name: page
         required: false
         in: query

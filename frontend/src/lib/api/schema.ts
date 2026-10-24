@@ -3587,6 +3587,8 @@ export interface operations {
             query?: {
                 /** @description Sinf (1–11) */
                 grade?: number;
+                /** @description `newest` — so'nggi qo'shilganlar birinchi (standart: sinf va fan bo'yicha) */
+                ordering?: "newest";
                 /** @description A page number within the paginated result set. */
                 page?: number;
                 /** @description Number of results to return per page. */

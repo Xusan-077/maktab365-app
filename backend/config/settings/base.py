@@ -196,7 +196,7 @@ ADMIN_PASSWORD = env("ADMIN_PASSWORD", default="")
 GOOGLE_CLIENT_ID = env("GOOGLE_CLIENT_ID", default="")
 # @BotFather bergan token; Telegram Login Widget imzosi shu bilan tekshiriladi. Bo'sh — o'chiq.
 TELEGRAM_BOT_TOKEN = env("TELEGRAM_BOT_TOKEN", default="")
-TELEGRAM_AUTH_MAX_AGE_SECONDS = env.int("TELEGRAM_AUTH_MAX_AGE_SECONDS", default=5 * 60)
+TELEGRAM_AUTH_MAX_AGE_SECONDS = env.int("TELEGRAM_AUTH_MAX_AGE_SECONDS", default=24 * 60 * 60)
 OTP_TTL = timedelta(minutes=env.int("OTP_TTL_MINUTES", default=10))
 OTP_MAX_ATTEMPTS = env.int("OTP_MAX_ATTEMPTS", default=5)
 OTP_RESEND_COOLDOWN_SECONDS = env.int("OTP_RESEND_COOLDOWN_SECONDS", default=60)

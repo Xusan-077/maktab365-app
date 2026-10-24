@@ -32,6 +32,8 @@ export interface PdfBookFilters {
   subject?: string;
   q?: string;
   page?: number;
+  /** `newest` — so'nggi qo'shilganlar birinchi (standart: sinf va fan bo'yicha). */
+  ordering?: "newest";
   /** Standart 24; sinf sahifasi hamma kitobni bir so'rovda oladi (backend chegarasi 100). */
   pageSize?: number;
 }
@@ -52,6 +54,7 @@ export class PdfBooksApi {
           grade: filters.grade,
           subject: filters.subject || undefined,
           q: filters.q || undefined,
+          ordering: filters.ordering,
           page: filters.page,
           page_size: filters.pageSize ?? PDF_PAGE_SIZE,
         },

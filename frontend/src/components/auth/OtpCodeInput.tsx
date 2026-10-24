@@ -16,6 +16,10 @@ import { cn } from "@/lib/utils/cn";
 export interface OtpCodeInputProps {
   /** 6 xona to'lganda chaqiriladi. */
   onComplete: (code: string) => void;
+  /** Har o'zgarishda joriy kod (to'liq bo'lmasligi mumkin): tugmani yoqish/o'chirish uchun. */
+  onCodeChange?: (code: string) => void;
+  /** Xato xabarining id'si (`aria-describedby`). */
+  describedBy?: string;
   disabled?: boolean;
   invalid?: boolean;
   /** Guruh nomi (ekran o'qigich uchun). */
@@ -27,7 +31,14 @@ export interface OtpCodeInputProps {
  * Backspace/o'q tugmalari, qo'yish va SMS/email avtoto'ldirish (`autocomplete="one-time-code"`).
  * Qayta boshlash uchun tashqaridan `key` o'zgartiriladi.
  */
-export function OtpCodeInput({ onComplete, disabled, invalid, label }: OtpCodeInputProps) {
+export function OtpCodeInput({
+  onComplete,
+  onCodeChange,
+  describedBy,
+  disabled,
+  invalid,
+  label,
+}: OtpCodeInputProps) {
   const t = useTranslations("authForm.otp");
   const [cells, setCells] = useState<OtpCells>(emptyCells);
   // Tez yozishda (avtoto'ldirish, Playwright) keyingi tugma render'dan oldin keladi: holat shu yerda.
@@ -41,6 +52,7 @@ export function OtpCodeInput({ onComplete, disabled, invalid, label }: OtpCodeIn
   const store = (next: OtpCells, focus: number) => {
     latest.current = next;
     setCells(next);
+    onCodeChange?.(codeOf(next));
     refs.current[focus]?.focus();
   };
 
@@ -69,31 +81,35 @@ export function OtpCodeInput({ onComplete, disabled, invalid, label }: OtpCodeIn
   };
 
   return (
-    <div role="group" aria-label={label} className="flex justify-between gap-2">
-      {cells.map((cell, index) => (
-        <input
-          key={index}
-          ref={(element) => {
-            refs.current[index] = element;
-          }}
-          value={cell}
-          onChange={(event) => onChange(index, event.target.value)}
-          onKeyDown={(event) => onKeyDown(index, event)}
-          onPaste={(event) => onPaste(index, event)}
-          onFocus={(event) => event.target.select()}
-          disabled={disabled}
-          inputMode="numeric"
-          autoComplete={index === 0 ? "one-time-code" : "off"}
-          pattern="[0-9]*"
-          aria-label={t("digit", { n: index + 1 })}
-          aria-invalid={invalid ? true : undefined}
-          className={cn(
-            "border-border bg-surface h-14 w-full min-w-0 rounded-lg border text-center text-2xl font-semibold tabular-nums outline-none",
-            "focus-visible:border-primary-600 disabled:opacity-50",
-            invalid && "border-danger",
-          )}
-        />
-      ))}
-    </div>
+    <fieldset className="m-0 min-w-0 border-0 p-0">
+      <legend className="text-auth-text mb-3 p-0 text-[14px] font-semibold">{label}</legend>
+      <div className="grid grid-cols-6 gap-2">
+        {cells.map((cell, index) => (
+          <input
+            key={index}
+            ref={(element) => {
+              refs.current[index] = element;
+            }}
+            value={cell}
+            onChange={(event) => onChange(index, event.target.value)}
+            onKeyDown={(event) => onKeyDown(index, event)}
+            onPaste={(event) => onPaste(index, event)}
+            onFocus={(event) => event.target.select()}
+            disabled={disabled}
+            inputMode="numeric"
+            autoComplete={index === 0 ? "one-time-code" : "off"}
+            pattern="[0-9]*"
+            aria-label={t("digit", { n: index + 1 })}
+            aria-invalid={invalid ? true : undefined}
+            aria-describedby={describedBy}
+            className={cn(
+              "bg-auth-panel text-auth-text h-[60px] w-full min-w-0 rounded-[14px] border-[1.5px] text-center text-2xl font-bold tabular-nums outline-none",
+              "focus-visible:border-brand focus-visible:ring-brand-ring focus-visible:ring-4 disabled:opacity-50",
+              invalid ? "border-danger" : "border-auth-field",
+            )}
+          />
+        ))}
+      </div>
+    </fieldset>
   );
 }

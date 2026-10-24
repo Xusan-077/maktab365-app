@@ -19,12 +19,11 @@ async function codeFor(request: APIRequestContext, email: string): Promise<strin
   return code!;
 }
 
-/** Kirish sahifasi: email → "Davom etish" → "Parolsiz: kodni emailga yuborish". */
+/** Kirish sahifasi: email → "Kod yuborish" (desktop). */
 async function requestCode(page: Page, email: string) {
   const step = page.getByTestId("email-step");
   await step.getByLabel("Email").fill(email);
-  await step.getByRole("button", { name: "Davom etish" }).click();
-  await page.getByRole("button", { name: "Parolsiz: kodni emailga yuborish" }).click();
+  await step.getByRole("button", { name: /Kod yuborish/ }).click();
 }
 
 test.describe("email kodi bilan kirish", () => {

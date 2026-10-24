@@ -139,7 +139,7 @@ test.describe("Env orqali kirish (ADMIN_EMAIL/ADMIN_PASSWORD)", () => {
     await expect(async () => {
       if (await form.isVisible()) return;
       await step.getByLabel("Email").fill(envEmail!);
-      await step.getByRole("button", { name: "Davom etish" }).click();
+      await step.getByRole("button", { name: "Parol bilan kirish" }).click();
       await expect(form).toBeVisible({ timeout: 2_000 });
     }).toPass();
     await form.getByLabel("Parol", { exact: true }).fill(`${envPassword}-xato`);

@@ -11,6 +11,13 @@ export const OTP_PROVIDER = "otp";
 /** Telegram Login Widget boti (`@BotFather`, domen `/setdomain` bilan bog'langan). Bo'sh — tugma yashirin. */
 export const TELEGRAM_BOT_USERNAME = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME ?? "";
 
+/**
+ * Telegram boti raqamli id'si (bot tokenining `:` gacha qismi, maxfiy emas). Berilsa, maxsus
+ * "Telegram bilan davom etish" tugmasi `Telegram.Login.auth` orqali ishlaydi; bo'sh bo'lsa va
+ * `TELEGRAM_BOT_USERNAME` bor bo'lsa, rasmiy vidjet chiziladi.
+ */
+export const TELEGRAM_BOT_ID = process.env.NEXT_PUBLIC_TELEGRAM_BOT_ID ?? "";
+
 /** Brauzerdagi API so'rovlari shu yerdan backend'ga o'tadi (tokenlar brauzerga chiqmaydi). */
 export const BFF_PREFIX = "/api/backend";
 

@@ -1586,5 +1586,50 @@
     "description": "Fanni tanlang va shu fandagi darsliklarni sinflar bo'yicha oching.",
     "metaTitle": "Fanlar",
     "metaDescription": "1–11-sinf fanlari: har bir fan bo'yicha darsliklarni toping va onlayn o'qing. Bepul."
+  },
+  "login": {
+    "pageTitle": "Kirish",
+    "welcome": "Xush kelibsiz",
+    "subtitleDesktop": "Kirish ixtiyoriy — darsliklar hamma uchun ochiq.",
+    "subtitleMobile": "Kirsangiz, oxirgi bet va sevimli darsliklar saqlanadi.",
+    "headline": "1–11-sinf darsliklari bir joyda",
+    "lead": "Rasmiy darsliklarni bepul o'qing — telefonda ham, kompyuterda ham.",
+    "benefits": {
+      "label": "Kirish afzalliklari",
+      "bookmark": "Oxirgi o'qilgan bet saqlanadi",
+      "favorites": "Sevimli darsliklar ro'yxati",
+      "devices": "Barcha qurilmalarda bir xil"
+    },
+    "collageLabel": "Yangi qo'shilgan darsliklar",
+    "coverGrade": "{grade}-SINF",
+    "readWithout": "Kirmasdan o'qish",
+    "google": "Google bilan davom etish",
+    "telegram": "Telegram bilan davom etish",
+    "methods": "Kirish usullari",
+    "or": "yoki",
+    "orEmail": "yoki email orqali",
+    "emailLabel": "Email",
+    "emailPlaceholder": "siz@gmail.com",
+    "sendCode": "Kod yuborish",
+    "getCode": "Kod olish",
+    "codeHint": "Emailga 6 xonali kod keladi. Hisob bo'lmasa, avtomatik yaratiladi.",
+    "usePassword": "Parol bilan kirish",
+    "legal": "Davom etish orqali <terms>Foydalanish shartlari</terms> va <privacy>Maxfiylik siyosati</privacy>ga rozilik bildirasiz.",
+    "settingsLabel": "Til va ko'rinish",
+    "themeToggle": "Qorong'i va yorug' rejimni almashtirish",
+    "verify": {
+      "back": "Orqaga",
+      "title": "Kodni kiriting",
+      "text": "6 xonali kodni {email} manziliga yubordik.",
+      "change": "O'zgartirish",
+      "legend": "Tasdiqlash kodi",
+      "noCode": "Kod kelmadimi?",
+      "resendIn": "Qayta yuborish {time} dan keyin",
+      "resend": "Qayta yuborish",
+      "sent": "Yangi kod yuborildi.",
+      "info": "Hisobingiz bo'lmasa, avtomatik yaratiladi. Parol shart emas.",
+      "submit": "Kirish",
+      "missingEmail": "Email ko'rsatilmagan. Kirish sahifasidan kod so'rang."
+    }
   }
 }

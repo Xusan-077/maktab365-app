@@ -6,7 +6,6 @@ import { signIn } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 import { useAuthErrorText } from "@/hooks/useAuthErrorText";
 import { useCompleteSignIn } from "@/hooks/useCompleteSignIn";
@@ -14,63 +13,12 @@ import { authClient, errorCodeOf } from "@/lib/auth/client";
 import { PASSWORD_PROVIDER } from "@/lib/auth/config";
 import { Link, useRouter } from "@/lib/i18n/navigation";
 import { ROUTES } from "@/lib/utils/routes";
-import {
-  forgotPasswordSchema,
-  loginSchema,
-  type ForgotPasswordValues,
-  type LoginValues,
-} from "@/lib/validation/auth";
+import { loginSchema, type LoginValues } from "@/lib/validation/auth";
 import { FormAlert } from "./FormAlert";
 
 type ApiLocale = Parameters<typeof authClient.requestOtp>[1];
 
-/**
- * 1-qadam: faqat email. Backend'ga so'rov yuborilmaydi (akkaunt bor-yo'qligi oshkor bo'lmasin) —
- * email tekshirilib, keyingi qadamga o'tiladi.
- */
-export function EmailStep({
-  initialEmail,
-  onContinue,
-}: {
-  initialEmail: string;
-  onContinue: (email: string) => void;
-}) {
-  const t = useTranslations("authForm");
-  const errorText = useAuthErrorText();
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<ForgotPasswordValues>({
-    resolver: yupResolver(forgotPasswordSchema),
-    defaultValues: { email: initialEmail },
-  });
-
-  return (
-    <form
-      noValidate
-      onSubmit={handleSubmit(({ email }) => onContinue(email))}
-      className="flex flex-col gap-4"
-      data-testid="email-step"
-    >
-      <Input
-        label={t("email")}
-        type="email"
-        autoComplete="username"
-        inputMode="email"
-        className="h-11"
-        placeholder={t("emailPlaceholder")}
-        error={errorText(errors.email?.message)}
-        {...register("email")}
-      />
-      <Button type="submit" size="lg">
-        {t("continue")}
-      </Button>
-    </form>
-  );
-}
-
-/** 2-qadam: parol yoki parolsiz (emailga kod). Xatolar forma ustida, forma o'zgarmaydi. */
+/** Parolli kirish (admin va eski hisoblar) yoki parolsiz (emailga kod). Xatolar forma ustida, forma o'zgarmaydi. */
 export function PasswordStep({
   email,
   callbackUrl,

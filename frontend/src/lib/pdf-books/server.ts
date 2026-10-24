@@ -23,6 +23,14 @@ export async function getGradeBooks(grade: number): Promise<PdfBook[]> {
   return page.results;
 }
 
+/** Eng so'nggi qo'shilgan nashr qilingan kitoblar (kirish sahifasi kollaji). */
+export async function getLatestBooks(count: number): Promise<PdfBook[]> {
+  "use cache";
+  lifetime();
+  const page = await new PdfBooksApi().list({ ordering: "newest", pageSize: count });
+  return page.results;
+}
+
 /** Kitob slug bo'yicha; yo'q yoki ko'rinmasa `null`. */
 export async function getBookBySlug(slug: string): Promise<PdfBookDetail | null> {
   "use cache";

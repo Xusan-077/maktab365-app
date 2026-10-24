@@ -72,6 +72,23 @@
   --color-danger-strong-hover: var(--danger-strong-hover);
   --color-overlay: var(--overlay);
 
+  /* Kirish sahifasi (darslik365 brendi); qiymatlari :root va dark blokida. */
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-panel: var(--brand-panel);
+  --color-brand-navy: var(--brand-navy);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-text: var(--brand-text);
+  --color-brand-ring: var(--brand-ring);
+  --color-auth-bg: var(--auth-bg);
+  --color-auth-panel: var(--auth-panel);
+  --color-auth-text: var(--auth-text);
+  --color-auth-muted: var(--auth-muted);
+  --color-auth-subtle: var(--auth-subtle);
+  --color-auth-border: var(--auth-border);
+  --color-auth-field: var(--auth-field);
+  --color-auth-surface-2: var(--auth-surface-2);
+
   --font-sans:
     var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
@@ -100,6 +117,22 @@
   --danger-strong: #dc2626;
   --danger-strong-hover: #b91c1c;
   --overlay: rgb(2 6 23 / 0.5);
+
+  --brand: #1554d1;
+  --brand-hover: #0f3fa3;
+  --brand-panel: #1554d1;
+  --brand-navy: #071633;
+  --brand-soft: #eaf0fc;
+  --brand-text: #1554d1;
+  --brand-ring: #dce6fb;
+  --auth-bg: #ffffff;
+  --auth-panel: #ffffff;
+  --auth-text: #071633;
+  --auth-muted: #5b6478;
+  --auth-subtle: #6b7385;
+  --auth-border: #e3e7ef;
+  --auth-field: #d5dae3;
+  --auth-surface-2: #f4f6fa;
 }
 
 :root[data-theme="dark"] {
@@ -125,6 +158,19 @@
   --danger-strong: #dc2626;
   --danger-strong-hover: #b91c1c;
   --overlay: rgb(2 6 23 / 0.7);
+
+  --brand-panel: #0f3fa3;
+  --brand-soft: #16264a;
+  --brand-text: #8db4ff;
+  --brand-ring: #1d3a78;
+  --auth-bg: #0b1220;
+  --auth-panel: #111a2e;
+  --auth-text: #e6ecf7;
+  --auth-muted: #9aa6bd;
+  --auth-subtle: #9aa6bd;
+  --auth-border: #22304a;
+  --auth-field: #2d3d5c;
+  --auth-surface-2: #16213a;
 }
 
 /* Matn hajmi: S / M / L (rem asosida, hamma narsa mutanosib o'zgaradi). */

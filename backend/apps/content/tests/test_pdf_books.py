@@ -424,6 +424,17 @@ def test_subjects_include_empty_lists_all_admin_subjects(catalog, anon, algebra)
     assert {(s["slug"], s["books_count"]) for s in eight} == {("algebra", 0), ("geometriya", 0)}
 
 
+def test_public_list_newest_ordering(catalog, anon, algebra):
+    first = catalog.pdf_book(algebra, 1, title={"uz": "Birinchi"})
+    second = catalog.pdf_book(algebra, 11, title={"uz": "Ikkinchi"})
+
+    default = anon.get(f"{PUBLIC}/").json()["results"]
+    newest = anon.get(f"{PUBLIC}/", {"ordering": "newest", "page_size": 1}).json()["results"]
+
+    assert [b["id"] for b in default] == [str(first.pk), str(second.pk)]
+    assert [b["id"] for b in newest] == [str(second.pk)]
+
+
 def test_list_searches_titles_and_hides_drafts(catalog, anon, algebra):
     catalog.pdf_book(algebra, 9, title={"uz": "Matematika darsligi"})
     catalog.pdf_book(algebra, 9, "draft", title={"uz": "Matematika qoralama"})

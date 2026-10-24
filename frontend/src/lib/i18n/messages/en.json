@@ -1586,5 +1586,50 @@
     "description": "Pick a subject and open its textbooks by grade.",
     "metaTitle": "Subjects",
     "metaDescription": "Grade 1–11 subjects: find textbooks for each subject and read them online. Free."
+  },
+  "login": {
+    "pageTitle": "Sign in",
+    "welcome": "Welcome",
+    "subtitleDesktop": "Signing in is optional — textbooks are open to everyone.",
+    "subtitleMobile": "Sign in to keep your last page and favorite textbooks.",
+    "headline": "Grade 1–11 textbooks in one place",
+    "lead": "Read official textbooks for free — on your phone or computer.",
+    "benefits": {
+      "label": "Benefits of signing in",
+      "bookmark": "Your last page is saved",
+      "favorites": "A list of favorite textbooks",
+      "devices": "The same on every device"
+    },
+    "collageLabel": "Recently added textbooks",
+    "coverGrade": "GRADE {grade}",
+    "readWithout": "Read without signing in",
+    "google": "Continue with Google",
+    "telegram": "Continue with Telegram",
+    "methods": "Sign-in methods",
+    "or": "or",
+    "orEmail": "or with email",
+    "emailLabel": "Email",
+    "emailPlaceholder": "you@gmail.com",
+    "sendCode": "Send code",
+    "getCode": "Get code",
+    "codeHint": "We'll email you a 6-digit code. If you have no account, one is created automatically.",
+    "usePassword": "Sign in with password",
+    "legal": "By continuing, you agree to the <terms>Terms of Use</terms> and <privacy>Privacy Policy</privacy>.",
+    "settingsLabel": "Language and appearance",
+    "themeToggle": "Toggle dark and light mode",
+    "verify": {
+      "back": "Back",
+      "title": "Enter the code",
+      "text": "We sent a 6-digit code to {email}.",
+      "change": "Change",
+      "legend": "Verification code",
+      "noCode": "Didn't get the code?",
+      "resendIn": "Resend in {time}",
+      "resend": "Resend",
+      "sent": "A new code has been sent.",
+      "info": "If you have no account, one is created automatically. No password needed.",
+      "submit": "Sign in",
+      "missingEmail": "No email given. Request a code from the sign-in page."
+    }
   }
 }

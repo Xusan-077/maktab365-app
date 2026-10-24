@@ -52,6 +52,8 @@ class PdfBookListView(PublicView, generics.ListAPIView):
                 | Q(title__ru__icontains=query)
                 | Q(title__en__icontains=query)
             )
+        if request.query_params.get("ordering") == "newest":
+            return books.order_by("-created_at", "pk")
         return books.order_by("grade", "subject__order", "-created_at", "pk")
 
     @extend_schema(
@@ -60,6 +62,12 @@ class PdfBookListView(PublicView, generics.ListAPIView):
             GRADE_PARAM,
             SUBJECT_PARAM,
             OpenApiParameter("q", OpenApiTypes.STR, description="Kitob nomi bo'yicha"),
+            OpenApiParameter(
+                "ordering",
+                OpenApiTypes.STR,
+                enum=["newest"],
+                description="`newest` — so'nggi qo'shilganlar birinchi (standart: sinf va fan bo'yicha)",
+            ),
         ],
         summary="PDF darsliklar (sahifalangan)",
         tags=TAGS,

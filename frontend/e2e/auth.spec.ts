@@ -13,7 +13,7 @@ async function submitLogin(page: Page, pass = password) {
   await expect(async () => {
     if (await form.isVisible()) return;
     await step.getByLabel("Email").fill(email);
-    await step.getByRole("button", { name: "Davom etish" }).click();
+    await step.getByRole("button", { name: "Parol bilan kirish" }).click();
     await expect(form).toBeVisible({ timeout: 2_000 });
   }).toPass();
   await form.getByLabel("Parol", { exact: true }).fill(pass);
@@ -63,7 +63,7 @@ test.describe.serial("email + parol", () => {
 
     const step = page.getByTestId("email-step");
     await step.getByLabel("Email").fill(email);
-    await step.getByRole("button", { name: "Davom etish" }).click();
+    await step.getByRole("button", { name: "Parol bilan kirish" }).click();
     await expect(page.getByTestId("login-email")).toHaveText(email);
     await expect(
       page.getByRole("button", { name: "Parolsiz: kodni emailga yuborish" }),

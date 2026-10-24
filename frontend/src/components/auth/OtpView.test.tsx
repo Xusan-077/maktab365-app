@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { NextIntlClientProvider } from "next-intl";
 import uz from "@/lib/i18n/messages/uz.json";
@@ -13,9 +13,19 @@ const { signIn, completeSignIn, requestOtp } = vi.hoisted(() => ({
 
 vi.mock("next-auth/react", () => ({ signIn }));
 vi.mock("@/hooks/useCompleteSignIn", () => ({ useCompleteSignIn: () => completeSignIn }));
+vi.mock("@/components/layout/Logo", () => ({ Logo: () => <span>logo</span> }));
 vi.mock("@/lib/i18n/navigation", () => ({
-  Link: ({ href, children, className }: { href: string; children: string; className?: string }) => (
-    <a href={href} className={className}>
+  Link: ({
+    href,
+    children,
+    className,
+    ...rest
+  }: {
+    href: string;
+    children: React.ReactNode;
+    className?: string;
+  }) => (
+    <a href={href} className={className} {...rest}>
       {children}
     </a>
   ),
@@ -46,6 +56,7 @@ function tick(seconds: number) {
 }
 
 const cells = () => screen.getAllByRole("textbox") as HTMLInputElement[];
+const submitButton = () => screen.getByRole("button", { name: "Kirish" }) as HTMLButtonElement;
 
 beforeEach(() => {
   vi.useFakeTimers({ shouldAdvanceTime: true });
@@ -60,9 +71,14 @@ afterEach(() => {
 });
 
 describe("OtpView", () => {
-  it("email ko'rsatiladi, kataklar bor, birinchisiga fokus", () => {
-    setup({ email: "ali@example.com" });
+  it("email, 'O'zgartirish' havolasi va kataklar bor, birinchisiga fokus", () => {
+    setup({ email: "ali@example.com", callbackUrl: "/uz/sozlamalar" });
     expect(screen.getByText(/ali@example\.com/)).toBeTruthy();
+    const change = screen.getByRole("link", { name: "O'zgartirish" });
+    expect(change.getAttribute("href")).toBe(
+      "/kirish?email=ali%40example.com&callbackUrl=%2Fuz%2Fsozlamalar",
+    );
+    expect(screen.getByRole("group", { name: "Tasdiqlash kodi" })).toBeTruthy();
     expect(cells()).toHaveLength(6);
     expect(document.activeElement).toBe(cells()[0]);
   });
@@ -70,14 +86,22 @@ describe("OtpView", () => {
   it("email bo'lmasa tushuntirish va kirish sahifasiga havola", () => {
     setup({});
     expect(screen.getByRole("alert").textContent).toContain("Email ko'rsatilmagan");
-    expect(screen.getByRole("link").getAttribute("href")).toBe("/kirish");
+    expect(
+      screen.getAllByRole("link").some((link) => link.getAttribute("href") === "/kirish"),
+    ).toBe(true);
     expect(screen.queryAllByRole("textbox")).toHaveLength(0);
   });
 
-  it("6 raqam to'lishi bilan avtomatik yuboriladi va kirish yakunlanadi", async () => {
+  it("'Kirish' tugmasi kod to'lguncha o'chiq, 6-raqamda avtomatik yuboriladi", async () => {
     signIn.mockResolvedValue({ error: null });
     const user = setup({ email: "ali@example.com", callbackUrl: "/uz/sozlamalar" });
-    await user.keyboard("123456");
+    expect(submitButton().disabled).toBe(true);
+
+    await user.keyboard("12345");
+    expect(submitButton().disabled).toBe(true);
+    expect(signIn).not.toHaveBeenCalled();
+
+    await user.keyboard("6");
     await waitFor(() => expect(completeSignIn).toHaveBeenCalledWith("/uz/sozlamalar"));
     expect(signIn).toHaveBeenCalledExactlyOnceWith("otp", {
       redirect: false,
@@ -87,7 +111,7 @@ describe("OtpView", () => {
     });
   });
 
-  it("noto'g'ri kod: xabar, kataklar tozalanadi, qayta fokus", async () => {
+  it("noto'g'ri kod: xabar kataklar ostida, kataklar tozalanadi, qayta fokus", async () => {
     signIn.mockResolvedValue({ error: "CredentialsSignin", code: "invalid_code" });
     const user = setup();
     await user.keyboard("000000");
@@ -95,34 +119,31 @@ describe("OtpView", () => {
     expect(completeSignIn).not.toHaveBeenCalled();
     expect(cells().every((cell) => cell.value === "")).toBe(true);
     expect(document.activeElement).toBe(cells()[0]);
+    expect(submitButton().disabled).toBe(true);
   });
 
-  it("qayta yuborish 60 soniyadan keyin yoqiladi va yangi kod so'raydi", async () => {
+  it("qayta yuborish 60 soniyali taymerdan keyin havolaga aylanadi", async () => {
     requestOtp.mockResolvedValue({ ok: true });
     const user = setup();
-    const resend = screen.getByRole("button", { name: /Qayta yuborish: 60 soniya/ });
-    expect((resend as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByTestId("resend-timer").textContent).toContain("1:00");
+    expect(screen.queryByRole("button", { name: "Qayta yuborish" })).toBeNull();
 
-    tick(30);
-    expect(screen.getByRole("button", { name: /Qayta yuborish: 30 soniya/ })).toBeTruthy();
+    tick(18);
+    expect(screen.getByTestId("resend-timer").textContent).toContain("0:42");
 
-    tick(30);
-    const ready = screen.getByRole("button", { name: "Kodni qayta yuborish" });
-    expect((ready as HTMLButtonElement).disabled).toBe(false);
-
-    await user.click(ready);
+    tick(42);
+    await user.click(screen.getByRole("button", { name: "Qayta yuborish" }));
     expect(requestOtp).toHaveBeenCalledExactlyOnceWith("ali@example.com", "uz");
     expect((await screen.findByRole("status")).textContent).toContain("Yangi kod yuborildi");
     // Taymer qayta boshlandi.
-    expect(screen.getByRole("button", { name: /Qayta yuborish: 60 soniya/ })).toBeTruthy();
+    expect(screen.getByTestId("resend-timer").textContent).toContain("1:00");
   });
 
   it("qayta so'rash xatosi (cooldown) tushunarli xabar bilan", async () => {
     requestOtp.mockRejectedValue({ code: "otp_cooldown" });
     const user = setup();
     tick(60);
-    fireEvent.click(screen.getByRole("button", { name: "Kodni qayta yuborish" }));
-    await user.tab();
+    await user.click(screen.getByRole("button", { name: "Qayta yuborish" }));
     expect((await screen.findByRole("alert")).textContent).toContain("Kod yaqinda yuborildi");
   });
 });
