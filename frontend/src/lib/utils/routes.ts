@@ -63,8 +63,8 @@ export const baseHome = (base: AppBase) => (base === "marketing" ? ROUTES.home :
 
 /** Darsliklar katalogi (sinf → fan → kitoblar): hamma uchun ochiq, panel ichida ham shu sahifa. */
 export const catalogPath = () => ROUTES.textbooks;
-/** Sinf sahifasi: `/darsliklar/9`. */
-export const gradePath = (grade: number) => `${ROUTES.textbooks}/${grade}`;
+/** Sinf bo'yicha katalog: `/darsliklar?sinf=9` (alohida sinf sahifasi yo'q). */
+export const gradePath = (grade: number) => `${ROUTES.textbooks}?sinf=${grade}`;
 
 /** Kitobning yo'l qismlari (API `PdfBook` ning ichki to'plami). */
 export interface BookRef {
@@ -73,7 +73,7 @@ export interface BookRef {
 }
 
 /** Kitob sahifasi: `/darsliklar/9/9-sinf-algebra`. */
-export const pdfBookPath = (book: BookRef) => `${gradePath(book.grade)}/${book.slug}`;
+export const pdfBookPath = (book: BookRef) => `${ROUTES.textbooks}/${book.grade}/${book.slug}`;
 
 /** O'qish oynasi: `/darsliklar/9/9-sinf-algebra/oqish?page=N`. */
 export const readerPath = (book: BookRef, page?: number) =>

@@ -28,7 +28,7 @@ function StartCard() {
   const t = useTranslations("library.continue");
   const { data: me } = useMe();
   const grade = me?.role === "student" ? me.grade : undefined;
-  const href = grade === undefined ? catalogPath() : `${catalogPath()}?grade=${grade}`;
+  const href = grade === undefined ? catalogPath() : `${catalogPath()}?sinf=${grade}`;
   return (
     <section className="border-border bg-surface flex flex-col items-start gap-3 rounded-xl border p-6">
       <h2 className="text-2xl font-semibold tracking-tight">{t("emptyTitle")}</h2>
@@ -136,7 +136,7 @@ function GradesPanel({ data }: { data: TeacherDashboard }) {
           <li key={row.grade} className="flex flex-col gap-1.5">
             <div className="flex items-baseline justify-between gap-3">
               <Link
-                href={`${catalogPath()}?grade=${row.grade}`}
+                href={`${catalogPath()}?sinf=${row.grade}`}
                 className="font-medium hover:underline"
               >
                 {t("grade", { grade: row.grade })}

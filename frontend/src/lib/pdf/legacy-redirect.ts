@@ -1,6 +1,6 @@
 import { isUuid } from "@/lib/admin/ids";
 import { parseGradeParam } from "./grade-groups";
-import { gradePath, readerPath } from "@/lib/utils/routes";
+import { readerPath, ROUTES } from "@/lib/utils/routes";
 
 /** Tilsiz yo'l `/darsliklar/<uuid>` bo'lsa uuid (eski o'qish manzili), aks holda `null`. */
 export function legacyBookId(path: string): string | null {
@@ -9,7 +9,7 @@ export function legacyBookId(path: string): string | null {
 }
 
 /**
- * Eski `/darsliklar?grade=9` → `/darsliklar/9` (qolgan parametrlar saqlanadi, `grade` olinadi).
+ * Eski `/darsliklar?grade=9` → `/darsliklar?sinf=9` (qolgan parametrlar saqlanadi, `grade` olinadi).
  * Yangi manzil kerak bo'lmasa `null`.
  */
 export function legacyGradeRedirect(path: string, search: string): string | null {
@@ -19,8 +19,8 @@ export function legacyGradeRedirect(path: string, search: string): string | null
   if (grade === null) return null;
   params.delete("grade");
   params.delete("page");
-  const rest = params.toString();
-  return `${gradePath(grade)}${rest ? `?${rest}` : ""}`;
+  params.set("sinf", String(grade));
+  return `${ROUTES.textbooks}?${params.toString()}`;
 }
 
 /** Eski uuid manzili bo'yicha topilgan kitobdan yangi o'qish manzili (`?page=` saqlanadi). */

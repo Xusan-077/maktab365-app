@@ -108,7 +108,7 @@ describe("PanelSearch", () => {
     const input = setup();
     fireEvent.change(input, { target: { value: "9" } });
     const link = screen.getByRole("link", { name: "9-sinf darsliklari" });
-    expect(link.getAttribute("href")).toBe("/darsliklar/9");
+    expect(link.getAttribute("href")).toBe("/darsliklar?sinf=9");
     expect(api.list).not.toHaveBeenCalled();
   });
 

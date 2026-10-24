@@ -32,7 +32,7 @@ describe("yo'llar", () => {
   it("katalog va kitob sahifasi hamma uchun bir xil, ochiq yo'lda", () => {
     expect(catalogPath()).toBe("/darsliklar");
     expect(pdfBookPath({ grade: 9, slug: "9-sinf-algebra" })).toBe("/darsliklar/9/9-sinf-algebra");
-    expect(gradePath(9)).toBe("/darsliklar/9");
+    expect(gradePath(9)).toBe("/darsliklar?sinf=9");
     expect(readerPath({ grade: 9, slug: "x" })).toBe("/darsliklar/9/x/oqish");
     expect(readerPath({ grade: 9, slug: "x" }, 1)).toBe("/darsliklar/9/x/oqish");
     expect(readerPath({ grade: 9, slug: "x" }, 12)).toBe("/darsliklar/9/x/oqish?page=12");

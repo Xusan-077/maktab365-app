@@ -17,10 +17,10 @@ describe("legacyBookId", () => {
 });
 
 describe("legacyGradeRedirect", () => {
-  it("?grade=9 ni /darsliklar/9 ga o'tkazadi, qolganini saqlaydi", () => {
-    expect(legacyGradeRedirect("/darsliklar", "?grade=9")).toBe("/darsliklar/9");
+  it("?grade=9 ni /darsliklar?sinf=9 ga o'tkazadi, qolganini saqlaydi", () => {
+    expect(legacyGradeRedirect("/darsliklar", "?grade=9")).toBe("/darsliklar?sinf=9");
     expect(legacyGradeRedirect("/darsliklar", "?grade=9&q=algebra&page=2")).toBe(
-      "/darsliklar/9?q=algebra",
+      "/darsliklar?q=algebra&sinf=9",
     );
   });
   it("yaroqsiz sinf yoki boshqa yo'lda o'tkazmaydi", () => {

@@ -145,7 +145,7 @@ describe("LibraryHome", () => {
 
     expect(await screen.findByText(t.continue.emptyTitle)).toBeTruthy();
     const link = screen.getByRole("link", { name: t.continue.browse });
-    expect(link.getAttribute("href")).toBe("/darsliklar?grade=7");
+    expect(link.getAttribute("href")).toBe("/darsliklar?sinf=7");
     expect(screen.queryByTestId("continue-card")).toBeNull();
   });
 

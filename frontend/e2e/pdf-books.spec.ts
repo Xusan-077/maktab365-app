@@ -205,10 +205,8 @@ test.describe.serial("PDF darsliklar", () => {
     await page.goto(`/uz/darsliklar/${bookId}`);
     await expect(page).toHaveURL(/\?page=5$/);
     await expect(page.getByTestId("pdf-page-input")).toHaveValue("5");
-    await page.goto("/uz/darsliklar?grade=9");
-    await expect(page.getByTestId("pdf-book-card").filter({ hasText: TITLE })).toContainText(
-      "5-betdan davom etish",
-    );
+    await page.goto("/uz/darsliklar?sinf=9");
+    await expect(page.getByRole("link").filter({ hasText: TITLE })).toContainText("5-bet");
 
     // --- URL'dagi sahifa saqlangandan ustun.
     await page.goto(`/uz/darsliklar/${bookId}?page=2`);

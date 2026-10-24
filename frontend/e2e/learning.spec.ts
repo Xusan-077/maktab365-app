@@ -112,9 +112,8 @@ test.describe.serial("O'qish jarayoni", () => {
     await page.goto("/uz/kabinet/natijalar");
     await expect(page.getByTestId("results-read")).toContainText(TITLE);
 
-    await page.goto("/uz/darsliklar?grade=9");
-    const card = page.getByTestId("pdf-book-card").filter({ hasText: TITLE });
-    await expect(card.getByTestId("pdf-read-badge")).toHaveText("O'qilgan");
+    await page.goto("/uz/darsliklar?sinf=9");
+    await expect(page.getByRole("link").filter({ hasText: TITLE })).toContainText("O'qilgan");
 
     // Menyuda yangi bo'limlar.
     await page.goto("/uz/kabinet/fanlar");

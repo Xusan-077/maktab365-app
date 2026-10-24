@@ -11,13 +11,27 @@ import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { routing } from "@/lib/i18n/routing";
 import { getAlternates } from "@/lib/i18n/seo";
 import { catalogFiltersKey, parseCatalogFilters } from "@/lib/pdf/catalog-filters";
-import { ROUTES } from "@/lib/utils/routes";
+import { getGradeBooks } from "@/lib/pdf-books/server";
+import { gradePath, ROUTES } from "@/lib/utils/routes";
 
 type Props = PageProps<"/[locale]/darsliklar">;
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
+  const { grade } = parseCatalogFilters(await searchParams);
+  // `?sinf=9` — sinf sahifasi o'rnidagi kanonik manzil (o'z sarlavhasi bilan); qolgan filtrlar katalogga kanonik.
+  if (grade) {
+    const [t, books] = await Promise.all([
+      getTranslations({ locale, namespace: "pdfBooks.grade.meta" }),
+      getGradeBooks(grade),
+    ]);
+    return {
+      title: t("title", { grade }),
+      description: t("description", { grade, count: books.length }),
+      alternates: getAlternates(locale, gradePath(grade)),
+    };
+  }
   const t = await getTranslations({ locale, namespace: "catalogPage" });
   return {
     title: t("metaTitle"),

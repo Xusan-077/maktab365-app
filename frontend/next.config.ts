@@ -22,6 +22,11 @@ const MOVED: { source: string; destination: string }[] = [
     source: `/${LOCALE}/darsliklar/:book((?![0-9]{1,2}/)[^/]+)/:topic`,
     destination: "/:locale/darsliklar",
   },
+  // Sinf sahifasi yo'q: `/darsliklar/9` → katalog filtri (so'rov parametrlari, masalan `?q=`, saqlanadi)
+  {
+    source: `/${LOCALE}/darsliklar/:sinf([0-9]{1,2})`,
+    destination: "/:locale/darsliklar?sinf=:sinf",
+  },
   { source: `/${LOCALE}/fanlar/:subject`, destination: "/:locale/darsliklar?subject=:subject" },
   // Panel ichidagi eski bo'limlar
   { source: `/${LOCALE}/kabinet/darsliklar/:path*`, destination: "/:locale/darsliklar" },
