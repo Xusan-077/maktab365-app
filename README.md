@@ -110,8 +110,10 @@ Yoki ildizdan: `make dev`. Boshqa buyruqlar: `make test`, `make lint`, `make sch
   `POST /admin/pdf-books/{id}/duplicate/`, belgilar `me/pdf-annotations/`, Telegram bot API `GET /bot/books/`
   (`BOT_API_TOKEN` bilan yoqiladi, `backend/README.md`). Migratsiyalar faqat qo'shuvchi (`content 0008–0011`,
   `analytics 0001`, `learning 0006`); predeploy da `migrate` avtomatik.
-- **O'qish oynasi:** sahifa foni (oddiy/sepiya/qorong'i), butun sahifa/kenglikka moslash, ikki marta bosib zoom, to'liq
-  ekran, klaviatura yorliqlari (`?`), kitob ichida qidiruv (Ctrl+F; matn qatlami yo'q skaner PDF uchun aniq xabar),
+- **O'qish oynasi:** ikki rejim (`?mode=h|v`, tanlov eslab qolinadi): gorizontal — kitob kabi varaqlash (desktopda 2 betlik
+  yoyma, ←/→/PgUp/PgDn/Space, swipe, qo'shni betlar oldindan chiziladi) va vertikal — uzluksiz scroll (virtualizatsiya:
+  faqat ko'rinayotgan bet ±2 chiziladi); «Sahifalar» thumbnail paneli, tanlanadigan matn qatlami, sahifa foni
+  (oddiy/sepiya/qorong'i), zoom 50–300% (tugma, ikki marta bosish, pinch, Ctrl+g'ildirak), to'liq ekran (F), klaviatura yorliqlari (`?`), kitob ichida qidiruv (Ctrl+F; matn qatlami yo'q skaner PDF uchun aniq xabar),
   3 rangli belgilar va qisqa eslatma (mehmonda brauzerda, kirganda serverda; kirgach birlashadi).
 - **Boshqa:** bosh sahifada «Davom ettirish» va «Oxirgi ko'rilganlar» (mehmon ham), global qidiruv (Ctrl+K: kitob, sinf, fan,
   mundarija bo'limi) sayt sarlavhasida ham, admin: statistika (`/admin/statistika`), ommaviy yuklash

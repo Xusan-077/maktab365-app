@@ -3,7 +3,6 @@ import {
   DEFAULT_READER_PREFS,
   DOUBLE_TAP_MS,
   isDoubleTap,
-  nextFit,
   nextTone,
   sanitizePrefs,
 } from "./reader-prefs";
@@ -14,14 +13,12 @@ describe("reader prefs", () => {
     expect(nextTone("sepia")).toBe("dark");
     expect(nextTone("dark")).toBe("light");
   });
-  it("moslash almashadi", () => {
-    expect(nextFit("width")).toBe("page");
-    expect(nextFit("page")).toBe("width");
-  });
   it("buzilgan xotira standartga qaytadi", () => {
     expect(sanitizePrefs(null)).toEqual(DEFAULT_READER_PREFS);
-    expect(sanitizePrefs({ tone: "neon", fit: 3 })).toEqual(DEFAULT_READER_PREFS);
-    expect(sanitizePrefs({ tone: "dark", fit: "page" })).toEqual({ tone: "dark", fit: "page" });
+    expect(sanitizePrefs({ tone: "neon", mode: "x" })).toEqual(DEFAULT_READER_PREFS);
+    expect(sanitizePrefs({ tone: "dark", mode: "h" })).toEqual({ tone: "dark", mode: "h" });
+    // Eski versiyadagi `fit` e'tiborsiz qoladi.
+    expect(sanitizePrefs({ tone: "sepia", fit: "page" })).toEqual({ tone: "sepia", mode: null });
   });
 });
 

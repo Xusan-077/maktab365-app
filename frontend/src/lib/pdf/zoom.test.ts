@@ -9,12 +9,14 @@ import {
   nextZoomStep,
   pinchZoom,
   visibleCount,
+  wheelZoom,
 } from "./zoom";
 
 describe("zoom chegaralari", () => {
-  it("1×–3× oralig'ida, 0.05 qadam bilan", () => {
-    expect([MIN_ZOOM, MAX_ZOOM]).toEqual([1, 3]);
-    expect(clampZoom(0.4)).toBe(1);
+  it("50%–300% oralig'ida, 0.05 qadam bilan", () => {
+    expect([MIN_ZOOM, MAX_ZOOM]).toEqual([0.5, 3]);
+    expect(clampZoom(0.4)).toBe(0.5);
+    expect(clampZoom(0.72)).toBe(0.7);
     expect(clampZoom(7)).toBe(3);
     expect(clampZoom(1.234)).toBe(1.25);
     expect(clampZoom(Number.NaN)).toBe(1);
@@ -26,7 +28,7 @@ describe("pinchZoom", () => {
     expect(pinchZoom(1, 100, 200)).toBe(2);
     expect(pinchZoom(2, 100, 75)).toBe(1.5);
     expect(pinchZoom(2, 100, 400)).toBe(3);
-    expect(pinchZoom(1.5, 100, 10)).toBe(1);
+    expect(pinchZoom(1.5, 100, 10)).toBe(0.5);
     expect(pinchZoom(1.5, 0, 50)).toBe(1.5); // boshlang'ich masofa 0 — o'zgarmaydi
   });
 });
@@ -36,6 +38,7 @@ describe("doubleTapZoom / nextZoomStep", () => {
     expect(doubleTapZoom(1)).toBe(2);
     expect(doubleTapZoom(2)).toBe(1);
     expect(doubleTapZoom(2.6)).toBe(1);
+    expect(doubleTapZoom(0.5)).toBe(1); // kichraytirilgan — 100% ga
   });
 
   it("tugma: 1 → 1.5 → 2 → 3 → 1; oraliq qiymatdan keyingi pog'onaga", () => {
@@ -44,10 +47,17 @@ describe("doubleTapZoom / nextZoomStep", () => {
     expect(nextZoomStep(2.95)).toBe(3);
   });
 
-  it("formatZoom", () => {
-    expect(formatZoom(1)).toBe("1×");
-    expect(formatZoom(1.5)).toBe("1.5×");
-    expect(formatZoom(2.25)).toBe("2.3×");
+  it("formatZoom — foizda", () => {
+    expect(formatZoom(1)).toBe("100%");
+    expect(formatZoom(1.5)).toBe("150%");
+    expect(formatZoom(0.5)).toBe("50%");
+  });
+
+  it("Ctrl+g'ildirak: yuqoriga — kattalashadi, pastga — kichrayadi, chegaralarda to'xtaydi", () => {
+    expect(wheelZoom(1, -100)).toBeGreaterThan(1);
+    expect(wheelZoom(1, 100)).toBeLessThan(1);
+    expect(wheelZoom(3, -500)).toBe(3);
+    expect(wheelZoom(0.5, 500)).toBe(0.5);
   });
 });
 

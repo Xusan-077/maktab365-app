@@ -1341,7 +1341,13 @@
         "about": "About"
       },
       "zoom": "Zoom",
-      "more": "More"
+      "more": "More",
+      "modeLabel": "Reading mode",
+      "modeH": "Horizontal: page flip",
+      "modeV": "Vertical: continuous scroll",
+      "pages": "Pages",
+      "pagesToggle": "Show or hide the pages panel",
+      "thumb": "Page {page}"
     },
     "bookmark": {
       "save": "Save",
@@ -1525,8 +1531,6 @@
         "sepia": "sepia",
         "dark": "dark"
       },
-      "fitPage": "Fit whole page",
-      "fitWidth": "Fit to width",
       "fullscreen": "Full screen",
       "exitFullscreen": "Exit full screen",
       "shortcuts": "Keyboard shortcuts",
@@ -1539,10 +1543,11 @@
     "shortcuts": {
       "title": "Keyboard shortcuts",
       "pages": "Previous / next page",
+      "pagesAlt": "Flip pages (horizontal mode)",
       "ends": "First / last page",
       "fullscreen": "Full screen",
       "tone": "Page background (normal, sepia, dark)",
-      "zoom": "Zoom 1× / 2× (double-tap the page too)",
+      "zoom": "Zoom 50–300% (Ctrl + wheel, double-tap)",
       "find": "Search in book",
       "help": "This list"
     },

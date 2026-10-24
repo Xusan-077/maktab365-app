@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { randomPassword } from "./credentials";
-import { register as registerUser, signIn } from "./helpers";
+import { CURRENT_PAGE, register as registerUser, signIn } from "./helpers";
 import { manage } from "./manage";
 import { makePdf } from "./pdf-fixture";
 
@@ -131,7 +131,7 @@ test.describe.serial("PDF darsliklar", () => {
 
     // --- Ochilganda 1-sahifa, URL'da ?page=1, «1 / 8».
     await expect(page).toHaveURL(/\/oqish\?page=1$/);
-    await expect(page.getByTestId("pdf-canvas")).toBeVisible();
+    await expect(page.locator(CURRENT_PAGE)).toBeVisible();
     await expect(page.getByTestId("pdf-page-total")).toHaveText(`/ ${PAGES}`);
 
     // --- Tavsif ko'rinadi; mundarija paneli bo'limni bossa shu betga o'tkazadi.
@@ -142,7 +142,7 @@ test.describe.serial("PDF darsliklar", () => {
     await expect(items.nth(0)).toHaveAttribute("aria-current", "location");
     await items.nth(1).click();
     await expect(page).toHaveURL(/\?page=2$/);
-    await expect(page.getByTestId("pdf-canvas")).toHaveAttribute("data-page", "2");
+    await expect(page.locator(CURRENT_PAGE)).toHaveAttribute("data-page", "2");
 
     // --- Raqam kiritib 5-sahifaga o'tish.
     const input = page.getByTestId("pdf-page-input");
@@ -150,7 +150,7 @@ test.describe.serial("PDF darsliklar", () => {
     await input.press("Enter");
     await expect(page).toHaveURL(new RegExp(`\\?page=5$`));
     await expect(input).toHaveValue("5");
-    await expect(page.getByTestId("pdf-canvas")).toHaveAttribute("data-page", "5");
+    await expect(page.locator(CURRENT_PAGE)).toHaveAttribute("data-page", "5");
 
     // --- Chegaradan tashqari qiymat tuzatiladi; klaviatura va tugmalar.
     await input.fill("999");
@@ -162,9 +162,13 @@ test.describe.serial("PDF darsliklar", () => {
     await input.fill("5");
     await input.press("Enter");
     await expect(page).toHaveURL(/\?page=5$/);
+    // Desktop (landshaft) — 2 betlik yoyma: 4–5 → 6–7 va orqaga 2 bet.
     await page.keyboard.press("ArrowRight");
     await expect(page).toHaveURL(/\?page=6$/);
     await page.getByTestId("pdf-prev").click();
+    await expect(page).toHaveURL(/\?page=4$/);
+    await input.fill("5");
+    await input.press("Enter");
     await expect(page).toHaveURL(/\?page=5$/);
 
     // --- Progress serverda saqlandi (debounce'dan keyin).
@@ -185,7 +189,7 @@ test.describe.serial("PDF darsliklar", () => {
   test("mehmon pozitsiyasi ro'yxatdan o'tganda akkauntga qo'shiladi", async ({ page }) => {
     // Mehmon: 4-sahifagacha o'qiydi (brauzerda saqlanadi).
     await page.goto(`/uz/darsliklar/${bookId}?page=4`);
-    await expect(page.getByTestId("pdf-canvas")).toHaveAttribute("data-page", "4");
+    await expect(page.locator(CURRENT_PAGE)).toHaveAttribute("data-page", "4");
     await expect
       .poll(() => page.evaluate(() => localStorage.getItem("maktab365-guest-pdf")))
       .toContain(bookId);
@@ -212,7 +216,7 @@ test.describe.serial("PDF darsliklar", () => {
   }) => {
     await signIn(page, studentEmail, userPassword);
     await page.goto(`/uz/darsliklar/${bookId}?page=3`);
-    await expect(page.getByTestId("pdf-canvas")).toHaveAttribute("data-page", "3");
+    await expect(page.locator(CURRENT_PAGE)).toHaveAttribute("data-page", "3");
     await page.getByTestId("pdf-bookmark").click();
     await expect.poll(() => savedBookIds(page)).toContain(bookId);
     await expect.poll(() => savedPage(page), { timeout: 15_000 }).toBe(3);

@@ -627,6 +627,106 @@ dialog[open]::backdrop {
   background-color: var(--background);
 }
 
+/* Gorizontal yoyma: o'rtadagi umurtqa soyasi va ekran chetidagi oldingi/keyingi tugmalari. */
+.pdf-spine {
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgb(15 23 42 / 0.16) 45%,
+    rgb(15 23 42 / 0.22) 50%,
+    rgb(15 23 42 / 0.16) 55%,
+    transparent
+  );
+}
+.pdf-edge-button {
+  position: absolute;
+  top: 50%;
+  z-index: 5;
+  display: inline-flex;
+  width: 2.75rem;
+  height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border);
+  border-radius: 9999px;
+  background-color: color-mix(in oklab, var(--color-surface) 88%, transparent);
+  color: var(--color-foreground);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-50%);
+  transition: opacity 150ms;
+}
+.pdf-edge-button:disabled {
+  opacity: 0;
+  pointer-events: none;
+}
+@media (hover: hover) {
+  .pdf-edge-button {
+    opacity: 0.55;
+  }
+  .pdf-edge-button:hover,
+  .pdf-edge-button:focus-visible {
+    opacity: 1;
+  }
+}
+
+/*
+ * Matn qatlami (pdf.js `TextLayer`, `pdf_viewer.css` dan qisqartirilgan): canvas ustidagi shaffof
+ * matn — belgilash va nusxa olish uchun. O'lcham `--total-scale-factor` dan (PdfPageCanvas qo'yadi).
+ */
+.textLayer {
+  --min-font-size: 1;
+  --text-scale-factor: calc(var(--total-scale-factor) * var(--min-font-size));
+  --min-font-size-inv: calc(1 / var(--min-font-size));
+  --scale-round-x: 1px;
+  --scale-round-y: 1px;
+  position: absolute;
+  inset: 0;
+  overflow: clip;
+  line-height: 1;
+  text-align: initial;
+  letter-spacing: normal;
+  word-spacing: normal;
+  text-size-adjust: none;
+  forced-color-adjust: none;
+  transform-origin: 0 0;
+  z-index: 0;
+}
+.textLayer :is(span, br) {
+  position: absolute;
+  color: transparent;
+  white-space: pre;
+  cursor: text;
+  transform-origin: 0% 0%;
+  user-select: text;
+}
+.textLayer > :not(.markedContent),
+.textLayer .markedContent span:not(.markedContent) {
+  --font-height: 0;
+  --scale-x: 1;
+  --rotate: 0deg;
+  z-index: 1;
+  font-size: calc(var(--text-scale-factor) * var(--font-height));
+  transform: rotate(var(--rotate)) scaleX(var(--scale-x)) scale(var(--min-font-size-inv));
+}
+.textLayer .markedContent {
+  display: contents;
+}
+.textLayer span[role="img"] {
+  user-select: none;
+  cursor: default;
+}
+.textLayer ::selection {
+  background: rgb(37 99 235 / 0.3);
+}
+.textLayer .endOfContent {
+  display: block;
+  position: absolute;
+  inset: 100% 0 0;
+  z-index: 0;
+  cursor: default;
+  user-select: none;
+}
+
 /* Kitob ichida qidiruv natijalari: PDF sahifasi ustidagi yarim shaffof belgi. */
 .pdf-mark {
   background-color: rgb(250 204 21 / 0.45);

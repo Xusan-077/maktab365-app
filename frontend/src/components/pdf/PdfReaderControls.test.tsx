@@ -22,12 +22,10 @@ class FakeResizeObserver {
 
 const props = (): PdfReaderControlsProps => ({
   tone: "light",
-  fit: "width",
   zoom: 1,
   fullscreen: false,
   fullscreenSupported: true,
   onTone: vi.fn(),
-  onFit: vi.fn(),
   onZoom: vi.fn(),
   onFullscreen: vi.fn(),
   onShortcuts: vi.fn(),
@@ -60,7 +58,7 @@ describe("PdfReaderControls: bir qator, sig'maganlari «⋯» da", () => {
   it("joy yetarli bo'lsa hammasi qatorda, «⋯» yo'q", () => {
     setup();
     act(() => report?.(1000));
-    expect(inline()).toBe(7);
+    expect(inline()).toBe(6);
     expect(screen.queryByTestId("pdf-controls-more")).toBeNull();
   });
 
@@ -81,7 +79,6 @@ describe("PdfReaderControls: bir qator, sig'maganlari «⋯» da", () => {
     expect(items).toEqual([
       uz.pdfBooks.controls.highlightOn,
       uz.pdfBooks.controls.tone.replace("{tone}", uz.pdfBooks.controls.tones.light),
-      uz.pdfBooks.controls.fitPage,
       uz.pdfBooks.controls.shortcuts,
     ]);
     fireEvent.click(screen.getByTestId("pdf-shortcuts"));
@@ -89,11 +86,11 @@ describe("PdfReaderControls: bir qator, sig'maganlari «⋯» da", () => {
     expect(screen.queryByRole("menu")).toBeNull();
   });
 
-  it("zoom darajasi tugmada: 1.5×", () => {
+  it("zoom darajasi tugmada foizda: 150%", () => {
     setup({ zoom: 1.5 });
-    expect(screen.getByTestId("pdf-zoom").textContent).toBe("1.5×");
+    expect(screen.getByTestId("pdf-zoom").textContent).toBe("150%");
     expect(screen.getByTestId("pdf-zoom").getAttribute("aria-label")).toBe(
-      uz.pdfBooks.controls.zoomLevel.replace("{level}", "1.5×"),
+      uz.pdfBooks.controls.zoomLevel.replace("{level}", "150%"),
     );
   });
 });

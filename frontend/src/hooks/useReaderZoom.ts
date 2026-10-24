@@ -4,10 +4,11 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState, type RefObje
 import {
   anchorOffset,
   clampZoom,
+  DEFAULT_ZOOM,
   doubleTapZoom,
-  MIN_ZOOM,
   nextZoomStep,
   pinchZoom,
+  wheelZoom,
 } from "@/lib/pdf/zoom";
 
 interface Point {
@@ -18,9 +19,13 @@ interface Point {
 interface PendingAnchor {
   ratio: number;
   left: number;
+  top: number;
   focalX: number;
   focalY: number;
 }
+
+/** Ctrl+g'ildirak to'xtagach shuncha ms dan keyin zoom qo'llanadi (har qadamda qayta chizilmaydi). */
+const WHEEL_SETTLE_MS = 160;
 
 /** Pinch paytidagi oldindan ko'rish: canvas qayta chizilmaydi, CSS `scale` (barmoqlar markazida). */
 export interface LiveZoom {
@@ -36,9 +41,10 @@ const center = (touches: TouchList): Point => ({
 });
 
 /**
- * O'qish oynasi zoom'i (1×–3×): tugma/klaviatura pog'onalari, ikki marta bosish va ikki barmoq
- * (pinch). Zoom o'zgarganda fokus nuqtasi (barmoqlar markazi yoki bosilgan joy) ekranda joyida
- * qoladi: gorizontal — sahifa konteyneri scroll'i, vertikal — oyna (to'liq ekranda — stage).
+ * O'qish oynasi zoom'i (50%–300%): tugma/klaviatura pog'onalari, ikki marta bosish, ikki barmoq
+ * (pinch) va Ctrl+g'ildirak (trackpad pinch ham shu). Zoom o'zgarganda fokus nuqtasi ekranda joyida
+ * qoladi: gorizontal — sahifa konteyneri scroll'i, vertikal — oyna (to'liq ekranda — stage) yoki,
+ * `panY: "scroller"` bo'lsa (gorizontal rejim: balandligi qat'iy quti), konteynerning o'zi.
  *
  * Kattalashganda surish brauzerning o'zida (`overflow-x-auto` + `touch-pan-x touch-pan-y`);
  * pinch'ni brauzer bajarmaydi (`touch-action` da `pinch-zoom` yo'q), shuning uchun ikki barmoqli
@@ -47,41 +53,47 @@ const center = (touches: TouchList): Point => ({
 export function useReaderZoom({
   stageRef,
   fullscreen,
+  panY = "page",
 }: {
   stageRef: RefObject<HTMLElement | null>;
   fullscreen: boolean;
+  panY?: "page" | "scroller";
 }) {
-  const [zoom, setZoom] = useState(MIN_ZOOM);
+  const [zoom, setZoom] = useState(DEFAULT_ZOOM);
   const [live, setLive] = useState<LiveZoom | null>(null);
   const [area, setArea] = useState<HTMLElement | null>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const zoomRef = useRef(MIN_ZOOM);
+  const zoomRef = useRef(DEFAULT_ZOOM);
   const pending = useRef<PendingAnchor | null>(null);
   /** Pinch bo'lgan teginish tap/swipe hisoblanmasin (PdfReader pointer handler'lari uchun). */
   const pinched = useRef(false);
 
-  const applyZoom = useCallback((next: number, point?: Point) => {
-    const previous = zoomRef.current;
-    const target = clampZoom(next);
-    if (target === previous) return;
-    const scroller = scrollerRef.current;
-    const content = contentRef.current;
-    if (scroller && content) {
-      const box = scroller.getBoundingClientRect();
-      const page = content.getBoundingClientRect();
-      const x = point?.x ?? box.left + box.width / 2;
-      const y = point?.y ?? Math.min(window.innerHeight / 2, page.bottom);
-      pending.current = {
-        ratio: target / previous,
-        left: scroller.scrollLeft,
-        focalX: x - box.left,
-        focalY: Math.max(0, y - page.top),
-      };
-    }
-    zoomRef.current = target;
-    setZoom(target);
-  }, []);
+  const applyZoom = useCallback(
+    (next: number, point?: Point) => {
+      const previous = zoomRef.current;
+      const target = clampZoom(next);
+      if (target === previous) return;
+      const scroller = scrollerRef.current;
+      const content = contentRef.current;
+      if (scroller && content) {
+        const box = scroller.getBoundingClientRect();
+        const page = content.getBoundingClientRect();
+        const x = point?.x ?? box.left + box.width / 2;
+        const y = point?.y ?? Math.min(window.innerHeight / 2, page.bottom);
+        pending.current = {
+          ratio: target / previous,
+          left: scroller.scrollLeft,
+          top: scroller.scrollTop,
+          focalX: x - box.left,
+          focalY: panY === "scroller" ? y - box.top : Math.max(0, y - page.top),
+        };
+      }
+      zoomRef.current = target;
+      setZoom(target);
+    },
+    [panY],
+  );
 
   useLayoutEffect(() => {
     const anchor = pending.current;
@@ -89,14 +101,18 @@ export function useReaderZoom({
     pending.current = null;
     const scroller = scrollerRef.current;
     if (scroller) scroller.scrollLeft = anchorOffset(anchor.left, anchor.focalX, anchor.ratio);
+    if (panY === "scroller") {
+      if (scroller) scroller.scrollTop = anchorOffset(anchor.top, anchor.focalY, anchor.ratio);
+      return;
+    }
     const dy = anchor.focalY * (anchor.ratio - 1);
     if (dy !== 0) (fullscreen ? stageRef.current : window)?.scrollBy?.(0, dy);
-  }, [zoom, fullscreen, stageRef]);
+  }, [zoom, fullscreen, stageRef, panY]);
 
   useEffect(() => {
     if (!area) return;
     let start: { distance: number; zoom: number; point: Point } | null = null;
-    let scale = MIN_ZOOM;
+    let scale = DEFAULT_ZOOM;
     const onStart = (event: TouchEvent) => {
       if (event.touches.length !== 2) return;
       const content = contentRef.current?.getBoundingClientRect();
@@ -121,11 +137,40 @@ export function useReaderZoom({
       setLive(null);
       applyZoom(scale, point);
     };
+    // Ctrl+g'ildirak: harakat paytida CSS scale (oldindan ko'rish), to'xtagach haqiqiy zoom.
+    let wheel: { scale: number; point: Point; timer: number } | null = null;
+    const onWheel = (event: WheelEvent) => {
+      if (!event.ctrlKey && !event.metaKey) return;
+      event.preventDefault();
+      const point = { x: event.clientX, y: event.clientY };
+      if (wheel) {
+        window.clearTimeout(wheel.timer);
+      } else {
+        const content = contentRef.current?.getBoundingClientRect();
+        wheel = { scale: zoomRef.current, point, timer: 0 };
+        setLive({
+          scale: 1,
+          origin: content ? `${point.x - content.left}px ${point.y - content.top}px` : "50% 50%",
+        });
+      }
+      const current = wheel;
+      current.scale = wheelZoom(current.scale, event.deltaY);
+      const ratio = current.scale / zoomRef.current;
+      setLive((live) => (live ? { ...live, scale: ratio } : live));
+      current.timer = window.setTimeout(() => {
+        wheel = null;
+        setLive(null);
+        applyZoom(current.scale, current.point);
+      }, WHEEL_SETTLE_MS);
+    };
+    area.addEventListener("wheel", onWheel, { passive: false });
     area.addEventListener("touchstart", onStart, { passive: true });
     area.addEventListener("touchmove", onMove, { passive: false });
     area.addEventListener("touchend", onEnd);
     area.addEventListener("touchcancel", onEnd);
     return () => {
+      if (wheel) window.clearTimeout(wheel.timer);
+      area.removeEventListener("wheel", onWheel);
       area.removeEventListener("touchstart", onStart);
       area.removeEventListener("touchmove", onMove);
       area.removeEventListener("touchend", onEnd);
@@ -133,9 +178,9 @@ export function useReaderZoom({
     };
   }, [area, applyZoom]);
 
-  /** Tugma / klaviatura: keyingi pog'ona (1 → 1.5 → 2 → 3 → 1). */
+  /** Tugma / klaviatura: keyingi pog'ona (100 → 150 → 200 → 300 → 100%). */
   const stepZoom = useCallback(() => applyZoom(nextZoomStep(zoomRef.current)), [applyZoom]);
-  /** Ikki marta bosish: 1× ↔ 2×, bosilgan joy ekranda qoladi. */
+  /** Ikki marta bosish: 100% ↔ 200%, bosilgan joy ekranda qoladi. */
   const zoomAtTap = useCallback(
     (point: Point) => applyZoom(doubleTapZoom(zoomRef.current), point),
     [applyZoom],
@@ -147,9 +192,12 @@ export function useReaderZoom({
   /** Shu teginishda pinch bo'ldimi (bo'lsa — tap ham, swipe ham emas). */
   const wasPinch = useCallback(() => pinched.current, []);
 
-  /** Yangi sahifa: gorizontal surish boshiga. */
+  /** Yangi sahifa: surish boshiga. */
   const resetPan = useCallback(() => {
-    if (scrollerRef.current) scrollerRef.current.scrollLeft = 0;
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+    scroller.scrollLeft = 0;
+    scroller.scrollTop = 0;
   }, []);
 
   return {

@@ -11,6 +11,9 @@ export interface PdfToolbarProps {
   total: number;
   onGo: (page: number) => void;
   disabled?: boolean;
+  /** Oldingi/keyingi tugma manzili (yoymada 2 betga); aytilmasa ±1, `null` — tugma o'chiq. */
+  prevPage?: number | null;
+  nextPage?: number | null;
   /** `inline` — yuqori panel (desktop); `bar` — mobil pastki panel (keyingi tugma to'ldirilgan). */
   variant?: "inline" | "bar";
 }
@@ -19,7 +22,15 @@ const NAV_BUTTON =
   "text-foreground inline-flex size-11 shrink-0 items-center justify-center rounded-xl transition-colors disabled:pointer-events-none disabled:opacity-40";
 
 /** Oldingi/keyingi tugmalari va sahifa raqami maydoni ("12 / 240"). Enter yoki fokus ketganda o'tadi. */
-export function PdfToolbar({ page, total, onGo, disabled, variant = "inline" }: PdfToolbarProps) {
+export function PdfToolbar({
+  page,
+  total,
+  onGo,
+  disabled,
+  prevPage = page > 1 ? page - 1 : null,
+  nextPage = page < total ? page + 1 : null,
+  variant = "inline",
+}: PdfToolbarProps) {
   const t = useTranslations("pdfBooks.reader");
   const bar = variant === "bar";
   // `null` — maydon joriy sahifani ko'rsatadi; tahrir paytida foydalanuvchi matni.
@@ -43,8 +54,8 @@ export function PdfToolbar({ page, total, onGo, disabled, variant = "inline" }: 
         type="button"
         aria-label={t("prev")}
         data-testid="pdf-prev"
-        disabled={disabled || page <= 1}
-        onClick={() => onGo(page - 1)}
+        disabled={disabled || prevPage === null}
+        onClick={() => prevPage !== null && onGo(prevPage)}
         className={cn(NAV_BUTTON, bar ? "bg-surface-2" : "border-border bg-surface border")}
       >
         <ChevronLeft className="size-5" aria-hidden />
@@ -93,8 +104,8 @@ export function PdfToolbar({ page, total, onGo, disabled, variant = "inline" }: 
         type="button"
         aria-label={t("next")}
         data-testid="pdf-next"
-        disabled={disabled || page >= total}
-        onClick={() => onGo(page + 1)}
+        disabled={disabled || nextPage === null}
+        onClick={() => nextPage !== null && onGo(nextPage)}
         className={cn(NAV_BUTTON, bar ? "bg-brand text-white" : "border-border bg-surface border")}
       >
         <ChevronRight className="size-5" aria-hidden />

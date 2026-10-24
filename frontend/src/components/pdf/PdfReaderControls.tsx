@@ -8,7 +8,6 @@ import {
   Minimize,
   Moon,
   NotebookPen,
-  ScanSearch,
   Search,
   Sun,
   Sunrise,
@@ -17,8 +16,8 @@ import type { LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { OverflowMenu } from "@/components/ui/OverflowMenu";
 import { cn } from "@/lib/utils/cn";
-import type { ReaderFit, ReaderTone } from "@/lib/pdf/reader-prefs";
-import { formatZoom, MIN_ZOOM, visibleCount } from "@/lib/pdf/zoom";
+import type { ReaderTone } from "@/lib/pdf/reader-prefs";
+import { DEFAULT_ZOOM, formatZoom, visibleCount } from "@/lib/pdf/zoom";
 
 const TONE_ICON: Record<ReaderTone, LucideIcon> = { light: Sun, sepia: Sunrise, dark: Moon };
 
@@ -32,19 +31,16 @@ const PRIORITY = [
   "highlight",
   "annotations",
   "tone",
-  "fit",
   "shortcuts",
 ] as const;
 type ControlId = (typeof PRIORITY)[number];
 
 export interface PdfReaderControlsProps {
   tone: ReaderTone;
-  fit: ReaderFit;
   zoom: number;
   fullscreen: boolean;
   fullscreenSupported: boolean;
   onTone: () => void;
-  onFit: () => void;
   onZoom: () => void;
   onFullscreen: () => void;
   onShortcuts: () => void;
@@ -113,15 +109,13 @@ function useWidth(enabled: boolean) {
   return { ref, width };
 }
 
-/** Sahifa fon rejimi, moslash, zoom, to'liq ekran, qidiruv va yorliqlar: har biri ikonka tugma. */
+/** Sahifa fon rejimi, zoom, to'liq ekran, qidiruv va yorliqlar: har biri ikonka tugma. */
 export function PdfReaderControls({
   tone,
-  fit,
   zoom,
   fullscreen,
   fullscreenSupported,
   onTone,
-  onFit,
   onZoom,
   onFullscreen,
   onShortcuts,
@@ -189,14 +183,6 @@ export function PdfReaderControls({
         onClick: onTone,
       },
       {
-        id: "fit",
-        label: t(fit === "page" ? "fitWidth" : "fitPage"),
-        icon: icon(ScanSearch),
-        pressed: fit === "page",
-        testId: "pdf-fit",
-        onClick: onFit,
-      },
-      {
         id: "zoom",
         label: t("zoomLevel", { level: formatZoom(zoom) }),
         icon: (
@@ -204,7 +190,7 @@ export function PdfReaderControls({
             {formatZoom(zoom)}
           </span>
         ),
-        pressed: zoom > MIN_ZOOM,
+        pressed: zoom !== DEFAULT_ZOOM,
         testId: "pdf-zoom",
         shortcut: "Z",
         onClick: onZoom,

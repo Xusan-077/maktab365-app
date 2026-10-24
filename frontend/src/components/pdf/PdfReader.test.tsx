@@ -14,6 +14,11 @@ const progress = vi.hoisted(() => ({
   state: { ready: true, position: null as null | { page: number }, resume: 1, record: vi.fn() },
 }));
 const api = vi.hoisted(() => ({ book: vi.fn() }));
+/** pdf.js hujjati: vertikal rejim bet o'lchamini `getPage().getViewport()` dan oladi. */
+const pdfDoc = vi.hoisted(() => ({
+  numPages: 240,
+  getPage: async () => ({ getViewport: () => ({ width: 600, height: 800 }) }),
+}));
 
 vi.mock("next/navigation", () => ({ useSearchParams: () => nav.params }));
 vi.mock("@/lib/i18n/navigation", () => ({
@@ -35,12 +40,12 @@ vi.mock("@/lib/pdf-books/api", () => ({
 vi.mock("./PdfBookmarkButton", () => ({ PdfBookmarkButton: () => null }));
 vi.mock("@/components/support/ReportErrorLink", () => ({ ReportErrorLink: () => null }));
 vi.mock("./usePdfDocument", () => ({
-  usePdfDocument: () => ({ doc: { numPages: 240 }, loading: false, error: null, reload: vi.fn() }),
+  usePdfDocument: () => ({ doc: pdfDoc, loading: false, error: null, reload: vi.fn() }),
   useSlidesDocument: () => ({ doc: { numPages: 8 }, loading: false, error: null, reload: vi.fn() }),
 }));
 vi.mock("./PdfPageCanvas", () => ({
-  PdfPageCanvas: ({ pageNumber }: { pageNumber: number }) => (
-    <div data-testid="pdf-canvas" data-page={pageNumber} />
+  PdfPageCanvas: ({ pageNumber, current }: { pageNumber: number; current?: boolean }) => (
+    <div data-testid="pdf-canvas" data-page={pageNumber} data-current={current || undefined} />
   ),
 }));
 
@@ -75,17 +80,36 @@ const openAbout = async () => {
   fireEvent.click(await screen.findByTestId("reader-tab-about"));
 };
 
-const currentPage = async () => (await screen.findByTestId("pdf-canvas")).dataset.page;
+const CURRENT = '[data-testid="pdf-canvas"][data-current]';
+const currentCanvas = () => document.querySelector<HTMLElement>(CURRENT);
+/** Joriy (URL'dagi) bet: gorizontalda qo'shni betlar ham (ko'rinmas) chiziladi. */
+const currentPage = async () => {
+  await waitFor(() => expect(currentCanvas()).not.toBeNull());
+  return currentCanvas()?.dataset.page;
+};
+const renderedPages = () =>
+  screen.queryAllByTestId("pdf-canvas").map((node) => Number(node.dataset.page));
 
-beforeEach(() => {
-  vi.clearAllMocks();
-  // Mundarija paneli (useMediaQuery) uchun: jsdom'da matchMedia yo'q; <dialog> usullari ham.
+const PREFS_KEY = "maktab365-reader-prefs";
+const storeMode = (mode: "h" | "v" | null) =>
+  window.localStorage.setItem(PREFS_KEY, JSON.stringify({ state: { tone: "light", mode } }));
+
+/** `matchMedia`: `true` — desktop va landshaft (yoyma), `false` — mobil. */
+const setViewport = (wide: boolean) => {
   window.matchMedia = ((query: string) => ({
-    matches: false,
+    matches: wide,
     media: query,
     addEventListener: () => {},
     removeEventListener: () => {},
   })) as unknown as typeof window.matchMedia;
+};
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  // Mundarija paneli (useMediaQuery) uchun: jsdom'da matchMedia yo'q; <dialog> usullari ham.
+  setViewport(false);
+  // Mavjud testlar bitta betli gorizontal rejimda (mobil + saqlangan "h").
+  storeMode("h");
   HTMLDialogElement.prototype.showModal = function showModal() {
     this.setAttribute("open", "");
   };
@@ -128,10 +152,10 @@ describe("PdfReader", () => {
     setup();
     await screen.findByTestId("pdf-reader");
     await new Promise((resolve) => setTimeout(resolve, 30));
-    expect(screen.queryByTestId("pdf-canvas")).toBeNull();
+    expect(screen.queryAllByTestId("pdf-canvas")).toHaveLength(0);
   });
 
-  it("← / → klavishlari sahifani suradi", async () => {
+  it("← / → klavishlari sahifani suradi (URL kechiksa ham bosishlar to'planadi)", async () => {
     setup("page=5");
     await currentPage();
     fireEvent.keyDown(window, { key: "ArrowRight" });
@@ -139,7 +163,8 @@ describe("PdfReader", () => {
     expect(nav.replace).toHaveBeenNthCalledWith(1, "/darsliklar/book-1?page=6", {
       scroll: false,
     });
-    expect(nav.replace).toHaveBeenNthCalledWith(2, "/darsliklar/book-1?page=4", {
+    // URL (mock) yangilanmagan, lekin ← so'ralgan 6-betdan hisoblanadi.
+    expect(nav.replace).toHaveBeenNthCalledWith(2, "/darsliklar/book-1?page=5", {
       scroll: false,
     });
   });
@@ -165,8 +190,8 @@ describe("PdfReader", () => {
 
   it("mobilda chapga swipe — keyingi sahifa, o'ngga — oldingi", async () => {
     setup("page=5");
-    const canvas = await screen.findByTestId("pdf-canvas");
-    const area = canvas.parentElement as HTMLElement;
+    await currentPage();
+    const area = screen.getByTestId("pdf-page-area");
     const swipe = (fromX: number, toX: number) => {
       fireEvent.pointerDown(area, { pointerType: "touch", clientX: fromX, clientY: 100 });
       fireEvent.pointerUp(area, { pointerType: "touch", clientX: toX, clientY: 105 });
@@ -176,14 +201,16 @@ describe("PdfReader", () => {
     expect(nav.replace).toHaveBeenNthCalledWith(1, "/darsliklar/book-1?page=6", {
       scroll: false,
     });
-    expect(nav.replace).toHaveBeenNthCalledWith(2, "/darsliklar/book-1?page=4", {
+    // URL (mock) yangilanmagan, lekin ← so'ralgan 6-betdan hisoblanadi.
+    expect(nav.replace).toHaveBeenNthCalledWith(2, "/darsliklar/book-1?page=5", {
       scroll: false,
     });
   });
 
   it("sichqoncha harakati swipe hisoblanmaydi", async () => {
     setup("page=5");
-    const area = (await screen.findByTestId("pdf-canvas")).parentElement as HTMLElement;
+    await currentPage();
+    const area = screen.getByTestId("pdf-page-area");
     fireEvent.pointerDown(area, { pointerType: "mouse", clientX: 300, clientY: 100 });
     fireEvent.pointerUp(area, { pointerType: "mouse", clientX: 100, clientY: 100 });
     expect(nav.replace).not.toHaveBeenCalled();
@@ -458,11 +485,11 @@ describe("PdfReader: zoom, pinch va sahifa boshi", () => {
     // Mundarijadagi «Algebra» (50-bet) bosildi → URL ?page=50.
     nav.params = new URLSearchParams("page=50");
     view.rerender(tree());
-    await waitFor(() => expect(screen.getByTestId("pdf-canvas").dataset.page).toBe("50"));
+    await waitFor(() => expect(currentCanvas()?.dataset.page).toBe("50"));
     expect(scrollTo).toHaveBeenCalledWith({ top: 0 });
   });
 
-  it("pastki paneldagi «Zoom»: 1× → 1.5× → 2× → 3× → 1×", async () => {
+  it("pastki paneldagi «Zoom»: 100% → 150% → 200% → 300% → 100%", async () => {
     setup("page=5");
     await currentPage();
     const button = screen.getByTestId("pdf-zoom-bar");
@@ -474,7 +501,7 @@ describe("PdfReader: zoom, pinch va sahifa boshi", () => {
     }
     expect(seen).toEqual(["1.5", "2", "3", "1"]);
     fireEvent.click(button);
-    expect(button.textContent).toContain("1.5×");
+    expect(button.textContent).toContain("150%");
   });
 
   it("ikki barmoq (pinch): harakat paytida CSS scale, qo'yib yuborilganda zoom (3× gacha)", async () => {
@@ -497,12 +524,101 @@ describe("PdfReader: zoom, pinch va sahifa boshi", () => {
     expect(nav.replace).not.toHaveBeenCalledWith("/darsliklar/book-1?page=6", { scroll: false });
   });
 
-  it("«⋯» menyusida «Oflayn» va «Ulashish»", async () => {
+  it("«⋯» menyusida «Sahifalar», «Oflayn» va «Ulashish»", async () => {
     setup("page=5");
     await currentPage();
     expect(screen.queryByTestId("pdf-share")).toBeNull();
     fireEvent.click(screen.getByTestId("pdf-bar-more"));
     const items = screen.getAllByRole("menuitem").map((item) => item.textContent);
-    expect(items).toEqual([uz.pdfBooks.reader.offline, uz.pdfBooks.reader.share]);
+    expect(items).toEqual([
+      uz.pdfBooks.reader.pages,
+      uz.pdfBooks.reader.offline,
+      uz.pdfBooks.reader.share,
+    ]);
+  });
+});
+
+describe("PdfReader: o'qish rejimlari", () => {
+  it("mobilda standart — vertikal: faqat joriy bet ±2 chiziladi, qolgani skeleton", async () => {
+    window.localStorage.removeItem(PREFS_KEY);
+    setup("page=12");
+    expect(await currentPage()).toBe("12");
+    expect(screen.getByTestId("pdf-page-area").dataset.mode).toBe("v");
+    expect(renderedPages()).toEqual([10, 11, 12, 13, 14]);
+    // Barcha 240 bet o'rni bor (balandlik saqlanadi — scroll sakramaydi).
+    expect(document.querySelectorAll("[data-page-slot]")).toHaveLength(240);
+  });
+
+  it("desktopda standart — yoyma: 33-bet 32–33 yoymasida, qo'shni yoymalar oldindan chiziladi", async () => {
+    window.localStorage.removeItem(PREFS_KEY);
+    setViewport(true);
+    setup("page=33");
+    expect(await currentPage()).toBe("33");
+    expect(screen.getByTestId("pdf-horizontal").dataset.spread).toBe("true");
+    const visible = [
+      ...document.querySelectorAll('[data-slot="current"] [data-testid="pdf-canvas"]'),
+    ];
+    expect(visible.map((node) => (node as HTMLElement).dataset.page)).toEqual(["32", "33"]);
+    expect(renderedPages().sort((a, b) => a - b)).toEqual([30, 31, 32, 33, 34, 35]);
+  });
+
+  it("yoymada ← / → / PageDown / Space bir bosishda 2 bet o'tadi", async () => {
+    setViewport(true);
+    setup("page=33");
+    await currentPage();
+    fireEvent.keyDown(window, { key: "ArrowRight" });
+    fireEvent.keyDown(window, { key: "ArrowLeft" });
+    fireEvent.keyDown(window, { key: "PageDown" });
+    fireEvent.keyDown(window, { key: " " });
+    fireEvent.keyDown(window, { key: " ", shiftKey: true });
+    const pages = nav.replace.mock.calls.map(([url]) =>
+      new URL(url, "http://x").searchParams.get("page"),
+    );
+    expect(pages).toEqual(["34", "32", "34", "36", "34"]);
+  });
+
+  it("yoymada 1-bet (muqova) yolg'iz: keyingisi — 2", async () => {
+    setViewport(true);
+    setup("page=1");
+    await currentPage();
+    expect((screen.getByTestId("pdf-edge-prev") as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.click(screen.getByTestId("pdf-edge-next"));
+    expect(nav.replace).toHaveBeenCalledWith("/darsliklar/book-1?page=2", { scroll: false });
+  });
+
+  it("?mode= URL'dan saqlangan tanlovdan ustun", async () => {
+    storeMode("h");
+    setup("page=12&mode=v");
+    await currentPage();
+    expect(screen.getByTestId("pdf-page-area").dataset.mode).toBe("v");
+  });
+
+  it("rejim almashganda joriy bet saqlanadi va tanlov URL'ga hamda xotiraga yoziladi", async () => {
+    setup("page=32");
+    await currentPage();
+    fireEvent.click(screen.getByTestId("pdf-view-open"));
+    fireEvent.click(screen.getByTestId("pdf-mode-v"));
+    expect(nav.replace).toHaveBeenCalledWith("/darsliklar/book-1?page=32&mode=v", {
+      scroll: false,
+    });
+    expect(window.localStorage.getItem(PREFS_KEY)).toContain('"mode":"v"');
+  });
+
+  it("vertikalda swipe bet almashtirmaydi (oddiy scroll)", async () => {
+    storeMode("v");
+    setup("page=5");
+    await currentPage();
+    const area = screen.getByTestId("pdf-page-area");
+    fireEvent.pointerDown(area, { pointerType: "touch", clientX: 300, clientY: 100 });
+    fireEvent.pointerUp(area, { pointerType: "touch", clientX: 100, clientY: 105 });
+    expect(nav.replace).not.toHaveBeenCalled();
+  });
+
+  it("vertikalda → qo'shni betga o'tadi (bitta bet)", async () => {
+    storeMode("v");
+    setup("page=5");
+    await currentPage();
+    fireEvent.keyDown(window, { key: "ArrowRight" });
+    expect(nav.replace).toHaveBeenCalledWith("/darsliklar/book-1?page=6", { scroll: false });
   });
 });

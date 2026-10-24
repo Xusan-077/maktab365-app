@@ -1,7 +1,7 @@
 export type SwipeDirection = "next" | "prev";
 
 /** Gorizontal harakat shuncha pikseldan oshsa swipe hisoblanadi. */
-export const SWIPE_MIN_DISTANCE = 60;
+export const SWIPE_MIN_DISTANCE = 50;
 /** Gorizontal harakat vertikalidan shuncha marta ko'p bo'lishi kerak (tikka scroll swipe emas). */
 export const SWIPE_DOMINANCE = 1.5;
 /** Juda sekin harakat (ushlab turish) swipe emas. */

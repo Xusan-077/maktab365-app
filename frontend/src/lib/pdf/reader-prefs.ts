@@ -1,23 +1,24 @@
-/** O'qish oynasi qulayliklari: sahifa fon rejimi, moslash, qisqa tugmalar (sof mantiq; zoom — `zoom.ts`). */
+/**
+ * O'qish oynasi qulayliklari: sahifa fon rejimi, o'qish rejimi, qisqa tugmalar (sof mantiq; zoom —
+ * `zoom.ts`, rejimlar — `reading-mode.ts`).
+ */
+
+import { isReadingMode, type ReadingMode } from "./reading-mode";
 
 export const READER_TONES = ["light", "sepia", "dark"] as const;
 export type ReaderTone = (typeof READER_TONES)[number];
 
-export const READER_FITS = ["width", "page"] as const;
-export type ReaderFit = (typeof READER_FITS)[number];
-
 export interface ReaderPrefs {
   tone: ReaderTone;
-  fit: ReaderFit;
+  /** Foydalanuvchi tanlagan o'qish rejimi; `null` — qurilma bo'yicha standart. */
+  mode: ReadingMode | null;
 }
 
-export const DEFAULT_READER_PREFS: ReaderPrefs = { tone: "light", fit: "width" };
+export const DEFAULT_READER_PREFS: ReaderPrefs = { tone: "light", mode: null };
 
 export function nextTone(tone: ReaderTone): ReaderTone {
   return READER_TONES[(READER_TONES.indexOf(tone) + 1) % READER_TONES.length];
 }
-
-export const nextFit = (fit: ReaderFit): ReaderFit => (fit === "width" ? "page" : "width");
 
 /** Xotiradan o'qilgan qiymatlardan faqat yaroqlilari. */
 export function sanitizePrefs(value: unknown): ReaderPrefs {
@@ -26,9 +27,7 @@ export function sanitizePrefs(value: unknown): ReaderPrefs {
     tone: READER_TONES.includes(raw.tone as ReaderTone)
       ? (raw.tone as ReaderTone)
       : DEFAULT_READER_PREFS.tone,
-    fit: READER_FITS.includes(raw.fit as ReaderFit)
-      ? (raw.fit as ReaderFit)
-      : DEFAULT_READER_PREFS.fit,
+    mode: isReadingMode(raw.mode) ? raw.mode : DEFAULT_READER_PREFS.mode,
   };
 }
 
@@ -53,6 +52,7 @@ export function isDoubleTap(previous: TapPoint | null, next: TapPoint): boolean 
 /** Klaviatura yorliqlari ro'yxati (`pdfBooks.shortcuts.*` kalitlari bilan). */
 export const READER_SHORTCUTS = [
   { keys: ["←", "→"], id: "pages" },
+  { keys: ["PgUp", "PgDn", "Space"], id: "pagesAlt" },
   { keys: ["Home", "End"], id: "ends" },
   { keys: ["F"], id: "fullscreen" },
   { keys: ["T"], id: "tone" },
