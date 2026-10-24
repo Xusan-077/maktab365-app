@@ -6,14 +6,14 @@
 
 /* Statik shkalalar: primary (ko'k) va accent (och sariq). */
 @theme {
-  --color-primary-50: #eff6ff;
-  --color-primary-100: #dbeafe;
+  --color-primary-50: #eaf0fc;
+  --color-primary-100: #dce6fb;
   --color-primary-200: #bfdbfe;
   --color-primary-300: #93c5fd;
   --color-primary-400: #60a5fa;
   --color-primary-500: #3b82f6;
-  --color-primary-600: #2563eb;
-  --color-primary-700: #1d4ed8;
+  --color-primary-600: #1554d1;
+  --color-primary-700: #0f3fa3;
   --color-primary-800: #1e40af;
   --color-primary-900: #1e3a8a;
   --color-primary: var(--color-primary-500);
@@ -32,6 +32,13 @@
   --radius-lg: 0.75rem;
   --radius-xl: 1rem;
   --radius-2xl: 1.5rem;
+  /* Redesign: kartochka 16–20, tugma 12–14, muqova 12, pill 999 */
+  --radius-card: 1.25rem;
+  --radius-card-sm: 1rem;
+  --radius-button: 0.75rem;
+  --radius-button-lg: 0.875rem;
+  --radius-cover: 0.75rem;
+  --radius-pill: 999px;
 
   --shadow-xs: 0 1px 2px 0 rgb(15 23 42 / 0.05);
   --shadow-sm: 0 1px 3px 0 rgb(15 23 42 / 0.07), 0 1px 2px -1px rgb(15 23 42 / 0.05);
@@ -89,23 +96,43 @@
   --color-auth-field: var(--auth-field);
   --color-auth-surface-2: var(--auth-surface-2);
 
+  /* Redesign tokenlari (qiymatlari :root va dark blokida) */
+  --color-navy: var(--navy);
+  --color-faint: var(--faint);
+  --color-placeholder: var(--placeholder);
+  --color-input-border: var(--input-border);
+  --color-surface-2: var(--surface-2);
+  --color-hero-bg: var(--hero-bg);
+  --color-footer-bg: var(--footer-bg);
+  --color-reader-bg: var(--reader-bg);
+  --color-group-exact: var(--group-exact);
+  --color-group-exact-soft: var(--group-exact-soft);
+  --color-group-natural: var(--group-natural);
+  --color-group-natural-soft: var(--group-natural-soft);
+  --color-group-language: var(--group-language);
+  --color-group-language-soft: var(--group-language-soft);
+  --color-group-social: var(--group-social);
+  --color-group-social-soft: var(--group-social-soft);
+  --color-group-arts: var(--group-arts);
+  --color-group-arts-soft: var(--group-arts-soft);
+
   --font-sans:
-    var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+    var(--font-onest), var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 :root {
   color-scheme: light;
-  --background: #f8fafc;
+  --background: #ffffff;
   --surface: #ffffff;
-  --subtle: #f1f5f9;
-  --foreground: #0f172a;
-  --muted: #56657a;
-  --border: #e2e8f0;
-  --ring: #3b82f6;
-  --link: #1d4ed8;
-  --primary-soft: #eff6ff;
-  --primary-soft-foreground: #1d4ed8;
+  --subtle: #f4f6fa;
+  --foreground: #071633;
+  --muted: #5b6478;
+  --border: #e3e7ef;
+  --ring: #1554d1;
+  --link: #1554d1;
+  --primary-soft: #eaf0fc;
+  --primary-soft-foreground: #1554d1;
   --accent-soft: #fef9c3;
   --accent-soft-foreground: #713f12;
   --success: #15803d;
@@ -133,19 +160,40 @@
   --auth-border: #e3e7ef;
   --auth-field: #d5dae3;
   --auth-surface-2: #f4f6fa;
+
+  --navy: #071633;
+  --faint: #6b7385;
+  --placeholder: #8a93a6;
+  --input-border: #d5dae3;
+  --surface-2: #f4f6fa;
+  --hero-bg: #f5f8fe;
+  --footer-bg: #f8fafd;
+  --reader-bg: #eef1f6;
+
+  /* Fan yo'nalishlari (backend SubjectGroup) va ularning och tint'lari */
+  --group-exact: #1554d1;
+  --group-exact-soft: #eaf0fc;
+  --group-natural: #0f766e;
+  --group-natural-soft: #e6f4f2;
+  --group-language: #c2410c;
+  --group-language-soft: #fdeee6;
+  --group-social: #7c3aed;
+  --group-social-soft: #f1ebfd;
+  --group-arts: #be185d;
+  --group-arts-soft: #fce8f1;
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --background: #0b1120;
+  --background: #0b1220;
   --surface: #111a2e;
-  --subtle: #1a2540;
-  --foreground: #e8edf6;
-  --muted: #94a3b8;
-  --border: #263248;
-  --ring: #60a5fa;
-  --link: #8dbafc;
-  --primary-soft: #14264d;
+  --subtle: #16213a;
+  --foreground: #e6ecf7;
+  --muted: #9aa6bd;
+  --border: #22304a;
+  --ring: #8db4ff;
+  --link: #8db4ff;
+  --primary-soft: #16264a;
   --primary-soft-foreground: #93c5fd;
   --accent-soft: #3a3210;
   --accent-soft-foreground: #fde047;
@@ -171,6 +219,27 @@
   --auth-border: #22304a;
   --auth-field: #2d3d5c;
   --auth-surface-2: #16213a;
+
+  --navy: #e6ecf7;
+  --faint: #9aa6bd;
+  --placeholder: #7d89a3;
+  --input-border: #2d3d5c;
+  --surface-2: #16213a;
+  --hero-bg: #0e1830;
+  --footer-bg: #0e1628;
+  --reader-bg: #0a101e;
+
+  /* Qorong'i fonda yo'nalish ranglari yorqinroq, tint'lari to'qroq */
+  --group-exact: #8db4ff;
+  --group-exact-soft: #16264a;
+  --group-natural: #5fd0c5;
+  --group-natural-soft: #10302d;
+  --group-language: #fb9a6b;
+  --group-language-soft: #3a2217;
+  --group-social: #b79af7;
+  --group-social-soft: #271c45;
+  --group-arts: #f27fb0;
+  --group-arts-soft: #3a1b2d;
 }
 
 /* Matn hajmi: S / M / L (rem asosida, hamma narsa mutanosib o'zgaradi). */
@@ -203,6 +272,7 @@ html[data-present="true"] body {
 :focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--brand-ring);
 }
 
 body:has(dialog[open]) {

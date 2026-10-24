@@ -18,6 +18,23 @@ import { SelectDemos } from "./SelectDemos";
 
 const PRIMARY_SHADES = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900] as const;
 const ACCENT_SHADES = [50, 100, 200, 300, 400, 500] as const;
+const BRAND_TOKENS = [
+  "brand",
+  "brand-hover",
+  "brand-soft",
+  "brand-ring",
+  "navy",
+  "muted",
+  "faint",
+  "placeholder",
+  "border",
+  "input-border",
+  "surface-2",
+  "hero-bg",
+  "footer-bg",
+  "reader-bg",
+] as const;
+const GROUP_TOKENS = ["exact", "natural", "language", "social", "arts"] as const;
 const SEMANTIC = [
   "background",
   "surface",
@@ -78,6 +95,35 @@ export function UiShowcase() {
             <Swatch key={name} label={name} color={`var(--${name})`} />
           ))}
         </div>
+      </Section>
+
+      <Section title={t("brandTokens")}>
+        <div className="flex flex-wrap gap-3">
+          {BRAND_TOKENS.map((name) => (
+            <Swatch key={name} label={name} color={`var(--${name})`} />
+          ))}
+        </div>
+        <div className="flex flex-wrap gap-3">
+          {GROUP_TOKENS.map((name) => (
+            <Swatch key={name} label={name} color={`var(--group-${name})`} />
+          ))}
+        </div>
+        <div className="flex flex-wrap gap-3">
+          {GROUP_TOKENS.map((name) => (
+            <Swatch
+              key={`${name}-soft`}
+              label={`${name}-soft`}
+              color={`var(--group-${name}-soft)`}
+            />
+          ))}
+        </div>
+        <div className="flex flex-wrap items-end gap-4">
+          <div className="border-border bg-surface rounded-card w-40 border p-4">card 20</div>
+          <div className="bg-brand rounded-button-lg px-5 py-3 text-white">button 14</div>
+          <div className="bg-brand-soft text-brand-text rounded-pill px-4 py-1.5 text-sm">pill</div>
+          <div className="bg-group-exact rounded-cover h-20 w-16" />
+        </div>
+        <p className="text-4xl font-extrabold tracking-tight">Onest — Ўзбекча Русский 1234567890</p>
       </Section>
 
       <Section title={t("buttons")}>
