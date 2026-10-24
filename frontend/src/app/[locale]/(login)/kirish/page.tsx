@@ -20,7 +20,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return { title: t("pageTitle"), robots: { index: false, follow: false } };
 }
 
-export default async function LoginPage({ params }: Props) {
+/** `params` `<Suspense>` ichidagi `LoginContent` da o'qiladi (Next "URL data outside of Suspense"). */
+export default function LoginPage({ params }: Props) {
+  return (
+    <Suspense>
+      <LoginContent params={params} />
+    </Suspense>
+  );
+}
+
+async function LoginContent({ params }: Pick<Props, "params">) {
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
