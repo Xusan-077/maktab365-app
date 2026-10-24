@@ -1238,6 +1238,7 @@
       "loading": "Sahifa yuklanmoqda",
       "loadError": "Darslikni ochib bo'lmadi. Internetni tekshirib, qayta urinib ko'ring.",
       "pageError": "Sahifani ko'rsatib bo'lmadi.",
+      "openInNewWindow": "PDFni yangi oynada ochish",
       "notFound": "Bunday darslik topilmadi yoki u hali nashr qilinmagan.",
       "retry": "Qayta urinish"
     },

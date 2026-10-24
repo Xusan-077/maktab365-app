@@ -1,4 +1,4 @@
-import { loadPdfjs } from "./pdfjs";
+import { loadPdfjs, pdfjsAssetOptions } from "./pdfjs";
 
 /** Muqova kengligi (px): katalog kartasi va kitob sahifasi uchun yetarli, siqilgan. */
 export const COVER_WIDTH = 600;
@@ -23,8 +23,11 @@ export async function renderCover(source: CoverSource): Promise<File> {
   const pdfjs = await loadPdfjs();
   const task =
     "file" in source
-      ? pdfjs.getDocument({ data: new Uint8Array(await source.file.arrayBuffer()) })
-      : pdfjs.getDocument({ url: source.url });
+      ? pdfjs.getDocument({
+          data: new Uint8Array(await source.file.arrayBuffer()),
+          ...pdfjsAssetOptions(),
+        })
+      : pdfjs.getDocument({ url: source.url, ...pdfjsAssetOptions() });
   try {
     const doc = await task.promise;
     const page = await doc.getPage(1);

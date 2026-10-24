@@ -21,6 +21,22 @@ export function loadPdfjs(): Promise<PdfjsModule> {
   return loading;
 }
 
+/**
+ * Resurslar (`scripts/copy-pdfjs-assets.mjs` → `public/pdfjs/`): CMap — CID-shriftli (kirill/CJK),
+ * standart shriftlar — embed qilinmagan shriftlar, wasm — JPEG2000/JBIG2 rasmlar, ICC — ranglar.
+ * Ularsiz bunday PDF'larda matn yoki rasm chizilmaydi. Mutlaq URL (worker uchun), oxirida `/`.
+ */
+export function pdfjsAssetOptions(origin: string = window.location.origin) {
+  const base = `${origin}/pdfjs/`;
+  return {
+    cMapUrl: `${base}cmaps/`,
+    cMapPacked: true,
+    standardFontDataUrl: `${base}standard_fonts/`,
+    wasmUrl: `${base}wasm/`,
+    iccUrl: `${base}iccs/`,
+  };
+}
+
 export type {
   PDFDocumentLoadingTask,
   PDFDocumentProxy,

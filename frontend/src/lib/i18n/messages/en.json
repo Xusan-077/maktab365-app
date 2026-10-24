@@ -1238,6 +1238,7 @@
       "loading": "Loading page",
       "loadError": "Could not open the textbook. Check your connection and try again.",
       "pageError": "Could not show the page.",
+      "openInNewWindow": "Open PDF in a new window",
       "notFound": "This textbook was not found or is not published yet.",
       "retry": "Try again"
     },

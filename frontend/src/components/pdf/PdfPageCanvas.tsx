@@ -105,7 +105,10 @@ export function PdfPageCanvas({
         }
         if (!cancelled) notifyRendered();
       } catch (error) {
-        if (!cancelled && !isCancelled(error)) notifyError(error);
+        if (!cancelled && !isCancelled(error)) {
+          console.error(`[pdf] ${pageNumber}-betni chizib bo'lmadi`, error);
+          notifyError(error);
+        }
       }
     })();
     return () => {

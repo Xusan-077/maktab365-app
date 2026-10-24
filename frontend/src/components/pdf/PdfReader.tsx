@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ListTree } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
@@ -47,6 +47,7 @@ import { ReaderShortcutsDialog } from "./ReaderShortcutsDialog";
 import { PdfSlidesViewer } from "./PdfSlidesViewer";
 import { PdfToolbar } from "./PdfToolbar";
 import { PdfTocDrawer } from "./PdfTocDrawer";
+import { resolveFileUrl } from "@/lib/pdf/file-url";
 import { usePdfDocument } from "./usePdfDocument";
 
 const isTypingTarget = (target: EventTarget | null) =>
@@ -62,6 +63,29 @@ function ReaderMessage({ message, action }: { message: string; action?: React.Re
       <p className="text-danger">{message}</p>
       {action}
     </div>
+  );
+}
+
+/** Xato holatidagi zaxira: PDF'ni brauzerning o'z ko'rgichida yangi oynada ochadi. */
+function OpenInNewWindowButton({ bookId, label }: { bookId: string; label: string }) {
+  const queryClient = useQueryClient();
+  const open = async () => {
+    // Oyna bosish onida (bloklanmasligi uchun) ochiladi, URL keyin qo'yiladi.
+    const popup = window.open("", "_blank");
+    try {
+      const { url } = await queryClient.fetchQuery(pdfQueries.fileUrl(bookId));
+      const target = resolveFileUrl(url, window.location.origin);
+      if (popup) popup.location.href = target;
+      else window.location.assign(target);
+    } catch (error) {
+      console.error("[pdf] yangi oynada ochib bo'lmadi", error);
+      popup?.close();
+    }
+  };
+  return (
+    <Button variant="ghost" onClick={() => void open()}>
+      {label}
+    </Button>
   );
 }
 
@@ -404,18 +428,24 @@ export function PdfReader({ bookId, backHref }: { bookId: string; backHref?: str
             <ReaderMessage
               message={t("loadError")}
               action={
-                <Button variant="secondary" onClick={retry}>
-                  {t("retry")}
-                </Button>
+                <>
+                  <Button variant="secondary" onClick={retry}>
+                    {t("retry")}
+                  </Button>
+                  <OpenInNewWindowButton bookId={bookId} label={t("openInNewWindow")} />
+                </>
               }
             />
           ) : renderFailed ? (
             <ReaderMessage
               message={t("pageError")}
               action={
-                <Button variant="secondary" onClick={retry}>
-                  {t("retry")}
-                </Button>
+                <>
+                  <Button variant="secondary" onClick={retry}>
+                    {t("retry")}
+                  </Button>
+                  <OpenInNewWindowButton bookId={bookId} label={t("openInNewWindow")} />
+                </>
               }
             />
           ) : document.doc && page !== null ? (

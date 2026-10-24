@@ -4,7 +4,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { loadOfflinePdf } from "@/lib/offline/pdf-cache";
 import { resolveFileUrl } from "@/lib/pdf/file-url";
-import { loadPdfjs, type PDFDocumentLoadingTask, type PDFDocumentProxy } from "@/lib/pdf/pdfjs";
+import {
+  loadPdfjs,
+  pdfjsAssetOptions,
+  type PDFDocumentLoadingTask,
+  type PDFDocumentProxy,
+} from "@/lib/pdf/pdfjs";
 import { pdfQueries } from "@/lib/pdf-books/queries";
 
 /** Bir so'rovda shuncha bayt (HTTP Range): kitob to'liq yuklanishini kutmaydi. */
@@ -43,9 +48,10 @@ function usePdfFromUrl(
         // Oflayn saqlangan nusxa (butun fayl xotirada) yoki imzolangan URL (Range bilan bo'laklab).
         task =
           "data" in file
-            ? pdfjs.getDocument({ data: file.data })
+            ? pdfjs.getDocument({ data: file.data, ...pdfjsAssetOptions() })
             : pdfjs.getDocument({
                 url: resolveFileUrl(file.url, window.location.origin),
+                ...pdfjsAssetOptions(),
                 rangeChunkSize: RANGE_CHUNK_BYTES,
                 disableAutoFetch: true,
               });
@@ -56,6 +62,7 @@ function usePdfFromUrl(
         }
         setState({ doc, loading: false, error: null });
       } catch (error) {
+        console.error("[pdf] hujjatni ochib bo'lmadi", error);
         if (!cancelled) setState({ doc: null, loading: false, error });
       }
     })();

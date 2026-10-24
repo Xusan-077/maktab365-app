@@ -21,7 +21,7 @@ const eslintConfig = defineConfig([
       ],
     },
   },
-  globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts", "src/lib/api/schema.ts"]),
+  globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts", "src/lib/api/schema.ts", "public/pdfjs/**"]),
 ]);
 
 export default eslintConfig;
