@@ -830,3 +830,23 @@ def test_duplicate_creates_draft_with_toc_but_without_file(admin, editor, upload
 def test_duplicate_requires_staff(uploaded):
     anon = APIClient()
     assert anon.post(f"{BASE}/{uploaded['id']}/duplicate/").status_code in (401, 403)
+
+
+def test_public_list_filters_by_group_and_language(catalog, anon):
+    exact = catalog.subject("algebra", group="exact")
+    natural = catalog.subject("fizika", group="natural")
+    language = catalog.subject("ona-tili", group="language")
+    a = catalog.pdf_book(exact, 9, language="uz")
+    b = catalog.pdf_book(natural, 9, language="ru")
+    c = catalog.pdf_book(language, 5, language="uz")
+
+    def ids(**params):
+        return {item["id"] for item in anon.get(f"{PUBLIC}/", params).json()["results"]}
+
+    assert ids(group="exact") == {str(a.pk)}
+    assert ids(group="exact,natural") == {str(a.pk), str(b.pk)}
+    assert ids(group=["exact", "language"]) == {str(a.pk), str(c.pk)}
+    assert ids(language="uz") == {str(a.pk), str(c.pk)}
+    assert ids(group="exact,natural", language="ru") == {str(b.pk)}
+    assert anon.get(f"{PUBLIC}/", {"group": "nope"}).status_code == 400
+    assert anon.get(f"{PUBLIC}/", {"language": "kaa"}).status_code == 400

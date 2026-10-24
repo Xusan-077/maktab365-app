@@ -1488,6 +1488,21 @@ paths:
           type: integer
         description: Sinf (1–11)
       - in: query
+        name: group
+        schema:
+          type: string
+        description: 'Fan guruhi: `exact|natural|language|social|arts`; bir nechta
+          bo''lsa vergul bilan'
+      - in: query
+        name: language
+        schema:
+          type: string
+          enum:
+          - en
+          - ru
+          - uz
+        description: Kitob tili
+      - in: query
         name: ordering
         schema:
           type: string

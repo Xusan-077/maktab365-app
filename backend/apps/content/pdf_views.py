@@ -10,7 +10,7 @@ from django.utils import timezone
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import generics
-from rest_framework.exceptions import APIException, NotFound
+from rest_framework.exceptions import APIException, NotFound, ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -18,7 +18,7 @@ from apps.analytics import services as analytics
 
 from . import pdf_storage as storage
 from .cache import public_cached
-from .models import PdfBook, PdfBookChapter, Subject
+from .models import BookLanguage, PdfBook, PdfBookChapter, Subject, SubjectGroup
 from .pdf_serializers import (
     ChapterHitSerializer,
     PdfBookDetailSerializer,
@@ -35,6 +35,19 @@ CHUNK = 64 * 1024
 RANGE_RE = re.compile(r"^bytes=(\d*)-(\d*)$")
 
 
+def _choice_list(request, name: str, allowed) -> list[str]:
+    """`?group=exact,natural` (yoki takrorlangan parametr) → tekshirilgan qiymatlar ro'yxati."""
+    values = [
+        part.strip()
+        for raw in request.query_params.getlist(name)
+        for part in raw.split(",")
+        if part.strip()
+    ]
+    if any(value not in allowed for value in values):
+        raise ValidationError({name: ["invalid"]})
+    return values
+
+
 class PdfBookListView(PublicView, generics.ListAPIView):
     serializer_class = PdfBookSerializer
     filter_backends: list = []
@@ -46,6 +59,12 @@ class PdfBookListView(PublicView, generics.ListAPIView):
             books = books.filter(grade=grade)
         if subject := request.query_params.get("subject"):
             books = books.filter(subject__slug=subject)
+        if groups := _choice_list(request, "group", SubjectGroup.values):
+            books = books.filter(subject__group__in=groups)
+        if language := request.query_params.get("language"):
+            if language not in BookLanguage.values:
+                raise ValidationError({"language": ["invalid"]})
+            books = books.filter(language=language)
         if query := request.query_params.get("q", "").strip():
             books = books.filter(
                 Q(title__uz__icontains=query)
@@ -62,6 +81,20 @@ class PdfBookListView(PublicView, generics.ListAPIView):
             GRADE_PARAM,
             SUBJECT_PARAM,
             OpenApiParameter("q", OpenApiTypes.STR, description="Kitob nomi bo'yicha"),
+            OpenApiParameter(
+                "group",
+                OpenApiTypes.STR,
+                description=(
+                    "Fan guruhi: `exact|natural|language|social|arts`; "
+                    "bir nechta bo'lsa vergul bilan"
+                ),
+            ),
+            OpenApiParameter(
+                "language",
+                OpenApiTypes.STR,
+                enum=list(BookLanguage.values),
+                description="Kitob tili",
+            ),
             OpenApiParameter(
                 "ordering",
                 OpenApiTypes.STR,
