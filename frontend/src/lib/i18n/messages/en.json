@@ -1418,6 +1418,15 @@
         "title": "{title} — grade {grade}, PDF",
         "description": "{title}: grade {grade}, {subject}. PDF ({size}, {pages} pages) — read online or download."
       },
+      "resume": "Continue from page {page}",
+      "subtitle": "Textbook for grade {grade}",
+      "progressAt": "You stopped at page {page}",
+      "progressDone": "You've finished this book",
+      "otherGrades": "{subject} in other grades",
+      "reportTitle": "Found a mistake?",
+      "reportText": "Report a bad scan or a missing page.",
+      "sameGrade": "More textbooks for grade {grade}",
+      "all": "All",
       "shareMore": "More apps…"
     },
     "controls": {

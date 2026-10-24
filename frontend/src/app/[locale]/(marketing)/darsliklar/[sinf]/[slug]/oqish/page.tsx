@@ -1,8 +1,10 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { MARKETING_CONTAINER } from "@/components/layout/containers";
+import { PageSkeleton } from "@/components/layout/PageSkeleton";
 import { PdfReaderLoader } from "@/components/pdf/PdfReaderLoader";
 import { getLocalized } from "@/lib/i18n/localized";
 import { routing } from "@/lib/i18n/routing";
@@ -34,9 +36,24 @@ export async function generateMetadata({
   };
 }
 
-export default async function PdfReaderPage({
-  params,
-}: PageProps<"/[locale]/darsliklar/[sinf]/[slug]/oqish">) {
+type Props = PageProps<"/[locale]/darsliklar/[sinf]/[slug]/oqish">;
+
+/** `params` faqat `<Suspense>` ichidagi `ReaderContent` da o'qiladi (App Shell bitta kitobga bog'lanmasin). */
+export default function PdfReaderPage({ params }: Props) {
+  return (
+    <Suspense
+      fallback={
+        <div className={`${MARKETING_CONTAINER} py-4`}>
+          <PageSkeleton variant="reading" />
+        </div>
+      }
+    >
+      <ReaderContent params={params} />
+    </Suspense>
+  );
+}
+
+async function ReaderContent({ params }: Pick<Props, "params">) {
   const { locale, sinf, slug } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   const grade = parseGradeParam(sinf);

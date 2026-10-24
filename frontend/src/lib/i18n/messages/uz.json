@@ -1418,6 +1418,15 @@
         "title": "{title} — {grade}-sinf, PDF",
         "description": "{title}: {grade}-sinf, {subject}. PDF ({size}, {pages} bet) — onlayn o'qing yoki yuklab oling."
       },
+      "resume": "{page}-betdan davom ettirish",
+      "subtitle": "{grade}-sinf uchun darslik",
+      "progressAt": "Siz {page}-betda to'xtagansiz",
+      "progressDone": "Siz bu kitobni o'qib chiqqansiz",
+      "otherGrades": "{subject} boshqa sinflarda",
+      "reportTitle": "Xato topdingizmi?",
+      "reportText": "Yomon skan yoki yetishmayotgan bet haqida xabar bering.",
+      "sameGrade": "{grade}-sinf uchun boshqa darsliklar",
+      "all": "Barchasi",
       "shareMore": "Boshqa ilovalar…"
     },
     "controls": {

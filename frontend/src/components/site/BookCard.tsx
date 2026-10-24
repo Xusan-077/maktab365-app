@@ -22,7 +22,11 @@ export function BookCard({ book, priority, sizes }: BookCardProps) {
   const meta = [t("gradeLabel", { grade: book.grade }), languageLabel].filter(Boolean).join(" · ");
 
   return (
-    <Link href={pdfBookPath(book)} className="group flex flex-col gap-3 rounded-xl">
+    <Link
+      href={pdfBookPath(book)}
+      className="group flex flex-col gap-3 rounded-xl"
+      data-testid="pdf-book-card"
+    >
       <div className="relative">
         <BookCover
           grade={book.grade}

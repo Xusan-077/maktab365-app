@@ -1,9 +1,11 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import { ContinueSection } from "@/components/home/ContinueSection";
 import { HomeHero } from "@/components/home/HomeHero";
+import { HomeSkeleton } from "@/components/home/HomeSkeleton";
 import {
   GradesSection,
   GroupsSection,
@@ -34,7 +36,16 @@ async function settled<T>(promise: Promise<T>): Promise<T | null> {
   }
 }
 
-export default async function HomePage({ params }: PageProps<"/[locale]">) {
+/** `params` faqat `<Suspense>` ichidagi `HomeContent` da o'qiladi (App Shell bitta tilga bog'lanmasin). */
+export default function HomePage({ params }: PageProps<"/[locale]">) {
+  return (
+    <Suspense fallback={<HomeSkeleton />}>
+      <HomeContent params={params} />
+    </Suspense>
+  );
+}
+
+async function HomeContent({ params }: Pick<PageProps<"/[locale]">, "params">) {
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);

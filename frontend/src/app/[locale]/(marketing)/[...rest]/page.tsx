@@ -6,6 +6,9 @@ export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale, rest: ["yoq"] }));
 }
 
+/** Yo'l noma'lum, shuning uchun layout'dagi `usePathname()` so'rov vaqtida hisoblanadi: bloklanishi mumkin. */
+export const instant = false;
+
 /** Mavjud bo'lmagan yo'llarni guruhning not-found sahifasiga yo'naltiradi (layout saqlanadi). */
 export default function CatchAllNotFound() {
   notFound();

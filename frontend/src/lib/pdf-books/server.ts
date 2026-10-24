@@ -30,6 +30,14 @@ export async function getGradeBooks(grade: number): Promise<PdfBook[]> {
   return page.results;
 }
 
+/** Fanning hamma sinflardagi kitoblari ("Algebra boshqa sinflarda"). */
+export async function getSubjectBooks(subject: string): Promise<PdfBook[]> {
+  "use cache";
+  lifetime();
+  const page = await new PdfBooksApi().list({ subject, pageSize: SERVER_PAGE_SIZE });
+  return page.results;
+}
+
 /** Eng so'nggi qo'shilgan nashr qilingan kitoblar (kirish sahifasi kollaji). */
 export async function getLatestBooks(count: number): Promise<PdfBook[]> {
   "use cache";

@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { BookOpen, Check, Download, Link2, Send, Share2 } from "lucide-react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { BookOpen, Check, Download, Link2, Loader2, Send, Share2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Button, buttonVariants } from "@/components/ui/Button";
+import { isBookRead, usePdfProgressMap } from "@/hooks/usePdfProgressMap";
 import { ApiError } from "@/lib/api/types";
 import { Link } from "@/lib/i18n/navigation";
 import { resolveFileUrl } from "@/lib/pdf/file-url";
 import { getPdfBooksApi } from "@/lib/pdf-books/api";
-import { formatBytes } from "@/lib/utils/bytes";
+import { cn } from "@/lib/utils/cn";
 import { readerPath } from "@/lib/utils/routes";
 
 export interface BookActionsProps {
@@ -16,9 +16,14 @@ export interface BookActionsProps {
   grade: number;
   slug: string;
   title: string;
-  sizeBytes: number;
+  pageCount: number;
   allowDownload: boolean;
+  /** "Saqlash" kabi qo'shimcha tugmalar (yuklab olishdan keyin, ulashishdan oldin). */
+  children?: ReactNode;
 }
+
+const outlineButton =
+  "border-input-border bg-surface text-foreground hover:bg-surface-2 flex items-center justify-center rounded-2xl border-[1.5px] font-semibold transition-colors disabled:opacity-50";
 
 /** `https://t.me/share/url` havolasi (Telegram'da ulashish). */
 export function telegramShareUrl(url: string, text: string): string {
@@ -66,20 +71,20 @@ function ShareMenu({ title, grade }: { title: string; grade: number }) {
 
   return (
     <div ref={root} className="relative">
-      <Button
-        variant="secondary"
-        size="lg"
+      <button
+        type="button"
+        aria-label={t("share")}
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
+        className={cn(outlineButton, "size-14")}
       >
-        <Share2 className="size-4" aria-hidden />
-        {t("share")}
-      </Button>
+        <Share2 className="size-5" aria-hidden />
+      </button>
       {open && (
         <div
           role="menu"
-          className="border-border bg-surface absolute top-full left-0 z-30 mt-2 w-64 rounded-xl border p-1 shadow-lg"
+          className="border-border bg-surface absolute top-full right-0 z-30 mt-2 w-64 rounded-xl border p-1 shadow-lg sm:right-auto sm:left-0"
         >
           <a
             role="menuitem"
@@ -130,17 +135,37 @@ function ShareMenu({ title, grade }: { title: string; grade: number }) {
   );
 }
 
-/** Kitob sahifasining asosiy harakatlari: onlayn o'qish (asosiy), PDF yuklab olish, ulashish. */
+const readLink =
+  "bg-brand hover:bg-brand-hover flex h-14 items-center gap-2.5 rounded-2xl px-7 text-[1.0625rem] font-bold text-white transition-colors";
+
+/** Progress/saqlash ma'lumoti kelguncha (Suspense fallback, serverda chiziladi): oddiy "Onlayn o'qish". */
+export function BookActionsFallback({ grade, slug }: Pick<BookActionsProps, "grade" | "slug">) {
+  const t = useTranslations("pdfBooks.page");
+  return (
+    <div className="flex flex-wrap items-center gap-2.5">
+      <Link href={readerPath({ grade, slug })} className={readLink}>
+        <BookOpen className="size-5" aria-hidden />
+        {t("read")}
+      </Link>
+    </div>
+  );
+}
+
+/** Kitob sahifasining harakatlari: o'qish yoki davom ettirish (asosiy), yuklab olish, saqlash, ulashish. */
 export function BookActions({
   id,
   grade,
   slug,
   title,
-  sizeBytes,
+  pageCount,
   allowDownload,
+  children,
 }: BookActionsProps) {
   const t = useTranslations("pdfBooks.page");
   const [state, setState] = useState<"idle" | "loading" | "failed" | "disabled">("idle");
+  const entry = usePdfProgressMap()[id];
+  const resumePage =
+    entry && entry.page > 1 && !isBookRead(entry, pageCount) ? entry.page : undefined;
 
   const download = async () => {
     setState("loading");
@@ -156,26 +181,28 @@ export function BookActions({
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-center gap-3">
-        <Link href={readerPath({ grade, slug })} className={buttonVariants({ size: "lg" })}>
+      <div className="flex flex-wrap items-center gap-2.5">
+        <Link href={readerPath({ grade, slug }, resumePage)} className={readLink}>
           <BookOpen className="size-5" aria-hidden />
-          {t("read")}
+          {resumePage ? t("resume", { page: resumePage }) : t("read")}
         </Link>
         {allowDownload && (
-          <Button
-            variant="secondary"
-            size="lg"
-            loading={state === "loading"}
+          <button
+            type="button"
+            disabled={state === "loading"}
+            aria-busy={state === "loading" || undefined}
             onClick={() => void download()}
+            className={cn(outlineButton, "h-14 gap-2.5 px-5 text-base")}
           >
-            {state !== "loading" && <Download className="size-4" aria-hidden />}
-            {state === "loading"
-              ? t("downloading")
-              : sizeBytes > 0
-                ? t("downloadSize", { size: formatBytes(sizeBytes) })
-                : t("download")}
-          </Button>
+            {state === "loading" ? (
+              <Loader2 className="size-5 animate-spin" aria-hidden />
+            ) : (
+              <Download className="size-5" aria-hidden />
+            )}
+            {state === "loading" ? t("downloading") : t("download")}
+          </button>
         )}
+        {children}
         <ShareMenu title={title} grade={grade} />
       </div>
       {(!allowDownload || state === "disabled") && (

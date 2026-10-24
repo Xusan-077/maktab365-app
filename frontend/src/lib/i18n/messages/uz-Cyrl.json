@@ -1418,6 +1418,15 @@
         "title": "{title} — {grade}-синф, PDF",
         "description": "{title}: {grade}-синф, {subject}. PDF ({size}, {pages} бет) — онлайн ўқинг ёки юклаб олинг."
       },
+      "resume": "{page}-бетдан давом эттириш",
+      "subtitle": "{grade}-синф учун дарслик",
+      "progressAt": "Сиз {page}-бетда тўхтагансиз",
+      "progressDone": "Сиз бу китобни ўқиб чиққансиз",
+      "otherGrades": "{subject} бошқа синфларда",
+      "reportTitle": "Хато топдингизми?",
+      "reportText": "Ёмон скан ёки етишмаётган бет ҳақида хабар беринг.",
+      "sameGrade": "{grade}-синф учун бошқа дарсликлар",
+      "all": "Барчаси",
       "shareMore": "Бошқа иловалар…"
     },
     "controls": {

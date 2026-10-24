@@ -1418,6 +1418,15 @@
         "title": "{title} — {grade} класс, PDF",
         "description": "{title}: {grade} класс, {subject}. PDF ({size}, {pages} стр.) — читайте онлайн или скачивайте."
       },
+      "resume": "Продолжить со стр. {page}",
+      "subtitle": "Учебник для {grade} класса",
+      "progressAt": "Вы остановились на стр. {page}",
+      "progressDone": "Вы прочитали эту книгу",
+      "otherGrades": "{subject} в других классах",
+      "reportTitle": "Нашли ошибку?",
+      "reportText": "Сообщите о плохом скане или недостающей странице.",
+      "sameGrade": "Другие учебники для {grade} класса",
+      "all": "Все",
       "shareMore": "Другие приложения…"
     },
     "controls": {

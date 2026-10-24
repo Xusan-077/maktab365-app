@@ -7,6 +7,17 @@ import { ApiError } from "@/lib/api/types";
 import uz from "@/lib/i18n/messages/uz.json";
 
 const api = vi.hoisted(() => ({ download: vi.fn() }));
+const progress = vi.hoisted(() => ({
+  map: {} as Record<string, { page: number; status: null }>,
+}));
+vi.mock("@/hooks/usePdfProgressMap", async () => {
+  const { mergeReadStatus } = await import("@/lib/pdf/progress");
+  return {
+    usePdfProgressMap: () => progress.map,
+    isBookRead: (entry: { page: number; status: null } | undefined, total: number) =>
+      entry !== undefined && mergeReadStatus(entry.status, entry.page, total) === "read",
+  };
+});
 vi.mock("@/lib/pdf-books/api", () => ({ getPdfBooksApi: () => api }));
 vi.mock("@/lib/i18n/navigation", () => ({
   Link: ({ href, children, ...rest }: { href: string; children: ReactNode }) => (
@@ -24,7 +35,7 @@ const props = {
   grade: 9,
   slug: "9-sinf-algebra",
   title: "Algebra",
-  sizeBytes: 10 * 1024 * 1024,
+  pageCount: 200,
   allowDownload: true,
 };
 
@@ -36,7 +47,10 @@ function setup(over: Partial<typeof props> = {}) {
   );
 }
 
-beforeEach(() => vi.clearAllMocks());
+beforeEach(() => {
+  vi.clearAllMocks();
+  progress.map = {};
+});
 afterEach(cleanup);
 
 describe("BookActions", () => {
@@ -44,6 +58,23 @@ describe("BookActions", () => {
     setup();
     const link = screen.getByRole("link", { name: t.read });
     expect(link.getAttribute("href")).toBe("/darsliklar/9/9-sinf-algebra/oqish");
+  });
+
+  it("o'qishni boshlagan foydalanuvchiga «N-betdan davom ettirish» ko'rinadi", () => {
+    progress.map = { b1: { page: 45, status: null } };
+    setup();
+    const link = screen.getByRole("link", { name: "45-betdan davom ettirish" });
+    expect(link.getAttribute("href")).toBe("/darsliklar/9/9-sinf-algebra/oqish?page=45");
+  });
+
+  it("oxirgi betga yetgan yoki 1-betdagi kitobda oddiy «Onlayn o'qish»", () => {
+    progress.map = { b1: { page: 200, status: null } };
+    setup();
+    expect(screen.getByRole("link", { name: t.read })).toBeTruthy();
+    cleanup();
+    progress.map = { b1: { page: 1, status: null } };
+    setup();
+    expect(screen.getByRole("link", { name: t.read })).toBeTruthy();
   });
 
   it("yuklab olish: URL olinadi va fayl nomi bilan yuklash boshlanadi", async () => {
@@ -54,7 +85,7 @@ describe("BookActions", () => {
     });
     const click = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
     setup();
-    fireEvent.click(screen.getByRole("button", { name: /PDF yuklab olish \(10 MB\)/ }));
+    fireEvent.click(screen.getByRole("button", { name: /PDF yuklab olish/ }));
     await waitFor(() => expect(click).toHaveBeenCalled());
     expect(api.download).toHaveBeenCalledWith("b1");
     click.mockRestore();
