@@ -23,6 +23,7 @@ import { getLocalized } from "@/lib/i18n/localized";
 import { Link, usePathname, useRouter } from "@/lib/i18n/navigation";
 import { formatBytes } from "@/lib/utils/bytes";
 import { cn } from "@/lib/utils/cn";
+import { formatDate } from "@/lib/utils/format-date";
 import { GRADES } from "@/types/catalog";
 import { useAdminIdentity } from "./AdminRoleProvider";
 import { Checkbox } from "./Checkbox";
@@ -462,7 +463,7 @@ export function PdfBooksView() {
                       </td>
                       <td className="text-muted hidden px-4 py-3 whitespace-nowrap md:table-cell">
                         <time dateTime={book.updated_at}>
-                          {new Date(book.updated_at).toLocaleDateString(locale)}
+                          {formatDate(book.updated_at, locale, "date")}
                         </time>
                       </td>
                       <td className="px-4 py-3">{rowActions(book)}</td>

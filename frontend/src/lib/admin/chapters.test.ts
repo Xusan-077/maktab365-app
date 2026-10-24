@@ -4,7 +4,9 @@ import {
   countRows,
   emptyRow,
   fromApi,
+  indentRow,
   moveItem,
+  outdentRow,
   parseBulk,
   slidesById,
   toPayload,
@@ -175,5 +177,122 @@ describe("saqlangan bo'limlar: id va prezentatsiya", () => {
     expect(map.get("c1a")).toBeNull();
     expect(map.get("c2")).toBeNull();
     expect(map.size).toBe(3);
+  });
+});
+
+describe("chapterProblems: bet tartibi", () => {
+  it("218 → 214 → 216: kichraygan qator (214) xato, keyingisi unga nisbatan tekshiriladi", () => {
+    const problems = chapterProblems(
+      [draft("A", "218"), draft("B", "214"), draft("C", "216")],
+      300,
+    );
+    expect(problems.get("k-B")).toBe("pageOrder");
+    expect(problems.has("k-A")).toBe(false);
+    expect(problems.has("k-C")).toBe(false);
+  });
+
+  it("hujjat tartibida: bob → uning bo'limlari → keyingi bob; teng bet mumkin", () => {
+    const ok = [
+      draft("I", "5", [
+        ["1", "5"],
+        ["2", "7"],
+      ]),
+      draft("II", "7", [["3", "9"]]),
+    ];
+    expect(chapterProblems(ok, 20).size).toBe(0);
+    const childBefore = [draft("I", "5", [["1", "4"]])];
+    expect(chapterProblems(childBefore, 20).get("k-1")).toBe("pageOrder");
+    const nextBefore = [draft("I", "5", [["1", "9"]]), draft("II", "8")];
+    expect(chapterProblems(nextBefore, 20).get("k-II")).toBe("pageOrder");
+  });
+
+  it("noto'g'ri yoki chegaradan oshgan bet tartibga ta'sir qilmaydi", () => {
+    const problems = chapterProblems([draft("A", "3"), draft("B", "99"), draft("C", "4")], 10);
+    expect(problems.get("k-B")).toBe("pageExceeds");
+    expect(problems.has("k-C")).toBe(false);
+  });
+});
+
+describe("indentRow / outdentRow (bob ↔ bo'lim)", () => {
+  const titles = (drafts: ChapterDraft[]) =>
+    drafts.map((d) => [d.title, d.children.map((c) => c.title)]);
+
+  it("indent: yuqori qator oldingi bobning oxirgi bo'limi bo'ladi, o'z bo'limlari ham ko'chadi", () => {
+    const drafts = [draft("I", "1", [["a", "2"]]), draft("b", "3", [["c", "4"]]), draft("II", "5")];
+    expect(titles(indentRow(drafts, 1))).toEqual([
+      ["I", ["a", "b", "c"]],
+      ["II", []],
+    ]);
+  });
+
+  it("birinchi qatorni indent qilib bo'lmaydi", () => {
+    const drafts = [draft("I", "1")];
+    expect(indentRow(drafts, 0)).toEqual(drafts);
+  });
+
+  it("outdent: bo'lim bob bo'ladi, undan keyingi bo'limlar unga o'tadi (tartib saqlanadi)", () => {
+    const drafts = [
+      draft("I", "1", [
+        ["a", "2"],
+        ["b", "3"],
+        ["c", "4"],
+      ]),
+      draft("II", "5"),
+    ];
+    expect(titles(outdentRow(drafts, 0, 1))).toEqual([
+      ["I", ["a"]],
+      ["b", ["c"]],
+      ["II", []],
+    ]);
+  });
+
+  it("id va kalitlar saqlanadi (prezentatsiya yo'qolmasin)", () => {
+    const drafts = [draft("I", "1"), { ...draft("b", "2"), id: "saved-b" }];
+    const child = indentRow(drafts, 1)[0].children[0];
+    expect(child).toMatchObject({ key: "k-b", id: "saved-b", title: "b", page: "2" });
+    expect("children" in child).toBe(false);
+    const back = outdentRow(indentRow(drafts, 1), 0, 0);
+    expect(back[1]).toMatchObject({ key: "k-b", id: "saved-b", children: [] });
+  });
+});
+
+describe("parseBulk: «I bob» sarlavhalari", () => {
+  const titles = (rows: ChapterDraft[]) =>
+    rows.map((d) => [d.title, d.children.map((c) => c.title)]);
+
+  it("«I bob …» qatorlari bob (level 0), qolganlari shu bob ichidagi bo'lim", () => {
+    const { rows } = parseBulk(
+      [
+        "Kirish ........ 3",
+        "I bob. Algebraik ifodalar ........ 5",
+        "1-§. Ko'phadlar ........ 6",
+        "2-§. Kasrlar ........ 12",
+        "II BOB Funksiyalar ........ 20",
+        "3-§. Chiziqli funksiya ........ 21",
+      ].join("\n"),
+    );
+    expect(titles(rows)).toEqual([
+      ["Kirish", []],
+      ["I bob. Algebraik ifodalar", ["1-§. Ko'phadlar", "2-§. Kasrlar"]],
+      ["II BOB Funksiyalar", ["3-§. Chiziqli funksiya"]],
+    ]);
+  });
+
+  it("raqamli va kirill yozuvdagi boblar ham taniladi", () => {
+    const { rows } = parseBulk(
+      "1-bob Sonlar 4\n1-§ Natural sonlar 5\nII боб Геометрия 30\n4-§ Нуқта 31",
+    );
+    expect(titles(rows)).toEqual([
+      ["1-bob Sonlar", ["1-§ Natural sonlar"]],
+      ["II боб Геометрия", ["4-§ Нуқта"]],
+    ]);
+  });
+
+  it("«bob» so'zi sarlavha o'rtasida bo'lsa bob emas", () => {
+    const { rows } = parseBulk("Kitob haqida bob 3\nMashqlar 4");
+    expect(titles(rows)).toEqual([
+      ["Kitob haqida bob", []],
+      ["Mashqlar", []],
+    ]);
   });
 });

@@ -1,0 +1,24 @@
+{
+  "description": "Yordam xabari sifati: backend (apps/support/quality.py) va frontend (lib/validation/support-quality.ts) bir xil natija berishi shart. min_length — qirqilgan matn uzunligi.",
+  "min_length": 15,
+  "cases": [
+    { "text": "3-betdagi formulada xato bor", "meaningless": false },
+    { "text": "Kitob ochilmayapti, yordam bering", "meaningless": false },
+    { "text": "Algebra 45-bet: javob noto'g'ri berilgan", "meaningless": false },
+    { "text": "Не открывается страница 12", "meaningless": false },
+    { "text": "Китобдаги расм кўринмаяпти", "meaningless": false },
+    { "text": "The answer on page 7 is wrong", "meaningless": false },
+    { "text": "Qanday qilib natijani ko'raman?", "meaningless": false },
+    { "text": "Dnxdnxdnxdnx", "meaningless": true },
+    { "text": "Dnxdnxdnxdnxdnxdnx", "meaningless": true },
+    { "text": "dnx dnx dnx dnx dnx", "meaningless": true },
+    { "text": "asdasdasdasdasdasd", "meaningless": true },
+    { "text": "aaaaaaaaaaaaaaaaaaaa", "meaningless": true },
+    { "text": "qwrtpsdfghjklzxcvbnm", "meaningless": true },
+    { "text": "qwrt psdf ghjk lzxc vbnm", "meaningless": true },
+    { "text": "1234567890 1234567890", "meaningless": true },
+    { "text": "!!!!!!!!?????????......", "meaningless": true },
+    { "text": "test test test test test", "meaningless": true },
+    { "text": "Assalomualaykumyordamberingizlar", "meaningless": true }
+  ]
+}

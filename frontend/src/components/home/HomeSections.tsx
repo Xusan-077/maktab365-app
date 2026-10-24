@@ -6,7 +6,7 @@ import { GroupCard } from "@/components/site/GroupCard";
 import { TELEGRAM_BOT_USERNAME } from "@/lib/auth/config";
 import { Link } from "@/lib/i18n/navigation";
 import type { PdfBook, PdfSubject } from "@/lib/pdf-books/api";
-import { GROUP_URL, SUBJECT_GROUPS } from "@/lib/pdf/grade-groups";
+import { GROUP_URL, groupSubjects, SUBJECT_GROUPS } from "@/lib/pdf/grade-groups";
 import { ROUTES } from "@/lib/utils/routes";
 import { GRADES } from "@/types/catalog";
 
@@ -15,8 +15,11 @@ const moreLink = "text-link text-[0.9375rem] font-semibold hover:underline";
 const booksGrid =
   "grid grid-cols-2 gap-x-5 gap-y-6 min-[560px]:grid-cols-3 md:grid-cols-4 lg:grid-cols-6";
 
-/** "Sinf bo'yicha": 1–11-sinf kartalari; fanlar soni API'dan (yuklanmasa son ko'rsatilmaydi). */
-export function GradesSection({ subjects }: { subjects: PdfSubject[] | null }) {
+/**
+ * "Sinf bo'yicha": 1–11-sinf kartalari va har birida nashr qilingan kitoblar soni; kitobi yo'q sinf
+ * "Tez orada" (kulrang). Sonlar yuklanmasa (`null`) ko'rsatilmaydi.
+ */
+export function GradesSection({ gradeCounts }: { gradeCounts: Record<number, number> | null }) {
   const t = useTranslations("home.grades");
   return (
     <section aria-labelledby="home-grades" className="flex flex-col gap-6">
@@ -28,7 +31,7 @@ export function GradesSection({ subjects }: { subjects: PdfSubject[] | null }) {
           <GradeTile
             key={grade}
             grade={grade}
-            subjectCount={subjects?.filter((s) => s.grades.includes(grade)).length}
+            bookCount={gradeCounts ? (gradeCounts[grade] ?? 0) : undefined}
           />
         ))}
       </div>
@@ -36,7 +39,7 @@ export function GradesSection({ subjects }: { subjects: PdfSubject[] | null }) {
   );
 }
 
-/** "Fan yo'nalishlari": 5 guruh, fanlar soni API'dan. */
+/** "Fan yo'nalishlari": 5 guruh; har birida kitobi bor haqiqiy fanlar (nomlari va soni) API'dan. */
 export function GroupsSection({ subjects }: { subjects: PdfSubject[] | null }) {
   const t = useTranslations("home.groups");
   return (
@@ -54,7 +57,7 @@ export function GroupsSection({ subjects }: { subjects: PdfSubject[] | null }) {
           <GroupCard
             key={group}
             group={group}
-            subjectCount={subjects?.filter((s) => s.group === group).length ?? 0}
+            subjects={subjects ? groupSubjects(subjects, group) : null}
             href={`${ROUTES.textbooks}?guruh=${GROUP_URL[group]}`}
           />
         ))}

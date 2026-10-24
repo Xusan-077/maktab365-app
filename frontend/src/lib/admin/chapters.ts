@@ -19,7 +19,8 @@ export const CHAPTERS_MAX = 500;
 export const CHAPTER_PAGE_MAX = 100_000;
 export const DESCRIPTION_MAX = 2000;
 
-export type RowProblem = "titleRequired" | "titleTooLong" | "pageInvalid" | "pageExceeds";
+export type RowProblem =
+  "titleRequired" | "titleTooLong" | "pageInvalid" | "pageExceeds" | "pageOrder";
 
 let counter = 0;
 export const newKey = () => `ch-${(counter += 1)}`;
@@ -92,19 +93,69 @@ export function rowProblem(row: ChapterRow, pageCount?: number): RowProblem | nu
   return null;
 }
 
-/** Qator kaliti → xato. Bo'sh qatorlar hisobga olinmaydi. */
+/**
+ * Qator kaliti → xato. Bo'sh qatorlar hisobga olinmaydi. Hujjat tartibida (bob, uning bo'limlari,
+ * keyingi bob…) bet kamaymasligi kerak: oldingi yaroqli betdan kichik qator — `pageOrder` (backend
+ * `chapter_page_order` bilan bir xil qoida). Yaroqsiz/chegaradan oshgan bet tartibga ta'sir qilmaydi.
+ */
 export function chapterProblems(
   drafts: readonly ChapterDraft[],
   pageCount?: number,
 ): Map<string, RowProblem> {
   const problems = new Map<string, RowProblem>();
+  let previous = 0;
   for (const draft of withoutBlankRows(drafts)) {
     for (const row of [draft, ...draft.children]) {
       const problem = rowProblem(row, pageCount);
       if (problem) problems.set(row.key, problem);
+      if (problem === "pageInvalid" || problem === "pageExceeds") continue;
+      const page = Number(row.page);
+      if (page < previous && !problem) problems.set(row.key, "pageOrder");
+      previous = page;
     }
   }
   return problems;
+}
+
+const toRow = ({ key, id, title, page }: ChapterRow): ChapterRow => ({
+  key,
+  title,
+  page,
+  ...(id && { id }),
+});
+
+/**
+ * Bobni bo'limga aylantiradi (→): `index` dagi yuqori qator oldingi bobning oxirgi bo'limi bo'ladi,
+ * uning bo'limlari ham ortidan ko'chadi (2 daraja; hujjat tartibi o'zgarmaydi). Birinchi qator — o'zgarmaydi.
+ */
+export function indentRow(drafts: readonly ChapterDraft[], index: number): ChapterDraft[] {
+  if (index <= 0 || index >= drafts.length) return [...drafts];
+  const moved = drafts[index];
+  return drafts
+    .map((draft, i) =>
+      i === index - 1
+        ? { ...draft, children: [...draft.children, toRow(moved), ...moved.children] }
+        : draft,
+    )
+    .filter((_, i) => i !== index);
+}
+
+/** Bo'limni bobga aylantiradi (←): undan keyingi bo'limlar yangi bobga o'tadi (tartib saqlanadi). */
+export function outdentRow(
+  drafts: readonly ChapterDraft[],
+  index: number,
+  childIndex: number,
+): ChapterDraft[] {
+  const parent = drafts[index];
+  const row = parent?.children[childIndex];
+  if (!row) return [...drafts];
+  const promoted: ChapterDraft = { ...toRow(row), children: parent.children.slice(childIndex + 1) };
+  return [
+    ...drafts.slice(0, index),
+    { ...parent, children: parent.children.slice(0, childIndex) },
+    promoted,
+    ...drafts.slice(index + 1),
+  ];
 }
 
 /** `items[index]` ni `delta` o'rin siljitadi (chegaradan chiqmaydi); yangi massiv qaytaradi. */
@@ -122,6 +173,8 @@ export function moveItem<T>(items: readonly T[], index: number, delta: -1 | 1): 
 
 const TRAILING_PAGE = /^(.*?)[\s.·…_\-–—:|,;]*?(\d{1,6})\s*$/;
 const NESTED_NUMBER = /^\s*\d+\.\d+/;
+/** Bob sarlavhasi: «I bob», «II BOB.», «1-bob», «2 bob», kirillda «III боб». */
+const CHAPTER_HEADING = /^\s*(?:[IVXLC]+|\d{1,3})\s*[-–.]?\s*(?:bob|боб)(?![\p{L}\p{N}])/iu;
 
 export interface BulkResult {
   rows: ChapterDraft[];
@@ -133,11 +186,17 @@ export interface BulkResult {
  * "1. Kirish ........ 5" kabi qatorlarni sarlavha va betga ajratadi. Oxirgi son — bet; undan oldingi
  * nuqta/chiziqcha/bo'shliqlar tashlanadi. Chekinish (bo'shliq/tab) yoki "1.2" raqamlash — ichki
  * bo'lim; ota bo'lim bo'lmasa yuqori darajada qoladi.
+ *
+ * Matnda «I bob …» kabi bob sarlavhalari bo'lsa: ular — bob (level 0), keyingi qatorlar — shu bob
+ * ichidagi bo'limlar (level 1); birinchi bobdan oldingi qatorlar (Kirish…) yuqori darajada.
  */
 export function parseBulk(text: string): BulkResult {
   const rows: ChapterDraft[] = [];
   let skipped = 0;
-  for (const line of text.split(/\r?\n/)) {
+  const lines = text.split(/\r?\n/);
+  const byHeadings = lines.some((line) => CHAPTER_HEADING.test(line));
+  let chapter: ChapterDraft | null = null;
+  for (const line of lines) {
     if (!line.trim()) continue;
     const match = TRAILING_PAGE.exec(line.trim());
     const title = match?.[1]?.replace(/\s+/g, " ").trim() ?? "";
@@ -145,8 +204,14 @@ export function parseBulk(text: string): BulkResult {
       skipped += 1;
       continue;
     }
-    const nested = /^[ \t]+\S/.test(line) || NESTED_NUMBER.test(line);
     const row: ChapterRow = { key: newKey(), title, page: String(Number(match[2])) };
+    if (byHeadings) {
+      if (CHAPTER_HEADING.test(line)) rows.push((chapter = { ...row, children: [] }));
+      else if (chapter) chapter.children.push(row);
+      else rows.push({ ...row, children: [] });
+      continue;
+    }
+    const nested = /^[ \t]+\S/.test(line) || NESTED_NUMBER.test(line);
     const parent = rows.at(-1);
     if (nested && parent) parent.children.push(row);
     else rows.push({ ...row, children: [] });

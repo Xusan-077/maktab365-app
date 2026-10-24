@@ -2,8 +2,7 @@
 
 import { Check } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { isBookRead, usePdfProgressMap } from "@/hooks/usePdfProgressMap";
-import { readFraction } from "@/components/pdf/PdfBookCard";
+import { useBookResume } from "@/hooks/useBookResume";
 
 interface BookProgressProps {
   bookId: string;
@@ -11,11 +10,8 @@ interface BookProgressProps {
 }
 
 /** Kitob bo'yicha o'qish holati; progress ma'lumoti bitta umumiy manbadan (kirgan: 1 so'rov, mehmon: localStorage). */
-function useBookProgress({ bookId, pageCount }: BookProgressProps) {
-  const entry = usePdfProgressMap()[bookId];
-  const read = isBookRead(entry, pageCount);
-  return { entry, read, fraction: readFraction(entry?.page, pageCount, read) };
-}
+const useBookProgress = ({ bookId, pageCount }: BookProgressProps) =>
+  useBookResume(bookId, pageCount);
 
 /** Muqova pastidagi 3px progress chizig'i (o'qishni boshlagan kitoblarda). */
 export function BookCoverProgress(props: BookProgressProps) {
@@ -31,10 +27,10 @@ export function BookCoverProgress(props: BookProgressProps) {
   );
 }
 
-/** Meta qatoriga qo'shimcha: "· 45-bet" yoki "✓ O'qilgan". */
+/** Meta qatoriga qo'shimcha: "· 32/240 · 13%" yoki "✓ O'qilgan". */
 export function BookMetaProgress(props: BookProgressProps) {
   const t = useTranslations("site.bookCard");
-  const { entry, read } = useBookProgress(props);
+  const { entry, read, percent } = useBookProgress(props);
   if (read) {
     return (
       <span className="text-success inline-flex items-center gap-1 font-semibold whitespace-nowrap">
@@ -45,5 +41,9 @@ export function BookMetaProgress(props: BookProgressProps) {
     );
   }
   if (!entry || entry.page < 1) return null;
-  return <span className="whitespace-nowrap">{` · ${t("page", { page: entry.page })}`}</span>;
+  return (
+    <span className="whitespace-nowrap tabular-nums">
+      {` · ${t("progress", { page: entry.page, total: props.pageCount, percent })}`}
+    </span>
+  );
 }

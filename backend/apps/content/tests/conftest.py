@@ -7,8 +7,7 @@ from apps.content.models import PdfBook, Subject
 
 
 @pytest.fixture(autouse=True)
-def clear_cache(settings):
-    settings.SHOW_DRAFTS_PUBLICLY = False  # backend/.env dagi dev qiymatidan mustaqil
+def clear_cache():
     cache.clear()
     yield
     cache.clear()

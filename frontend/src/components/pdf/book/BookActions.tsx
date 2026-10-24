@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { BookOpen, Check, Download, Link2, Loader2, Send, Share2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { isBookRead, usePdfProgressMap } from "@/hooks/usePdfProgressMap";
+import { useBookResume } from "@/hooks/useBookResume";
 import { ApiError } from "@/lib/api/types";
 import { Link } from "@/lib/i18n/navigation";
 import { resolveFileUrl } from "@/lib/pdf/file-url";
@@ -163,9 +163,7 @@ export function BookActions({
 }: BookActionsProps) {
   const t = useTranslations("pdfBooks.page");
   const [state, setState] = useState<"idle" | "loading" | "failed" | "disabled">("idle");
-  const entry = usePdfProgressMap()[id];
-  const resumePage =
-    entry && entry.page > 1 && !isBookRead(entry, pageCount) ? entry.page : undefined;
+  const { resumePage } = useBookResume(id, pageCount);
 
   const download = async () => {
     setState("loading");

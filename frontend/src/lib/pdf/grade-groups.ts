@@ -17,3 +17,20 @@ export function parseGradeParam(value: string): number | null {
   const grade = Number(value);
   return grade >= 1 && grade <= 11 ? grade : null;
 }
+
+/** Sinf → nashr qilingan kitoblar soni (bosh sahifa sinf kartalari); kitobsiz sinf kalitda yo'q. */
+export function countBooksByGrade(books: readonly { grade: number }[]): Record<number, number> {
+  const counts: Record<number, number> = {};
+  for (const { grade } of books) counts[grade] = (counts[grade] ?? 0) + 1;
+  return counts;
+}
+
+/** Yo'nalishning kitobi bor fanlari (`order` bo'yicha): soni ham, tavsifdagi nomlar ham shulardan. */
+export function groupSubjects<T extends { group: string; order: number; books_count: number }>(
+  subjects: readonly T[],
+  group: SubjectGroup,
+): T[] {
+  return subjects
+    .filter((subject) => subject.group === group && subject.books_count > 0)
+    .sort((a, b) => a.order - b.order);
+}

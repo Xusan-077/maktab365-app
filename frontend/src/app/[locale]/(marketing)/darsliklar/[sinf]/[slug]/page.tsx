@@ -10,10 +10,16 @@ import { JsonLd } from "@/components/pdf/JsonLd";
 import { RecordRecentBook } from "@/components/pdf/RecordRecentBook";
 import { BookActions, BookActionsFallback } from "@/components/pdf/book/BookActions";
 import { OfflineButton } from "@/components/pdf/OfflineButton";
+import {
+  BookResumeCard,
+  BookStickyBar,
+  BookStickyBarFallback,
+} from "@/components/book/BookStickyBar";
 import { BookPreview } from "@/components/pdf/book/BookPreview";
 import {
   BookToc,
   OtherGrades,
+  SameGradeList,
   sectionHeading,
   SimilarBooks,
 } from "@/components/pdf/book/BookSections";
@@ -145,7 +151,7 @@ async function BookContent({ params }: Pick<Props, "params">) {
         }
       />
 
-      <div className="max-w-site mx-auto flex w-full flex-col gap-[4.5rem] px-4 pt-14 pb-24 sm:px-8">
+      <div className="max-w-site mx-auto flex w-full flex-col gap-[4.5rem] px-4 pt-14 pb-16 sm:px-8 md:pb-24">
         <div className="flex flex-wrap items-start gap-10">
           <div className="flex min-w-0 flex-[999_1_35rem] flex-col gap-10">
             {book.description.trim() && (
@@ -158,15 +164,45 @@ async function BookContent({ params }: Pick<Props, "params">) {
             )}
             <BookToc book={book} />
           </div>
-          <aside className="flex min-w-0 flex-[1_1_18.75rem] flex-col gap-6">
-            <OtherGrades current={book} subjectBooks={subjectBooks} subjectTitle={subjectTitle} />
+          {/* Yonma-yon (lg+) bo'lganda o'ng ustun ekranda qoladi; juda baland bo'lsa ichida suriladi. */}
+          <aside
+            data-testid="book-aside"
+            className="flex min-w-0 flex-[1_1_18.75rem] flex-col gap-6 self-start lg:sticky lg:top-24 lg:max-h-[calc(100dvh-7rem)] lg:overflow-y-auto"
+          >
+            {/* Mobilda shu vazifani pastki panel bajaradi. */}
+            <Suspense fallback={null}>
+              <div className="hidden md:block">
+                <BookResumeCard
+                  bookId={book.id}
+                  grade={book.grade}
+                  slug={book.slug}
+                  pageCount={book.page_count}
+                />
+              </div>
+            </Suspense>
             <ReportErrorLink topicId={book.id} card />
+            <div className="hidden md:block">
+              <SameGradeList current={book} gradeBooks={gradeBooks} />
+            </div>
+            <OtherGrades current={book} subjectBooks={subjectBooks} subjectTitle={subjectTitle} />
           </aside>
         </div>
 
         <BookPreview bookId={book.id} pageCount={book.page_count} />
-        <SimilarBooks current={book} gradeBooks={gradeBooks} />
+        {/* Desktop'da shu sinf kitoblari o'ng ustunda; mobilda — kartalar to'ri. */}
+        <div className="md:hidden">
+          <SimilarBooks current={book} gradeBooks={gradeBooks} />
+        </div>
       </div>
+
+      <Suspense fallback={<BookStickyBarFallback grade={book.grade} slug={book.slug} />}>
+        <BookStickyBar
+          bookId={book.id}
+          grade={book.grade}
+          slug={book.slug}
+          pageCount={book.page_count}
+        />
+      </Suspense>
 
       <JsonLd
         data={breadcrumbList(SITE_URL, locale, [

@@ -19,8 +19,8 @@ const isProtected = (path: string) => PROTECTED_ROUTES.some((route) => isUnder(p
 /**
  * Proxy yo'naltirishi (til prefiksisiz natija yoki `null`):
  * - kirmagan: himoyalangan sahifa va onboarding → `/kirish?callbackUrl=…`;
- * - admin (`staff: "admin"`): faqat `/admin` — qolgan hamma sahifa (sayt, kabinet, ustoz, kirish,
- *   onboarding) → `/admin`;
+ * - admin (`staff: "admin"`): ochiq sayt va `/admin` — yo'naltirilmaydi (saytni oddiy foydalanuvchidek
+ *   ko'radi); o'quvchi/ustoz panellari, sozlamalar, kirish va onboarding → `/admin` (onboarding'siz);
  * - sessiya (`onboarded`/`role` sessiyada): onboarding tugamagan → `/onboarding`;
  *   tugagan → kirish/kod/onboarding sahifasidan va boshqa rol paneli → o'z paneli (`/kabinet` | `/ustoz`).
  */
@@ -33,10 +33,14 @@ export function resolveAuthRedirect({ path, returnTo, session }: RedirectInput):
   }
 
   const user = session.user;
-  if (user?.staff === "admin") return isUnder(path, ROUTES.admin) ? null : ROUTES.admin;
-  if (typeof user?.onboarded !== "boolean" || !user.role) return null;
   const onAuthPage =
     isUnder(path, ROUTES.login) || isUnder(path, ROUTES.register) || isUnder(path, ROUTES.otp);
+  if (user?.staff === "admin") {
+    if (isUnder(path, ROUTES.admin)) return null;
+    const learnerOnly = isProtected(path) || onAuthPage || isUnder(path, ROUTES.onboarding);
+    return learnerOnly ? ROUTES.admin : null;
+  }
+  if (typeof user?.onboarded !== "boolean" || !user.role) return null;
   if (!user.onboarded) {
     return isProtected(path) || onAuthPage ? ROUTES.onboarding : null;
   }

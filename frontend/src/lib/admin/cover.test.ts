@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { applyCover, coverImageProblem, COVER_MAX_BYTES } from "./cover";
+import { applyCover, coverImageProblem, COVER_MAX_BYTES, previewCover } from "./cover";
 
 vi.mock("@/lib/pdf/thumbnail", () => ({
   renderCover: vi.fn(async () => new File(["x"], "cover.webp", { type: "image/webp" })),
@@ -64,5 +64,20 @@ describe("applyCover", () => {
     await expect(
       applyCover(api() as never, "b", { mode: "first_page", image: null }),
     ).rejects.toThrow();
+  });
+});
+
+describe("previewCover", () => {
+  it("custom va PDF 1-beti rejimida admin rasmini beradi", () => {
+    expect(previewCover({ cover_mode: "custom", cover_url: "https://c/x.webp" })).toBe(
+      "https://c/x.webp",
+    );
+    expect(previewCover({ cover_mode: "first_page", cover_url: "https://c/y.webp" })).toBe(
+      "https://c/y.webp",
+    );
+  });
+  it("auto rejimida yoki rasm bo'lmasa generativ muqova (null)", () => {
+    expect(previewCover({ cover_mode: "auto", cover_url: "https://c/old.webp" })).toBeNull();
+    expect(previewCover({ cover_mode: "custom", cover_url: null })).toBeNull();
   });
 });

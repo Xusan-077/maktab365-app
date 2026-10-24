@@ -49,12 +49,20 @@ export function SiteShowcase() {
         </div>
         <div className="grid grid-cols-[repeat(auto-fill,minmax(9.375rem,1fr))] gap-3">
           {[1, 4, 5, 9, 11].map((grade) => (
-            <GradeTile key={grade} grade={grade} subjectCount={10 + grade} />
+            <GradeTile key={grade} grade={grade} bookCount={grade > 9 ? 0 : 2 + grade} />
           ))}
         </div>
         <div className="grid grid-cols-[repeat(auto-fill,minmax(13.75rem,1fr))] gap-4">
           {SUBJECT_GROUPS.map((group, index) => (
-            <GroupCard key={group} group={group} subjectCount={4 + index} href="/fanlar" />
+            <GroupCard
+              key={group}
+              group={group}
+              subjects={Array.from({ length: index + 1 }, (_, i) => ({
+                slug: `${group}-${i}`,
+                title: { uz: `Fan ${i + 1}` },
+              }))}
+              href="/fanlar"
+            />
           ))}
         </div>
         <div className="grid grid-cols-[repeat(auto-fill,minmax(16.25rem,1fr))] gap-3">

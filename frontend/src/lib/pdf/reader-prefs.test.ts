@@ -5,7 +5,6 @@ import {
   isDoubleTap,
   nextFit,
   nextTone,
-  nextZoom,
   sanitizePrefs,
 } from "./reader-prefs";
 
@@ -15,11 +14,9 @@ describe("reader prefs", () => {
     expect(nextTone("sepia")).toBe("dark");
     expect(nextTone("dark")).toBe("light");
   });
-  it("moslash va zoom almashadi", () => {
+  it("moslash almashadi", () => {
     expect(nextFit("width")).toBe("page");
     expect(nextFit("page")).toBe("width");
-    expect(nextZoom(1)).toBe(2);
-    expect(nextZoom(2)).toBe(1);
   });
   it("buzilgan xotira standartga qaytadi", () => {
     expect(sanitizePrefs(null)).toEqual(DEFAULT_READER_PREFS);

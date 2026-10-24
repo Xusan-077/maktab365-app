@@ -7,10 +7,20 @@ import { Dialog } from "@/components/ui/Dialog";
 import { SupportForm } from "./SupportForm";
 
 /**
- * "Xato topdingizmi?": formani mavzu va sahifa manzili bilan ochadi. `card` — kitob sahifasidagi
- * to'liq blok (sarlavha + izoh), aks holda oxiridagi kichik havola.
+ * "Xato topdingizmi?": formani kitob (va o'qish oynasida — joriy bet) hamda sahifa manzili bilan
+ * ochadi. `card` — kitob sahifasidagi to'liq blok (sarlavha + izoh), aks holda oxiridagi kichik havola.
  */
-export function ReportErrorLink({ topicId, card = false }: { topicId: string; card?: boolean }) {
+export function ReportErrorLink({
+  topicId,
+  page,
+  card = false,
+}: {
+  /** Kitob id (`topic` va `pdf_book` sifatida yuboriladi). */
+  topicId: string;
+  /** O'qish oynasidagi joriy bet. */
+  page?: number;
+  card?: boolean;
+}) {
   const t = useTranslations("support.reportError");
   const tp = useTranslations("pdfBooks.page");
   const [open, setOpen] = useState(false);
@@ -47,6 +57,8 @@ export function ReportErrorLink({ topicId, card = false }: { topicId: string; ca
             idPrefix="report-error"
             defaultKind="content_error"
             topic={topicId}
+            pdfBook={topicId}
+            page={page}
             attachPageUrl
             onDone={() => setOpen(false)}
             doneLabel={t("close")}

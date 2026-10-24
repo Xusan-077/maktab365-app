@@ -60,6 +60,12 @@ class SupportRateThrottle(_ClientIpMixin, _LiveRateMixin, AnonRateThrottle):
         return self.cache_format % {"scope": self.scope, "ident": self.get_ident(request)}
 
 
+class SupportBurstThrottle(SupportRateThrottle):
+    """Yordam murojaatlari: ketma-ket yuborishga qarshi qisqa oyna (`support_burst`, IP)."""
+
+    scope = "support_burst"
+
+
 class PdfUploadThrottle(_LiveRateMixin, UserRateThrottle):
     """Admin PDF yuklash endpointlari: kirgan foydalanuvchi bo'yicha."""
 

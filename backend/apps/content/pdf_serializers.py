@@ -1,6 +1,7 @@
 from django.db import transaction
 from rest_framework import serializers
 
+from . import ocr
 from . import pdf_storage as storage
 from .admin_serializers import LocalizedInput, StoredPathField
 from .models import CoverMode, PdfBook, Subject
@@ -54,6 +55,14 @@ class PdfBookAdminSerializer(serializers.ModelSerializer):
     has_file = serializers.SerializerMethodField()
     upload_pending = serializers.SerializerMethodField()
     allowed_transitions = serializers.SerializerMethodField()
+    has_text_layer = serializers.BooleanField(
+        read_only=True,
+        allow_null=True,
+        help_text="Matn qatlami (kitob ichidan qidiruv); null — hali tekshirilmagan",
+    )
+    ocr_available = serializers.SerializerMethodField(
+        help_text="OCR serverda yoqilganmi (`OCR_ENABLED`)"
+    )
 
     class Meta:
         model = PdfBook
@@ -78,6 +87,11 @@ class PdfBookAdminSerializer(serializers.ModelSerializer):
             "published_at",
             "upload_pending",
             "allowed_transitions",
+            "has_text_layer",
+            "ocr_status",
+            "ocr_error",
+            "ocr_updated_at",
+            "ocr_available",
             "created_at",
             "updated_at",
         ]
@@ -89,6 +103,9 @@ class PdfBookAdminSerializer(serializers.ModelSerializer):
             "page_count",
             "status",
             "published_at",
+            "ocr_status",
+            "ocr_error",
+            "ocr_updated_at",
             "created_at",
             "updated_at",
         ]
@@ -161,6 +178,9 @@ class PdfBookAdminSerializer(serializers.ModelSerializer):
 
     def get_upload_pending(self, book) -> bool:
         return bool(book.pending_file)
+
+    def get_ocr_available(self, book) -> bool:
+        return ocr.is_available()
 
     def get_allowed_transitions(self, book) -> list[str]:
         request = self.context.get("request")
@@ -259,6 +279,10 @@ class PdfBookDetailSerializer(PdfBookSerializer):
         help_text="600px WebP (kitob sahifasi); null bo'lsa `cover` ishlatiladi",
     )
     allow_download = serializers.BooleanField()
+    has_text_layer = serializers.BooleanField(
+        allow_null=True,
+        help_text="false — matn qatlami yo'q (skan), qidiruv ishlamaydi; null — noma'lum",
+    )
     chapters = PublicChapterSerializer(source="chapter_tree", many=True)
 
 

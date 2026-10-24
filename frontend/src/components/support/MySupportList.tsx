@@ -1,11 +1,13 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useFormatter, useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Badge, type BadgeVariant } from "@/components/ui/Badge";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { apiQueries } from "@/lib/api/queries";
+import type { Locale } from "@/lib/i18n/config";
+import { formatDate } from "@/lib/utils/format-date";
 import type { SupportStatus } from "@/types/support";
 
 const STATUS_VARIANT: Record<SupportStatus, BadgeVariant> = {
@@ -18,7 +20,7 @@ const STATUS_VARIANT: Record<SupportStatus, BadgeVariant> = {
 /** "Mening xabarlarim": foydalanuvchining murojaatlari va ularning holati. */
 export function MySupportList() {
   const t = useTranslations("support");
-  const format = useFormatter();
+  const locale = useLocale() as Locale;
   const { signedIn } = useAuth();
   const { data, isPending, isError } = useQuery({ ...apiQueries.mySupport(), enabled: signedIn });
 
@@ -41,7 +43,7 @@ export function MySupportList() {
           </div>
           <p className="line-clamp-3 break-words whitespace-pre-line">{item.message}</p>
           <time dateTime={item.createdAt} className="text-muted text-xs">
-            {format.dateTime(new Date(item.createdAt), { dateStyle: "medium", timeStyle: "short" })}
+            {formatDate(item.createdAt, locale, "dateTime")}
           </time>
         </li>
       ))}

@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from apps.accounts import audit
 from apps.core.throttling import PdfUploadThrottle
 
+from . import ocr as ocr_service
 from . import pdf_services as services
 from . import pdf_storage as storage
 from . import slides_services as slides
@@ -147,6 +148,26 @@ class PdfBookAdminViewSet(AdminViewSet):
         fresh = self.get_queryset().get(pk=copy.pk)
         data = PdfBookAdminSerializer(fresh, context=self.get_serializer_context()).data
         return Response(data, status=201)
+
+    @extend_schema(
+        operation_id="admin_pdf_books_ocr",
+        tags=TAG,
+        summary=(
+            "OCR so'rash (matn qatlami yo'q kitob): holat `ocr_status` da. Xatolar: "
+            "`ocr_disabled` (503), `no_file`, `ocr_not_needed`, `ocr_in_progress` (409)"
+        ),
+        request=None,
+        responses={202: PdfBookAdminSerializer},
+    )
+    @action(detail=True, methods=["post"])
+    def ocr(self, request, pk=None):
+        book = self.get_object()
+        with transaction.atomic():
+            ocr_service.request_ocr(book)
+            self.log("ocr_request", book)
+        fresh = self.get_queryset().get(pk=book.pk)
+        data = PdfBookAdminSerializer(fresh, context=self.get_serializer_context()).data
+        return Response(data, status=202)
 
     @extend_schema(
         operation_id="admin_pdf_books_upload_init",

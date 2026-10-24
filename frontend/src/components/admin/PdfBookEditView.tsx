@@ -26,6 +26,7 @@ import type { Locale } from "@/lib/i18n/config";
 import { getLocalized } from "@/lib/i18n/localized";
 import { Link, useRouter } from "@/lib/i18n/navigation";
 import { formatBytes } from "@/lib/utils/bytes";
+import { formatDate } from "@/lib/utils/format-date";
 import { createPdfBookSchema } from "@/lib/validation/admin";
 import { GRADES } from "@/types/catalog";
 import type { LocalizedText } from "@/types/i18n";
@@ -36,6 +37,7 @@ import type { SlidesContext } from "./ChapterSlides";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { CoverPicker } from "./CoverPicker";
 import { LocalizedFields, toLocalized } from "./LocalizedFields";
+import { OcrSection } from "./OcrSection";
 import { PdfFilePicker } from "./PdfFilePicker";
 import { QueryError } from "./QueryError";
 import { BookStatusBadge } from "./StatusBadge";
@@ -58,7 +60,7 @@ function Details({ book }: { book: AdminPdfBook }) {
   const rows: [string, string][] = [
     [t("info.pages"), book.has_file ? String(book.page_count) : "—"],
     [t("info.size"), book.has_file ? formatBytes(book.size_bytes) : "—"],
-    [t("info.updated"), new Date(book.updated_at).toLocaleString(locale)],
+    [t("info.updated"), formatDate(book.updated_at, locale, "dateTime")],
   ];
   return (
     <dl className="grid gap-3 sm:grid-cols-3" data-testid="pdf-details">
@@ -604,6 +606,7 @@ export function PdfBookEditView({ id }: { id: string }) {
         </div>
         <CoverSection key={`cover-${book.updated_at}`} book={book} subjectTitle={subjectTitle} />
         <ReplaceFile key={book.updated_at} book={book} />
+        <OcrSection book={book} />
         <PdfBookForm key={`form-${book.updated_at}`} book={book} />
         <PdfBookDetailsForm key={`details-${book.updated_at}`} book={book} />
       </div>

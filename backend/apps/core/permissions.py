@@ -15,12 +15,12 @@ def IsRole(*roles: str) -> type[BasePermission]:  # noqa: N802 — permission si
 
 
 class IsLearner(BasePermission):
-    """Kirgan foydalanuvchi, admin emas: o'qish jarayoni (`/me/pdf-*`, `goals`…) o'quvchi/o'qituvchi
-    uchun. Admin faqat admin panel bilan ishlaydi — bu API'larda 403."""
+    """Har qanday kirgan foydalanuvchi (o'quvchi, o'qituvchi, muharrir, admin): o'qish jarayoni
+    (`/me/pdf-*`, `goals`…). Staff ham kitobni o'qiydi (admin preview) — ma'lumoti o'ziniki."""
 
     def has_permission(self, request, view):
         user = request.user
-        return bool(user and user.is_authenticated and getattr(user, "role", None) != "admin")
+        return bool(user and user.is_authenticated)
 
 
 class IsOwner(BasePermission):

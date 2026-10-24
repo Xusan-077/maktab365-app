@@ -1,15 +1,23 @@
+import json
+from pathlib import Path
+
 import pytest
 from django.core import mail
 from django.core.cache import cache
 from rest_framework.test import APIClient
 
 from apps.accounts.models import User
+from apps.content.tests.conftest import Catalog
 from apps.core.tests.passwords import TEST_PASSWORD
+from apps.support import quality
 from apps.support.models import Kind, Status, SupportMessage
 
 pytestmark = pytest.mark.django_db
 
 URL = "/api/v1/support/"
+CONTRACT = (
+    Path(__file__).resolve().parents[4] / "contracts" / "fixtures" / "support-message-quality.json"
+)
 PAYLOAD = {
     "kind": "bug",
     "email": "ali@example.com",
@@ -97,7 +105,6 @@ class TestAbuse:
         [
             "Visit http://a.example http://b.example http://c.example now please",
             "Best CASINO bonus for you, click here please",
-            "a" * 40,
         ],
     )
     def test_spam_is_marked_and_not_notified(self, send, text):
@@ -112,6 +119,7 @@ class TestAbuse:
             "DEFAULT_THROTTLE_RATES": {
                 **settings.REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"],
                 "support": "5/hour",
+                "support_burst": "100/min",  # bu test soatlik chegarani tekshiradi
             },
         }
         for _ in range(5):
@@ -176,3 +184,61 @@ class TestMine:
         assert SupportMessage.objects.filter(user=user).count() == 2
         body = api.get("/api/v1/me/support/").json()
         assert [item["status"] for item in body["results"]] == ["new"]
+
+
+class TestQuality:
+    """Juda qisqa yoki ma'nosiz xabar saqlanmaydi (400), kontrakt — frontend bilan bir xil."""
+
+    @pytest.mark.parametrize("text", ["Dnxdnxdnxdnx", "asdasdasdasdasdasd", "qwrt psdf ghjk lzxc"])
+    def test_meaningless_message_is_rejected(self, send, text):
+        response = send({**PAYLOAD, "message": text})
+        assert response.status_code == 400
+        assert response.json()["details"]["message"] == ["message_meaningless"]
+        assert not SupportMessage.objects.exists()
+
+    def test_too_short_message_is_rejected(self, send):
+        response = send({**PAYLOAD, "message": "Xato bor ekan"})  # 13 belgi
+        assert response.status_code == 400
+        assert "message" in response.json()["details"]
+
+    def test_shared_contract(self):
+        contract = json.loads(CONTRACT.read_text(encoding="utf-8"))
+        assert contract["min_length"] == quality.MIN_MESSAGE_LENGTH
+        for case in contract["cases"]:
+            assert quality.is_meaningless(case["text"]) is case["meaningless"], case["text"]
+
+    def test_burst_throttle(self, send, settings):
+        settings.REST_FRAMEWORK = {
+            **settings.REST_FRAMEWORK,
+            "DEFAULT_THROTTLE_RATES": {
+                **settings.REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"],
+                "support": "100/hour",
+                "support_burst": "2/min",
+            },
+        }
+        assert send().status_code == 201
+        assert send().status_code == 201
+        assert send().status_code == 429
+
+
+class TestBookAndPage:
+    @pytest.fixture
+    def book(self, db):
+        catalog = Catalog()
+        return catalog.pdf_book(catalog.subject("algebra"), 9, pages=200)
+
+    def test_explicit_book_and_page(self, send, book):
+        send({**PAYLOAD, "pdf_book": str(book.pk), "page": 45})
+        msg = SupportMessage.objects.get()
+        assert (msg.pdf_book, msg.page) == (book, 45)
+
+    def test_old_client_book_from_topic_and_page_from_url(self, send, book):
+        url = f"https://x.uz/uz/darsliklar/9/{book.slug}/oqish?page=12&find=x"
+        send({**PAYLOAD, "topic": str(book.pk), "page_url": url})
+        msg = SupportMessage.objects.get()
+        assert (msg.pdf_book, msg.page) == (book, 12)
+
+    def test_unknown_book_is_ignored(self, send):
+        send({**PAYLOAD, "topic": "00000000-0000-4000-8000-000000000000"})
+        msg = SupportMessage.objects.get()
+        assert (msg.pdf_book, msg.page) == (None, None)

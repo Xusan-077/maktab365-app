@@ -1,7 +1,15 @@
 import type { Metadata } from "next";
 import { defaultLocale, locales, type Locale } from "./config";
 
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+export const DEFAULT_SITE_URL = "https://www.darslik365.uz";
+
+/** Saytning ochiq manzili (sitemap, robots, canonical, JSON-LD): env yoki prod domeni, oxirgi `/` siz. */
+export function resolveSiteUrl(value: string | undefined): string {
+  return (value?.trim() || DEFAULT_SITE_URL).replace(/\/+$/, "");
+}
+
+/** `NEXT_PUBLIC_*` build vaqtida kodga yoziladi: env o'zgarsa qayta deploy kerak. */
+export const SITE_URL = resolveSiteUrl(process.env.NEXT_PUBLIC_SITE_URL);
 
 /** `pathname` — tilsiz yo'l ("/" yoki "/darsliklar"). */
 function localizedPath(locale: Locale, pathname: string): string {

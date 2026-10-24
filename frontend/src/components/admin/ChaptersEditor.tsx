@@ -1,7 +1,15 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { ChevronDown, ChevronUp, ListPlus, Plus, Trash2 } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  IndentDecrease,
+  IndentIncrease,
+  ListPlus,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { AnimatePresence, m } from "@/components/ui/motion";
@@ -12,7 +20,9 @@ import {
   countRows,
   emptyDraft,
   emptyRow,
+  indentRow,
   moveItem,
+  outdentRow,
   parseBulk,
   withoutBlankRows,
   type ChapterDraft,
@@ -24,6 +34,7 @@ import { ChapterSlides, type SlidesContext } from "./ChapterSlides";
 
 const iconButton =
   "text-muted hover:bg-subtle hover:text-foreground inline-flex size-11 shrink-0 items-center justify-center rounded-lg transition-colors disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent sm:size-10";
+const LIVE_PROBLEMS = new Set<RowProblem>(["pageOrder", "pageExceeds"]);
 const inputClasses =
   "border-border bg-surface text-foreground placeholder:text-muted hover:border-primary-300 aria-[invalid=true]:border-danger h-11 min-w-0 rounded-lg border px-3 text-sm shadow-xs transition-colors disabled:cursor-not-allowed disabled:opacity-50 sm:h-10";
 
@@ -67,7 +78,14 @@ function RowFields({
   const errorId = `${row.key}-error`;
   return (
     <div className={cn("flex flex-col gap-1", nested && "border-border ml-4 border-l pl-3")}>
-      <div className="flex flex-wrap items-center gap-2">
+      <div
+        data-testid="toc-row-fields"
+        data-invalid={problem ? "true" : undefined}
+        className={cn(
+          "flex flex-wrap items-center gap-2",
+          problem && "bg-danger-soft ring-danger -m-1.5 rounded-lg p-1.5 ring-1",
+        )}
+      >
         <input
           value={row.title}
           disabled={disabled}
@@ -87,7 +105,12 @@ function RowFields({
           inputMode="numeric"
           aria-label={t("pageLabel", { n: position })}
           placeholder={t("pagePlaceholder")}
-          aria-invalid={problem === "pageInvalid" || problem === "pageExceeds" || undefined}
+          aria-invalid={
+            problem === "pageInvalid" ||
+            problem === "pageExceeds" ||
+            problem === "pageOrder" ||
+            undefined
+          }
           aria-describedby={problem ? errorId : undefined}
           autoComplete="off"
           data-testid="toc-page"
@@ -178,7 +201,14 @@ export function ChaptersEditor({
   slides,
 }: ChaptersEditorProps) {
   const t = useTranslations("admin.toc");
-  const problems = showProblems ? chapterProblems(value, pageCount) : new Map<string, RowProblem>();
+  // Bet tartibi va PDF chegarasi darrov ko'rinadi (saqlangan tartibsiz mundarija ochilganda ham);
+  // to'ldirilmagan qatorlar — faqat yuborishga urinishdan keyin.
+  const allProblems = chapterProblems(value, pageCount);
+  const problems = showProblems
+    ? allProblems
+    : new Map<string, RowProblem>(
+        [...allProblems].filter(([, problem]) => LIVE_PROBLEMS.has(problem)),
+      );
   const set = (next: ChapterDraft[]) => onChange(next);
 
   const patchTop = (index: number, patch: Partial<ChapterRow>) =>
@@ -285,6 +315,17 @@ export function ChaptersEditor({
                       <button
                         type="button"
                         className={iconButton}
+                        disabled={disabled || index === 0}
+                        aria-label={t("indent", { n: index + 1 })}
+                        title={t("indentHint")}
+                        data-testid="toc-indent"
+                        onClick={() => set(indentRow(value, index))}
+                      >
+                        <IndentIncrease className="size-5" aria-hidden />
+                      </button>
+                      <button
+                        type="button"
+                        className={iconButton}
                         disabled={disabled}
                         aria-label={t("addChildFor", { n: index + 1 })}
                         title={t("addChild")}
@@ -343,6 +384,17 @@ export function ChaptersEditor({
                           onClick={() => moveChild(index, childIndex, 1)}
                         >
                           <ChevronDown className="size-5" aria-hidden />
+                        </button>
+                        <button
+                          type="button"
+                          className={iconButton}
+                          disabled={disabled}
+                          aria-label={t("outdent", { n: `${index + 1}.${childIndex + 1}` })}
+                          title={t("outdentHint")}
+                          data-testid="toc-outdent"
+                          onClick={() => set(outdentRow(value, index, childIndex))}
+                        >
+                          <IndentDecrease className="size-5" aria-hidden />
                         </button>
                         <button
                           type="button"

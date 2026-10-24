@@ -69,7 +69,7 @@ Majburiy:
 | `AWS_STORAGE_BUCKET_NAME`, `AWS_S3_ENDPOINT_URL`, `AWS_S3_REGION_NAME=auto`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` | R2                                                                                    |
 | `EMAIL_URL`, `DEFAULT_FROM_EMAIL`                                                                                         | SMTP (xat yuborish)                                                                   |
 
-Tavsiya/ixtiyoriy: `AWS_S3_CUSTOM_DOMAIN` (muqova rasmlari), `GOOGLE_CLIENT_ID`, `TELEGRAM_BOT_TOKEN`, `SUPPORT_NOTIFY_EMAILS`, `SENTRY_DSN` (+ `SENTRY_ENVIRONMENT=production`), `WEB_CONCURRENCY` (default 2), `SECURE_SSL_REDIRECT`, `SHOW_DRAFTS_PUBLICLY` (**qo'ymang**), `PDF_BOOK_MAX_BYTES` (ixtiyoriy PDF hajm chegarasi, bayt; **bo'sh yoki 0 = cheksiz**, default cheksiz; multipart bo'laklari katta faylga qarab avtomatik kattalashadi — 10 000 bo'lakgacha), qolganlari — `backend/.env.example`.
+Tavsiya/ixtiyoriy: `AWS_S3_CUSTOM_DOMAIN` (muqova rasmlari), `GOOGLE_CLIENT_ID`, `TELEGRAM_BOT_TOKEN`, `SUPPORT_NOTIFY_EMAILS`, `SENTRY_DSN` (+ `SENTRY_ENVIRONMENT=production`), `WEB_CONCURRENCY` (default 2), `SECURE_SSL_REDIRECT`, `PDF_BOOK_MAX_BYTES` (ixtiyoriy PDF hajm chegarasi, bayt; **bo'sh yoki 0 = cheksiz**, default cheksiz; multipart bo'laklari katta faylga qarab avtomatik kattalashadi — 10 000 bo'lakgacha), qolganlari — `backend/.env.example`.
 
 ## Vercel (frontend)
 
@@ -80,7 +80,7 @@ Project → Settings → General: **Root Directory = `frontend`**, **Production 
 | `NEXT_PUBLIC_API_MODE`                     | `http`                                                                        | `http`                             |
 | `API_URL`                                  | `https://api.maktab365.uz` (**majburiy**: build backend'ni shu orqali kutadi) | staging backend (prod'ni **emas**) |
 | `NEXT_PUBLIC_API_URL`                      | `API_URL` bilan bir xil                                                       | —                                  |
-| `NEXT_PUBLIC_SITE_URL`                     | `https://maktab365.uz`                                                        | preview URL yoki bo'sh             |
+| `NEXT_PUBLIC_SITE_URL`                     | `https://www.darslik365.uz` (sitemap/robots/canonical; build'da yoziladi)     | bo'sh (fallback prod domeni)       |
 | `AUTH_SECRET`                              | `openssl rand -base64 32`                                                     | alohida qiymat                     |
 | `AUTH_URL`                                 | `https://maktab365.uz`                                                        | — (Vercel `trustHost`)             |
 | `BACKEND_FORWARD_SECRET`                   | `FORWARDED_IP_SECRET` bilan bir xil                                           | staging bilan bir xil              |

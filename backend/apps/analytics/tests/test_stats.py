@@ -2,7 +2,6 @@ from datetime import timedelta
 
 import pytest
 from django.core.management import call_command
-from django.utils import timezone
 from rest_framework.test import APIClient
 
 from apps.analytics import services
@@ -60,7 +59,7 @@ def test_download_endpoint_counts_download(book):
 
 
 def test_summary_windows_and_no_personal_data(book):
-    old = timezone.localdate() - timedelta(days=20)
+    old = services._today() - timedelta(days=20)
     BookDailyStat.objects.create(book=book, day=old, opens=5, downloads=1)
     PageDailyStat.objects.create(book=book, day=old, page=9, views=4)
     services.record_open(book.pk)
@@ -96,7 +95,7 @@ def test_admin_stats_payload_and_period_param(book):
 
 
 def test_purge_removes_old_rows(book):
-    BookDailyStat.objects.create(book=book, day=timezone.localdate() - timedelta(days=400), opens=1)
+    BookDailyStat.objects.create(book=book, day=services._today() - timedelta(days=400), opens=1)
     services.record_open(book.pk)
     call_command("purge_stats")
     assert BookDailyStat.objects.count() == 1

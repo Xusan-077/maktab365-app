@@ -33,6 +33,9 @@ export interface SupportFormProps {
   topic?: string;
   /** `true` — yuborilayotgan paytdagi sahifa manzili (`window.location`) murojaatga qo'shiladi. */
   attachPageUrl?: boolean;
+  /** Kitob va bet (darslikdagi xato): admin "Xabarlar"da shu bet ochiladi. */
+  pdfBook?: string;
+  page?: number;
   /** Muvaffaqiyat holatidagi tugma (masalan, dialogni yopish); berilmasa "Yana xabar yuborish". */
   onDone?: () => void;
   doneLabel?: string;
@@ -44,6 +47,8 @@ export function SupportForm({
   defaultKind = "question",
   topic,
   attachPageUrl = false,
+  pdfBook,
+  page,
   onDone,
   doneLabel,
 }: SupportFormProps) {
@@ -69,6 +74,8 @@ export function SupportForm({
       const input = buildSupportInput(values, {
         topic,
         pageUrl: attachPageUrl ? window.location.href : undefined,
+        pdfBook,
+        page,
       });
       // Honeypot to'ldirilgan (bot): yubormaymiz, lekin muvaffaqiyat ko'rsatamiz.
       if (input) await getApi().sendSupport(input);

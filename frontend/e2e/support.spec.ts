@@ -20,7 +20,12 @@ test.describe("yordam va aloqa", () => {
     await form.getByLabel("Email").fill("mehmon@example.com");
     await form.getByLabel("Xabaringiz").fill("qisqa");
     await form.getByRole("button", { name: "Yuborish" }).click();
-    await expect(form.getByText("Xabar kamida 10 ta belgidan iborat bo'lsin")).toBeVisible();
+    await expect(form.getByText("Xabar kamida 15 ta belgidan iborat bo'lsin")).toBeVisible();
+
+    // Uzunligi yetarli, lekin ma'nosiz — yuborilmaydi.
+    await form.getByLabel("Xabaringiz").fill("Dnxdnxdnxdnxdnxdnx");
+    await form.getByRole("button", { name: "Yuborish" }).click();
+    await expect(form.getByText("Xabarni aniqroq yozing", { exact: false })).toBeVisible();
 
     await form.getByText("Taklif", { exact: true }).click();
     await form

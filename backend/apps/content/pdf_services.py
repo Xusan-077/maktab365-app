@@ -9,8 +9,8 @@ from django.utils import timezone
 
 from . import pdf_storage as storage
 from .admin_services import EDITORS, InvalidTransition, TransitionForbidden, UploadError
-from .cache import is_staff, show_drafts
-from .models import CHAPTER_TITLE_MAX, PdfBook, PdfBookChapter, PdfBookStatus
+from .cache import is_staff
+from .models import CHAPTER_TITLE_MAX, OcrStatus, PdfBook, PdfBookChapter, PdfBookStatus
 from .storage import covers_storage
 
 TRANSITIONS: dict[tuple[str, str], tuple[str, ...]] = {
@@ -23,15 +23,18 @@ def allowed_transitions(role: str, current: str) -> list[str]:
     return [to for (frm, to), roles in TRANSITIONS.items() if frm == current and role in roles]
 
 
-def visible_pdf_books(request):
-    """Ochiq API'da ko'rinadigan PDF kitoblar: fayli bor va nashr qilingan.
+def public_pdf_books():
+    """Ochiq ro'yxatlar (katalog, yangilar, qidiruv, fanlar, sitemap, bot): faqat nashr qilingan
+    kitoblar — staff uchun ham (ro'yxatlar umumiy keshda, yashirin kitob hech qayerda chiqmaydi)."""
+    return PdfBook.objects.published().select_related("subject")
 
-    Staff hammasini ko'radi; `SHOW_DRAFTS_PUBLICLY` yoqilgan bo'lsa draft ham (`unverified`).
-    """
-    books = PdfBook.objects.select_related("subject").exclude(file="")
-    if is_staff(request.user) or show_drafts(request):
-        return books
-    return books.filter(status=PdfBookStatus.PUBLISHED)
+
+def visible_pdf_books(request):
+    """Bitta kitobga kirish (tafsilot, o'qish URL'i, prezentatsiya, o'qish jarayoni): hamma uchun
+    nashr qilinganlar; staff fayli bor yashirin kitobni ham ochadi (admin preview, `unverified`)."""
+    if is_staff(request.user):
+        return PdfBook.objects.select_related("subject").exclude(file="")
+    return public_pdf_books()
 
 
 # --- Mundarija ---
@@ -41,13 +44,17 @@ MAX_CHAPTER_PAGE = 100_000
 
 
 def chapter_errors(chapters: list[dict], page_count: int) -> list[str]:
-    """Mundarija xato kodlari (bo'sh — to'g'ri); `page_count == 0` — yuqori chegara yo'q."""
-    rows = [(item, False) for item in chapters]
-    rows += [(child, True) for item in chapters for child in item.get("children", [])]
+    """Mundarija xato kodlari (bo'sh — to'g'ri); `page_count == 0` — yuqori chegara yo'q.
+
+    Hujjat tartibida (bob, uning bo'limlari, keyingi bob…) bet raqami kamaymasligi kerak
+    (`chapter_page_order`; teng bo'lishi mumkin — bir betda bob va uning 1-bo'limi).
+    """
+    rows = [row for item in chapters for row in (item, *item.get("children", []))]
     codes: set[str] = set()
     if len(rows) > MAX_CHAPTERS:
         codes.add("chapters_too_many")
-    for row, _is_child in rows:
+    previous = 0
+    for row in rows:
         title = (row.get("title") or "").strip()
         if not title:
             codes.add("chapter_title_required")
@@ -56,8 +63,13 @@ def chapter_errors(chapters: list[dict], page_count: int) -> list[str]:
         page = row.get("page")
         if not isinstance(page, int) or page < 1 or page > MAX_CHAPTER_PAGE:
             codes.add("chapter_page_invalid")
-        elif page_count and page > page_count:
+            continue
+        if page_count and page > page_count:
             codes.add("chapter_page_exceeds")
+            continue  # chegaradan tashqari bet keyingi qatorlar tartibiga ta'sir qilmaydi
+        if page < previous:
+            codes.add("chapter_page_order")
+        previous = page
     return sorted(codes)
 
 
@@ -204,8 +216,14 @@ def _drop_pending(book: PdfBook, key: str, upload_id: str = "") -> None:
     PdfBook.objects.filter(pk=book.pk).update(pending_file="", pending_upload_id="")
 
 
-def activate(book: PdfBook, key: str, upload_id: str = "") -> PdfBook:
-    """Saqlangan faylni tekshirib kitobga biriktiradi (eski fayl o'chiriladi)."""
+def activate(book: PdfBook, key: str, upload_id: str = "", ocr: bool = False) -> PdfBook:
+    """Saqlangan faylni tekshirib kitobga biriktiradi (eski fayl o'chiriladi).
+
+    Yangi fayl: matn qatlami noma'lum bo'ladi va Celery'da qayta tekshiriladi; OCR holati
+    tozalanadi (`ocr=True` — fayl OCR natijasi, holat `ocr.run` da yoziladi).
+    """
+    from .tasks import prepare_pdf_files
+
     try:
         if not storage.exists(key):
             raise UploadError("upload_incomplete")
@@ -224,12 +242,21 @@ def activate(book: PdfBook, key: str, upload_id: str = "") -> PdfBook:
     with transaction.atomic():
         book = PdfBook.objects.select_for_update().get(pk=book.pk)
         old_key = book.file.name if book.file else ""
+        old_download = book.download_file.name if book.download_file else ""
         book.file = key
+        book.download_file = ""
         book.size_bytes, book.page_count = size, pages
         book.pending_file = book.pending_upload_id = ""
+        book.has_text_layer = None
+        if not ocr:
+            book.ocr_status, book.ocr_error, book.ocr_updated_at = OcrStatus.NONE, "", None
         book.save()
         if old_key and old_key != key:
             transaction.on_commit(lambda: storage.delete(old_key))
+        if old_download:
+            transaction.on_commit(lambda: storage.delete(old_download))
+        # Watermark tozalanadi, yuklab olish nusxasi tayyorlanadi, so'ng matn qatlami tekshiriladi.
+        transaction.on_commit(lambda: prepare_pdf_files.delay(str(book.pk)))
     return book
 
 
@@ -267,7 +294,10 @@ def delete_book(book: PdfBook) -> None:
     tranzaksiya qaytadi va kitob saqlanib qoladi. Progress, xatcho'p va mundarija `CASCADE` bilan
     ketadi; rejalar (`StudyGoal`) kitobsiz qoladi.
     """
-    keys = [book.file.name if book.file else ""]
+    keys = [
+        book.file.name if book.file else "",
+        book.download_file.name if book.download_file else "",
+    ]
     # Muqova va variantlari ommaviy `covers` saqlashda (PDF'dan alohida bucket).
     cover_keys = [
         book.cover.name if book.cover else "",

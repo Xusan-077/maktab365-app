@@ -223,8 +223,9 @@ def test_saving_chapters_with_ids_keeps_slides(admin, book):
         f"{BASE}/{book['id']}/",
         {
             "chapters": [
-                {"id": book["chapters"][1]["id"], "title": "II bob (yangi nom)", "page": 3},
-                {"id": first["id"], "title": "I bob", "page": 1},
+                # Tartib almashadi (betlar kamaymasligi uchun ular ham almashtirilgan).
+                {"id": book["chapters"][1]["id"], "title": "II bob (yangi nom)", "page": 1},
+                {"id": first["id"], "title": "I bob", "page": 3},
             ]
         },
         "json",

@@ -361,21 +361,12 @@ def test_public_catalog_hides_drafts_and_fileless_books(catalog, anon, algebra):
     assert anon.get(f"{PUBLIC}/{published.pk}/").json()["page_count"] == 12
 
 
-def test_show_drafts_publicly_flag_exposes_drafts_as_unverified(catalog, anon, algebra, settings):
-    settings.SHOW_DRAFTS_PUBLICLY = True
+def test_staff_opens_drafts_privately_but_lists_stay_published(catalog, editor, algebra):
     draft = catalog.pdf_book(algebra, 9, "draft")
 
-    item = anon.get(f"{PUBLIC}/{draft.pk}/").json()
-
-    assert item["unverified"] is True
-
-
-def test_staff_sees_drafts_privately(catalog, editor, algebra):
-    draft = catalog.pdf_book(algebra, 9, "draft")
-
-    resp = editor.get(f"{PUBLIC}/")
-
-    assert [b["id"] for b in resp.json()["results"]] == [str(draft.pk)]
+    assert editor.get(f"{PUBLIC}/").json()["results"] == []
+    resp = editor.get(f"{PUBLIC}/{draft.pk}/")
+    assert resp.json()["unverified"] is True
     assert "no-store" in resp["Cache-Control"]
 
 

@@ -2,7 +2,7 @@
 
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Check, Target, Trash2 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useForm, type Resolver } from "react-hook-form";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -10,13 +10,16 @@ import { Input } from "@/components/ui/Input";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useGoals } from "@/hooks/useGoals";
 import { useToast } from "@/hooks/useToast";
+import type { Locale } from "@/lib/i18n/config";
 import { cn } from "@/lib/utils/cn";
+import { formatDate } from "@/lib/utils/format-date";
 import { createGoalSchema, GOAL_TITLE_MAX, type GoalFormValues } from "@/lib/validation/goal";
 import { EmptyText, Panel } from "./Panel";
 
 /** Shaxsiy rejalar: qisqa ro'yxat, "bajarildi" belgisi va yangi reja qo'shish. */
 export function GoalsPanel() {
   const t = useTranslations("library.goals");
+  const locale = useLocale() as Locale;
   const { toast } = useToast();
   const { goals, isPending, isError, create, toggle, remove } = useGoals();
   const {
@@ -77,7 +80,7 @@ export function GoalsPanel() {
                 </p>
                 {goal.due_date && (
                   <p className="text-muted text-sm tabular-nums">
-                    {t("due", { date: goal.due_date })}
+                    {t("due", { date: formatDate(goal.due_date, locale, "date") })}
                   </p>
                 )}
               </div>

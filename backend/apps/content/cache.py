@@ -30,9 +30,9 @@ def bump_content_version() -> None:
     cache.set(VERSION_KEY, time.time_ns(), None)
 
 
-def _cache_key(request, show_drafts: bool) -> str:
+def _cache_key(request) -> str:
     query = request.META.get("QUERY_STRING", "")
-    raw = f"{request.path}?{query}|{request_locale(request)}|{show_drafts}"
+    raw = f"{request.path}?{query}|{request_locale(request)}"
     return f"content:v{content_version()}:{hashlib.sha1(raw.encode()).hexdigest()}"  # noqa: S324
 
 
@@ -51,11 +51,6 @@ def is_staff(user) -> bool:
         and user.is_authenticated
         and (user.is_staff or getattr(user, "role", "") in ("editor", "admin"))
     )
-
-
-def show_drafts(request) -> bool:
-    """Qoralama PDF kitoblar ko'rinadimi: staff yoki `SHOW_DRAFTS_PUBLICLY`."""
-    return is_staff(request.user) or settings.SHOW_DRAFTS_PUBLICLY
 
 
 def _etag_matches(header: str, etag: str) -> bool:
@@ -77,7 +72,7 @@ def public_cached(get):
             response["Vary"] = "Authorization"
             return response
 
-        key = _cache_key(request, settings.SHOW_DRAFTS_PUBLICLY)
+        key = _cache_key(request)
         entry = cache.get(key)
         if entry is None:
             response = get(self, request, *args, **kwargs)

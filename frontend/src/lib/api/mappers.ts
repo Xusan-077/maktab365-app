@@ -68,6 +68,8 @@ export function toSupportRequest(input: SupportInput): SupportCreateRequest {
     website: input.website ?? "",
     ...(input.email && { email: input.email }),
     ...(input.pageUrl && { page_url: input.pageUrl }),
+    ...(input.pdfBook && { pdf_book: input.pdfBook }),
+    ...(input.page && { page: input.page }),
   };
 }
 

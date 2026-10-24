@@ -1,7 +1,9 @@
 """Kitob statistikasi: yozish (atomik `F()+1`) va admin uchun yig'ish. Shaxsiy ma'lumotsiz."""
 
 from datetime import date, timedelta
+from zoneinfo import ZoneInfo
 
+from django.conf import settings
 from django.db import transaction
 from django.db.models import F, Sum
 from django.utils import timezone
@@ -13,7 +15,8 @@ TOP_PAGES = 15
 
 
 def _today() -> date:
-    return timezone.localdate()
+    """Kunlik sanagich kuni — Toshkent bo'yicha (API va baza UTC'da)."""
+    return timezone.localdate(timezone=ZoneInfo(settings.LOCAL_TIME_ZONE))
 
 
 def _bump(model, lookup: dict, field: str) -> None:

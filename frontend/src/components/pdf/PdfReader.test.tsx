@@ -406,3 +406,103 @@ describe("PdfReader: prezentatsiya", () => {
     expect(screen.queryByTestId("slides-viewer")).toBeNull();
   });
 });
+
+describe("PdfReader: matn qatlami", () => {
+  it.each([true, null, undefined])("has_text_layer=%s — qidiruv tugmasi bor", async (value) => {
+    setup("?page=3", { has_text_layer: value });
+    expect(await screen.findByTestId("pdf-find-open")).toBeTruthy();
+  });
+
+  it("matn qatlami yo'q (skan) — qidiruv tugmasi va Ctrl+F yo'q", async () => {
+    setup("?page=3", { has_text_layer: false });
+    expect(await currentPage()).toBe("3");
+    await screen.findByText("Algebra 9");
+
+    expect(screen.queryByTestId("pdf-find-open")).toBeNull();
+    fireEvent.keyDown(window, { key: "f", ctrlKey: true });
+    expect(screen.queryByTestId("pdf-find-input")).toBeNull();
+  });
+});
+
+describe("PdfReader: zoom, pinch va sahifa boshi", () => {
+  const zoomOf = () => screen.getByTestId("pdf-zoom-content").dataset.zoom;
+
+  it("mundarijadan boshqa betga o'tilsa sahifa boshidan ochiladi (birinchi ochilishda emas)", async () => {
+    const scrollTo = vi.fn();
+    window.scrollTo = scrollTo as unknown as typeof window.scrollTo;
+    nav.params = new URLSearchParams("page=5");
+    api.book.mockResolvedValue({
+      id: "book-1",
+      title: { uz: "Algebra 9" },
+      page_count: 240,
+      grade: 9,
+      subject: "algebra",
+      subject_title: { uz: "Algebra" },
+      subject_group: "exact",
+      slug: "9-sinf-algebra",
+      description: "",
+      chapters: CHAPTERS,
+    });
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const tree = () => (
+      <NextIntlClientProvider locale="uz" messages={uz}>
+        <QueryClientProvider client={client}>
+          <PdfReader bookId="book-1" />
+        </QueryClientProvider>
+      </NextIntlClientProvider>
+    );
+    const view = render(tree());
+    expect(await currentPage()).toBe("5");
+    expect(scrollTo).not.toHaveBeenCalled();
+
+    // Mundarijadagi «Algebra» (50-bet) bosildi → URL ?page=50.
+    nav.params = new URLSearchParams("page=50");
+    view.rerender(tree());
+    await waitFor(() => expect(screen.getByTestId("pdf-canvas").dataset.page).toBe("50"));
+    expect(scrollTo).toHaveBeenCalledWith({ top: 0 });
+  });
+
+  it("pastki paneldagi «Zoom»: 1× → 1.5× → 2× → 3× → 1×", async () => {
+    setup("page=5");
+    await currentPage();
+    const button = screen.getByTestId("pdf-zoom-bar");
+    expect(zoomOf()).toBe("1");
+    const seen = [];
+    for (let i = 0; i < 4; i += 1) {
+      fireEvent.click(button);
+      seen.push(zoomOf());
+    }
+    expect(seen).toEqual(["1.5", "2", "3", "1"]);
+    fireEvent.click(button);
+    expect(button.textContent).toContain("1.5×");
+  });
+
+  it("ikki barmoq (pinch): harakat paytida CSS scale, qo'yib yuborilganda zoom (3× gacha)", async () => {
+    setup("page=5");
+    await currentPage();
+    const area = screen.getByTestId("pdf-page-area");
+    const touches = (gap: number) => [
+      { clientX: 100, clientY: 200 },
+      { clientX: 100 + gap, clientY: 200 },
+    ];
+    fireEvent.touchStart(area, { touches: touches(100) });
+    fireEvent.touchMove(area, { touches: touches(200) });
+    expect(screen.getByTestId("pdf-zoom-content").style.transform).toBe("scale(2)");
+    fireEvent.touchMove(area, { touches: touches(500) });
+    fireEvent.touchEnd(area, { touches: [] });
+    expect(zoomOf()).toBe("3");
+    expect(screen.getByTestId("pdf-zoom-content").style.transform).toBe("");
+    // Pinch tugagan barmoq ko'tarilishi swipe/tap hisoblanmaydi.
+    fireEvent.pointerUp(area, { pointerType: "touch", clientX: 300, clientY: 200 });
+    expect(nav.replace).not.toHaveBeenCalledWith("/darsliklar/book-1?page=6", { scroll: false });
+  });
+
+  it("«⋯» menyusida «Oflayn» va «Ulashish»", async () => {
+    setup("page=5");
+    await currentPage();
+    expect(screen.queryByTestId("pdf-share")).toBeNull();
+    fireEvent.click(screen.getByTestId("pdf-bar-more"));
+    const items = screen.getAllByRole("menuitem").map((item) => item.textContent);
+    expect(items).toEqual([uz.pdfBooks.reader.offline, uz.pdfBooks.reader.share]);
+  });
+});

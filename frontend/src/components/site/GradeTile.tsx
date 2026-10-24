@@ -5,8 +5,8 @@ import { gradePath } from "@/lib/utils/routes";
 
 export interface GradeTileProps {
   grade: number;
-  /** Shu sinfdagi fanlar soni (API'dan); berilmasa ko'rsatilmaydi. */
-  subjectCount?: number;
+  /** Shu sinfdagi nashr qilingan kitoblar soni; `0` — "Tez orada" (kulrang, havolasiz); berilmasa ko'rsatilmaydi. */
+  bookCount?: number;
   /** `tile` — katta kartochka (bosh sahifa); `button` — 44×44 raqam tugmasi (hero). */
   variant?: "tile" | "button";
   href?: string;
@@ -18,7 +18,7 @@ const isPrimarySchool = (grade: number) => grade <= 4;
 
 export function GradeTile({
   grade,
-  subjectCount,
+  bookCount,
   variant = "tile",
   href = gradePath(grade),
   className,
@@ -40,11 +40,32 @@ export function GradeTile({
     );
   }
 
+  const tileClass = "flex flex-col gap-3.5 rounded-[1.125rem] border p-[1.125rem]";
+
+  // Kitobi yo'q sinf: bosiladigan emas (bo'sh katalogga olib bormaydi), kulrang.
+  if (bookCount === 0) {
+    return (
+      <div
+        data-testid="grade-tile-soon"
+        className={cn(tileClass, "border-border bg-subtle text-muted", className)}
+      >
+        <span className="flex items-baseline gap-1.5">
+          <span className="text-[2.75rem] leading-none font-extrabold tracking-[-0.03em]">
+            {grade}
+          </span>
+          <span className="text-[0.9375rem] font-semibold">{t("gradeWord")}</span>
+        </span>
+        <span className="text-sm">{t("comingSoon")}</span>
+      </div>
+    );
+  }
+
   return (
     <Link
       href={href}
       className={cn(
-        "border-border text-foreground flex flex-col gap-3.5 rounded-[1.125rem] border p-[1.125rem] transition-shadow hover:shadow-md",
+        tileClass,
+        "border-border text-foreground transition-shadow hover:shadow-md",
         isPrimarySchool(grade) ? "bg-warm-soft" : "bg-hero-bg",
         className,
       )}
@@ -60,8 +81,8 @@ export function GradeTile({
         </span>
         <span className="text-[0.9375rem] font-semibold">{t("gradeWord")}</span>
       </span>
-      {subjectCount !== undefined && (
-        <span className="text-muted text-sm">{t("subjectCount", { count: subjectCount })}</span>
+      {bookCount !== undefined && (
+        <span className="text-muted text-sm">{t("bookCount", { count: bookCount })}</span>
       )}
     </Link>
   );

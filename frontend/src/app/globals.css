@@ -289,6 +289,13 @@ body:has(dialog[open]) {
   overflow: hidden;
 }
 
+/* `viewport-fit=cover` (pastki panellar `safe-area-inset-bottom` ni oladi): yotiq iPhone'da yon
+   "chuqurcha" matnni yopmasin. Pastki inset har panelning o'zida hisobga olinadi. */
+body {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
 @keyframes ui-rise {
   from {
     opacity: 0;
