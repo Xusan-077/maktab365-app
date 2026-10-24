@@ -66,7 +66,7 @@ class PdfBookListView(PublicView, generics.ListAPIView):
                 "ordering",
                 OpenApiTypes.STR,
                 enum=["newest"],
-                description="`newest` — so'nggi qo'shilganlar birinchi (standart: sinf va fan bo'yicha)",
+                description="`newest` — so'nggi qo'shilganlar birinchi (standart: sinf va fan bo'yicha)",  # noqa: E501
             ),
         ],
         summary="PDF darsliklar (sahifalangan)",

@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
+from apps.content.cache import bump_content_version
 from apps.content.models import Subject
 
 # Maktab fanlari: slug barqaror (kitoblar shunga bog'lanadi), `order` ro'yxat tartibi.
@@ -190,4 +191,6 @@ class Command(BaseCommand):
         if options["force"]:
             for slug, grades in GRADES.items():
                 Subject.objects.filter(slug=slug).update(grades=grades)
+        # `update()` signal chaqirmaydi: ochiq API keshi qo'lda yangilanadi.
+        transaction.on_commit(bump_content_version)
         self.stdout.write(f"fan: {created} yangi, {len(SUBJECTS) - created} mavjud")
