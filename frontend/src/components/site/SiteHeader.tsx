@@ -20,7 +20,7 @@ export function SiteHeader() {
 
   return (
     <header className="border-border bg-background present:hidden sticky top-0 z-40 border-b print:hidden">
-      <div className="max-w-site mx-auto flex items-center gap-3 px-4 py-3.5 sm:px-8 md:gap-7">
+      <div className="max-w-site mx-auto flex items-center gap-3 px-4 py-3.5 sm:px-8 md:gap-3 lg:gap-7">
         {/* Tor ekranda (375px) belgi: logo + qidiruv + "Kirish" + menyu bir qatorga sig'adi */}
         <Logo height={30} className="max-[400px]:hidden" />
         <Logo variant="mark" height={30} className="min-[401px]:hidden" />

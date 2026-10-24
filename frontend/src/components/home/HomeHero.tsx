@@ -7,6 +7,10 @@ import { ROUTES } from "@/lib/utils/routes";
 import { GRADES } from "@/types/catalog";
 import { HeroCollage } from "./HeroCollage";
 
+/** Kollaj uchun 3 ta kitob: muqova rasmi borlari birinchi (generativ muqovalar keyin). */
+const collageBooks = (books: PdfBook[]) =>
+  [...books].sort((a, b) => Number(!!b.cover) - Number(!!a.cover)).slice(0, 3);
+
 /** Hero: nishon, sarlavha (LCP — matn), qidiruv, 1–11 sinf tugmalari va o'ngda muqovalar kollaji. */
 export function HomeHero({ books }: { books: PdfBook[] }) {
   const t = useTranslations("home.hero");
@@ -65,7 +69,7 @@ export function HomeHero({ books }: { books: PdfBook[] }) {
           </nav>
         </div>
 
-        <HeroCollage books={books.slice(0, 3)} />
+        <HeroCollage books={collageBooks(books)} />
       </div>
     </section>
   );

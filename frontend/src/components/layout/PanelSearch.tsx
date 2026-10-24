@@ -103,14 +103,14 @@ export function PanelSearch({
         aria-keyshortcuts="Control+K Meta+K /"
         className={cn(
           variant === "icon"
-            ? "border-border bg-surface text-foreground hover:bg-surface-2 inline-flex h-11 min-w-11 items-center justify-center gap-2 rounded-xl border text-sm transition-colors md:px-3"
+            ? "border-border bg-surface text-foreground hover:bg-surface-2 inline-flex h-11 min-w-11 items-center justify-center gap-2 rounded-xl border text-sm transition-colors lg:px-3"
             : "border-border bg-surface text-muted hover:border-primary-300 hover:text-foreground inline-flex h-10 items-center gap-2 rounded-lg border px-3 text-sm shadow-xs transition-colors max-lg:w-10 max-lg:justify-center max-lg:border-transparent max-lg:px-0 max-lg:shadow-none lg:w-72",
           className,
         )}
       >
         <Search className="size-4 shrink-0" aria-hidden />
         {variant === "icon" ? (
-          <kbd className="text-faint hidden font-sans text-xs font-medium md:inline">Ctrl K</kbd>
+          <kbd className="text-faint hidden font-sans text-xs font-medium whitespace-nowrap lg:inline">Ctrl K</kbd>
         ) : (
           <>
             <span className="hidden flex-1 text-left lg:inline">{t("placeholder")}</span>

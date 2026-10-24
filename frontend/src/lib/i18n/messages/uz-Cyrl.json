@@ -282,11 +282,7 @@
     "selectSubmit": "Текшириш",
     "selectPlaceholder": "Танланг",
     "selectOption": "Вариант {n}",
-    "selectDisabledOption": "Учинчи вариант (ўчирилган)",
-    "splash": "Сплаш (кириш анимацияси)",
-    "splashReset": "Сплашъни қайта кўрсатиш",
-    "splashResetDone": "Тайёр. Бош саҳифани тўлиқ янгилаб очинг.",
-    "splashResetFailed": "Браузер хотирасига ёзиб бўлмади"
+    "selectDisabledOption": "Учинчи вариант (ўчирилган)"
   },
   "breadcrumb": {
     "label": "Саҳифа йўли",

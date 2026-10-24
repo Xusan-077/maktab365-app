@@ -33,7 +33,7 @@ function BarLink({
   );
 }
 
-/** lg dan kichik ekranlarda pastki navigatsiya: Bosh sahifa, Darsliklar, Fanlar va Loyiha haqida. Qidiruv — sarlavhada. */
+/** md dan kichik ekranlarda pastki navigatsiya: Bosh sahifa, Darsliklar, Fanlar va Loyiha haqida. Qidiruv — sarlavhada. */
 export function MobileNav() {
   const t = useTranslations();
   const pathname = usePathname();
@@ -42,7 +42,7 @@ export function MobileNav() {
   return (
     <nav
       aria-label={t("nav.mobile")}
-      className="border-border bg-surface present:hidden fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 gap-1 border-t px-2 pt-1 pb-[max(0.25rem,env(safe-area-inset-bottom))] lg:hidden print:hidden"
+      className="border-border bg-surface present:hidden fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 gap-1 border-t px-2 pt-1 pb-[max(0.25rem,env(safe-area-inset-bottom))] md:hidden print:hidden"
     >
       <BarLink
         href={ROUTES.home}

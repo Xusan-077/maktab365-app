@@ -282,11 +282,7 @@
     "selectSubmit": "Tekshirish",
     "selectPlaceholder": "Tanlang",
     "selectOption": "Variant {n}",
-    "selectDisabledOption": "Uchinchi variant (o'chirilgan)",
-    "splash": "Splash (kirish animatsiyasi)",
-    "splashReset": "Splash'ni qayta ko'rsatish",
-    "splashResetDone": "Tayyor. Bosh sahifani to'liq yangilab oching.",
-    "splashResetFailed": "Brauzer xotirasiga yozib bo'lmadi"
+    "selectDisabledOption": "Uchinchi variant (o'chirilgan)"
   },
   "breadcrumb": {
     "label": "Sahifa yo'li",

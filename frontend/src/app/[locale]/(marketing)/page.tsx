@@ -10,7 +10,6 @@ import {
   LatestSection,
   TelegramBand,
 } from "@/components/home/HomeSections";
-import { SplashScreen } from "@/components/layout/SplashScreen";
 import { routing } from "@/lib/i18n/routing";
 import { getAlternates } from "@/lib/i18n/seo";
 import { getLatestBooks, getSubjects } from "@/lib/pdf-books/server";
@@ -22,7 +21,9 @@ export async function generateMetadata({ params }: PageProps<"/[locale]">): Prom
   return { alternates: getAlternates(locale, ROUTES.home) };
 }
 
+/** Ro'yxatga 6 ta; hero kollaji muqovasi borlarini birinchi tanlaydi, shuning uchun ko'proq olinadi. */
 const LATEST_COUNT = 6;
+const POOL_COUNT = 12;
 
 /** Backend javob bermasa sahifa baribir chiziladi: bo'limlar o'z xato/bo'sh holatini ko'rsatadi. */
 async function settled<T>(promise: Promise<T>): Promise<T | null> {
@@ -39,19 +40,18 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   setRequestLocale(locale);
 
   const [books, subjects] = await Promise.all([
-    settled(getLatestBooks(LATEST_COUNT)),
+    settled(getLatestBooks(POOL_COUNT)),
     settled(getSubjects()),
   ]);
 
   return (
     <>
-      <SplashScreen />
       <HomeHero books={books ?? []} />
       <div className="max-w-site mx-auto flex w-full flex-col gap-16 px-4 pt-12 pb-20 sm:gap-[5.5rem] sm:px-8 sm:pt-[4.5rem] sm:pb-24">
         <ContinueSection />
         <GradesSection subjects={subjects} />
         <GroupsSection subjects={subjects} />
-        <LatestSection books={books} />
+        <LatestSection books={books?.slice(0, LATEST_COUNT) ?? null} />
         <TelegramBand />
       </div>
     </>
