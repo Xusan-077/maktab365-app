@@ -18,12 +18,30 @@ describe("messages", () => {
     }
   });
 
-  it("uz-Cyrl uz'dan generatsiya qilinadi, til nomlari esa o'z holicha", async () => {
+  it("uz-Cyrl: til nomlari o'z holicha, matn kirillda", async () => {
     const cyrl = (await getMessages("uz-Cyrl")) as MessageTree & {
       nav: { login: string };
       language: { names: Record<string, string> };
     };
     expect(cyrl.nav.login).toBe(transliterateMessage("Kirish"));
     expect(cyrl.language.names.en).toBe("English");
+  });
+
+  it("uz-Cyrl: ICU o'zgaruvchilari uz bilan bir xil (qo'lda tahrirda buzilmasin)", async () => {
+    const placeholders = (text: string) =>
+      [...text.matchAll(/\{\s*(\w+)\s*[,}]/g)].map((match) => match[1]).sort();
+    const flatten = (tree: MessageTree, prefix = ""): Record<string, string> =>
+      Object.fromEntries(
+        Object.entries(tree).flatMap(([key, value]) =>
+          typeof value === "string"
+            ? [[`${prefix}${key}`, value]]
+            : Object.entries(flatten(value, `${prefix}${key}.`)),
+        ),
+      );
+    const uz = flatten((await getMessages("uz")) as MessageTree);
+    const cyrl = flatten((await getMessages("uz-Cyrl")) as MessageTree);
+    for (const [path, text] of Object.entries(uz)) {
+      expect(placeholders(cyrl[path]), path).toEqual(placeholders(text));
+    }
   });
 });

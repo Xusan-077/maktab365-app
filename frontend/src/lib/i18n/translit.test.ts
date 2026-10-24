@@ -33,6 +33,12 @@ describe("latinToCyrillic", () => {
     ["hayot", "ҳаёт"],
     ["jadval", "жадвал"],
     ["vazifa", "вазифа"],
+    ["operatsiya", "операция"],
+    ["Natsional", "Национал"],
+    ["protsent", "процент"],
+    ["Tsement", "Цемент"],
+    ["otsiz", "отсиз"],
+    ["mutatsiya", "мутация"],
   ])("%s → %s", (latin, cyrillic) => {
     expect(latinToCyrillic(latin)).toBe(cyrillic);
   });

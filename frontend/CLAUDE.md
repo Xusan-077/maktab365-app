@@ -48,6 +48,7 @@ framer-motion, next-intl, clsx + tailwind-merge (`cn()` — `src/lib/utils/cn.ts
 ## Asosiy qoidalar
 
 1. **UI matnlari faqat i18n orqali, hardcode yo'q.** Barcha matn `src/lib/i18n/messages/*.json` da; serverda `getTranslations`, klientda `useTranslations`. JSX ichida, `aria-label`, `placeholder`, `title`, metadata'da ham literal matn yozilmaydi.
+   Tillar: `uz` (asos), `ru`, `en` va `uz-Cyrl` — `messages/uz-Cyrl.json` qo'lda tahrirlanadigan fayl (boshlang'ich nusxa `scripts/translit-uz-cyrl.ts` bilan uz.json dan; yangi uz kalitlari uchun `npx tsx scripts/translit-uz-cyrl.ts --missing-only`). `messages.test.ts` kalitlar va ICU o'zgaruvchilari tillar bo'yicha mosligini tekshiradi. `LocalizedText` (API matnlari) uz-Cyrl'ga hamon runtime'da `lib/i18n/translit.ts` bilan o'giriladi.
 2. **Server komponent default, `'use client'` faqat kerak bo'lganda** (state, effect, brauzer API, event handler, hook'lar). Iloji boricha client chegarasini kichik, barg komponentlarga tushiring.
 3. **Mock data faqat `src/mocks` da.**
 4. Stilda `cn()` dan foydalaning; Tailwind v4 utility'lari, ranglar/tokenlar `globals.css` dagi `@theme` da.

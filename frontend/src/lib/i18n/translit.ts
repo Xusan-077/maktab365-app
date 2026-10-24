@@ -39,6 +39,19 @@ const isLatinLetter = (ch: string | undefined) => !!ch && /^[a-z]$/i.test(ch);
 const isUpper = (ch: string) => ch !== ch.toLowerCase();
 const isApostrophe = (ch: string | undefined) => !!ch && APOSTROPHES.has(ch);
 
+/** `ts` dan keyin: -tsiya (operatsiya), -tsional (natsional), -tsent (protsent, tsentr). */
+const TS_LOAN_AFTER = /^(?:iya|ion|ent)/i;
+/** So'z boshidagi `ts`: tsement, tsirk, tsikl. */
+const TS_WORD_START_AFTER = /^(?:em|ir|ik)/i;
+
+function isTsDigraph(input: string, index: number): boolean {
+  const rest = input.slice(index + 2, index + 5);
+  if (TS_LOAN_AFTER.test(rest)) return true;
+  const before = input[index - 1];
+  const wordStart = !isLatinLetter(before) && !isApostrophe(before);
+  return wordStart && TS_WORD_START_AFTER.test(rest);
+}
+
 /** Kirill harfning registrini manba (lotin) harfning registriga moslaydi. */
 function withCase(cyrillic: string, source: string): string {
   return isUpper(source) ? cyrillic.toUpperCase() : cyrillic;
@@ -144,6 +157,14 @@ function convert(input: string): string {
       }
     }
 
+    // ts → ц faqat o'zlashma so'zlarda (operatsiya, natsional, protsent, tsement); o'zbekcha
+    // so'zlarda t+s alohida (otsiz → отсиз).
+    if (lower === "t" && nextLower === "s" && isTsDigraph(input, i)) {
+      out += withCase("ц", ch);
+      i += 2;
+      continue;
+    }
+
     // So'z boshida e → э
     if (lower === "e" && !isLatinLetter(input[i - 1]) && !isApostrophe(input[i - 1])) {
       out += withCase("э", ch);
@@ -234,6 +255,15 @@ function transliterateArgument(body: string): string {
 }
 
 export type MessageTree = { [key: string]: string | MessageTree };
+
+const VERBATIM_SUFFIX = "Verbatim";
+
+/**
+ * Kirillga o'girilmaydigan xabarlar: tilning o'z nomlari (til tanlagich hamma tilda bir xil)
+ * va kaliti "...Verbatim" bilan tugaydiganlar (masalan, ingliz tili namunasidagi inglizcha gap).
+ */
+export const isVerbatimPath = (path: string) =>
+  path === "language.names" || path.endsWith(VERBATIM_SUFFIX);
 
 /**
  * Xabarlar daraxtini o'giradi. `skip` true qaytargan yo'llar (nuqta bilan, masalan "language.names")
