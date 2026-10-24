@@ -673,7 +673,12 @@
       "prev": "Previous",
       "next": "Next",
       "done": "Done",
-      "edit": "Edit"
+      "edit": "Edit",
+      "view": {
+        "label": "View",
+        "list": "List",
+        "grid": "Cards"
+      }
     },
     "bookStatus": {
       "draft": "Hidden",
@@ -692,7 +697,22 @@
       "noMessages": "No new messages.",
       "recentActivity": "Latest changes",
       "noActivity": "No changes yet.",
-      "subjects": "Subjects"
+      "subjects": "Subjects",
+      "refresh": "Refresh",
+      "quickTitle": "Quick actions",
+      "addBook": "Add PDF book",
+      "bulkUpload": "Bulk upload",
+      "addSubject": "Manage subjects",
+      "stats": "Statistics",
+      "published": "Published",
+      "publishedHint": "Visible to students",
+      "draftHint": "Not visible on the site — click to view",
+      "publishedShare": "Share of published books",
+      "shareValue": "{percent}% published",
+      "openBooks": "Open books list",
+      "openSubjects": "Open subjects list",
+      "openMessages": "View messages",
+      "viewAllActivity": "All books"
     },
     "audit": {
       "actions": {
@@ -962,7 +982,25 @@
       },
       "editLabel": "Edit “{title}”",
       "deleteLabel": "Delete “{title}”",
-      "bulk": "Bulk upload"
+      "bulk": "Bulk upload",
+      "select": {
+        "all": "Select all on this page",
+        "row": "Select “{title}”",
+        "count": "{count} selected",
+        "clear": "Clear selection"
+      },
+      "batch": {
+        "publish": "Publish",
+        "hide": "Hide",
+        "delete": "Delete",
+        "publishDone": "{count} books published",
+        "hideDone": "{count} books hidden",
+        "deleteDone": "{count} books deleted",
+        "partial": "{ok} done, {failed} failed (e.g. no PDF file or no permission).",
+        "failed": "None could be completed.",
+        "deleteTitle": "Delete {count} books",
+        "deleteDescription": "The {count} selected books will be deleted permanently. This cannot be undone."
+      }
     },
     "pdfWizard": {
       "createTitle": "New PDF book",

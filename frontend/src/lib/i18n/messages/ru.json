@@ -673,7 +673,12 @@
       "prev": "Previous",
       "next": "Next",
       "done": "Готово",
-      "edit": "Редактировать"
+      "edit": "Редактировать",
+      "view": {
+        "label": "Вид",
+        "list": "Список",
+        "grid": "Карточки"
+      }
     },
     "bookStatus": {
       "draft": "Hidden",
@@ -692,7 +697,22 @@
       "noMessages": "No new messages.",
       "recentActivity": "Latest changes",
       "noActivity": "No changes yet.",
-      "subjects": "Предметы"
+      "subjects": "Предметы",
+      "refresh": "Обновить",
+      "quickTitle": "Быстрые действия",
+      "addBook": "Добавить PDF-книгу",
+      "bulkUpload": "Массовая загрузка",
+      "addSubject": "Управление предметами",
+      "stats": "Статистика",
+      "published": "Опубликовано",
+      "publishedHint": "Доступно ученикам",
+      "draftHint": "Не видно на сайте — нажмите, чтобы открыть",
+      "publishedShare": "Доля опубликованных книг",
+      "shareValue": "Опубликовано: {percent}%",
+      "openBooks": "Открыть список книг",
+      "openSubjects": "Открыть список предметов",
+      "openMessages": "Открыть обращения",
+      "viewAllActivity": "Все книги"
     },
     "audit": {
       "actions": {
@@ -962,7 +982,25 @@
       },
       "editLabel": "Редактировать книгу «{title}»",
       "deleteLabel": "Удалить книгу «{title}»",
-      "bulk": "Массовая загрузка"
+      "bulk": "Массовая загрузка",
+      "select": {
+        "all": "Выбрать все на странице",
+        "row": "Выбрать «{title}»",
+        "count": "Выбрано: {count}",
+        "clear": "Снять выбор"
+      },
+      "batch": {
+        "publish": "Опубликовать",
+        "hide": "Скрыть",
+        "delete": "Удалить",
+        "publishDone": "Опубликовано книг: {count}",
+        "hideDone": "Скрыто книг: {count}",
+        "deleteDone": "Удалено книг: {count}",
+        "partial": "Выполнено: {ok}, не выполнено: {failed} (например, нет PDF-файла или нет прав).",
+        "failed": "Ничего не выполнено.",
+        "deleteTitle": "Удалить книги: {count}",
+        "deleteDescription": "Выбранные книги ({count}) будут удалены навсегда. Это действие нельзя отменить."
+      }
     },
     "pdfWizard": {
       "createTitle": "Новая PDF-книга",

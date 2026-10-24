@@ -8,7 +8,7 @@
  * - PDF fayllar bu yerda KESHLANMAYDI: "Oflayn saqlash" ularni sahifaning o'zi `maktab365-pdf-v1`
  *   keshiga yozadi (shu nomli kesh yangilanishda o'chirilmaydi).
  */
-const VERSION = "v1";
+const VERSION = "v2";
 const STATIC_CACHE = `m365-static-${VERSION}`;
 const PAGE_CACHE = `m365-pages-${VERSION}`;
 const DATA_CACHE = `m365-data-${VERSION}`;

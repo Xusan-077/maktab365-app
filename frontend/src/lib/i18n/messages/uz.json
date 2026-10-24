@@ -673,7 +673,12 @@
       "prev": "Oldingi",
       "next": "Keyingi",
       "done": "Tayyor",
-      "edit": "Tahrirlash"
+      "edit": "Tahrirlash",
+      "view": {
+        "label": "Ko'rinish",
+        "list": "Ro'yxat",
+        "grid": "Kartalar"
+      }
     },
     "bookStatus": {
       "draft": "Yashirin",
@@ -692,7 +697,22 @@
       "noMessages": "Yangi xabar yo'q.",
       "recentActivity": "Oxirgi o'zgarishlar",
       "noActivity": "Hozircha o'zgarish yo'q.",
-      "subjects": "Fanlar"
+      "subjects": "Fanlar",
+      "refresh": "Yangilash",
+      "quickTitle": "Tezkor amallar",
+      "addBook": "PDF kitob qo'shish",
+      "bulkUpload": "Ommaviy yuklash",
+      "addSubject": "Fanlarni boshqarish",
+      "stats": "Statistika",
+      "published": "Nashr qilingan",
+      "publishedHint": "O'quvchilarga ochiq",
+      "draftHint": "Saytda ko'rinmaydi — ko'rish uchun bosing",
+      "publishedShare": "Kitoblarning nashr qilingan ulushi",
+      "shareValue": "{percent}% nashr qilingan",
+      "openBooks": "Kitoblar ro'yxatini ochish",
+      "openSubjects": "Fanlar ro'yxatini ochish",
+      "openMessages": "Murojaatlarni ko'rish",
+      "viewAllActivity": "Hamma kitoblar"
     },
     "audit": {
       "actions": {
@@ -962,7 +982,25 @@
       },
       "editLabel": "«{title}» kitobini tahrirlash",
       "deleteLabel": "«{title}» kitobini o'chirish",
-      "bulk": "Ommaviy yuklash"
+      "bulk": "Ommaviy yuklash",
+      "select": {
+        "all": "Sahifadagi hammasini tanlash",
+        "row": "«{title}» ni tanlash",
+        "count": "{count} ta tanlandi",
+        "clear": "Tanlovni bekor qilish"
+      },
+      "batch": {
+        "publish": "Nashr qilish",
+        "hide": "Yashirish",
+        "delete": "O'chirish",
+        "publishDone": "{count} ta kitob nashr qilindi",
+        "hideDone": "{count} ta kitob yashirildi",
+        "deleteDone": "{count} ta kitob o'chirildi",
+        "partial": "{ok} ta bajarildi, {failed} tasi bajarilmadi (masalan, PDF fayl yo'q yoki ruxsat yo'q).",
+        "failed": "Hech biri bajarilmadi.",
+        "deleteTitle": "{count} ta kitobni o'chirish",
+        "deleteDescription": "Tanlangan {count} ta kitob butunlay o'chiriladi. Bu amalni bekor qilib bo'lmaydi."
+      }
     },
     "pdfWizard": {
       "createTitle": "Yangi PDF kitob",

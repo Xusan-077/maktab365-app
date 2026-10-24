@@ -92,7 +92,7 @@ export async function proxyToBackend(request: Request): Promise<Response> {
   }
 
   if (changesPublicContent(request.method, path, upstream.status)) {
-    revalidateTag("content", { expire: 0 });
+    revalidateTag("pdf-books", { expire: 0 });
   }
 
   const responseHeaders = new Headers({ "Cache-Control": "no-store" });

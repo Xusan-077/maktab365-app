@@ -37,8 +37,8 @@ export function upstreamPath(pathname: string): string | null {
 }
 
 /**
- * Admin yozuvi (kontent o'zgardi) muvaffaqiyatli bo'lsa, Next'dagi ochiq katalog keshi (`content`
- * tegi, `lib/api/server.ts`) eskirgan: keyingi so'rovda yangilanadi.
+ * Admin yozuvi (kontent o'zgardi) muvaffaqiyatli bo'lsa, Next'dagi ochiq katalog keshi (`pdf-books`
+ * tegi, `lib/pdf-books/server.ts`) eskirgan: keyingi so'rovda yangilanadi.
  */
 export function changesPublicContent(method: string, path: string, status: number): boolean {
   return (

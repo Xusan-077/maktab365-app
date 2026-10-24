@@ -12,6 +12,7 @@ const api = vi.hoisted(() => ({
   pdfBooks: vi.fn(),
   subjects: vi.fn(),
   deletePdfBook: vi.fn(),
+  transitionPdfBook: vi.fn(),
 }));
 const identity = vi.hoisted(() => ({ role: "admin" }));
 const nav = vi.hoisted(() => ({ replace: vi.fn(), query: "" }));
@@ -62,6 +63,7 @@ function setup(role = "admin") {
   api.pdfBooks.mockResolvedValue({ count: BOOKS.length, results: BOOKS });
   api.subjects.mockResolvedValue(SUBJECTS);
   api.deletePdfBook.mockResolvedValue(undefined);
+  api.transitionPdfBook.mockResolvedValue(undefined);
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   render(
     <NextIntlClientProvider locale="uz" messages={uz}>
@@ -76,6 +78,7 @@ const label = (template: string, title: string) => template.replace("{title}", t
 
 beforeEach(() => {
   vi.clearAllMocks();
+  window.localStorage.clear();
   window.matchMedia = vi.fn().mockReturnValue({
     matches: false,
     addEventListener: vi.fn(),
@@ -92,6 +95,40 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe("PdfBooksView (admin)", () => {
+  it("tanlangan kitoblarni ommaviy nashr qiladi (allaqachon nashr qilinganlarsiz)", async () => {
+    setup();
+    await screen.findByTestId("pdf-books-table");
+
+    fireEvent.click(screen.getAllByRole("checkbox", { name: t.select.all })[0]);
+    const bar = await screen.findByTestId("batch-actions");
+    fireEvent.click(within(bar).getByRole("button", { name: t.batch.publish }));
+
+    await waitFor(() => expect(api.transitionPdfBook).toHaveBeenCalledTimes(1));
+    expect(api.transitionPdfBook).toHaveBeenCalledWith("b2", "published");
+  });
+
+  it("ommaviy o'chirish tasdiqlashdan keyin tanlanganlarni o'chiradi", async () => {
+    setup();
+    await screen.findByTestId("pdf-books-table");
+
+    fireEvent.click(screen.getByRole("checkbox", { name: label(t.select.row, "Algebra 9") }));
+    const bar = await screen.findByTestId("batch-actions");
+    fireEvent.click(within(bar).getByRole("button", { name: t.batch.delete }));
+    const dialog = await screen.findByRole("dialog");
+    expect(api.deletePdfBook).not.toHaveBeenCalled();
+    fireEvent.click(within(dialog).getByRole("button", { name: uz.admin.common.delete }));
+
+    await waitFor(() => expect(api.deletePdfBook).toHaveBeenCalledWith("b1"));
+    expect(api.deletePdfBook).toHaveBeenCalledTimes(1);
+  });
+
+  it("kartalar ko'rinishiga o'tkazadi", async () => {
+    setup();
+    await screen.findByTestId("pdf-books-table");
+    fireEvent.click(screen.getByRole("button", { name: uz.admin.common.view.grid }));
+    expect(await screen.findByTestId("pdf-books-grid")).toBeTruthy();
+  });
+
   it("har qatorda muqova, fan nomi, Tahrirlash va O'chirish amallari bor", async () => {
     setup();
     const table = await screen.findByTestId("pdf-books-table");

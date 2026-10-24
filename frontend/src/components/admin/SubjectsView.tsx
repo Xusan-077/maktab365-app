@@ -23,6 +23,7 @@ import { useAdminIdentity } from "./AdminRoleProvider";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { QueryError } from "./QueryError";
 import { SubjectDialog } from "./SubjectDialog";
+import { ViewToggle, useViewMode } from "./ViewToggle";
 import { useAdminErrorText } from "./useAdminErrorText";
 
 type Editing = { kind: "create" } | { kind: "edit"; subject: AdminSubject } | null;
@@ -40,6 +41,7 @@ export function SubjectsView() {
   const [editing, setEditing] = useState<Editing>(null);
   const [deleting, setDeleting] = useState<AdminSubject | null>(null);
   const [gradeFilter, setGradeFilter] = useState("");
+  const [view, setView] = useViewMode("subjects");
   const rows = (data ?? []).filter(
     (subject) => !gradeFilter || subjectHasGrade(subject, Number(gradeFilter)),
   );
@@ -79,23 +81,86 @@ export function SubjectsView() {
         </EmptyState>
       ) : (
         <div className="flex flex-col gap-3">
-          <div className="max-w-xs" data-testid="subjects-grade-filter">
-            <Select
-              label={t("gradeFilter")}
-              value={gradeFilter}
-              onChange={setGradeFilter}
-              searchable={false}
-              options={[
-                { value: "", label: t("allGrades") },
-                ...GRADES.map((grade) => ({
-                  value: String(grade),
-                  label: t("gradeChip", { grade }),
-                })),
-              ]}
-            />
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div className="w-full max-w-xs" data-testid="subjects-grade-filter">
+              <Select
+                label={t("gradeFilter")}
+                value={gradeFilter}
+                onChange={setGradeFilter}
+                searchable={false}
+                options={[
+                  { value: "", label: t("allGrades") },
+                  ...GRADES.map((grade) => ({
+                    value: String(grade),
+                    label: t("gradeChip", { grade }),
+                  })),
+                ]}
+              />
+            </div>
+            <ViewToggle value={view} onChange={setView} />
           </div>
           {rows.length === 0 ? (
             <EmptyState icon={Library}>{t("emptyFiltered")}</EmptyState>
+          ) : view === "grid" ? (
+            <ul
+              data-testid="subjects-grid"
+              className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+            >
+              {rows.map((subject) => {
+                const name = getLocalized(subject.title, locale);
+                const hasBooks = subject.pdf_books_count > 0;
+                return (
+                  <li
+                    key={subject.id}
+                    className="border-border bg-surface flex flex-col gap-3 rounded-xl border p-4 transition-shadow hover:shadow-md"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold">{name}</p>
+                      <p className="text-muted truncate text-xs">{subject.slug}</p>
+                    </div>
+                    <dl className="grid grid-cols-2 gap-2 text-sm">
+                      <div>
+                        <dt className="text-muted text-xs">{t("columns.grades")}</dt>
+                        <dd data-testid="subject-grades">{formatGrades(subject.grades ?? [])}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-muted text-xs">{t("columns.books")}</dt>
+                        <dd className="tabular-nums">{subject.pdf_books_count}</dd>
+                      </div>
+                    </dl>
+                    <div className="mt-auto flex justify-end gap-1">
+                      <Button
+                        variant="ghost"
+                        aria-label={t("editLabel", { name })}
+                        onClick={() => setEditing({ kind: "edit", subject })}
+                      >
+                        <Pencil className="size-4" aria-hidden />
+                      </Button>
+                      {canDelete(role) && (
+                        <Button
+                          variant="ghost"
+                          aria-label={
+                            hasBooks
+                              ? t("hasBooks", { count: subject.pdf_books_count })
+                              : t("deleteLabel", { name })
+                          }
+                          title={
+                            hasBooks ? t("hasBooks", { count: subject.pdf_books_count }) : undefined
+                          }
+                          disabled={hasBooks}
+                          onClick={() => {
+                            remove.reset();
+                            setDeleting(subject);
+                          }}
+                        >
+                          <Trash2 className="size-4" aria-hidden />
+                        </Button>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
           ) : (
             <div className="border-border bg-surface overflow-x-auto rounded-xl border">
               <table className="w-full text-sm sm:min-w-[32rem]" data-testid="subjects-table">

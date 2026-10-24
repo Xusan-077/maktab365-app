@@ -1,31 +1,56 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { BookOpen, Inbox, Layers, Library } from "lucide-react";
+import { BarChart3, BookOpen, Files, Inbox, Layers, Library, Plus, RefreshCw } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { Button, buttonVariants } from "@/components/ui/Button";
 import { Card, CardTitle } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { adminQueries } from "@/lib/admin/queries";
 import { ADMIN_ROUTES } from "@/lib/admin/routes";
 import type { AdminDashboard } from "@/lib/admin/types";
 import { Link } from "@/lib/i18n/navigation";
+import { cn } from "@/lib/utils/cn";
 import { QueryError } from "./QueryError";
 
-function Stat({ label, value, hint }: { label: string; value: number; hint?: string }) {
-  return (
-    <div className="flex flex-col gap-0.5">
+function Stat({
+  label,
+  value,
+  hint,
+  href,
+}: {
+  label: string;
+  value: number;
+  hint?: string;
+  href?: string;
+}) {
+  const body = (
+    <>
       <dt className="text-muted text-sm">{label}</dt>
       <dd className="text-2xl font-bold tabular-nums">{value}</dd>
       {hint && <dd className="text-muted text-xs">{hint}</dd>}
-    </div>
+    </>
+  );
+  if (!href) return <div className="flex flex-col gap-0.5">{body}</div>;
+  return (
+    <Link
+      href={href}
+      title={hint}
+      className="hover:bg-subtle -m-2 flex flex-col gap-0.5 rounded-lg p-2 transition-colors"
+    >
+      {body}
+    </Link>
   );
 }
 
 function Counts({ data }: { data: AdminDashboard }) {
   const t = useTranslations("admin.dashboard");
   const tb = useTranslations("admin.bookStatus");
+  const { total, published, draft } = data.pdf_books;
+  const percent = total === 0 ? 0 : Math.round((published / total) * 100);
   return (
     <div className="grid gap-4 md:grid-cols-3">
       <Card>
@@ -34,10 +59,29 @@ function Counts({ data }: { data: AdminDashboard }) {
           {t("books")}
         </CardTitle>
         <dl className="mt-4 grid grid-cols-3 gap-3" data-testid="books-counts">
-          <Stat label={t("total")} value={data.pdf_books.total} />
-          <Stat label={tb("published")} value={data.pdf_books.published} />
-          <Stat label={tb("draft")} value={data.pdf_books.draft} />
+          <Stat
+            label={t("total")}
+            value={total}
+            hint={t("openBooks")}
+            href={ADMIN_ROUTES.pdfBooks}
+          />
+          <Stat
+            label={tb("published")}
+            value={published}
+            hint={t("publishedHint")}
+            href={`${ADMIN_ROUTES.pdfBooks}?status=published`}
+          />
+          <Stat
+            label={tb("draft")}
+            value={draft}
+            hint={t("draftHint")}
+            href={`${ADMIN_ROUTES.pdfBooks}?status=draft`}
+          />
         </dl>
+        <div className="mt-4 flex flex-col gap-1">
+          <ProgressBar value={percent} label={t("publishedShare")} />
+          <p className="text-muted text-xs">{t("shareValue", { percent })}</p>
+        </div>
       </Card>
       <Card>
         <CardTitle className="flex items-center gap-2">
@@ -45,7 +89,12 @@ function Counts({ data }: { data: AdminDashboard }) {
           {t("subjects")}
         </CardTitle>
         <dl className="mt-4" data-testid="subjects-count">
-          <Stat label={t("total")} value={data.subjects_count} />
+          <Stat
+            label={t("total")}
+            value={data.subjects_count}
+            hint={t("openSubjects")}
+            href={ADMIN_ROUTES.subjects}
+          />
         </dl>
       </Card>
       <Card>
@@ -58,6 +107,33 @@ function Counts({ data }: { data: AdminDashboard }) {
         </dl>
       </Card>
     </div>
+  );
+}
+
+function QuickActions() {
+  const t = useTranslations("admin.dashboard");
+  const actions = [
+    { href: ADMIN_ROUTES.newPdfBook, label: t("addBook"), Icon: Plus, primary: true },
+    { href: ADMIN_ROUTES.bulkPdfBooks, label: t("bulkUpload"), Icon: Files },
+    { href: ADMIN_ROUTES.subjects, label: t("addSubject"), Icon: Library },
+    { href: ADMIN_ROUTES.stats, label: t("stats"), Icon: BarChart3 },
+  ] as const;
+  return (
+    <Card>
+      <CardTitle>{t("quickTitle")}</CardTitle>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {actions.map(({ href, label, Icon, ...rest }) => (
+          <Link
+            key={href}
+            href={href}
+            className={cn(buttonVariants({ variant: "primary" in rest ? "primary" : "secondary" }))}
+          >
+            <Icon className="size-4" aria-hidden />
+            {label}
+          </Link>
+        ))}
+      </div>
+    </Card>
   );
 }
 
@@ -125,7 +201,7 @@ function RecentActivity({ data }: { data: AdminDashboard }) {
 /** Dashboard: kitob/fan sonlari (kitoblar status bo'yicha), yangi xabarlar va oxirgi o'zgarishlar. */
 export function DashboardView() {
   const t = useTranslations("admin.dashboard");
-  const { data, error, isPending, refetch } = useQuery(adminQueries.dashboard());
+  const { data, error, isPending, isFetching, refetch } = useQuery(adminQueries.dashboard());
 
   return (
     <>
@@ -133,12 +209,18 @@ export function DashboardView() {
         title={t("title")}
         description={t("description")}
         action={
-          <Link
-            href={ADMIN_ROUTES.pdfBooks}
-            className="text-link text-sm font-medium underline-offset-4 hover:underline"
-          >
-            {t("allBooks")}
-          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="secondary" disabled={isFetching} onClick={() => void refetch()}>
+              <RefreshCw className={cn("size-4", isFetching && "animate-spin")} aria-hidden />
+              {t("refresh")}
+            </Button>
+            <Link
+              href={ADMIN_ROUTES.pdfBooks}
+              className="text-link text-sm font-medium underline-offset-4 hover:underline"
+            >
+              {t("allBooks")}
+            </Link>
+          </div>
         }
       />
       {isPending ? (
@@ -152,6 +234,7 @@ export function DashboardView() {
       ) : (
         <>
           <Counts data={data} />
+          <QuickActions />
           <div className="grid gap-4 lg:grid-cols-2">
             <RecentActivity data={data} />
             <RecentMessages data={data} />
