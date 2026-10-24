@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import Image, { type ImageLoaderProps } from "next/image";
 import { useTranslations } from "next-intl";
 import { groupColor } from "@/lib/subject-colors";
@@ -57,6 +57,14 @@ export function BookCover({
   const loader = ({ width }: ImageLoaderProps) =>
     (width <= SMALL_MAX_WIDTH ? srcSmall : srcLarge) ?? primary ?? "";
   const small = size === "sm";
+  // Gradient guruh rangidan inline hosil qilinadi (token o'zgaruvchisi): `bg-*` klassiga bog'liq emas,
+  // shuning uchun stil fayli eskirgan bo'lsa ham zaxira bo'sh ko'rinmaydi. Dark rejimda ham mos.
+  const color = groupColor(group).vars.color;
+  const fallbackStyle: CSSProperties = {
+    backgroundColor: color,
+    backgroundImage: `linear-gradient(150deg, color-mix(in oklab, ${color} 82%, white) 0%, ${color} 48%, color-mix(in oklab, ${color} 74%, black) 100%)`,
+    color: "var(--on-group)",
+  };
 
   return (
     <div
@@ -66,24 +74,40 @@ export function BookCover({
       )}
     >
       <div
+        data-testid="book-cover-fallback"
+        style={fallbackStyle}
         className={cn(
-          "text-on-group absolute inset-0 flex flex-col justify-between",
-          groupColor(group).solid,
-          small ? "p-2" : "p-4",
+          "absolute inset-0 flex flex-col justify-between overflow-hidden",
+          small ? "p-2 pl-3" : "p-4 pl-5",
         )}
       >
+        {/* Bezak: yumshoq doiralar va kitob "umurtqasi" (gradient ustida, matn ostida). */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -top-[18%] -right-[22%] size-[62%] rounded-full bg-white/15"
+        />
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -bottom-[26%] -left-[30%] size-[75%] rounded-full bg-black/10"
+        />
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 left-0 w-[5%] bg-black/15"
+        />
         <span
           className={cn(
-            "font-bold tracking-[0.08em] uppercase",
-            small ? "text-[0.5rem]" : "text-xs",
+            "relative self-start rounded-full bg-black/15 font-bold tracking-[0.08em] uppercase",
+            small ? "px-1.5 py-px text-[0.5rem]" : "px-2.5 py-1 text-xs",
           )}
         >
           {t("grade", { grade })}
         </span>
         <span
           className={cn(
-            "font-extrabold",
-            small ? "text-xs leading-tight" : "text-[1.3125rem] leading-[1.08]",
+            "relative font-extrabold [overflow-wrap:anywhere]",
+            small
+              ? "line-clamp-3 text-xs leading-tight"
+              : "line-clamp-4 text-[1.3125rem] leading-[1.08]",
           )}
         >
           {title}
