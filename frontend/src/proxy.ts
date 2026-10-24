@@ -6,7 +6,14 @@ import { isAdminDenied } from "@/lib/auth/staff";
 import { resolveBaseUrl } from "@/lib/api/http-client";
 import { defaultLocale, isLocale, locales } from "@/lib/i18n/config";
 import { routing } from "@/lib/i18n/routing";
-import { legacyBookId, legacyBookTarget, legacyGradeRedirect } from "@/lib/pdf/legacy-redirect";
+import {
+  bookPageRef,
+  legacyBookId,
+  legacyBookTarget,
+  legacyGradeRedirect,
+} from "@/lib/pdf/legacy-redirect";
+import { GRADES } from "@/types/catalog";
+import { pdfBookPath } from "@/lib/utils/routes";
 
 const intlMiddleware = createMiddleware(routing);
 
@@ -27,6 +34,36 @@ async function legacyBookRedirect(id: string, search: string): Promise<string | 
 }
 
 /**
+ * Kitob sahifasi (`/darsliklar/<sinf>/<slug>`) uchun haqiqiy HTTP holati. Sahifa o'zi buni qila
+ * olmaydi: slug oldindan noma'lum, kontent streaming bilan keladi va status allaqachon 200 bo'ladi
+ * (soft 404). Shuning uchun shu yerda: yo'q kitob — 404 (rewrite), boshqa sinfdagi — 308.
+ * Backend javob bermasa (tarmoq, 5xx) so'rov sahifaga o'tadi.
+ */
+async function bookPageCheck(
+  ref: { grade: number; slug: string },
+  locale: string,
+  origin: string,
+): Promise<NextResponse | null> {
+  const notFoundResponse = () => NextResponse.rewrite(new URL(`/${locale}/not-found-book`, origin));
+  if (!(GRADES as readonly number[]).includes(ref.grade)) return notFoundResponse();
+  try {
+    const response = await fetch(
+      `${resolveBaseUrl()}/api/v1/pdf-books/by-slug/${encodeURIComponent(ref.slug)}/`,
+      { signal: AbortSignal.timeout(3000) },
+    );
+    if (response.status === 404) return notFoundResponse();
+    if (!response.ok) return null;
+    const book = (await response.json()) as { grade: number; slug: string };
+    if (book.grade !== ref.grade) {
+      return NextResponse.redirect(new URL(`/${locale}${pdfBookPath(book)}`, origin), 308);
+    }
+  } catch {
+    // Backend javob bermadi: tekshiruvsiz davom etamiz (sahifa o'zi notFound() qiladi).
+  }
+  return null;
+}
+
+/**
  * Sessiyaga qarab yo'naltirish (`resolveAuthRedirect`), qolgani — faqat til yo'naltirishi.
  * `auth()` o'rami access muddati yaqinlashganda backend tokenlarini yangilaydi va cookie'ni yozadi.
  * Haqiqiy tekshiruv `AccountGate` da.
@@ -43,6 +80,11 @@ export default auth(async (request) => {
   if (legacyId) {
     const target = await legacyBookRedirect(legacyId, search);
     if (target) return NextResponse.redirect(new URL(`/${locale}${target}`, origin), 308);
+  }
+  const bookRef = bookPageRef(bare);
+  if (bookRef) {
+    const checked = await bookPageCheck(bookRef, locale, origin);
+    if (checked) return checked;
   }
   const target = resolveAuthRedirect({
     path: pathname.replace(LOCALE_PREFIX, "") || "/",

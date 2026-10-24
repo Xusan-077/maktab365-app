@@ -34,3 +34,9 @@ export function legacyBookTarget(book: { grade: number; slug: string }, search: 
   if (!rest) return path;
   return `${path}${path.includes("?") ? "&" : "?"}${rest}`;
 }
+
+/** Tilsiz yo'l kitob sahifasi (`/darsliklar/9/<slug>`, o'qish oynasi emas) bo'lsa — sinf va slug. */
+export function bookPageRef(path: string): { grade: number; slug: string } | null {
+  const match = /^\/darsliklar\/(\d{1,2})\/([^/]+)\/?$/.exec(path);
+  return match ? { grade: Number(match[1]), slug: match[2] } : null;
+}

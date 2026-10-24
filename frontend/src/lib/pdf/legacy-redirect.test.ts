@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { legacyBookId, legacyBookTarget, legacyGradeRedirect } from "./legacy-redirect";
+import {
+  bookPageRef,
+  legacyBookId,
+  legacyBookTarget,
+  legacyGradeRedirect,
+} from "./legacy-redirect";
 
 const UUID = "57f6e0ce-f3d8-463c-8ffc-7388484d0c8c";
 
@@ -44,5 +49,21 @@ describe("legacyBookTarget", () => {
     expect(legacyBookTarget(book, "?slides=c1")).toBe(
       "/darsliklar/9/9-sinf-algebra/oqish?slides=c1",
     );
+  });
+});
+
+describe("bookPageRef", () => {
+  it("kitob sahifasi yo'lini taniydi", () => {
+    expect(bookPageRef("/darsliklar/9/9-sinf-algebra")).toEqual({
+      grade: 9,
+      slug: "9-sinf-algebra",
+    });
+    expect(bookPageRef("/darsliklar/11/x/")).toEqual({ grade: 11, slug: "x" });
+  });
+  it("o'qish oynasi, sinf va boshqa yo'llarni tanimaydi", () => {
+    expect(bookPageRef("/darsliklar/9/x/oqish")).toBeNull();
+    expect(bookPageRef("/darsliklar/9")).toBeNull();
+    expect(bookPageRef("/darsliklar/abc/x")).toBeNull();
+    expect(bookPageRef("/fanlar/9/x")).toBeNull();
   });
 });
