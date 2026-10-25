@@ -311,3 +311,42 @@ class TestSetWebhookCommand:
             post.return_value.json.return_value = {"ok": False, "description": "bad url"}
             with pytest.raises(CommandError, match="bad url"):
                 call_command("set_telegram_webhook", "https://api.example.uz")
+
+
+class TestPollCommand:
+    def updates(self, *results, ok=True, **extra):
+        response = mock.Mock()
+        response.json.return_value = {"ok": ok, "result": list(results), **extra}
+        return response
+
+    def test_confirms_start_and_replies(self, api):
+        body = start(api)
+        with mock.patch("requests.get") as get, mock.patch("requests.post") as post:
+            get.return_value = self.updates(update(f"/start {body['token']}") | {"update_id": 41})
+            call_command("telegram_poll", "--once")
+        assert status(api, body["token"], body["nonce"]).json() == {"status": "confirmed"}
+        url = post.call_args.args[0]
+        assert url.endswith("/sendMessage")
+        assert post.call_args.kwargs["json"] == {
+            "chat_id": 777,
+            "text": telegram_login.CONFIRMED_TEXT,
+        }
+        # --once: qayta ishga tushirishda update takrorlanmasin — offset tasdiqlanadi.
+        assert get.call_args.kwargs["params"] == {"offset": 42, "timeout": 0}
+
+    def test_ignored_update_sends_nothing(self):
+        with mock.patch("requests.get") as get, mock.patch("requests.post") as post:
+            get.return_value = self.updates(update("salom"))
+            call_command("telegram_poll", "--once")
+        post.assert_not_called()
+
+    def test_webhook_conflict_is_reported(self):
+        with mock.patch("requests.get") as get:
+            get.return_value = self.updates(ok=False, error_code=409, description="Conflict")
+            with pytest.raises(CommandError, match="409"):
+                call_command("telegram_poll", "--once")
+
+    def test_requires_configuration(self, settings):
+        settings.TELEGRAM_WEBHOOK_SECRET = ""
+        with pytest.raises(CommandError):
+            call_command("telegram_poll", "--once")

@@ -36,14 +36,7 @@ function useNow(active: boolean) {
  * (tab yashirin bo'lsa TanStack Query to'xtatadi), muddat tugasa yoki `confirmed`/`expired`
  * bo'lsa polling to'xtaydi. `confirmed` → `signIn("telegram-bot")` (token bir martalik) → `onSignedIn`.
  */
-export function useTelegramLogin({
-  onSignedIn,
-  onLink,
-}: {
-  onSignedIn: () => void | Promise<void>;
-  /** Havola olingach (masalan, mobilda darhol Telegram'ni ochish uchun). */
-  onLink?: (link: TelegramLoginLink) => void;
-}) {
+export function useTelegramLogin({ onSignedIn }: { onSignedIn: () => void | Promise<void> }) {
   const locale = useLocale();
   const [link, setLink] = useState<ActiveLink | null>(null);
   const [signInError, setSignInError] = useState<string | null>(null);
@@ -56,7 +49,6 @@ export function useTelegramLogin({
     mutationFn: requestTelegramLogin,
     onSuccess: (data) => {
       setLink({ ...data, expiresAt: Date.now() + data.expires_in * 1000 });
-      onLink?.(data);
     },
   });
 

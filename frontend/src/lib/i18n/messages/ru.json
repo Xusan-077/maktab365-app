@@ -2193,15 +2193,12 @@
   },
   "telegramLogin": {
     "start": "Войти через Telegram",
-    "starting": "Готовим ссылку…",
-    "pending": "Нажмите Start в Telegram",
-    "pendingHint": "Отсканируйте QR-код камерой телефона или нажмите «Открыть в Telegram».",
-    "pendingHintMobile": "Откроется Telegram — нажмите Start в боте и вернитесь на эту страницу.",
-    "expiresIn": "Ссылка действует {time}",
-    "openTelegram": "Открыть в Telegram",
     "qrTitle": "QR-код ссылки на Telegram-бота",
+    "qrHint": "Отсканируйте QR-код камерой телефона",
+    "botHint": "Нажмите Start в боте — вход на этой странице выполнится автоматически.",
+    "expiresIn": "Код действует {time}",
     "confirming": "Подтверждено, выполняем вход…",
-    "expired": "Срок действия ссылки истёк.",
+    "expired": "Срок действия кода истёк.",
     "retry": "Попробовать снова"
   },
   "authModal": {

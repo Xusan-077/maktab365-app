@@ -59,5 +59,17 @@ services:
     depends_on:
       - backend
 
+  # Lokal Telegram bot kirishi: Telegram localhost'ga webhook yubora olmaydi, shuning uchun
+  # update'lar getUpdates bilan olinadi. Ixtiyoriy: `docker compose --profile telegram up -d`.
+  # backend/.env da TELEGRAM_BOT_TOKEN/USERNAME/WEBHOOK_SECRET bo'lishi va webhook o'chiq bo'lishi kerak.
+  telegram-poll:
+    <<: *backend
+    command: python manage.py telegram_poll
+    ports: []
+    restart: unless-stopped
+    profiles: ["telegram"]
+    depends_on:
+      - backend
+
 volumes:
   postgres-data:

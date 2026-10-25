@@ -1,26 +1,27 @@
 "use client";
 
-import { Loader2, RefreshCw, Send } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { Loader2, RefreshCw } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { useTranslations } from "next-intl";
+import { AuthDivider } from "@/components/auth/AuthDivider";
 import { TelegramIcon } from "@/components/login/TelegramIcon";
-import { Button } from "@/components/ui/Button";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { useAuthErrorText } from "@/hooks/useAuthErrorText";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useTelegramLogin } from "@/hooks/useTelegramLogin";
-import { formatCountdown, openTelegramLink } from "@/lib/auth/telegram-login";
+import { formatCountdown } from "@/lib/auth/telegram-login";
 import { cn } from "@/lib/utils/cn";
 
 const telegramButton =
   "bg-telegram inline-flex h-13 w-full items-center justify-center gap-2.5 rounded-xl px-5 text-base font-semibold text-white transition-[filter,transform] hover:brightness-95 motion-safe:active:scale-[0.98] disabled:opacity-70";
 
-/** Telefon/planshet: havola darhol Telegram ilovasida ochiladi, QR kerak emas. */
-const TOUCH_QUERY = "(pointer: coarse)";
+const QR_SIZE = 176;
 
 /**
- * "Telegram bilan kirish" (bot deep-link). Holatlar: tugma → (mobilda Telegram ochiladi | desktopda QR +
- * "Telegramda ochish") + 5:00 teskari sanoq → tasdiqlangach kirish; muddat tugasa yoki xato bo'lsa
- * "Qayta urinish".
+ * Telegram orqali kirish — ikki yo'l, bitta bir martalik havola: (1) QR kod (doim ko'rinadi; boshqa
+ * qurilmadagi Telegram bilan skanerlanadi), (2) "Telegram bilan kirish" — botni yangi oynada/ilovada
+ * ochadi. Ikkalasida ham botda Start bosilgach shu sahifa o'zi kiradi (holat polling'i). Havola
+ * panel ochilishi bilan olinadi; muddat tugasa yoki xato bo'lsa QR ustida "Qayta urinish".
  */
 export function TelegramLoginPanel({
   onSignedIn,
@@ -31,35 +32,15 @@ export function TelegramLoginPanel({
 }) {
   const t = useTranslations("telegramLogin");
   const errorText = useAuthErrorText();
-  const touch = useMediaQuery(TOUCH_QUERY);
-  const { phase, error, link, remainingMs, start, retry } = useTelegramLogin({
-    onSignedIn,
-    onLink: (next) => {
-      if (window.matchMedia(TOUCH_QUERY).matches) openTelegramLink(next.bot_url);
-    },
-  });
+  const { phase, error, link, remainingMs, start, retry } = useTelegramLogin({ onSignedIn });
+  const started = useRef(false);
 
-  if (phase === "idle" || phase === "starting") {
-    return (
-      <div className={className}>
-        <button
-          type="button"
-          onClick={start}
-          disabled={phase === "starting"}
-          aria-busy={phase === "starting" || undefined}
-          className={telegramButton}
-          data-testid="telegram-bot-login"
-        >
-          {phase === "starting" ? (
-            <Loader2 className="size-5 animate-spin" aria-hidden />
-          ) : (
-            <TelegramIcon inverted className="size-6" />
-          )}
-          {t("start")}
-        </button>
-      </div>
-    );
-  }
+  useEffect(() => {
+    // StrictMode'da effekt ikki marta ishlaydi — havola bir marta olinsin.
+    if (started.current) return;
+    started.current = true;
+    start();
+  }, [start]);
 
   if (phase === "confirming") {
     return (
@@ -73,46 +54,95 @@ export function TelegramLoginPanel({
     );
   }
 
-  if (phase === "expired" || phase === "error") {
-    return (
-      <div className={cn("flex flex-col items-center gap-4 py-2 text-center", className)}>
-        <p role="alert" className={cn("text-sm", phase === "error" ? "text-danger" : "text-muted")}>
-          {phase === "expired" ? t("expired") : errorText(error ?? "unknown")}
-        </p>
-        <Button variant="secondary" size="lg" onClick={retry} className="w-full">
-          <RefreshCw className="size-4" aria-hidden />
-          {t("retry")}
-        </Button>
-      </div>
-    );
-  }
+  const failed = phase === "expired" || phase === "error";
+  const ready = phase === "pending" && link !== null;
 
-  // pending
   return (
     <div className={cn("flex flex-col items-center gap-4 text-center", className)}>
-      {!touch && link && (
-        <div className="border-border rounded-xl border bg-white p-3" data-testid="telegram-qr">
-          <QRCodeSVG value={link.bot_url} size={176} marginSize={0} title={t("qrTitle")} />
-        </div>
-      )}
-      <div className="flex flex-col gap-1" role="status" aria-live="polite">
-        <p className="font-semibold">{t("pending")}</p>
-        <p className="text-muted text-sm">{touch ? t("pendingHintMobile") : t("pendingHint")}</p>
-        <p className="text-muted text-sm tabular-nums">
-          {t("expiresIn", { time: formatCountdown(remainingMs) })}
-        </p>
-      </div>
-      {link && (
-        <a
-          href={link.bot_url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={cn(telegramButton, "h-12 text-sm")}
+      <div className="flex flex-col items-center gap-2">
+        <div
+          className="border-border relative rounded-xl border bg-white p-3"
+          data-testid="telegram-qr"
         >
-          <Send className="size-4" aria-hidden />
-          {t("openTelegram")}
-        </a>
-      )}
+          {link && phase !== "starting" ? (
+            <QRCodeSVG
+              value={link.bot_url}
+              size={QR_SIZE}
+              marginSize={0}
+              title={t("qrTitle")}
+              className={cn(failed && "opacity-15 blur-[2px]")}
+            />
+          ) : failed ? (
+            <div style={{ width: QR_SIZE, height: QR_SIZE }} />
+          ) : (
+            <Skeleton style={{ width: QR_SIZE, height: QR_SIZE }} />
+          )}
+          {failed && (
+            <button
+              type="button"
+              onClick={retry}
+              className="text-foreground absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-xl text-sm font-semibold"
+            >
+              <RefreshCw className="size-6" aria-hidden />
+              {t("retry")}
+            </button>
+          )}
+        </div>
+        <div role="status" aria-live="polite" className="flex flex-col gap-0.5">
+          {phase === "error" ? (
+            <p role="alert" className="text-danger text-sm">
+              {errorText(error ?? "unknown")}
+            </p>
+          ) : phase === "expired" ? (
+            <p className="text-muted text-sm">{t("expired")}</p>
+          ) : (
+            <>
+              <p className="text-sm font-medium">{t("qrHint")}</p>
+              {ready && (
+                <p className="text-muted text-xs tabular-nums">
+                  {t("expiresIn", { time: formatCountdown(remainingMs) })}
+                </p>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+
+      <div className="w-full">
+        <AuthDivider />
+      </div>
+
+      <div className="flex w-full flex-col gap-2">
+        {ready ? (
+          <a
+            href={link.bot_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={telegramButton}
+            data-testid="telegram-bot-login"
+          >
+            <TelegramIcon inverted className="size-6" />
+            {t("start")}
+          </a>
+        ) : (
+          <button
+            type="button"
+            onClick={failed ? retry : undefined}
+            disabled={!failed}
+            aria-busy={phase === "starting" || undefined}
+            className={telegramButton}
+            data-testid="telegram-bot-login"
+          >
+            {phase === "starting" || phase === "idle" ? (
+              <Loader2 className="size-5 animate-spin" aria-hidden />
+            ) : (
+              <TelegramIcon inverted className="size-6" />
+            )}
+            {t("start")}
+          </button>
+        )}
+        <p className="text-muted text-xs">{t("botHint")}</p>
+      </div>
     </div>
   );
 }
