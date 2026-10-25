@@ -1522,7 +1522,10 @@
       "pagesToggle": "Show or hide the pages panel",
       "thumb": "Page {page}",
       "tocOpen": "{title} — open contents. Current section: {section}",
-      "topic": "Topic"
+      "topic": "Topic",
+      "book": "Book",
+      "bookPages": "Pages {from}–{to}",
+      "bookPage": "Page {page}"
     },
     "bookmark": {
       "save": "Save",
@@ -1788,18 +1791,18 @@
       "scale": "Scale",
       "fitWidth": "Fit width",
       "fitPage": "Whole page",
-      "fitFlipHint": "In “Flip” mode the page always fits the screen.",
+      "fitFlipHint": "In “Book” mode the book always fits the screen; zoom with the percentage below.",
       "zoom": "Zoom",
       "zoomOut": "Zoom out",
       "zoomIn": "Zoom in",
-      "zoomReset": "Zoom: {value}. Reset to 100%",
+      "zoomReset": "Zoom: {value}. Fit to screen",
       "paging": "Page turning",
-      "pagingFlip": "Flip",
+      "pagingFlip": "Book",
       "pagingScroll": "Continuous",
-      "spread": "2 pages side by side",
-      "spreadHint": "Only in “Flip” mode",
       "warm": "Warm tint for eyes",
-      "warmHint": "Less blue light when reading at night"
+      "warmHint": "Less blue light when reading at night",
+      "fit": "Fit",
+      "fitLabel": "Fit the book to the screen"
     },
     "nav": {
       "label": "Page navigation",

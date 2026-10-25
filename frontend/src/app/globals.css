@@ -203,6 +203,12 @@
   --hero-bg: #f5f8fe;
   --footer-bg: #f8fafd;
   --reader-bg: #eef1f6;
+  /* Kitob rejimi: tinch neytral "stol", qog'oz va varaqlar qirrasi. */
+  --book-desk: #e4e3df;
+  --book-paper: #ffffff;
+  --book-edge: #f4f2ed;
+  --book-edge-line: #d9d5cc;
+  --book-ground: 0 22px 38px -16px rgb(30 28 24 / 0.38), 0 6px 14px -6px rgb(30 28 24 / 0.22);
   --warm-soft: #fff7ed;
   --on-group: #ffffff; /* yo'nalish rangi ustidagi matn */
   --telegram: #229ed9; /* Telegram brend rangi (ikkala temada bir xil) */
@@ -280,6 +286,11 @@
   --hero-bg: #0e1830;
   --footer-bg: #0e1628;
   --reader-bg: #0a101e;
+  --book-desk: #0b111c;
+  --book-paper: #1b2233;
+  --book-edge: #262f43;
+  --book-edge-line: #121826;
+  --book-ground: 0 22px 40px -14px rgb(0 0 0 / 0.7), 0 6px 14px -6px rgb(0 0 0 / 0.5);
   --warm-soft: #2a1d14;
   --on-group: #0b1220;
 
@@ -775,17 +786,105 @@ dialog[open]::backdrop {
   outline-offset: 2px;
 }
 
-/* Gorizontal yoyma: o'rtadagi umurtqa soyasi va ekran chetidagi oldingi/keyingi tugmalari. */
-.pdf-spine {
+/* Ekran chetidagi oldingi/keyingi tugmalari (kitob rejimi). */
+/*
+ * Kitob rejimi (BookView): stol, varaqlar to'plami (qalinlik — `--book-stack` box-shadow
+ * qatlamlari), yer soyasi, umurtqa va varaq ag'darishdagi harakatlanuvchi soya/yorug'lik.
+ */
+html:has(.pdf-stage[data-book]) {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+html:has(.pdf-stage[data-book]) body {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+.book-desk {
+  background-color: var(--book-desk);
+  background-image: radial-gradient(ellipse at 50% 42%, rgb(255 255 255 / 0.22), transparent 70%);
+}
+.pdf-stage[data-tone="sepia"] .book-desk {
+  --book-desk: #e2d6ba;
+  --book-paper: #f6eedb;
+  --book-edge: #efe4cb;
+  --book-edge-line: #cdbd98;
+}
+.pdf-stage[data-tone="dark"] .book-desk {
+  --book-desk: #0b111c;
+  --book-paper: #1b2233;
+  --book-edge: #262f43;
+  --book-edge-line: #121826;
+  background-image: none;
+}
+.book-base {
+  background-color: var(--book-paper);
+  box-shadow: var(--book-stack), var(--book-ground);
+  transition: box-shadow 300ms ease;
+}
+.book-page {
+  background-color: var(--book-paper);
+  will-change: clip-path, transform;
+}
+/* Bet chizilguncha — yumshoq skeleton (qog'oz "nafas oladi"). */
+.book-page:not(:has(canvas[data-drawn])) {
+  animation: book-pulse 1.4s ease-in-out infinite;
+}
+@keyframes book-pulse {
+  50% {
+    opacity: 0.72;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .book-page:not(:has(canvas[data-drawn])) {
+    animation: none;
+  }
+}
+.book-spine {
   background: linear-gradient(
     to right,
     transparent,
-    rgb(15 23 42 / 0.16) 45%,
-    rgb(15 23 42 / 0.22) 50%,
-    rgb(15 23 42 / 0.16) 55%,
+    rgb(15 23 42 / 0.06) 30%,
+    rgb(15 23 42 / 0.2) 48%,
+    rgb(15 23 42 / 0.26) 50%,
+    rgb(15 23 42 / 0.2) 52%,
+    rgb(15 23 42 / 0.06) 70%,
     transparent
   );
 }
+.book-curl-shadow {
+  background: linear-gradient(
+    to right,
+    rgb(15 15 20 / 0.34),
+    rgb(15 15 20 / 0.12) 35%,
+    transparent
+  );
+}
+.book-curl-light {
+  background: linear-gradient(
+    to right,
+    rgb(15 15 20 / 0.16),
+    rgb(255 255 255 / 0.28) 14%,
+    rgb(255 255 255 / 0.06) 45%,
+    rgb(15 15 20 / 0.08) 80%,
+    transparent
+  );
+}
+.pdf-stage[data-tone="dark"] .book-curl-light {
+  background: linear-gradient(
+    to right,
+    rgb(0 0 0 / 0.3),
+    rgb(255 255 255 / 0.08) 14%,
+    transparent 60%
+  );
+}
+/* Ag'darish paytida matn belgilanmaydi (tinch holatda — ishlaydi). */
+[data-flipping] .textLayer {
+  pointer-events: none;
+}
+.book-desk .pdf-edge-button {
+  z-index: 10;
+}
+
 .pdf-edge-button {
   position: absolute;
   top: 50%;

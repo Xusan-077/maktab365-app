@@ -7,9 +7,11 @@ import {
   DEFAULT_ZOOM,
   doubleTapZoom,
   nextZoomStep,
+  nudgeZoom,
   pinchZoom,
   wheelZoom,
 } from "@/lib/pdf/zoom";
+import { useReaderPrefsStore } from "@/stores/reader-prefs.store";
 
 interface Point {
   x: number;
@@ -59,12 +61,17 @@ export function useReaderZoom({
   fullscreen: boolean;
   panY?: "page" | "scroller";
 }) {
-  const [zoom, setZoom] = useState(DEFAULT_ZOOM);
+  // Zoom — umumiy holat (`reader-prefs.store`): kitob rejimi, Aa menyusi va zoom guruhi bilan bitta.
+  const zoom = useReaderPrefsStore((state) => state.zoom);
+  const setZoom = useReaderPrefsStore((state) => state.setZoom);
   const [live, setLive] = useState<LiveZoom | null>(null);
   const [area, setArea] = useState<HTMLElement | null>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const zoomRef = useRef(DEFAULT_ZOOM);
+  const zoomRef = useRef(zoom);
+  useLayoutEffect(() => {
+    zoomRef.current = zoom;
+  }, [zoom]);
   const pending = useRef<PendingAnchor | null>(null);
   /** Pinch bo'lgan teginish tap/swipe hisoblanmasin (PdfReader pointer handler'lari uchun). */
   const pinched = useRef(false);
@@ -92,7 +99,7 @@ export function useReaderZoom({
       zoomRef.current = target;
       setZoom(target);
     },
-    [panY],
+    [panY, setZoom],
   );
 
   useLayoutEffect(() => {
@@ -178,6 +185,11 @@ export function useReaderZoom({
     };
   }, [area, applyZoom]);
 
+  /** Klaviatura `+`/`−`: 10% qadam. */
+  const nudge = useCallback(
+    (direction: 1 | -1) => applyZoom(nudgeZoom(zoomRef.current, direction)),
+    [applyZoom],
+  );
   /** Tugma / klaviatura: keyingi pog'ona (100 → 150 → 200 → 300 → 100%). */
   const stepZoom = useCallback(() => applyZoom(nextZoomStep(zoomRef.current)), [applyZoom]);
   /** Aniq qiymat (Aa menyusidagi −/+ va «100%»): chegaraga keltiriladi. */
@@ -206,6 +218,7 @@ export function useReaderZoom({
     zoom,
     live,
     stepZoom,
+    nudge,
     setZoomLevel,
     zoomAtTap,
     beginTouch,

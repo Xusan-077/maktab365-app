@@ -32,7 +32,7 @@ import { useToast } from "@/hooks/useToast";
 import { ApiError } from "@/lib/api/types";
 import type { Locale } from "@/lib/i18n/config";
 import { getLocalized } from "@/lib/i18n/localized";
-import { Link, usePathname, useRouter } from "@/lib/i18n/navigation";
+import { Link } from "@/lib/i18n/navigation";
 import {
   annotationsOnPage,
   newAnnotation,
@@ -42,17 +42,17 @@ import {
 } from "@/lib/pdf/annotations";
 import { clampPage, parsePageParam } from "@/lib/pdf/page-nav";
 import { isDoubleTap, type TapPoint } from "@/lib/pdf/reader-prefs";
+import { BOOK_SPREAD_MIN_WIDTH } from "@/lib/pdf/book";
 import {
   nextSpread,
   parseModeParam,
   prevSpread,
   resolveMode,
-  SPREAD_MIN_WIDTH,
+  spreadStart,
   type ReadingMode,
 } from "@/lib/pdf/reading-mode";
 import { parseSlidesParams, readSlidesProgress, withSlidesParams } from "@/lib/pdf/slides";
 import { currentTocItem, flattenToc } from "@/lib/pdf/toc";
-import { swipeDirection } from "@/lib/pdf/swipe";
 import { DEFAULT_ZOOM } from "@/lib/pdf/zoom";
 import { pdfQueries } from "@/lib/pdf-books/queries";
 import { cn } from "@/lib/utils/cn";
@@ -70,7 +70,8 @@ import { PdfPageCanvas } from "./PdfPageCanvas";
 import { PdfTocDrawer } from "./PdfTocDrawer";
 import { ReaderShortcutsDialog } from "./ReaderShortcutsDialog";
 import { PdfSlidesViewer } from "./PdfSlidesViewer";
-import { HorizontalView, type RenderPageOptions } from "./reader/HorizontalView";
+import { BookView, type BookRenderOptions } from "./reader/BookView";
+import { BookZoomControls } from "./reader/BookZoomControls";
 import { PageNumberInput } from "./reader/PageNumberInput";
 import { AppearanceMenu } from "./reader/ReaderAppearance";
 import { ReaderFloatingNav } from "./reader/ReaderFloatingNav";
@@ -90,15 +91,12 @@ const isPressable = (target: EventTarget | null) =>
 
 /**
  * Sarlavha (3.5rem + 3px progress), bet ustidagi chekinish va pastdagi suzuvchi panel egallagan joy:
- * gorizontal ko'rinish balandligi va vertikal «butun bet» masshtabi shundan hisoblanadi.
+ * vertikal «butun bet» masshtabi shundan hisoblanadi.
  */
 const CHROME_REM = 10;
 const REM_PX = 16;
-
-/** Gorizontal ko'rinish balandligi (bet ekranga to'liq sig'adi); qidiruv chipi ham joy oladi. */
-function horizontalHeight(findChip: boolean) {
-  return `calc(100dvh - ${CHROME_REM + (findChip ? 3.5 : 0)}rem)`;
-}
+/** Desktopda o'ngdan ochiladigan Mavzu paneli eni (px): kitob qolgan joyga moslanadi. */
+const TOPIC_PANEL_PX = 480;
 
 /** Imzolangan URL muddati tugagach birinchi xatoda yangi URL bilan hujjat qayta ochiladi. */
 const MAX_AUTO_RELOADS = 1;
@@ -138,9 +136,9 @@ function OpenInNewWindowButton({ bookId, label }: { bookId: string; label: strin
 /**
  * PDF darslik o'qish oynasi — «fokus rejimi»: yupqa sarlavha (orqaga, kitob nomi + joriy bo'lim →
  * Mundarija, bet raqami, qidiruv, Aa, Mavzu, Saqlash, «⋯») va 3px progress, pastda suzuvchi
- * navigatsiya. Standart — bitta bet eni bo'yicha, uzluksiz scroll (virtualizatsiya); Aa menyusida
- * «surish» (varaqlash) va ≥1280px da 2 betlik yoyma. Sahifa URL'da (`?page=12`), oxirgi sahifa
- * eslab qolinadi.
+ * navigatsiya. Standart — «Kitob» (ochiq kitob, varaq ag'darish; ≥1024px da 2 bet), Aa menyusida
+ * «Uzluksiz» (vertikal scroll, virtualizatsiya). Sahifa URL'da (`?page=12`, `history.replaceState`),
+ * oxirgi sahifa eslab qolinadi.
  */
 export function PdfReader({
   bookId,
@@ -159,8 +157,6 @@ export function PdfReader({
   const ts = useTranslations("pdfBooks.selection");
   const tb = useTranslations("brand");
   const locale = useLocale() as Locale;
-  const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const book = useQuery(pdfQueries.book(bookId));
@@ -169,7 +165,7 @@ export function PdfReader({
   const document = usePdfDocument(bookId);
   const [renderFailed, setRenderFailed] = useState(false);
   const desktop = useMediaQuery("(min-width: 1024px)");
-  const wide = useMediaQuery(`(min-width: ${SPREAD_MIN_WIDTH}px)`);
+  const twoPageWide = useMediaQuery(`(min-width: ${BOOK_SPREAD_MIN_WIDTH}px)`);
   const [tocOpen, setTocOpen] = useState(false);
   const [topicOpen, setTopicOpen] = useState(false);
   const [topicTab, setTopicTab] = useState<TopicTab>("summary");
@@ -208,19 +204,21 @@ export function PdfReader({
   }, []);
 
   const mode: ReadingMode = resolveMode(parseModeParam(searchParams.get("mode")), prefs.mode);
-  const horizontal = mode === "h";
-  // 2 betlik yoyma: faqat «surish» rejimida, keng ekranda va Aa menyusida yoqilgan bo'lsa.
-  const spread = horizontal && wide && prefs.spread;
+  const bookMode = mode === "b";
+  // Ochiq kitob (2 bet) — «Kitob» rejimida ≥1024px; aks holda bitta bet.
+  const spread = bookMode && twoPageWide;
 
   const rawPage = searchParams.get("page");
   const urlPage = total > 0 ? parsePageParam(rawPage, total) : null;
-  // Tez varaqlashda (klaviatura, swipe) URL yangilanishi (`router.replace`) kechikadi: so'ralgan bet
+  // Tez varaqlashda (klaviatura, swipe) URL yangilanishi (`useSearchParams`) kechikadi: so'ralgan bet
   // URL unga yetguncha darhol ko'rsatiladi, keyingi bosish shu betdan hisoblanadi — bosish yo'qolmaydi.
   const [pendingPage, setPendingPage] = useState<number | null>(null);
   if (pendingPage !== null && urlPage === pendingPage) setPendingPage(null);
   // So'ralgan bet > URL > saqlangan pozitsiya > 1. Pozitsiya aniqlanguncha `null`.
-  const page =
+  const requested =
     total === 0 ? null : (pendingPage ?? urlPage ?? (progress.ready ? progress.resume : null));
+  // Ochiq kitobda URL'ga yoymaning chap (yoki yolg'iz) beti yoziladi.
+  const page = requested === null ? null : spread ? spreadStart(requested, true) : requested;
 
   // «Davom ettirish» kartasi: oyna ochilgandagi saqlangan joy (keyingi yozuvlar uni o'zgartirmaydi).
   const [resumeAt, setResumeAt] = useState<number | null | undefined>(undefined);
@@ -230,19 +228,15 @@ export function PdfReader({
     zoom,
     live: liveZoom,
     stepZoom,
+    nudge: nudgeZoomLevel,
     setZoomLevel,
     zoomAtTap,
     beginTouch,
     wasPinch,
-    resetPan,
     areaRef: pageAreaRef,
     scrollerRef: zoomScrollerRef,
     contentRef: zoomContentRef,
-  } = useReaderZoom({
-    stageRef,
-    fullscreen: fullscreen.active,
-    panY: horizontal ? "scroller" : "page",
-  });
+  } = useReaderZoom({ stageRef, fullscreen: fullscreen.active });
   const setPageArea = useCallback(
     (element: HTMLDivElement | null) => {
       pageBoxRef.current = element;
@@ -250,39 +244,26 @@ export function PdfReader({
     },
     [pageAreaRef],
   );
-
-  // Gorizontal: yangi sahifa (mundarija, tugmalar, swipe…) doim boshidan ochiladi — oldingi sahifada
-  // pastga surilgan bo'lsa ham sarlavha ekranning yuqorisida. Birinchi ochilishda scroll'ga
-  // tegilmaydi. Vertikalda scroll'ni `VerticalView` o'zi boshqaradi.
-  const shownPage = useRef<number | null>(null);
-  useEffect(() => {
-    if (page === null) return;
-    const previous = shownPage.current;
-    shownPage.current = page;
-    if (!horizontal || previous === null || previous === page) return;
-    const scroller = fullscreen.active ? stageRef.current : window;
-    scroller?.scrollTo?.({ top: 0 });
-    resetPan();
-  }, [page, horizontal, fullscreen.active, resetPan]);
-
-  // Vertikaldan gorizontalga o'tilganda ro'yxat bo'yicha surilgan scroll boshiga qaytadi.
-  const shownMode = useRef(mode);
-  useEffect(() => {
-    const previous = shownMode.current;
-    shownMode.current = mode;
-    if (previous === mode || mode !== "h") return;
-    (fullscreen.active ? stageRef.current : window)?.scrollTo?.({ top: 0 });
-  }, [mode, fullscreen.active]);
+  // Kitob rejimida zoom/pan/pinch'ni `BookView` o'zi boshqaradi — bu yerda faqat belgilash maydoni.
+  const setBookArea = useCallback((element: HTMLDivElement | null) => {
+    pageBoxRef.current = element;
+  }, []);
 
   // Admin oldindan ko'rishi statistika va "oxirgi ko'rilganlar"ga yozilmaydi.
   const counted = book.data && !book.data.unverified && !preview;
   useBookStats(counted ? bookId : undefined, page);
 
   // Boshqa parametrlar (`slides`, `slide`) saqlanadi: sahifa almashganda ko'rgich yopilmaydi.
+  // `history.replaceState` — Next router bilan sinxron (`useSearchParams` yangilanadi), lekin RSC
+  // so'rovi va navigatsiyasiz: tez varaqlashda ham arzon.
   const replaceQuery = useCallback(
     (patch: Parameters<typeof withSlidesParams>[1]) =>
-      router.replace(`${pathname}?${withSlidesParams(searchParams, patch)}`, { scroll: false }),
-    [router, pathname, searchParams],
+      window.history.replaceState(
+        window.history.state,
+        "",
+        `?${withSlidesParams(searchParams, patch)}`,
+      ),
+    [searchParams],
   );
   const setPageInUrl = useCallback(
     (next: number) => {
@@ -384,18 +365,18 @@ export function PdfReader({
       }
       if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
       if (isTypingTarget(event.target)) return;
-      // Varaqlash: ← → (ikkala rejimda); gorizontalda PgUp PgDn Space (Shift+Space — orqaga) ham.
-      // Vertikalda PgUp/PgDn/Space — brauzerning odatiy scroll'i.
+      // Varaqlash: ← → (ikkala rejimda); kitobda PgUp PgDn Space (Shift+Space — orqaga) ham.
+      // Uzluksiz rejimda PgUp/PgDn/Space — brauzerning odatiy scroll'i.
       const space = event.key === " " && !isPressable(event.target);
       const back =
         event.key === "ArrowLeft" ||
-        (horizontal && (event.key === "PageUp" || (space && event.shiftKey)));
+        (bookMode && (event.key === "PageUp" || (space && event.shiftKey)));
       const forward =
         event.key === "ArrowRight" ||
-        (horizontal && (event.key === "PageDown" || (space && !event.shiftKey)));
+        (bookMode && (event.key === "PageDown" || (space && !event.shiftKey)));
       if (back || forward) {
-        // Gorizontalda chegarada ham oyna surilmasin (bet ekranga sig'gan).
-        if (horizontal) event.preventDefault();
+        // Kitobda chegarada ham oyna surilmasin (kitob ekranga sig'gan).
+        if (bookMode) event.preventDefault();
         const target = back ? prevPage : nextPage;
         if (target !== null) {
           event.preventDefault();
@@ -425,6 +406,15 @@ export function PdfReader({
         cycleTone();
       } else if (key === "z") {
         stepZoom();
+      } else if (event.key === "+" || event.key === "=") {
+        event.preventDefault();
+        nudgeZoomLevel(1);
+      } else if (event.key === "-" || event.key === "_") {
+        event.preventDefault();
+        nudgeZoomLevel(-1);
+      } else if (event.key === "0") {
+        event.preventDefault();
+        setZoomLevel(DEFAULT_ZOOM);
       } else if (event.key === "?") {
         event.preventDefault();
         setShortcutsOpen(true);
@@ -436,13 +426,15 @@ export function PdfReader({
     page,
     total,
     goTo,
-    horizontal,
+    bookMode,
     prevPage,
     nextPage,
     toggleFullscreen,
     cycleTone,
     searchable,
     stepZoom,
+    nudgeZoomLevel,
+    setZoomLevel,
   ]);
 
   const touch = useRef<{ x: number; y: number; at: number } | null>(null);
@@ -472,12 +464,7 @@ export function PdfReader({
       }
       return;
     }
-    // Swipe faqat «surish» rejimida, barmoq bilan va kattalashtirilmagan sahifada
-    // (kattalashganda surish — pan; uzluksiz rejimda — oddiy scroll).
-    if (!horizontal || event.pointerType === "mouse" || zoom > DEFAULT_ZOOM) return;
-    const direction = swipeDirection(dx, dy, event.timeStamp - start.at);
-    if (direction === "next" && nextPage !== null) goTo(nextPage);
-    if (direction === "prev" && prevPage !== null) goTo(prevPage);
+    // Uzluksiz rejimda barmoq harakati — oddiy scroll (swipe yo'q); kitobda — `BookView`.
   };
 
   const retry = () => {
@@ -526,16 +513,20 @@ export function PdfReader({
   const textLayer = book.data?.has_text_layer !== false;
   const renderPage = (
     pageNumber: number,
-    options: { current: boolean } & Partial<Omit<RenderPageOptions, "current">>,
+    options: { current: boolean } & Partial<Omit<BookRenderOptions, "current">>,
   ) =>
     document.doc && (
       <PdfPageCanvas
         doc={document.doc}
         pageNumber={pageNumber}
         label={t("position", { page: pageNumber, total })}
-        fit={horizontal ? "contain" : "width"}
+        fit={bookMode ? "contain" : "width"}
         align={options.align}
         current={options.current}
+        variant={bookMode ? "book" : "sheet"}
+        renderScale={options.renderScale}
+        pool={options.pool}
+        priority={options.priority}
         textLayer={textLayer}
         highlight={findTerm || undefined}
         overlay={
@@ -676,14 +667,22 @@ export function PdfReader({
       data-tone={prefs.tone}
       data-warm={prefs.warm || undefined}
       data-testid="pdf-reader"
+      data-book={bookMode || undefined}
       className={cn(
-        "pdf-stage bg-ds-canvas text-ds-ink font-ui flex min-h-dvh flex-col",
-        fullscreen.active && "overflow-auto",
+        "pdf-stage bg-ds-canvas text-ds-ink font-ui flex flex-col",
+        // Kitob: sahifa scroll'i yo'q, kitob stage markazida qotib turadi.
+        bookMode ? "h-dvh overflow-hidden overscroll-none" : "min-h-dvh",
+        fullscreen.active && !bookMode && "overflow-auto",
       )}
     >
       <RecordRecentBook book={counted ? book.data : undefined} />
 
-      <header className="border-ds-line bg-ds-surface sticky top-0 z-20 border-b print:hidden">
+      <header
+        className={cn(
+          "border-ds-line bg-ds-surface z-20 border-b print:hidden",
+          bookMode ? "relative shrink-0" : "sticky top-0",
+        )}
+      >
         <div className="flex h-14 items-center gap-1 px-2 lg:gap-2 lg:px-4">
           <Link href={backLink} aria-label={t("back")} className={READER_ICON_BUTTON}>
             <ArrowLeft className="size-5" aria-hidden />
@@ -721,6 +720,10 @@ export function PdfReader({
             <Skeleton className="h-11 w-28 max-sm:hidden" />
           )}
 
+          {bookMode && prefsReady && desktop && (
+            <BookZoomControls zoom={zoom} onZoom={setZoomLevel} className="mx-1" />
+          )}
+
           <div className="flex shrink-0 items-center gap-0.5">
             {searchable && desktop && (
               <button
@@ -741,14 +744,11 @@ export function PdfReader({
                 mode={mode}
                 fit={prefs.fit}
                 zoom={zoom}
-                spread={prefs.spread}
-                spreadAvailable={wide}
                 warm={prefs.warm}
                 onTone={prefs.setTone}
                 onMode={changeMode}
                 onFit={prefs.setFit}
                 onZoom={setZoomLevel}
-                onSpread={prefs.setSpread}
                 onWarm={prefs.setWarm}
               />
             )}
@@ -780,74 +780,128 @@ export function PdfReader({
         </div>
       </header>
 
-      <div className="min-w-0 flex-1 px-2.5 pt-4 pb-28 lg:px-6">
-        {findTerm && (
-          <div
-            className="mb-3 flex items-center justify-center gap-2 text-sm"
-            data-testid="pdf-find-chip"
-          >
-            <span className="text-ds-muted">{tf("highlighted", { term: findTerm })}</span>
-            <button
-              type="button"
-              onClick={() => replaceQuery({ find: null })}
-              className="text-ds-accent-ink min-h-11 font-semibold underline underline-offset-4"
+      {bookMode ? (
+        <div className="relative min-h-0 min-w-0 flex-1">
+          {findTerm && (
+            <div
+              className="bg-ds-surface/90 absolute inset-x-0 top-0 z-10 flex items-center justify-center gap-2 text-sm backdrop-blur"
+              data-testid="pdf-find-chip"
             >
-              {tf("clear")}
-            </button>
-          </div>
-        )}
-
-        <div
-          ref={setPageArea}
-          data-testid="pdf-page-area"
-          data-mode={prefsReady ? mode : undefined}
-          className={cn(
-            "pdf-page-area mx-auto w-full select-none",
-            zoom > DEFAULT_ZOOM ? "touch-pan-x touch-pan-y" : "touch-pan-y",
+              <span className="text-ds-muted">{tf("highlighted", { term: findTerm })}</span>
+              <button
+                type="button"
+                onClick={() => replaceQuery({ find: null })}
+                className="text-ds-accent-ink min-h-11 font-semibold underline underline-offset-4"
+              >
+                {tf("clear")}
+              </button>
+            </div>
           )}
-          onPointerDown={onPointerDown}
-          onPointerUp={onPointerUp}
-          onPointerCancel={() => (touch.current = null)}
-        >
           {document.error && !document.doc ? (
-            <ReaderMessage
-              message={t("loadError")}
-              action={
-                <>
-                  <Button variant="secondary" onClick={retry}>
-                    {t("retry")}
-                  </Button>
-                  <OpenInNewWindowButton bookId={bookId} label={t("openInNewWindow")} />
-                </>
-              }
-            />
-          ) : renderFailed ? (
-            <ReaderMessage
-              message={t("pageError")}
-              action={
-                <>
-                  <Button variant="secondary" onClick={retry}>
-                    {t("retry")}
-                  </Button>
-                  <OpenInNewWindowButton bookId={bookId} label={t("openInNewWindow")} />
-                </>
-              }
-            />
-          ) : document.doc && page !== null && prefsReady ? (
-            horizontal ? (
-              <HorizontalView
-                page={page}
-                total={total}
-                spread={spread}
-                zoom={zoom}
-                live={liveZoom}
-                height={horizontalHeight(Boolean(findTerm))}
-                scrollerRef={zoomScrollerRef}
-                contentRef={zoomContentRef}
-                onGo={goTo}
-                renderPage={renderPage}
+            <div className="px-4">
+              <ReaderMessage
+                message={t("loadError")}
+                action={
+                  <>
+                    <Button variant="secondary" onClick={retry}>
+                      {t("retry")}
+                    </Button>
+                    <OpenInNewWindowButton bookId={bookId} label={t("openInNewWindow")} />
+                  </>
+                }
               />
-            ) : (
+            </div>
+          ) : renderFailed ? (
+            <div className="px-4">
+              <ReaderMessage
+                message={t("pageError")}
+                action={
+                  <>
+                    <Button variant="secondary" onClick={retry}>
+                      {t("retry")}
+                    </Button>
+                    <OpenInNewWindowButton bookId={bookId} label={t("openInNewWindow")} />
+                  </>
+                }
+              />
+            </div>
+          ) : document.doc && page !== null && prefsReady ? (
+            <BookView
+              doc={document.doc}
+              page={page}
+              total={total}
+              twoPage={spread}
+              reserveRight={topicOpen && desktop ? TOPIC_PANEL_PX : 0}
+              onGo={goTo}
+              renderPage={renderPage}
+              areaRef={setBookArea}
+            />
+          ) : (
+            <div role="status" aria-label={t("loading")} className="flex h-full justify-center p-7">
+              <Skeleton className="aspect-[1/1.4] h-full max-h-[calc(100%-4.5rem)]" />
+            </div>
+          )}
+          {book.data && (
+            <div className="absolute bottom-[4.75rem] left-3 z-10 max-sm:hidden">
+              <ReportErrorLink topicId={bookId} page={page ?? undefined} />
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="min-w-0 flex-1 px-2.5 pt-4 pb-28 lg:px-6">
+          {findTerm && (
+            <div
+              className="mb-3 flex items-center justify-center gap-2 text-sm"
+              data-testid="pdf-find-chip"
+            >
+              <span className="text-ds-muted">{tf("highlighted", { term: findTerm })}</span>
+              <button
+                type="button"
+                onClick={() => replaceQuery({ find: null })}
+                className="text-ds-accent-ink min-h-11 font-semibold underline underline-offset-4"
+              >
+                {tf("clear")}
+              </button>
+            </div>
+          )}
+
+          <div
+            ref={setPageArea}
+            data-testid="pdf-page-area"
+            data-mode={prefsReady ? mode : undefined}
+            className={cn(
+              "pdf-page-area mx-auto w-full select-none",
+              zoom > DEFAULT_ZOOM ? "touch-pan-x touch-pan-y" : "touch-pan-y",
+            )}
+            onPointerDown={onPointerDown}
+            onPointerUp={onPointerUp}
+            onPointerCancel={() => (touch.current = null)}
+          >
+            {document.error && !document.doc ? (
+              <ReaderMessage
+                message={t("loadError")}
+                action={
+                  <>
+                    <Button variant="secondary" onClick={retry}>
+                      {t("retry")}
+                    </Button>
+                    <OpenInNewWindowButton bookId={bookId} label={t("openInNewWindow")} />
+                  </>
+                }
+              />
+            ) : renderFailed ? (
+              <ReaderMessage
+                message={t("pageError")}
+                action={
+                  <>
+                    <Button variant="secondary" onClick={retry}>
+                      {t("retry")}
+                    </Button>
+                    <OpenInNewWindowButton bookId={bookId} label={t("openInNewWindow")} />
+                  </>
+                }
+              />
+            ) : document.doc && page !== null && prefsReady ? (
               <VerticalView
                 doc={document.doc}
                 page={page}
@@ -863,20 +917,20 @@ export function PdfReader({
                 fit={prefs.fit}
                 pageReserve={CHROME_REM * REM_PX}
               />
-            )
-          ) : (
-            <div role="status" aria-label={t("loading")}>
-              <Skeleton className="mx-auto aspect-[1/1.4] w-full max-w-3xl" />
+            ) : (
+              <div role="status" aria-label={t("loading")}>
+                <Skeleton className="mx-auto aspect-[1/1.4] w-full max-w-3xl" />
+              </div>
+            )}
+          </div>
+
+          {book.data && (
+            <div className="mx-auto mt-6 max-w-[53.75rem]">
+              <ReportErrorLink topicId={bookId} page={page ?? undefined} />
             </div>
           )}
         </div>
-
-        {book.data && (
-          <div className="mx-auto mt-6 max-w-[53.75rem]">
-            <ReportErrorLink topicId={bookId} page={page ?? undefined} />
-          </div>
-        )}
-      </div>
+      )}
 
       {page !== null && total > 0 && (
         <ReaderFloatingNav

@@ -3,7 +3,8 @@
  * `zoom.ts`, rejimlar — `reading-mode.ts`).
  */
 
-import { isReadingMode, type ReadingMode } from "./reading-mode";
+import { toReadingMode, type ReadingMode } from "./reading-mode";
+import { clampZoom, DEFAULT_ZOOM } from "./zoom";
 
 export const READER_TONES = ["light", "sepia", "dark"] as const;
 export type ReaderTone = (typeof READER_TONES)[number];
@@ -14,11 +15,11 @@ export type ReaderFit = (typeof READER_FITS)[number];
 
 export interface ReaderPrefs {
   tone: ReaderTone;
-  /** Foydalanuvchi tanlagan o'qish rejimi; `null` — standart (uzluksiz scroll). */
+  /** Foydalanuvchi tanlagan o'qish rejimi; `null` — standart («Kitob»). */
   mode: ReadingMode | null;
   fit: ReaderFit;
-  /** 2 betlik yoyma (faqat ≥1280px va «surish» rejimida). */
-  spread: boolean;
+  /** Masshtab (0.5–3; 1 — «Moslash»): kitob va uzluksiz rejimda, zoom guruhi va Aa menyusida bitta. */
+  zoom: number;
   /** Ko'z uchun iliq rang (butun oyna ustida yengil sariq filtr). */
   warm: boolean;
 }
@@ -27,7 +28,7 @@ export const DEFAULT_READER_PREFS: ReaderPrefs = {
   tone: "light",
   mode: null,
   fit: "width",
-  spread: false,
+  zoom: DEFAULT_ZOOM,
   warm: false,
 };
 
@@ -42,11 +43,14 @@ export function sanitizePrefs(value: unknown): ReaderPrefs {
     tone: READER_TONES.includes(raw.tone as ReaderTone)
       ? (raw.tone as ReaderTone)
       : DEFAULT_READER_PREFS.tone,
-    mode: isReadingMode(raw.mode) ? raw.mode : DEFAULT_READER_PREFS.mode,
+    mode: toReadingMode(raw.mode) ?? DEFAULT_READER_PREFS.mode,
     fit: READER_FITS.includes(raw.fit as ReaderFit)
       ? (raw.fit as ReaderFit)
       : DEFAULT_READER_PREFS.fit,
-    spread: typeof raw.spread === "boolean" ? raw.spread : DEFAULT_READER_PREFS.spread,
+    zoom:
+      typeof raw.zoom === "number" && Number.isFinite(raw.zoom)
+        ? clampZoom(raw.zoom)
+        : DEFAULT_READER_PREFS.zoom,
     warm: typeof raw.warm === "boolean" ? raw.warm : DEFAULT_READER_PREFS.warm,
   };
 }

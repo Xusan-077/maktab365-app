@@ -3,6 +3,8 @@
  * ko'rilgan slayd (brauzerda, `localStorage`). Sof funksiyalar; storage xatolari ichida yutiladi.
  */
 
+import type { ReadingMode } from "./reading-mode";
+
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export interface SlidesParams {
@@ -30,7 +32,7 @@ export interface ParamsPatch {
   /** Kitob ichida qidirilgan so'z (sahifada belgilanadi). */
   find?: string | null;
   /** O'qish rejimi: `h` (varaqlash) | `v` (scroll). */
-  mode?: "h" | "v" | null;
+  mode?: ReadingMode | null;
 }
 
 /** Joriy query'ni saqlab (boshqa parametrlar tegilmaydi) `page`/`slides`/`slide` ni almashtiradi. */

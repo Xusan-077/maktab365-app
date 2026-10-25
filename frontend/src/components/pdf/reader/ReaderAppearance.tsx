@@ -18,15 +18,11 @@ export interface AppearanceSettingsProps {
   mode: ReadingMode;
   fit: ReaderFit;
   zoom: number;
-  spread: boolean;
-  /** 2 betlik yoyma tanlovi ko'rsatilsinmi (≥1280px). */
-  spreadAvailable: boolean;
   warm: boolean;
   onTone: (tone: ReaderTone) => void;
   onMode: (mode: ReadingMode) => void;
   onFit: (fit: ReaderFit) => void;
   onZoom: (zoom: number) => void;
-  onSpread: (spread: boolean) => void;
   onWarm: (warm: boolean) => void;
 }
 
@@ -38,7 +34,7 @@ function Swatch({ tone }: { tone: ReaderTone }) {
 const ZOOM_BUTTON =
   "border-ds-line text-ds-ink hover:bg-ds-canvas inline-flex size-11 items-center justify-center rounded-ds-sm border disabled:pointer-events-none disabled:opacity-40";
 
-/** Aa sozlamalari: fon, masshtab, betni almashtirish, 2 bet (keng ekran), iliq rang. */
+/** Aa sozlamalari: fon, masshtab (zoom — kitob ostidagi guruh bilan bitta holat), rejim, iliq rang. */
 export function AppearanceSettings(props: AppearanceSettingsProps) {
   const t = useTranslations("pdfBooks.appearance");
   const scroll = props.mode === "v";
@@ -82,6 +78,7 @@ export function AppearanceSettings(props: AppearanceSettingsProps) {
             data-testid="reader-zoom-reset"
             aria-label={t("zoomReset", { value: formatZoom(props.zoom) })}
             onClick={() => props.onZoom(DEFAULT_ZOOM)}
+            title={t("fitLabel")}
             className="bg-ds-canvas text-ds-ink rounded-ds-sm h-11 flex-1 text-sm font-bold tabular-nums"
           >
             {formatZoom(props.zoom)}
@@ -103,22 +100,12 @@ export function AppearanceSettings(props: AppearanceSettingsProps) {
         value={props.mode}
         onChange={props.onMode}
         options={[
-          { value: "h", label: t("pagingFlip"), testId: "pdf-mode-h" },
+          { value: "b", label: t("pagingFlip"), testId: "pdf-mode-b" },
           { value: "v", label: t("pagingScroll"), testId: "pdf-mode-v" },
         ]}
       />
 
       <div className="border-ds-line flex flex-col gap-1 border-t pt-3">
-        {props.spreadAvailable && (
-          <Switch
-            checked={props.spread}
-            disabled={scroll}
-            onCheckedChange={props.onSpread}
-            label={t("spread")}
-            description={scroll ? t("spreadHint") : undefined}
-            testId="reader-spread"
-          />
-        )}
         <Switch
           checked={props.warm}
           onCheckedChange={props.onWarm}

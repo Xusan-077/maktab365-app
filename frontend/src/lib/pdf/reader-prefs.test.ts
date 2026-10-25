@@ -16,19 +16,21 @@ describe("reader prefs", () => {
   it("buzilgan xotira standartga qaytadi", () => {
     expect(sanitizePrefs(null)).toEqual(DEFAULT_READER_PREFS);
     expect(sanitizePrefs({ tone: "neon", mode: "x" })).toEqual(DEFAULT_READER_PREFS);
+    // Eski «Surish» (`h`) — «Kitob».
     expect(sanitizePrefs({ tone: "dark", mode: "h" })).toEqual({
       ...DEFAULT_READER_PREFS,
       tone: "dark",
-      mode: "h",
+      mode: "b",
     });
-    expect(sanitizePrefs({ tone: "sepia", fit: "page", spread: true, warm: true })).toEqual({
+    expect(sanitizePrefs({ tone: "sepia", fit: "page", zoom: 1.84, warm: true })).toEqual({
       tone: "sepia",
       mode: null,
       fit: "page",
-      spread: true,
+      zoom: 1.85,
       warm: true,
     });
-    expect(sanitizePrefs({ fit: "zoom", spread: "ha", warm: 1 })).toEqual(DEFAULT_READER_PREFS);
+    expect(sanitizePrefs({ zoom: 9 }).zoom).toBe(3);
+    expect(sanitizePrefs({ fit: "zoom", zoom: "2", warm: 1 })).toEqual(DEFAULT_READER_PREFS);
   });
 });
 

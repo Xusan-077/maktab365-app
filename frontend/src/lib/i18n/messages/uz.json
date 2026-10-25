@@ -1522,7 +1522,10 @@
       "pagesToggle": "Sahifalar panelini ko'rsatish yoki yashirish",
       "thumb": "{page}-bet",
       "tocOpen": "{title} — mundarijani ochish. Joriy bo‘lim: {section}",
-      "topic": "Mavzu"
+      "topic": "Mavzu",
+      "book": "Kitob",
+      "bookPages": "{from}–{to}-betlar",
+      "bookPage": "{page}-bet"
     },
     "bookmark": {
       "save": "Saqlash",
@@ -1788,18 +1791,18 @@
       "scale": "Masshtab",
       "fitWidth": "Eni bo‘yicha",
       "fitPage": "Butun bet",
-      "fitFlipHint": "«Surish» rejimida bet doim ekranga to‘liq sig‘adi.",
+      "fitFlipHint": "«Kitob» rejimida kitob doim ekranga to‘liq sig‘adi; kattalashtirish — pastdagi foiz.",
       "zoom": "Kattalashtirish",
       "zoomOut": "Kichiklashtirish",
       "zoomIn": "Kattalashtirish",
-      "zoomReset": "Kattalashtirish: {value}. 100% ga qaytarish",
+      "zoomReset": "Kattalashtirish: {value}. Moslashga qaytarish",
       "paging": "Betni almashtirish",
-      "pagingFlip": "Surish",
+      "pagingFlip": "Kitob",
       "pagingScroll": "Uzluksiz",
-      "spread": "2 bet yonma-yon",
-      "spreadHint": "Faqat «Surish» rejimida",
       "warm": "Ko‘z uchun iliq rang",
-      "warmHint": "Kechqurun o‘qishda ko‘k nur kamayadi"
+      "warmHint": "Kechqurun o‘qishda ko‘k nur kamayadi",
+      "fit": "Moslash",
+      "fitLabel": "Kitobni ekranga moslash"
     },
     "nav": {
       "label": "Betlar bo‘yicha harakat",

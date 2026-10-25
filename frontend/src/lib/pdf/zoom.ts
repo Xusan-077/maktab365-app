@@ -45,10 +45,10 @@ export function anchorOffset(offset: number, focal: number, ratio: number): numb
   return Math.max(0, (offset + focal) * ratio - focal);
 }
 
-/** Aa menyusidagi −/+ qadami (25%). */
-export const ZOOM_NUDGE = 0.25;
+/** −/+ (Aa menyusi, zoom guruhi, klaviatura `+`/`−`) qadami: 10%. */
+export const ZOOM_NUDGE = 0.1;
 
-/** −/+ : eng yaqin 25% pog'onasiga, chegaralar ichida. */
+/** −/+ : eng yaqin 10% pog'onasiga, chegaralar ichida. */
 export function nudgeZoom(zoom: number, direction: 1 | -1): number {
   const steps = Math.round(zoom / ZOOM_NUDGE) + direction;
   return clampZoom(steps * ZOOM_NUDGE);

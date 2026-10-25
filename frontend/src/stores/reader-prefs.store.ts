@@ -6,6 +6,7 @@ import {
   sanitizePrefs,
   type ReaderPrefs,
 } from "@/lib/pdf/reader-prefs";
+import { clampZoom } from "@/lib/pdf/zoom";
 
 export const READER_PREFS_STORAGE_KEY = "maktab365-reader-prefs";
 
@@ -14,13 +15,13 @@ interface ReaderPrefsState extends ReaderPrefs {
   setTone: (tone: ReaderPrefs["tone"]) => void;
   setMode: (mode: ReaderPrefs["mode"]) => void;
   setFit: (fit: ReaderPrefs["fit"]) => void;
-  setSpread: (spread: boolean) => void;
+  setZoom: (zoom: number) => void;
   setWarm: (warm: boolean) => void;
 }
 
 /**
- * O'qish oynasi sozlamalari (qurilma bo'yicha, localStorage): fon, o'qish rejimi (surish / uzluksiz),
- * masshtab asosi, 2 betlik yoyma va iliq rang (Aa menyusi).
+ * O'qish oynasi sozlamalari (qurilma bo'yicha, localStorage): fon, o'qish rejimi (kitob / uzluksiz),
+ * masshtab asosi, zoom (kitob ostidagi guruh, Aa menyusi, klaviatura — bitta holat) va iliq rang.
  */
 export const useReaderPrefsStore = create<ReaderPrefsState>()(
   persist(
@@ -30,7 +31,7 @@ export const useReaderPrefsStore = create<ReaderPrefsState>()(
       setTone: (tone) => set({ tone }),
       setMode: (mode) => set({ mode }),
       setFit: (fit) => set({ fit }),
-      setSpread: (spread) => set({ spread }),
+      setZoom: (zoom) => set({ zoom: clampZoom(zoom) }),
       setWarm: (warm) => set({ warm }),
     }),
     {
@@ -40,7 +41,7 @@ export const useReaderPrefsStore = create<ReaderPrefsState>()(
         tone: state.tone,
         mode: state.mode,
         fit: state.fit,
-        spread: state.spread,
+        zoom: state.zoom,
         warm: state.warm,
       }),
       merge: (persisted, current) => ({ ...current, ...sanitizePrefs(persisted) }),

@@ -13,15 +13,16 @@ import {
 
 describe("rejim tanlovi", () => {
   it("?mode= faqat h | v", () => {
-    expect(parseModeParam("h")).toBe("h");
+    expect(parseModeParam("b")).toBe("b");
+    expect(parseModeParam("h")).toBe("b"); // eski «Surish» — «Kitob»
     expect(parseModeParam(" V ")).toBe("v");
     expect(parseModeParam("x")).toBeNull();
     expect(parseModeParam(null)).toBeNull();
   });
   it("URL > saqlangan > qurilma (desktop — h, mobil — v)", () => {
-    expect(resolveMode("v", "h")).toBe("v");
-    expect(resolveMode(null, "h")).toBe("h");
-    expect(resolveMode(null, null)).toBe("v");
+    expect(resolveMode("v", "b")).toBe("v");
+    expect(resolveMode(null, "v")).toBe("v");
+    expect(resolveMode(null, null)).toBe("b");
   });
 });
 

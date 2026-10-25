@@ -72,9 +72,11 @@ describe("anchorOffset", () => {
 });
 
 describe("nudgeZoom", () => {
-  it("25% qadam, chegaralar ichida", () => {
-    expect(nudgeZoom(1, 1)).toBe(1.25);
-    expect(nudgeZoom(1.1, -1)).toBe(0.75);
+  it("10% qadam, chegaralar ichida", () => {
+    expect(nudgeZoom(1, 1)).toBe(1.1);
+    expect(nudgeZoom(1.1, -1)).toBe(1);
+    expect(nudgeZoom(1.23, 1)).toBe(1.3);
+    expect(nudgeZoom(2.9, 1)).toBe(3);
     expect(nudgeZoom(3, 1)).toBe(3);
     expect(nudgeZoom(0.5, -1)).toBe(0.5);
   });

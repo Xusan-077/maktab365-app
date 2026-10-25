@@ -2,7 +2,9 @@
 
 import { useEffect, useEffectEvent, useRef, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
+import { renderPixelRatio } from "@/lib/pdf/book";
 import { matchRects, type NormalizedRect, type PositionedItem } from "@/lib/pdf/find";
+import type { PageRenderPool } from "@/lib/pdf/render-pool";
 import {
   loadPdfjs,
   type PDFDocumentProxy,
@@ -42,6 +44,18 @@ export interface PdfPageCanvasProps {
   align?: "start" | "center" | "end";
   /** Joriy (URL'dagi) bet: bir nechta bet chizilganda testlar va e2e uchun `data-current`. */
   current?: boolean;
+  /**
+   * Qo'shimcha aniqlik (kitob rejimida zoom): canvas `devicePixelRatio × renderScale` zichlikda
+   * chiziladi (eng katta tomon ≤ 4096px), CSS o'lchami o'zgarmaydi — transform bilan kattalashganda
+   * matn xiralashmaydi.
+   */
+  renderScale?: number;
+  /** Chizish navbati va LRU kesh (kitob rejimi): keshdagi nusxa darhol, aniqrog'i keyin. */
+  pool?: PageRenderPool;
+  /** Navbatdagi ustuvorlik (kichigi oldinroq): ko'rinayotgan bet 0, oldindan chiziladigan — 1+. */
+  priority?: number;
+  /** `book` — kitob beti: soya va yumaloq burchaksiz (umurtqaga yopishib turadi). */
+  variant?: "sheet" | "book";
 }
 
 /** Canvas o'lchami bilan bir xil masshtab (CSS px): sahifa eni/bo'yi konteynerga moslanadi. */
@@ -67,6 +81,10 @@ export function PdfPageCanvas({
   textLayer = false,
   align = "center",
   current,
+  renderScale = 1,
+  pool,
+  priority = 0,
+  variant = "sheet",
 }: PdfPageCanvasProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -80,6 +98,8 @@ export function PdfPageCanvas({
   });
   const notifyRendered = useEffectEvent(() => onRendered?.());
   const notifyError = useEffectEvent((error: unknown) => onError(error));
+  // Ustuvorlik o'zgarsa (oldindan chizilgan bet ko'rinib qoldi) chizish qayta boshlanmaydi.
+  const queuePriority = useEffectEvent(() => priority);
 
   useEffect(() => {
     const element = wrapRef.current;
@@ -98,15 +118,49 @@ export function PdfPageCanvas({
     if (!width || (contain && !height)) return;
     let cancelled = false;
     let task: RenderTask | undefined;
+    let request: { cancel(): void } | undefined;
     let page: PDFPageProxy | undefined;
     const target = canvasRef.current;
     void (async () => {
       try {
         page = await doc.getPage(pageNumber);
         if (cancelled) return;
-        const ratio = Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO);
-        const scale = fitScale(page.getViewport({ scale: 1 }), width, height, contain);
+        const natural = page.getViewport({ scale: 1 });
+        const scale = fitScale(natural, width, height, contain);
+        const css = { width: natural.width * scale, height: natural.height * scale };
+        const ratio = renderPixelRatio(
+          Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO),
+          renderScale,
+          css,
+        );
         const viewport = page.getViewport({ scale: scale * ratio });
+        const show = (source: HTMLCanvasElement) => {
+          const canvas = canvasRef.current;
+          if (!canvas) return false;
+          canvas.width = source.width;
+          canvas.height = source.height;
+          canvas.style.width = `${Math.floor(css.width)}px`;
+          canvas.style.height = `${Math.floor(css.height)}px`;
+          canvas.getContext("2d")?.drawImage(source, 0, 0);
+          canvas.dataset.drawn = "true";
+          return true;
+        };
+        if (pool) {
+          // Keshdagi (boshqa masshtabdagi) nusxa darhol — past sifatli "eskiz", keyin aniqrog'i.
+          const canvas = canvasRef.current;
+          const preview = pool.peek(pageNumber);
+          if (preview && canvas && !canvas.dataset.drawn) show(preview);
+          const pending = pool.request(
+            pageNumber,
+            Number((scale * ratio).toFixed(3)),
+            queuePriority(),
+          );
+          request = pending;
+          const ready = await pending.promise;
+          if (cancelled || !show(ready)) return;
+          if (!cancelled) notifyRendered();
+          return;
+        }
         // Sahifa ekrandan tashqari canvas'da chiziladi: tayyor bo'lgach bir zumda almashadi
         // (joriy sahifa bo'sh oq kadrsiz turadi, o'lcham sakramaydi).
         const buffer = document.createElement("canvas");
@@ -116,14 +170,11 @@ export function PdfPageCanvas({
         if (!context) throw new Error("Canvas is not available");
         task = page.render({ canvas: buffer, canvasContext: context, viewport });
         await task.promise;
+        if (cancelled || !show(buffer)) return;
+        buffer.width = 0;
+        buffer.height = 0;
         const canvas = canvasRef.current;
-        if (cancelled || !canvas) return;
-        canvas.width = buffer.width;
-        canvas.height = buffer.height;
-        canvas.style.width = `${Math.floor(viewport.width / ratio)}px`;
-        canvas.style.height = `${Math.floor(viewport.height / ratio)}px`;
-        canvas.getContext("2d")?.drawImage(buffer, 0, 0);
-        if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        if (canvas && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
           canvas.animate([{ opacity: 0.55 }, { opacity: 1 }], {
             duration: 160,
             easing: "ease-out",
@@ -140,14 +191,16 @@ export function PdfPageCanvas({
     return () => {
       cancelled = true;
       task?.cancel();
-      page?.cleanup();
+      request?.cancel();
+      // Navbat (pool) o'zi chizgandan keyin tozalaydi; bu yerda faqat o'zimiz chizgan bet.
+      if (!pool) page?.cleanup();
       // Canvas xotirasi darhol bo'shaydi (virtualizatsiyada bet ro'yxatdan chiqqanda).
       if (target && !target.isConnected) {
         target.width = 0;
         target.height = 0;
       }
     };
-  }, [doc, pageNumber, width, height, contain]);
+  }, [doc, pageNumber, width, height, contain, renderScale, pool]);
 
   // Matn qatlami: shaffof span'lar canvas ustida (belgilash/nusxa olish), canvas'dan mustaqil.
   useEffect(() => {
@@ -239,7 +292,10 @@ export function PdfPageCanvas({
           data-testid="pdf-canvas"
           data-page={pageNumber}
           data-current={current || undefined}
-          className="bg-surface mx-auto block max-w-full rounded-sm shadow-md"
+          className={cn(
+            "bg-surface mx-auto block max-w-full",
+            variant === "sheet" && "rounded-sm shadow-md",
+          )}
         />
         {textLayer && <div ref={textRef} className="textLayer" data-testid="pdf-text-layer" />}
         {overlay}
