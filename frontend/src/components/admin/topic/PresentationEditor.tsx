@@ -21,7 +21,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
-import { EyeOff, FileUp, GripVertical, Loader2, RefreshCw, X } from "lucide-react";
+import { EyeOff, FileUp, GripVertical, Loader2, RefreshCw, Trash2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
   Controller,
@@ -53,6 +53,7 @@ import type { Presentation, Slide } from "@/lib/topic-materials/types";
 import { formatBytes } from "@/lib/utils/bytes";
 import { cn } from "@/lib/utils/cn";
 import { SLIDE_LIMITS, slidesSchema } from "@/lib/validation/topic-materials";
+import { ConfirmDialog } from "../ConfirmDialog";
 import { QueryError } from "../QueryError";
 import { useAdminErrorText } from "../useAdminErrorText";
 
@@ -67,6 +68,9 @@ interface SlideValue {
 interface SlidesValues {
   slides: SlideValue[];
 }
+
+/** O'chirish tasdig'i: bitta slayd (raqami bilan) yoki butun taqdimot. */
+type DeleteTarget = { kind: "slide"; id: string; n: number } | { kind: "all" };
 
 const slidesResolver = yupResolver(slidesSchema) as unknown as Resolver<SlidesValues>;
 
@@ -386,6 +390,26 @@ function SlidesForm({ topicId, presentation }: { topicId: string; presentation: 
     },
   });
 
+  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
+  // Slaydlar to'plami o'zgaradi → forma qaytadan boshlanadi (saqlanmagan tahrirlar yo'qoladi).
+  const remove = useMutation({
+    mutationFn: async (target: DeleteTarget) => {
+      const api = getTopicMaterialsApi();
+      if (target.kind === "slide") return api.deleteSlide(presentation.id, target.id);
+      await api.deletePresentation(topicId);
+      return null;
+    },
+    onSuccess: (next, target) => {
+      setDeleteTarget(null);
+      queryClient.setQueryData(topicKeys.presentation(topicId), next);
+      toast({ variant: "success", title: t(target.kind === "slide" ? "slideDeleted" : "deleted") });
+    },
+  });
+  const openDelete = (target: DeleteTarget) => {
+    remove.reset();
+    setDeleteTarget(target);
+  };
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -519,6 +543,16 @@ function SlidesForm({ topicId, presentation }: { topicId: string; presentation: 
               error={fieldError(`slides.${selectedIndex}.alt`, errors)}
               {...register(`slides.${selectedIndex}.alt`)}
             />
+            <Button
+              variant="ghost"
+              className="text-danger self-start"
+              disabled={save.isPending}
+              data-testid="slide-delete"
+              onClick={() => openDelete({ kind: "slide", id: selected.id, n: selectedIndex + 1 })}
+            >
+              <Trash2 className="size-4" aria-hidden />
+              {t("deleteSlide")}
+            </Button>
           </section>
         )}
       </div>
@@ -542,7 +576,43 @@ function SlidesForm({ topicId, presentation }: { topicId: string; presentation: 
             {t("discard")}
           </Button>
         )}
+        <Button
+          variant="ghost"
+          className="text-danger ms-auto"
+          disabled={save.isPending}
+          data-testid="presentation-delete"
+          onClick={() => openDelete({ kind: "all" })}
+        >
+          <Trash2 className="size-4" aria-hidden />
+          {t("deleteAll")}
+        </Button>
       </div>
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => {
+          if (!open && !remove.isPending) setDeleteTarget(null);
+        }}
+        title={
+          deleteTarget?.kind === "slide"
+            ? t("deleteSlideTitle", { n: deleteTarget.n })
+            : t("deleteAllTitle")
+        }
+        description={
+          <>
+            {deleteTarget?.kind === "slide"
+              ? t("deleteSlideDescription")
+              : t("deleteAllDescription", { count: fields.length })}
+            {isDirty && <> {t("unsavedLost")}</>}
+          </>
+        }
+        confirmLabel={tc("delete")}
+        pending={remove.isPending}
+        error={remove.isError ? errorText(remove.error) : undefined}
+        onConfirm={() => {
+          if (deleteTarget) remove.mutate(deleteTarget);
+        }}
+      />
     </form>
   );
 }

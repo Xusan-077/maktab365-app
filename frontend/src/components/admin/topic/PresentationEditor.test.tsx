@@ -49,7 +49,15 @@ function setup() {
   return { patch };
 }
 
-beforeEach(() => vi.clearAllMocks());
+beforeEach(() => {
+  vi.clearAllMocks();
+  HTMLDialogElement.prototype.showModal = function showModal() {
+    this.setAttribute("open", "");
+  };
+  HTMLDialogElement.prototype.close = function close() {
+    this.removeAttribute("open");
+  };
+});
 afterEach(cleanup);
 
 describe("PresentationEditor", () => {
@@ -134,6 +142,35 @@ describe("PresentationEditor", () => {
     expect(screen.getByRole("link", { name: t.pdf }).getAttribute("href")).toBe(
       "https://cdn.example/t1.pdf",
     );
+  });
+
+  it("slaydni o'chirish: tasdiqlashdan keyin qolganlari qayta raqamlanadi", async () => {
+    setup();
+    const tiles = await screen.findAllByTestId("slide-tile");
+    const remove = vi.spyOn(state.api, "deleteSlide");
+    fireEvent.click(within(tiles[2]).getByRole("button", { name: t.select.replace("{n}", "3") }));
+    fireEvent.click(screen.getByTestId("slide-delete"));
+    expect(screen.getByText(t.deleteSlideTitle.replace("{n}", "3"))).toBeTruthy();
+    expect(remove).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: uz.admin.common.delete }));
+    await waitFor(() => expect(screen.getAllByTestId("slide-tile")).toHaveLength(7));
+    expect(remove).toHaveBeenCalledWith("t1-presentation", "t1-slide-3");
+    expect(screen.getByTestId("slides-summary").textContent).toContain("7 slayd");
+    expect(toast).toHaveBeenCalledWith(expect.objectContaining({ title: t.slideDeleted }));
+  });
+
+  it("taqdimotni butunlay o'chirish → yuklash maydoni qoladi", async () => {
+    setup();
+    await screen.findAllByTestId("slide-tile");
+    fireEvent.click(screen.getByTestId("presentation-delete"));
+    expect(screen.getByText(t.deleteAllTitle)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: uz.admin.common.delete }));
+    await waitFor(() => expect(screen.queryAllByTestId("slide-tile")).toHaveLength(0));
+    expect(screen.getByText(t.uploadTitle)).toBeTruthy();
+    expect(toast).toHaveBeenCalledWith(expect.objectContaining({ title: t.deleted }));
+    // Qayta o'qilganda ham yo'q (namunaviy taqdimot qaytib kelmaydi).
+    expect(await state.api.presentation("t1")).toBeNull();
   });
 
   it("konvertatsiya xatosi: xabar va qayta urinish", async () => {
