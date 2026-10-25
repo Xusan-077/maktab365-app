@@ -791,11 +791,12 @@ dialog[open]::backdrop {
  * Kitob rejimi (BookView): stol, varaqlar to'plami (qalinlik — `--book-stack` box-shadow
  * qatlamlari), yer soyasi, umurtqa va varaq ag'darishdagi harakatlanuvchi soya/yorug'lik.
  */
-html:has(.pdf-stage[data-book]) {
+/* `data-book-lock` ni PdfReader effekti qo'yadi (`:has` emas — yashirin <Activity> sahifasida ham ishlab qolardi). */
+html[data-book-lock] {
   overflow: hidden;
   overscroll-behavior: none;
 }
-html:has(.pdf-stage[data-book]) body {
+html[data-book-lock] body {
   overflow: hidden;
   overscroll-behavior: none;
 }
