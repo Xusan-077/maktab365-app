@@ -2193,15 +2193,12 @@
   },
   "telegramLogin": {
     "start": "Sign in with Telegram",
-    "starting": "Preparing the link…",
-    "pending": "Press Start in Telegram",
-    "pendingHint": "Scan the QR code with your phone camera or press “Open in Telegram”.",
-    "pendingHintMobile": "Telegram will open — press Start in the bot and come back to this page.",
-    "expiresIn": "The link is valid for {time}",
-    "openTelegram": "Open in Telegram",
     "qrTitle": "QR code of the Telegram bot link",
+    "qrHint": "Scan the QR code with your phone camera",
+    "botHint": "Press Start in the bot — this page signs you in automatically.",
+    "expiresIn": "The code is valid for {time}",
     "confirming": "Confirmed, signing you in…",
-    "expired": "The link has expired.",
+    "expired": "The code has expired.",
     "retry": "Try again"
   },
   "authModal": {

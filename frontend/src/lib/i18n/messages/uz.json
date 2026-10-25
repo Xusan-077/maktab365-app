@@ -2193,15 +2193,12 @@
   },
   "telegramLogin": {
     "start": "Telegram bilan kirish",
-    "starting": "Havola tayyorlanmoqda…",
-    "pending": "Telegramda Start bosing",
-    "pendingHint": "Telefon kamerasi bilan QR kodni skanerlang yoki «Telegramda ochish» tugmasini bosing.",
-    "pendingHintMobile": "Telegram ochiladi — botda Start tugmasini bosing va shu sahifaga qayting.",
-    "expiresIn": "Havola {time} amal qiladi",
-    "openTelegram": "Telegramda ochish",
     "qrTitle": "Telegram bot havolasi QR kodi",
+    "qrHint": "QR kodni telefon kamerasi bilan skanerlang",
+    "botHint": "Botda Start bosing — shu sahifada avtomatik kirasiz.",
+    "expiresIn": "Kod {time} amal qiladi",
     "confirming": "Tasdiqlandi, kirilmoqda…",
-    "expired": "Havola muddati tugadi.",
+    "expired": "Kod muddati tugadi.",
     "retry": "Qayta urinish"
   },
   "authModal": {
