@@ -117,3 +117,28 @@ class IdentityListSerializer(serializers.Serializer):
 
 class PasswordSetSerializer(serializers.Serializer):
     new_password = password_field()
+
+
+# --- Telegram bot orqali kirish (deep-link) ---
+
+TELEGRAM_LOGIN_PATTERN = r"^[A-Za-z0-9_-]{16,64}$"
+
+
+class TelegramLoginStartSerializer(serializers.Serializer):
+    token = serializers.CharField()
+    bot_url = serializers.URLField()
+    expires_in = serializers.IntegerField()
+    # Brauzerga bog'lash kaliti: Next serveri uni o'z httpOnly `tg_nonce` cookie'siga yozadi.
+    nonce = serializers.CharField()
+
+
+class TelegramLoginStatusSerializer(serializers.Serializer):
+    status = serializers.ChoiceField(choices=["pending", "confirmed", "expired"])
+
+
+class TelegramLoginCompleteSerializer(_LocaleMixin):
+    token = serializers.RegexField(TELEGRAM_LOGIN_PATTERN)
+
+
+class TelegramLoginSessionSerializer(AuthSessionSerializer):
+    profile_completed = serializers.BooleanField()

@@ -556,7 +556,10 @@
       "provider_auth_expired": "The sign-in request has expired. Please try again.",
       "provider_auth_replayed": "This sign-in request was already used. Please try again.",
       "provider_email_unverified": "Google hasn't verified your email. Choose another method.",
-      "provider_not_configured": "This sign-in method isn't available yet."
+      "provider_not_configured": "This sign-in method isn't available yet.",
+      "telegram_nonce_mismatch": "Sign-in was started in another browser. Try again from this page.",
+      "telegram_login_expired": "The link has expired. Try again.",
+      "telegram_login_pending": "Sign-in has not been confirmed in Telegram yet."
     },
     "forgot": {
       "title": "Reset password",
@@ -2187,5 +2190,30 @@
     "downloadPdf": "Download PDF",
     "fullscreen": "Full screen",
     "exitFullscreen": "Exit full screen"
+  },
+  "telegramLogin": {
+    "start": "Sign in with Telegram",
+    "starting": "Preparing the link…",
+    "pending": "Press Start in Telegram",
+    "pendingHint": "Scan the QR code with your phone camera or press “Open in Telegram”.",
+    "pendingHintMobile": "Telegram will open — press Start in the bot and come back to this page.",
+    "expiresIn": "The link is valid for {time}",
+    "openTelegram": "Open in Telegram",
+    "qrTitle": "QR code of the Telegram bot link",
+    "confirming": "Confirmed, signing you in…",
+    "expired": "The link has expired.",
+    "retry": "Try again"
+  },
+  "authModal": {
+    "title": "Sign in",
+    "reason": {
+      "default": "No separate sign-up: sign in with Google or Telegram in one tap.",
+      "save": "Sign in to save.",
+      "note": "Sign in to save notes.",
+      "result": "Sign in to save your test result.",
+      "resume": "Sign in to continue reading on another device."
+    },
+    "guestNote": "You can read textbooks without an account.",
+    "otherMethods": "Sign in with email"
   }
 }

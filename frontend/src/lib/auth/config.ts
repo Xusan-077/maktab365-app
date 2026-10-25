@@ -7,16 +7,11 @@ export const PASSWORD_PROVIDER = "password";
 export const GOOGLE_PROVIDER = "google";
 export const TELEGRAM_PROVIDER = "telegram";
 export const OTP_PROVIDER = "otp";
+/** Telegram bot orqali kirish (deep-link + polling); `telegram` — eski Login Widget (bog'lash uchun). */
+export const TELEGRAM_BOT_PROVIDER = "telegram-bot";
 
-/** Telegram Login Widget boti (`@BotFather`, domen `/setdomain` bilan bog'langan). Bo'sh — tugma yashirin. */
+/** Telegram Login Widget boti (faqat Sozlamalar → kirish usullarini bog'lash; domen `/setdomain`). */
 export const TELEGRAM_BOT_USERNAME = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME ?? "";
-
-/**
- * Telegram boti raqamli id'si (bot tokenining `:` gacha qismi, maxfiy emas). Berilsa, maxsus
- * "Telegram bilan davom etish" tugmasi `Telegram.Login.auth` orqali ishlaydi; bo'sh bo'lsa va
- * `TELEGRAM_BOT_USERNAME` bor bo'lsa, rasmiy vidjet chiziladi.
- */
-export const TELEGRAM_BOT_ID = process.env.NEXT_PUBLIC_TELEGRAM_BOT_ID ?? "";
 
 /** Brauzerdagi API so'rovlari shu yerdan backend'ga o'tadi (tokenlar brauzerga chiqmaydi). */
 export const BFF_PREFIX = "/api/backend";

@@ -12,7 +12,13 @@ import { backendJwt, type JwtDeps } from "@/lib/auth/jwt-callback";
 import { passwordProvider } from "@/lib/auth/password-provider";
 import { LOCALE_COOKIE_NAME } from "@/lib/i18n/config";
 import { refreshOnce } from "@/lib/auth/refresh";
-import { googleSignIn, localeOf, otpProvider, telegramProvider } from "@/lib/auth/social-providers";
+import {
+  googleSignIn,
+  localeOf,
+  otpProvider,
+  telegramBotProvider,
+  telegramProvider,
+} from "@/lib/auth/social-providers";
 
 const jwtDeps: JwtDeps = {
   now: Date.now,
@@ -25,7 +31,7 @@ const jwtDeps: JwtDeps = {
  * himoyalangan yo'llar sessiya talab qiladi.
  * Hamma kirish usuli backend JWT juftligiga olib keladi (u faqat shifrlangan cookie'da, brauzerga
  * chiqmaydi); sessiyada rol/onboarding/email tasdig'i:
- * - `password`, `telegram`, `otp` — Credentials (backend `/auth/*` ga `authorize` ichida boradi);
+ * - `password`, `telegram`, `telegram-bot`, `otp` — Credentials (backend `/auth/*` ga `authorize` ichida boradi);
  * - Google — OAuth, lekin `signIn` callback'ida `id_token` backend'ga almashtiriladi: Google'ning
  *   o'z sessiyasi/profili ishlatilmaydi.
  */
@@ -38,6 +44,7 @@ export const authConfig = {
     }),
     passwordProvider,
     telegramProvider,
+    telegramBotProvider,
     otpProvider,
   ],
   session: { strategy: "jwt" },

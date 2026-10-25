@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.urls import path
 
-from . import auth_views, social_views
+from . import auth_views, social_views, telegram_login_views
 from .views import ExportView, MeView, OnboardingView, RoleView
 
 urlpatterns = [
@@ -23,6 +23,26 @@ urlpatterns = [
     path("me/password/set/", social_views.PasswordSetView.as_view(), name="me-password-set"),
     path("auth/google/", social_views.GoogleLoginView.as_view(), name="auth-google"),
     path("auth/telegram/", social_views.TelegramLoginView.as_view(), name="auth-telegram"),
+    path(
+        "auth/telegram/start/",
+        telegram_login_views.TelegramLoginStartView.as_view(),
+        name="auth-telegram-start",
+    ),
+    path(
+        "auth/telegram/status/",
+        telegram_login_views.TelegramLoginStatusView.as_view(),
+        name="auth-telegram-status",
+    ),
+    path(
+        "auth/telegram/complete/",
+        telegram_login_views.TelegramLoginCompleteView.as_view(),
+        name="auth-telegram-complete",
+    ),
+    path(
+        "auth/telegram/webhook/",
+        telegram_login_views.TelegramWebhookView.as_view(),
+        name="auth-telegram-webhook",
+    ),
     path("auth/otp/request/", social_views.OtpRequestView.as_view(), name="auth-otp-request"),
     path("auth/otp/verify/", social_views.OtpVerifyView.as_view(), name="auth-otp-verify"),
     path("auth/register/", auth_views.RegisterView.as_view(), name="auth-register"),

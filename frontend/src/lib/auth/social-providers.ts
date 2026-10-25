@@ -4,14 +4,16 @@ import type { components } from "@/lib/api/schema";
 import { isLocale } from "@/lib/i18n/config";
 import {
   clientInfoFrom,
+  completeTelegramLogin,
   loginWithOtp,
   loginWithTelegram,
   type ClientInfo,
   type loginWithGoogle,
 } from "./backend";
-import { OTP_PROVIDER, TELEGRAM_PROVIDER } from "./config";
+import { OTP_PROVIDER, TELEGRAM_BOT_PROVIDER, TELEGRAM_PROVIDER } from "./config";
 import { accountClaims } from "./jwt-callback";
 import { signInErrorCode } from "./sign-in-errors";
+import { readCookie, TELEGRAM_NONCE_COOKIE } from "./telegram-bot";
 import { toBackendTokens } from "./tokens";
 
 type AuthSession = components["schemas"]["AuthSession"];
@@ -92,6 +94,33 @@ export async function authorizeOtp(credentials: Credentials, headers: Headers): 
     throw new BackendSignInError(signInErrorCode(error));
   }
 }
+
+/** Botda tasdiqlangan kirish: `token` brauzerdan, nonce — shu brauzerning httpOnly `tg_nonce` cookie'sidan. */
+export async function authorizeTelegramBot(
+  credentials: Credentials,
+  headers: Headers,
+): Promise<User> {
+  const token = text(credentials.token);
+  if (!/^[A-Za-z0-9_-]{16,64}$/.test(token)) throw new BackendSignInError("telegram_login_expired");
+  const locale = localeOf(credentials.locale);
+  try {
+    const session = await completeTelegramLogin(
+      { token, ...(locale && { locale }) },
+      readCookie(headers, TELEGRAM_NONCE_COOKIE),
+      clientInfoFrom(headers),
+    );
+    return userFromSession(session);
+  } catch (error) {
+    throw new BackendSignInError(signInErrorCode(error));
+  }
+}
+
+export const telegramBotProvider = Credentials({
+  id: TELEGRAM_BOT_PROVIDER,
+  name: "Telegram bot",
+  credentials: { token: {}, locale: {} },
+  authorize: (credentials, request) => authorizeTelegramBot(credentials, request.headers),
+});
 
 export const telegramProvider = Credentials({
   id: TELEGRAM_PROVIDER,

@@ -16,6 +16,10 @@ vi.mock("next-auth/react", () => ({ signIn: mocks.signIn }));
 vi.mock("next/navigation", () => ({ useSearchParams: () => new URLSearchParams(mocks.query) }));
 vi.mock("@/hooks/useCompleteSignIn", () => ({ useCompleteSignIn: () => vi.fn() }));
 vi.mock("@/components/layout/LanguageSwitcher", () => ({ LanguageSwitcher: () => null }));
+// Telegram bot paneli o'z testida (`TelegramLoginPanel.test.tsx`).
+vi.mock("@/components/auth/TelegramLoginPanel", () => ({
+  TelegramLoginPanel: () => <button type="button">Telegram</button>,
+}));
 vi.mock("@/components/auth/LoginForm", () => ({
   PasswordStep: ({ email }: { email: string }) => <div data-testid="password-step">{email}</div>,
 }));

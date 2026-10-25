@@ -9,7 +9,7 @@ import { GraduationCap, UserRound } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { MultiSelect, Select } from "@/components/ui/Select";
+import { MultiSelect } from "@/components/ui/Select";
 import { useToast } from "@/hooks/useToast";
 import { getApi } from "@/lib/api";
 import { queryKeys } from "@/lib/api/query-keys";
@@ -17,8 +17,8 @@ import { pdfQueries } from "@/lib/pdf-books/queries";
 import type { Locale } from "@/lib/i18n/config";
 import { getLocalized } from "@/lib/i18n/localized";
 import { profileSchema, toProfileInput, type ProfileFormValues } from "@/lib/validation/profile";
-import { GRADES } from "@/types/catalog";
 import type { User } from "@/types/user";
+import { GradeChips } from "./GradeChips";
 
 export interface ProfileFormProps {
   /** Mavjud profil (sozlamalar) yoki `null` (onboarding). */
@@ -59,10 +59,6 @@ export function ProfileForm({ initial, defaultName = "", submitLabel, onSaved }:
   const queryClient = useQueryClient();
   const { update: updateSession } = useSession();
   const { data: subjects } = useQuery(pdfQueries.subjects());
-  const gradeOptions = useMemo(
-    () => GRADES.map((grade) => ({ value: String(grade), label: t("gradeOption", { grade }) })),
-    [t],
-  );
   const subjectOptions = useMemo(
     () =>
       (subjects ?? []).map((subject) => ({
@@ -141,14 +137,10 @@ export function ProfileForm({ initial, defaultName = "", submitLabel, onSaved }:
           control={control}
           name="grade"
           render={({ field }) => (
-            <Select
-              ref={field.ref}
-              name={field.name}
+            <GradeChips
               label={t("gradeLabel")}
-              placeholder={t("gradePlaceholder")}
-              options={gradeOptions}
-              value={field.value === undefined ? "" : String(field.value)}
-              onChange={(next) => field.onChange(next === "" ? undefined : Number(next))}
+              value={field.value}
+              onChange={field.onChange}
               onBlur={field.onBlur}
               error={fieldError(errors.grade?.message)}
             />
@@ -177,14 +169,10 @@ export function ProfileForm({ initial, defaultName = "", submitLabel, onSaved }:
             control={control}
             name="grades"
             render={({ field }) => (
-              <MultiSelect
-                ref={field.ref}
-                name={field.name}
+              <GradeChips
+                multiple
                 label={t("gradesLabel")}
-                placeholder={t("gradesPlaceholder")}
-                options={gradeOptions}
-                searchable={false}
-                value={field.value.map(String)}
+                value={field.value.map(Number)}
                 onChange={field.onChange}
                 onBlur={field.onBlur}
                 error={fieldError(errors.grades?.message)}
