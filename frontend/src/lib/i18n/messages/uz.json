@@ -1936,5 +1936,58 @@
     "errorText": "Darsliklarni yuklab bo'lmadi. Keyinroq qayta urinib ko'ring.",
     "retry": "Qayta urinish",
     "subjectChip": "Fan: {name}"
+  },
+  "topic": {
+    "title": "Mavzu",
+    "tabsLabel": "Mavzu materiallari",
+    "tabs": {
+      "summary": "Xulosa",
+      "slides": "Taqdimot",
+      "notes": "Konspekt",
+      "test": "Test"
+    },
+    "verified": "Ustoz tekshirgan",
+    "loading": "Yuklanmoqda",
+    "loadError": "Ma’lumotni yuklab bo‘lmadi.",
+    "retry": "Qayta urinish",
+    "testSoon": "Bu mavzu bo‘yicha test tez orada qo‘shiladi.",
+    "summary": {
+      "empty": "Bu mavzu uchun xulosa hali tayyorlanmagan.",
+      "updated": "Yangilangan: {date}",
+      "teacherNote": "Ustoz, diqqat qiling",
+      "example": "Misol"
+    },
+    "slides": {
+      "empty": "Bu mavzu uchun taqdimot hali yuklanmagan.",
+      "card": "Taqdimot · {count} slayd",
+      "open": "Ochish"
+    },
+    "notes": {
+      "empty": "Matnni belgilang va «Konspektga qo‘shish» ni bosing — yozuvlar shu yerda saqlanadi.",
+      "page": "{page}-bet",
+      "remove": "Yozuvni o‘chirish"
+    }
+  },
+  "presentation": {
+    "title": "Taqdimot",
+    "metaTitle": "{topic} — taqdimot · {book}",
+    "loading": "Taqdimot yuklanmoqda",
+    "loadError": "Taqdimotni yuklab bo‘lmadi. Birozdan keyin qayta urinib ko‘ring.",
+    "empty": "Bu mavzu uchun taqdimot hali tayyor emas.",
+    "back": "O‘qishga qaytish",
+    "thumbs": "Slaydlar",
+    "goTo": "{n}-slaydga o‘tish",
+    "slideAlt": "{n}-slayd",
+    "prev": "Oldingi slayd",
+    "next": "Keyingi slayd",
+    "positionLabel": "Slayd",
+    "position": "{n} / {total}",
+    "note": "Ustoz eslatmasi",
+    "hideNote": "Yashirish",
+    "showNote": "Ko‘rsatish",
+    "subtitle": "Taqdimot · {book}",
+    "downloadPdf": "PDF yuklab olish",
+    "fullscreen": "To‘liq ekran",
+    "exitFullscreen": "To‘liq ekrandan chiqish"
   }
 }

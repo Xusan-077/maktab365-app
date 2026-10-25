@@ -1936,5 +1936,58 @@
     "errorText": "Couldn't load textbooks. Please try again later.",
     "retry": "Try again",
     "subjectChip": "Subject: {name}"
+  },
+  "topic": {
+    "title": "Topic",
+    "tabsLabel": "Topic materials",
+    "tabs": {
+      "summary": "Summary",
+      "slides": "Slides",
+      "notes": "Notes",
+      "test": "Test"
+    },
+    "verified": "Checked by a teacher",
+    "loading": "Loading",
+    "loadError": "Could not load the data.",
+    "retry": "Try again",
+    "testSoon": "A test for this topic is coming soon.",
+    "summary": {
+      "empty": "The summary for this topic is not ready yet.",
+      "updated": "Updated: {date}",
+      "teacherNote": "Teacher, please note",
+      "example": "Example"
+    },
+    "slides": {
+      "empty": "No slides have been uploaded for this topic yet.",
+      "card": "Slides · {count}",
+      "open": "Open"
+    },
+    "notes": {
+      "empty": "Select text and tap “Add to notes” — your notes will appear here.",
+      "page": "p. {page}",
+      "remove": "Delete note"
+    }
+  },
+  "presentation": {
+    "title": "Presentation",
+    "metaTitle": "{topic} — presentation · {book}",
+    "loading": "Loading presentation",
+    "loadError": "Couldn’t load the presentation. Please try again later.",
+    "empty": "The presentation for this topic isn’t ready yet.",
+    "back": "Back to reading",
+    "thumbs": "Slides",
+    "goTo": "Go to slide {n}",
+    "slideAlt": "Slide {n}",
+    "prev": "Previous slide",
+    "next": "Next slide",
+    "positionLabel": "Slide",
+    "position": "{n} / {total}",
+    "note": "Teacher’s note",
+    "hideNote": "Hide",
+    "showNote": "Show",
+    "subtitle": "Presentation · {book}",
+    "downloadPdf": "Download PDF",
+    "fullscreen": "Full screen",
+    "exitFullscreen": "Exit full screen"
   }
 }

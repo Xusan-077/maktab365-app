@@ -17,10 +17,20 @@ export interface TabsProps {
   defaultValue?: string;
   value?: string;
   onValueChange?: (id: string) => void;
+  /** `true` — faol bo'lmagan panellar ham DOM'da (`hidden`): ichidagi holat (yuklash, forma) yo'qolmaydi. */
+  keepMounted?: boolean;
   className?: string;
 }
 
-export function Tabs({ items, label, defaultValue, value, onValueChange, className }: TabsProps) {
+export function Tabs({
+  items,
+  label,
+  defaultValue,
+  value,
+  onValueChange,
+  keepMounted,
+  className,
+}: TabsProps) {
   const baseId = useId();
   const [inner, setInner] = useState(defaultValue ?? items.find((i) => !i.disabled)?.id);
   const current = value ?? inner;
@@ -60,7 +70,7 @@ export function Tabs({ items, label, defaultValue, value, onValueChange, classNa
         role="tablist"
         aria-label={label}
         onKeyDown={onKeyDown}
-        className="border-border flex gap-1 overflow-x-auto border-b"
+        className="border-border flex gap-1 overflow-x-auto overflow-y-hidden border-b"
       >
         {items.map((item) => {
           const selected = item.id === current;
@@ -87,17 +97,19 @@ export function Tabs({ items, label, defaultValue, value, onValueChange, classNa
           );
         })}
       </div>
-      {active && (
+      {(keepMounted ? items : active ? [active] : []).map((item) => (
         <div
+          key={item.id}
           role="tabpanel"
-          id={`${baseId}-panel-${active.id}`}
-          aria-labelledby={`${baseId}-tab-${active.id}`}
+          id={`${baseId}-panel-${item.id}`}
+          aria-labelledby={`${baseId}-tab-${item.id}`}
+          hidden={item.id !== active?.id}
           tabIndex={0}
           className="rounded-md pt-4"
         >
-          {active.content}
+          {item.content}
         </div>
-      )}
+      ))}
     </div>
   );
 }

@@ -43,8 +43,11 @@ function isErrorBody(value: unknown): value is ApiErrorBody {
   );
 }
 
-/** Tarmoq/timeout xatolarini `ApiError` ga o'raydi; HTTP xatolari `unwrap` da qayta ishlanadi. */
-function createFetch(options: HttpClientOptions): typeof fetch {
+/**
+ * Tarmoq/timeout xatolarini `ApiError` ga o'raydi; HTTP xatolari `unwrap` da qayta ishlanadi.
+ * Sxemada hali yo'q endpoint'lar (`lib/topic-materials`) shu `fetch` dan to'g'ridan-to'g'ri foydalanadi.
+ */
+export function createFetch(options: HttpClientOptions = {}): typeof fetch {
   const baseFetch = options.fetch ?? fetch;
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
 
