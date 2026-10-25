@@ -79,6 +79,10 @@ export const pdfBookPath = (book: BookRef) => `${ROUTES.textbooks}/${book.grade}
 export const readerPath = (book: BookRef, page?: number) =>
   `${pdfBookPath(book)}/oqish${page && page > 1 ? `?page=${page}` : ""}`;
 
+/** Aynan shu bet (1-bet ham `?page=1` bilan — saqlangan pozitsiyaga o'tib ketmasin). */
+export const readerPagePath = (book: BookRef, page: number) =>
+  `${pdfBookPath(book)}/oqish?page=${Math.max(1, page)}`;
+
 /** Mavzu taqdimoti: `/darsliklar/9/9-sinf-algebra/taqdimot/<mavzu id>[?slayd=N]`. */
 export const presentationPath = (book: BookRef, topicId: string, slide?: number) =>
   `${pdfBookPath(book)}/taqdimot/${topicId}${slide && slide > 1 ? `?slayd=${slide}` : ""}`;

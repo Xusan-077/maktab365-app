@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatDate } from "./format-date";
+import { daysAgo, formatDate } from "./format-date";
 
 // API UTC qaytaradi: 18:03 UTC = 23:03 Toshkent.
 const AT = "2026-10-24T18:03:10Z";
@@ -74,5 +74,19 @@ describe("formatDate (yaroqsiz qiymat)", () => {
 
   it("Date obyektini ham qabul qiladi", () => {
     expect(formatDate(new Date(AT), "uz", "dateTime")).toBe("24-okt, 23:03");
+  });
+});
+
+describe("formatDate time va daysAgo", () => {
+  it("vaqt Toshkentda: '09:41'", () => {
+    expect(formatDate("2026-10-25T04:41:00Z", "uz", "time")).toBe("09:41");
+  });
+
+  it("kalendar kun farqi Toshkent vaqtida (UTC yarim tun emas)", () => {
+    const now = new Date("2026-10-25T20:00:00Z"); // Toshkentda 26-okt, 01:00
+    expect(daysAgo("2026-10-25T19:30:00Z", now)).toBe(0);
+    expect(daysAgo("2026-10-25T10:00:00Z", now)).toBe(1);
+    expect(daysAgo("2026-10-20T10:00:00Z", now)).toBe(6);
+    expect(daysAgo("yaroqsiz", now)).toBeNull();
   });
 });

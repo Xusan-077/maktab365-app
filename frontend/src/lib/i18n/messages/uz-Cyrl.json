@@ -1783,6 +1783,65 @@
       "highlight": "Белгилаш",
       "noted": "Конспектга қўшилди",
       "highlighted": "Белги қўйилди"
+    },
+    "contents": {
+      "title": "Мундарижа",
+      "meta": "{chapters} боб · {pages} бет",
+      "metaRead": "{count} параграф ўқилган",
+      "collapseAll": "Ҳаммасини йиғиш",
+      "expandAll": "Ҳаммасини очиш",
+      "searchLabel": "Мундарижадан қидириш",
+      "searchPlaceholder": "Параграф ёки мавзу номи бўйича қидириш",
+      "searchShortcut": "Ctrl K",
+      "filtersLabel": "Мундарижа филтри",
+      "filters": {
+        "all": "Ҳаммаси",
+        "inProgress": "Давом этаётган",
+        "unread": "Ўқилмаган",
+        "tests": "Тестлар"
+      },
+      "results": "{count} та натижа",
+      "empty": "Ҳеч нарса топилмади",
+      "clear": "Тозалаш",
+      "chapterRange": "{roman} боб · {start}–{end}-бет",
+      "chapterDone": "Тугатилди",
+      "chapterUnread": "Ўқилмаган",
+      "chapterPercent": "{percent}%",
+      "chapterProgress": "{percent}% ўқилган",
+      "page": "{page}-бет",
+      "lastRead": "охирги ўқилган",
+      "resume": "Давом эттириш",
+      "resumeLabel": "{page}-бетдан давом эттириш",
+      "chapterEnd": "Боб охирида",
+      "practice": {
+        "exercise": "Машқ",
+        "test": "Тест",
+        "project": "Амалий иш"
+      },
+      "status": {
+        "done": "тугатилган",
+        "current": "жорий параграф",
+        "pending": "ўқилмаган"
+      },
+      "card": {
+        "label": "Давом эттириш",
+        "lastRead": "Охирги ўқилган · {when}",
+        "today": "бугун {time}",
+        "yesterday": "кеча {time}",
+        "startTitle": "Ўқишни бошланг",
+        "startLabel": "Биринчи боб",
+        "pages": "{page} / {total}-бет",
+        "percent": "{percent}% ўқилди",
+        "resume": "{page}-бетдан давом эттириш",
+        "start": "1-бетдан бошлаш",
+        "restart": "Бошидан бошлаш",
+        "finished": "Китоб ўқиб чиқилди"
+      },
+      "mastery": {
+        "title": "Боб бўйича ўзлаштириш",
+        "item": "{roman} боб"
+      },
+      "reportAction": "Хабар бериш"
     }
   },
   "library": {

@@ -146,6 +146,15 @@
   --color-ds-ok-bg: var(--ds-ok-bg);
   --color-ds-ok-ink: var(--ds-ok-ink);
   --color-ds-on-accent: var(--ds-on-accent);
+  /* Kitob mundarijasi: ochiq bob/joriy qator, "Davom ettirish" kartasi, holat belgilari. */
+  --color-ds-accent-wash: var(--ds-accent-wash);
+  --color-ds-accent-line: var(--ds-accent-line);
+  --color-ds-deep: var(--ds-deep);
+  --color-ds-on-deep: var(--ds-on-deep);
+  --color-ds-ink-2: var(--ds-ink-2);
+  --color-ds-line-2: var(--ds-line-2);
+  --color-ds-ok: var(--ds-ok);
+  --color-ds-on-ok: var(--ds-on-ok);
 
   --font-ui: var(--font-manrope), var(--font-onest), ui-sans-serif, system-ui, sans-serif;
   --font-book: var(--font-source-serif), Georgia, "Times New Roman", serif;
@@ -227,6 +236,14 @@
   --ds-ok-bg: #e3f6ec;
   --ds-ok-ink: #0b6b3a;
   --ds-on-accent: #ffffff;
+  --ds-accent-wash: #f1f5ff;
+  --ds-accent-line: #cbd7f8;
+  --ds-deep: #1f3a8a;
+  --ds-on-deep: #ffffff;
+  --ds-ink-2: #3a4156;
+  --ds-line-2: #c3c9d8;
+  --ds-ok: #0e8f6e;
+  --ds-on-ok: #ffffff;
 
   /* Fan yo'nalishlari (backend SubjectGroup) va ularning och tint'lari */
   --group-exact: #1554d1;
@@ -308,6 +325,14 @@
   --ds-ok-bg: #10301f;
   --ds-ok-ink: #7fe0a8;
   --ds-on-accent: #0b1220;
+  --ds-accent-wash: #131f3d;
+  --ds-accent-line: #2f4580;
+  --ds-deep: #1a2f6e;
+  --ds-on-deep: #ffffff;
+  --ds-ink-2: #c4cbdb;
+  --ds-line-2: #3d4a68;
+  --ds-ok: #4cc79a;
+  --ds-on-ok: #06231a;
 
   /* Qorong'i fonda yo'nalish ranglari yorqinroq, tint'lari to'qroq */
   --group-exact: #8db4ff;
@@ -791,11 +816,12 @@ dialog[open]::backdrop {
  * Kitob rejimi (BookView): stol, varaqlar to'plami (qalinlik — `--book-stack` box-shadow
  * qatlamlari), yer soyasi, umurtqa va varaq ag'darishdagi harakatlanuvchi soya/yorug'lik.
  */
-html:has(.pdf-stage[data-book]) {
+/* `data-book-lock` ni PdfReader effekti qo'yadi (`:has` emas — yashirin <Activity> sahifasida ham ishlab qolardi). */
+html[data-book-lock] {
   overflow: hidden;
   overscroll-behavior: none;
 }
-html:has(.pdf-stage[data-book]) body {
+html[data-book-lock] body {
   overflow: hidden;
   overscroll-behavior: none;
 }

@@ -8,7 +8,6 @@ import { gradePath, pdfBookPath } from "@/lib/utils/routes";
 import { sectionHeading } from "./book-styles";
 
 export { sectionHeading };
-export { BookToc } from "./BookToc";
 
 /** "Algebra boshqa sinflarda": shu fanning boshqa sinflardagi kitoblari (sinf raqami plitkalari). */
 export function OtherGrades({

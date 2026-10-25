@@ -1,6 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type PointerEvent,
+} from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
@@ -349,6 +357,18 @@ export function PdfReader({
     setTopicTab(tab);
     setTopicOpen(true);
   }, []);
+
+  // Kitob rejimida sahifa scroll'i yopiq. Next.js chiqib ketgan sahifani <Activity> bilan DOM'da
+  // yashirib qoldiradi, shuning uchun CSS `:has(.pdf-stage[data-book])` ga emas, effekt
+  // qo'yadigan atributga tayanamiz — yashirilganda cleanup uni darhol olib tashlaydi.
+  useLayoutEffect(() => {
+    if (!bookMode) return;
+    const root = window.document.documentElement;
+    root.dataset.bookLock = "";
+    return () => {
+      delete root.dataset.bookLock;
+    };
+  }, [bookMode]);
 
   useEffect(() => {
     if (page === null) return;
