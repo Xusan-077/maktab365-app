@@ -1160,7 +1160,9 @@
       "choose": "Choose a presentation file for section {n}",
       "addFor": "Add a presentation to section {n}",
       "replaceFor": "Replace the presentation of section {n}",
-      "removeFor": "Delete the presentation of section {n}"
+      "removeFor": "Delete the presentation of section {n}",
+      "materials": "Summary & slides",
+      "materialsFor": "Section {n} materials: summary, slides"
     },
     "cover": {
       "label": "Cover",
@@ -1280,6 +1282,177 @@
       "saveNote": "Save note",
       "noteSaved": "Note saved",
       "empty": "No messages for this filter."
+    },
+    "topic": {
+      "metaTitle": "Topic materials",
+      "backToBook": "← Back to book",
+      "notFoundTitle": "Topic not found",
+      "notFound": "This section isn’t in the book’s table of contents. Check that the contents are saved.",
+      "tabsLabel": "Topic sections",
+      "tabs": {
+        "main": "General",
+        "summary": "Summary",
+        "slides": "Slides",
+        "notes": "Notes",
+        "test": "Test"
+      },
+      "soon": {
+        "notes": "Note templates are coming in the next stage.",
+        "test": "Topic tests are coming in the next stage."
+      },
+      "main": {
+        "title": "Title",
+        "chapter": "Chapter",
+        "page": "Start page",
+        "hint": "Title and page are edited in the book’s table of contents.",
+        "openReader": "Open in reader"
+      },
+      "errors": {
+        "required": "Required",
+        "tooLong": "Text is too long",
+        "tooMany": "Too many items",
+        "blocksRequired": "Add at least one block to publish",
+        "unknownType": "Unknown block type",
+        "invalid": "Invalid value"
+      },
+      "summary": {
+        "formLabel": "Summary editor",
+        "status": "Status",
+        "statuses": {
+          "draft": "Draft",
+          "published": "Published"
+        },
+        "visibleToStudents": "Visible to students",
+        "hiddenFromStudents": "Hidden from students",
+        "empty": "No blocks yet. Start with “Add block” or “Fill with AI”.",
+        "blocksLabel": "Summary blocks",
+        "addBlock": "Add block",
+        "full": "Up to {max} blocks",
+        "drag": "Move block {n} ({type})",
+        "remove": "Delete block {n}",
+        "removeTitle": "Delete block",
+        "removeDescription": "Block {n} and its text will be deleted.",
+        "types": {
+          "idea": {
+            "title": "Key idea",
+            "hint": "Title and short text — the gist of the topic"
+          },
+          "bullets": {
+            "title": "Bullet list",
+            "hint": "Rules, definitions, steps"
+          },
+          "chips": {
+            "title": "Keywords",
+            "hint": "Short terms shown as tags"
+          },
+          "teacher_note": {
+            "title": "Teacher’s note",
+            "hint": "Common mistakes and what to watch for"
+          },
+          "example": {
+            "title": "Example",
+            "hint": "A sample problem and its solution"
+          }
+        },
+        "fields": {
+          "title": "Title",
+          "text": "Text",
+          "label": "Title",
+          "labelHint": "Optional, e.g. “Keywords”",
+          "teacher_note": "Note text",
+          "teacherNoteHint": "Students see it too — as the teacher’s tip.",
+          "example": "Example text"
+        },
+        "bullets": "Bullets",
+        "bulletLead": "Bullet {n} key",
+        "bulletLeadPlaceholder": "Key (optional)",
+        "bulletText": "Bullet {n} text",
+        "bulletTextPlaceholder": "Bullet text",
+        "removeBullet": "Delete bullet {n}",
+        "addBullet": "Add bullet",
+        "chips": "Keywords",
+        "chipsHint": "Type and press Enter or comma",
+        "chipsFull": "Keyword limit reached",
+        "removeChip": "Remove “{chip}”",
+        "save": {
+          "savedAt": "Saved · {date}",
+          "empty": "Not saved yet",
+          "unsaved": "Unsaved changes",
+          "saving": "Saving…",
+          "invalid": "Fill in the fields to publish — not saved",
+          "error": "Couldn’t save",
+          "retry": "Retry"
+        },
+        "preview": {
+          "title": "Preview",
+          "device": "Device",
+          "desktop": "Desktop",
+          "mobile": "Mobile",
+          "empty": "Once blocks are filled in, the student view appears here."
+        },
+        "ai": {
+          "button": "Fill with AI",
+          "hint": "AI drafts a summary from the topic text. It’s added as a draft — review it, then publish.",
+          "applied": "AI draft added — please review it",
+          "empty": "AI couldn’t draft a summary for this topic",
+          "replaceTitle": "Replace blocks",
+          "replaceDescription": "Current blocks will be replaced with the AI draft and the summary becomes a draft.",
+          "replace": "Replace"
+        },
+        "dnd": {
+          "instructions": "To move, press Space or Enter, choose a position with the arrow keys and press Space again. Press Esc to cancel.",
+          "pickedUp": "Picked up item {n}",
+          "over": "Item {n} is over position {to}",
+          "dropped": "Item {n} dropped at position {to}",
+          "cancelled": "Move cancelled, item {n} stays in place"
+        }
+      },
+      "slides": {
+        "uploadTitle": "Upload slides",
+        "replaceTitle": "Replace slides",
+        "dropHint": "Drop a PPTX or PDF file here",
+        "limits": "PPTX or PDF, up to {size}. Slides are converted to images automatically.",
+        "choose": "Choose a presentation file",
+        "chooseButton": "Choose file",
+        "replaceHint": "Uploading a new file replaces the current slides, notes and order.",
+        "problems": {
+          "type": "Only PPTX or PDF files can be uploaded",
+          "size": "File is larger than {size}",
+          "empty": "File is empty"
+        },
+        "uploading": "Uploading…",
+        "uploadProgress": "Slides upload progress",
+        "cancel": "Cancel",
+        "converting": "Preparing slides — this may take a few minutes",
+        "conversionProgress": "Conversion progress",
+        "conversionFailed": "Couldn’t convert the file into slides. Try another file or save it as PDF.",
+        "retry": "Retry",
+        "ready": "Slides are ready",
+        "saved": "Slides saved",
+        "discard": "Discard changes",
+        "gridTitle": "Slides",
+        "count": "{total} slides · {visible} visible to students",
+        "pdf": "PDF",
+        "select": "Select slide {n}",
+        "selectHidden": "Select slide {n} (hidden)",
+        "hiddenBadge": "Hidden",
+        "drag": "Move slide {n}",
+        "details": "Slide {n} settings",
+        "slideAlt": "Slide {n}",
+        "visible": "Show to students",
+        "visibleHint": "When off, only teachers and admins see the slide.",
+        "note": "Teacher’s note",
+        "noteHint": "Visible to teachers only.",
+        "alt": "Alt text",
+        "altHint": "A short description of the slide for screen readers.",
+        "dnd": {
+          "instructions": "To move, press Space or Enter, choose a position with the arrow keys and press Space again. Press Esc to cancel.",
+          "pickedUp": "Picked up slide {n}",
+          "over": "Slide {n} is over position {to}",
+          "dropped": "Slide {n} dropped at position {to}",
+          "cancelled": "Move cancelled, slide {n} stays in place"
+        }
+      }
     }
   },
   "pdfBooks": {
@@ -1347,7 +1520,12 @@
       "modeV": "Vertical: continuous scroll",
       "pages": "Pages",
       "pagesToggle": "Show or hide the pages panel",
-      "thumb": "Page {page}"
+      "thumb": "Page {page}",
+      "tocOpen": "{title} — open contents. Current section: {section}",
+      "topic": "Topic",
+      "book": "Book",
+      "bookPages": "Pages {from}–{to}",
+      "bookPage": "Page {page}"
     },
     "bookmark": {
       "save": "Save",
@@ -1361,7 +1539,17 @@
       "searchPlaceholder": "Search the contents…",
       "searchEmpty": "No sections match “{query}”",
       "expand": "Expand sections of “{title}”",
-      "collapse": "Collapse sections of “{title}”"
+      "collapse": "Collapse sections of “{title}”",
+      "status": {
+        "read": "read",
+        "current": "current section",
+        "unread": "not read"
+      },
+      "anchors": "Exercises and problems in this section",
+      "resumeTitle": "Continue reading",
+      "hereTitle": "You are here",
+      "resumeMeta": "p. {page} of {total} · {percent}%",
+      "resume": "Continue"
     },
     "description": {
       "more": "Read more",
@@ -1538,7 +1726,8 @@
       "highlightOff": "Turn off highlight mode",
       "annotations": "Highlights and notes ({count})",
       "zoomLevel": "Zoom: {level}",
-      "more": "More tools"
+      "more": "More tools",
+      "highlight": "Highlight mode (drag on the page)"
     },
     "shortcuts": {
       "title": "Keyboard shortcuts",
@@ -1549,7 +1738,9 @@
       "tone": "Page background (normal, sepia, dark)",
       "zoom": "Zoom 50–300% (Ctrl + wheel, double-tap)",
       "find": "Search in book",
-      "help": "This list"
+      "help": "This list",
+      "search": "Search the book",
+      "toc": "Contents"
     },
     "find": {
       "title": "Search in book",
@@ -1587,6 +1778,48 @@
       "empty": "No highlights yet. Turn on highlight mode and drag over the part of the page you want.",
       "page": "Page {page}",
       "noNote": "No note"
+    },
+    "appearance": {
+      "title": "Display settings",
+      "short": "Aa",
+      "tone": "Background",
+      "tones": {
+        "light": "Light",
+        "sepia": "Sepia",
+        "dark": "Dark"
+      },
+      "scale": "Scale",
+      "fitWidth": "Fit width",
+      "fitPage": "Whole page",
+      "fitFlipHint": "In “Book” mode the book always fits the screen; zoom with the percentage below.",
+      "zoom": "Zoom",
+      "zoomOut": "Zoom out",
+      "zoomIn": "Zoom in",
+      "zoomReset": "Zoom: {value}. Fit to screen",
+      "paging": "Page turning",
+      "pagingFlip": "Book",
+      "pagingScroll": "Continuous",
+      "warm": "Warm tint for eyes",
+      "warmHint": "Less blue light when reading at night",
+      "fit": "Fit",
+      "fitLabel": "Fit the book to the screen"
+    },
+    "nav": {
+      "label": "Page navigation",
+      "slider": "Page",
+      "thumb": "p. {page}",
+      "thumbWithSection": "p. {page} · {section}",
+      "count": "{page} / {total}",
+      "exercises": "Exercises",
+      "test": "Test"
+    },
+    "selection": {
+      "label": "Selected text",
+      "solution": "See the solution",
+      "note": "Add to notes",
+      "highlight": "Highlight",
+      "noted": "Added to notes",
+      "highlighted": "Highlight added"
     }
   },
   "library": {
@@ -1879,5 +2112,58 @@
     "errorText": "Couldn't load textbooks. Please try again later.",
     "retry": "Try again",
     "subjectChip": "Subject: {name}"
+  },
+  "topic": {
+    "title": "Topic",
+    "tabsLabel": "Topic materials",
+    "tabs": {
+      "summary": "Summary",
+      "slides": "Slides",
+      "notes": "Notes",
+      "test": "Test"
+    },
+    "verified": "Checked by a teacher",
+    "loading": "Loading",
+    "loadError": "Could not load the data.",
+    "retry": "Try again",
+    "testSoon": "A test for this topic is coming soon.",
+    "summary": {
+      "empty": "The summary for this topic is not ready yet.",
+      "updated": "Updated: {date}",
+      "teacherNote": "Teacher, please note",
+      "example": "Example"
+    },
+    "slides": {
+      "empty": "No slides have been uploaded for this topic yet.",
+      "card": "Slides · {count}",
+      "open": "Open"
+    },
+    "notes": {
+      "empty": "Select text and tap “Add to notes” — your notes will appear here.",
+      "page": "p. {page}",
+      "remove": "Delete note"
+    }
+  },
+  "presentation": {
+    "title": "Presentation",
+    "metaTitle": "{topic} — presentation · {book}",
+    "loading": "Loading presentation",
+    "loadError": "Couldn’t load the presentation. Please try again later.",
+    "empty": "The presentation for this topic isn’t ready yet.",
+    "back": "Back to reading",
+    "thumbs": "Slides",
+    "goTo": "Go to slide {n}",
+    "slideAlt": "Slide {n}",
+    "prev": "Previous slide",
+    "next": "Next slide",
+    "positionLabel": "Slide",
+    "position": "{n} / {total}",
+    "note": "Teacher’s note",
+    "hideNote": "Hide",
+    "showNote": "Show",
+    "subtitle": "Presentation · {book}",
+    "downloadPdf": "Download PDF",
+    "fullscreen": "Full screen",
+    "exitFullscreen": "Exit full screen"
   }
 }

@@ -2,9 +2,9 @@
 
 import { useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Presentation, RefreshCw, Trash2, Upload, X } from "lucide-react";
+import { NotebookPen, Presentation, RefreshCw, Trash2, Upload, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/Button";
+import { Button, buttonVariants } from "@/components/ui/Button";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { useToast } from "@/hooks/useToast";
 import { getAdminApi } from "@/lib/admin/api";
@@ -12,7 +12,9 @@ import type { ChapterRow } from "@/lib/admin/chapters";
 import { pdfFileProblem, type PdfFileProblem } from "@/lib/admin/pdf-file";
 import { slidesProxyUrl, uploadPdf, xhrSender } from "@/lib/admin/pdf-upload";
 import { ADMIN_ROOT_KEY } from "@/lib/admin/queries";
+import { adminTopicPath } from "@/lib/admin/routes";
 import type { AdminSlides } from "@/lib/admin/types";
+import { Link } from "@/lib/i18n/navigation";
 import { formatBytes } from "@/lib/utils/bytes";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { useAdminErrorText } from "./useAdminErrorText";
@@ -155,6 +157,17 @@ export function ChapterSlides({ context, row, position, disabled }: ChapterSlide
             void start(chosen);
           }}
         />
+        {bookId && chapterId && (
+          <Link
+            href={adminTopicPath(bookId, chapterId)}
+            aria-label={t("materialsFor", { n: position })}
+            data-testid="topic-materials-link"
+            className={buttonVariants({ variant: "ghost", size: "sm" })}
+          >
+            <NotebookPen className="size-4" aria-hidden />
+            {t("materials")}
+          </Link>
+        )}
         {!busy && (
           <Button
             variant="secondary"

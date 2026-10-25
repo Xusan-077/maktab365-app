@@ -16,9 +16,21 @@ describe("reader prefs", () => {
   it("buzilgan xotira standartga qaytadi", () => {
     expect(sanitizePrefs(null)).toEqual(DEFAULT_READER_PREFS);
     expect(sanitizePrefs({ tone: "neon", mode: "x" })).toEqual(DEFAULT_READER_PREFS);
-    expect(sanitizePrefs({ tone: "dark", mode: "h" })).toEqual({ tone: "dark", mode: "h" });
-    // Eski versiyadagi `fit` e'tiborsiz qoladi.
-    expect(sanitizePrefs({ tone: "sepia", fit: "page" })).toEqual({ tone: "sepia", mode: null });
+    // Eski «Surish» (`h`) — «Kitob».
+    expect(sanitizePrefs({ tone: "dark", mode: "h" })).toEqual({
+      ...DEFAULT_READER_PREFS,
+      tone: "dark",
+      mode: "b",
+    });
+    expect(sanitizePrefs({ tone: "sepia", fit: "page", zoom: 1.84, warm: true })).toEqual({
+      tone: "sepia",
+      mode: null,
+      fit: "page",
+      zoom: 1.85,
+      warm: true,
+    });
+    expect(sanitizePrefs({ zoom: 9 }).zoom).toBe(3);
+    expect(sanitizePrefs({ fit: "zoom", zoom: "2", warm: 1 })).toEqual(DEFAULT_READER_PREFS);
   });
 });
 

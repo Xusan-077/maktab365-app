@@ -4,11 +4,13 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import uz from "@/lib/i18n/messages/uz.json";
 import { saveSlidesProgress } from "@/lib/pdf/slides";
+import type { TocChapter } from "@/lib/pdf/toc";
 import { PdfTocDrawer } from "./PdfTocDrawer";
 
 const A = "3f2b8c1e-5d4a-4c7e-9a10-0b6f1d2e3c4d";
 const B = "9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d";
 const t = uz.pdfBooks.slides;
+const toc = uz.pdfBooks.toc;
 
 const CHAPTERS = [
   {
@@ -21,19 +23,27 @@ const CHAPTERS = [
   { id: B, title: "Algebra", page: 50 },
 ];
 
-function setup(withSlides = true) {
+function setup(
+  withSlides = true,
+  { page = 1, resume = null as number | null, chapters = CHAPTERS as TocChapter[] } = {},
+) {
   const onGo = vi.fn();
   const onOpenSlides = vi.fn();
   const onOpenChange = vi.fn();
+  const onPickAnnotation = vi.fn();
   render(
     <NextIntlClientProvider locale="uz" messages={uz}>
       <PdfTocDrawer
         open
         onOpenChange={onOpenChange}
-        chapters={CHAPTERS}
-        page={1}
+        chapters={chapters}
+        page={page}
+        total={240}
+        resume={resume}
         onGo={onGo}
         onOpenSlides={withSlides ? onOpenSlides : undefined}
+        annotations={[]}
+        onPickAnnotation={onPickAnnotation}
       />
     </NextIntlClientProvider>,
   );
@@ -64,11 +74,11 @@ describe("PdfTocDrawer: prezentatsiya", () => {
 
     expect(buttons).toHaveLength(1);
     expect(buttons[0].getAttribute("aria-label")).toBe("Kirish: prezentatsiyani ochish (12 slayd)");
-    // Boshqa bo'limlarda hech narsa o'zgarmadi: 3 ta element, avvalgi matn.
+    // Boshqa bo'limlarda hech narsa o'zgarmadi: 3 ta element (holat — ekran o'qigich uchun).
     expect(screen.getAllByTestId("pdf-toc-item").map((item) => item.textContent)).toEqual([
-      "Kirish1-bet",
-      "Maqsad10-bet",
-      "Algebra50-bet",
+      `${toc.status.current}Kirish1-bet`,
+      `${toc.status.unread}Maqsad10-bet`,
+      `${toc.status.unread}Algebra50-bet`,
     ]);
   });
 
@@ -114,5 +124,60 @@ describe("PdfTocDrawer: prezentatsiya", () => {
     fireEvent.click(screen.getByTestId("pdf-toc-slides"));
 
     expect(onOpenSlides).toHaveBeenCalledWith(A, 1);
+  });
+});
+
+describe("PdfTocDrawer: davom ettirish, holatlar, mashqlar", () => {
+  it("saqlangan joy joriy betdan farq qilsa «Davom ettirish» shu betga o'tadi va yopiladi", () => {
+    const { onGo, onOpenChange } = setup(false, { page: 1, resume: 55 });
+    expect(screen.getByTestId("pdf-toc-resume").textContent).toContain("Algebra");
+    fireEvent.click(screen.getByTestId("pdf-toc-resume-go"));
+    expect(onGo).toHaveBeenCalledWith(55);
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it("joriy bet saqlangani bilan bir xil — tugmasiz «Siz shu yerdasiz»", () => {
+    setup(false, { page: 12, resume: 12 });
+    expect(screen.getByTestId("pdf-toc-resume").textContent).toContain(toc.hereTitle);
+    expect(screen.queryByTestId("pdf-toc-resume-go")).toBeNull();
+  });
+
+  it("o'qilgan / joriy / o'qilmagan holatlar", () => {
+    setup(false, { page: 12 });
+    expect(screen.getAllByTestId("pdf-toc-item").map((item) => item.dataset.status)).toEqual([
+      "current",
+      "current",
+      "unread",
+    ]);
+  });
+
+  it("joriy bo'lim ichidagi mashqlar bosilsa shu betga o'tadi", () => {
+    const { onGo } = setup(false, {
+      page: 12,
+      chapters: [
+        {
+          id: A,
+          title: "Kirish",
+          page: 1,
+          children: [
+            {
+              id: "c1a",
+              title: "Maqsad",
+              page: 10,
+              anchors: [{ kind: "exercise", title: "Mashqlar", page: 14 }],
+            },
+          ],
+        },
+      ],
+    });
+    fireEvent.click(screen.getByTestId("pdf-toc-anchor"));
+    expect(onGo).toHaveBeenCalledWith(14);
+  });
+
+  it("qidiruv maydoni qisqa mundarijada ham bor; «Belgilar» yorlig'i", () => {
+    setup(false);
+    expect(screen.getByTestId("toc-search")).toBeTruthy();
+    fireEvent.click(screen.getByTestId("reader-tab-marks"));
+    expect(screen.getByText(uz.pdfBooks.annotations.empty)).toBeTruthy();
   });
 });

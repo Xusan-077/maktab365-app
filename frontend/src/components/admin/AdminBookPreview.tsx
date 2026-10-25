@@ -1,22 +1,18 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import { Eye } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { PdfReaderLoader } from "@/components/pdf/PdfReaderLoader";
-import { previewCover } from "@/lib/admin/cover";
-import { adminQueries } from "@/lib/admin/queries";
 import { adminPdfBookPath } from "@/lib/admin/routes";
 import { Link } from "@/lib/i18n/navigation";
 
 /**
  * Qoralama (yoki nashr qilingan) kitobni o'quvchi o'qish oynasida ko'rsatadi. Admin ochiq saytga
  * chiqmaydi, shuning uchun o'qish oynasi admin qobig'ida; orqaga havola tahrirlashga qaytaradi.
- * Muqova admin API'dan (custom/1-bet rasmi), progress va statistika yuborilmaydi (`preview`).
+ * Progress va statistika yuborilmaydi (`preview`).
  */
 export function AdminBookPreview({ id }: { id: string }) {
   const t = useTranslations("admin.pdfEdit");
-  const admin = useQuery(adminQueries.pdfBook(id));
   return (
     <div className="flex flex-col gap-4">
       <div
@@ -29,12 +25,7 @@ export function AdminBookPreview({ id }: { id: string }) {
           {t("previewBack")}
         </Link>
       </div>
-      <PdfReaderLoader
-        bookId={id}
-        backHref={adminPdfBookPath(id)}
-        preview
-        cover={admin.data ? previewCover(admin.data) : undefined}
-      />
+      <PdfReaderLoader bookId={id} backHref={adminPdfBookPath(id)} preview />
     </div>
   );
 }

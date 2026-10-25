@@ -74,8 +74,15 @@ const PDF_FILE_PATH =
 /** Lokal (dev) PDF fayl endpoint'i: Range va kesh sarlavhalari BFF orqali o'tadi. */
 export const isPdfFilePath = (path: string) => PDF_FILE_PATH.test(path);
 
+/** Mavzu taqdimoti (PPTX/PDF ≤ 25 MB, multipart): fayl + multipart sarlavhalari uchun zaxira. */
+export const MAX_PRESENTATION_BODY_BYTES = 25 * 1024 * 1024 + 64 * 1024;
+const PRESENTATION_UPLOAD_PATH = /^\/api\/v1\/admin\/topics\/[0-9a-f-]{36}\/presentation\/$/;
+
+export const isPresentationUploadPath = (path: string) => PRESENTATION_UPLOAD_PATH.test(path);
+
 export function bodyLimitFor(path: string): number {
-  return isPdfUploadPath(path) ? MAX_PDF_BODY_BYTES : MAX_BODY_BYTES;
+  if (isPdfUploadPath(path)) return MAX_PDF_BODY_BYTES;
+  return isPresentationUploadPath(path) ? MAX_PRESENTATION_BODY_BYTES : MAX_BODY_BYTES;
 }
 
 /** `Content-Length` chegaradan oshsa (tanani o'qimasdan) rad etish uchun. */

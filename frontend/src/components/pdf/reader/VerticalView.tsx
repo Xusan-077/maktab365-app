@@ -45,6 +45,12 @@ export interface VerticalViewProps {
   onPageChange: (page: number) => void;
   /** `PdfPageCanvas` (`fit="width"`) — belgilar qatlami va qidiruv belgilari bilan. */
   renderPage: (pageNumber: number, options: { current: boolean }) => ReactNode;
+  /**
+   * Masshtab asosi: `width` — eni bo'yicha (900px gacha), `page` — butun bet ekran balandligiga
+   * sig'adi (`pageReserve` — sarlavha va pastki panel egallagan px).
+   */
+  fit?: "width" | "page";
+  pageReserve?: number;
 }
 
 /**
@@ -65,6 +71,8 @@ export function VerticalView({
   contentRef,
   onPageChange,
   renderPage,
+  fit = "width",
+  pageReserve = 0,
 }: VerticalViewProps) {
   const outerRef = useRef<HTMLDivElement>(null);
   const slotRefs = useRef(new Map<number, HTMLDivElement>());
@@ -85,7 +93,19 @@ export function VerticalView({
     observer.observe(element);
     return () => observer.disconnect();
   }, []);
-  const baseWidth = Math.min(available || MAX_WIDTH, MAX_WIDTH);
+  const [viewportHeight, setViewportHeight] = useState(0);
+  useEffect(() => {
+    if (fit !== "page") return;
+    const update = () => setViewportHeight(window.innerHeight);
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, [fit]);
+  const fitWidth = Math.min(available || MAX_WIDTH, MAX_WIDTH);
+  const baseWidth =
+    fit === "page" && viewportHeight > pageReserve
+      ? Math.min(fitWidth, Math.floor((viewportHeight - pageReserve) / aspects.base))
+      : fitWidth;
   const pageWidth = Math.floor(baseWidth * zoom);
 
   // 1-bet nisbati — barcha betlar uchun standart.
@@ -153,7 +173,7 @@ export function VerticalView({
   );
 
   // Dasturiy scroll (raqam/mundarija) paytida oraliq betlar URL'ga yozilmaydi.
-  const target = useRef<{ page: number; until: number } | null>(null);
+  const target = useRef<{ page: number; until: number; smooth?: boolean } | null>(null);
   const reported = useRef(page);
   const timer = useRef<number | undefined>(undefined);
   const report = useEffectEvent((next: number) => {
@@ -166,6 +186,14 @@ export function VerticalView({
     }, REPORT_DEBOUNCE_MS);
   });
 
+  // Ko'rinib turgan bet va uning ekrandagi o'rni: yuqoridagi betlar balandligi keyin aniqlansa
+  // (haqiqiy nisbatlar yuklanganda) shu bet joyida qolishi uchun.
+  const anchor = useRef<{ page: number; top: number } | null>(null);
+  const rememberAnchor = useCallback((number: number) => {
+    const slot = slotRefs.current.get(number);
+    if (slot) anchor.current = { page: number, top: slot.getBoundingClientRect().top };
+  }, []);
+
   const measure = useEffectEvent(() => {
     const list = contentRef.current;
     if (!list) return;
@@ -177,6 +205,7 @@ export function VerticalView({
     const middle = top - list.getBoundingClientRect().top;
     const next = pageAtCenter(layout.tops, heights, middle);
     setCenter(next);
+    rememberAnchor(next);
     const pending = target.current;
     if (pending && (next === pending.page || performance.now() > pending.until)) {
       target.current = null;
@@ -221,10 +250,45 @@ export function VerticalView({
     const slot = slotRefs.current.get(page);
     if (!slot) return;
     const smooth = !first && !window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    target.current = { page, until: performance.now() + (smooth ? 1500 : 300) };
+    target.current = { page, until: performance.now() + (smooth ? 1500 : 300), smooth };
     setCenter(page);
     slot.scrollIntoView?.({ behavior: smooth ? "smooth" : "auto", block: "start" });
-  }, [page, available]);
+    if (!smooth) rememberAnchor(page);
+  }, [page, available, rememberAnchor]);
+
+  // Betlar balandligi o'zgarsa (eni o'zgarmagan holda — haqiqiy nisbatlar keldi): ko'rinib turgan
+  // bet ekranda o'sha joyda qoladi. Betlar `overflow-anchor: none` — brauzer anchoring'i bilan
+  // ikki marta tuzatilmasin. Eni o'zgarishini pastdagi effekt va `useReaderZoom` boshqaradi.
+  const previousHeights = useRef({ heights, pageWidth });
+  useLayoutEffect(() => {
+    const previous = previousHeights.current;
+    previousHeights.current = { heights, pageWidth };
+    if (previous.heights === heights || previous.pageWidth !== pageWidth) return;
+    const saved = anchor.current;
+    if (!saved || target.current?.smooth) return;
+    const slot = slotRefs.current.get(saved.page);
+    const root = scrollRoot();
+    if (!slot || !root) return;
+    const delta = slot.getBoundingClientRect().top - saved.top;
+    if (Math.abs(delta) >= 1) root.scrollBy({ top: delta, behavior: "instant" });
+  }, [heights, pageWidth, scrollRoot]);
+
+  // Masshtab rejimi (eni/butun bet) yoki oyna o'lchami o'zgarsa betlar balandligi o'zgaradi: joriy
+  // bet joyida qolsin (aks holda piksel scroll boshqa betga tushib qoladi). Zoom o'z yangi
+  // nuqtasini `useReaderZoom` da saqlaydi, shuning uchun bu yerda faqat `baseWidth`.
+  const previousBase = useRef(baseWidth);
+  useLayoutEffect(() => {
+    if (previousBase.current === baseWidth) return;
+    previousBase.current = baseWidth;
+    if (!mounted.current) return;
+    const current = reported.current;
+    const slot = slotRefs.current.get(current);
+    if (!slot) return;
+    target.current = { page: current, until: performance.now() + 300 };
+    setCenter(current);
+    slot.scrollIntoView?.({ behavior: "auto", block: "start" });
+    rememberAnchor(current);
+  }, [baseWidth, rememberAnchor]);
 
   const { from, to } = renderWindow(center, total, RENDER_RADIUS);
 
@@ -253,7 +317,7 @@ export function VerticalView({
                   else slotRefs.current.delete(number);
                 }}
                 data-page-slot={number}
-                className="relative scroll-mt-20 [overflow-anchor:auto]"
+                className="relative scroll-mt-20 [overflow-anchor:none]"
                 style={{ height }}
               >
                 {rendered ? (

@@ -2,12 +2,20 @@
 
 import { normalizeSearchText } from "@/lib/i18n/translit";
 
+/** Bo'lim ichidagi mashq/masala boshlanishi (backend `anchors`, ixtiyoriy — `docs/api-mavzu-materiallari.md`). */
+export interface TocAnchor {
+  kind: "exercise" | "problem";
+  title: string;
+  page: number;
+}
+
 export interface TocLeaf {
   id: string;
   title: string;
   page: number;
   /** Ixtiyoriy prezentatsiya (PDF slaydlar); yo'q bo'lsa `null`/berilmaydi. */
   slides?: { page_count: number; size_bytes: number } | null;
+  anchors?: readonly TocAnchor[] | null;
 }
 
 export interface TocChapter extends TocLeaf {
@@ -27,6 +35,7 @@ export function flattenToc(chapters: readonly TocChapter[]): TocItem[] {
       title: chapter.title,
       page: chapter.page,
       slides: chapter.slides ?? null,
+      anchors: chapter.anchors ?? null,
       level: 0 as const,
     },
     ...(chapter.children ?? []).map((child) => ({
@@ -34,6 +43,7 @@ export function flattenToc(chapters: readonly TocChapter[]): TocItem[] {
       title: child.title,
       page: child.page,
       slides: child.slides ?? null,
+      anchors: child.anchors ?? null,
       level: 1 as const,
     })),
   ]);
@@ -98,5 +108,55 @@ export function filterTocGroups(groups: readonly TocGroup[], query: string): rea
     if (matches(group.chapter)) return [group];
     const sections = group.sections.filter(matches);
     return sections.length > 0 ? [{ ...group, sections }] : [];
+  });
+}
+
+export type TocStatus = "read" | "current" | "unread";
+
+/**
+ * Har bo'lim holati joriy betga nisbatan: joriy bo'lim — `current`, undan oldingilari — `read`,
+ * keyingilari — `unread`. Bob faqat oxirgi bo'limi ham o'tilgan bo'lsa `read`; joriy bo'lim shu
+ * bob ichida bo'lsa bob ham `current`.
+ */
+export function tocStatuses(groups: readonly TocGroup[], page: number): Map<string, TocStatus> {
+  const items = groups.flatMap((group) => [group.chapter, ...group.sections]);
+  const current = currentTocItem(items, page);
+  const currentIndex = current ? items.indexOf(current) : -1;
+  const statuses = new Map<string, TocStatus>();
+  items.forEach((item, index) =>
+    statuses.set(
+      item.id,
+      index === currentIndex ? "current" : index < currentIndex ? "read" : "unread",
+    ),
+  );
+  for (const group of groups) {
+    if (group.sections.some((section) => section.id === current?.id)) {
+      statuses.set(group.chapter.id, "current");
+    } else if (group.sections.length > 0 && statuses.get(group.chapter.id) === "read") {
+      const last = group.sections.at(-1);
+      if (last && statuses.get(last.id) !== "read") statuses.set(group.chapter.id, "unread");
+    }
+  }
+  return statuses;
+}
+
+/** Bo'lim sarlavhasidagi qisqa belgi: "15-§. Kvadrat tenglama" → "15-§", "§ 3 …" → "3-§"; yo'q — `null`. */
+export function sectionLabel(title: string): string | null {
+  const match = /(\d{1,3})\s*-?\s*§|§\s*(\d{1,3})/.exec(title);
+  if (!match) return null;
+  return `${match[1] ?? match[2]}-§`;
+}
+
+/** Slider ustidagi bo'lim belgilari: har bo'lim boshlanishi 0..1 ulushda (1-betdagilar chiqmaydi). */
+export function tocMarkers(
+  items: readonly TocItem[],
+  total: number,
+): { id: string; page: number; at: number; level: 0 | 1 }[] {
+  if (total <= 1) return [];
+  const seen = new Set<number>();
+  return items.flatMap((item) => {
+    if (item.page <= 1 || item.page > total || seen.has(item.page)) return [];
+    seen.add(item.page);
+    return [{ id: item.id, page: item.page, at: (item.page - 1) / (total - 1), level: item.level }];
   });
 }

@@ -69,6 +69,9 @@ function usePdfFromUrl(
     return () => {
       cancelled = true;
       void task?.destroy();
+      // Yo'q qilingan hujjat state'da qolmasin: Next `<Activity>` sahifani yashirib keyin qaytarganda
+      // (orqaga navigatsiya) bolalar eski `doc.getPage` ni chaqirib yiqilardi.
+      setState({ doc: null, loading: true, error: null });
     };
   }, [sourceKey, attempt]);
 

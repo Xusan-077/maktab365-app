@@ -74,12 +74,6 @@ function setup(query = "", extra: Record<string, unknown> = {}) {
   );
 }
 
-/** Panelni ochib «Tavsif» yorlig'iga o'tadi. */
-const openAbout = async () => {
-  fireEvent.click(await screen.findByTestId("pdf-toc-open"));
-  fireEvent.click(await screen.findByTestId("reader-tab-about"));
-};
-
 const CURRENT = '[data-testid="pdf-canvas"][data-current]';
 const currentCanvas = () => document.querySelector<HTMLElement>(CURRENT);
 /** Joriy (URL'dagi) bet: gorizontalda qo'shni betlar ham (ko'rinmas) chiziladi. */
@@ -91,10 +85,14 @@ const renderedPages = () =>
   screen.queryAllByTestId("pdf-canvas").map((node) => Number(node.dataset.page));
 
 const PREFS_KEY = "maktab365-reader-prefs";
-const storeMode = (mode: "h" | "v" | null) =>
-  window.localStorage.setItem(PREFS_KEY, JSON.stringify({ state: { tone: "light", mode } }));
+const storeMode = (mode: "b" | "h" | "v" | null, extra: Record<string, unknown> = {}) =>
+  window.localStorage.setItem(
+    PREFS_KEY,
+    JSON.stringify({ state: { tone: "light", mode, ...extra } }),
+  );
+const status = uz.pdfBooks.toc.status;
 
-/** `matchMedia`: `true` — desktop va landshaft (yoyma), `false` — mobil. */
+/** `matchMedia`: `true` — desktop (≥1024, ochiq kitob — 2 bet), `false` — mobil. */
 const setViewport = (wide: boolean) => {
   window.matchMedia = ((query: string) => ({
     matches: wide,
@@ -108,8 +106,8 @@ beforeEach(() => {
   vi.clearAllMocks();
   // Mundarija paneli (useMediaQuery) uchun: jsdom'da matchMedia yo'q; <dialog> usullari ham.
   setViewport(false);
-  // Mavjud testlar bitta betli gorizontal rejimda (mobil + saqlangan "h").
-  storeMode("h");
+  // Mavjud testlar bitta betli kitob rejimida (mobil + saqlangan "b").
+  storeMode("b");
   HTMLDialogElement.prototype.showModal = function showModal() {
     this.setAttribute("open", "");
   };
@@ -118,8 +116,16 @@ beforeEach(() => {
     this.dispatchEvent(new Event("close")); // jsdom bermaydi; brauzerda Esc/close() shuni chiqaradi
   };
   progress.state = { ready: true, position: null, resume: 1, record: vi.fn() };
+  // O'qish oynasi URL'ni `history.replaceState("?…")` bilan yangilaydi (Next router bilan sinxron):
+  // testlarda router mock'idek — `nav.replace(<yo'l>?…)`, haqiqiy URL o'zgarmaydi.
+  vi.spyOn(window.history, "replaceState").mockImplementation((_state, _unused, url) => {
+    nav.replace(`/darsliklar/book-1${String(url)}`, { scroll: false });
+  });
 });
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.restoreAllMocks();
+});
 
 describe("PdfReader", () => {
   it("?page=12 bo'yicha shu sahifani chizadi va «12 / 240» ni ko'rsatadi", async () => {
@@ -248,7 +254,7 @@ const CHAPTERS = [
   { id: "c2", title: "Algebra", page: 50 },
 ];
 
-describe("PdfReader: mundarija va tavsif", () => {
+describe("PdfReader: mundarija", () => {
   it("mundarija bo'lmasa panelda «Mundarija» yorlig'i yo'q", async () => {
     setup("page=5", { description: "", chapters: [] });
     await currentPage();
@@ -263,15 +269,14 @@ describe("PdfReader: mundarija va tavsif", () => {
     fireEvent.click(await screen.findByTestId("pdf-toc-open"));
 
     const items = await screen.findAllByTestId("pdf-toc-item");
-    const toc = screen.getByTestId("pdf-toc");
     expect(items.map((item) => item.textContent)).toEqual([
-      "Kirish1-bet",
-      "Maqsad10-bet",
-      "Algebra50-bet",
+      `${status.current}Kirish1-bet`,
+      `${status.unread}Maqsad10-bet`,
+      `${status.unread}Algebra50-bet`,
     ]);
     fireEvent.click(items[2]);
     expect(nav.replace).toHaveBeenCalledWith("/darsliklar/book-1?page=50", { scroll: false });
-    await waitFor(() => expect(toc.closest("dialog")?.hasAttribute("open")).toBe(false));
+    await waitFor(() => expect(screen.queryByTestId("pdf-toc-drawer")).toBeNull());
   });
 
   it("joriy bo'lim ajratib ko'rsatiladi", async () => {
@@ -292,40 +297,6 @@ describe("PdfReader: mundarija va tavsif", () => {
     fireEvent.click(await screen.findByTestId("pdf-toc-open"));
     fireEvent.click((await screen.findAllByTestId("pdf-toc-item"))[0]);
     expect(nav.replace).toHaveBeenCalledWith("/darsliklar/book-1?page=240", { scroll: false });
-  });
-
-  it("qisqa tavsif to'liq ko'rinadi, uzuni «Batafsil» bilan kengayadi", async () => {
-    const long = "Uzun tavsif. ".repeat(30);
-    setup("page=1", { description: long, chapters: [] });
-    await currentPage();
-    await openAbout();
-    const more = await screen.findByRole("button", { name: uz.pdfBooks.description.more });
-    expect(more.getAttribute("aria-expanded")).toBe("false");
-    expect(screen.getByTestId("pdf-description").querySelector("p")?.className).toContain(
-      "line-clamp-2",
-    );
-    fireEvent.click(more);
-    expect(
-      screen
-        .getByRole("button", { name: uz.pdfBooks.description.less })
-        .getAttribute("aria-expanded"),
-    ).toBe("true");
-    expect(screen.getByTestId("pdf-description").querySelector("p")?.className).not.toContain(
-      "line-clamp-2",
-    );
-  });
-
-  it("qisqa tavsifda «Batafsil» tugmasi yo'q; tavsif bo'lmasa blok yo'q", async () => {
-    setup("page=1", { description: "Qisqa tavsif", chapters: [] });
-    await currentPage();
-    await openAbout();
-    expect(await screen.findByText("Qisqa tavsif")).toBeTruthy();
-    expect(screen.queryByRole("button", { name: uz.pdfBooks.description.more })).toBeNull();
-    cleanup();
-    setup("page=1", { description: "", chapters: [] });
-    await currentPage();
-    fireEvent.click(await screen.findByTestId("pdf-toc-open"));
-    expect(screen.queryByTestId("reader-tab-about")).toBeNull();
   });
 });
 
@@ -435,18 +406,27 @@ describe("PdfReader: prezentatsiya", () => {
 });
 
 describe("PdfReader: matn qatlami", () => {
-  it.each([true, null, undefined])("has_text_layer=%s — qidiruv tugmasi bor", async (value) => {
+  it.each([true, null, undefined])("has_text_layer=%s — qidiruv bor", async (value) => {
+    setup("?page=3", { has_text_layer: value });
+    await currentPage();
+    // Mobilda qidiruv «⋯» menyusida, desktopda sarlavhada.
+    fireEvent.click(screen.getByTestId("pdf-more"));
+    expect(screen.getByTestId("pdf-find-open")).toBeTruthy();
+    cleanup();
+    setViewport(true);
     setup("?page=3", { has_text_layer: value });
     expect(await screen.findByTestId("pdf-find-open")).toBeTruthy();
   });
 
-  it("matn qatlami yo'q (skan) — qidiruv tugmasi va Ctrl+F yo'q", async () => {
+  it("matn qatlami yo'q (skan) — qidiruv, Ctrl+F va / yo'q", async () => {
     setup("?page=3", { has_text_layer: false });
     expect(await currentPage()).toBe("3");
     await screen.findByText("Algebra 9");
 
+    fireEvent.click(screen.getByTestId("pdf-more"));
     expect(screen.queryByTestId("pdf-find-open")).toBeNull();
     fireEvent.keyDown(window, { key: "f", ctrlKey: true });
+    fireEvent.keyDown(window, { key: "/" });
     expect(screen.queryByTestId("pdf-find-input")).toBeNull();
   });
 });
@@ -454,7 +434,7 @@ describe("PdfReader: matn qatlami", () => {
 describe("PdfReader: zoom, pinch va sahifa boshi", () => {
   const zoomOf = () => screen.getByTestId("pdf-zoom-content").dataset.zoom;
 
-  it("mundarijadan boshqa betga o'tilsa sahifa boshidan ochiladi (birinchi ochilishda emas)", async () => {
+  it("kitobda mundarijadan uzoq betga sakrash: shu bet ko'rinadi, sahifa scroll qilinmaydi", async () => {
     const scrollTo = vi.fn();
     window.scrollTo = scrollTo as unknown as typeof window.scrollTo;
     nav.params = new URLSearchParams("page=5");
@@ -486,25 +466,64 @@ describe("PdfReader: zoom, pinch va sahifa boshi", () => {
     nav.params = new URLSearchParams("page=50");
     view.rerender(tree());
     await waitFor(() => expect(currentCanvas()?.dataset.page).toBe("50"));
-    expect(scrollTo).toHaveBeenCalledWith({ top: 0 });
+    // Kitob stage'da qotib turadi — oyna scroll'i yo'q.
+    expect(scrollTo).not.toHaveBeenCalled();
+    expect(screen.getByTestId("book-announce").textContent).toBe(
+      uz.pdfBooks.reader.bookPage.replace("{page}", "50"),
+    );
   });
 
-  it("pastki paneldagi «Zoom»: 100% → 150% → 200% → 300% → 100%", async () => {
+  it("Z klavishi: 100% → 150% → 200% → 300% → 100%; Aa menyusida −/+ va 100%", async () => {
     setup("page=5");
     await currentPage();
-    const button = screen.getByTestId("pdf-zoom-bar");
     expect(zoomOf()).toBe("1");
     const seen = [];
     for (let i = 0; i < 4; i += 1) {
-      fireEvent.click(button);
+      fireEvent.keyDown(window, { key: "z" });
       seen.push(zoomOf());
     }
     expect(seen).toEqual(["1.5", "2", "3", "1"]);
-    fireEvent.click(button);
-    expect(button.textContent).toContain("150%");
+
+    fireEvent.click(screen.getByTestId("pdf-view-open"));
+    fireEvent.click(screen.getByRole("button", { name: uz.pdfBooks.appearance.zoomIn }));
+    expect(zoomOf()).toBe("1.1");
+    const reset = screen.getByTestId("reader-zoom-reset");
+    expect(reset.textContent).toBe("110%");
+    fireEvent.click(reset);
+    expect(zoomOf()).toBe("1");
   });
 
-  it("ikki barmoq (pinch): harakat paytida CSS scale, qo'yib yuborilganda zoom (3× gacha)", async () => {
+  it("klaviatura + − 0: 10% qadam, 0 — «Moslash»; tanlov xotiraga yoziladi", async () => {
+    setup("page=5");
+    await currentPage();
+    fireEvent.keyDown(window, { key: "+" });
+    fireEvent.keyDown(window, { key: "+" });
+    expect(zoomOf()).toBe("1.2");
+    fireEvent.keyDown(window, { key: "-" });
+    expect(zoomOf()).toBe("1.1");
+    expect(window.localStorage.getItem(PREFS_KEY)).toContain('"zoom":1.1');
+    fireEvent.keyDown(window, { key: "0" });
+    expect(zoomOf()).toBe("1");
+  });
+
+  it("kitobda pinch qo'yib yuborilganda zoom holatga yoziladi (3× gacha), swipe bo'lmaydi", async () => {
+    setup("page=5");
+    await currentPage();
+    const area = screen.getByTestId("pdf-page-area");
+    const touches = (gap: number) => [
+      { clientX: 100, clientY: 200 },
+      { clientX: 100 + gap, clientY: 200 },
+    ];
+    fireEvent.touchStart(area, { touches: touches(100) });
+    fireEvent.touchMove(area, { touches: touches(500) });
+    fireEvent.touchEnd(area, { touches: [] });
+    expect(zoomOf()).toBe("3");
+    fireEvent.pointerUp(area, { pointerType: "touch", clientX: 300, clientY: 200 });
+    expect(nav.replace).not.toHaveBeenCalledWith("/darsliklar/book-1?page=6", { scroll: false });
+  });
+
+  it("uzluksiz rejimda ikki barmoq (pinch): harakat paytida CSS scale, qo'yilganda zoom", async () => {
+    storeMode("v");
     setup("page=5");
     await currentPage();
     const area = screen.getByTestId("pdf-page-area");
@@ -528,43 +547,64 @@ describe("PdfReader: zoom, pinch va sahifa boshi", () => {
     setup("page=5");
     await currentPage();
     expect(screen.queryByTestId("pdf-share")).toBeNull();
-    fireEvent.click(screen.getByTestId("pdf-bar-more"));
+    fireEvent.click(screen.getByTestId("pdf-more"));
     const items = screen.getAllByRole("menuitem").map((item) => item.textContent);
-    expect(items).toEqual([
-      uz.pdfBooks.reader.pages,
-      uz.pdfBooks.reader.offline,
-      uz.pdfBooks.reader.share,
-    ]);
+    expect(items).toEqual(
+      expect.arrayContaining([
+        uz.pdfBooks.reader.pages,
+        uz.pdfBooks.reader.offline,
+        uz.pdfBooks.reader.share,
+      ]),
+    );
   });
 });
 
 describe("PdfReader: o'qish rejimlari", () => {
-  it("mobilda standart — vertikal: faqat joriy bet ±2 chiziladi, qolgani skeleton", async () => {
+  it("standart — kitob: mobilda bitta bet, canvas faqat joriy bet ±2 da", async () => {
     window.localStorage.removeItem(PREFS_KEY);
     setup("page=12");
     expect(await currentPage()).toBe("12");
-    expect(screen.getByTestId("pdf-page-area").dataset.mode).toBe("v");
+    expect(screen.getByTestId("pdf-page-area").dataset.mode).toBe("b");
+    expect(screen.getByTestId("pdf-zoom-content").dataset.twoPage).toBeUndefined();
     expect(renderedPages()).toEqual([10, 11, 12, 13, 14]);
-    // Barcha 240 bet o'rni bor (balandlik saqlanadi — scroll sakramaydi).
-    expect(document.querySelectorAll("[data-page-slot]")).toHaveLength(240);
+    const book = screen.getByRole("group", { name: uz.pdfBooks.reader.book });
+    expect(book).toBeTruthy();
   });
 
-  it("desktopda standart — yoyma: 33-bet 32–33 yoymasida, qo'shni yoymalar oldindan chiziladi", async () => {
-    window.localStorage.removeItem(PREFS_KEY);
+  it("eski saqlangan «surish» (h) — kitob rejimi", async () => {
+    storeMode("h");
+    setup("page=12");
+    await currentPage();
+    expect(screen.getByTestId("pdf-page-area").dataset.mode).toBe("b");
+  });
+
+  it("desktopda (≥1024) ochiq kitob: 33-bet 32–33 yoymasida, URL'da chap bet, qo'shnilar oldindan", async () => {
     setViewport(true);
     setup("page=33");
-    expect(await currentPage()).toBe("33");
-    expect(screen.getByTestId("pdf-horizontal").dataset.spread).toBe("true");
+    expect(await currentPage()).toBe("32");
+    await waitFor(() =>
+      expect(nav.replace).toHaveBeenCalledWith("/darsliklar/book-1?page=32", { scroll: false }),
+    );
+    expect(screen.getByTestId("pdf-zoom-content").dataset.twoPage).toBe("true");
     const visible = [
       ...document.querySelectorAll('[data-slot="current"] [data-testid="pdf-canvas"]'),
     ];
     expect(visible.map((node) => (node as HTMLElement).dataset.page)).toEqual(["32", "33"]);
     expect(renderedPages().sort((a, b) => a - b)).toEqual([30, 31, 32, 33, 34, 35]);
+    expect(screen.getByTestId("book-announce").textContent).toBe(
+      uz.pdfBooks.reader.bookPages.replace("{from}", "32").replace("{to}", "33"),
+    );
   });
 
-  it("yoymada ← / → / PageDown / Space bir bosishda 2 bet o'tadi", async () => {
-    setViewport(true);
+  it("1024px dan tor ekranda bitta bet", async () => {
     setup("page=33");
+    await currentPage();
+    expect(screen.getByTestId("pdf-zoom-content").dataset.twoPage).toBeUndefined();
+  });
+
+  it("ochiq kitobda ← / → / PageDown / Space bir bosishda 2 bet o'tadi", async () => {
+    setViewport(true);
+    setup("page=32");
     await currentPage();
     fireEvent.keyDown(window, { key: "ArrowRight" });
     fireEvent.keyDown(window, { key: "ArrowLeft" });
@@ -577,7 +617,7 @@ describe("PdfReader: o'qish rejimlari", () => {
     expect(pages).toEqual(["34", "32", "34", "36", "34"]);
   });
 
-  it("yoymada 1-bet (muqova) yolg'iz: keyingisi — 2", async () => {
+  it("ochiq kitobda 1-bet (muqova) yolg'iz: keyingisi — 2", async () => {
     setViewport(true);
     setup("page=1");
     await currentPage();
@@ -587,7 +627,7 @@ describe("PdfReader: o'qish rejimlari", () => {
   });
 
   it("?mode= URL'dan saqlangan tanlovdan ustun", async () => {
-    storeMode("h");
+    storeMode("b");
     setup("page=12&mode=v");
     await currentPage();
     expect(screen.getByTestId("pdf-page-area").dataset.mode).toBe("v");
@@ -620,5 +660,99 @@ describe("PdfReader: o'qish rejimlari", () => {
     await currentPage();
     fireEvent.keyDown(window, { key: "ArrowRight" });
     expect(nav.replace).toHaveBeenCalledWith("/darsliklar/book-1?page=6", { scroll: false });
+  });
+});
+
+describe("PdfReader: fokus rejimi, mavzu paneli, suzuvchi panel", () => {
+  it("sarlavhada kitob nomi va joriy bo'lim; bosilsa (yoki M) mundarija ochiladi", async () => {
+    setup("page=12", { chapters: CHAPTERS });
+    await currentPage();
+    expect(screen.getByTestId("pdf-current-section").textContent).toBe("Maqsad");
+    fireEvent.keyDown(window, { key: "m" });
+    expect(await screen.findByTestId("pdf-toc-drawer")).toBeTruthy();
+  });
+
+  it("chap sidebar va pastki thumbnail lentasi yo'q", async () => {
+    setViewport(true);
+    setup("page=12", { chapters: CHAPTERS });
+    await currentPage();
+    expect(screen.queryByTestId("pdf-sidebar-toggle")).toBeNull();
+    expect(screen.queryByTestId("pdf-thumbs-toggle")).toBeNull();
+    expect(screen.queryByRole("complementary")).toBeNull();
+  });
+
+  it("suzuvchi panel: oldingi/keyingi va slider qo'yib yuborilganda betga o'tadi", async () => {
+    setup("page=12", { chapters: CHAPTERS });
+    await currentPage();
+    fireEvent.click(screen.getByTestId("pdf-next"));
+    expect(nav.replace).toHaveBeenLastCalledWith("/darsliklar/book-1?page=13", { scroll: false });
+    const slider = screen.getByTestId("reader-slider");
+    fireEvent.focus(slider);
+    fireEvent.change(slider, { target: { value: "50" } });
+    expect(screen.getByTestId("reader-slider-tooltip").textContent).toBe("50-bet · Algebra");
+    fireEvent.pointerUp(slider);
+    expect(nav.replace).toHaveBeenLastCalledWith("/darsliklar/book-1?page=50", { scroll: false });
+    // Bo'lim boshlanishlari (1-betdagisidan tashqari) belgilangan.
+    expect(screen.getAllByTestId("reader-slider-marker")).toHaveLength(2);
+  });
+
+  it("«Mavzu» joriy bo'lim xulosasini ochadi; «Test» — Test yorlig'ini", async () => {
+    setup("page=12", { chapters: CHAPTERS });
+    await currentPage();
+    fireEvent.click(screen.getByTestId("pdf-topic-open"));
+    const panel = await screen.findByTestId("topic-panel");
+    expect(await within(panel).findByTestId("summary-blocks")).toBeTruthy();
+    expect(await screen.findByTestId("topic-verified")).toBeTruthy();
+    fireEvent.keyDown(panel, { key: "Escape" });
+    cleanup();
+
+    setup("page=12", { chapters: CHAPTERS });
+    await currentPage();
+    fireEvent.click(screen.getByTestId("reader-test"));
+    const tab = await screen.findByRole("tab", { name: uz.topic.tabs.test });
+    expect(tab.getAttribute("aria-selected")).toBe("true");
+  });
+
+  it("mundarijasiz kitobda «Mavzu» va «Test» yo'q", async () => {
+    setup("page=12", { chapters: [] });
+    await currentPage();
+    expect(screen.queryByTestId("pdf-topic-open")).toBeNull();
+    expect(screen.queryByTestId("reader-test")).toBeNull();
+  });
+
+  it("joriy bo'limda mashq bo'lsa «Mashqlar» shu betga o'tadi", async () => {
+    setup("page=12", {
+      chapters: [
+        {
+          id: "c1",
+          title: "Kirish",
+          page: 1,
+          children: [
+            {
+              id: "c1a",
+              title: "Maqsad",
+              page: 10,
+              anchors: [{ kind: "exercise", title: "Mashqlar", page: 16 }],
+            },
+          ],
+        },
+      ],
+    });
+    await currentPage();
+    fireEvent.click(screen.getByTestId("reader-exercises"));
+    expect(nav.replace).toHaveBeenLastCalledWith("/darsliklar/book-1?page=16", { scroll: false });
+  });
+
+  it("Aa sozlamalari xotiraga yoziladi: fon, iliq rang", async () => {
+    setup("page=12");
+    await currentPage();
+    fireEvent.click(screen.getByTestId("pdf-view-open"));
+    fireEvent.click(screen.getByTestId("reader-tone-sepia"));
+    fireEvent.click(screen.getByTestId("reader-warm"));
+    expect(screen.getByTestId("pdf-reader").dataset.tone).toBe("sepia");
+    expect(screen.getByTestId("pdf-reader").dataset.warm).toBe("true");
+    const stored = window.localStorage.getItem(PREFS_KEY) ?? "";
+    expect(stored).toContain('"tone":"sepia"');
+    expect(stored).toContain('"warm":true');
   });
 });

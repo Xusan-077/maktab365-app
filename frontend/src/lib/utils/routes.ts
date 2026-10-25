@@ -79,6 +79,10 @@ export const pdfBookPath = (book: BookRef) => `${ROUTES.textbooks}/${book.grade}
 export const readerPath = (book: BookRef, page?: number) =>
   `${pdfBookPath(book)}/oqish${page && page > 1 ? `?page=${page}` : ""}`;
 
+/** Mavzu taqdimoti: `/darsliklar/9/9-sinf-algebra/taqdimot/<mavzu id>[?slayd=N]`. */
+export const presentationPath = (book: BookRef, topicId: string, slide?: number) =>
+  `${pdfBookPath(book)}/taqdimot/${topicId}${slide && slide > 1 ? `?slayd=${slide}` : ""}`;
+
 /** Panel ichidagi Yordam sahifasi (rolga mos). */
 export const helpPath = (base: PanelBase) =>
   base === "kabinet" ? ROUTES.cabinetHelp : ROUTES.teacherHelp;

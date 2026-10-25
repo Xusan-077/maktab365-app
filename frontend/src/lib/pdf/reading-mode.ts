@@ -1,27 +1,31 @@
 /**
- * O'qish rejimlari (sof funksiyalar): gorizontal (`h`, kitob kabi varaqlash; desktopda 2 betlik
- * yoyma) va vertikal (`v`, uzluksiz scroll, virtualizatsiya bilan).
+ * O'qish rejimlari (sof funksiyalar): «Kitob» (`b`, ochiq kitob — varaq ag'darish; ≥1024px da
+ * ikki bet yonma-yon) va «Uzluksiz» (`v`, vertikal scroll, virtualizatsiya bilan).
  */
 
-export const READING_MODES = ["h", "v"] as const;
+export const READING_MODES = ["b", "v"] as const;
 export type ReadingMode = (typeof READING_MODES)[number];
 
 export const isReadingMode = (value: unknown): value is ReadingMode =>
   READING_MODES.includes(value as ReadingMode);
 
-/** `?mode=` qiymati: `h` | `v`, boshqasi — `null` (aytilmagan). */
-export function parseModeParam(raw: string | null | undefined): ReadingMode | null {
-  const value = raw?.trim().toLowerCase();
-  return isReadingMode(value) ? value : null;
+/** Eski «Surish» rejimi (`h`) — endi «Kitob». */
+const LEGACY_MODES: Record<string, ReadingMode> = { h: "b" };
+
+/** Xotiradagi yoki URL'dagi qiymat: `b` | `v` (eski `h` → `b`), boshqasi — `null`. */
+export function toReadingMode(value: unknown): ReadingMode | null {
+  if (isReadingMode(value)) return value;
+  return typeof value === "string" ? (LEGACY_MODES[value] ?? null) : null;
 }
 
-/** URL > saqlangan tanlov > qurilma bo'yicha standart (desktop — yoyma, mobil — scroll). */
-export function resolveMode(
-  url: ReadingMode | null,
-  stored: ReadingMode | null,
-  desktop: boolean,
-): ReadingMode {
-  return url ?? stored ?? (desktop ? "h" : "v");
+/** `?mode=` qiymati: `b` | `v` (eski `h` → `b`), boshqasi — `null` (aytilmagan). */
+export function parseModeParam(raw: string | null | undefined): ReadingMode | null {
+  return toReadingMode(raw?.trim().toLowerCase());
+}
+
+/** URL > saqlangan tanlov > standart: «Kitob». */
+export function resolveMode(url: ReadingMode | null, stored: ReadingMode | null): ReadingMode {
+  return url ?? stored ?? "b";
 }
 
 /**

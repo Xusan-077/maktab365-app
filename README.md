@@ -110,11 +110,36 @@ Yoki ildizdan: `make dev`. Boshqa buyruqlar: `make test`, `make lint`, `make sch
   `POST /admin/pdf-books/{id}/duplicate/`, belgilar `me/pdf-annotations/`, Telegram bot API `GET /bot/books/`
   (`BOT_API_TOKEN` bilan yoqiladi, `backend/README.md`). Migratsiyalar faqat qo'shuvchi (`content 0008–0011`,
   `analytics 0001`, `learning 0006`); predeploy da `migrate` avtomatik.
-- **O'qish oynasi:** ikki rejim (`?mode=h|v`, tanlov eslab qolinadi): gorizontal — kitob kabi varaqlash (desktopda 2 betlik
-  yoyma, ←/→/PgUp/PgDn/Space, swipe, qo'shni betlar oldindan chiziladi) va vertikal — uzluksiz scroll (virtualizatsiya:
-  faqat ko'rinayotgan bet ±2 chiziladi); «Sahifalar» thumbnail paneli, tanlanadigan matn qatlami, sahifa foni
-  (oddiy/sepiya/qorong'i), zoom 50–300% (tugma, ikki marta bosish, pinch, Ctrl+g'ildirak), to'liq ekran (F), klaviatura yorliqlari (`?`), kitob ichida qidiruv (Ctrl+F; matn qatlami yo'q skaner PDF uchun aniq xabar),
+- **O'qish oynasi:** fokus rejimi (ingichka sarlavha + 3px progress, «Aa» sozlamalari, suzuvchi pastki navigatsiya bo'lim
+  belgilari bilan, belgilangan matn menyusi, «Mavzu» paneli: Xulosa/Taqdimot/Konspekt/Test). Ikki rejim (`?mode=b|v`, standart
+  — «Kitob», tanlov eslab qolinadi; eski `?mode=h` — «Kitob»): «Kitob» — ochiq kitob, varaq ag'darish (qarang «Kitob rejimi»
+  pastda) va «Uzluksiz» — vertikal scroll (virtualizatsiya: faqat ko'rinayotgan bet ±2 chiziladi); «Sahifalar» thumbnail
+  paneli, tanlanadigan matn qatlami, sahifa foni (oddiy/sepiya/qorong'i), zoom 50–300% (10% qadam: sarlavhadagi guruh, Aa,
+  `+`/`−`/`0`, ikki marta bosish, pinch, Ctrl+g'ildirak; bitta saqlanadigan holat), to'liq ekran (F), klaviatura yorliqlari (`?`), kitob ichida qidiruv (Ctrl+F; matn qatlami yo'q skaner PDF uchun aniq xabar),
   3 rangli belgilar va qisqa eslatma (mehmonda brauzerda, kirganda serverda; kirgach birlashadi).
+- **Kitob rejimi** (`components/pdf/reader/BookView.tsx`, sof mantiq `lib/pdf/book.ts`, `lib/pdf/page-curl.ts`, zoom —
+  `hooks/useBookZoom.ts`):
+  - **Kutubxona:** o'z curl dvigatelimiz (2D buklanish: clip-path + affin transform + harakatdagi soya), `page-flip` emas — uning
+    `getMousePos` i CSS scale'ni hisobga olmaydi (zoom ostida sudrash koordinatalari siljiydi) va HTML rejimi DOM tugunlarini
+    o'zi ko'chirib/klonlaydi (React va chizilgan canvas'lar bilan to'qnashadi).
+  - **Qanday ishlaydi:** ≥1024px da ikki bet (muqova va juft sonli kitobning oxirgi beti yolg'iz, juft bet chapda), kichigida
+    bitta bet. Ag'darish: burchak/chekkani sudrash yoki bosish, ←/→/PgUp/PgDn/Space, pastki navigatsiya, swipe; uzoq sakrash
+    (raqam, slider, mundarija) — bitta tez varaq + crossfade. Kitob joylashuvi bir marta hisoblanadi (PDF nisbati, stage dan
+    28px ichkarida), keyin oyna yoki Mavzu paneli o'zgarsa faqat «Moslash» masshtabi animatsiya bilan o'zgaradi (CLS 0). Zoom/pan
+    — faqat GPU transform (Framer Motion `animate`, prujina ~300ms), fokus nuqtasi joyida; 200ms tinchigach betlar
+    `devicePixelRatio × zoom` da (tomoni ≤ 4096px) qayta chiziladi. Zoom > 105% da sudrash — pan (chegarali), ag'darish —
+    tugma/klaviatura. Canvas faqat joriy yoyma ±2 betda; `lib/pdf/render-pool.ts` — chizish navbati (2 parallel, keraksizi
+    bekor), LRU kesh (12 bet, chiqarilgan canvas 0×0), har chizishdan keyin `page.cleanup()`. URL `?page=` —
+    `history.replaceState` (yoymada chap bet). `prefers-reduced-motion` yoki sust qurilma (≤ 2 yadro / ≤ 2 GB) — curl o'rniga
+    crossfade, zoom animatsiyasiz. Kitob konteyneri `role="group"`, «77–78-betlar» `aria-live` bilan e'lon qilinadi.
+  - **Ma'lum cheklovlar:** toq sonli kitobning oxirgi beti juftlikda (juft/toq tartib buzilmasligi uchun); ag'darish paytida
+    matn belgilanmaydi (tinch holatda ishlaydi), zoom > 105% da sichqoncha sudrashi pan bo'lgani uchun matnni belgilab
+    bo'lmaydi; bitta bet rejimida varaqning orqasi toza qog'oz; kitob joylashuvi birinchi o'lchamdan — oyna juda
+    kattalashtirilsa sifatni `renderScale` ushlab turadi, lekin canvas tomoni 4096px bilan cheklangan.
+- **Mavzu materiallari:** mavzu (mundarija bo'limi) uchun tipli bloklardan iborat Xulosa va slaydli Taqdimot
+  (`/darsliklar/N/<slug>/taqdimot/<mavzu>`); admin `/admin/kitoblar/<id>/mavzu/<bo'lim>` da muharrir (drag-and-drop,
+  avtosaqlash, AI qoralamasi, PPTX/PDF yuklash). Backend shartnomasi — `docs/api-mavzu-materiallari.md`; backend tayyor
+  bo'lguncha frontend mock bilan ishlaydi (`NEXT_PUBLIC_TOPIC_MATERIALS_API=http` — haqiqiy API).
 - **Boshqa:** bosh sahifada «Davom ettirish» va «Oxirgi ko'rilganlar» (mehmon ham), global qidiruv (Ctrl+K: kitob, sinf, fan,
   mundarija bo'limi) sayt sarlavhasida ham, admin: statistika (`/admin/statistika`), ommaviy yuklash
   (`/admin/kitoblar/ommaviy`), nusxalash va qoralamani o'quvchi ko'rinishida ko'rish (`/admin/kitoblar/{id}/korish`).
@@ -142,4 +167,3 @@ Yozuvlar (sahifa, xatcho'p, hodisa) `lib/offline/write-queue.ts` orqali: TanStac
 brauzerda (`maktab365-writes:<user>`) navbatga tushadi va internet qaytganda/taymerda qayta yuboriladi, 4xx bo'lsa o'zgarish qaytariladi.
 Mehmon ma'lumoti kirgach merge qilinadi; xatoda saqlanadi va oshib boruvchi oraliq bilan qayta uriniladi. E2E: `frontend/e2e/learning.spec.ts`.
 Rejalar (goals) navbatsiz: optimistic + rollback, offline'da xato ko'rsatiladi.
-

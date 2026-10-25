@@ -9,6 +9,7 @@ import {
   isSameOrigin,
   MAX_BODY_BYTES,
   MAX_PDF_BODY_BYTES,
+  MAX_PRESENTATION_BODY_BYTES,
   toBffUrl,
   upstreamPath,
 } from "./request-guards";
@@ -65,6 +66,10 @@ describe("BFF: tana hajmi chegarasi", () => {
       MAX_BODY_BYTES,
     );
     expect(bodyLimitFor("/api/v1/admin/pdf-books/../upload/")).toBe(MAX_BODY_BYTES);
+    expect(
+      bodyLimitFor("/api/v1/admin/topics/3f2b8c1e-5d4a-4c7e-9a10-0b6f1d2e3c4d/presentation/"),
+    ).toBe(MAX_PRESENTATION_BODY_BYTES);
+    expect(bodyLimitFor("/api/v1/admin/topics/x/presentation/")).toBe(MAX_BODY_BYTES);
   });
 
   it("PDF fayl endpoint'i faqat aniq yo'lda tanib olinadi", () => {
