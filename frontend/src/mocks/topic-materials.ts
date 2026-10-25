@@ -97,7 +97,8 @@ const CONVERSION_MS = 6000;
 
 export class MockTopicMaterialsApi implements TopicMaterialsApi {
   private readonly summaries = new Map<string, TopicSummary>();
-  private readonly presentations = new Map<string, Presentation>();
+  /** `null` — taqdimot o'chirilgan (namunaviy qayta paydo bo'lmaydi). */
+  private readonly presentations = new Map<string, Presentation | null>();
   private readonly conversions = new Map<string, Conversion>();
   private readonly latencyMs: number;
 
@@ -124,9 +125,9 @@ export class MockTopicMaterialsApi implements TopicMaterialsApi {
     return summary;
   }
 
-  private presentationOf(topicId: string): Presentation {
+  private presentationOf(topicId: string): Presentation | null {
     let presentation = this.presentations.get(topicId);
-    if (!presentation) {
+    if (presentation === undefined) {
       presentation = toPresentation(`${topicId}-presentation`, sampleSlides(topicId, 8));
       this.presentations.set(topicId, presentation);
     }
@@ -195,11 +196,7 @@ export class MockTopicMaterialsApi implements TopicMaterialsApi {
   }
 
   async patchSlides(presentationId: string, patches: SlidePatch[]) {
-    const entry = [...this.presentations.entries()].find(
-      ([, value]) => value.id === presentationId,
-    );
-    if (!entry) throw new ApiError("Taqdimot topilmadi", 404, { code: "not_found" });
-    const [topicId, presentation] = entry;
+    const [topicId, presentation] = this.entryOf(presentationId);
     const byId = new Map(presentation.slides.map((slide) => [slide.id, slide]));
     const slides = patches.flatMap((patch) => {
       const slide = byId.get(patch.id);
@@ -218,5 +215,34 @@ export class MockTopicMaterialsApi implements TopicMaterialsApi {
     const next = toPresentation(presentation.id, slides);
     this.presentations.set(topicId, next);
     return this.delay(next);
+  }
+
+  async deleteSlide(presentationId: string, slideId: string) {
+    const [topicId, presentation] = this.entryOf(presentationId);
+    if (!presentation.slides.some((slide) => slide.id === slideId)) {
+      throw new ApiError("Slayd topilmadi", 404, { code: "not_found" });
+    }
+    const slides = [...presentation.slides]
+      .filter((slide) => slide.id !== slideId)
+      .sort((a, b) => a.order - b.order)
+      .map((slide, index) => ({ ...slide, order: index + 1 }));
+    const next = slides.length > 0 ? toPresentation(presentation.id, slides) : null;
+    this.presentations.set(topicId, next);
+    return this.delay(next);
+  }
+
+  async deletePresentation(topicId: string) {
+    if (!this.presentationOf(topicId)) {
+      throw new ApiError("Taqdimot topilmadi", 404, { code: "not_found" });
+    }
+    this.presentations.set(topicId, null);
+    await this.delay(null);
+  }
+
+  private entryOf(presentationId: string): [string, Presentation] {
+    for (const [topicId, value] of this.presentations) {
+      if (value?.id === presentationId) return [topicId, value];
+    }
+    throw new ApiError("Taqdimot topilmadi", 404, { code: "not_found" });
   }
 }

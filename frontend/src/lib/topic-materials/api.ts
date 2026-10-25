@@ -35,6 +35,10 @@ export interface TopicMaterialsApi {
   ): Promise<PresentationUpload>;
   conversionStatus(topicId: string): Promise<ConversionState>;
   patchSlides(presentationId: string, slides: SlidePatch[]): Promise<Presentation>;
+  /** Bitta slayd: qolganlari qayta raqamlanadi; oxirgisi o'chirilsa taqdimot ham yo'qoladi (`null`). */
+  deleteSlide(presentationId: string, slideId: string): Promise<Presentation | null>;
+  /** Mavzu taqdimoti butunlay (slaydlar, eslatmalar, PDF). */
+  deletePresentation(topicId: string): Promise<void>;
 }
 
 const path = {
@@ -42,8 +46,10 @@ const path = {
   adminSummary: (id: string) => `/api/v1/admin/topics/${id}/summary/`,
   aiDraft: (id: string) => `/api/v1/admin/topics/${id}/summary/ai-draft/`,
   presentation: (id: string) => `/api/v1/topics/${id}/presentation/`,
+  adminPresentation: (id: string) => `/api/v1/admin/topics/${id}/presentation/`,
   status: (id: string) => `/api/v1/admin/topics/${id}/presentation/status/`,
   slides: (id: string) => `/api/v1/admin/presentations/${id}/slides/`,
+  slide: (id: string, slideId: string) => `/api/v1/admin/presentations/${id}/slides/${slideId}/`,
 };
 
 /** Yuklash (multipart) brauzerdan BFF orqali: oxirgi `/` siz (Next 308 qilmasin). */
@@ -66,7 +72,7 @@ export class HttpTopicMaterialsApi implements TopicMaterialsApi {
   ) {}
 
   private async request<T>(
-    method: "GET" | "PUT" | "POST" | "PATCH",
+    method: "GET" | "PUT" | "POST" | "PATCH" | "DELETE",
     url: string,
     body?: unknown,
   ): Promise<{ status: number; data: T }> {
@@ -125,6 +131,18 @@ export class HttpTopicMaterialsApi implements TopicMaterialsApi {
 
   async patchSlides(presentationId: string, slides: SlidePatch[]) {
     return (await this.request<Presentation>("PATCH", path.slides(presentationId), slides)).data;
+  }
+
+  async deleteSlide(presentationId: string, slideId: string) {
+    const { status, data } = await this.request<Presentation>(
+      "DELETE",
+      path.slide(presentationId, slideId),
+    );
+    return status === 204 ? null : data;
+  }
+
+  async deletePresentation(topicId: string) {
+    await this.request<null>("DELETE", path.adminPresentation(topicId));
   }
 }
 

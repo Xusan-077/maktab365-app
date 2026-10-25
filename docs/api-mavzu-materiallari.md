@@ -168,6 +168,21 @@ Staff. Tana — **barcha** slaydlar, yangi tartibda:
 - Ro'yxatda taqdimotning hamma slaydlari aynan bir martadan bo'lishi kerak. Aks holda `400 validation_error`.
 - Javob: `200` + yangilangan `Presentation` (staff ko'rinishi).
 
+### `DELETE /api/v1/admin/presentations/{presentation_id}/slides/{slide_id}/`
+
+Staff. Bitta slaydni o'chiradi (rasm va eskiz storage'dan ham).
+
+- Qolgan slaydlar `order` bo'yicha 1..N qayta raqamlanadi.
+- Javob: `200` + yangilangan `Presentation` (staff ko'rinishi). Oxirgi slayd o'chirilsa taqdimot ham o'chiriladi → `204`.
+- `404 not_found`: taqdimot yoki slayd yo'q.
+
+### `DELETE /api/v1/admin/topics/{topic_id}/presentation/`
+
+Staff. Mavzu taqdimotini butunlay o'chiradi: barcha slaydlar, eslatmalar, `pdf_url` fayli.
+
+- Javob: `204`. Keyin `GET …/presentation/` → `404`.
+- `404 not_found`: taqdimot yo'q. `409 conversion_in_progress`: konvertatsiya ketayotgan bo'lsa.
+
 ### Backend tavsiyasi: konvertatsiya
 
 Celery vazifasi (`CELERY_TASK_ALWAYS_EAGER` testlarda) quyidagilarni bajaradi:
