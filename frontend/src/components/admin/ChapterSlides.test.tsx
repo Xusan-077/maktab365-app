@@ -41,6 +41,7 @@ interface Setup {
   bookId?: string;
   slides?: AdminSlides | null;
   canDelete?: boolean;
+  manage?: boolean;
 }
 
 function setup({
@@ -48,6 +49,7 @@ function setup({
   bookId = "book-1",
   slides = null,
   canDelete = true,
+  manage = true,
 }: Setup = {}) {
   const context: SlidesContext = {
     bookId,
@@ -63,6 +65,7 @@ function setup({
           context={context}
           row={{ key: "k", title: row.title ?? "Kirish", page: "1", id: row.id }}
           position="2"
+          manage={manage}
         />
       </QueryClientProvider>
     </NextIntlClientProvider>,
@@ -88,6 +91,17 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe("ChapterSlides", () => {
+  it("mundarija qatori: faqat holat va «Xulosa va taqdimot» havolasi — yuklash mavzu sahifasida", () => {
+    setup({ slides: SLIDES, manage: false });
+    expect(screen.getByTestId("slides-info").textContent).toContain("algebra-slaydlar.pdf");
+    expect(screen.getByTestId("topic-materials-link").getAttribute("href")).toContain(
+      "/admin/kitoblar/book-1/mavzu/ch-1",
+    );
+    expect(screen.queryByTestId("slides-input")).toBeNull();
+    expect(screen.queryByRole("button", { name: t.replaceFor.replace("{n}", "2") })).toBeNull();
+    expect(screen.queryByRole("button", { name: t.removeFor.replace("{n}", "2") })).toBeNull();
+  });
+
   it("prezentatsiyasiz saqlangan bo'limda ixtiyoriy «Qo'shish» tugmasi va belgi yo'q", () => {
     setup();
 
