@@ -1160,7 +1160,9 @@
       "choose": "{n}-bo'lim uchun prezentatsiya faylini tanlash",
       "addFor": "{n}-bo'lim uchun prezentatsiya qo'shish",
       "replaceFor": "{n}-bo'lim prezentatsiyasini almashtirish",
-      "removeFor": "{n}-bo'lim prezentatsiyasini o'chirish"
+      "removeFor": "{n}-bo'lim prezentatsiyasini o'chirish",
+      "materials": "Xulosa va taqdimot",
+      "materialsFor": "{n}-bo‘lim materiallari: xulosa, taqdimot"
     },
     "cover": {
       "label": "Muqova",
@@ -1280,6 +1282,177 @@
       "saveNote": "Izohni saqlash",
       "noteSaved": "Izoh saqlandi",
       "empty": "Bu filtr bo'yicha xabar yo'q."
+    },
+    "topic": {
+      "metaTitle": "Mavzu materiallari",
+      "backToBook": "← Kitobga qaytish",
+      "notFoundTitle": "Mavzu topilmadi",
+      "notFound": "Bu bo‘lim kitob mundarijasida yo‘q. Mundarija saqlanganini tekshiring.",
+      "tabsLabel": "Mavzu bo‘limlari",
+      "tabs": {
+        "main": "Asosiy",
+        "summary": "Xulosa",
+        "slides": "Taqdimot",
+        "notes": "Konspekt",
+        "test": "Test"
+      },
+      "soon": {
+        "notes": "Konspekt shablonlari keyingi bosqichda qo‘shiladi.",
+        "test": "Mavzu testlari keyingi bosqichda qo‘shiladi."
+      },
+      "main": {
+        "title": "Nomi",
+        "chapter": "Bob",
+        "page": "Boshlanish beti",
+        "hint": "Nomi va beti kitob mundarijasida tahrirlanadi.",
+        "openReader": "O‘qish oynasida ochish"
+      },
+      "errors": {
+        "required": "To‘ldiring",
+        "tooLong": "Matn juda uzun",
+        "tooMany": "Juda ko‘p element",
+        "blocksRequired": "Nashr qilish uchun kamida bitta blok qo‘shing",
+        "unknownType": "Noma’lum blok turi",
+        "invalid": "Qiymat noto‘g‘ri"
+      },
+      "summary": {
+        "formLabel": "Xulosa muharriri",
+        "status": "Holat",
+        "statuses": {
+          "draft": "Qoralama",
+          "published": "Nashr qilingan"
+        },
+        "visibleToStudents": "O‘quvchilarga ko‘rinadi",
+        "hiddenFromStudents": "O‘quvchilarga ko‘rinmaydi",
+        "empty": "Hali blok yo‘q. «Blok qo‘shish» yoki «AI bilan to‘ldirish» dan boshlang.",
+        "blocksLabel": "Xulosa bloklari",
+        "addBlock": "Blok qo‘shish",
+        "full": "Ko‘pi bilan {max} ta blok",
+        "drag": "{n}-blokni ({type}) ko‘chirish",
+        "remove": "{n}-blokni o‘chirish",
+        "removeTitle": "Blokni o‘chirish",
+        "removeDescription": "{n}-blok va uning matni o‘chiriladi.",
+        "types": {
+          "idea": {
+            "title": "Asosiy g‘oya",
+            "hint": "Sarlavha va qisqa matn — mavzuning mazmuni"
+          },
+          "bullets": {
+            "title": "Bandlar ro‘yxati",
+            "hint": "Qoidalar, ta’riflar, bosqichlar"
+          },
+          "chips": {
+            "title": "Kalit so‘zlar",
+            "hint": "Qisqa atamalar — teglar ko‘rinishida"
+          },
+          "teacher_note": {
+            "title": "Ustoz eslatmasi",
+            "hint": "Ko‘p uchraydigan xatolar, diqqat qilinadigan joylar"
+          },
+          "example": {
+            "title": "Misol",
+            "hint": "Namunaviy masala va uning yechimi"
+          }
+        },
+        "fields": {
+          "title": "Sarlavha",
+          "text": "Matn",
+          "label": "Sarlavha",
+          "labelHint": "Ixtiyoriy, masalan «Kalit so‘zlar»",
+          "teacher_note": "Eslatma matni",
+          "teacherNoteHint": "O‘quvchilar ham ko‘radi — ustozning maslahati sifatida.",
+          "example": "Misol matni"
+        },
+        "bullets": "Bandlar",
+        "bulletLead": "{n}-band kaliti",
+        "bulletLeadPlaceholder": "Kalit (ixtiyoriy)",
+        "bulletText": "{n}-band matni",
+        "bulletTextPlaceholder": "Band matni",
+        "removeBullet": "{n}-bandni o‘chirish",
+        "addBullet": "Band qo‘shish",
+        "chips": "Kalit so‘zlar",
+        "chipsHint": "Yozib Enter yoki vergul bosing",
+        "chipsFull": "Kalit so‘zlar soni chegarasiga yetdi",
+        "removeChip": "«{chip}» ni olib tashlash",
+        "save": {
+          "savedAt": "Saqlandi · {date}",
+          "empty": "Hali saqlanmagan",
+          "unsaved": "Saqlanmagan o‘zgarishlar",
+          "saving": "Saqlanmoqda…",
+          "invalid": "Nashr uchun maydonlarni to‘ldiring — saqlanmadi",
+          "error": "Saqlab bo‘lmadi",
+          "retry": "Qayta urinish"
+        },
+        "preview": {
+          "title": "Oldindan ko‘rish",
+          "device": "Qurilma",
+          "desktop": "Desktop",
+          "mobile": "Mobil",
+          "empty": "Bloklar to‘ldirilgach shu yerda o‘quvchi ko‘rinishi chiqadi."
+        },
+        "ai": {
+          "button": "AI bilan to‘ldirish",
+          "hint": "AI mavzu matnidan qoralama tuzadi. Natija qoralama sifatida qo‘yiladi — tekshirib, keyin nashr qiling.",
+          "applied": "AI qoralamasi qo‘shildi — tekshirib chiqing",
+          "empty": "AI bu mavzu uchun qoralama tuza olmadi",
+          "replaceTitle": "Bloklarni almashtirish",
+          "replaceDescription": "Joriy bloklar AI qoralamasi bilan almashtiriladi va xulosa qoralama holatiga o‘tadi.",
+          "replace": "Almashtirish"
+        },
+        "dnd": {
+          "instructions": "Ko‘chirish uchun Probel yoki Enter ni bosing, strelkalar bilan joyini tanlang, yana Probel bilan qo‘ying. Bekor qilish — Esc.",
+          "pickedUp": "{n}-element olindi",
+          "over": "{n}-element {to}-o‘rin ustida",
+          "dropped": "{n}-element {to}-o‘ringa qo‘yildi",
+          "cancelled": "Ko‘chirish bekor qilindi, {n}-element joyida"
+        }
+      },
+      "slides": {
+        "uploadTitle": "Taqdimot yuklash",
+        "replaceTitle": "Taqdimotni almashtirish",
+        "dropHint": "PPTX yoki PDF faylni shu yerga tashlang",
+        "limits": "PPTX yoki PDF, {size} gacha. Slaydlar avtomatik rasmga aylantiriladi.",
+        "choose": "Taqdimot faylini tanlash",
+        "chooseButton": "Fayl tanlash",
+        "replaceHint": "Yangi fayl yuklansa joriy slaydlar, eslatmalar va tartib almashtiriladi.",
+        "problems": {
+          "type": "Faqat PPTX yoki PDF fayl yuklash mumkin",
+          "size": "Fayl {size} dan katta",
+          "empty": "Fayl bo‘sh"
+        },
+        "uploading": "Yuklanmoqda…",
+        "uploadProgress": "Taqdimot yuklash jarayoni",
+        "cancel": "Bekor qilish",
+        "converting": "Slaydlar tayyorlanmoqda — bu bir necha daqiqa olishi mumkin",
+        "conversionProgress": "Slaydlarga aylantirish jarayoni",
+        "conversionFailed": "Faylni slaydlarga aylantirib bo‘lmadi. Boshqa faylni sinab ko‘ring yoki PDF ga saqlab yuklang.",
+        "retry": "Qayta urinish",
+        "ready": "Taqdimot tayyor",
+        "saved": "Slaydlar saqlandi",
+        "discard": "O‘zgarishlarni bekor qilish",
+        "gridTitle": "Slaydlar",
+        "count": "{total} slayd · o‘quvchiga {visible} tasi ko‘rinadi",
+        "pdf": "PDF",
+        "select": "{n}-slaydni tanlash",
+        "selectHidden": "{n}-slaydni tanlash (yashirin)",
+        "hiddenBadge": "Yashirin",
+        "drag": "{n}-slaydni ko‘chirish",
+        "details": "{n}-slayd sozlamalari",
+        "slideAlt": "{n}-slayd",
+        "visible": "O‘quvchilarga ko‘rsatish",
+        "visibleHint": "O‘chirilsa, slayd faqat ustoz va adminga ko‘rinadi.",
+        "note": "Ustoz eslatmasi",
+        "noteHint": "Faqat ustozlarga ko‘rinadi.",
+        "alt": "Muqobil matn (alt)",
+        "altHint": "Ekran o‘qigichlar uchun slayd mazmuni qisqacha.",
+        "dnd": {
+          "instructions": "Ko‘chirish uchun Probel yoki Enter ni bosing, strelkalar bilan joyini tanlang, yana Probel bilan qo‘ying. Bekor qilish — Esc.",
+          "pickedUp": "{n}-slayd olindi",
+          "over": "{n}-slayd {to}-o‘rin ustida",
+          "dropped": "{n}-slayd {to}-o‘ringa qo‘yildi",
+          "cancelled": "Ko‘chirish bekor qilindi, {n}-slayd joyida"
+        }
+      }
     }
   },
   "pdfBooks": {

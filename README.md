@@ -110,11 +110,17 @@ Yoki ildizdan: `make dev`. Boshqa buyruqlar: `make test`, `make lint`, `make sch
   `POST /admin/pdf-books/{id}/duplicate/`, belgilar `me/pdf-annotations/`, Telegram bot API `GET /bot/books/`
   (`BOT_API_TOKEN` bilan yoqiladi, `backend/README.md`). Migratsiyalar faqat qo'shuvchi (`content 0008–0011`,
   `analytics 0001`, `learning 0006`); predeploy da `migrate` avtomatik.
-- **O'qish oynasi:** ikki rejim (`?mode=h|v`, tanlov eslab qolinadi): gorizontal — kitob kabi varaqlash (desktopda 2 betlik
+- **O'qish oynasi:** fokus rejimi (ingichka sarlavha + 3px progress, «Aa» sozlamalari, suzuvchi pastki navigatsiya bo'lim
+  belgilari bilan, belgilangan matn menyusi, «Mavzu» paneli: Xulosa/Taqdimot/Konspekt/Test). Ikki rejim (`?mode=h|v`, standart
+  — vertikal, tanlov eslab qolinadi): gorizontal — kitob kabi varaqlash (≥1280px da ixtiyoriy 2 betlik
   yoyma, ←/→/PgUp/PgDn/Space, swipe, qo'shni betlar oldindan chiziladi) va vertikal — uzluksiz scroll (virtualizatsiya:
   faqat ko'rinayotgan bet ±2 chiziladi); «Sahifalar» thumbnail paneli, tanlanadigan matn qatlami, sahifa foni
   (oddiy/sepiya/qorong'i), zoom 50–300% (tugma, ikki marta bosish, pinch, Ctrl+g'ildirak), to'liq ekran (F), klaviatura yorliqlari (`?`), kitob ichida qidiruv (Ctrl+F; matn qatlami yo'q skaner PDF uchun aniq xabar),
   3 rangli belgilar va qisqa eslatma (mehmonda brauzerda, kirganda serverda; kirgach birlashadi).
+- **Mavzu materiallari:** mavzu (mundarija bo'limi) uchun tipli bloklardan iborat Xulosa va slaydli Taqdimot
+  (`/darsliklar/N/<slug>/taqdimot/<mavzu>`); admin `/admin/kitoblar/<id>/mavzu/<bo'lim>` da muharrir (drag-and-drop,
+  avtosaqlash, AI qoralamasi, PPTX/PDF yuklash). Backend shartnomasi — `docs/api-mavzu-materiallari.md`; backend tayyor
+  bo'lguncha frontend mock bilan ishlaydi (`NEXT_PUBLIC_TOPIC_MATERIALS_API=http` — haqiqiy API).
 - **Boshqa:** bosh sahifada «Davom ettirish» va «Oxirgi ko'rilganlar» (mehmon ham), global qidiruv (Ctrl+K: kitob, sinf, fan,
   mundarija bo'limi) sayt sarlavhasida ham, admin: statistika (`/admin/statistika`), ommaviy yuklash
   (`/admin/kitoblar/ommaviy`), nusxalash va qoralamani o'quvchi ko'rinishida ko'rish (`/admin/kitoblar/{id}/korish`).
@@ -142,4 +148,3 @@ Yozuvlar (sahifa, xatcho'p, hodisa) `lib/offline/write-queue.ts` orqali: TanStac
 brauzerda (`maktab365-writes:<user>`) navbatga tushadi va internet qaytganda/taymerda qayta yuboriladi, 4xx bo'lsa o'zgarish qaytariladi.
 Mehmon ma'lumoti kirgach merge qilinadi; xatoda saqlanadi va oshib boruvchi oraliq bilan qayta uriniladi. E2E: `frontend/e2e/learning.spec.ts`.
 Rejalar (goals) navbatsiz: optimistic + rollback, offline'da xato ko'rsatiladi.
-
