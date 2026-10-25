@@ -1347,7 +1347,9 @@
       "modeV": "Vertikal: uzluksiz scroll",
       "pages": "Sahifalar",
       "pagesToggle": "Sahifalar panelini ko'rsatish yoki yashirish",
-      "thumb": "{page}-bet"
+      "thumb": "{page}-bet",
+      "tocOpen": "{title} — mundarijani ochish. Joriy bo‘lim: {section}",
+      "topic": "Mavzu"
     },
     "bookmark": {
       "save": "Saqlash",
@@ -1361,7 +1363,17 @@
       "searchPlaceholder": "Mundarijadan qidirish…",
       "searchEmpty": "«{query}» bo'yicha bo'lim topilmadi",
       "expand": "«{title}» bo'limlarini ochish",
-      "collapse": "«{title}» bo'limlarini yopish"
+      "collapse": "«{title}» bo'limlarini yopish",
+      "status": {
+        "read": "o‘qilgan",
+        "current": "joriy bo‘lim",
+        "unread": "o‘qilmagan"
+      },
+      "anchors": "Bo‘lim ichidagi mashq va masalalar",
+      "resumeTitle": "Davom ettirish",
+      "hereTitle": "Siz shu yerdasiz",
+      "resumeMeta": "{page} / {total}-bet · {percent}%",
+      "resume": "Davom ettirish"
     },
     "description": {
       "more": "Batafsil",
@@ -1538,7 +1550,8 @@
       "highlightOff": "Belgilash rejimini o'chirish",
       "annotations": "Belgilar va eslatmalar ({count})",
       "zoomLevel": "Kattalashtirish: {level}",
-      "more": "Boshqa asboblar"
+      "more": "Boshqa asboblar",
+      "highlight": "Belgilash rejimi (sahifada sudrab belgilang)"
     },
     "shortcuts": {
       "title": "Klaviatura yorliqlari",
@@ -1549,7 +1562,9 @@
       "tone": "Sahifa foni (oddiy, sepiya, qorong'i)",
       "zoom": "Kattalashtirish 50–300% (Ctrl + g'ildirak, ikki marta bosish)",
       "find": "Kitobdan qidirish",
-      "help": "Shu ro'yxat"
+      "help": "Shu ro'yxat",
+      "search": "Kitobdan qidirish",
+      "toc": "Mundarija"
     },
     "find": {
       "title": "Kitob ichidan qidirish",
@@ -1587,6 +1602,48 @@
       "empty": "Hozircha belgi yo'q. Belgilash tugmasini bosib, sahifada kerakli joyni sudrab belgilang.",
       "page": "{page}-bet",
       "noNote": "Eslatmasiz"
+    },
+    "appearance": {
+      "title": "Ko‘rinish sozlamalari",
+      "short": "Aa",
+      "tone": "Fon",
+      "tones": {
+        "light": "Yorug‘",
+        "sepia": "Sepiya",
+        "dark": "Qorong‘i"
+      },
+      "scale": "Masshtab",
+      "fitWidth": "Eni bo‘yicha",
+      "fitPage": "Butun bet",
+      "fitFlipHint": "«Surish» rejimida bet doim ekranga to‘liq sig‘adi.",
+      "zoom": "Kattalashtirish",
+      "zoomOut": "Kichiklashtirish",
+      "zoomIn": "Kattalashtirish",
+      "zoomReset": "Kattalashtirish: {value}. 100% ga qaytarish",
+      "paging": "Betni almashtirish",
+      "pagingFlip": "Surish",
+      "pagingScroll": "Uzluksiz",
+      "spread": "2 bet yonma-yon",
+      "spreadHint": "Faqat «Surish» rejimida",
+      "warm": "Ko‘z uchun iliq rang",
+      "warmHint": "Kechqurun o‘qishda ko‘k nur kamayadi"
+    },
+    "nav": {
+      "label": "Betlar bo‘yicha harakat",
+      "slider": "Bet",
+      "thumb": "{page}-bet",
+      "thumbWithSection": "{page}-bet · {section}",
+      "count": "{page} / {total}",
+      "exercises": "Mashqlar",
+      "test": "Test"
+    },
+    "selection": {
+      "label": "Belgilangan matn",
+      "solution": "Yechimini ko‘rish",
+      "note": "Konspektga qo‘shish",
+      "highlight": "Belgilash",
+      "noted": "Konspektga qo‘shildi",
+      "highlighted": "Belgi qo‘yildi"
     }
   },
   "library": {

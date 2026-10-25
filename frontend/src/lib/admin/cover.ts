@@ -22,14 +22,6 @@ export function coverImageProblem(file: File): CoverImageProblem | null {
   return null;
 }
 
-/**
- * Oldindan ko'rishdagi muqova: admin API'dagi joriy rejim va rasm (ochiq API'ning keshlangan
- * nusxasi emas). `auto` yoki rasm yo'q — `null` (generativ muqova).
- */
-export function previewCover(book: Pick<AdminPdfBook, "cover_mode" | "cover_url">): string | null {
-  return book.cover_mode && book.cover_mode !== "auto" && book.cover_url ? book.cover_url : null;
-}
-
 type CoverApi = Pick<AdminApi, "upload" | "updatePdfBook">;
 
 /**

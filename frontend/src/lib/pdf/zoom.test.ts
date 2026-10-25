@@ -7,8 +7,8 @@ import {
   MAX_ZOOM,
   MIN_ZOOM,
   nextZoomStep,
+  nudgeZoom,
   pinchZoom,
-  visibleCount,
   wheelZoom,
 } from "./zoom";
 
@@ -71,12 +71,11 @@ describe("anchorOffset", () => {
   });
 });
 
-describe("visibleCount", () => {
-  it("hammasi sig'sa — hammasi, aks holda «⋯» uchun joy qoldiriladi", () => {
-    expect(visibleCount(8, 8 * 46, 46)).toBe(8);
-    expect(visibleCount(8, 8 * 46 - 1, 46)).toBe(6); // 7 ta + «⋯» sig'maydi
-    expect(visibleCount(8, 200, 46)).toBe(3);
-    expect(visibleCount(8, 30, 46)).toBe(0);
-    expect(visibleCount(0, 500, 46)).toBe(0);
+describe("nudgeZoom", () => {
+  it("25% qadam, chegaralar ichida", () => {
+    expect(nudgeZoom(1, 1)).toBe(1.25);
+    expect(nudgeZoom(1.1, -1)).toBe(0.75);
+    expect(nudgeZoom(3, 1)).toBe(3);
+    expect(nudgeZoom(0.5, -1)).toBe(0.5);
   });
 });

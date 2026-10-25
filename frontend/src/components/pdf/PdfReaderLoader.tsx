@@ -27,18 +27,12 @@ export function PdfReaderLoader(
   props: ({ bookId: string } | { slug: string }) & {
     backHref?: string;
     preview?: boolean;
-    cover?: string | null;
   },
 ) {
   return (
     <Suspense fallback={<Skeleton className="h-96" />}>
       {"bookId" in props ? (
-        <PdfReader
-          bookId={props.bookId}
-          backHref={props.backHref}
-          preview={props.preview}
-          cover={props.cover}
-        />
+        <PdfReader bookId={props.bookId} backHref={props.backHref} preview={props.preview} />
       ) : (
         <PdfReaderBySlug slug={props.slug} backHref={props.backHref} />
       )}

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Onest } from "next/font/google";
+import { Inter, Manrope, Onest, Source_Serif_4 } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -27,6 +27,26 @@ const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext"],
   display: "swap",
+});
+
+/**
+ * Dizayn tizimi shriftlari (`font-ui`, `font-book` — `globals.css`): o'qish oynasi, taqdimot va admin
+ * mavzu muharriri. Faqat shu sahifalarda kerak — oldindan yuklanmaydi (`preload: false`).
+ */
+const manrope = Manrope({
+  variable: "--font-manrope",
+  subsets: ["latin", "cyrillic"],
+  display: "swap",
+  preload: false,
+});
+
+/** Faqat kitob sarlavhasi uchun. */
+const sourceSerif = Source_Serif_4({
+  variable: "--font-source-serif",
+  subsets: ["latin", "cyrillic"],
+  weight: ["600", "700"],
+  display: "swap",
+  preload: false,
 });
 
 /**
@@ -60,7 +80,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[lo
   return (
     <html
       lang={locale}
-      className={`${onest.variable} ${inter.variable} h-full`}
+      className={`${onest.variable} ${inter.variable} ${manrope.variable} ${sourceSerif.variable} h-full`}
       suppressHydrationWarning
     >
       <head>

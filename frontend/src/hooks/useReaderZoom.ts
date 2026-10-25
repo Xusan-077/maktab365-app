@@ -180,6 +180,8 @@ export function useReaderZoom({
 
   /** Tugma / klaviatura: keyingi pog'ona (100 → 150 → 200 → 300 → 100%). */
   const stepZoom = useCallback(() => applyZoom(nextZoomStep(zoomRef.current)), [applyZoom]);
+  /** Aniq qiymat (Aa menyusidagi −/+ va «100%»): chegaraga keltiriladi. */
+  const setZoomLevel = useCallback((next: number) => applyZoom(next), [applyZoom]);
   /** Ikki marta bosish: 100% ↔ 200%, bosilgan joy ekranda qoladi. */
   const zoomAtTap = useCallback(
     (point: Point) => applyZoom(doubleTapZoom(zoomRef.current), point),
@@ -204,6 +206,7 @@ export function useReaderZoom({
     zoom,
     live,
     stepZoom,
+    setZoomLevel,
     zoomAtTap,
     beginTouch,
     wasPinch,

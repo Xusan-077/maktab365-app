@@ -1,4 +1,4 @@
-/** O'qish oynasi zoom'i (0.5×–3×) va asboblar panelining sig'imi (sof funksiyalar). */
+/** O'qish oynasi zoom'i (0.5×–3×; sof funksiyalar). */
 
 export const MIN_ZOOM = 0.5;
 export const MAX_ZOOM = 3;
@@ -45,12 +45,11 @@ export function anchorOffset(offset: number, focal: number, ratio: number): numb
   return Math.max(0, (offset + focal) * ratio - focal);
 }
 
-/**
- * Bir xil kenglikdagi tugmalardan nechtasi qatorga sig'adi: hammasi sig'sa — hammasi, aks holda
- * "⋯" tugmasiga joy qoldiriladi (qolganlari menyuga tushadi).
- */
-export function visibleCount(total: number, available: number, itemWidth: number): number {
-  if (total <= 0) return 0;
-  if (total * itemWidth <= available) return total;
-  return Math.max(0, Math.min(total - 1, Math.floor((available - itemWidth) / itemWidth)));
+/** Aa menyusidagi −/+ qadami (25%). */
+export const ZOOM_NUDGE = 0.25;
+
+/** −/+ : eng yaqin 25% pog'onasiga, chegaralar ichida. */
+export function nudgeZoom(zoom: number, direction: 1 | -1): number {
+  const steps = Math.round(zoom / ZOOM_NUDGE) + direction;
+  return clampZoom(steps * ZOOM_NUDGE);
 }

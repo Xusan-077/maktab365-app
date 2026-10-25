@@ -5,7 +5,10 @@ import {
   filterTocGroups,
   flattenToc,
   groupToc,
+  sectionLabel,
+  tocMarkers,
   tocRowCount,
+  tocStatuses,
   type TocChapter,
   type TocGroup,
 } from "./toc";
@@ -154,5 +157,55 @@ describe("filterTocGroups", () => {
   it("bo'sh so'rov — hammasi, mos kelmasa — bo'sh", () => {
     expect(filterTocGroups(groups, "  ")).toBe(groups);
     expect(filterTocGroups(groups, "geometriya")).toEqual([]);
+  });
+});
+
+describe("tocStatuses / sectionLabel / tocMarkers", () => {
+  const book: TocChapter[] = [
+    {
+      id: "b1",
+      title: "I bob",
+      page: 3,
+      children: [
+        { id: "s1", title: "1-§. Ko'phad", page: 3 },
+        { id: "s2", title: "2-§. Kasr", page: 10 },
+      ],
+    },
+    {
+      id: "b2",
+      title: "II bob",
+      page: 20,
+      children: [{ id: "s3", title: "§ 3 Funksiya", page: 20 }],
+    },
+  ];
+  const groups = groupToc(book);
+
+  it("joriy bo'limdan oldingilari o'qilgan, keyingilari o'qilmagan; bob joriy bo'lim bilan", () => {
+    const statuses = tocStatuses(groups, 12);
+    expect(Object.fromEntries(statuses)).toEqual({
+      b1: "current",
+      s1: "read",
+      s2: "current",
+      b2: "unread",
+      s3: "unread",
+    });
+    expect(tocStatuses(groups, 25).get("b1")).toBe("read");
+    expect(tocStatuses(groups, 1).get("s1")).toBe("unread");
+  });
+
+  it("sarlavhadan «N-§» belgisi", () => {
+    expect(sectionLabel("15-§. Kvadrat tenglama")).toBe("15-§");
+    expect(sectionLabel("§ 3 Funksiya")).toBe("3-§");
+    expect(sectionLabel("Kirish")).toBeNull();
+  });
+
+  it("slider belgilari: 1-betdagi va takror betlar chiqmaydi, ulush 0..1", () => {
+    const markers = tocMarkers(flattenToc(book), 21);
+    expect(markers.map((m) => [m.id, m.page, m.at])).toEqual([
+      ["b1", 3, 0.1],
+      ["s2", 10, 0.45],
+      ["b2", 20, 0.95],
+    ]);
+    expect(tocMarkers(flattenToc(book), 1)).toEqual([]);
   });
 });

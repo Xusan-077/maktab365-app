@@ -1347,7 +1347,9 @@
       "modeV": "Vertical: continuous scroll",
       "pages": "Pages",
       "pagesToggle": "Show or hide the pages panel",
-      "thumb": "Page {page}"
+      "thumb": "Page {page}",
+      "tocOpen": "{title} — open contents. Current section: {section}",
+      "topic": "Topic"
     },
     "bookmark": {
       "save": "Save",
@@ -1361,7 +1363,17 @@
       "searchPlaceholder": "Search the contents…",
       "searchEmpty": "No sections match “{query}”",
       "expand": "Expand sections of “{title}”",
-      "collapse": "Collapse sections of “{title}”"
+      "collapse": "Collapse sections of “{title}”",
+      "status": {
+        "read": "read",
+        "current": "current section",
+        "unread": "not read"
+      },
+      "anchors": "Exercises and problems in this section",
+      "resumeTitle": "Continue reading",
+      "hereTitle": "You are here",
+      "resumeMeta": "p. {page} of {total} · {percent}%",
+      "resume": "Continue"
     },
     "description": {
       "more": "Read more",
@@ -1538,7 +1550,8 @@
       "highlightOff": "Turn off highlight mode",
       "annotations": "Highlights and notes ({count})",
       "zoomLevel": "Zoom: {level}",
-      "more": "More tools"
+      "more": "More tools",
+      "highlight": "Highlight mode (drag on the page)"
     },
     "shortcuts": {
       "title": "Keyboard shortcuts",
@@ -1549,7 +1562,9 @@
       "tone": "Page background (normal, sepia, dark)",
       "zoom": "Zoom 50–300% (Ctrl + wheel, double-tap)",
       "find": "Search in book",
-      "help": "This list"
+      "help": "This list",
+      "search": "Search the book",
+      "toc": "Contents"
     },
     "find": {
       "title": "Search in book",
@@ -1587,6 +1602,48 @@
       "empty": "No highlights yet. Turn on highlight mode and drag over the part of the page you want.",
       "page": "Page {page}",
       "noNote": "No note"
+    },
+    "appearance": {
+      "title": "Display settings",
+      "short": "Aa",
+      "tone": "Background",
+      "tones": {
+        "light": "Light",
+        "sepia": "Sepia",
+        "dark": "Dark"
+      },
+      "scale": "Scale",
+      "fitWidth": "Fit width",
+      "fitPage": "Whole page",
+      "fitFlipHint": "In “Flip” mode the page always fits the screen.",
+      "zoom": "Zoom",
+      "zoomOut": "Zoom out",
+      "zoomIn": "Zoom in",
+      "zoomReset": "Zoom: {value}. Reset to 100%",
+      "paging": "Page turning",
+      "pagingFlip": "Flip",
+      "pagingScroll": "Continuous",
+      "spread": "2 pages side by side",
+      "spreadHint": "Only in “Flip” mode",
+      "warm": "Warm tint for eyes",
+      "warmHint": "Less blue light when reading at night"
+    },
+    "nav": {
+      "label": "Page navigation",
+      "slider": "Page",
+      "thumb": "p. {page}",
+      "thumbWithSection": "p. {page} · {section}",
+      "count": "{page} / {total}",
+      "exercises": "Exercises",
+      "test": "Test"
+    },
+    "selection": {
+      "label": "Selected text",
+      "solution": "See the solution",
+      "note": "Add to notes",
+      "highlight": "Highlight",
+      "noted": "Added to notes",
+      "highlighted": "Highlight added"
     }
   },
   "library": {

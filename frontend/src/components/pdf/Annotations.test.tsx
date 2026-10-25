@@ -6,7 +6,7 @@ import uz from "@/lib/i18n/messages/uz.json";
 import type { Annotation } from "@/lib/pdf/annotations";
 import { AnnotationDialog } from "./AnnotationDialog";
 import { AnnotationLayer } from "./AnnotationLayer";
-import { AnnotationsListDialog } from "./AnnotationsListDialog";
+import { AnnotationsList } from "./AnnotationsListDialog";
 
 const t = uz.pdfBooks.annotations;
 const note: Annotation = {
@@ -149,15 +149,15 @@ describe("AnnotationDialog", () => {
   });
 });
 
-describe("AnnotationsListDialog", () => {
+describe("AnnotationsList", () => {
   it("belgilar ro'yxati, bosilsa shu belgi tanlanadi; bo'sh holat", () => {
     const onPick = vi.fn();
-    render(intl(<AnnotationsListDialog items={[note]} onPick={onPick} onClose={vi.fn()} />));
+    render(intl(<AnnotationsList items={[note]} onPick={onPick} />));
     fireEvent.click(screen.getByRole("button", { name: /4-bet/ }));
     expect(onPick).toHaveBeenCalledWith(note);
     cleanup();
 
-    render(intl(<AnnotationsListDialog items={[]} onPick={onPick} onClose={vi.fn()} />));
+    render(intl(<AnnotationsList items={[]} onPick={onPick} />));
     expect(screen.getByText(t.empty)).toBeTruthy();
   });
 });

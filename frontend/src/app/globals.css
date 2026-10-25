@@ -39,6 +39,15 @@
   --radius-button-lg: 0.875rem;
   --radius-cover: 0.75rem;
   --radius-pill: 999px;
+  /* Dizayn tizimi radiuslari: 12 (tugma), 16 (karta), 22 (panel/sheet). */
+  --radius-ds-sm: 0.75rem;
+  --radius-ds: 1rem;
+  --radius-ds-lg: 1.375rem;
+  /* Taqdimot ko'rgichi foni (ikkala temada bir xil). */
+  --color-ds-stage: #0f1322;
+  --color-ds-stage-panel: #171c2e;
+  --color-ds-stage-line: #2a3149;
+  --color-ds-stage-muted: #a3abc2;
   --container-site: 77.5rem; /* 1240px */
   --shadow-cover: 0 10px 24px rgb(7 22 51 / 0.12);
 
@@ -121,6 +130,26 @@
   --color-group-arts: var(--group-arts);
   --color-group-arts-soft: var(--group-arts-soft);
 
+  /* Dizayn tizimi (o'qish oynasi, mavzu paneli, taqdimot, admin mavzu muharriri): `ds-*`.
+     Mavjud `accent-*` (sariq shkala) bilan to'qnashmasligi uchun prefiksli. */
+  --color-ds-accent: var(--ds-accent);
+  --color-ds-accent-ink: var(--ds-accent-ink);
+  --color-ds-accent-tint: var(--ds-accent-tint);
+  --color-ds-ink: var(--ds-ink);
+  --color-ds-muted: var(--ds-muted);
+  --color-ds-line: var(--ds-line);
+  --color-ds-canvas: var(--ds-canvas);
+  --color-ds-surface: var(--ds-surface);
+  --color-ds-warn-bg: var(--ds-warn-bg);
+  --color-ds-warn-border: var(--ds-warn-border);
+  --color-ds-warn-ink: var(--ds-warn-ink);
+  --color-ds-ok-bg: var(--ds-ok-bg);
+  --color-ds-ok-ink: var(--ds-ok-ink);
+  --color-ds-on-accent: var(--ds-on-accent);
+
+  --font-ui: var(--font-manrope), var(--font-onest), ui-sans-serif, system-ui, sans-serif;
+  --font-book: var(--font-source-serif), Georgia, "Times New Roman", serif;
+
   --font-sans:
     var(--font-onest), var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI",
     Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -177,6 +206,21 @@
   --warm-soft: #fff7ed;
   --on-group: #ffffff; /* yo'nalish rangi ustidagi matn */
   --telegram: #229ed9; /* Telegram brend rangi (ikkala temada bir xil) */
+
+  --ds-accent: #2b5fe8;
+  --ds-accent-ink: #1f4bc4;
+  --ds-accent-tint: #e8eeff;
+  --ds-ink: #151a2d;
+  --ds-muted: #5b6378;
+  --ds-line: #e3e6ee;
+  --ds-canvas: #eef0f4;
+  --ds-surface: #ffffff;
+  --ds-warn-bg: #fff9e5;
+  --ds-warn-border: #e0b73a;
+  --ds-warn-ink: #8a5a00;
+  --ds-ok-bg: #e3f6ec;
+  --ds-ok-ink: #0b6b3a;
+  --ds-on-accent: #ffffff;
 
   /* Fan yo'nalishlari (backend SubjectGroup) va ularning och tint'lari */
   --group-exact: #1554d1;
@@ -239,6 +283,21 @@
   --warm-soft: #2a1d14;
   --on-group: #0b1220;
 
+  --ds-accent: #7fa2ff;
+  --ds-accent-ink: #a9c1ff;
+  --ds-accent-tint: #18264a;
+  --ds-ink: #e6ecf7;
+  --ds-muted: #a3adc2;
+  --ds-line: #26324a;
+  --ds-canvas: #0a101e;
+  --ds-surface: #111a2e;
+  --ds-warn-bg: #2b2310;
+  --ds-warn-border: #b8932a;
+  --ds-warn-ink: #f2cd6b;
+  --ds-ok-bg: #10301f;
+  --ds-ok-ink: #7fe0a8;
+  --ds-on-accent: #0b1220;
+
   /* Qorong'i fonda yo'nalish ranglari yorqinroq, tint'lari to'qroq */
   --group-exact: #8db4ff;
   --group-exact-soft: #16264a;
@@ -256,6 +315,11 @@
 html {
   font-size: 16px;
   scroll-padding-top: 5rem;
+}
+/* O'qish oynasida global padding yo'q: sticky sarlavhadagi tugma fokus olganda (popover, dialog
+   yopilgach) brauzer sahifani surib, joriy betni o'zgartirmasin. Bet o'z `scroll-margin` i bilan. */
+html:has(.pdf-stage) {
+  scroll-padding-top: 0;
 }
 html[data-text-size="s"] {
   font-size: 14.5px;
@@ -337,9 +401,14 @@ dialog[data-placement="right"] {
   transform: translateX(100%);
   transition-duration: 0.22s;
 }
+dialog[data-placement="left"] {
+  transform: translateX(-100%);
+  transition-duration: 0.22s;
+}
 /* Ochiq holat yuqoridagi yopiq-holat transformidan ustun bo'lsin. */
 dialog[open][data-placement="bottom"],
-dialog[open][data-placement="right"] {
+dialog[open][data-placement="right"],
+dialog[open][data-placement="left"] {
   transform: none;
 }
 dialog::backdrop {
@@ -362,6 +431,9 @@ dialog[open]::backdrop {
   }
   dialog[open][data-placement="right"] {
     transform: translateX(100%);
+  }
+  dialog[open][data-placement="left"] {
+    transform: translateX(-100%);
   }
   dialog[open]::backdrop {
     opacity: 0;
@@ -605,17 +677,13 @@ dialog[open]::backdrop {
   }
 }
 
-/* O'qish oynasi: sahifa fon rejimlari (faqat sahifa maydoni va canvas filtri; boshqaruv paneli tema rangida qoladi). */
-.pdf-stage[data-tone="sepia"] .pdf-page-area {
+/* O'qish oynasi: sahifa fon rejimlari — betlar ortidagi butun sahna va canvas filtri (sarlavha paneli
+   tema rangida qoladi). */
+.pdf-stage[data-tone="sepia"] {
   background-color: #f2e8d0;
 }
-.pdf-stage[data-tone="dark"] .pdf-page-area {
+.pdf-stage[data-tone="dark"] {
   background-color: #0f1623;
-}
-.pdf-stage[data-tone="sepia"] .pdf-page-area,
-.pdf-stage[data-tone="dark"] .pdf-page-area {
-  border-radius: var(--radius-lg);
-  padding: 0.75rem;
 }
 .pdf-stage[data-tone="sepia"] canvas {
   filter: sepia(0.5) saturate(0.9) brightness(0.97) contrast(0.95);
@@ -624,7 +692,87 @@ dialog[open]::backdrop {
   filter: invert(0.9) hue-rotate(180deg) contrast(0.95);
 }
 .pdf-stage:fullscreen {
-  background-color: var(--background);
+  background-color: var(--ds-canvas);
+}
+
+/* Ko'z uchun iliq rang: butun oyna ustida yengil sariq filtr (bosishlarni o'tkazadi). */
+.pdf-stage[data-warm]::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  background-color: rgb(255 170 60 / 0.14);
+  mix-blend-mode: multiply;
+}
+
+/* Suv belgisi: bet burchagida kichik yozuv (diagonal katta belgi o'rniga). Rasmga tegmaydi. */
+.pdf-page-mark {
+  position: absolute;
+  right: 0.5rem;
+  bottom: 0.375rem;
+  z-index: 1;
+  pointer-events: none;
+  user-select: none;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgb(21 26 45 / 0.38);
+}
+.pdf-stage[data-tone="dark"] .pdf-page-mark {
+  color: rgb(230 236 247 / 0.4);
+}
+
+/* Aa menyusidagi fon namunalari (sahifa rangi). */
+.reader-swatch {
+  border-color: var(--ds-line);
+  background-color: #ffffff;
+}
+.reader-swatch[data-tone="sepia"] {
+  background-color: #f2e8d0;
+}
+.reader-swatch[data-tone="dark"] {
+  background-color: #1b2233;
+}
+
+/* Bet slayderi: trek alohida chizilgan (bo'lim belgilari bilan), input faqat tutqich. */
+.reader-slider::-webkit-slider-runnable-track {
+  height: 2.75rem;
+  background: transparent;
+}
+.reader-slider::-moz-range-track {
+  height: 2.75rem;
+  background: transparent;
+}
+.reader-slider::-webkit-slider-thumb {
+  appearance: none;
+  margin-top: calc((2.75rem - 1.25rem) / 2);
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 999px;
+  border: 3px solid var(--ds-surface);
+  background-color: var(--ds-accent);
+  box-shadow: 0 1px 4px rgb(15 23 42 / 0.3);
+}
+.reader-slider::-moz-range-thumb {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 999px;
+  border: 3px solid var(--ds-surface);
+  background-color: var(--ds-accent);
+  box-shadow: 0 1px 4px rgb(15 23 42 / 0.3);
+}
+.reader-slider:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+.reader-slider:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.reader-slider:focus-visible::-moz-range-thumb {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
 }
 
 /* Gorizontal yoyma: o'rtadagi umurtqa soyasi va ekran chetidagi oldingi/keyingi tugmalari. */

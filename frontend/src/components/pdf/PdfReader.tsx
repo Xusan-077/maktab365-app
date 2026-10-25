@@ -2,18 +2,33 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ChevronDown, ChevronUp, PanelLeft, Search } from "lucide-react";
+import {
+  ArrowLeft,
+  BookOpenText,
+  ChevronDown,
+  Highlighter,
+  Images,
+  Keyboard,
+  Maximize,
+  Minimize,
+  Search,
+  Share2,
+  WifiOff,
+} from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Dialog } from "@/components/ui/Dialog";
+import { OverflowMenu, type OverflowMenuItem } from "@/components/ui/OverflowMenu";
+import { TopicPanel, type TopicTab } from "@/components/topic/TopicPanel";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useBookStats } from "@/hooks/useBookStats";
 import { useFullscreen } from "@/hooks/useFullscreen";
 import { usePdfAnnotations } from "@/hooks/usePdfAnnotations";
 import { usePdfProgress } from "@/hooks/usePdfProgress";
 import { useReaderZoom } from "@/hooks/useReaderZoom";
+import { useToast } from "@/hooks/useToast";
 import { ApiError } from "@/lib/api/types";
 import type { Locale } from "@/lib/i18n/config";
 import { getLocalized } from "@/lib/i18n/localized";
@@ -32,6 +47,7 @@ import {
   parseModeParam,
   prevSpread,
   resolveMode,
+  SPREAD_MIN_WIDTH,
   type ReadingMode,
 } from "@/lib/pdf/reading-mode";
 import { parseSlidesParams, readSlidesProgress, withSlidesParams } from "@/lib/pdf/slides";
@@ -42,24 +58,24 @@ import { pdfQueries } from "@/lib/pdf-books/queries";
 import { cn } from "@/lib/utils/cn";
 import { pdfBookPath, ROUTES } from "@/lib/utils/routes";
 import { useReaderPrefsStore } from "@/stores/reader-prefs.store";
+import { useTopicNotesStore } from "@/stores/topic-notes.store";
 import { ReportErrorLink } from "@/components/support/ReportErrorLink";
-import { BookCover } from "./BookCover";
 import { OfflineButton } from "./OfflineButton";
 import { RecordRecentBook } from "./RecordRecentBook";
 import { PdfBookmarkButton } from "./PdfBookmarkButton";
 import { AnnotationDialog } from "./AnnotationDialog";
 import { AnnotationLayer } from "./AnnotationLayer";
-import { AnnotationsListDialog } from "./AnnotationsListDialog";
 import { PdfFindDialog } from "./PdfFindDialog";
 import { PdfPageCanvas } from "./PdfPageCanvas";
-import { PdfReaderControls } from "./PdfReaderControls";
+import { PdfTocDrawer } from "./PdfTocDrawer";
 import { ReaderShortcutsDialog } from "./ReaderShortcutsDialog";
 import { PdfSlidesViewer } from "./PdfSlidesViewer";
-import { PdfToolbar } from "./PdfToolbar";
 import { HorizontalView, type RenderPageOptions } from "./reader/HorizontalView";
-import { ReaderBottomBar } from "./reader/ReaderBottomBar";
-import { ReaderPanel } from "./reader/ReaderPanel";
-import { ReadingModeToggle } from "./reader/ReadingModeToggle";
+import { PageNumberInput } from "./reader/PageNumberInput";
+import { AppearanceMenu } from "./reader/ReaderAppearance";
+import { ReaderFloatingNav } from "./reader/ReaderFloatingNav";
+import { READER_ICON_BUTTON } from "./reader/reader-styles";
+import { SelectionMenu, type TextSelection } from "./reader/SelectionMenu";
 import { ThumbnailStrip } from "./reader/ThumbnailStrip";
 import { VerticalView } from "./reader/VerticalView";
 import { resolveFileUrl } from "@/lib/pdf/file-url";
@@ -73,21 +89,15 @@ const isPressable = (target: EventTarget | null) =>
   target instanceof HTMLElement && ["BUTTON", "A", "SUMMARY"].includes(target.tagName);
 
 /**
- * Gorizontal ko'rinish balandligi (bet ekranga to'liq sig'adi): ekrandan sarlavha, chekinishlar,
- * mobil pastki panel yoki desktop "Sahifalar" paneli (ochiq bo'lsa lenta ham) va qidiruv chipi
- * egallagan joy (rem) ayriladi.
+ * Sarlavha (3.5rem + 3px progress), bet ustidagi chekinish va pastdagi suzuvchi panel egallagan joy:
+ * gorizontal ko'rinish balandligi va vertikal «butun bet» masshtabi shundan hisoblanadi.
  */
-function horizontalHeight({
-  desktop,
-  thumbs,
-  findChip,
-}: {
-  desktop: boolean;
-  thumbs: boolean;
-  findChip: boolean;
-}) {
-  const reserved = (desktop ? (thumbs ? 15.75 : 9.25) : 14.5) + (findChip ? 3.5 : 0);
-  return `calc(100dvh - ${reserved}rem)`;
+const CHROME_REM = 10;
+const REM_PX = 16;
+
+/** Gorizontal ko'rinish balandligi (bet ekranga to'liq sig'adi); qidiruv chipi ham joy oladi. */
+function horizontalHeight(findChip: boolean) {
+  return `calc(100dvh - ${CHROME_REM + (findChip ? 3.5 : 0)}rem)`;
 }
 
 /** Imzolangan URL muddati tugagach birinchi xatoda yangi URL bilan hujjat qayta ochiladi. */
@@ -126,60 +136,56 @@ function OpenInNewWindowButton({ bookId, label }: { bookId: string; label: strin
 }
 
 /**
- * PDF darslik o'qish oynasi, ikki rejim (`?mode=h|v`, tanlov `localStorage` da ham):
- * gorizontal — bet yoki 2 betlik yoyma ekranga sig'adi, ←→/PgUp/PgDn/Space/swipe bilan
- * varaqlanadi, qo'shni yoymalar oldindan chiziladi; vertikal — uzluksiz scroll, virtualizatsiya
- * (canvas faqat ko'rinayotgan bet ±2 da). Sahifa URL'da (`?page=12`), oxirgi sahifa eslab qolinadi.
+ * PDF darslik o'qish oynasi — «fokus rejimi»: yupqa sarlavha (orqaga, kitob nomi + joriy bo'lim →
+ * Mundarija, bet raqami, qidiruv, Aa, Mavzu, Saqlash, «⋯») va 3px progress, pastda suzuvchi
+ * navigatsiya. Standart — bitta bet eni bo'yicha, uzluksiz scroll (virtualizatsiya); Aa menyusida
+ * «surish» (varaqlash) va ≥1280px da 2 betlik yoyma. Sahifa URL'da (`?page=12`), oxirgi sahifa
+ * eslab qolinadi.
  */
 export function PdfReader({
   bookId,
   backHref,
   preview = false,
-  cover,
 }: {
   bookId: string;
   backHref?: string;
   /** Admin oldindan ko'rishi: progress, statistika va "oxirgi ko'rilganlar" yuborilmaydi. */
   preview?: boolean;
-  /** Muqova rasmi ochiq API o'rniga (admin preview: admin tanlagan rasm; `null` — generativ). */
-  cover?: string | null;
 }) {
   const t = useTranslations("pdfBooks.reader");
-  const tt = useTranslations("pdfBooks.toc");
   const tc = useTranslations("pdfBooks.card");
   const tf = useTranslations("pdfBooks.find");
+  const tcontrols = useTranslations("pdfBooks.controls");
+  const ts = useTranslations("pdfBooks.selection");
+  const tb = useTranslations("brand");
   const locale = useLocale() as Locale;
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { toast } = useToast();
   const book = useQuery(pdfQueries.book(bookId));
   const total = book.data?.page_count ?? 0;
   const progress = usePdfProgress(bookId, total, { track: !preview });
   const document = usePdfDocument(bookId);
   const [renderFailed, setRenderFailed] = useState(false);
-  const tcontrols = useTranslations("pdfBooks.controls");
   const desktop = useMediaQuery("(min-width: 1024px)");
-  // Yoyma faqat keng landshaft ekranda; planshet/mobil va portretda — bitta bet.
-  const wide = useMediaQuery("(min-width: 1024px) and (orientation: landscape)");
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [thumbsOpen, setThumbsOpen] = useState(false);
-  const [pagesSheetOpen, setPagesSheetOpen] = useState(false);
+  const wide = useMediaQuery(`(min-width: ${SPREAD_MIN_WIDTH}px)`);
   const [tocOpen, setTocOpen] = useState(false);
-  const [viewOpen, setViewOpen] = useState(false);
+  const [topicOpen, setTopicOpen] = useState(false);
+  const [topicTab, setTopicTab] = useState<TopicTab>("summary");
+  const [pagesSheetOpen, setPagesSheetOpen] = useState(false);
   const [offlineOpen, setOfflineOpen] = useState(false);
   const reloads = useRef(0);
   const stageRef = useRef<HTMLDivElement>(null);
-  const tone = useReaderPrefsStore((state) => state.tone);
-  const storedMode = useReaderPrefsStore((state) => state.mode);
-  const cycleTone = useReaderPrefsStore((state) => state.cycleTone);
-  const setStoredMode = useReaderPrefsStore((state) => state.setMode);
-  // Saqlangan rejim o'qilguncha ko'rinish chizilmaydi (desktopda vertikal "miltillamasin").
+  const pageBoxRef = useRef<HTMLDivElement>(null);
+  const prefs = useReaderPrefsStore();
+  // Saqlangan rejim o'qilguncha ko'rinish chizilmaydi (rejim "miltillamasin").
   const [prefsReady, setPrefsReady] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [findOpen, setFindOpen] = useState(false);
   const annotations = usePdfAnnotations(bookId);
+  const addNote = useTopicNotesStore((state) => state.add);
   const [drawing, setDrawing] = useState(false);
-  const [listOpen, setListOpen] = useState(false);
   // Dialog: yangi belgi (chizilgan to'rtburchak va uning beti) yoki mavjudini tahrirlash.
   const [draft, setDraft] = useState<
     | { kind: "new"; rect: AnnotationRect; page: number }
@@ -193,6 +199,7 @@ export function PdfReader({
   const searchable = Boolean(document.doc) && book.data?.has_text_layer !== false;
   const fullscreen = useFullscreen(stageRef);
   const toggleFullscreen = fullscreen.toggle;
+  const { cycleTone } = prefs;
 
   useEffect(() => {
     void Promise.resolve(useReaderPrefsStore.persist.rehydrate()).finally(() =>
@@ -200,13 +207,10 @@ export function PdfReader({
     );
   }, []);
 
-  const mode: ReadingMode = resolveMode(
-    parseModeParam(searchParams.get("mode")),
-    storedMode,
-    desktop,
-  );
+  const mode: ReadingMode = resolveMode(parseModeParam(searchParams.get("mode")), prefs.mode);
   const horizontal = mode === "h";
-  const spread = horizontal && wide;
+  // 2 betlik yoyma: faqat «surish» rejimida, keng ekranda va Aa menyusida yoqilgan bo'lsa.
+  const spread = horizontal && wide && prefs.spread;
 
   const rawPage = searchParams.get("page");
   const urlPage = total > 0 ? parsePageParam(rawPage, total) : null;
@@ -218,10 +222,15 @@ export function PdfReader({
   const page =
     total === 0 ? null : (pendingPage ?? urlPage ?? (progress.ready ? progress.resume : null));
 
+  // «Davom ettirish» kartasi: oyna ochilgandagi saqlangan joy (keyingi yozuvlar uni o'zgartirmaydi).
+  const [resumeAt, setResumeAt] = useState<number | null | undefined>(undefined);
+  if (resumeAt === undefined && progress.ready) setResumeAt(progress.position?.page ?? null);
+
   const {
     zoom,
     live: liveZoom,
     stepZoom,
+    setZoomLevel,
     zoomAtTap,
     beginTouch,
     wasPinch,
@@ -234,6 +243,13 @@ export function PdfReader({
     fullscreen: fullscreen.active,
     panY: horizontal ? "scroller" : "page",
   });
+  const setPageArea = useCallback(
+    (element: HTMLDivElement | null) => {
+      pageBoxRef.current = element;
+      pageAreaRef(element);
+    },
+    [pageAreaRef],
+  );
 
   // Gorizontal: yangi sahifa (mundarija, tugmalar, swipe…) doim boshidan ochiladi — oldingi sahifada
   // pastga surilgan bo'lsa ham sarlavha ekranning yuqorisida. Birinchi ochilishda scroll'ga
@@ -276,7 +292,7 @@ export function PdfReader({
     [replaceQuery],
   );
 
-  // Prezentatsiya: `?slides=<bo'lim id>&slide=N`; faqat prezentatsiyasi bor bo'lim ochiladi.
+  // Prezentatsiya (PDF slaydlar): `?slides=<bo'lim id>&slide=N`; faqat prezentatsiyasi bor bo'lim.
   const slidesParams = parseSlidesParams(searchParams);
   const slidesItem = useMemo(
     () =>
@@ -340,11 +356,21 @@ export function PdfReader({
 
   const changeMode = useCallback(
     (next: ReadingMode) => {
-      setStoredMode(next);
+      prefs.setMode(next);
       replaceQuery({ mode: next });
     },
-    [setStoredMode, replaceQuery],
+    [prefs, replaceQuery],
   );
+
+  const chapters = useMemo(() => book.data?.chapters ?? [], [book.data]);
+  const tocItems = useMemo(() => flattenToc(chapters), [chapters]);
+  const currentItem = page !== null ? currentTocItem(tocItems, page) : null;
+  const exercisePage =
+    currentItem?.anchors?.find((anchor) => anchor.kind === "exercise")?.page ?? null;
+  const openTopic = useCallback((tab: TopicTab) => {
+    setTopicTab(tab);
+    setTopicOpen(true);
+  }, []);
 
   useEffect(() => {
     if (page === null) return;
@@ -358,8 +384,8 @@ export function PdfReader({
       }
       if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
       if (isTypingTarget(event.target)) return;
-      // Gorizontalda varaqlash: ← → PgUp PgDn Space (Shift+Space — orqaga). Vertikalda ←/→ —
-      // qo'shni betga scroll; PgUp/PgDn/Space brauzerning odatiy scroll'i.
+      // Varaqlash: ← → (ikkala rejimda); gorizontalda PgUp PgDn Space (Shift+Space — orqaga) ham.
+      // Vertikalda PgUp/PgDn/Space — brauzerning odatiy scroll'i.
       const space = event.key === " " && !isPressable(event.target);
       const back =
         event.key === "ArrowLeft" ||
@@ -377,7 +403,7 @@ export function PdfReader({
         }
         return;
       }
-      // Qolgan yorliqlar ochiq dialog (mundarija, prezentatsiya, yordam) ustida ishlamaydi.
+      // Qolgan yorliqlar ochiq dialog (mundarija, mavzu, prezentatsiya, yordam) ustida ishlamaydi.
       if (window.document.querySelector("dialog[open]")) return;
       const key = event.key.toLowerCase();
       if (event.key === "Home" && page > 1) {
@@ -386,6 +412,12 @@ export function PdfReader({
       } else if (event.key === "End" && page < total) {
         event.preventDefault();
         goTo(total);
+      } else if (event.key === "/" && searchable) {
+        event.preventDefault();
+        setFindOpen(true);
+      } else if (key === "m") {
+        event.preventDefault();
+        setTocOpen(true);
       } else if (key === "f") {
         event.preventDefault();
         toggleFullscreen();
@@ -440,8 +472,8 @@ export function PdfReader({
       }
       return;
     }
-    // Swipe faqat gorizontal rejimda, barmoq bilan va kattalashtirilmagan sahifada
-    // (kattalashganda surish — pan; vertikalda — oddiy scroll).
+    // Swipe faqat «surish» rejimida, barmoq bilan va kattalashtirilmagan sahifada
+    // (kattalashganda surish — pan; uzluksiz rejimda — oddiy scroll).
     if (!horizontal || event.pointerType === "mouse" || zoom > DEFAULT_ZOOM) return;
     const direction = swipeDirection(dx, dy, event.timeStamp - start.at);
     if (direction === "next" && nextPage !== null) goTo(nextPage);
@@ -485,37 +517,11 @@ export function PdfReader({
 
   const title = book.data ? getLocalized(book.data.title, locale) : "";
   const subjectTitle = book.data ? getLocalized(book.data.subject_title, locale) : "";
-  const chapters = book.data?.chapters ?? [];
-  const currentChapter =
-    page !== null ? currentTocItem(flattenToc(chapters), page)?.title : undefined;
-  const subtitle = book.data
-    ? [tc("meta", { grade: book.data.grade, subject: subjectTitle }), currentChapter]
-        .filter(Boolean)
-        .join(" · ")
-    : "";
+  const subtitle =
+    currentItem?.title ??
+    (book.data ? tc("meta", { grade: book.data.grade, subject: subjectTitle }) : "");
   const percent = page !== null && total > 0 ? Math.max(1, Math.round((page / total) * 100)) : 0;
   const backLink = backHref ?? (book.data ? pdfBookPath(book.data) : ROUTES.textbooks);
-  const toolbar =
-    page !== null && total > 0 ? (
-      <PdfToolbar page={page} total={total} onGo={goTo} prevPage={prevPage} nextPage={nextPage} />
-    ) : (
-      <Skeleton className="h-11 w-56" />
-    );
-  const controlProps = {
-    tone,
-    zoom,
-    fullscreen: fullscreen.active,
-    fullscreenSupported: fullscreen.supported,
-    onTone: cycleTone,
-    onZoom: stepZoom,
-    onFullscreen: toggleFullscreen,
-    onShortcuts: () => setShortcutsOpen(true),
-    onSearch: searchable ? () => setFindOpen(true) : undefined,
-    drawing,
-    onDrawing: document.doc ? () => setDrawing((value) => !value) : undefined,
-    annotationCount: annotations.items.length,
-    onAnnotations: () => setListOpen(true),
-  };
   // Matnli kitobda (backend `has_text_layer` — `false` emas) betlar ustida tanlanadigan matn qatlami.
   const textLayer = book.data?.has_text_layer !== false;
   const renderPage = (
@@ -533,12 +539,18 @@ export function PdfReader({
         textLayer={textLayer}
         highlight={findTerm || undefined}
         overlay={
-          <AnnotationLayer
-            annotations={annotationsOnPage(annotations.items, pageNumber)}
-            drawing={drawing}
-            onDraw={(rect) => setDraft({ kind: "new", rect, page: pageNumber })}
-            onSelect={(annotation) => setDraft({ kind: "edit", annotation })}
-          />
+          <>
+            <AnnotationLayer
+              annotations={annotationsOnPage(annotations.items, pageNumber)}
+              drawing={drawing}
+              onDraw={(rect) => setDraft({ kind: "new", rect, page: pageNumber })}
+              onSelect={(annotation) => setDraft({ kind: "edit", annotation })}
+            />
+            {/* Suv belgisi: bet burchagida kichik (rasmning o'ziga tegilmaydi). */}
+            <span aria-hidden className="pdf-page-mark">
+              {tb("name")}
+            </span>
+          </>
         }
         onRendered={() => (reloads.current = 0)}
         // Ko'rinmas prefetch beti xatosi e'tiborsiz: bet ko'ringanda qayta chiziladi va o'shanda aytiladi.
@@ -553,20 +565,6 @@ export function PdfReader({
       void navigator.clipboard?.writeText(url).catch(() => undefined);
     }
   };
-  const panel = (onPick?: () => void, scrollOnMount?: boolean) =>
-    page !== null && (
-      <ReaderPanel
-        chapters={chapters}
-        page={page}
-        description={book.data?.description ?? ""}
-        annotations={annotations.items}
-        onGo={goTo}
-        onOpenSlides={openSlides}
-        onPickAnnotation={(annotation) => goTo(annotation.page)}
-        onPick={onPick}
-        scrollOnMount={scrollOnMount}
-      />
-    );
   const offlineBook =
     book.data && !backHref
       ? {
@@ -578,299 +576,388 @@ export function PdfReader({
         }
       : null;
 
+  const topicOf = (pageNumber: number) => currentTocItem(tocItems, pageNumber);
+  const onSelectionNote = (selection: TextSelection) => {
+    const topic = topicOf(selection.page);
+    if (!topic) return;
+    addNote({ bookId, topicId: topic.id, page: selection.page, text: selection.text });
+    toast({ variant: "success", title: ts("noted") });
+  };
+  const onSelectionHighlight = (selection: TextSelection) => {
+    const [first] = selection.rects;
+    if (!first) return;
+    annotations.save({
+      ...newAnnotation({ bookId, page: selection.page, color: lastColor, rect: first }),
+      rects: selection.rects,
+    });
+    toast({ variant: "success", title: ts("highlighted") });
+  };
+
+  const moreItems: OverflowMenuItem[] = [
+    ...(searchable && !desktop
+      ? [
+          {
+            id: "find",
+            label: tcontrols("find"),
+            icon: <Search className="size-4" />,
+            onSelect: () => setFindOpen(true),
+            testId: "pdf-find-open",
+          },
+        ]
+      : []),
+    ...(document.doc
+      ? [
+          {
+            id: "highlight",
+            label: tcontrols("highlight"),
+            icon: <Highlighter className="size-4" />,
+            pressed: drawing,
+            onSelect: () => setDrawing((value) => !value),
+            testId: "pdf-highlight",
+          },
+          {
+            id: "pages",
+            label: t("pages"),
+            icon: <Images className="size-4" />,
+            onSelect: () => setPagesSheetOpen(true),
+            testId: "pdf-pages",
+          },
+        ]
+      : []),
+    ...(fullscreen.supported
+      ? [
+          {
+            id: "fullscreen",
+            label: tcontrols(fullscreen.active ? "exitFullscreen" : "fullscreen"),
+            icon: fullscreen.active ? (
+              <Minimize className="size-4" />
+            ) : (
+              <Maximize className="size-4" />
+            ),
+            onSelect: toggleFullscreen,
+            testId: "pdf-fullscreen",
+          },
+        ]
+      : []),
+    ...(offlineBook
+      ? [
+          {
+            id: "offline",
+            label: t("offline"),
+            icon: <WifiOff className="size-4" />,
+            onSelect: () => setOfflineOpen(true),
+            testId: "pdf-offline",
+          },
+        ]
+      : []),
+    {
+      id: "share",
+      label: t("share"),
+      icon: <Share2 className="size-4" />,
+      onSelect: share,
+      testId: "pdf-share",
+    },
+    ...(desktop
+      ? [
+          {
+            id: "shortcuts",
+            label: tcontrols("shortcuts"),
+            icon: <Keyboard className="size-4" />,
+            onSelect: () => setShortcutsOpen(true),
+            testId: "pdf-shortcuts",
+          },
+        ]
+      : []),
+  ];
+
   return (
     <div
       ref={stageRef}
-      data-tone={tone}
+      data-tone={prefs.tone}
+      data-warm={prefs.warm || undefined}
       data-testid="pdf-reader"
       className={cn(
-        "pdf-stage bg-reader-bg flex min-h-dvh flex-col",
+        "pdf-stage bg-ds-canvas text-ds-ink font-ui flex min-h-dvh flex-col",
         fullscreen.active && "overflow-auto",
       )}
     >
       <RecordRecentBook book={counted ? book.data : undefined} />
 
-      <header className="border-border bg-surface sticky top-0 z-20 border-b">
-        <div className="flex h-[3.75rem] items-center gap-1 px-2 lg:h-16 lg:gap-4 lg:px-5">
-          <div className="flex min-w-0 flex-1 items-center gap-1 lg:gap-3">
-            <Link
-              href={backLink}
-              aria-label={t("back")}
-              className="text-foreground lg:border-border inline-flex size-11 shrink-0 items-center justify-center rounded-xl lg:border"
-            >
-              <ArrowLeft className="size-5" aria-hidden />
-            </Link>
-            {desktop && (
-              <button
-                type="button"
-                aria-label={t("panelToggle")}
-                aria-pressed={sidebarOpen}
-                data-testid="pdf-sidebar-toggle"
-                onClick={() => setSidebarOpen((value) => !value)}
-                className={cn(
-                  "inline-flex size-11 shrink-0 items-center justify-center rounded-xl border",
-                  sidebarOpen
-                    ? "border-brand-soft bg-brand-soft text-brand-text"
-                    : "border-border text-foreground",
-                )}
-              >
-                <PanelLeft className="size-5" aria-hidden />
-              </button>
-            )}
-            {book.data && (
-              <BookCover
-                grade={book.data.grade}
-                subject={book.data.subject}
-                subjectTitle={subjectTitle}
-                src={cover !== undefined ? cover : book.data.cover}
-                className="hidden w-8 shrink-0 lg:block"
-              />
-            )}
-            <div className="min-w-0">
-              <h1 className="truncate text-base leading-tight font-bold">{title}</h1>
-              <p className="text-muted truncate text-xs lg:text-[0.8125rem]">{subtitle}</p>
-            </div>
-          </div>
+      <header className="border-ds-line bg-ds-surface sticky top-0 z-20 border-b print:hidden">
+        <div className="flex h-14 items-center gap-1 px-2 lg:gap-2 lg:px-4">
+          <Link href={backLink} aria-label={t("back")} className={READER_ICON_BUTTON}>
+            <ArrowLeft className="size-5" aria-hidden />
+          </Link>
 
-          {desktop && (
-            <div className="flex shrink-0 items-center gap-2">
-              {toolbar}
-              {prefsReady && <ReadingModeToggle mode={mode} onChange={changeMode} />}
-            </div>
+          <button
+            type="button"
+            aria-haspopup="dialog"
+            aria-expanded={tocOpen}
+            aria-label={t("tocOpen", { title, section: subtitle })}
+            data-testid="pdf-toc-open"
+            disabled={page === null}
+            onClick={() => setTocOpen(true)}
+            className="hover:bg-ds-canvas rounded-ds-sm flex min-h-11 min-w-0 flex-1 items-center gap-2 px-2 text-left transition-colors lg:max-w-[min(32rem,40vw)] lg:flex-none"
+          >
+            <span className="min-w-0">
+              <span className="font-book block truncate text-[0.9375rem] leading-tight font-semibold">
+                {title}
+              </span>
+              <span
+                className="text-ds-muted block truncate text-xs"
+                data-testid="pdf-current-section"
+              >
+                {subtitle}
+              </span>
+            </span>
+            <ChevronDown className="text-ds-muted size-4 shrink-0" aria-hidden />
+          </button>
+
+          <div className="hidden flex-1 lg:block" />
+
+          {page !== null && total > 0 ? (
+            <PageNumberInput page={page} total={total} onGo={goTo} className="max-sm:hidden" />
+          ) : (
+            <Skeleton className="h-11 w-28 max-sm:hidden" />
           )}
 
-          <div className="flex shrink-0 items-center justify-end gap-0.5 lg:min-w-0 lg:flex-1">
-            {controlProps.onSearch && !desktop && (
+          <div className="flex shrink-0 items-center gap-0.5">
+            {searchable && desktop && (
               <button
                 type="button"
                 data-testid="pdf-find-open"
                 aria-label={tcontrols("find")}
-                onClick={controlProps.onSearch}
-                className="text-foreground inline-flex size-11 items-center justify-center"
+                aria-keyshortcuts="/ Control+F"
+                onClick={() => setFindOpen(true)}
+                className={READER_ICON_BUTTON}
               >
                 <Search className="size-5" aria-hidden />
               </button>
             )}
-            {desktop && <PdfReaderControls {...controlProps} overflow />}
+            {prefsReady && (
+              <AppearanceMenu
+                desktop={desktop}
+                tone={prefs.tone}
+                mode={mode}
+                fit={prefs.fit}
+                zoom={zoom}
+                spread={prefs.spread}
+                spreadAvailable={wide}
+                warm={prefs.warm}
+                onTone={prefs.setTone}
+                onMode={changeMode}
+                onFit={prefs.setFit}
+                onZoom={setZoomLevel}
+                onSpread={prefs.setSpread}
+                onWarm={prefs.setWarm}
+              />
+            )}
+            {currentItem && (
+              <button
+                type="button"
+                aria-haspopup="dialog"
+                aria-expanded={topicOpen}
+                data-testid="pdf-topic-open"
+                onClick={() => openTopic("summary")}
+                className={cn(
+                  READER_ICON_BUTTON,
+                  "lg:w-auto lg:gap-1.5 lg:px-3 lg:text-sm lg:font-semibold",
+                )}
+              >
+                <BookOpenText className="size-5" aria-hidden />
+                <span className="max-lg:sr-only">{t("topic")}</span>
+              </button>
+            )}
             {book.data && <PdfBookmarkButton bookId={bookId} compact />}
+            <OverflowMenu items={moreItems} label={t("more")} testId="pdf-more" />
           </div>
         </div>
-        <div aria-hidden className="bg-brand-soft h-[3px]">
-          <div className="bg-brand h-[3px]" style={{ width: `${percent}%` }} />
+        <div aria-hidden className="bg-ds-accent-tint h-[3px]">
+          <div
+            className="bg-ds-accent h-[3px] transition-[width]"
+            style={{ width: `${percent}%` }}
+          />
         </div>
       </header>
 
-      <div className="flex flex-1 items-stretch">
-        {desktop && sidebarOpen && page !== null && (
-          <aside
-            aria-label={tt("title")}
-            className="border-border bg-surface sticky top-[calc(3.75rem+3px)] h-[calc(100dvh-4rem)] w-80 shrink-0 overflow-y-auto border-r p-4"
+      <div className="min-w-0 flex-1 px-2.5 pt-4 pb-28 lg:px-6">
+        {findTerm && (
+          <div
+            className="mb-3 flex items-center justify-center gap-2 text-sm"
+            data-testid="pdf-find-chip"
           >
-            {panel()}
-            {offlineBook && (
-              <div className="border-border mt-4 border-t pt-4">
-                <OfflineButton book={offlineBook} />
-              </div>
-            )}
-          </aside>
+            <span className="text-ds-muted">{tf("highlighted", { term: findTerm })}</span>
+            <button
+              type="button"
+              onClick={() => replaceQuery({ find: null })}
+              className="text-ds-accent-ink min-h-11 font-semibold underline underline-offset-4"
+            >
+              {tf("clear")}
+            </button>
+          </div>
         )}
 
-        <div className="min-w-0 flex-1 px-2.5 pt-4 pb-40 lg:px-6 lg:pb-0">
-          {findTerm && (
-            <div
-              className="mb-3 flex items-center justify-center gap-2 text-sm"
-              data-testid="pdf-find-chip"
-            >
-              <span className="text-muted">{tf("highlighted", { term: findTerm })}</span>
-              <button
-                type="button"
-                onClick={() => replaceQuery({ find: null })}
-                className="text-link min-h-11 underline underline-offset-4"
-              >
-                {tf("clear")}
-              </button>
-            </div>
+        <div
+          ref={setPageArea}
+          data-testid="pdf-page-area"
+          data-mode={prefsReady ? mode : undefined}
+          className={cn(
+            "pdf-page-area mx-auto w-full select-none",
+            zoom > DEFAULT_ZOOM ? "touch-pan-x touch-pan-y" : "touch-pan-y",
           )}
-
-          <div
-            ref={pageAreaRef}
-            data-testid="pdf-page-area"
-            data-mode={prefsReady ? mode : undefined}
-            className={cn(
-              "pdf-page-area mx-auto w-full select-none",
-              zoom > DEFAULT_ZOOM ? "touch-pan-x touch-pan-y" : "touch-pan-y",
-            )}
-            onPointerDown={onPointerDown}
-            onPointerUp={onPointerUp}
-            onPointerCancel={() => (touch.current = null)}
-          >
-            {document.error && !document.doc ? (
-              <ReaderMessage
-                message={t("loadError")}
-                action={
-                  <>
-                    <Button variant="secondary" onClick={retry}>
-                      {t("retry")}
-                    </Button>
-                    <OpenInNewWindowButton bookId={bookId} label={t("openInNewWindow")} />
-                  </>
-                }
+          onPointerDown={onPointerDown}
+          onPointerUp={onPointerUp}
+          onPointerCancel={() => (touch.current = null)}
+        >
+          {document.error && !document.doc ? (
+            <ReaderMessage
+              message={t("loadError")}
+              action={
+                <>
+                  <Button variant="secondary" onClick={retry}>
+                    {t("retry")}
+                  </Button>
+                  <OpenInNewWindowButton bookId={bookId} label={t("openInNewWindow")} />
+                </>
+              }
+            />
+          ) : renderFailed ? (
+            <ReaderMessage
+              message={t("pageError")}
+              action={
+                <>
+                  <Button variant="secondary" onClick={retry}>
+                    {t("retry")}
+                  </Button>
+                  <OpenInNewWindowButton bookId={bookId} label={t("openInNewWindow")} />
+                </>
+              }
+            />
+          ) : document.doc && page !== null && prefsReady ? (
+            horizontal ? (
+              <HorizontalView
+                page={page}
+                total={total}
+                spread={spread}
+                zoom={zoom}
+                live={liveZoom}
+                height={horizontalHeight(Boolean(findTerm))}
+                scrollerRef={zoomScrollerRef}
+                contentRef={zoomContentRef}
+                onGo={goTo}
+                renderPage={renderPage}
               />
-            ) : renderFailed ? (
-              <ReaderMessage
-                message={t("pageError")}
-                action={
-                  <>
-                    <Button variant="secondary" onClick={retry}>
-                      {t("retry")}
-                    </Button>
-                    <OpenInNewWindowButton bookId={bookId} label={t("openInNewWindow")} />
-                  </>
-                }
-              />
-            ) : document.doc && page !== null && prefsReady ? (
-              horizontal ? (
-                <HorizontalView
-                  page={page}
-                  total={total}
-                  spread={spread}
-                  zoom={zoom}
-                  live={liveZoom}
-                  height={horizontalHeight({
-                    desktop,
-                    thumbs: thumbsOpen,
-                    findChip: Boolean(findTerm),
-                  })}
-                  scrollerRef={zoomScrollerRef}
-                  contentRef={zoomContentRef}
-                  onGo={goTo}
-                  renderPage={renderPage}
-                />
-              ) : (
-                <VerticalView
-                  doc={document.doc}
-                  page={page}
-                  total={total}
-                  zoom={zoom}
-                  live={liveZoom}
-                  fullscreen={fullscreen.active}
-                  stageRef={stageRef}
-                  scrollerRef={zoomScrollerRef}
-                  contentRef={zoomContentRef}
-                  onPageChange={setPageInUrl}
-                  renderPage={renderPage}
-                />
-              )
             ) : (
-              <div role="status" aria-label={t("loading")}>
-                <Skeleton className="mx-auto aspect-[1/1.4] w-full max-w-3xl" />
-              </div>
-            )}
-          </div>
-
-          {desktop && document.doc && page !== null && total > 0 && (
-            <div className="border-border bg-surface sticky bottom-0 z-10 -mx-6 mt-4 border-t print:hidden">
-              <button
-                type="button"
-                aria-expanded={thumbsOpen}
-                aria-label={t("pagesToggle")}
-                data-testid="pdf-thumbs-toggle"
-                onClick={() => setThumbsOpen((value) => !value)}
-                className="text-foreground hover:bg-subtle flex h-10 w-full items-center justify-center gap-1.5 text-sm font-semibold"
-              >
-                {thumbsOpen ? (
-                  <ChevronDown className="size-4" aria-hidden />
-                ) : (
-                  <ChevronUp className="size-4" aria-hidden />
-                )}
-                {t("pages")}
-              </button>
-              {thumbsOpen && (
-                <ThumbnailStrip doc={document.doc} page={page} total={total} onGo={goTo} />
-              )}
-            </div>
-          )}
-
-          {book.data && (
-            <div className="mx-auto mt-6 max-w-[53.75rem] lg:pb-12">
-              <ReportErrorLink topicId={bookId} page={page ?? undefined} />
+              <VerticalView
+                doc={document.doc}
+                page={page}
+                total={total}
+                zoom={zoom}
+                live={liveZoom}
+                fullscreen={fullscreen.active}
+                stageRef={stageRef}
+                scrollerRef={zoomScrollerRef}
+                contentRef={zoomContentRef}
+                onPageChange={setPageInUrl}
+                renderPage={renderPage}
+                fit={prefs.fit}
+                pageReserve={CHROME_REM * REM_PX}
+              />
+            )
+          ) : (
+            <div role="status" aria-label={t("loading")}>
+              <Skeleton className="mx-auto aspect-[1/1.4] w-full max-w-3xl" />
             </div>
           )}
         </div>
+
+        {book.data && (
+          <div className="mx-auto mt-6 max-w-[53.75rem]">
+            <ReportErrorLink topicId={bookId} page={page ?? undefined} />
+          </div>
+        )}
       </div>
 
-      {!desktop && page !== null && total > 0 && (
-        <ReaderBottomBar
+      {page !== null && total > 0 && (
+        <ReaderFloatingNav
           page={page}
           total={total}
-          onGo={goTo}
+          items={tocItems}
           prevPage={prevPage}
           nextPage={nextPage}
-          onPanel={() => setTocOpen(true)}
-          onView={() => setViewOpen(true)}
-          zoom={zoom}
-          onZoom={stepZoom}
-          onPages={document.doc ? () => setPagesSheetOpen(true) : undefined}
-          onOffline={offlineBook ? () => setOfflineOpen(true) : undefined}
-          onShare={share}
+          onGo={goTo}
+          exercisePage={exercisePage}
+          onTest={currentItem ? () => openTopic("test") : undefined}
         />
       )}
 
-      {!desktop && (
-        <>
-          <Dialog open={tocOpen} onOpenChange={setTocOpen} title={tt("title")} placement="bottom">
-            {panel(() => setTocOpen(false), tocOpen)}
-          </Dialog>
-          <Dialog open={viewOpen} onOpenChange={setViewOpen} title={t("view")} placement="bottom">
-            <div className="flex flex-col gap-3">
-              <ReadingModeToggle
-                mode={mode}
-                labels
-                onChange={(next) => {
-                  changeMode(next);
-                  setViewOpen(false);
-                }}
-              />
-              <PdfReaderControls
-                {...controlProps}
-                labels
-                only="view"
-                onAfter={() => setViewOpen(false)}
-              />
-            </div>
-          </Dialog>
-          {document.doc && page !== null && (
-            <Dialog
-              open={pagesSheetOpen}
-              onOpenChange={setPagesSheetOpen}
-              title={t("pages")}
-              placement="bottom"
-            >
-              {pagesSheetOpen && (
-                <ThumbnailStrip
-                  doc={document.doc}
-                  page={page}
-                  total={total}
-                  className="-mx-3"
-                  onGo={(next) => {
-                    setPagesSheetOpen(false);
-                    goTo(next);
-                  }}
-                />
-              )}
-            </Dialog>
+      {textLayer && document.doc && (
+        <SelectionMenu
+          areaRef={pageBoxRef}
+          onSolution={() => openTopic("summary")}
+          onNote={onSelectionNote}
+          onHighlight={onSelectionHighlight}
+        />
+      )}
+
+      {page !== null && (
+        <PdfTocDrawer
+          open={tocOpen}
+          onOpenChange={setTocOpen}
+          chapters={chapters}
+          page={page}
+          total={total}
+          resume={resumeAt ?? null}
+          onGo={goTo}
+          onOpenSlides={openSlides}
+          annotations={annotations.items}
+          onPickAnnotation={(annotation) => goTo(annotation.page)}
+        />
+      )}
+
+      {currentItem && book.data && (
+        <TopicPanel
+          open={topicOpen}
+          onOpenChange={setTopicOpen}
+          tab={topicTab}
+          onTabChange={setTopicTab}
+          topic={{ id: currentItem.id, title: currentItem.title }}
+          bookId={bookId}
+          book={book.data}
+          desktop={desktop}
+        />
+      )}
+
+      {document.doc && page !== null && (
+        <Dialog
+          open={pagesSheetOpen}
+          onOpenChange={setPagesSheetOpen}
+          title={t("pages")}
+          placement="bottom"
+        >
+          {pagesSheetOpen && (
+            <ThumbnailStrip
+              doc={document.doc}
+              page={page}
+              total={total}
+              className="-mx-3"
+              onGo={(next) => {
+                setPagesSheetOpen(false);
+                goTo(next);
+              }}
+            />
           )}
-          {offlineBook && (
-            <Dialog
-              open={offlineOpen}
-              onOpenChange={setOfflineOpen}
-              title={t("offline")}
-              placement="bottom"
-            >
-              <OfflineButton book={offlineBook} />
-            </Dialog>
-          )}
-        </>
+        </Dialog>
+      )}
+      {offlineBook && (
+        <Dialog
+          open={offlineOpen}
+          onOpenChange={setOfflineOpen}
+          title={t("offline")}
+          placement={desktop ? "center" : "bottom"}
+        >
+          <OfflineButton book={offlineBook} />
+        </Dialog>
       )}
 
       {draft && (
@@ -899,16 +986,6 @@ export function PdfReader({
                 }
               : undefined
           }
-        />
-      )}
-      {listOpen && (
-        <AnnotationsListDialog
-          items={annotations.items}
-          onClose={() => setListOpen(false)}
-          onPick={(annotation) => {
-            setListOpen(false);
-            goTo(annotation.page);
-          }}
         />
       )}
       {findOpen && searchable && document.doc && (

@@ -22,6 +22,8 @@ export interface TocTreeProps {
   /** Bitta qator (bob yoki bo'lim): havola yoki tugma — chaqiruvchi beradi. */
   renderItem: (item: TocItem, state: { active: boolean }) => ReactNode;
   testId?: string;
+  /** Qidiruv maydoni qatorlar sonidan qat'i nazar (o'qish oynasi mundarijasi). */
+  alwaysSearchable?: boolean;
   className?: string;
 }
 
@@ -30,7 +32,14 @@ export interface TocTreeProps {
  * DOM'da qoladi, qidiruv tizimlari uchun havolalar yo'qolmaydi). Joriy bob ochiq turadi;
  * `TOC_SEARCH_THRESHOLD` dan ko'p qatorda mundarija ichida qidiruv chiqadi (topilganlar ochiq).
  */
-export function TocTree({ chapters, page, renderItem, testId, className }: TocTreeProps) {
+export function TocTree({
+  chapters,
+  page,
+  renderItem,
+  testId,
+  alwaysSearchable = false,
+  className,
+}: TocTreeProps) {
   const t = useTranslations("pdfBooks.toc");
   const baseId = useId();
   const groups = useMemo(() => groupToc(chapters), [chapters]);
@@ -48,7 +57,7 @@ export function TocTree({ chapters, page, renderItem, testId, className }: TocTr
   const [query, setQuery] = useState("");
   const isOpen = (id: string) => toggled.get(id) ?? id === currentGroup;
 
-  const searchable = tocRowCount(groups) > TOC_SEARCH_THRESHOLD;
+  const searchable = alwaysSearchable || tocRowCount(groups) > TOC_SEARCH_THRESHOLD;
   const searching = searchable && query.trim().length > 0;
   const visible = searching ? filterTocGroups(groups, query) : groups;
   const toggle = (id: string) => setToggled((map) => new Map(map).set(id, !isOpen(id)));

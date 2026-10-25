@@ -10,8 +10,8 @@ export interface DialogProps {
   onOpenChange: (open: boolean) => void;
   title: ReactNode;
   description?: ReactNode;
-  /** `bottom` — mobil pastki sheet, `right` — o'ng tomondagi panel (drawer). */
-  placement?: "center" | "bottom" | "right";
+  /** `bottom` — mobil pastki sheet, `right`/`left` — yon panel (drawer). */
+  placement?: "center" | "bottom" | "right" | "left";
   children?: ReactNode;
   className?: string;
 }
@@ -56,13 +56,15 @@ export function Dialog({
           "border-border mx-0 mt-auto mb-0 w-full max-w-none rounded-t-2xl border-t",
         placement === "right" &&
           "border-border my-0 mr-0 ml-auto h-dvh max-h-none w-full max-w-sm rounded-l-2xl border-l",
+        placement === "left" &&
+          "border-border my-0 mr-auto ml-0 h-dvh max-h-none w-full max-w-sm rounded-r-2xl border-r",
         className,
       )}
     >
       <div
         className={cn(
           "flex flex-col gap-4 overflow-y-auto p-5",
-          placement === "right" ? "h-full" : "max-h-[85dvh]",
+          placement === "right" || placement === "left" ? "h-full" : "max-h-[85dvh]",
         )}
       >
         <div className="flex items-start justify-between gap-4">

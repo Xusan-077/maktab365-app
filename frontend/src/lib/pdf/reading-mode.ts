@@ -15,14 +15,13 @@ export function parseModeParam(raw: string | null | undefined): ReadingMode | nu
   return isReadingMode(value) ? value : null;
 }
 
-/** URL > saqlangan tanlov > qurilma bo'yicha standart (desktop — yoyma, mobil — scroll). */
-export function resolveMode(
-  url: ReadingMode | null,
-  stored: ReadingMode | null,
-  desktop: boolean,
-): ReadingMode {
-  return url ?? stored ?? (desktop ? "h" : "v");
+/** URL > saqlangan tanlov > standart: hamma qurilmada uzluksiz scroll (fokus rejimi). */
+export function resolveMode(url: ReadingMode | null, stored: ReadingMode | null): ReadingMode {
+  return url ?? stored ?? "v";
 }
+
+/** 2 betlik yoyma shu kenglikdan boshlab (Aa menyusida ixtiyoriy); mobil/planshetda — bitta bet. */
+export const SPREAD_MIN_WIDTH = 1280;
 
 /**
  * Yoyma (2 bet): 1-bet (muqova) yolg'iz o'ngda, keyin 2–3, 4–5… juft. `[chap, o'ng]`, bo'sh tomon

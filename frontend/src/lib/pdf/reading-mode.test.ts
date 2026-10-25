@@ -19,10 +19,9 @@ describe("rejim tanlovi", () => {
     expect(parseModeParam(null)).toBeNull();
   });
   it("URL > saqlangan > qurilma (desktop — h, mobil — v)", () => {
-    expect(resolveMode("v", "h", true)).toBe("v");
-    expect(resolveMode(null, "v", true)).toBe("v");
-    expect(resolveMode(null, null, true)).toBe("h");
-    expect(resolveMode(null, null, false)).toBe("v");
+    expect(resolveMode("v", "h")).toBe("v");
+    expect(resolveMode(null, "h")).toBe("h");
+    expect(resolveMode(null, null)).toBe("v");
   });
 });
 

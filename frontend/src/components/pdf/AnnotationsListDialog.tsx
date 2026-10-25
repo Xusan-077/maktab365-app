@@ -1,7 +1,6 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Dialog } from "@/components/ui/Dialog";
 import type { Annotation } from "@/lib/pdf/annotations";
 
 /** Kitobdagi barcha belgilar va eslatmalar ro'yxati: bosilsa shu betga o'tadi. */
@@ -40,27 +39,5 @@ export function AnnotationsList({
         </li>
       ))}
     </ul>
-  );
-}
-
-/** Kitobdagi barcha belgilar va eslatmalar (dialog): bosilsa shu betga o'tadi. */
-export function AnnotationsListDialog({
-  items,
-  onPick,
-  onClose,
-}: {
-  items: Annotation[];
-  onPick: (annotation: Annotation) => void;
-  onClose: () => void;
-}) {
-  const t = useTranslations("pdfBooks.annotations");
-  return (
-    <Dialog open onOpenChange={(open) => !open && onClose()} title={t("listTitle")}>
-      <AnnotationsList
-        items={items}
-        onPick={onPick}
-        className="-mx-2 max-h-[55dvh] overflow-y-auto"
-      />
-    </Dialog>
   );
 }
