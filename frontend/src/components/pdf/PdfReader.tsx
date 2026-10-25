@@ -255,14 +255,11 @@ export function PdfReader({
 
   // Boshqa parametrlar (`slides`, `slide`) saqlanadi: sahifa almashganda ko'rgich yopilmaydi.
   // `history.replaceState` — Next router bilan sinxron (`useSearchParams` yangilanadi), lekin RSC
-  // so'rovi va navigatsiyasiz: tez varaqlashda ham arzon.
+  // so'rovi va navigatsiyasiz: tez varaqlashda ham arzon. Holat `null` bo'lishi shart: Next'ning
+  // ichki holati uzatilsa chaqiruv routerniki deb hisoblanadi va `useSearchParams` yangilanmaydi.
   const replaceQuery = useCallback(
     (patch: Parameters<typeof withSlidesParams>[1]) =>
-      window.history.replaceState(
-        window.history.state,
-        "",
-        `?${withSlidesParams(searchParams, patch)}`,
-      ),
+      window.history.replaceState(null, "", `?${withSlidesParams(searchParams, patch)}`),
     [searchParams],
   );
   const setPageInUrl = useCallback(
@@ -977,7 +974,11 @@ export function PdfReader({
           onTabChange={setTopicTab}
           topic={{ id: currentItem.id, title: currentItem.title }}
           bookId={bookId}
-          book={book.data}
+          slides={currentItem.slides ?? null}
+          onOpenSlides={() => {
+            setTopicOpen(false);
+            openSlides(currentItem.id, readSlidesProgress(currentItem.id) ?? 1);
+          }}
           desktop={desktop}
         />
       )}

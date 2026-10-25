@@ -585,6 +585,10 @@ describe("PdfReader: o'qish rejimlari", () => {
     await waitFor(() =>
       expect(nav.replace).toHaveBeenCalledWith("/darsliklar/book-1?page=32", { scroll: false }),
     );
+    // Holat `null`: Next ichki holati uzatilsa `useSearchParams` yangilanmay qoladi.
+    expect(
+      vi.mocked(window.history.replaceState).mock.calls.every(([state]) => state === null),
+    ).toBe(true);
     expect(screen.getByTestId("pdf-zoom-content").dataset.twoPage).toBe("true");
     const visible = [
       ...document.querySelectorAll('[data-slot="current"] [data-testid="pdf-canvas"]'),

@@ -28,14 +28,26 @@ interface FoundTopic {
   page: number;
   /** Bob ichidagi bo'lim bo'lsa — bob nomi. */
   parent?: string;
+  /** Mundarijadagi tartib raqami: "2" yoki "2.1". */
+  position: string;
 }
 
 /** Mundarija daraxtidan bo'limni id bo'yicha topadi (bob yoki uning bo'limi). */
 export function findTopic(chapters: readonly AdminChapter[], id: string): FoundTopic | null {
-  for (const chapter of chapters) {
-    if (chapter.id === id) return { title: chapter.title, page: chapter.page };
-    const child = chapter.children?.find((item) => item.id === id);
-    if (child) return { title: child.title, page: child.page, parent: chapter.title };
+  for (const [index, chapter] of chapters.entries()) {
+    if (chapter.id === id) {
+      return { title: chapter.title, page: chapter.page, position: String(index + 1) };
+    }
+    const childIndex = chapter.children?.findIndex((item) => item.id === id) ?? -1;
+    const child = chapter.children?.[childIndex];
+    if (child) {
+      return {
+        title: child.title,
+        page: child.page,
+        parent: chapter.title,
+        position: `${index + 1}.${childIndex + 1}`,
+      };
+    }
   }
   return null;
 }
@@ -131,7 +143,14 @@ export function TopicMaterialsView({ bookId, topicId }: { bookId: string; topicI
           {
             id: "slides",
             label: t("tabs.slides"),
-            content: <PresentationEditor topicId={topicId} />,
+            content: (
+              <PresentationEditor
+                book={book}
+                topicId={topicId}
+                title={topic.title}
+                position={topic.position}
+              />
+            ),
           },
           {
             id: "notes",

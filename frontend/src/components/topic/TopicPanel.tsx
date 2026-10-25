@@ -10,17 +10,14 @@ import {
   Trash2,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { buttonVariants, Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import { Dialog } from "@/components/ui/Dialog";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Tabs } from "@/components/ui/Tabs";
 import type { Locale } from "@/lib/i18n/config";
-import { Link } from "@/lib/i18n/navigation";
 import { topicQueries } from "@/lib/topic-materials/queries";
-import { visibleSlides } from "@/lib/topic-materials/slides";
 import { formatDate } from "@/lib/utils/format-date";
-import { presentationPath, type BookRef } from "@/lib/utils/routes";
 import { useTopicNotesStore } from "@/stores/topic-notes.store";
 import { SummaryBlocks } from "./SummaryBlocks";
 
@@ -40,7 +37,10 @@ export interface TopicPanelProps {
   onTabChange: (tab: TopicTab) => void;
   topic: TopicRef;
   bookId: string;
-  book: BookRef;
+  /** Bo'lim prezentatsiyasi (PDF slaydlar); yo'q bo'lsa `null`. */
+  slides: { page_count: number } | null;
+  /** Prezentatsiyani o'qish oynasining slayd ko'rgichida ochadi. */
+  onOpenSlides: () => void;
   /** Desktop — o'ngda 480px panel, aks holda pastki sheet. */
   desktop: boolean;
 }
@@ -87,13 +87,15 @@ function SummaryTab({ topicId }: { topicId: string }) {
   );
 }
 
-function SlidesTab({ topicId, book }: { topicId: string; book: BookRef }) {
+function SlidesTab({
+  slides,
+  onOpen,
+}: {
+  slides: { page_count: number } | null;
+  onOpen: () => void;
+}) {
   const t = useTranslations("topic.slides");
-  const presentation = useQuery(topicQueries.presentation(topicId));
-  if (presentation.isPending) return <PanelSkeleton />;
-  if (presentation.error) return <LoadError onRetry={() => void presentation.refetch()} />;
-  const count = presentation.data ? visibleSlides(presentation.data.slides).length : 0;
-  if (!presentation.data || count === 0) {
+  if (!slides || slides.page_count === 0) {
     return <EmptyState icon={Presentation}>{t("empty")}</EmptyState>;
   }
   return (
@@ -104,15 +106,15 @@ function SlidesTab({ topicId, book }: { topicId: string; book: BookRef }) {
       <span className="bg-ds-accent-tint text-ds-accent-ink rounded-ds-sm flex size-11 shrink-0 items-center justify-center">
         <Presentation className="size-5" aria-hidden />
       </span>
-      <p className="text-ds-ink min-w-0 flex-1 text-sm font-bold">{t("card", { count })}</p>
-      <Link
-        href={presentationPath(book, topicId)}
-        className={buttonVariants({
-          className: "bg-ds-accent hover:bg-ds-accent-ink text-ds-on-accent rounded-ds-sm h-11",
-        })}
+      <p className="text-ds-ink min-w-0 flex-1 text-sm font-bold">
+        {t("card", { count: slides.page_count })}
+      </p>
+      <Button
+        onClick={onOpen}
+        className="bg-ds-accent hover:bg-ds-accent-ink text-ds-on-accent rounded-ds-sm h-11"
       >
         {t("open")}
-      </Link>
+      </Button>
     </div>
   );
 }
@@ -177,7 +179,8 @@ export function TopicPanel({
   onTabChange,
   topic,
   bookId,
-  book,
+  slides,
+  onOpenSlides,
   desktop,
 }: TopicPanelProps) {
   const t = useTranslations("topic");
@@ -212,7 +215,7 @@ export function TopicPanel({
               {
                 id: "slides",
                 label: t("tabs.slides"),
-                content: <SlidesTab topicId={topic.id} book={book} />,
+                content: <SlidesTab slides={slides} onOpen={onOpenSlides} />,
               },
               {
                 id: "notes",

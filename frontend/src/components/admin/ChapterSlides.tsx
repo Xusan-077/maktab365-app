@@ -12,6 +12,7 @@ import type { ChapterRow } from "@/lib/admin/chapters";
 import { pdfFileProblem, type PdfFileProblem } from "@/lib/admin/pdf-file";
 import { slidesProxyUrl, uploadPdf, xhrSender } from "@/lib/admin/pdf-upload";
 import { ADMIN_ROOT_KEY } from "@/lib/admin/queries";
+import { pdfKeys } from "@/lib/pdf-books/queries";
 import { adminTopicPath } from "@/lib/admin/routes";
 import type { AdminSlides } from "@/lib/admin/types";
 import { Link } from "@/lib/i18n/navigation";
@@ -35,6 +36,11 @@ export interface ChapterSlidesProps {
   /** Qator tartib raqami ("2" yoki "2.1"): tugma nomlari uchun. */
   position: string;
   disabled?: boolean;
+  /**
+   * `true` — yuklash, almashtirish va o'chirish (mavzu sahifasining «Taqdimot» tabi). `false`
+   * (mundarija qatori) — faqat holat va «Xulosa va taqdimot» havolasi: prezentatsiya bitta joyda boshqariladi.
+   */
+  manage?: boolean;
 }
 
 type Phase = "idle" | "uploading" | "error";
@@ -44,7 +50,13 @@ type Phase = "idle" | "uploading" | "error";
  * qayta urinish) va olib tashlash. Mundarija formasidan mustaqil: yuklash xatosi kitobning boshqa
  * maydonlarini saqlashga xalaqit bermaydi.
  */
-export function ChapterSlides({ context, row, position, disabled }: ChapterSlidesProps) {
+export function ChapterSlides({
+  context,
+  row,
+  position,
+  disabled,
+  manage = false,
+}: ChapterSlidesProps) {
   const t = useTranslations("admin.slides");
   const tp = useTranslations("admin.pdfUpload");
   const tc = useTranslations("admin.common");
@@ -65,7 +77,11 @@ export function ChapterSlides({ context, row, position, disabled }: ChapterSlide
   const slides = chapterId ? (context.byId.get(chapterId) ?? null) : null;
   const ready = Boolean(bookId && chapterId);
 
-  const refresh = () => queryClient.invalidateQueries({ queryKey: ADMIN_ROOT_KEY });
+  const refresh = async () => {
+    // Fayl almashdi: o'quvchi tomonidagi kitob ma'lumoti (slaydlar soni) ham yangilansin.
+    if (bookId) void queryClient.invalidateQueries({ queryKey: pdfKeys.book(bookId) });
+    await queryClient.invalidateQueries({ queryKey: ADMIN_ROOT_KEY });
+  };
 
   async function start(chosen: File) {
     if (!bookId || !chapterId) return;
@@ -137,27 +153,29 @@ export function ChapterSlides({ context, row, position, disabled }: ChapterSlide
             <p className="text-muted">{t("optional")}</p>
           )}
         </div>
-        <input
-          ref={inputRef}
-          type="file"
-          accept="application/pdf,.pdf"
-          className="sr-only"
-          tabIndex={-1}
-          aria-label={t("choose", { n: position })}
-          data-testid="slides-input"
-          disabled={!ready || disabled || busy}
-          onChange={(event) => {
-            const chosen = event.target.files?.[0] ?? null;
-            event.target.value = "";
-            if (!chosen) return;
-            const found = pdfFileProblem(chosen);
-            setProblem(found);
-            if (found) return;
-            setFile(chosen);
-            void start(chosen);
-          }}
-        />
-        {bookId && chapterId && (
+        {manage && (
+          <input
+            ref={inputRef}
+            type="file"
+            accept="application/pdf,.pdf"
+            className="sr-only"
+            tabIndex={-1}
+            aria-label={t("choose", { n: position })}
+            data-testid="slides-input"
+            disabled={!ready || disabled || busy}
+            onChange={(event) => {
+              const chosen = event.target.files?.[0] ?? null;
+              event.target.value = "";
+              if (!chosen) return;
+              const found = pdfFileProblem(chosen);
+              setProblem(found);
+              if (found) return;
+              setFile(chosen);
+              void start(chosen);
+            }}
+          />
+        )}
+        {!manage && bookId && chapterId && (
           <Link
             href={adminTopicPath(bookId, chapterId)}
             aria-label={t("materialsFor", { n: position })}
@@ -168,7 +186,7 @@ export function ChapterSlides({ context, row, position, disabled }: ChapterSlide
             {t("materials")}
           </Link>
         )}
-        {!busy && (
+        {manage && !busy && (
           <Button
             variant="secondary"
             size="sm"
@@ -184,7 +202,7 @@ export function ChapterSlides({ context, row, position, disabled }: ChapterSlide
             {t(slides ? "replace" : "add")}
           </Button>
         )}
-        {!busy && slides && context.canDelete && (
+        {manage && !busy && slides && context.canDelete && (
           <Button
             variant="ghost"
             size="sm"
@@ -207,7 +225,7 @@ export function ChapterSlides({ context, row, position, disabled }: ChapterSlide
         </p>
       )}
 
-      {problem && (
+      {manage && problem && (
         <p role="alert" className="text-danger text-sm">
           {tp(`problems.${problem}`)}
         </p>
