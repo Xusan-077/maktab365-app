@@ -23,24 +23,33 @@ export function ReportErrorLink({
 }) {
   const t = useTranslations("support.reportError");
   const tp = useTranslations("pdfBooks.page");
+  const tc = useTranslations("pdfBooks.contents");
   const [open, setOpen] = useState(false);
 
   return (
     <div className="present:hidden print:hidden">
       {card ? (
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="bg-surface-2 text-muted hover:bg-brand-soft flex min-h-11 w-full items-start gap-3 rounded-[0.875rem] p-4 text-left text-sm leading-normal transition-colors"
+        <section
+          aria-labelledby="report-error-title"
+          className="border-ds-warn-border bg-ds-warn-bg font-ui flex flex-col gap-3 rounded-[20px] border p-5"
         >
-          <TriangleAlert
-            className="text-group-language mt-0.5 size-[1.125rem] shrink-0"
-            aria-hidden
-          />
-          <span>
-            <strong className="text-foreground">{tp("reportTitle")}</strong> {tp("reportText")}
-          </span>
-        </button>
+          <div className="flex items-start gap-3">
+            <TriangleAlert className="text-ds-warn-ink mt-0.5 size-5 shrink-0" aria-hidden />
+            <div className="flex flex-col gap-1">
+              <h2 id="report-error-title" className="text-ds-ink text-base font-extrabold">
+                {tp("reportTitle")}
+              </h2>
+              <p className="text-ds-ink-2 text-sm leading-normal">{tp("reportText")}</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className="border-ds-warn-border text-ds-warn-ink hover:bg-ds-surface/60 min-h-11 self-start rounded-xl border px-4 text-sm font-bold transition-colors"
+          >
+            {tc("reportAction")}
+          </button>
+        </section>
       ) : (
         <button
           type="button"

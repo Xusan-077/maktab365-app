@@ -1783,6 +1783,65 @@
       "highlight": "Выделить",
       "noted": "Добавлено в конспект",
       "highlighted": "Пометка добавлена"
+    },
+    "contents": {
+      "title": "Оглавление",
+      "meta": "Глав: {chapters} · {pages} стр.",
+      "metaRead": "Прочитано параграфов: {count}",
+      "collapseAll": "Свернуть все",
+      "expandAll": "Развернуть все",
+      "searchLabel": "Поиск по оглавлению",
+      "searchPlaceholder": "Поиск по названию параграфа или темы",
+      "searchShortcut": "Ctrl K",
+      "filtersLabel": "Фильтр оглавления",
+      "filters": {
+        "all": "Все",
+        "inProgress": "В процессе",
+        "unread": "Непрочитанные",
+        "tests": "Тесты"
+      },
+      "results": "Результатов: {count}",
+      "empty": "Ничего не найдено",
+      "clear": "Сбросить",
+      "chapterRange": "Глава {roman} · с. {start}–{end}",
+      "chapterDone": "Завершено",
+      "chapterUnread": "Не прочитано",
+      "chapterPercent": "{percent}%",
+      "chapterProgress": "Прочитано {percent}%",
+      "page": "с. {page}",
+      "lastRead": "последнее прочитанное",
+      "resume": "Продолжить",
+      "resumeLabel": "Продолжить со страницы {page}",
+      "chapterEnd": "В конце главы",
+      "practice": {
+        "exercise": "Упражнение",
+        "test": "Тест",
+        "project": "Практическая работа"
+      },
+      "status": {
+        "done": "завершён",
+        "current": "текущий параграф",
+        "pending": "не прочитан"
+      },
+      "card": {
+        "label": "Продолжить чтение",
+        "lastRead": "Последнее прочитанное · {when}",
+        "today": "сегодня {time}",
+        "yesterday": "вчера {time}",
+        "startTitle": "Начните читать",
+        "startLabel": "Первая глава",
+        "pages": "{page} / {total} стр.",
+        "percent": "Прочитано {percent}%",
+        "resume": "Продолжить со страницы {page}",
+        "start": "Начать с 1-й страницы",
+        "restart": "Начать сначала",
+        "finished": "Книга прочитана"
+      },
+      "mastery": {
+        "title": "Прогресс по главам",
+        "item": "Глава {roman}"
+      },
+      "reportAction": "Сообщить"
     }
   },
   "library": {

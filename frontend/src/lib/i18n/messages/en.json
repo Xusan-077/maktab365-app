@@ -1783,6 +1783,65 @@
       "highlight": "Highlight",
       "noted": "Added to notes",
       "highlighted": "Highlight added"
+    },
+    "contents": {
+      "title": "Contents",
+      "meta": "{chapters} chapters · {pages} pages",
+      "metaRead": "{count} sections read",
+      "collapseAll": "Collapse all",
+      "expandAll": "Expand all",
+      "searchLabel": "Search contents",
+      "searchPlaceholder": "Search by section or topic name",
+      "searchShortcut": "Ctrl K",
+      "filtersLabel": "Contents filter",
+      "filters": {
+        "all": "All",
+        "inProgress": "In progress",
+        "unread": "Unread",
+        "tests": "Tests"
+      },
+      "results": "{count} results",
+      "empty": "Nothing found",
+      "clear": "Clear",
+      "chapterRange": "Chapter {roman} · pp. {start}–{end}",
+      "chapterDone": "Completed",
+      "chapterUnread": "Unread",
+      "chapterPercent": "{percent}%",
+      "chapterProgress": "{percent}% read",
+      "page": "p. {page}",
+      "lastRead": "last read",
+      "resume": "Continue",
+      "resumeLabel": "Continue from page {page}",
+      "chapterEnd": "End of chapter",
+      "practice": {
+        "exercise": "Exercise",
+        "test": "Test",
+        "project": "Practical work"
+      },
+      "status": {
+        "done": "completed",
+        "current": "current section",
+        "pending": "unread"
+      },
+      "card": {
+        "label": "Continue reading",
+        "lastRead": "Last read · {when}",
+        "today": "today {time}",
+        "yesterday": "yesterday {time}",
+        "startTitle": "Start reading",
+        "startLabel": "First chapter",
+        "pages": "{page} / {total} pages",
+        "percent": "{percent}% read",
+        "resume": "Continue from page {page}",
+        "start": "Start from page 1",
+        "restart": "Start over",
+        "finished": "Book finished"
+      },
+      "mastery": {
+        "title": "Progress by chapter",
+        "item": "Chapter {roman}"
+      },
+      "reportAction": "Report"
     }
   },
   "library": {

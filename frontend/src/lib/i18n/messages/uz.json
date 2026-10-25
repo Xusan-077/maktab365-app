@@ -1783,6 +1783,65 @@
       "highlight": "Belgilash",
       "noted": "Konspektga qo‘shildi",
       "highlighted": "Belgi qo‘yildi"
+    },
+    "contents": {
+      "title": "Mundarija",
+      "meta": "{chapters} bob · {pages} bet",
+      "metaRead": "{count} paragraf o‘qilgan",
+      "collapseAll": "Hammasini yig‘ish",
+      "expandAll": "Hammasini ochish",
+      "searchLabel": "Mundarijadan qidirish",
+      "searchPlaceholder": "Paragraf yoki mavzu nomi bo‘yicha qidirish",
+      "searchShortcut": "Ctrl K",
+      "filtersLabel": "Mundarija filtri",
+      "filters": {
+        "all": "Hammasi",
+        "inProgress": "Davom etayotgan",
+        "unread": "O‘qilmagan",
+        "tests": "Testlar"
+      },
+      "results": "{count} ta natija",
+      "empty": "Hech narsa topilmadi",
+      "clear": "Tozalash",
+      "chapterRange": "{roman} bob · {start}–{end}-bet",
+      "chapterDone": "Tugatildi",
+      "chapterUnread": "O‘qilmagan",
+      "chapterPercent": "{percent}%",
+      "chapterProgress": "{percent}% o‘qilgan",
+      "page": "{page}-bet",
+      "lastRead": "oxirgi o‘qilgan",
+      "resume": "Davom ettirish",
+      "resumeLabel": "{page}-betdan davom ettirish",
+      "chapterEnd": "Bob oxirida",
+      "practice": {
+        "exercise": "Mashq",
+        "test": "Test",
+        "project": "Amaliy ish"
+      },
+      "status": {
+        "done": "tugatilgan",
+        "current": "joriy paragraf",
+        "pending": "o‘qilmagan"
+      },
+      "card": {
+        "label": "Davom ettirish",
+        "lastRead": "Oxirgi o‘qilgan · {when}",
+        "today": "bugun {time}",
+        "yesterday": "kecha {time}",
+        "startTitle": "O‘qishni boshlang",
+        "startLabel": "Birinchi bob",
+        "pages": "{page} / {total}-bet",
+        "percent": "{percent}% o‘qildi",
+        "resume": "{page}-betdan davom ettirish",
+        "start": "1-betdan boshlash",
+        "restart": "Boshidan boshlash",
+        "finished": "Kitob o‘qib chiqildi"
+      },
+      "mastery": {
+        "title": "Bob bo‘yicha o‘zlashtirish",
+        "item": "{roman} bob"
+      },
+      "reportAction": "Xabar berish"
     }
   },
   "library": {
