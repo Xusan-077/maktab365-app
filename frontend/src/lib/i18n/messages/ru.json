@@ -556,7 +556,10 @@
       "provider_auth_expired": "Срок действия запроса на вход истёк. Попробуйте ещё раз.",
       "provider_auth_replayed": "Этот запрос на вход уже использован. Попробуйте ещё раз.",
       "provider_email_unverified": "Google не подтвердил ваш email. Выберите другой способ.",
-      "provider_not_configured": "Этот способ входа пока недоступен."
+      "provider_not_configured": "Этот способ входа пока недоступен.",
+      "telegram_nonce_mismatch": "Вход начат в другом браузере. Попробуйте снова с этой страницы.",
+      "telegram_login_expired": "Ссылка устарела. Попробуйте снова.",
+      "telegram_login_pending": "Вход ещё не подтверждён в Telegram."
     },
     "forgot": {
       "title": "Восстановление пароля",
@@ -2187,5 +2190,30 @@
     "downloadPdf": "Скачать PDF",
     "fullscreen": "Полный экран",
     "exitFullscreen": "Выйти из полноэкранного режима"
+  },
+  "telegramLogin": {
+    "start": "Войти через Telegram",
+    "starting": "Готовим ссылку…",
+    "pending": "Нажмите Start в Telegram",
+    "pendingHint": "Отсканируйте QR-код камерой телефона или нажмите «Открыть в Telegram».",
+    "pendingHintMobile": "Откроется Telegram — нажмите Start в боте и вернитесь на эту страницу.",
+    "expiresIn": "Ссылка действует {time}",
+    "openTelegram": "Открыть в Telegram",
+    "qrTitle": "QR-код ссылки на Telegram-бота",
+    "confirming": "Подтверждено, выполняем вход…",
+    "expired": "Срок действия ссылки истёк.",
+    "retry": "Попробовать снова"
+  },
+  "authModal": {
+    "title": "Вход",
+    "reason": {
+      "default": "Отдельная регистрация не нужна: войдите через Google или Telegram в одно касание.",
+      "save": "Войдите, чтобы сохранить.",
+      "note": "Войдите, чтобы сохранять заметки.",
+      "result": "Войдите, чтобы сохранить результат теста.",
+      "resume": "Войдите, чтобы продолжить чтение на другом устройстве."
+    },
+    "guestNote": "Читать учебники можно и без аккаунта.",
+    "otherMethods": "Войти по email"
   }
 }

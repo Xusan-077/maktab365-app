@@ -266,6 +266,117 @@ paths:
               schema:
                 $ref: '#/components/schemas/AuthSession'
           description: ''
+  /api/v1/auth/telegram/start/:
+    post:
+      operationId: auth_telegram_start
+      description: 'Kirmagan foydalanuvchi uchun: eskirgan `Authorization` sarlavhasi
+        so''rovni buzmasin.'
+      summary: 'Telegram bot orqali kirish: bir martalik havola (5 daqiqa)'
+      tags:
+      - auth
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TelegramLoginStart'
+          description: ''
+  /api/v1/auth/telegram/status/:
+    get:
+      operationId: auth_telegram_status
+      description: 'Kirmagan foydalanuvchi uchun: eskirgan `Authorization` sarlavhasi
+        so''rovni buzmasin.'
+      summary: Telegram orqali kirish holati (pending | confirmed | expired)
+      parameters:
+      - in: header
+        name: X-Telegram-Nonce
+        schema:
+          type: string
+        description: '`start` bergan nonce (yoki `tg_nonce` cookie''si).'
+      - in: query
+        name: token
+        schema:
+          type: string
+        required: true
+      tags:
+      - auth
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TelegramLoginStatus'
+          description: ''
+  /api/v1/auth/telegram/complete/:
+    post:
+      operationId: auth_telegram_complete
+      description: 'Kirmagan foydalanuvchi uchun: eskirgan `Authorization` sarlavhasi
+        so''rovni buzmasin.'
+      summary: Tasdiqlangan Telegram kirishini sessiyaga almashtirish (token bir martalik)
+      parameters:
+      - in: header
+        name: X-Telegram-Nonce
+        schema:
+          type: string
+        description: '`start` bergan nonce (yoki `tg_nonce` cookie''si).'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TelegramLoginCompleteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TelegramLoginCompleteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TelegramLoginCompleteRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TelegramLoginSession'
+          description: ''
+  /api/v1/auth/telegram/webhook/:
+    post:
+      operationId: auth_telegram_webhook
+      description: 'Faqat Telegram: `X-Telegram-Bot-Api-Secret-Token` = `TELEGRAM_WEBHOOK_SECRET`.'
+      summary: Telegram bot webhook'i (/start <token>)
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: {}
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: {}
+          multipart/form-data:
+            schema:
+              type: object
+              additionalProperties: {}
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
   /api/v1/auth/otp/request/:
     post:
       operationId: auth_otp_request
@@ -5082,6 +5193,70 @@ components:
       - first_name
       - hash
       - id
+    TelegramLoginCompleteRequest:
+      type: object
+      properties:
+        locale:
+          $ref: '#/components/schemas/LocaleEnum'
+        token:
+          type: string
+          minLength: 1
+          pattern: ^[A-Za-z0-9_-]{16,64}$
+      required:
+      - token
+    TelegramLoginSession:
+      type: object
+      properties:
+        access:
+          type: string
+        refresh:
+          type: string
+        user:
+          $ref: '#/components/schemas/Me'
+        is_new:
+          type: boolean
+        profile_completed:
+          type: boolean
+      required:
+      - access
+      - is_new
+      - profile_completed
+      - refresh
+      - user
+    TelegramLoginStart:
+      type: object
+      properties:
+        token:
+          type: string
+        bot_url:
+          type: string
+          format: uri
+        expires_in:
+          type: integer
+        nonce:
+          type: string
+      required:
+      - bot_url
+      - expires_in
+      - nonce
+      - token
+    TelegramLoginStatus:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/TelegramLoginStatusStatusEnum'
+      required:
+      - status
+    TelegramLoginStatusStatusEnum:
+      enum:
+      - pending
+      - confirmed
+      - expired
+      type: string
+      description: |-
+        * `pending` - pending
+        * `confirmed` - confirmed
+        * `expired` - expired
     ToEnum:
       enum:
       - draft

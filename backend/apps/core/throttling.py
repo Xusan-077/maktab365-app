@@ -79,3 +79,18 @@ class StatsThrottle(_ClientIpMixin, _LiveRateMixin, AnonRateThrottle):
 
     def get_cache_key(self, request, view):
         return self.cache_format % {"scope": self.scope, "ident": self.get_ident(request)}
+
+
+class TelegramStartThrottle(_ClientIpMixin, _LiveRateMixin, AnonRateThrottle):
+    """Telegram bot orqali kirish havolasini yaratish: IP bo'yicha (`telegram_start`)."""
+
+    scope = "telegram_start"
+
+    def get_cache_key(self, request, view):
+        return self.cache_format % {"scope": self.scope, "ident": self.get_ident(request)}
+
+
+class TelegramStatusThrottle(TelegramStartThrottle):
+    """Kirish holatini so'rash (frontend 2 s da polling qiladi): IP bo'yicha (`telegram_status`)."""
+
+    scope = "telegram_status"

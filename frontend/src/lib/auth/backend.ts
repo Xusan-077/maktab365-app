@@ -115,6 +115,39 @@ export async function loginWithOtp(input: OtpVerify, info?: ClientInfo) {
   return unwrap(result) satisfies AuthSession;
 }
 
+/** Telegram bot orqali kirish: bir martalik havola (`nonce` Next cookie'siga yoziladi, brauzerga emas). */
+export async function startTelegramLogin(info?: ClientInfo) {
+  const result = await backend().POST("/api/v1/auth/telegram/start/", {
+    headers: forwardHeaders(info),
+  });
+  return unwrap(result);
+}
+
+const nonceHeader = (nonce: string) => ({ "X-Telegram-Nonce": nonce });
+
+export async function telegramLoginStatus(token: string, nonce: string, info?: ClientInfo) {
+  const result = await backend().GET("/api/v1/auth/telegram/status/", {
+    params: { query: { token } },
+    headers: { ...nonceHeader(nonce), ...forwardHeaders(info) },
+  });
+  return unwrap(result);
+}
+
+type TelegramLoginComplete = components["schemas"]["TelegramLoginCompleteRequest"];
+
+/** Botda tasdiqlangan kirish → backend sessiyasi (token bir martalik). */
+export async function completeTelegramLogin(
+  input: TelegramLoginComplete,
+  nonce: string,
+  info?: ClientInfo,
+) {
+  const result = await backend().POST("/api/v1/auth/telegram/complete/", {
+    body: input,
+    headers: { ...nonceHeader(nonce), ...forwardHeaders(info) },
+  });
+  return unwrap(result) satisfies AuthSession;
+}
+
 /**
  * `invalid` — refresh yaroqsiz/bekor qilingan (sessiya tugashi kerak);
  * `unavailable` — backend javob bermadi (sessiya saqlanadi, keyinroq qayta urinadi).

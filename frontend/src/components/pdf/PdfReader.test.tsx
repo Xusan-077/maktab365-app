@@ -30,6 +30,13 @@ vi.mock("@/lib/i18n/navigation", () => ({
 }));
 vi.mock("@/hooks/usePdfProgress", () => ({ usePdfProgress: () => progress.state }));
 vi.mock("@/hooks/useBookStats", () => ({ useBookStats: vi.fn() }));
+// Kirgan foydalanuvchi: saqlash amallari darhol bajariladi.
+vi.mock("@/hooks/useRequireAuth", () => ({
+  useRequireAuth: () => (action?: () => void) => {
+    action?.();
+    return true;
+  },
+}));
 vi.mock("@/hooks/usePdfAnnotations", () => ({
   usePdfAnnotations: () => ({ items: [], save: vi.fn(), remove: vi.fn(), failed: false }),
 }));

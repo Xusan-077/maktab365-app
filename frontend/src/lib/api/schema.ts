@@ -176,6 +176,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/telegram/start/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Telegram bot orqali kirish: bir martalik havola (5 daqiqa)
+         * @description Kirmagan foydalanuvchi uchun: eskirgan `Authorization` sarlavhasi so'rovni buzmasin.
+         */
+        post: operations["auth_telegram_start"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/telegram/status/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Telegram orqali kirish holati (pending | confirmed | expired)
+         * @description Kirmagan foydalanuvchi uchun: eskirgan `Authorization` sarlavhasi so'rovni buzmasin.
+         */
+        get: operations["auth_telegram_status"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/telegram/complete/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Tasdiqlangan Telegram kirishini sessiyaga almashtirish (token bir martalik)
+         * @description Kirmagan foydalanuvchi uchun: eskirgan `Authorization` sarlavhasi so'rovni buzmasin.
+         */
+        post: operations["auth_telegram_complete"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/telegram/webhook/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Telegram bot webhook'i (/start <token>)
+         * @description Faqat Telegram: `X-Telegram-Bot-Api-Secret-Token` = `TELEGRAM_WEBHOOK_SECRET`.
+         */
+        post: operations["auth_telegram_webhook"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/otp/request/": {
         parameters: {
             query?: never;
@@ -2397,6 +2477,34 @@ export interface components {
             auth_date: number;
             hash: string;
         };
+        TelegramLoginCompleteRequest: {
+            locale?: components["schemas"]["LocaleEnum"];
+            token: string;
+        };
+        TelegramLoginSession: {
+            access: string;
+            refresh: string;
+            user: components["schemas"]["Me"];
+            is_new: boolean;
+            profile_completed: boolean;
+        };
+        TelegramLoginStart: {
+            token: string;
+            /** Format: uri */
+            bot_url: string;
+            expires_in: number;
+            nonce: string;
+        };
+        TelegramLoginStatus: {
+            status: components["schemas"]["TelegramLoginStatusStatusEnum"];
+        };
+        /**
+         * @description * `pending` - pending
+         *     * `confirmed` - confirmed
+         *     * `expired` - expired
+         * @enum {string}
+         */
+        TelegramLoginStatusStatusEnum: "pending" | "confirmed" | "expired";
         /**
          * @description * `draft` - draft
          *     * `published` - published
@@ -2741,6 +2849,110 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AuthSession"];
+                };
+            };
+        };
+    };
+    auth_telegram_start: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TelegramLoginStart"];
+                };
+            };
+        };
+    };
+    auth_telegram_status: {
+        parameters: {
+            query: {
+                token: string;
+            };
+            header?: {
+                /** @description `start` bergan nonce (yoki `tg_nonce` cookie'si). */
+                "X-Telegram-Nonce"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TelegramLoginStatus"];
+                };
+            };
+        };
+    };
+    auth_telegram_complete: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description `start` bergan nonce (yoki `tg_nonce` cookie'si). */
+                "X-Telegram-Nonce"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TelegramLoginCompleteRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["TelegramLoginCompleteRequest"];
+                "multipart/form-data": components["schemas"]["TelegramLoginCompleteRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TelegramLoginSession"];
+                };
+            };
+        };
+    };
+    auth_telegram_webhook: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    [key: string]: unknown;
+                };
+                "application/x-www-form-urlencoded": {
+                    [key: string]: unknown;
+                };
+                "multipart/form-data": {
+                    [key: string]: unknown;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
                 };
             };
         };

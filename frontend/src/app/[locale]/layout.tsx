@@ -3,6 +3,7 @@ import { Inter, Manrope, Onest, Source_Serif_4 } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { AuthModal } from "@/components/auth/AuthModal";
 import { AuthProvider } from "@/components/layout/AuthProvider";
 import { PreferencesProvider } from "@/components/layout/PreferencesProvider";
 import { QueryProvider } from "@/components/layout/QueryProvider";
@@ -96,6 +97,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[lo
                 <ServiceWorkerRegister />
                 {children}
                 <Toaster />
+                <AuthModal />
               </MotionProvider>
             </AuthProvider>
           </QueryProvider>

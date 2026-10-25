@@ -36,6 +36,7 @@ import { useFullscreen } from "@/hooks/useFullscreen";
 import { usePdfAnnotations } from "@/hooks/usePdfAnnotations";
 import { usePdfProgress } from "@/hooks/usePdfProgress";
 import { useReaderZoom } from "@/hooks/useReaderZoom";
+import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { useToast } from "@/hooks/useToast";
 import { ApiError } from "@/lib/api/types";
 import type { Locale } from "@/lib/i18n/config";
@@ -189,6 +190,7 @@ export function PdfReader({
   const [findOpen, setFindOpen] = useState(false);
   const annotations = usePdfAnnotations(bookId);
   const addNote = useTopicNotesStore((state) => state.add);
+  const requireAuth = useRequireAuth();
   const [drawing, setDrawing] = useState(false);
   // Dialog: yangi belgi (chizilgan to'rtburchak va uning beti) yoki mavjudini tahrirlash.
   const [draft, setDraft] = useState<
@@ -588,8 +590,11 @@ export function PdfReader({
   const onSelectionNote = (selection: TextSelection) => {
     const topic = topicOf(selection.page);
     if (!topic) return;
-    addNote({ bookId, topicId: topic.id, page: selection.page, text: selection.text });
-    toast({ variant: "success", title: ts("noted") });
+    // Qayd — saqlanadigan narsa: mehmonga avval "Kirish" oynasi, kirgach qayd qo'shiladi.
+    requireAuth(() => {
+      addNote({ bookId, topicId: topic.id, page: selection.page, text: selection.text });
+      toast({ variant: "success", title: ts("noted") });
+    }, "note");
   };
   const onSelectionHighlight = (selection: TextSelection) => {
     const [first] = selection.rects;

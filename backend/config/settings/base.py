@@ -192,6 +192,9 @@ REST_FRAMEWORK = {
         "support_burst": env("SUPPORT_BURST_THROTTLE_RATE", default="2/min"),
         "pdf_upload": PDF_UPLOAD_THROTTLE_RATE,
         "stats": env("STATS_THROTTLE_RATE", default="600/hour"),
+        # Telegram bot orqali kirish: yangi havola (IP) va holatni 2 s da so'rash (IP).
+        "telegram_start": env("TELEGRAM_START_THROTTLE_RATE", default="10/min"),
+        "telegram_status": env("TELEGRAM_STATUS_THROTTLE_RATE", default="60/min"),
     },
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "EXCEPTION_HANDLER": "apps.core.exceptions.api_exception_handler",
@@ -230,6 +233,12 @@ GOOGLE_CLIENT_ID = env("GOOGLE_CLIENT_ID", default="")
 # @BotFather bergan token; Telegram Login Widget imzosi shu bilan tekshiriladi. Bo'sh — o'chiq.
 TELEGRAM_BOT_TOKEN = env("TELEGRAM_BOT_TOKEN", default="")
 TELEGRAM_AUTH_MAX_AGE_SECONDS = env.int("TELEGRAM_AUTH_MAX_AGE_SECONDS", default=24 * 60 * 60)
+# Bot orqali kirish (deep-link `t.me/<bot>?start=<token>`): bot username'i (`@`siz) va webhook siri
+# (`set_telegram_webhook` uni Telegram'ga beradi, Telegram har so'rovda sarlavhada qaytaradi).
+# Ikkalasi ham bo'sh bo'lmasa yoqiladi.
+TELEGRAM_BOT_USERNAME = env("TELEGRAM_BOT_USERNAME", default="").lstrip("@")
+TELEGRAM_WEBHOOK_SECRET = env("TELEGRAM_WEBHOOK_SECRET", default="")
+TELEGRAM_LOGIN_TTL_SECONDS = env.int("TELEGRAM_LOGIN_TTL_SECONDS", default=300)
 OTP_TTL = timedelta(minutes=env.int("OTP_TTL_MINUTES", default=10))
 OTP_MAX_ATTEMPTS = env.int("OTP_MAX_ATTEMPTS", default=5)
 OTP_RESEND_COOLDOWN_SECONDS = env.int("OTP_RESEND_COOLDOWN_SECONDS", default=60)

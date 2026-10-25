@@ -556,7 +556,10 @@
       "provider_auth_expired": "Kirish so'rovining muddati tugagan. Qayta urinib ko'ring.",
       "provider_auth_replayed": "Bu kirish so'rovi allaqachon ishlatilgan. Qayta urinib ko'ring.",
       "provider_email_unverified": "Google emailingizni tasdiqlamagan. Boshqa usulni tanlang.",
-      "provider_not_configured": "Bu kirish usuli hozircha mavjud emas."
+      "provider_not_configured": "Bu kirish usuli hozircha mavjud emas.",
+      "telegram_nonce_mismatch": "Kirish boshqa brauzerda boshlangan. Shu sahifadan qayta urinib ko'ring.",
+      "telegram_login_expired": "Havola eskirgan. Qayta urinib ko'ring.",
+      "telegram_login_pending": "Kirish hali Telegramda tasdiqlanmagan."
     },
     "forgot": {
       "title": "Parolni tiklash",
@@ -2187,5 +2190,30 @@
     "downloadPdf": "PDF yuklab olish",
     "fullscreen": "To‘liq ekran",
     "exitFullscreen": "To‘liq ekrandan chiqish"
+  },
+  "telegramLogin": {
+    "start": "Telegram bilan kirish",
+    "starting": "Havola tayyorlanmoqda…",
+    "pending": "Telegramda Start bosing",
+    "pendingHint": "Telefon kamerasi bilan QR kodni skanerlang yoki «Telegramda ochish» tugmasini bosing.",
+    "pendingHintMobile": "Telegram ochiladi — botda Start tugmasini bosing va shu sahifaga qayting.",
+    "expiresIn": "Havola {time} amal qiladi",
+    "openTelegram": "Telegramda ochish",
+    "qrTitle": "Telegram bot havolasi QR kodi",
+    "confirming": "Tasdiqlandi, kirilmoqda…",
+    "expired": "Havola muddati tugadi.",
+    "retry": "Qayta urinish"
+  },
+  "authModal": {
+    "title": "Kirish",
+    "reason": {
+      "default": "Hisob alohida ochilmaydi: Google yoki Telegram orqali bir bosishda kirasiz.",
+      "save": "Saqlash uchun hisobingizga kiring.",
+      "note": "Qaydlarni saqlash uchun hisobingizga kiring.",
+      "result": "Test natijasini saqlash uchun hisobingizga kiring.",
+      "resume": "O'qishni boshqa qurilmada davom ettirish uchun hisobingizga kiring."
+    },
+    "guestNote": "Darsliklarni hisobsiz ham o'qiy olasiz.",
+    "otherMethods": "Email bilan kirish"
   }
 }
