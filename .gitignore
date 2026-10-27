@@ -40,3 +40,4 @@ media/
 docker-compose.override.yml
 
 design-ref/
+.vercel
