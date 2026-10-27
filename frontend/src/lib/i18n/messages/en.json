@@ -165,7 +165,8 @@
     "mobile": "Mobile navigation",
     "home": "Home",
     "goToCabinet": "Go to dashboard",
-    "goToTeacher": "Go to teacher panel"
+    "goToTeacher": "Go to teacher panel",
+    "games": "Games"
   },
   "search": {
     "label": "Search the site",
@@ -2300,5 +2301,141 @@
     },
     "guestNote": "You can read textbooks without an account.",
     "otherMethods": "Sign in with email"
+  },
+  "games": {
+    "meta": {
+      "title": "Interactive games",
+      "description": "Team games for the classroom based on textbook topics: Mystery Box, Wheel of Luck and Tug of War."
+    },
+    "page": {
+      "title": "Interactive games",
+      "lead": "Pick a topic and play a team quiz with your class.",
+      "searchLabel": "Search topics",
+      "searchPlaceholder": "Type a topic or textbook name…",
+      "clearSearch": "Clear search",
+      "gradeFilter": "Grade",
+      "subjectFilter": "Subject",
+      "allGrades": "All",
+      "allSubjects": "All subjects",
+      "grade": "Grade {grade}",
+      "results": "{count, plural, =0 {No topics found} one {# topic} other {# topics}}",
+      "empty": "No game-ready topics match these filters. Try another word or filter.",
+      "resetFilters": "Reset filters",
+      "error": "Couldn't load topics. Check your connection and try again.",
+      "retry": "Try again",
+      "loadMore": "Show more",
+      "loading": "Loading…"
+    },
+    "card": {
+      "meta": "{subject} · Grade {grade} · {textbook}",
+      "questions": "{count} questions",
+      "play": "Play",
+      "playLabel": "Play “{topic}”",
+      "gamesLabel": "Available games"
+    },
+    "list": {
+      "box": {
+        "name": "Mystery Box",
+        "tag": "1–3 teams",
+        "description": "Open the box to reveal a question. A correct answer earns the team points."
+      },
+      "wheel": {
+        "name": "Wheel of Luck",
+        "tag": "1–3 teams",
+        "description": "Spin the wheel: the sector it lands on decides the question."
+      },
+      "rope": {
+        "name": "Tug of War",
+        "tag": "2 teams",
+        "description": "Two teams compete: every correct answer pulls the rope to your side."
+      }
+    },
+    "allowance": {
+      "freeLeft": "{left} of {limit} free left",
+      "coins": "{coins} coins",
+      "coinsLabel": "Coin balance: {coins}",
+      "monthlyBonus": "{coins} bonus coins every month"
+    },
+    "modal": {
+      "title": "Start a game",
+      "step": "Step {step} / {total}",
+      "back": "Back",
+      "close": "Close",
+      "pickTitle": "Which game shall we play?",
+      "pickLead": "Topic: {topic}",
+      "continue": "Continue",
+      "selected": "Selected",
+      "setupTitle": "Set up the game",
+      "teams": "Number of teams",
+      "teamsOption": "{count, plural, one {# team} other {# teams}}",
+      "ropeOnlyTwo": "This game is for 2 teams only",
+      "teamNames": "Team names",
+      "teamNameLabel": "Team {n} name",
+      "questions": "Number of questions",
+      "questionsOption": "{count}",
+      "minutes": "~{minutes} min",
+      "notEnough": "The topic has {count} questions",
+      "summary": "{teams} teams · {questions} questions · {seconds} seconds each · about {minutes} min",
+      "start": "Start game",
+      "starting": "Getting ready…",
+      "costNote": "Free games are used up: this game costs {cost} coins.",
+      "limitTitle": "This month's free games are used up",
+      "limitText": "You need {cost} coins to play again. Your balance: {coins}. Next month you get {free} free games and {bonus} coins.",
+      "limitGuest": "Sign in to get {bonus} bonus coins every month and keep playing.",
+      "signIn": "Sign in",
+      "understood": "Got it",
+      "startError": "Couldn't start the game. Please try again.",
+      "teamDefault": {
+        "blue": "Blue team",
+        "red": "Red team",
+        "green": "Green team"
+      },
+      "errors": {
+        "tooLong": "No more than {max} characters"
+      }
+    },
+    "topicBlock": {
+      "title": "Interactive games",
+      "lead": "Reinforce the topic with your class through a game.",
+      "unavailable": "This topic doesn't have enough questions for a game yet.",
+      "error": "Couldn't load game details."
+    },
+    "play": {
+      "exit": "Leave game",
+      "fullscreen": "Full screen",
+      "exitFullscreen": "Exit full screen",
+      "soundOn": "Turn sound on",
+      "soundOff": "Turn sound off",
+      "question": "Question {current} / {total}",
+      "turn": "Turn: {team}",
+      "answersLabel": "Answer options",
+      "answerHint": "Keyboard: 1–4 or A–D",
+      "option": "{letter}: {text}",
+      "correct": "Correct!",
+      "wrong": "Wrong",
+      "timeUp": "Time's up",
+      "correctAnswer": "Correct answer: {letter}",
+      "next": "Next question",
+      "finish": "See results",
+      "timerLabel": "Time left",
+      "points": "+{points}",
+      "score": "{team}: {score} points",
+      "scoresLabel": "Team scores",
+      "notReady": "Game not found. Start it again from the games page.",
+      "toGames": "Back to games",
+      "checkError": "Couldn't check the answer. Please choose again."
+    },
+    "result": {
+      "title": "Results",
+      "winner": "{team} wins!",
+      "draw": "It's a draw!",
+      "noWinner": "Nobody scored this time",
+      "place": "Place {place}",
+      "score": "{score} points",
+      "accuracy": "{correct}/{total} correct",
+      "playAgain": "Play again",
+      "otherTopic": "Another topic",
+      "saveError": "Couldn't save the result, but it stays on this page."
+    }
   }
 }

@@ -27,6 +27,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: ROUTES.home, priority: 1 },
     { path: ROUTES.textbooks, priority: 0.9 },
     { path: ROUTES.subjects, priority: 0.8 },
+    { path: ROUTES.games, priority: 0.7 },
     { path: ROUTES.about, priority: 0.3 },
     { path: ROUTES.help, priority: 0.3 },
     // Sinf sahifasi yo'q — kanonik manzil katalog filtri (`/darsliklar?sinf=N`).

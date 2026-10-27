@@ -165,7 +165,8 @@
     "mobile": "Mobil navigatsiya",
     "home": "Bosh sahifa",
     "goToCabinet": "Kabinetga o'tish",
-    "goToTeacher": "Ustoz paneliga o'tish"
+    "goToTeacher": "Ustoz paneliga o'tish",
+    "games": "O'yinlar"
   },
   "search": {
     "label": "Saytdan qidirish",
@@ -2300,5 +2301,141 @@
     },
     "guestNote": "Darsliklarni hisobsiz ham o'qiy olasiz.",
     "otherMethods": "Email bilan kirish"
+  },
+  "games": {
+    "meta": {
+      "title": "Interaktiv o'yinlar",
+      "description": "Darslik mavzulari bo'yicha sinf uchun jamoaviy o'yinlar: Sirli quti, Omad charhi va Arqon tortish."
+    },
+    "page": {
+      "title": "Interaktiv o'yinlar",
+      "lead": "Mavzuni tanlang va sinf bilan jamoaviy viktorina o'ynang.",
+      "searchLabel": "Mavzu qidirish",
+      "searchPlaceholder": "Mavzu yoki darslik nomini yozing…",
+      "clearSearch": "Qidiruvni tozalash",
+      "gradeFilter": "Sinf",
+      "subjectFilter": "Fan",
+      "allGrades": "Barchasi",
+      "allSubjects": "Barcha fanlar",
+      "grade": "{grade}-sinf",
+      "results": "{count, plural, =0 {Mavzu topilmadi} other {# ta mavzu}}",
+      "empty": "Bu filtrlar bo'yicha o'yinga tayyor mavzu yo'q. Boshqa so'z yoki filtrni sinab ko'ring.",
+      "resetFilters": "Filtrlarni tozalash",
+      "error": "Mavzularni yuklab bo'lmadi. Internetni tekshirib, qayta urinib ko'ring.",
+      "retry": "Qayta urinish",
+      "loadMore": "Yana ko'rsatish",
+      "loading": "Yuklanmoqda…"
+    },
+    "card": {
+      "meta": "{subject} · {grade}-sinf · {textbook}",
+      "questions": "{count} ta savol",
+      "play": "O'ynash",
+      "playLabel": "«{topic}» mavzusida o'ynash",
+      "gamesLabel": "Mavjud o'yinlar"
+    },
+    "list": {
+      "box": {
+        "name": "Sirli quti",
+        "tag": "1–3 jamoa",
+        "description": "Qutini oching — ichidan savol chiqadi. To'g'ri javob jamoaga ball olib keladi."
+      },
+      "wheel": {
+        "name": "Omad charhi",
+        "tag": "1–3 jamoa",
+        "description": "Charxni aylantiring: qaysi sektorga tushsa, shu savol o'ynaladi."
+      },
+      "rope": {
+        "name": "Arqon tortish",
+        "tag": "2 jamoa",
+        "description": "Ikki jamoa bellashadi: har to'g'ri javob arqonni o'z tomoningizga tortadi."
+      }
+    },
+    "allowance": {
+      "freeLeft": "Bepul {limit} tadan {left} ta qoldi",
+      "coins": "{coins} tanga",
+      "coinsLabel": "Tanga balansi: {coins}",
+      "monthlyBonus": "Har oy {coins} tanga bonus"
+    },
+    "modal": {
+      "title": "O'yinni boshlash",
+      "step": "{step}-qadam / {total}",
+      "back": "Orqaga",
+      "close": "Yopish",
+      "pickTitle": "Qaysi o'yinni o'ynaymiz?",
+      "pickLead": "Mavzu: {topic}",
+      "continue": "Davom etish",
+      "selected": "Tanlangan",
+      "setupTitle": "O'yinni sozlang",
+      "teams": "Jamoalar soni",
+      "teamsOption": "{count} jamoa",
+      "ropeOnlyTwo": "Bu o'yinda faqat 2 jamoa",
+      "teamNames": "Jamoa nomlari",
+      "teamNameLabel": "{n}-jamoa nomi",
+      "questions": "Savollar soni",
+      "questionsOption": "{count} ta",
+      "minutes": "~{minutes} daqiqa",
+      "notEnough": "Mavzuda {count} ta savol bor",
+      "summary": "{teams} jamoa · {questions} ta savol · har biriga {seconds} soniya · taxminan {minutes} daqiqa",
+      "start": "O'yinni boshlash",
+      "starting": "Tayyorlanmoqda…",
+      "costNote": "Bepul o'yinlar tugagan: bu o'yin uchun {cost} tanga yechiladi.",
+      "limitTitle": "Bu oygi bepul o'yinlar tugadi",
+      "limitText": "Yana o'ynash uchun {cost} tanga kerak. Balansingiz: {coins} tanga. Yangi oyda {free} ta bepul o'yin va {bonus} tanga beriladi.",
+      "limitGuest": "Kirsangiz, har oy {bonus} tanga bonus olasiz va o'ynashda davom etasiz.",
+      "signIn": "Kirish",
+      "understood": "Tushunarli",
+      "startError": "O'yinni boshlab bo'lmadi. Qayta urinib ko'ring.",
+      "teamDefault": {
+        "blue": "Ko'k jamoa",
+        "red": "Qizil jamoa",
+        "green": "Yashil jamoa"
+      },
+      "errors": {
+        "tooLong": "Nom {max} belgidan oshmasin"
+      }
+    },
+    "topicBlock": {
+      "title": "Interaktiv o'yinlar",
+      "lead": "Mavzuni sinf bilan o'yin orqali mustahkamlang.",
+      "unavailable": "Bu mavzuda o'yin uchun savollar hali yetarli emas.",
+      "error": "O'yinlar ma'lumotini yuklab bo'lmadi."
+    },
+    "play": {
+      "exit": "O'yindan chiqish",
+      "fullscreen": "To'liq ekran",
+      "exitFullscreen": "To'liq ekrandan chiqish",
+      "soundOn": "Ovozni yoqish",
+      "soundOff": "Ovozni o'chirish",
+      "question": "{current}-savol / {total}",
+      "turn": "Navbat: {team}",
+      "answersLabel": "Javob variantlari",
+      "answerHint": "Klaviatura: 1–4 yoki A–D",
+      "option": "{letter}: {text}",
+      "correct": "To'g'ri!",
+      "wrong": "Noto'g'ri",
+      "timeUp": "Vaqt tugadi",
+      "correctAnswer": "To'g'ri javob: {letter}",
+      "next": "Keyingi savol",
+      "finish": "Natijani ko'rish",
+      "timerLabel": "Qolgan vaqt",
+      "points": "+{points}",
+      "score": "{team}: {score} ball",
+      "scoresLabel": "Jamoalar bali",
+      "notReady": "O'yin topilmadi. Uni o'yinlar sahifasidan qayta boshlang.",
+      "toGames": "O'yinlarga qaytish",
+      "checkError": "Javobni tekshirib bo'lmadi. Qayta tanlang."
+    },
+    "result": {
+      "title": "Natijalar",
+      "winner": "{team} g'olib!",
+      "draw": "Durang!",
+      "noWinner": "Bu safar hech kim ball olmadi",
+      "place": "{place}-o'rin",
+      "score": "{score} ball",
+      "accuracy": "{correct}/{total} to'g'ri",
+      "playAgain": "Yana o'ynash",
+      "otherTopic": "Boshqa mavzu",
+      "saveError": "Natijani saqlab bo'lmadi, lekin u shu yerda ko'rinib turadi."
+    }
   }
 }

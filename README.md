@@ -171,3 +171,13 @@ Yozuvlar (sahifa, xatcho'p, hodisa) `lib/offline/write-queue.ts` orqali: TanStac
 brauzerda (`maktab365-writes:<user>`) navbatga tushadi va internet qaytganda/taymerda qayta yuboriladi, 4xx bo'lsa o'zgarish qaytariladi.
 Mehmon ma'lumoti kirgach merge qilinadi; xatoda saqlanadi va oshib boruvchi oraliq bilan qayta uriniladi. E2E: `frontend/e2e/learning.spec.ts`.
 Rejalar (goals) navbatsiz: optimistic + rollback, offline'da xato ko'rsatiladi.
+
+**Interaktiv o'yinlar (2-bosqich, frontend):** `/games` — mavzu qidiruvi (300 ms debounce) va sinf/fan chiplari URL'da
+(`?q=&grade=&subject=`), o'yinga tayyor mavzu kartalari (backend `GET games/topics/`). Karta 2 qadamli kirish modalini ochadi:
+o'yin (Sirli quti, Omad charhi, Arqon tortish — faqat 2 jamoa), jamoalar soni va nomlari, savollar soni (8/12/16/24; mavzuda
+yetmaydigani o'chiq). «O'yinni boshlash» savollarni oladi va urinish sarflaydi: kirganda server sessiyasi (`403 game_limit_reached`
+modalda tushunarli holat sifatida, toast emas), mehmonda `localStorage` (oyiga 10 ta, Toshkent oyi). Holat `stores/game.store.ts`
+(sessionStorage — sahifa yangilansa tiklanadi). O'yin ekrani `/games/<mavzu>/<o'yin>` va natija `/games/<mavzu>/natija`:
+uchala o'yin hozircha umumiy savol-javob raundi bilan (30 s taymer, 1–4/A–D klaviatura, javob serverda `answer_token` bilan
+tekshiriladi); o'yinga xos sahnalar (quti, charx, arqon) keyingi bosqichda — sof mantiq tayyor (`lib/games/wheel.ts`, `rope.ts`).
+Mavzu panelining «Test» tabida «Interaktiv o'yinlar» bloki. E2E: `frontend/e2e/games.spec.ts` (o'yin API'si mock qilinadi).

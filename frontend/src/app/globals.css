@@ -49,6 +49,26 @@
   --color-ds-stage-line: #2a3149;
   --color-ds-stage-muted: #a3abc2;
   --container-site: 77.5rem; /* 1240px */
+
+  /* Interaktiv o'yinlar (ikkala temada bir xil): asosiy indigo, o'yin gradientlari va jamoa ranglari.
+     `*-deep` — tugma ostidagi "pastki chiziq" (box-shadow 0 5px 0). */
+  --color-game-indigo: #4f5be0;
+  --color-game-indigo-deep: #3741b5;
+  --color-game-box-from: #4f5be0;
+  --color-game-box-to: #0ea5e9;
+  --color-game-box-deep: #3741b5;
+  --color-game-wheel-from: #c026d3;
+  --color-game-wheel-to: #7c3aed;
+  --color-game-wheel-deep: #8e1a9c;
+  --color-game-rope-from: #047857;
+  --color-game-rope-to: #0891b2;
+  --color-game-rope-deep: #03543d;
+  --color-team-blue: #2563eb;
+  --color-team-blue-deep: #1a46b8;
+  --color-team-red: #ef4444;
+  --color-team-red-deep: #b42424;
+  --color-team-green: #10b981;
+  --color-team-green-deep: #08805a;
   --shadow-cover: 0 10px 24px rgb(7 22 51 / 0.12);
 
   --shadow-xs: 0 1px 2px 0 rgb(15 23 42 / 0.05);
@@ -158,6 +178,7 @@
 
   --font-ui: var(--font-manrope), var(--font-onest), ui-sans-serif, system-ui, sans-serif;
   --font-book: var(--font-source-serif), Georgia, "Times New Roman", serif;
+  --font-game: var(--font-jakarta), var(--font-onest), ui-sans-serif, system-ui, sans-serif;
 
   --font-sans:
     var(--font-onest), var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI",
@@ -1157,5 +1178,74 @@ html[data-book-lock] body {
   from {
     opacity: 0.2;
     transform: perspective(600px) rotateY(-70deg) scale(0.92);
+  }
+}
+
+/* --- Interaktiv o'yinlar --- */
+/* `data-game` / `data-team` elementga o'z rangini beradi: komponentlar `var(--game-*)`, `var(--team*)` bilan. */
+[data-game="box"] {
+  --game-from: var(--color-game-box-from);
+  --game-to: var(--color-game-box-to);
+  --game-deep: var(--color-game-box-deep);
+}
+[data-game="wheel"] {
+  --game-from: var(--color-game-wheel-from);
+  --game-to: var(--color-game-wheel-to);
+  --game-deep: var(--color-game-wheel-deep);
+}
+[data-game="rope"] {
+  --game-from: var(--color-game-rope-from);
+  --game-to: var(--color-game-rope-to);
+  --game-deep: var(--color-game-rope-deep);
+}
+[data-team="blue"] {
+  --team: var(--color-team-blue);
+  --team-deep: var(--color-team-blue-deep);
+}
+[data-team="red"] {
+  --team: var(--color-team-red);
+  --team-deep: var(--color-team-red-deep);
+}
+[data-team="green"] {
+  --team: var(--color-team-green);
+  --team-deep: var(--color-team-green-deep);
+}
+
+/* Ikonka sekin suzib turadi (modalning o'yin kartalari). */
+@keyframes game-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(-3deg);
+  }
+}
+.game-float {
+  animation: game-float 3.6s ease-in-out infinite;
+}
+
+/* Pastki chiziqli tugma: bosilganda chiziq "botadi". */
+.game-press {
+  box-shadow: 0 5px 0 var(--press-deep, var(--color-game-indigo-deep));
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    filter 150ms ease;
+}
+.game-press:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+.game-press:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 var(--press-deep, var(--color-game-indigo-deep));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-float {
+    animation: none;
+  }
+  .game-press:active:not(:disabled) {
+    transform: none;
   }
 }
