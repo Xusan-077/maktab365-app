@@ -8,7 +8,7 @@ Bitta Django monolit: Python 3.12 · Django 5.2 · DRF · drf-spectacular · sim
 
 - `config/settings/{base,dev,prod,test}.py` — barcha sozlama env orqali (`django-environ`, `.env`). `dev` default (`manage.py`), `prod` — wsgi/asgi, `test` — pytest.
 - `config/{urls,celery,asgi,wsgi}.py`.
-- `apps/core` — qayta ishlatiladigan poydevor (quyida). `apps/accounts` — foydalanuvchi va profil (quyida). `apps/content` — kontent (quyida). `apps/learning` — o'qish jarayoni (quyida). `apps/support` — murojaatlar. `apps/analytics` — kitob/sahifa kunlik sanagichlari (anonim, faqat son): `BookDailyStat`, `PageDailyStat`, `POST pdf-books/{id}/stats/` (throttle `STATS_THROTTLE_RATE`), admin `GET /admin/stats/?days=7|30`, `manage.py purge_stats`.
+- `apps/core` — qayta ishlatiladigan poydevor (quyida). `apps/accounts` — foydalanuvchi va profil (quyida). `apps/content` — kontent (quyida). `apps/learning` — o'qish jarayoni (quyida). `apps/support` — murojaatlar. `apps/games` — mavzu testlari va interaktiv o'yinlar (quyida). `apps/analytics` — kitob/sahifa kunlik sanagichlari (anonim, faqat son): `BookDailyStat`, `PageDailyStat`, `POST pdf-books/{id}/stats/` (throttle `STATS_THROTTLE_RATE`), admin `GET /admin/stats/?days=7|30`, `manage.py purge_stats`.
 
 ## `apps/core` poydevori
 
@@ -77,6 +77,14 @@ Bitta Django monolit: Python 3.12 · Django 5.2 · DRF · drf-spectacular · sim
 - Yangi (spam bo'lmagan) xabarda `tasks.notify_staff` (Celery, `on_commit`) `SUPPORT_NOTIFY_EMAILS` ga yuboradi; bo'sh bo'lsa hech narsa.
 - Admin (`support/admin_views.py`, editor+admin): `GET /admin/support/` (`status`, `kind`, `pdf_book` filtrlari; `status` siz — spam'siz), `PATCH /admin/support/{id}/` (faqat `status`, `staff_note`; audit `support_message`), `GET /admin/support/summary/` (`new` soni va xabari bor kitoblar). O'chirish yo'q.
 - `GET /api/v1/me/support/` — o'z murojaatlari (paginatsiyalangan, spam ko'rsatilmaydi).
+
+## `apps/games`
+
+- Mavzu = `PdfBookChapter` (alohida Topic modeli yo'q). `Question` (`topic` FK, `text` LocalizedText ≤ 1000, `image` — `covers` saqlashda `images/…`, `difficulty` easy|medium|hard, `order`, `is_active`) va `Option` (`text` ≤ 300, `is_correct`, `order` 0..3). Qoida "aniq 4 variant, aniq 1 to'g'ri" — `models.option_set_errors` (serializer va `Question.clean()`), bazada ham: `(question, order)` unique, `order < 4`, bitta `is_correct=True` (partial unique). Kodlar `options_count`, `options_one_correct`, `text_too_long`.
+- Admin (editor+admin, o'chirish — admin; audit `question`): `GET/POST admin/topics/{chapter_id}/questions/` (nofaollari ham, tartibda; yangi savol oxiriga), `POST …/reorder/` (`{ids}` — barcha savollar aynan bir martadan, aks holda `ids_mismatch`), `POST …/import/` (`{questions, dry_run}`, ≤ 200, hammasi yoki hech biri; xatolar `details.questions = {"<indeks>": {...}}`), `GET/PATCH/DELETE admin/questions/{id}/` (variantlar joyida yangilanadi, id'lar saqlanadi). Qoralama kitob bo'limiga ham qo'shiladi.
+- Ochiq: `GET games/topics/?q=&grade=&subject=` (paginatsiya; nashr qilingan kitob, ≥ `GAMES_MIN_QUESTIONS` faol savol; qidiruv bo'lim nomi + kitob va fan nomlari uz/ru/en, kirill so'rov lotinga ham o'giriladi — `services.cyr_to_lat`), `GET games/topics/{slug}/questions/?count=` (4..40, standart 16; savollar va variantlar aralashgan, `answer_token`, `no-store`), `POST games/check/` → `{correct, correct_option_id}` (`invalid_answer_token`). Slug `services.topic_slug` — `<nom>-<bo'lim id'sining 12 hex boshi>`, nom qismi faqat chiroy (qidiruv id prefiksi bo'yicha).
+- Limit (kirgan foydalanuvchi, `IsLearner`): `GET games/allowance/`, `POST games/sessions/` (`{game_type, topic?}` → `{session_id, paid_with, allowance}`; avval oylik bepul, keyin `GAMES_COIN_COST` tanga, bo'lmasa 403 `game_limit_reached`), `POST games/sessions/{id}/finish/` (`teams` [{name, score, correct, total}] 1..8, `duration_seconds`; bir marta — 409 `session_finished`; begonaniki 404). Oy — `LOCAL_TIME_ZONE` bo'yicha (`GameAllowance` unique user+month); yangi oyning birinchi murojaatida `GAMES_MONTHLY_COINS` bonus (`CoinTransaction` ledger, bonus oyiga bir marta — partial unique; balans `CoinWallet`, yozishda `select_for_update`). Mehmon limiti — frontend `localStorage`. `delete_account` o'yin ma'lumotlarini o'chiradi, `export_data` `games` ni beradi.
+- Testlar: `apps/games/tests/` (`Topics` — o'ynaladigan bo'lim yaratuvchi).
 
 ## Admin API
 

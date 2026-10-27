@@ -7,6 +7,7 @@ from django.utils import timezone
 from rest_framework.exceptions import APIException, PermissionDenied
 
 from apps.core.net import client_ip
+from apps.games import services as games
 
 from .models import (
     AuthEvent,
@@ -115,6 +116,7 @@ def delete_account(user: User, request=None) -> None:
     user.pdf_bookmarks.all().delete()
     user.pdf_annotations.all().delete()
     user.study_goals.all().delete()
+    games.delete_user_data(user)
     Profile.objects.filter(user=user).update(
         display_name="",
         avatar_url="",
@@ -183,6 +185,7 @@ def export_data(user: User, request=None) -> dict:
             "pdf_annotations": user.pdf_annotations.all(),
             "goals": user.study_goals.all(),
         },
+        "games": games.export_user_data(user),
     }
 
 

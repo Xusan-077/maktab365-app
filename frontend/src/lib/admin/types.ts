@@ -32,6 +32,13 @@ export type AdminSupportSummary = Schemas["SupportSummary"];
 export type SupportStatus = AdminSupportMessage["status"];
 export type SupportMessageKind = AdminSupportMessage["kind"];
 export type BookStatus = "published" | "draft";
+/** Mavzu testi savoli (aniq 4 variant, aniq 1 to'g'ri javob). */
+export type AdminQuestion = Schemas["QuestionAdmin"];
+export type AdminQuestionInput = Schemas["QuestionAdminRequest"];
+export type AdminQuestionPatch = Schemas["PatchedQuestionAdminRequest"];
+export type QuestionDifficulty = Schemas["DifficultyEnum"];
+export type QuestionImportItem = Schemas["QuestionImportItemRequest"];
+export type QuestionImportResult = Schemas["QuestionImportResult"];
 
 export interface Page<T> {
   count: number;

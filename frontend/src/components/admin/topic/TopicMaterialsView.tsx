@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ClipboardCheck, ExternalLink, NotebookPen } from "lucide-react";
+import { ExternalLink, NotebookPen } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { buttonVariants } from "@/components/ui/Button";
@@ -18,6 +18,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { readerPath } from "@/lib/utils/routes";
 import { QueryError } from "../QueryError";
 import { PresentationEditor } from "./PresentationEditor";
+import { QuestionsEditor } from "./QuestionsEditor";
 import { SummaryEditor } from "./SummaryEditor";
 
 export const TOPIC_EDITOR_TABS = ["main", "summary", "slides", "notes", "test"] as const;
@@ -86,7 +87,7 @@ function MainTab({ topic, readerHref }: { topic: FoundTopic; readerHref: string 
 }
 
 /**
- * Admin: mavzu (mundarija bo'limi) materiallari — Asosiy | Xulosa | Taqdimot | Konspekt | Test.
+ * Admin: mavzu (mundarija bo'limi) materiallari — Asosiy | Xulosa | Taqdimot | Konspekt | Testlar.
  * Mavzu id'si = bo'lim id'si (`chapters[].id`); nomi va beti kitob mundarijasida tahrirlanadi.
  */
 export function TopicMaterialsView({ bookId, topicId }: { bookId: string; topicId: string }) {
@@ -160,7 +161,7 @@ export function TopicMaterialsView({ bookId, topicId }: { bookId: string; topicI
           {
             id: "test",
             label: t("tabs.test"),
-            content: <EmptyState icon={ClipboardCheck}>{t("soon.test")}</EmptyState>,
+            content: <QuestionsEditor topicId={topicId} />,
           },
         ]}
       />

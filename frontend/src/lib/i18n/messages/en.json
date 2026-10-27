@@ -928,7 +928,11 @@
         "grades_invalid": "Grades must be from 1 to 11",
         "grades_duplicate": "Grades must not repeat",
         "subject_not_in_grade": "This subject is not taught in the selected grade",
-        "chapter_page_order": "Contents page numbers are out of order: a row can't be lower than the previous one"
+        "chapter_page_order": "Contents page numbers are out of order: a row can't be lower than the previous one",
+        "options_count": "Exactly 4 options are required",
+        "options_one_correct": "Exactly one correct answer is required",
+        "text_too_long": "Text is too long",
+        "ids_mismatch": "The list is out of date — reload the page"
       },
       "gradeHasBooks": "This subject has {count} book(s) in grade {grade}: move them to another subject or delete them first."
     },
@@ -1297,11 +1301,10 @@
         "summary": "Summary",
         "slides": "Slides",
         "notes": "Notes",
-        "test": "Test"
+        "test": "Tests"
       },
       "soon": {
-        "notes": "Note templates are coming in the next stage.",
-        "test": "Topic tests are coming in the next stage."
+        "notes": "Note templates are coming in the next stage."
       },
       "main": {
         "title": "Title",
@@ -1418,6 +1421,91 @@
         "countPdf": "{total} slides",
         "previewLoading": "Loading slides…",
         "previewError": "Couldn’t open the slides."
+      }
+    },
+    "questions": {
+      "count": "{active} active / {total} questions",
+      "ready": "Ready for games",
+      "notReady": "{n} more active questions needed for games",
+      "add": "Add question",
+      "importButton": "Import (CSV/JSON)",
+      "import": {
+        "title": "Import questions",
+        "formatCsv": "CSV: each row is question, A, B, C, D, correct answer (A–D or 1–4) and optional difficulty (easy/medium/hard). The header row is optional; comma or semicolon separated.",
+        "exampleCsv": "savol;A;B;C;D;to‘g‘ri_javob;qiyinlik",
+        "formatJson": "JSON: [{\"question\": \"…\", \"A\": \"…\", \"B\": \"…\", \"C\": \"…\", \"D\": \"…\", \"answer\": \"B\"}] — texts may also be {\"uz\", \"ru\", \"en\"} objects.",
+        "file": "Choose file (.csv, .json)",
+        "paste": "Or paste the text here",
+        "preview": "Preview",
+        "validCount": "{n} valid",
+        "invalidCount": "{n} with errors",
+        "valid": "Valid",
+        "invalid": "Error",
+        "line": "Line {line}",
+        "skipInvalid": "Rows with errors will be skipped — fix them and import again.",
+        "submit": "Add {n} questions",
+        "done": "{n} questions added",
+        "errors": {
+          "invalidJson": "Invalid JSON: an array of questions is expected",
+          "empty": "No questions found",
+          "tooMany": "At most {max} questions at once",
+          "fileTooLarge": "File is too large (up to 2 MB)",
+          "questionRequired": "Question text is missing",
+          "optionsCount": "Exactly 4 options are required",
+          "optionRequired": "An option is empty",
+          "answerInvalid": "Correct answer must be A–D (or 1–4)",
+          "difficultyInvalid": "Difficulty: easy, medium or hard",
+          "tooLong": "Text is too long",
+          "invalidRow": "Invalid row",
+          "server": "The server rejected this row"
+        }
+      },
+      "empty": "No questions yet. Add at least {min} active questions for this topic to appear in games.",
+      "listLabel": "Topic questions",
+      "drag": "Move question {n}",
+      "edit": "Edit question {n}",
+      "remove": "Delete question {n}",
+      "removeTitle": "Delete question",
+      "removeDescription": "Question {n} and its options will be permanently deleted.",
+      "removeConfirm": "Delete",
+      "active": "Active",
+      "inactive": "Inactive",
+      "answer": "Answer: {letter}",
+      "hasImage": "Question with image",
+      "difficulty": {
+        "label": "Difficulty",
+        "easy": "Easy",
+        "medium": "Medium",
+        "hard": "Hard"
+      },
+      "dnd": {
+        "instructions": "To move, press Space or Enter, choose a position with the arrow keys and press Space again. Esc cancels.",
+        "pickedUp": "Picked up question {n}",
+        "over": "Question {n} is over position {to}",
+        "dropped": "Question {n} moved to position {to}",
+        "cancelled": "Move cancelled, question {n} stays in place"
+      },
+      "form": {
+        "createTitle": "New question",
+        "editTitle": "Edit question",
+        "text": "Question text",
+        "image": "Image (optional)",
+        "imagePick": "Choose image",
+        "imageReplace": "Replace image",
+        "imageRemove": "Remove",
+        "options": "Answer options",
+        "correctHint": "Mark the correct answer — there is exactly one.",
+        "correctOption": "{letter} is correct",
+        "option": "Option {letter}",
+        "active": "Active",
+        "activeHint": "Inactive questions are not used in games."
+      },
+      "errors": {
+        "required": "Required",
+        "tooLong": "Text is too long",
+        "correctRequired": "Choose the correct answer",
+        "optionsCount": "Exactly 4 options are required",
+        "invalid": "Invalid value"
       }
     }
   },

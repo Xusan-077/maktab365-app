@@ -2,6 +2,11 @@ import { createHttpClient, unwrap, type HttpClient } from "@/lib/api/http-client
 import {
   PAGE_SIZE,
   type AdminDashboard,
+  type AdminQuestion,
+  type AdminQuestionInput,
+  type AdminQuestionPatch,
+  type QuestionImportItem,
+  type QuestionImportResult,
   type AdminPdfBook,
   type AdminPdfBookInput,
   type AdminStats,
@@ -277,6 +282,58 @@ export class AdminApi {
     this.assertDeleted(
       await this.client.DELETE("/api/v1/admin/users/{id}/", { params: { path: { id } } }),
     );
+  }
+
+  /** Mavzu (mundarija bo'limi) savollari: hammasi, nofaollari ham, tartib bo'yicha. */
+  async topicQuestions(topicId: string): Promise<AdminQuestion[]> {
+    const result = await this.client.GET("/api/v1/admin/topics/{topic_id}/questions/", {
+      params: { path: { topic_id: topicId } },
+    });
+    return unwrap(result);
+  }
+
+  async createQuestion(topicId: string, input: AdminQuestionInput): Promise<AdminQuestion> {
+    const result = await this.client.POST("/api/v1/admin/topics/{topic_id}/questions/", {
+      params: { path: { topic_id: topicId } },
+      body: input,
+    });
+    return unwrap(result);
+  }
+
+  async updateQuestion(id: string, patch: AdminQuestionPatch): Promise<AdminQuestion> {
+    const result = await this.client.PATCH("/api/v1/admin/questions/{id}/", {
+      params: { path: { id } },
+      body: patch,
+    });
+    return unwrap(result);
+  }
+
+  async deleteQuestion(id: string): Promise<void> {
+    this.assertDeleted(
+      await this.client.DELETE("/api/v1/admin/questions/{id}/", { params: { path: { id } } }),
+    );
+  }
+
+  /** Yangi tartib: mavzuning barcha savollari aynan bir martadan. */
+  async reorderQuestions(topicId: string, ids: string[]): Promise<AdminQuestion[]> {
+    const result = await this.client.POST("/api/v1/admin/topics/{topic_id}/questions/reorder/", {
+      params: { path: { topic_id: topicId } },
+      body: { ids },
+    });
+    return unwrap(result);
+  }
+
+  /** Ommaviy import (hammasi yoki hech biri); `dryRun` — faqat server tekshiruvi. */
+  async importQuestions(
+    topicId: string,
+    questions: QuestionImportItem[],
+    dryRun = false,
+  ): Promise<QuestionImportResult> {
+    const result = await this.client.POST("/api/v1/admin/topics/{topic_id}/questions/import/", {
+      params: { path: { topic_id: topicId } },
+      body: { questions, dry_run: dryRun },
+    });
+    return unwrap(result);
   }
 
   private assertDeleted(result: Deleted): void {

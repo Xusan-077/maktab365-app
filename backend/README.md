@@ -37,7 +37,7 @@ make types      # frontend/src/lib/api/schema.ts ni yangilaydi
 
 ## Muhit o'zgaruvchilari
 
-`.env.example` ga qarang. Muhimlari: `SECRET_KEY`, `DATABASE_URL`, `REDIS_URL`, `FRONTEND_ORIGINS` (CORS faqat shu origin'lar), `SENTRY_DSN` (ixtiyoriy), `SUPPORT_NOTIFY_EMAILS` (yordam murojaatlari haqida xabar oladigan staff email'lari, vergul bilan; bo'sh bo'lsa xat yuborilmaydi), `SUPPORT_THROTTLE_RATE` (default `5/hour`, IP bo'yicha), `SUPPORT_BURST_THROTTLE_RATE` (default `2/min`, ketma-ket yuborishga qarshi). Production: `DJANGO_SETTINGS_MODULE=config.settings.prod`, `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`.
+`.env.example` ga qarang. Muhimlari: `SECRET_KEY`, `DATABASE_URL`, `REDIS_URL`, `FRONTEND_ORIGINS` (CORS faqat shu origin'lar), `SENTRY_DSN` (ixtiyoriy), `SUPPORT_NOTIFY_EMAILS` (yordam murojaatlari haqida xabar oladigan staff email'lari, vergul bilan; bo'sh bo'lsa xat yuborilmaydi), `SUPPORT_THROTTLE_RATE` (default `5/hour`, IP bo'yicha), `SUPPORT_BURST_THROTTLE_RATE` (default `2/min`, ketma-ket yuborishga qarshi). O'yinlar: `GAMES_MIN_QUESTIONS` (8 — mavzu o'yinlar ro'yxatiga kirishi uchun faol savollar), `GAMES_FREE_PER_MONTH` (10), `GAMES_MONTHLY_COINS` (20), `GAMES_COIN_COST` (5 — bepul o'yinlar tugagach bir o'yin narxi), `GAMES_ANSWER_TOKEN_MAX_AGE` (soniya, 6 soat). Production: `DJANGO_SETTINGS_MODULE=config.settings.prod`, `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`.
 
 ## Xavfsizlik qarorlari
 
@@ -48,6 +48,7 @@ make types      # frontend/src/lib/api/schema.ts ni yangilaydi
 - **Telegram.** Imzo HMAC-SHA256 (kalit = SHA256(`TELEGRAM_BOT_TOKEN`)), `auth_date` 5 daqiqadan eski (yoki 30 soniyadan ortiq kelajakdagi) bo'lsa rad etiladi, bir xil imzo ikkinchi marta qabul qilinmaydi (cache/Redis, `provider_auth_replayed`).
 - **Email OTP.** 6 xonali kod, 10 daqiqa, bazada faqat HMAC xeshi (`SECRET_KEY` bilan), 5 xato urinishdan keyin bloklanadi (`otp_locked`), qayta so'rash 60 soniyada bir marta, throttle IP va email bo'yicha. Yangi so'rov eski kodni bekor qiladi. SMS OTP (Eskiz.uz) uchun `providers/sms.py` da interfeys bor, implementatsiya keyin.
 - **Oxirgi kirish usulini o'chirib bo'lmaydi** (`last_identity`, 409). Parolsiz akkaunt `POST /me/password/set/` bilan parol qo'yadi.
+- **O'yin javoblari.** `games/topics/{slug}/questions/` `is_correct` ni bermaydi: har savolda `answer_token` (Django `signing`, salt `games.answer`, `GAMES_ANSWER_TOKEN_MAX_AGE`). Token ichida faqat savol id'si bor (imzolangan, lekin shifrlanmagan — to'g'ri javob tokenga yozilmaydi); `POST games/check/` uni serverda tekshiradi. Mehmon limiti faqat brauzerda (`localStorage`) — ongli qaror: mehmon uchun server hisobi yo'q, ochiq API anon throttle bilan cheklangan.
 - **Dev qulayliklari prod'da yopiq.** `prod.py` `OTP_DEV_INBOX` va `CELERY_TASK_ALWAYS_EAGER` ni env'dan qat'i nazar `False` qiladi; `/api/v1/dev/otp/` prod'da 404 (`apps/core/tests/test_prod_settings.py`).
 
 

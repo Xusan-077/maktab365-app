@@ -928,7 +928,11 @@
         "grades_invalid": "Sinflar 1 dan 11 gacha bo'lishi kerak",
         "grades_duplicate": "Sinflar takrorlanmasin",
         "subject_not_in_grade": "Bu fan tanlangan sinfda o'tilmaydi",
-        "chapter_page_order": "Mundarijada bet raqamlari tartibsiz: keyingi qator oldingisidan kichik bo'lmasin"
+        "chapter_page_order": "Mundarijada bet raqamlari tartibsiz: keyingi qator oldingisidan kichik bo'lmasin",
+        "options_count": "Aniq 4 ta variant bo‘lishi kerak",
+        "options_one_correct": "Aniq bitta to‘g‘ri javob bo‘lishi kerak",
+        "text_too_long": "Matn juda uzun",
+        "ids_mismatch": "Ro‘yxat eskirgan — sahifani yangilang"
       },
       "gradeHasBooks": "Bu fanning {grade}-sinfda {count} ta kitobi bor, avval kitoblarni boshqa fanga ko'chiring yoki o'chiring."
     },
@@ -1297,11 +1301,10 @@
         "summary": "Xulosa",
         "slides": "Taqdimot",
         "notes": "Konspekt",
-        "test": "Test"
+        "test": "Testlar"
       },
       "soon": {
-        "notes": "Konspekt shablonlari keyingi bosqichda qo‘shiladi.",
-        "test": "Mavzu testlari keyingi bosqichda qo‘shiladi."
+        "notes": "Konspekt shablonlari keyingi bosqichda qo‘shiladi."
       },
       "main": {
         "title": "Nomi",
@@ -1418,6 +1421,91 @@
         "countPdf": "{total} slayd",
         "previewLoading": "Slaydlar yuklanmoqda…",
         "previewError": "Slaydlarni ochib bo‘lmadi."
+      }
+    },
+    "questions": {
+      "count": "{active} ta faol / jami {total} ta savol",
+      "ready": "O‘yinlarga tayyor",
+      "notReady": "O‘yinlar uchun yana {n} ta faol savol kerak",
+      "add": "Savol qo‘shish",
+      "importButton": "Import (CSV/JSON)",
+      "import": {
+        "title": "Savollarni import qilish",
+        "formatCsv": "CSV: har qatorda savol, A, B, C, D, to‘g‘ri javob (A–D yoki 1–4) va ixtiyoriy qiyinlik (oson/o‘rta/qiyin). Sarlavha qatori ixtiyoriy, ajratuvchi vergul yoki nuqtali vergul.",
+        "exampleCsv": "savol;A;B;C;D;to‘g‘ri_javob;qiyinlik",
+        "formatJson": "JSON: [{\"savol\": \"…\", \"A\": \"…\", \"B\": \"…\", \"C\": \"…\", \"D\": \"…\", \"togri_javob\": \"B\"}] — matnlar {\"uz\", \"ru\", \"en\"} ko‘rinishida ham bo‘lishi mumkin.",
+        "file": "Fayl tanlash (.csv, .json)",
+        "paste": "Yoki matnni shu yerga joylang",
+        "preview": "Oldindan ko‘rish",
+        "validCount": "{n} ta to‘g‘ri",
+        "invalidCount": "{n} ta xato",
+        "valid": "To‘g‘ri",
+        "invalid": "Xato",
+        "line": "{line}-qator",
+        "skipInvalid": "Xato qatorlar qo‘shilmaydi — ularni tuzatib, qayta import qilishingiz mumkin.",
+        "submit": "{n} ta savolni qo‘shish",
+        "done": "{n} ta savol qo‘shildi",
+        "errors": {
+          "invalidJson": "JSON noto‘g‘ri: savollar massivi kutilgan",
+          "empty": "Bitta ham savol topilmadi",
+          "tooMany": "Bir martada ko‘pi bilan {max} ta savol",
+          "fileTooLarge": "Fayl juda katta (2 MB gacha)",
+          "questionRequired": "Savol matni yo‘q",
+          "optionsCount": "Aniq 4 ta variant kerak",
+          "optionRequired": "Bo‘sh variant bor",
+          "answerInvalid": "To‘g‘ri javob A–D (yoki 1–4) bo‘lishi kerak",
+          "difficultyInvalid": "Qiyinlik: oson, o‘rta yoki qiyin",
+          "tooLong": "Matn juda uzun",
+          "invalidRow": "Qator noto‘g‘ri",
+          "server": "Server bu qatorni rad etdi"
+        }
+      },
+      "empty": "Hali savol yo‘q. Mavzu o‘yinlarda chiqishi uchun kamida {min} ta faol savol qo‘shing.",
+      "listLabel": "Mavzu savollari",
+      "drag": "{n}-savolni ko‘chirish",
+      "edit": "{n}-savolni tahrirlash",
+      "remove": "{n}-savolni o‘chirish",
+      "removeTitle": "Savolni o‘chirish",
+      "removeDescription": "{n}-savol va uning variantlari butunlay o‘chiriladi.",
+      "removeConfirm": "O‘chirish",
+      "active": "Faol",
+      "inactive": "Nofaol",
+      "answer": "Javob: {letter}",
+      "hasImage": "Rasmli savol",
+      "difficulty": {
+        "label": "Qiyinlik",
+        "easy": "Oson",
+        "medium": "O‘rta",
+        "hard": "Qiyin"
+      },
+      "dnd": {
+        "instructions": "Ko‘chirish uchun Probel yoki Enter bosing, strelkalar bilan joyini tanlang va yana Probel bosing. Bekor qilish — Esc.",
+        "pickedUp": "{n}-savol olindi",
+        "over": "{n}-savol {to}-o‘rin ustida",
+        "dropped": "{n}-savol {to}-o‘ringa qo‘yildi",
+        "cancelled": "Ko‘chirish bekor qilindi, {n}-savol joyida"
+      },
+      "form": {
+        "createTitle": "Yangi savol",
+        "editTitle": "Savolni tahrirlash",
+        "text": "Savol matni",
+        "image": "Rasm (ixtiyoriy)",
+        "imagePick": "Rasm tanlash",
+        "imageReplace": "Rasmni almashtirish",
+        "imageRemove": "Olib tashlash",
+        "options": "Javob variantlari",
+        "correctHint": "To‘g‘ri javobni belgilang — u aniq bitta bo‘ladi.",
+        "correctOption": "{letter} — to‘g‘ri javob",
+        "option": "{letter} variant",
+        "active": "Faol",
+        "activeHint": "Nofaol savol o‘yinlarda chiqmaydi."
+      },
+      "errors": {
+        "required": "To‘ldiring",
+        "tooLong": "Matn juda uzun",
+        "correctRequired": "To‘g‘ri javobni tanlang",
+        "optionsCount": "Aniq 4 ta variant bo‘lishi kerak",
+        "invalid": "Qiymat noto‘g‘ri"
       }
     }
   },

@@ -1702,6 +1702,209 @@ paths:
               schema:
                 $ref: '#/components/schemas/SupportAdmin'
           description: ''
+  /api/v1/admin/topics/{topic_id}/questions/:
+    get:
+      operationId: admin_topic_questions_list
+      summary: Mavzu savollari (hammasi, nofaollari ham), tartib bo'yicha
+      parameters:
+      - in: path
+        name: topic_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuestionAdmin'
+          description: ''
+    post:
+      operationId: admin_topic_questions_create
+      parameters:
+      - in: path
+        name: topic_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuestionAdminRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/QuestionAdminRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/QuestionAdminRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionAdmin'
+          description: ''
+  /api/v1/admin/topics/{topic_id}/questions/reorder/:
+    post:
+      operationId: admin_topic_questions_reorder
+      summary: 'Tartib: mavzuning barcha savollari aynan bir martadan, yangi tartibda'
+      parameters:
+      - in: path
+        name: topic_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuestionReorderRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/QuestionReorderRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/QuestionReorderRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuestionAdmin'
+          description: ''
+  /api/v1/admin/topics/{topic_id}/questions/import/:
+    post:
+      operationId: admin_topic_questions_import
+      summary: Ommaviy import (hammasi yoki hech biri); `dry_run` — faqat tekshirish
+      parameters:
+      - in: path
+        name: topic_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuestionImportRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/QuestionImportRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/QuestionImportRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionImportResult'
+          description: ''
+  /api/v1/admin/questions/{id}/:
+    get:
+      operationId: admin_questions_retrieve
+      description: |-
+        Bitta savol: tahrirlash (variantlar bilan), faol/nofaol, o'chirish (faqat admin).
+        Ro'yxat va yaratish mavzu ostida (`topics/{id}/questions/`), shuning uchun `list` ulanmagan.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionAdmin'
+          description: ''
+    patch:
+      operationId: admin_questions_update
+      description: |-
+        Bitta savol: tahrirlash (variantlar bilan), faol/nofaol, o'chirish (faqat admin).
+        Ro'yxat va yaratish mavzu ostida (`topics/{id}/questions/`), shuning uchun `list` ulanmagan.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedQuestionAdminRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedQuestionAdminRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedQuestionAdminRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionAdmin'
+          description: ''
+    delete:
+      operationId: admin_questions_delete
+      description: |-
+        Bitta savol: tahrirlash (variantlar bilan), faol/nofaol, o'chirish (faqat admin).
+        Ro'yxat va yaratish mavzu ostida (`topics/{id}/questions/`), shuning uchun `list` ulanmagan.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/v1/bot/books/:
     get:
       operationId: bot_books_search
@@ -2524,6 +2727,182 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/games/topics/:
+    get:
+      operationId: games_topics_list
+      description: 'O''yin uchun mavzular: kamida `GAMES_MIN_QUESTIONS` faol savol,
+        nashr qilingan kitobda.'
+      parameters:
+      - in: query
+        name: grade
+        schema:
+          type: integer
+        description: Sinf (1–11)
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Mavzu, fan yoki darslik nomi (barcha tillarda)
+      - in: query
+        name: subject
+        schema:
+          type: string
+        description: Fan slug'i
+      tags:
+      - games
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedGameTopicList'
+          description: ''
+  /api/v1/games/topics/{slug}/questions/:
+    get:
+      operationId: games_topic_questions
+      summary: Tasodifiy savollar (variantlar aralashgan); `is_correct` o'rniga `answer_token`
+      parameters:
+      - in: query
+        name: count
+        schema:
+          type: integer
+        description: Savollar soni (4–40, standart 16)
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - games
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameQuestions'
+          description: ''
+  /api/v1/games/check/:
+    post:
+      operationId: games_check_answer
+      tags:
+      - games
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckAnswerRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CheckAnswerRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CheckAnswerRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckAnswer'
+          description: ''
+  /api/v1/games/allowance/:
+    get:
+      operationId: games_allowance
+      summary: Oylik bepul o'yinlar va tanga balansi (yangi oyda bonus beriladi)
+      tags:
+      - games
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Allowance'
+          description: ''
+  /api/v1/games/sessions/:
+    post:
+      operationId: games_sessions_start
+      summary: 'O''yin boshlanishi: bitta urinish sarflanadi (bepul, tugagan bo''lsa
+        tanga)'
+      tags:
+      - games
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionStartRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SessionStartRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SessionStartRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionStart'
+          description: ''
+  /api/v1/games/sessions/{id}/finish/:
+    post:
+      operationId: games_sessions_finish
+      summary: Natijani saqlash (bir marta; qayta — 409 `session_finished`)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - games
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionFinishRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SessionFinishRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SessionFinishRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameSession'
+          description: ''
 components:
   schemas:
     AdminDashboard:
@@ -2549,6 +2928,29 @@ components:
       - recent_activity
       - recent_messages
       - subjects_count
+    Allowance:
+      type: object
+      properties:
+        month:
+          type: string
+          format: date
+        free_games_limit:
+          type: integer
+        free_games_used:
+          type: integer
+        free_games_left:
+          type: integer
+        coins:
+          type: integer
+        game_cost_coins:
+          type: integer
+      required:
+      - coins
+      - free_games_left
+      - free_games_limit
+      - free_games_used
+      - game_cost_coins
+      - month
     Annotation:
       type: object
       properties:
@@ -2906,6 +3308,30 @@ components:
       required:
       - page
       - title
+    CheckAnswer:
+      type: object
+      properties:
+        correct:
+          type: boolean
+        correct_option_id:
+          type: string
+          format: uuid
+      required:
+      - correct
+      - correct_option_id
+    CheckAnswerRequestRequest:
+      type: object
+      properties:
+        answer_token:
+          type: string
+          minLength: 1
+          maxLength: 500
+        option_id:
+          type: string
+          format: uuid
+      required:
+      - answer_token
+      - option_id
     CheckStatusEnum:
       enum:
       - ok
@@ -2985,6 +3411,16 @@ components:
       - icon
       - slug
       - title
+    DifficultyEnum:
+      enum:
+      - easy
+      - medium
+      - hard
+      type: string
+      description: |-
+        * `easy` - Easy
+        * `medium` - Medium
+        * `hard` - Hard
     EmailRequest:
       type: object
       properties:
@@ -3036,9 +3472,12 @@ components:
             $ref: '#/components/schemas/ExportEvent'
         learning:
           $ref: '#/components/schemas/ExportLearning'
+        games:
+          $ref: '#/components/schemas/ExportGames'
       required:
       - auth_events
       - exported_at
+      - games
       - identities
       - learning
       - profile
@@ -3065,6 +3504,18 @@ components:
       - meta
       - type
       - user_agent
+    ExportGames:
+      type: object
+      properties:
+        coins:
+          type: integer
+        sessions:
+          type: array
+          items:
+            $ref: '#/components/schemas/GameSession'
+      required:
+      - coins
+      - sessions
     ExportIdentity:
       type: object
       properties:
@@ -3139,6 +3590,175 @@ components:
       - id
       - last_login
       - role
+    GameOption:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        text:
+          $ref: '#/components/schemas/LocalizedText'
+      required:
+      - id
+      - text
+    GameQuestion:
+      type: object
+      description: 'Savol o''yin uchun: `is_correct` yo''q, javob `answer_token` bilan
+        serverda tekshiriladi.'
+      properties:
+        id:
+          type: string
+          format: uuid
+        text:
+          $ref: '#/components/schemas/LocalizedText'
+        image:
+          type: string
+          format: uri
+          nullable: true
+        difficulty:
+          $ref: '#/components/schemas/DifficultyEnum'
+        options:
+          type: array
+          items:
+            $ref: '#/components/schemas/GameOption'
+        answer_token:
+          type: string
+          readOnly: true
+      required:
+      - answer_token
+      - difficulty
+      - id
+      - image
+      - options
+      - text
+    GameQuestions:
+      type: object
+      properties:
+        topic:
+          $ref: '#/components/schemas/GameTopic'
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/GameQuestion'
+      required:
+      - questions
+      - topic
+    GameSession:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        game_type:
+          type: string
+          readOnly: true
+        topic:
+          type: string
+          nullable: true
+          readOnly: true
+        paid_with:
+          allOf:
+          - $ref: '#/components/schemas/GameSessionPaidWithEnum'
+          readOnly: true
+        coins_spent:
+          type: integer
+          readOnly: true
+        started_at:
+          type: string
+          format: date-time
+          readOnly: true
+        finished_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        duration_seconds:
+          type: integer
+          readOnly: true
+          nullable: true
+        teams:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeamResult'
+          readOnly: true
+      required:
+      - coins_spent
+      - duration_seconds
+      - finished_at
+      - game_type
+      - id
+      - paid_with
+      - started_at
+      - teams
+      - topic
+    GameSessionPaidWithEnum:
+      enum:
+      - free
+      - coins
+      type: string
+      description: |-
+        * `free` - Free
+        * `coins` - Coins
+    GameSubject:
+      type: object
+      properties:
+        slug:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          $ref: '#/components/schemas/LocalizedText'
+      required:
+      - slug
+      - title
+    GameTextbook:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        slug:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          $ref: '#/components/schemas/LocalizedText'
+      required:
+      - id
+      - slug
+      - title
+    GameTopic:
+      type: object
+      description: 'O''yin uchun mavzu (mundarija bo''limi): nom — bo''lim nomi, kitob
+        tilida (tarjimasiz).'
+      properties:
+        id:
+          type: string
+          format: uuid
+        slug:
+          type: string
+          readOnly: true
+        title:
+          type: string
+        subject:
+          allOf:
+          - $ref: '#/components/schemas/GameSubject'
+          readOnly: true
+        grade:
+          type: integer
+        textbook:
+          allOf:
+          - $ref: '#/components/schemas/GameTextbook'
+          readOnly: true
+        question_count:
+          type: integer
+      required:
+      - grade
+      - id
+      - question_count
+      - slug
+      - subject
+      - textbook
+      - title
     Goal:
       type: object
       properties:
@@ -3573,6 +4193,33 @@ components:
       description: |-
         * `student` - student
         * `teacher` - teacher
+    OptionAdmin:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        text:
+          $ref: '#/components/schemas/LocalizedText'
+        is_correct:
+          type: boolean
+        order:
+          type: integer
+          readOnly: true
+      required:
+      - id
+      - order
+      - text
+    OptionAdminRequest:
+      type: object
+      properties:
+        text:
+          $ref: '#/components/schemas/LocalizedTextRequest'
+        is_correct:
+          type: boolean
+      required:
+      - text
     OtpRequestRequest:
       type: object
       properties:
@@ -3603,6 +4250,29 @@ components:
       required:
       - code
       - email
+    PaginatedGameTopicList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/GameTopic'
     PaginatedPdfBookAdminList:
       type: object
       required:
@@ -3864,6 +4534,23 @@ components:
             maximum: 11
             minimum: 1
           maxItems: 11
+    PatchedQuestionAdminRequest:
+      type: object
+      description: Savol + aniq 4 variant (tartib A..D ro'yxat tartibidan), aniq 1
+        to'g'ri javob.
+      properties:
+        text:
+          $ref: '#/components/schemas/LocalizedTextRequest'
+        image:
+          type: string
+        difficulty:
+          $ref: '#/components/schemas/DifficultyEnum'
+        is_active:
+          type: boolean
+        options:
+          type: array
+          items:
+            $ref: '#/components/schemas/OptionAdminRequest'
     PatchedRoleRequest:
       type: object
       properties:
@@ -4501,6 +5188,127 @@ components:
       - page
       - slides
       - title
+    QuestionAdmin:
+      type: object
+      description: Savol + aniq 4 variant (tartib A..D ro'yxat tartibidan), aniq 1
+        to'g'ri javob.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        topic:
+          type: string
+          format: uuid
+          readOnly: true
+        text:
+          $ref: '#/components/schemas/LocalizedText'
+        image:
+          type: string
+        image_url:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        difficulty:
+          $ref: '#/components/schemas/DifficultyEnum'
+        order:
+          type: integer
+          readOnly: true
+        is_active:
+          type: boolean
+        options:
+          type: array
+          items:
+            $ref: '#/components/schemas/OptionAdmin'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - image_url
+      - options
+      - order
+      - text
+      - topic
+      - updated_at
+    QuestionAdminRequest:
+      type: object
+      description: Savol + aniq 4 variant (tartib A..D ro'yxat tartibidan), aniq 1
+        to'g'ri javob.
+      properties:
+        text:
+          $ref: '#/components/schemas/LocalizedTextRequest'
+        image:
+          type: string
+        difficulty:
+          $ref: '#/components/schemas/DifficultyEnum'
+        is_active:
+          type: boolean
+        options:
+          type: array
+          items:
+            $ref: '#/components/schemas/OptionAdminRequest'
+      required:
+      - options
+      - text
+    QuestionImportItemRequest:
+      type: object
+      description: Savol + aniq 4 variant (tartib A..D ro'yxat tartibidan), aniq 1
+        to'g'ri javob.
+      properties:
+        text:
+          $ref: '#/components/schemas/LocalizedTextRequest'
+        difficulty:
+          $ref: '#/components/schemas/DifficultyEnum'
+        options:
+          type: array
+          items:
+            $ref: '#/components/schemas/OptionAdminRequest'
+        is_active:
+          type: boolean
+          default: true
+      required:
+      - options
+      - text
+    QuestionImportRequestRequest:
+      type: object
+      properties:
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionImportItemRequest'
+        dry_run:
+          type: boolean
+          default: false
+      required:
+      - questions
+    QuestionImportResult:
+      type: object
+      properties:
+        created:
+          type: integer
+        dry_run:
+          type: boolean
+      required:
+      - created
+      - dry_run
+    QuestionReorderRequestRequest:
+      type: object
+      properties:
+        ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+      required:
+      - ids
     ReadStatusEnum:
       enum:
       - in_progress
@@ -4592,6 +5400,63 @@ components:
         * `teacher` - Teacher
         * `editor` - Editor
         * `admin` - Admin
+    SessionFinishRequestRequest:
+      type: object
+      properties:
+        game_type:
+          type: string
+          minLength: 1
+          maxLength: 32
+        topic:
+          type: string
+          nullable: true
+          minLength: 1
+        teams:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeamResultRequest'
+        duration_seconds:
+          type: integer
+          maximum: 14400
+          minimum: 0
+      required:
+      - duration_seconds
+      - teams
+    SessionStart:
+      type: object
+      properties:
+        session_id:
+          type: string
+          format: uuid
+        paid_with:
+          $ref: '#/components/schemas/SessionStartPaidWithEnum'
+        allowance:
+          $ref: '#/components/schemas/Allowance'
+      required:
+      - allowance
+      - paid_with
+      - session_id
+    SessionStartPaidWithEnum:
+      enum:
+      - free
+      - coins
+      type: string
+      description: |-
+        * `free` - free
+        * `coins` - coins
+    SessionStartRequestRequest:
+      type: object
+      properties:
+        game_type:
+          type: string
+          minLength: 1
+          maxLength: 32
+        topic:
+          type: string
+          nullable: true
+          minLength: 1
+      required:
+      - game_type
     SlidesAdmin:
       type: object
       description: 'Bo''lim prezentatsiyasi (admin): fayl nomi, slaydlar soni, hajm.
@@ -5155,6 +6020,53 @@ components:
       - books_opened
       - books_total
       - grade
+    TeamResult:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 40
+        score:
+          type: integer
+          maximum: 1000000
+          minimum: 0
+        correct:
+          type: integer
+          maximum: 1000
+          minimum: 0
+        total:
+          type: integer
+          maximum: 1000
+          minimum: 0
+      required:
+      - correct
+      - name
+      - score
+      - total
+    TeamResultRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 40
+        score:
+          type: integer
+          maximum: 1000000
+          minimum: 0
+        correct:
+          type: integer
+          maximum: 1000
+          minimum: 0
+        total:
+          type: integer
+          maximum: 1000
+          minimum: 0
+      required:
+      - correct
+      - name
+      - score
+      - total
     TelegramAuthRequest:
       type: object
       description: Telegram Login Widget qaytargan maydonlar (imzo tekshiruvi providers/telegram.py
