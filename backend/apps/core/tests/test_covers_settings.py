@@ -29,6 +29,8 @@ COVERS_KEYS = tuple(COVERS_ENV) + ("COVERS_S3_ENDPOINT_URL",)
 def run_probe(**overrides) -> subprocess.CompletedProcess:
     env = {k: v for k, v in os.environ.items() if k not in COVERS_KEYS}
     env.update(
+        # Lokal `.env` (haqiqiy bucket kalitlari) aralashmasin: faqat shu yerdagi qiymatlar.
+        DJANGO_READ_DOTENV="0",
         DJANGO_SETTINGS_MODULE="config.settings.prod",
         SECRET_KEY=os.environ.get("SECRET_KEY", "covers-settings-test"),
         ALLOWED_HOSTS="testserver",

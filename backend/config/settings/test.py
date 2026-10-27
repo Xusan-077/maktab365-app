@@ -1,4 +1,8 @@
+import atexit
 import os
+import shutil
+import tempfile
+from pathlib import Path
 
 import environ
 
@@ -35,3 +39,11 @@ REST_FRAMEWORK = {  # noqa: F405
 EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
 FRONTEND_URL = "http://frontend.test"
 SUPPORT_NOTIFY_EMAILS = ["staff@example.com"]
+
+# Testlar haqiqiy obyekt saqlashga (S3/R2) hech qachon murojaat qilmaydi: `.env` da bucket
+# (`AWS_STORAGE_BUCKET_NAME`, `COVERS_BUCKET_NAME`) bo'lsa ham fayllar vaqtinchalik lokal papkaga.
+# S3 xatti-harakatini tekshiradigan testlar `settings.STORAGES` ni o'zi almashtiradi.
+MEDIA_ROOT = Path(tempfile.mkdtemp(prefix="maktab365-test-media-"))
+atexit.register(shutil.rmtree, MEDIA_ROOT, ignore_errors=True)
+_LOCAL_STORAGE = {"BACKEND": "django.core.files.storage.FileSystemStorage"}
+STORAGES = {**STORAGES, "default": _LOCAL_STORAGE, "covers": _LOCAL_STORAGE}  # noqa: F405

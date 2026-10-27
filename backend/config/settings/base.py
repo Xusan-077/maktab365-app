@@ -8,7 +8,9 @@ from corsheaders.defaults import default_headers
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 env = environ.Env()
-environ.Env.read_env(BASE_DIR / ".env")
+# `DJANGO_READ_DOTENV=0` — `.env` o'qilmaydi (sozlamalarni faqat berilgan env bilan tekshirish).
+if os.environ.get("DJANGO_READ_DOTENV", "1") != "0":
+    environ.Env.read_env(BASE_DIR / ".env")
 
 SECRET_KEY = env("SECRET_KEY")
 DEBUG = env.bool("DEBUG", default=False)
