@@ -178,6 +178,13 @@ o'yin (Sirli quti, Omad charhi, Arqon tortish — faqat 2 jamoa), jamoalar soni 
 yetmaydigani o'chiq). «O'yinni boshlash» savollarni oladi va urinish sarflaydi: kirganda server sessiyasi (`403 game_limit_reached`
 modalda tushunarli holat sifatida, toast emas), mehmonda `localStorage` (oyiga 10 ta, Toshkent oyi). Holat `stores/game.store.ts`
 (sessionStorage — sahifa yangilansa tiklanadi). O'yin ekrani `/games/<mavzu>/<o'yin>` va natija `/games/<mavzu>/natija`:
-uchala o'yin hozircha umumiy savol-javob raundi bilan (30 s taymer, 1–4/A–D klaviatura, javob serverda `answer_token` bilan
-tekshiriladi); o'yinga xos sahnalar (quti, charx, arqon) keyingi bosqichda — sof mantiq tayyor (`lib/games/wheel.ts`, `rope.ts`).
-Mavzu panelining «Test» tabida «Interaktiv o'yinlar» bloki. E2E: `frontend/e2e/games.spec.ts` (o'yin API'si mock qilinadi).
+javob serverda `answer_token` bilan tekshiriladi, klaviatura 1–4/A–D. Mavzu panelining «Test» tabida «Interaktiv o'yinlar» bloki
+(mavzu ma'lumoti `GET games/topics/<slug>/`). E2E: `frontend/e2e/games.spec.ts` (o'yin API'si mock qilinadi).
+
+**Interaktiv o'yinlar (3-bosqich, o'yin sahnalari):** to'g'ri javob +1 ball.
+- *Sirli quti* — 4 ustunli raqamli qutilar; savol modali (30 s); har 16 qutidan 1 Bonus (+2) va 1 Bomba (−1), joyi tasodifiy;
+  hamma quti ochilsa natija.
+- *Omad charhi* — 8 sektor (1–6 savol, «×2» — 2 ball, «Bonus» — savolsiz +2), 4 s aylanish; navbat 1→2→3; savollar tugasa natija.
+- *Arqon tortish* — ikki jamoa bir vaqtda, har biriga o'z savoli (juft/toq), chap 1–4, o'ng 6–9 klavishlari; xato — 1.5 s blok;
+  5 qadam yoki 3:00 tugaganda oldindagi jamoa yutadi (teng — durang), g'olib modali. Bolalar rasmi — vaqtinchalik SVG
+  (`components/games/TugOfWarArt.tsx`, rasm bilan almashtiriladi).

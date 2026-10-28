@@ -3,9 +3,6 @@ import { ApiError } from "@/lib/api/types";
 import { getGamesApi, type GameTopic } from "./api";
 import type { GameFilters } from "./filters";
 
-/** Bitta mavzu ma'lumoti uchun eng kam savollar so'rovi (backend `GAMES_MIN_COUNT`). */
-const TOPIC_PROBE_COUNT = 4;
-
 export const gameKeys = {
   root: ["games"] as const,
   topics: (filters: GameFilters) => ["games", "topics", filters] as const,
@@ -23,16 +20,13 @@ export const gameQueries = {
       staleTime: 60_000,
       placeholderData: (previous) => previous,
     }),
-  /**
-   * Mavzu sahifasidagi blok uchun: o'ynab bo'lmaydigan (savoli kam) mavzu — `null` (404).
-   * Ochiq ro'yxatda id bo'yicha filtr yo'q, shuning uchun eng kichik savollar so'rovidan olinadi.
-   */
+  /** Mavzu sahifasidagi blok uchun: o'ynab bo'lmaydigan (savoli kam) mavzu — `null` (404). */
   topic: (slug: string) =>
     queryOptions({
       queryKey: gameKeys.topic(slug),
       queryFn: async (): Promise<GameTopic | null> => {
         try {
-          return (await getGamesApi().questions(slug, TOPIC_PROBE_COUNT)).topic;
+          return await getGamesApi().topic(slug);
         } catch (error) {
           if (error instanceof ApiError && error.status === 404) return null;
           throw error;

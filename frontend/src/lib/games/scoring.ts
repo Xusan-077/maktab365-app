@@ -1,5 +1,3 @@
-import { SECONDS_PER_QUESTION } from "./config";
-
 /** Jamoaning joriy natijasi (backend `TeamResult` bilan bir xil maydonlar). */
 export interface TeamResult {
   name: string;
@@ -8,33 +6,32 @@ export interface TeamResult {
   total: number;
 }
 
-export const POINTS_CORRECT = 10;
-/** Tez javob uchun qo'shimcha: har 6 soniya qolgan vaqtga +1 (eng ko'pi 5). */
-const BONUS_STEP_SECONDS = 6;
+/** To'g'ri javob uchun ball (charxning "×2" sektorida — ikki baravar). */
+export const POINTS_CORRECT = 1;
 
-/** To'g'ri javob uchun ball: 10 + tezlik bonusi; xato yoki vaqt tugasa 0. */
-export function answerPoints(correct: boolean, secondsLeft: number): number {
-  if (!correct) return 0;
-  const left = Math.min(Math.max(secondsLeft, 0), SECONDS_PER_QUESTION);
-  return POINTS_CORRECT + Math.floor(left / BONUS_STEP_SECONDS);
-}
-
-/** Bir jamoa javobini hisobga oladi (o'zgarmas: yangi massiv). */
+/** Bir jamoa javobini hisobga oladi (o'zgarmas: yangi massiv); xato javob ball bermaydi. */
 export function applyAnswer(
   teams: TeamResult[],
   teamIndex: number,
   correct: boolean,
-  secondsLeft: number,
+  points = POINTS_CORRECT,
 ): TeamResult[] {
   return teams.map((team, index) =>
     index === teamIndex
       ? {
           ...team,
-          score: team.score + answerPoints(correct, secondsLeft),
+          score: team.score + (correct ? points : 0),
           correct: team.correct + (correct ? 1 : 0),
           total: team.total + 1,
         }
       : team,
+  );
+}
+
+/** Savolsiz ball (Bonus +2, Bomba −1): javoblar soniga kirmaydi, ball 0 dan pastga tushmaydi. */
+export function applyBonus(teams: TeamResult[], teamIndex: number, delta: number): TeamResult[] {
+  return teams.map((team, index) =>
+    index === teamIndex ? { ...team, score: Math.max(0, team.score + delta) } : team,
   );
 }
 

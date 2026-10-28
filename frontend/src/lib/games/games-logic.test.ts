@@ -6,18 +6,27 @@ import {
   fitQuestionCount,
   isGameId,
 } from "./config";
+import {
+  allOpened,
+  boxQuestionCount,
+  makeBoxes,
+  openBox,
+  specialCount,
+  specialPoints,
+} from "./box";
 import { gamesHref, parseGameFilters } from "./filters";
 import { consumeGuest, guestAllowance, monthKey, parseGuestRecord } from "./guest-allowance";
-import { pullRope, ropeFinalWinner, ropePercent, ropeWinner, ROPE_LIMIT } from "./rope";
 import {
-  answerPoints,
-  applyAnswer,
-  nextTurn,
-  rankTeams,
-  winners,
-  type TeamResult,
-} from "./scoring";
-import { sectorAt, spinRotation } from "./wheel";
+  pullRope,
+  ropeDots,
+  ropeFinalWinner,
+  ropePercent,
+  ropeQuestionIndex,
+  ropeWinner,
+  ROPE_LIMIT,
+} from "./rope";
+import { applyAnswer, applyBonus, nextTurn, rankTeams, winners, type TeamResult } from "./scoring";
+import { sectorAt, sectorPoints, spinRotation, WHEEL_SECTORS } from "./wheel";
 
 const team = (name: string, score = 0, correct = 0, total = 0): TeamResult => ({
   name,
@@ -27,21 +36,20 @@ const team = (name: string, score = 0, correct = 0, total = 0): TeamResult => ({
 });
 
 describe("scoring", () => {
-  it("gives 10 points plus a speed bonus only for correct answers", () => {
-    expect(answerPoints(true, 30)).toBe(15);
-    expect(answerPoints(true, 11)).toBe(11);
-    expect(answerPoints(true, 0)).toBe(10);
-    expect(answerPoints(true, 99)).toBe(15);
-    expect(answerPoints(false, 30)).toBe(0);
+  it("gives 1 point per correct answer (more on a ×2 sector) and counts every answer", () => {
+    const teams = [team("A"), team("B")];
+    const next = applyAnswer(teams, 1, true);
+    expect(next[0]).toEqual(team("A"));
+    expect(next[1]).toEqual(team("B", 1, 1, 1));
+    expect(applyAnswer(next, 1, false)[1]).toEqual(team("B", 1, 1, 2));
+    expect(applyAnswer(next, 1, true, 2)[1]).toEqual(team("B", 3, 2, 2));
+    expect(teams[1]).toEqual(team("B"));
   });
 
-  it("updates only the answering team", () => {
-    const teams = [team("A"), team("B")];
-    const next = applyAnswer(teams, 1, true, 12);
-    expect(next[0]).toEqual(team("A"));
-    expect(next[1]).toEqual(team("B", 12, 1, 1));
-    expect(applyAnswer(next, 1, false, 30)[1]).toEqual(team("B", 12, 1, 2));
-    expect(teams[1]).toEqual(team("B"));
+  it("applies bonuses without counting answers and never goes below zero", () => {
+    expect(applyBonus([team("A", 1, 1, 1)], 0, 2)[0]).toEqual(team("A", 3, 1, 1));
+    expect(applyBonus([team("A", 0)], 0, -1)[0].score).toBe(0);
+    expect(applyBonus([team("A", 3)], 0, -1)[0].score).toBe(2);
   });
 
   it("rotates turns", () => {
@@ -86,6 +94,67 @@ describe("wheel", () => {
   });
 });
 
+describe("wheel sectors", () => {
+  it("has 6 question sectors, one ×2 and one bonus", () => {
+    expect(WHEEL_SECTORS).toHaveLength(8);
+    expect(WHEEL_SECTORS.filter((sector) => sector.kind === "question")).toHaveLength(6);
+    expect(WHEEL_SECTORS.map(sectorPoints)).toEqual([1, 1, 2, 1, 1, 2, 1, 1]);
+  });
+
+  it("lands every spin on the sector shown under the pointer", () => {
+    let rotation = 0;
+    for (let target = 0; target < WHEEL_SECTORS.length; target++) {
+      rotation = spinRotation(rotation, target, WHEEL_SECTORS.length, 5, 0.2);
+      expect(WHEEL_SECTORS[sectorAt(rotation, WHEEL_SECTORS.length)]).toBe(WHEEL_SECTORS[target]);
+    }
+  });
+});
+
+describe("box", () => {
+  const seeded = (seed: number) => () => {
+    seed = (seed * 9301 + 49297) % 233280;
+    return seed / 233280;
+  };
+
+  it("adds one bonus and one bomb per 16 boxes", () => {
+    expect([8, 12, 16, 24].map(specialCount)).toEqual([1, 1, 1, 2]);
+    expect(boxQuestionCount(16)).toBe(14);
+    for (const count of [8, 12, 16, 24]) {
+      const boxes = makeBoxes(count, seeded(count));
+      expect(boxes).toHaveLength(count);
+      expect(boxes.filter((box) => box.kind === "bonus")).toHaveLength(specialCount(count));
+      expect(boxes.filter((box) => box.kind === "bomb")).toHaveLength(specialCount(count));
+      // Savolli qutilar savollarga ketma-ket bog'langan.
+      expect(boxes.filter((box) => box.kind === "question").map((box) => box.question)).toEqual(
+        Array.from({ length: boxQuestionCount(count) }, (_, index) => index),
+      );
+    }
+  });
+
+  it("places specials randomly", () => {
+    const layouts = new Set(
+      [1, 2, 3, 4, 5].map((seed) =>
+        makeBoxes(16, seeded(seed))
+          .map((box) => box.kind[0])
+          .join(""),
+      ),
+    );
+    expect(layouts.size).toBeGreaterThan(1);
+  });
+
+  it("opens each box once and finishes when all are open", () => {
+    let boxes = makeBoxes(8, seeded(7));
+    expect(allOpened(boxes)).toBe(false);
+    boxes = openBox(boxes, 0, "correct");
+    expect(openBox(boxes, 0, "wrong")[0].result).toBe("correct");
+    for (let index = 1; index < boxes.length; index++) boxes = openBox(boxes, index, "wrong");
+    expect(allOpened(boxes)).toBe(true);
+    expect([specialPoints("bonus"), specialPoints("bomb"), specialPoints("question")]).toEqual([
+      2, -1, 0,
+    ]);
+  });
+});
+
 describe("rope", () => {
   it("moves toward the team that answered correctly, clamped to the limit", () => {
     expect(pullRope(0, 0, true)).toBe(-1);
@@ -110,6 +179,19 @@ describe("rope", () => {
     expect(ropePercent(0)).toBe(50);
     expect(ropePercent(-ROPE_LIMIT)).toBe(0);
     expect(ropePercent(99)).toBe(100);
+  });
+
+  it("shows 11 position dots", () => {
+    expect(ropeDots()).toEqual([-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5]);
+  });
+
+  it("splits questions between the teams and cycles each team's own", () => {
+    expect([0, 1, 2, 3].map((cursor) => ropeQuestionIndex(0, cursor, 8))).toEqual([0, 2, 4, 6]);
+    expect([0, 1, 2, 3, 4].map((cursor) => ropeQuestionIndex(1, cursor, 8))).toEqual([
+      1, 3, 5, 7, 1,
+    ]);
+    expect(ropeQuestionIndex(0, 4, 9)).toBe(8);
+    expect(ropeQuestionIndex(1, 4, 9)).toBe(1);
   });
 });
 

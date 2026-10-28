@@ -2,8 +2,16 @@ import { useEffect, useState } from "react";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import type { GameQuestion, GameTopic } from "@/lib/games/api";
+import { allOpened, makeBoxes, openBox, type BoxCell, type BoxResult } from "@/lib/games/box";
 import { isGameId, type GameId } from "@/lib/games/config";
-import { applyAnswer, nextTurn, type TeamResult } from "@/lib/games/scoring";
+import { pullRope, ROPE_SECONDS, ropeWinner } from "@/lib/games/rope";
+import {
+  applyAnswer,
+  applyBonus,
+  nextTurn,
+  POINTS_CORRECT,
+  type TeamResult,
+} from "@/lib/games/scoring";
 
 export const GAME_STORAGE_KEY = "maktab365-game";
 
@@ -17,6 +25,14 @@ export interface GameSetup {
   sessionId: string | null;
 }
 
+/** Arqon tortish: `position` — arqon belgisi, `cursor` — har jamoa nechanchi savolda. */
+export interface RopeState {
+  position: number;
+  cursor: [number, number];
+  /** Umumiy taymer tugaydigan vaqt (ms) — sahifa yangilansa ham davom etadi. */
+  endsAt: number;
+}
+
 interface GameState {
   game: GameId | null;
   topic: GameTopic | null;
@@ -26,17 +42,33 @@ interface GameState {
   scores: TeamResult[];
   /** Navbatdagi jamoa indeksi. */
   turn: number;
-  /** Joriy savol indeksi. */
+  /** Omad charhi: keyingi savol indeksi. */
   index: number;
+  /** Sirli quti: qutilar to'ri. */
+  boxes: BoxCell[];
+  /** Omad charhi: charxning joriy burilishi (gradus). */
+  rotation: number;
+  rope: RopeState | null;
   session: string | null;
   startedAt: number | null;
   finishedAt: number | null;
 
   start: (setup: GameSetup) => void;
   /** Navbatdagi jamoa javobi: ball qo'shiladi (navbat `next` da almashadi). */
-  answer: (correct: boolean, secondsLeft: number) => void;
-  /** Keyingi savol va jamoa; savollar tugasa o'yin tugaydi. */
-  next: () => void;
+  answer: (correct: boolean, points?: number) => void;
+  /** Navbatdagi jamoaga savolsiz ball (Bonus/Bomba). */
+  bonus: (delta: number) => void;
+  /** Sirli quti: qutini natija bilan ochadi. */
+  openBox: (cell: number, result: BoxResult) => void;
+  /** Omad charhi: yangi burilish burchagi. */
+  spin: (rotation: number) => void;
+  /**
+   * Navbat keyingi jamoaga. Quti: hamma quti ochilsa o'yin tugaydi. Charx: `consumed` bo'lsa
+   * savol sarflangan — savollar tugasa o'yin tugaydi.
+   */
+  next: (consumed?: boolean) => void;
+  /** Arqon tortish: jamoa javobi — to'g'ri bo'lsa arqon tortiladi, jamoaga yangi savol. */
+  ropeAnswer: (team: 0 | 1, correct: boolean) => void;
   finish: () => void;
   reset: () => void;
 }
@@ -49,6 +81,9 @@ const EMPTY = {
   scores: [],
   turn: 0,
   index: 0,
+  boxes: [],
+  rotation: 0,
+  rope: null,
   session: null,
   startedAt: null,
   finishedAt: null,
@@ -71,19 +106,42 @@ export const useGameStore = create<GameState>()(
           scores: setup.teamNames.map((name) => ({ name, score: 0, correct: 0, total: 0 })),
           turn: 0,
           index: 0,
+          boxes: setup.game === "sirli-quti" ? makeBoxes(setup.questionCount) : [],
+          rotation: 0,
+          rope:
+            setup.game === "arqon-tortish"
+              ? { position: 0, cursor: [0, 0], endsAt: Date.now() + ROPE_SECONDS * 1000 }
+              : null,
           session: setup.sessionId,
           startedAt: Date.now(),
           finishedAt: null,
         }),
-      answer: (correct, secondsLeft) =>
-        set((state) => ({ scores: applyAnswer(state.scores, state.turn, correct, secondsLeft) })),
-      next: () => {
-        const { index, questions, turn, scores } = get();
-        if (index + 1 >= questions.length) {
-          get().finish();
-          return;
+      answer: (correct, points = POINTS_CORRECT) =>
+        set((state) => ({ scores: applyAnswer(state.scores, state.turn, correct, points) })),
+      bonus: (delta) => set((state) => ({ scores: applyBonus(state.scores, state.turn, delta) })),
+      openBox: (cell, result) => set((state) => ({ boxes: openBox(state.boxes, cell, result) })),
+      spin: (rotation) => set({ rotation }),
+      next: (consumed = true) => {
+        const { game, index, questions, turn, scores, boxes } = get();
+        if (game === "sirli-quti" && allOpened(boxes)) return get().finish();
+        const nextIndex = game === "omad-charhi" && consumed ? index + 1 : index;
+        if (game === "omad-charhi" && nextIndex >= questions.length) {
+          set({ index: nextIndex });
+          return get().finish();
         }
-        set({ index: index + 1, turn: nextTurn(turn, scores.length) });
+        set({ index: nextIndex, turn: nextTurn(turn, scores.length) });
+      },
+      ropeAnswer: (team, correct) => {
+        const { rope, finishedAt } = get();
+        if (!rope || finishedAt !== null) return;
+        const position = pullRope(rope.position, team, correct);
+        const cursor: [number, number] = [...rope.cursor];
+        cursor[team] += 1;
+        set((state) => ({
+          scores: applyAnswer(state.scores, team, correct),
+          rope: { ...rope, position, cursor },
+        }));
+        if (ropeWinner(position) !== null) get().finish();
       },
       finish: () => set((state) => ({ finishedAt: state.finishedAt ?? Date.now() })),
       reset: () => set({ ...EMPTY }),
@@ -99,6 +157,9 @@ export const useGameStore = create<GameState>()(
         scores,
         turn,
         index,
+        boxes,
+        rotation,
+        rope,
         session,
         startedAt,
         finishedAt,
@@ -110,6 +171,9 @@ export const useGameStore = create<GameState>()(
         scores,
         turn,
         index,
+        boxes,
+        rotation,
+        rope,
         session,
         startedAt,
         finishedAt,
@@ -129,7 +193,8 @@ export const useGameStore = create<GameState>()(
 
 /** O'yin/natija sahifalari: `sessionStorage` dan tiklanguncha `false` (SSR va birinchi render). */
 export function useGameHydrated(): boolean {
-  const [hydrated, setHydrated] = useState(() => useGameStore.persist.hasHydrated());
+  // Serverda `sessionStorage` yo'q — persist middleware `persist` API'sini qo'shmaydi.
+  const [hydrated, setHydrated] = useState(() => useGameStore.persist?.hasHydrated() ?? false);
   useEffect(() => {
     if (useGameStore.persist.hasHydrated()) return;
     const unsubscribe = useGameStore.persist.onFinishHydration(() => setHydrated(true));

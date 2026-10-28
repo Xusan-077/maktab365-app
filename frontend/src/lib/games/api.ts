@@ -39,6 +39,14 @@ export class GamesApi {
     return unwrap(result);
   }
 
+  /** O'ynab bo'lmaydigan (savoli kam yoki yo'q) mavzuda `ApiError` 404. */
+  async topic(slug: string): Promise<GameTopic> {
+    const result = await this.client.GET("/api/v1/games/topics/{slug}/", {
+      params: { path: { slug } },
+    });
+    return unwrap(result);
+  }
+
   async questions(slug: string, count: number): Promise<GameQuestions> {
     const result = await this.client.GET("/api/v1/games/topics/{slug}/questions/", {
       params: { path: { slug }, query: { count } },

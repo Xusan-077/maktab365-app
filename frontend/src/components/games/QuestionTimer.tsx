@@ -12,15 +12,31 @@ export const formatClock = (seconds: number) => {
   return `${String(Math.floor(whole / 60)).padStart(2, "0")}:${String(whole % 60).padStart(2, "0")}`;
 };
 
-/** Kamayadigan chiziq + `mm:ss`; oxirgi 5 soniyada qizil. Hisob `useCountdown` da. */
-export function QuestionTimer({ remaining, total }: { remaining: number; total: number }) {
+/**
+ * Kamayadigan chiziq + `mm:ss`; oxirgi `warnAt` soniyada qizil. Hisob `useCountdown` da.
+ * `tone="sun"` — to'q (indigo) fon ustida sariq chiziq va oq raqamlar (Sirli quti modali).
+ */
+export function QuestionTimer({
+  remaining,
+  total,
+  tone = "default",
+  warnAt = TIMER_WARNING_SECONDS,
+  className,
+}: {
+  remaining: number;
+  total: number;
+  tone?: "default" | "sun";
+  warnAt?: number;
+  className?: string;
+}) {
   const t = useTranslations("games.play");
-  const warning = remaining <= TIMER_WARNING_SECONDS;
+  const warning = remaining <= warnAt;
+  const sun = tone === "sun";
   const fraction = total > 0 ? Math.max(0, Math.min(1, remaining / total)) : 0;
 
   return (
     <div
-      className="flex items-center gap-3"
+      className={cn("flex items-center gap-3", className)}
       data-testid="question-timer"
       data-warning={warning || undefined}
     >
@@ -31,12 +47,19 @@ export function QuestionTimer({ remaining, total }: { remaining: number; total: 
         aria-valuemax={total}
         aria-valuenow={Math.ceil(remaining)}
         aria-valuetext={formatClock(remaining)}
-        className="bg-subtle h-3.5 flex-1 overflow-hidden rounded-full"
+        className={cn(
+          "h-3.5 flex-1 overflow-hidden rounded-full",
+          sun ? "bg-white/25" : "bg-subtle",
+        )}
       >
         <div
           className={cn(
             "h-full origin-left rounded-full transition-[transform,background-color] duration-200 ease-linear",
-            warning ? "bg-team-red" : "bg-[var(--game-from,var(--color-game-indigo))]",
+            warning
+              ? "bg-team-red"
+              : sun
+                ? "bg-game-sun"
+                : "bg-[var(--game-from,var(--color-game-indigo))]",
           )}
           style={{ transform: `scaleX(${fraction})` }}
         />
@@ -45,7 +68,11 @@ export function QuestionTimer({ remaining, total }: { remaining: number; total: 
         aria-hidden
         className={cn(
           "inline-flex min-w-[5.5rem] items-center justify-end gap-1.5 text-2xl font-extrabold tabular-nums sm:text-3xl",
-          warning ? "text-danger motion-safe:animate-pulse" : "text-foreground",
+          sun
+            ? cn("text-white", warning && "motion-safe:animate-pulse")
+            : warning
+              ? "text-danger motion-safe:animate-pulse"
+              : "text-foreground",
         )}
       >
         <Timer className="size-6" aria-hidden />

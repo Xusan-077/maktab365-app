@@ -23,7 +23,7 @@ interface Piece {
   round: boolean;
 }
 
-function makePieces(count: number): Piece[] {
+function makePieces(count: number, colors: readonly string[]): Piece[] {
   return Array.from({ length: count }, (_, index) => ({
     left: Math.random() * 100,
     delay: Math.random() * 0.6,
@@ -31,7 +31,7 @@ function makePieces(count: number): Piece[] {
     drift: (Math.random() - 0.5) * 160,
     spin: (Math.random() - 0.5) * 900,
     size: 8 + Math.random() * 8,
-    color: COLORS[index % COLORS.length],
+    color: colors[index % colors.length],
     round: index % 3 === 0,
   }));
 }
@@ -40,8 +40,15 @@ function makePieces(count: number): Piece[] {
  * Bir martalik konfetti (bezak, `aria-hidden`). Faqat transform/opacity; `prefers-reduced-motion`
  * da `MotionConfig` transformlarni o'chiradi — bo'laklar shunchaki so'nadi.
  */
-export function Confetti({ count = 90 }: { count?: number }) {
-  const [pieces] = useState(() => makePieces(count));
+export function Confetti({
+  count = 90,
+  colors = COLORS,
+}: {
+  count?: number;
+  /** Masalan, g'olib jamoa ranglari (`var(--color-team-blue)` …). */
+  colors?: readonly string[];
+}) {
+  const [pieces] = useState(() => makePieces(count, colors));
   return (
     <div
       aria-hidden

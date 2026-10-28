@@ -2406,7 +2406,6 @@
       "exitFullscreen": "To'liq ekrandan chiqish",
       "soundOn": "Ovozni yoqish",
       "soundOff": "Ovozni o'chirish",
-      "question": "{current}-savol / {total}",
       "turn": "Navbat: {team}",
       "answersLabel": "Javob variantlari",
       "answerHint": "Klaviatura: 1–4 yoki A–D",
@@ -2423,7 +2422,46 @@
       "scoresLabel": "Jamoalar bali",
       "notReady": "O'yin topilmadi. Uni o'yinlar sahifasidan qayta boshlang.",
       "toGames": "O'yinlarga qaytish",
-      "checkError": "Javobni tekshirib bo'lmadi. Qayta tanlang."
+      "checkError": "Javobni tekshirib bo'lmadi. Qayta tanlang.",
+      "turnBadge": "Navbat",
+      "minusPoints": "−{points}",
+      "continue": "Davom etish",
+      "seeResult": "Natijani ko'rish",
+      "box": {
+        "board": "Sirli qutilar",
+        "label": "{n}-quti",
+        "modalLabel": "Quti",
+        "opened": {
+          "correct": "{n}-quti: to'g'ri javob",
+          "wrong": "{n}-quti: noto'g'ri javob",
+          "bonus": "{n}-quti: bonus",
+          "bomb": "{n}-quti: bomba"
+        },
+        "bonusTag": "+2",
+        "bombTag": "−1",
+        "bonusNotice": "Bonus! {team} +{points} ball oldi",
+        "bombNotice": "Bomba! {team} {points} ball yo'qotdi"
+      },
+      "wheel": {
+        "double": "×2",
+        "bonus": "Bonus",
+        "spin": "Aylantirish",
+        "spinLabel": "Charxni aylantirish",
+        "spinning": "Charx aylanmoqda…",
+        "prompt": "Charxni aylantiring: sektor savol qiymatini belgilaydi.",
+        "left": "{count, plural, =0 {Savollar tugadi} other {# ta savol qoldi}}",
+        "sector": "Sektor {label}",
+        "points": "{points} ball",
+        "bonusTitle": "Bonus! {team} +{points} ball"
+      },
+      "rope": {
+        "timerLabel": "Qolgan vaqt: {time}",
+        "panelLabel": "{team} savoli",
+        "pulled": "+1 · Tortdi!",
+        "blocked": "Xato — kuting",
+        "keys": "Klaviatura: {keys}",
+        "position": "Arqon belgisi: {position, number}"
+      }
     },
     "result": {
       "title": "Natijalar",

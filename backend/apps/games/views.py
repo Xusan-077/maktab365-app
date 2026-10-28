@@ -58,6 +58,20 @@ class GameTopicListView(ListAPIView):
         )
 
 
+class GameTopicDetailView(APIView):
+    permission_classes = [AllowAny]
+
+    @extend_schema(
+        operation_id="games_topic_retrieve",
+        tags=TAGS,
+        responses=GameTopicSerializer,
+        summary="Bitta o'yin mavzusi va savollar soni (o'ynab bo'lmasa — 404)",
+    )
+    def get(self, request, slug):
+        topic = services.get_playable_topic(slug)
+        return Response(GameTopicSerializer(topic, context={"request": request}).data)
+
+
 class GameQuestionsView(APIView):
     permission_classes = [AllowAny]
 

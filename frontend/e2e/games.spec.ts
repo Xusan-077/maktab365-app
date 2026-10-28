@@ -126,29 +126,124 @@ test.describe("Interaktiv o'yinlar", () => {
       "2 jamoa · 8 ta savol · har biriga 30 soniya · taxminan 6 daqiqa",
     );
     await modal.getByTestId("game-start").click();
-
     await expect(page).toHaveURL(new RegExp(`/uz/games/${SLUG}/sirli-quti$`));
-    await expect(
-      page.getByRole("heading", { level: 1, name: "1 + 1 nechaga teng?" }),
-    ).toBeVisible();
+    await expect(page.getByTestId("box-board").getByRole("button")).toHaveCount(8);
+  });
+
+  test("Sirli quti: qutilar, savol modali, bonus/bomba va natija", async ({ page }) => {
+    await mockGamesApi(page);
+    await startGame(page, "sirli-quti");
+    const board = page.getByTestId("box-board");
+    await expect(board.getByRole("button")).toHaveCount(8);
     await expect(page.getByTestId("game-turn")).toHaveText("Navbat: Ko'k jamoa");
 
-    // Klaviatura bilan javob: "2" → B (to'g'ri).
-    await page.keyboard.press("2");
-    await expect(page.getByTestId("game-outcome")).toHaveText("To'g'ri!");
-    // 10 + tezlik bonusi (javob 30 soniyaning boshida) — 14 yoki 15.
-    await expect(page.getByTestId("team-score").first()).toContainText(/1[45]/);
-    await page.getByTestId("game-next").click();
-    await expect(page.getByTestId("game-turn")).toHaveText("Navbat: Qizil jamoa");
+    for (let n = 1; n <= 8; n++) {
+      const tile = page.getByTestId(`box-${n}`);
+      await expect(tile).toBeEnabled();
+      await tile.click();
+      const dialog = page.getByTestId("box-question");
+      await expect(dialog.or(page.locator(`[data-testid="box-${n}"][data-result]`))).toBeVisible();
+      if (await dialog.isVisible()) {
+        await expect(dialog.getByRole("heading", { level: 1 })).toContainText("nechaga teng?");
+        // Klaviatura: "2" → B (mock'da har savolda to'g'ri).
+        await page.keyboard.press("2");
+        await expect(dialog.getByTestId("game-outcome")).toHaveText("To'g'ri!");
+        await dialog.getByTestId("game-next").click();
+        await expect(dialog).toHaveCount(0);
+        await expect(tile).toHaveAttribute("data-result", "correct");
+      } else {
+        await expect(tile).toHaveAttribute("data-result", /^(bonus|bomb)$/);
+      }
+      if (n === 1) {
+        // Navbat keyingi jamoaga o'tdi; sahifa yangilansa ochilgan qutilar tiklanadi.
+        await expect(page.getByTestId("game-turn")).toHaveText("Navbat: Qizil jamoa");
+        await page.reload();
+        await expect(page.getByTestId("box-1")).toHaveAttribute("data-result", /.+/);
+      }
+    }
 
-    // Sahifa yangilansa holat sessionStorage'dan tiklanadi.
-    await page.reload();
-    await expect(
-      page.getByRole("heading", { level: 1, name: "2 + 2 nechaga teng?" }),
-    ).toBeVisible();
+    await expect(page).toHaveURL(new RegExp(`/uz/games/${SLUG}/natija$`));
+    await expect(page.getByTestId("game-ranking").getByRole("listitem")).toHaveCount(2);
+    await expect(page.getByTestId("game-headline")).toBeVisible();
 
     // Bitta bepul o'yin sarflandi (mehmon hisobi).
     await page.goto("/uz/games");
     await expect(page.getByTestId("allowance-free")).toHaveText("Bepul 10 tadan 9 ta qoldi");
   });
+
+  test("Omad charhi: aylantirish, sektor, bonus va navbat", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    // 0.7 → "Bonus" sektori (5-sektor).
+    await page.addInitScript(() => {
+      Math.random = () => 0.7;
+    });
+    await mockGamesApi(page);
+    await startGame(page, "omad-charhi");
+    await expect(page.getByTestId("game-turn")).toHaveText("Navbat: Ko'k jamoa");
+
+    await page.getByTestId("wheel-spin").click();
+    await expect(page.getByTestId("wheel-bonus")).toContainText("Bonus! Ko'k jamoa +2 ball");
+    await expect(page.getByTestId("team-score").first()).toContainText("2");
+    await page.getByTestId("game-next").click();
+    await expect(page.getByTestId("game-turn")).toHaveText("Navbat: Qizil jamoa");
+    await expect(page.getByTestId("wheel-left")).toHaveText("8 ta savol qoldi");
+
+    // Endi har aylanish "1" sektoriga (oddiy savol, 1 ball).
+    await page.evaluate(() => {
+      Math.random = () => 0.01;
+    });
+    for (let round = 0; round < 8; round++) {
+      await page.getByTestId("wheel-spin").click();
+      const panel = page.getByTestId("wheel-question");
+      await expect(panel.getByTestId("wheel-sector")).toHaveText("Sektor 1");
+      await expect(panel.getByTestId("wheel-points")).toHaveText("1 ball");
+      await page.keyboard.press("b");
+      await expect(panel.getByTestId("game-outcome")).toHaveText("To'g'ri!");
+      await panel.getByTestId("game-next").click();
+    }
+    await expect(page).toHaveURL(new RegExp(`/uz/games/${SLUG}/natija$`));
+    // Ko'k: bonus 2 + 4 savol = 6, Qizil: 4.
+    await expect(page.getByTestId("game-headline")).toHaveText("Ko'k jamoa g'olib!");
+  });
+
+  test("Arqon tortish: ikki panel, blok va g'olib modali", async ({ page }) => {
+    await mockGamesApi(page);
+    await startGame(page, "arqon-tortish");
+    const left = page.getByTestId("rope-panel-0");
+    const right = page.getByTestId("rope-panel-1");
+    const art = page.getByTestId("rope-art");
+    await expect(page.getByTestId("rope-timer")).toHaveText(/^(03:00|02:5\d)$/);
+    await expect(left.getByTestId("rope-question-0")).toHaveText("1 + 1 nechaga teng?");
+    await expect(right.getByTestId("rope-question-1")).toHaveText("2 + 2 nechaga teng?");
+
+    // O'ng jamoa xato (6 → A): panel bloklanadi, keyin yangi savol.
+    await page.keyboard.press("6");
+    await expect(right).toHaveAttribute("data-blocked", "true");
+    await expect(right).not.toHaveAttribute("data-blocked");
+    await expect(right.getByTestId("rope-question-1")).toHaveText("4 + 4 nechaga teng?");
+    await expect(art).toHaveAttribute("data-position", "0");
+
+    // Chap jamoa 5 marta to'g'ri (1–4 klavishlari, "2" → B) — arqon chapga, g'alaba.
+    for (let pull = 1; pull <= 5; pull++) {
+      await expect(left.getByTestId("answer-option").nth(1)).toBeEnabled();
+      await page.keyboard.press("2");
+      await expect(art).toHaveAttribute("data-position", String(-pull));
+    }
+    const winner = page.getByTestId("rope-winner");
+    await expect(winner.getByTestId("game-headline")).toHaveText("Ko'k jamoa g'olib!");
+    await winner.getByTestId("rope-see-result").click();
+    await expect(page).toHaveURL(new RegExp(`/uz/games/${SLUG}/natija$`));
+    await expect(page.getByTestId("game-headline")).toHaveText("Ko'k jamoa g'olib!");
+  });
 });
+
+async function startGame(page: Page, game: "sirli-quti" | "omad-charhi" | "arqon-tortish") {
+  await page.goto("/uz/games");
+  await page.getByRole("button", { name: `«${topic.title}» mavzusida o'ynash` }).click();
+  const modal = page.getByTestId("game-modal");
+  await modal.getByTestId(`game-option-${game}`).click();
+  await modal.getByTestId("game-continue").click();
+  await modal.getByTestId("questions-8").click();
+  await modal.getByTestId("game-start").click();
+  await expect(page).toHaveURL(new RegExp(`/uz/games/${SLUG}/${game}$`));
+}

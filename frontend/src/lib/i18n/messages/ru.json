@@ -2406,7 +2406,6 @@
       "exitFullscreen": "Выйти из полноэкранного режима",
       "soundOn": "Включить звук",
       "soundOff": "Выключить звук",
-      "question": "Вопрос {current} / {total}",
       "turn": "Ход: {team}",
       "answersLabel": "Варианты ответа",
       "answerHint": "Клавиатура: 1–4 или A–D",
@@ -2423,7 +2422,46 @@
       "scoresLabel": "Очки команд",
       "notReady": "Игра не найдена. Начните её заново на странице игр.",
       "toGames": "Вернуться к играм",
-      "checkError": "Не удалось проверить ответ. Выберите ещё раз."
+      "checkError": "Не удалось проверить ответ. Выберите ещё раз.",
+      "turnBadge": "Ход",
+      "minusPoints": "−{points}",
+      "continue": "Продолжить",
+      "seeResult": "Посмотреть результат",
+      "box": {
+        "board": "Таинственные коробки",
+        "label": "Коробка {n}",
+        "modalLabel": "Коробка",
+        "opened": {
+          "correct": "Коробка {n}: верный ответ",
+          "wrong": "Коробка {n}: неверный ответ",
+          "bonus": "Коробка {n}: бонус",
+          "bomb": "Коробка {n}: бомба"
+        },
+        "bonusTag": "+2",
+        "bombTag": "−1",
+        "bonusNotice": "Бонус! {team} получает +{points}",
+        "bombNotice": "Бомба! {team} теряет {points}"
+      },
+      "wheel": {
+        "double": "×2",
+        "bonus": "Бонус",
+        "spin": "Крутить",
+        "spinLabel": "Крутить колесо",
+        "spinning": "Колесо крутится…",
+        "prompt": "Крутите колесо: сектор задаёт стоимость вопроса.",
+        "left": "{count, plural, =0 {Вопросы закончились} one {Остался # вопрос} few {Осталось # вопроса} other {Осталось # вопросов}}",
+        "sector": "Сектор {label}",
+        "points": "{points} балл.",
+        "bonusTitle": "Бонус! {team} +{points}"
+      },
+      "rope": {
+        "timerLabel": "Осталось времени: {time}",
+        "panelLabel": "Вопрос команды «{team}»",
+        "pulled": "+1 · Тянет!",
+        "blocked": "Ошибка — подождите",
+        "keys": "Клавиши: {keys}",
+        "position": "Метка каната: {position, number}"
+      }
     },
     "result": {
       "title": "Результаты",

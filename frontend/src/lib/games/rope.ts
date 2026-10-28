@@ -29,3 +29,23 @@ export function ropeFinalWinner(position: number): 0 | 1 | null {
 /** Belgining ekrandagi joyi foizda (0 — chap chekka, 50 — markaz, 100 — o'ng chekka). */
 export const ropePercent = (position: number, limit = ROPE_LIMIT) =>
   50 + (Math.max(-limit, Math.min(limit, position)) / limit) * 50;
+
+/** Umumiy vaqt (3:00) va oxirgi shuncha soniyada taymer qizil. */
+export const ROPE_SECONDS = 180;
+export const ROPE_WARNING_SECONDS = 30;
+/** Xato javobdan keyin jamoa shuncha bloklanadi. */
+export const ROPE_BLOCK_MS = 1500;
+
+/** Pozitsiya ko'rsatkichi nuqtalari: −LIMIT…+LIMIT (11 ta). */
+export const ropeDots = (limit = ROPE_LIMIT) =>
+  Array.from({ length: limit * 2 + 1 }, (_, index) => index - limit);
+
+/**
+ * Har jamoaning o'z savollari: 0-jamoa — juft, 1-jamoa — toq indekslar. `cursor` — jamoa nechanchi
+ * savolda; savollar tugasa jamoa o'z savollarini boshidan aylanadi (vaqt tugaguncha).
+ */
+export function ropeQuestionIndex(team: 0 | 1, cursor: number, questionCount: number): number {
+  const own = team === 0 ? Math.ceil(questionCount / 2) : Math.floor(questionCount / 2);
+  if (own === 0) return 0;
+  return (cursor % own) * 2 + team;
+}

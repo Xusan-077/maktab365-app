@@ -2406,7 +2406,6 @@
       "exitFullscreen": "Тўлиқ экрандан чиқиш",
       "soundOn": "Овозни ёқиш",
       "soundOff": "Овозни ўчириш",
-      "question": "{current}-савол / {total}",
       "turn": "Навбат: {team}",
       "answersLabel": "Жавоб вариантлари",
       "answerHint": "Клавиатура: 1–4 ёки А–Д",
@@ -2423,7 +2422,46 @@
       "scoresLabel": "Жамоалар бали",
       "notReady": "Ўйин топилмади. Уни ўйинлар саҳифасидан қайта бошланг.",
       "toGames": "Ўйинларга қайтиш",
-      "checkError": "Жавобни текшириб бўлмади. Қайта танланг."
+      "checkError": "Жавобни текшириб бўлмади. Қайта танланг.",
+      "turnBadge": "Навбат",
+      "minusPoints": "−{points}",
+      "continue": "Давом этиш",
+      "seeResult": "Натижани кўриш",
+      "box": {
+        "board": "Сирли қутилар",
+        "label": "{n}-қути",
+        "modalLabel": "Қути",
+        "opened": {
+          "correct": "{n}-қути: тўғри жавоб",
+          "wrong": "{n}-қути: нотўғри жавоб",
+          "bonus": "{n}-қути: бонус",
+          "bomb": "{n}-қути: бомба"
+        },
+        "bonusTag": "+2",
+        "bombTag": "−1",
+        "bonusNotice": "Бонус! {team} +{points} балл олди",
+        "bombNotice": "Бомба! {team} {points} балл йўқотди"
+      },
+      "wheel": {
+        "double": "×2",
+        "bonus": "Бонус",
+        "spin": "Айлантириш",
+        "spinLabel": "Чархни айлантириш",
+        "spinning": "Чарх айланмоқда…",
+        "prompt": "Чархни айлантиринг: сектор савол қийматини белгилайди.",
+        "left": "{count, plural, =0 {Саволлар тугади} other {# та савол қолди}}",
+        "sector": "Сектор {label}",
+        "points": "{points} балл",
+        "bonusTitle": "Бонус! {team} +{points} балл"
+      },
+      "rope": {
+        "timerLabel": "Қолган вақт: {time}",
+        "panelLabel": "{team} саволи",
+        "pulled": "+1 · Тортди!",
+        "blocked": "Хато — кутинг",
+        "keys": "Клавиатура: {keys}",
+        "position": "Арқон белгиси: {position, number}"
+      }
     },
     "result": {
       "title": "Натижалар",

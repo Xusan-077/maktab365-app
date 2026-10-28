@@ -77,6 +77,25 @@ def test_filters_grade_and_subject(anon, topics, catalog):
     assert anon.get(TOPICS, {"grade": "x"}).status_code == 400
 
 
+def test_topic_detail(anon, topics):
+    topic = topics.playable(9)
+    slug = services.topic_slug(topic)
+    data = anon.get(f"{TOPICS}{slug}/").json()
+    assert data["id"] == str(topic.pk)
+    assert data["slug"] == slug
+    assert data["question_count"] == 9
+    assert data["textbook"]["title"]["uz"] == "Algebra 9"
+    assert anon.get(f"{TOPICS}{topic.pk.hex[:12]}/").status_code == 200
+
+
+def test_topic_detail_404_when_not_playable(anon, topics):
+    few = topics.playable(7)
+    draft = topics.playable(status="draft")
+    assert anon.get(f"{TOPICS}{services.topic_slug(few)}/").status_code == 404
+    assert anon.get(f"{TOPICS}{services.topic_slug(draft)}/").status_code == 404
+    assert anon.get(f"{TOPICS}nom-000000000000/").status_code == 404
+
+
 def test_questions_random_without_correct_flag(anon, topics):
     topic = topics.playable(20)
     slug = services.topic_slug(topic)

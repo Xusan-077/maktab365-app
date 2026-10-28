@@ -9,12 +9,14 @@ import { Link } from "@/lib/i18n/navigation";
 import { ROUTES } from "@/lib/utils/routes";
 import { GameIcon } from "./GameIcon";
 
-const control =
+export const gameControl =
   "border-border bg-surface text-foreground hover:bg-subtle inline-flex size-11 shrink-0 items-center sm:size-12 justify-center rounded-[1rem] border-2 transition-colors focus-visible:ring-4 focus-visible:ring-game-indigo/50 focus-visible:outline-none";
 
 /**
  * O'yin ekrani qobig'i (proyektor uchun): o'yin nomi va mavzu, ovoz on/off, to'liq ekran, chiqish.
  * Rang `data-game` dan; ichidagi barcha o'yin komponentlari `var(--game-*)` ni oladi.
+ * `header` berilsa standart sarlavha o'rniga (masalan, Sirli quti banneri) — boshqaruv tugmalari
+ * argument sifatida beriladi.
  */
 export function GameShell({
   game,
@@ -22,6 +24,7 @@ export function GameShell({
   subtitle,
   sound,
   exitHref = ROUTES.games,
+  header,
   children,
 }: {
   game: GameId;
@@ -29,57 +32,68 @@ export function GameShell({
   subtitle?: string;
   sound?: { enabled: boolean; toggle: () => void };
   exitHref?: string;
+  header?: (controls: ReactNode) => ReactNode;
   children: ReactNode;
 }) {
   const t = useTranslations("games.play");
   const ref = useRef<HTMLDivElement>(null);
   const fullscreen = useFullscreen(ref);
 
+  const controls = (
+    <>
+      {sound && (
+        <button
+          type="button"
+          onClick={sound.toggle}
+          aria-pressed={sound.enabled}
+          aria-label={sound.enabled ? t("soundOff") : t("soundOn")}
+          className={gameControl}
+        >
+          {sound.enabled ? (
+            <Volume2 className="size-6" aria-hidden />
+          ) : (
+            <VolumeX className="size-6" aria-hidden />
+          )}
+        </button>
+      )}
+      {fullscreen.supported && (
+        <button
+          type="button"
+          onClick={fullscreen.toggle}
+          aria-label={fullscreen.active ? t("exitFullscreen") : t("fullscreen")}
+          className={gameControl}
+        >
+          {fullscreen.active ? (
+            <Minimize className="size-6" aria-hidden />
+          ) : (
+            <Maximize className="size-6" aria-hidden />
+          )}
+        </button>
+      )}
+      <Link href={exitHref} aria-label={t("exit")} className={gameControl} data-testid="game-exit">
+        <LogOut className="size-6" aria-hidden />
+      </Link>
+    </>
+  );
+
   return (
     <div
       ref={ref}
       data-game={GAME_KEYS[game]}
-      className="font-game bg-background text-foreground flex min-h-dvh flex-col bg-[radial-gradient(ellipse_at_top,color-mix(in_srgb,var(--game-from)_14%,transparent),transparent_60%)]"
+      className="font-game bg-background text-foreground flex min-h-dvh flex-col overflow-x-clip bg-[radial-gradient(ellipse_at_top,color-mix(in_srgb,var(--game-from)_14%,transparent),transparent_60%)]"
     >
-      <header className="flex items-center gap-2 px-4 py-3 sm:gap-3 sm:px-8 sm:py-4">
-        <GameIcon game={game} size="md" className="max-sm:hidden" />
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-lg font-extrabold sm:text-xl">{title}</p>
-          {subtitle && <p className="text-muted truncate text-sm sm:text-base">{subtitle}</p>}
-        </div>
-        {sound && (
-          <button
-            type="button"
-            onClick={sound.toggle}
-            aria-pressed={sound.enabled}
-            aria-label={sound.enabled ? t("soundOff") : t("soundOn")}
-            className={control}
-          >
-            {sound.enabled ? (
-              <Volume2 className="size-6" aria-hidden />
-            ) : (
-              <VolumeX className="size-6" aria-hidden />
-            )}
-          </button>
-        )}
-        {fullscreen.supported && (
-          <button
-            type="button"
-            onClick={fullscreen.toggle}
-            aria-label={fullscreen.active ? t("exitFullscreen") : t("fullscreen")}
-            className={control}
-          >
-            {fullscreen.active ? (
-              <Minimize className="size-6" aria-hidden />
-            ) : (
-              <Maximize className="size-6" aria-hidden />
-            )}
-          </button>
-        )}
-        <Link href={exitHref} aria-label={t("exit")} className={control} data-testid="game-exit">
-          <LogOut className="size-6" aria-hidden />
-        </Link>
-      </header>
+      {header ? (
+        header(controls)
+      ) : (
+        <header className="flex items-center gap-2 px-4 py-3 sm:gap-3 sm:px-8 sm:py-4">
+          <GameIcon game={game} size="md" className="max-sm:hidden" />
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-lg font-extrabold sm:text-xl">{title}</p>
+            {subtitle && <p className="text-muted truncate text-sm sm:text-base">{subtitle}</p>}
+          </div>
+          {controls}
+        </header>
+      )}
       <div className="flex flex-1 flex-col px-4 pb-6 sm:px-8 sm:pb-10">{children}</div>
     </div>
   );

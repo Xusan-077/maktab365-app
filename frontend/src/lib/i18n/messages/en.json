@@ -2406,7 +2406,6 @@
       "exitFullscreen": "Exit full screen",
       "soundOn": "Turn sound on",
       "soundOff": "Turn sound off",
-      "question": "Question {current} / {total}",
       "turn": "Turn: {team}",
       "answersLabel": "Answer options",
       "answerHint": "Keyboard: 1–4 or A–D",
@@ -2423,7 +2422,46 @@
       "scoresLabel": "Team scores",
       "notReady": "Game not found. Start it again from the games page.",
       "toGames": "Back to games",
-      "checkError": "Couldn't check the answer. Please choose again."
+      "checkError": "Couldn't check the answer. Please choose again.",
+      "turnBadge": "Turn",
+      "minusPoints": "−{points}",
+      "continue": "Continue",
+      "seeResult": "See results",
+      "box": {
+        "board": "Mystery boxes",
+        "label": "Box {n}",
+        "modalLabel": "Box",
+        "opened": {
+          "correct": "Box {n}: correct answer",
+          "wrong": "Box {n}: wrong answer",
+          "bonus": "Box {n}: bonus",
+          "bomb": "Box {n}: bomb"
+        },
+        "bonusTag": "+2",
+        "bombTag": "−1",
+        "bonusNotice": "Bonus! {team} gets +{points}",
+        "bombNotice": "Bomb! {team} loses {points}"
+      },
+      "wheel": {
+        "double": "×2",
+        "bonus": "Bonus",
+        "spin": "Spin",
+        "spinLabel": "Spin the wheel",
+        "spinning": "The wheel is spinning…",
+        "prompt": "Spin the wheel: the sector sets the question's value.",
+        "left": "{count, plural, =0 {No questions left} one {# question left} other {# questions left}}",
+        "sector": "Sector {label}",
+        "points": "{points, plural, one {# point} other {# points}}",
+        "bonusTitle": "Bonus! {team} +{points}"
+      },
+      "rope": {
+        "timerLabel": "Time left: {time}",
+        "panelLabel": "{team} question",
+        "pulled": "+1 · Pulled!",
+        "blocked": "Wrong — wait",
+        "keys": "Keys: {keys}",
+        "position": "Rope marker: {position, number}"
+      }
     },
     "result": {
       "title": "Results",

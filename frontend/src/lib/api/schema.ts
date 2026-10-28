@@ -1504,6 +1504,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/games/topics/{slug}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Bitta o'yin mavzusi va savollar soni (o'ynab bo'lmasa — 404) */
+        get: operations["games_topic_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/games/topics/{slug}/questions/": {
         parameters: {
             query?: never;
@@ -5397,6 +5414,27 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedGameTopicList"];
+                };
+            };
+        };
+    };
+    games_topic_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GameTopic"];
                 };
             };
         };

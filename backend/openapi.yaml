@@ -2772,6 +2772,28 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedGameTopicList'
           description: ''
+  /api/v1/games/topics/{slug}/:
+    get:
+      operationId: games_topic_retrieve
+      summary: Bitta o'yin mavzusi va savollar soni (o'ynab bo'lmasa — 404)
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - games
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameTopic'
+          description: ''
   /api/v1/games/topics/{slug}/questions/:
     get:
       operationId: games_topic_questions

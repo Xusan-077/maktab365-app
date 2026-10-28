@@ -69,6 +69,23 @@
   --color-team-red-deep: #b42424;
   --color-team-green: #10b981;
   --color-team-green-deep: #08805a;
+  /* Sirli quti: shaxmat tartibidagi ikki tus (oq raqam kontrasti ≥ 3:1 — katta matn). */
+  --color-game-tile-a-from: #4f5be0;
+  --color-game-tile-a-to: #0284c7;
+  --color-game-tile-b-from: #2563eb;
+  --color-game-tile-b-to: #0369a1;
+  --color-game-tile-deep: #2b3399;
+  /* Sariq: quti savolidagi raqam va vaqt chizig'i. */
+  --color-game-sun: #fde047;
+  --color-game-amber: #b45309;
+  /* Arqon tortish illyustratsiyasi (vaqtinchalik SVG). */
+  --color-game-skin: #f2c29b;
+  --color-game-hair: #3b2a20;
+  --color-game-cord: #a16207;
+  /* Javob holatlari (#ECFDF5/#10B981, #FEF2F2/#EF4444), dark'da to'qroq fon. */
+  --color-game-ok-soft: var(--game-ok-soft);
+  --color-game-bad-soft: var(--game-bad-soft);
+  --color-game-banner: var(--game-banner);
   --shadow-cover: 0 10px 24px rgb(7 22 51 / 0.12);
 
   --shadow-xs: 0 1px 2px 0 rgb(15 23 42 / 0.05);
@@ -187,6 +204,9 @@
 
 :root {
   color-scheme: light;
+  --game-ok-soft: #ecfdf5;
+  --game-bad-soft: #fef2f2;
+  --game-banner: #eef0ff;
   --background: #ffffff;
   --surface: #ffffff;
   --subtle: #f4f6fa;
@@ -281,6 +301,9 @@
 
 :root[data-theme="dark"] {
   color-scheme: dark;
+  --game-ok-soft: #0d3b2e;
+  --game-bad-soft: #451a1d;
+  --game-banner: #1a2050;
   --background: #0b1220;
   --surface: #111a2e;
   --subtle: #16213a;
@@ -1211,6 +1234,13 @@ html[data-book-lock] body {
   --team-deep: var(--color-team-green-deep);
 }
 
+/* O'yin shrifti: lotin — Plus Jakarta Sans, kirill (ru, uz-Cyrl) — Onest (Jakarta'da kirill yo'q).
+   `--font-game` `@theme inline` da — utility qiymatni o'ziga oladi, shuning uchun klassning o'zi. */
+:root:lang(ru) .font-game,
+:root:lang(uz-Cyrl) .font-game {
+  font-family: var(--font-onest), ui-sans-serif, system-ui, sans-serif;
+}
+
 /* Ikonka sekin suzib turadi (modalning o'yin kartalari). */
 @keyframes game-float {
   0%,
@@ -1241,8 +1271,35 @@ html[data-book-lock] body {
   box-shadow: 0 2px 0 var(--press-deep, var(--color-game-indigo-deep));
 }
 
+/* Sirli quti banneri: nuqtali naqsh. */
+.game-dots {
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--color-game-indigo) 22%, transparent) 1.5px,
+    transparent 1.6px
+  );
+  background-size: 18px 18px;
+}
+
+/* Charxning "AYLANTIRISH" tugmasi pulslab turadi: tashqi halqa (tugma o'lchami o'zgarmaydi). */
+@keyframes game-pulse {
+  0% {
+    box-shadow:
+      0 6px 0 var(--game-deep),
+      0 0 0 0 color-mix(in srgb, var(--game-from) 55%, transparent);
+  }
+  100% {
+    box-shadow:
+      0 6px 0 var(--game-deep),
+      0 0 0 22px color-mix(in srgb, var(--game-from) 0%, transparent);
+  }
+}
+.game-pulse {
+  animation: game-pulse 1.4s ease-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .game-float {
+  .game-float,
+  .game-pulse {
     animation: none;
   }
   .game-press:active:not(:disabled) {
