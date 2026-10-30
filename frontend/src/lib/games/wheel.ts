@@ -42,12 +42,12 @@ export type WheelSector =
 export const WHEEL_SECTORS: readonly WheelSector[] = [
   { kind: "question", label: 1 },
   { kind: "question", label: 2 },
-  { kind: "double" },
   { kind: "question", label: 3 },
   { kind: "question", label: 4 },
-  { kind: "bonus" },
   { kind: "question", label: 5 },
   { kind: "question", label: 6 },
+  { kind: "double" },
+  { kind: "bonus" },
 ];
 
 export const WHEEL_BONUS_POINTS = 2;

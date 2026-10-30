@@ -97,7 +97,7 @@ describe("wheel sectors", () => {
   it("has 6 question sectors, one ×2 and one bonus", () => {
     expect(WHEEL_SECTORS).toHaveLength(8);
     expect(WHEEL_SECTORS.filter((sector) => sector.kind === "question")).toHaveLength(6);
-    expect(WHEEL_SECTORS.map(sectorPoints)).toEqual([1, 1, 2, 1, 1, 2, 1, 1]);
+    expect(WHEEL_SECTORS.map(sectorPoints)).toEqual([1, 1, 1, 1, 1, 1, 2, 2]);
   });
 
   it("lands every spin on the sector shown under the pointer", () => {
@@ -197,7 +197,7 @@ describe("rope", () => {
 describe("config", () => {
   it("estimates duration and limits counts by topic size", () => {
     expect(estimateMinutes(16)).toBe(11);
-    expect(estimateMinutes(8)).toBe(6);
+    expect(estimateMinutes(8)).toBe(5);
     expect(availableCounts(13)).toEqual([8, 12]);
     expect(fitQuestionCount(16, 13)).toBe(12);
     expect(fitQuestionCount(16, 40)).toBe(16);

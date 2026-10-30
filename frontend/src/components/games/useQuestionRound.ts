@@ -21,8 +21,8 @@ interface Options {
   question: GameQuestion;
   /** Savol taymeri (soniya); `null` — taymersiz (arqon tortishda umumiy taymer). */
   seconds: number | null;
-  /** Bir marta chaqiriladi: to'g'ri/xato yoki vaqt tugashi (`false`). */
-  onResolved: (correct: boolean) => void;
+  /** Bir marta chaqiriladi: to'g'ri/xato yoki vaqt tugashi (`false`); `ms` — javobgacha o'tgan vaqt. */
+  onResolved: (correct: boolean, ms: number) => void;
   /** Klaviatura → variant indeksi; `null` — klaviatura o'chiq. */
   keyMap?: ((key: string) => number | null) | null;
   /** Masalan, arqonda blok paytida yoki o'yin tugaganda. */
@@ -45,6 +45,10 @@ export function useQuestionRound({
   const [error, setError] = useState(false);
   // Javob bir marta hisoblanadi (taymer va tekshiruv javobi bir vaqtda kelsa ham).
   const settled = useRef(false);
+  const shownAt = useRef(0);
+  useEffect(() => {
+    shownAt.current = Date.now();
+  }, [question]);
   const resolved = useRef(onResolved);
   useEffect(() => {
     resolved.current = onResolved;
@@ -53,7 +57,7 @@ export function useQuestionRound({
   const expire = useCallback(() => {
     if (settled.current) return;
     settled.current = true;
-    resolved.current(false);
+    resolved.current(false, Date.now() - shownAt.current);
     setOutcome({ kind: "timeout" });
   }, []);
   const remaining = useCountdown(
@@ -72,7 +76,7 @@ export function useQuestionRound({
         const result = await getGamesApi().check(question.answer_token, option.id);
         if (settled.current) return;
         settled.current = true;
-        resolved.current(result.correct);
+        resolved.current(result.correct, Date.now() - shownAt.current);
         setOutcome({
           kind: "answered",
           correct: result.correct,

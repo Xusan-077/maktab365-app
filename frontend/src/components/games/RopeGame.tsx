@@ -1,15 +1,17 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { Lock, Timer, Trophy } from "lucide-react";
+import { Clock, Trophy } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { AnimatePresence, m } from "@/components/ui/motion";
 import { Logo } from "@/components/layout/Logo";
-import type { useSound } from "@/hooks/useSound";
+import { useSound } from "@/hooks/useSound";
 import type { GameQuestion } from "@/lib/games/api";
 import { TEAM_COLORS } from "@/lib/games/config";
+import { replayAnimation } from "@/lib/games/replay-animation";
 import {
+  ROPE_BEEP_SECONDS,
   ROPE_BLOCK_MS,
+  ROPE_LIMIT,
   ROPE_WARNING_SECONDS,
   ropeDots,
   ropeFinalWinner,
@@ -21,29 +23,38 @@ import { useRouter } from "@/lib/i18n/navigation";
 import { cn } from "@/lib/utils/cn";
 import { gameResultPath } from "@/lib/utils/routes";
 import { useGameStore } from "@/stores/game.store";
-import { OptionGrid, primaryButton } from "./AnswerFeedback";
+import { ghostButton, OptionGrid, primaryButton } from "./AnswerFeedback";
 import { Confetti } from "./Confetti";
 import { GameDialog } from "./GameDialog";
 import { GameShell } from "./GameShell";
 import { GameStartModal } from "./GameStartModal";
-import { formatClock } from "./QuestionTimer";
+import { RopeScene } from "./RopeScene";
 import { ScoreNumber, nextGainId, type ScoreGain } from "./TeamScore";
-import { TugOfWarArt } from "./TugOfWarArt";
+import { formatClock, useCountdownBeep } from "./TimeBar";
 import { useQuestionRound } from "./useQuestionRound";
 
-type Sound = ReturnType<typeof useSound>;
 type Side = 0 | 1;
 
-/** To'g'ri javobdan keyin yangi savol shuncha vaqtdan keyin (yashil ko'rinsin). */
-const CORRECT_PAUSE_MS = 700;
-/** Ikki jamoa bir klaviaturada: chap — 1–4, o'ng — 6–9. */
+/** To'g'ri javobdan keyin yangi savol shuncha vaqtdan keyin. */
+const CORRECT_PAUSE_MS = 650;
+/** Ikki jamoa bir klaviaturada: ko'k — 1–4, qizil — 7, 8, 9, 0. */
 const KEY_MAPS: Record<Side, (key: string) => number | null> = {
-  0: (key) => ("1234".includes(key) && key.length === 1 ? "1234".indexOf(key) : null),
-  1: (key) => ("6789".includes(key) && key.length === 1 ? "6789".indexOf(key) : null),
+  0: (key) => (key.length === 1 && "1234".includes(key) ? "1234".indexOf(key) : null),
+  1: (key) => (key.length === 1 && "7890".includes(key) ? "7890".indexOf(key) : null),
 };
 const WINNER_COLORS: Record<Side, readonly string[]> = {
-  0: ["var(--color-team-blue)", "var(--color-team-blue-deep)", "var(--color-game-sun)"],
-  1: ["var(--color-team-red)", "var(--color-team-red-deep)", "var(--color-game-sun)"],
+  0: [
+    "var(--color-team-blue)",
+    "var(--color-game-kid-blue)",
+    "var(--color-game-gold)",
+    "var(--color-team-green)",
+  ],
+  1: [
+    "var(--color-team-red)",
+    "var(--color-game-kid-red)",
+    "var(--color-game-gold)",
+    "var(--color-team-green)",
+  ],
 };
 
 /** Umumiy taymer: `endsAt` gacha qolgan soniya (sahifa yangilansa ham davom etadi). */
@@ -73,7 +84,7 @@ function useRemaining(endsAt: number, running: boolean, onExpire: () => void) {
  * To'g'ri javob arqonni o'z tomoniga 1 qadam tortadi, xato — jamoa 1.5 s bloklanadi.
  * 5 qadam yoki 3:00 tugaganda oldinda turgan jamoa yutadi (teng — durang).
  */
-export function RopeGame({ title, sound }: { title: string; sound: Sound }) {
+export function RopeGame() {
   const t = useTranslations("games.play");
   const state = useGameStore();
   const rope = state.rope;
@@ -82,126 +93,128 @@ export function RopeGame({ title, sound }: { title: string; sound: Sound }) {
     useGameStore.getState().finish(),
   );
   const [gains, setGains] = useState<Record<Side, ScoreGain | null>>({ 0: null, 1: null });
+  useCountdownBeep(remaining, ROPE_BEEP_SECONDS, !finished && rope !== null);
 
   if (!rope) return null;
   const warning = remaining <= ROPE_WARNING_SECONDS;
 
+  const side = (index: Side) => (
+    <div
+      data-team={TEAM_COLORS[index]}
+      data-testid="team-score"
+      className="flex items-center justify-center gap-3 pt-1.5"
+    >
+      {index === 1 && <RopeScore side={1} gain={gains[1]} />}
+      <i aria-hidden className="size-3.5 shrink-0 rounded-full bg-[var(--team)]" />
+      <span className="text-[15px] font-bold tracking-[0.3px] text-[var(--team-deep)] uppercase max-[1000px]:hidden">
+        {state.scores[index]?.name}
+      </span>
+      {index === 0 && <RopeScore side={0} gain={gains[0]} />}
+    </div>
+  );
+
   return (
-    <GameShell game="arqon-tortish" title={title} subtitle={state.topic?.title} sound={sound}>
-      <div className="mx-auto flex w-full max-w-[96rem] flex-1 flex-col gap-4 sm:gap-5">
-        <section
-          className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 sm:gap-6"
+    <GameShell
+      game="arqon-tortish"
+      toolsAtBottom
+      className="overflow-hidden"
+      header={() => (
+        <header
+          className="grid grid-cols-[1fr_auto_1fr] items-start px-4 pt-[22px]"
           aria-label={t("scoresLabel")}
         >
-          {([0, 1] as const).map((side) => (
-            <RopeScore
-              key={side}
-              side={side}
-              name={state.scores[side]?.name ?? ""}
-              score={state.scores[side]?.score ?? 0}
-              gain={gains[side]}
-            />
-          ))}
-          <div className="order-2 flex flex-col items-center gap-2">
-            <Logo variant="mark" height={30} className="max-sm:hidden" />
-            <p
+          {side(0)}
+          <div className="flex flex-col items-center gap-2.5">
+            <Logo height={30} />
+            <div
               role="timer"
               aria-label={t("rope.timerLabel", { time: formatClock(remaining) })}
               data-warning={warning || undefined}
               data-testid="rope-timer"
               className={cn(
-                "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xl font-extrabold text-white tabular-nums sm:px-5 sm:text-3xl",
+                "flex items-center gap-2.5 rounded-full border-2 px-4 py-1.5 text-xl font-extrabold min-[1001px]:px-[26px] min-[1001px]:py-2 min-[1001px]:text-[28px]",
                 warning
-                  ? "bg-team-red-deep motion-safe:animate-pulse"
-                  : "bg-foreground text-background",
+                  ? "border-game-err-ring bg-game-bad-soft text-game-err-dark shadow-[0_4px_0_var(--color-game-err-ring)]"
+                  : "border-game-brand-ring bg-game-banner text-game-indigo shadow-[0_4px_0_var(--color-game-brand-ring)]",
               )}
             >
-              <Timer className="size-5 sm:size-7" aria-hidden />
+              <Clock className="size-[22px]" strokeWidth={2.4} aria-hidden />
               {formatClock(remaining)}
-            </p>
+            </div>
           </div>
+          {side(1)}
+        </header>
+      )}
+    >
+      <main className="grid min-h-0 flex-1 grid-cols-1 gap-4 p-4 pb-[72px] min-[641px]:grid-cols-2 min-[1001px]:grid-cols-[minmax(300px,340px)_1fr_minmax(300px,340px)]">
+        <RopePanel
+          side={0}
+          disabled={finished}
+          onGain={(gain) => setGains((current) => ({ ...current, 0: gain }))}
+        />
+        <section className="relative order-first col-span-full flex h-[220px] min-w-0 items-center justify-center min-[1001px]:order-none min-[1001px]:col-span-1 min-[1001px]:h-auto">
+          <div className="absolute top-9 bottom-9 left-1/2 border-l-2 border-dashed border-[var(--game-strong)]" />
+          <div
+            data-team="blue"
+            className="absolute top-[20%] bottom-[20%] left-[8%] w-1.5 rounded-[3px] bg-[var(--team)] opacity-25"
+          />
+          <div
+            data-team="red"
+            className="absolute top-[20%] right-[8%] bottom-[20%] w-1.5 rounded-[3px] bg-[var(--team)] opacity-25"
+          />
+          <RopeScene position={rope.position} />
+          <PositionDots position={rope.position} />
         </section>
-
-        <div className="grid flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(15rem,24rem)_minmax(0,1fr)] lg:gap-6">
-          <RopePanel
-            side={0}
-            disabled={finished}
-            sound={sound}
-            onGain={(gain) => setGains((current) => ({ ...current, 0: gain }))}
-          />
-          <div className="flex flex-col justify-center max-lg:order-first">
-            <TugOfWarArt position={rope.position} className="max-lg:mx-auto max-lg:max-w-md" />
-          </div>
-          <RopePanel
-            side={1}
-            disabled={finished}
-            sound={sound}
-            onGain={(gain) => setGains((current) => ({ ...current, 1: gain }))}
-          />
-        </div>
-
-        <PositionDots position={rope.position} />
-      </div>
+        <RopePanel
+          side={1}
+          disabled={finished}
+          onGain={(gain) => setGains((current) => ({ ...current, 1: gain }))}
+        />
+      </main>
       {finished && <RopeWinner key={state.finishedAt} />}
     </GameShell>
   );
 }
 
-function RopeScore({
-  side,
-  name,
-  score,
-  gain,
-}: {
-  side: Side;
-  name: string;
-  score: number;
-  gain: ScoreGain | null;
-}) {
+function RopeScore({ side, gain }: { side: Side; gain: ScoreGain | null }) {
   const t = useTranslations("games.play");
+  const team = useGameStore((state) => state.scores[side]);
   return (
-    <div
-      data-team={TEAM_COLORS[side]}
-      data-testid="team-score"
-      className={cn(
-        "flex min-w-0 items-center gap-2 sm:gap-4",
-        side === 0 ? "order-1" : "order-3 flex-row-reverse text-right",
-      )}
-    >
-      <span aria-hidden className="size-4 shrink-0 rounded-full bg-[var(--team)] sm:size-5" />
-      <span className="line-clamp-2 min-w-0 text-sm leading-tight font-extrabold tracking-wide break-words uppercase sm:text-2xl">
-        {name}
-      </span>
+    <>
       <span className="sr-only" aria-live="polite">
-        {t("score", { team: name, score })}
+        {t("score", { team: team?.name ?? "", score: team?.score ?? 0 })}
       </span>
-      <ScoreNumber score={score} gain={gain} className="text-3xl sm:text-6xl" />
-    </div>
+      <ScoreNumber score={team?.score ?? 0} gain={gain} className="text-[32px]" />
+    </>
   );
 }
 
-/** Jamoa paneli: o'z savoli va 4 ta variant ustma-ust; javobdan keyin pauza, keyin yangi savol. */
+/** Jamoa paneli: o'z savoli va 4 ta variant; javobdan keyin pauza, keyin yangi savol. */
 function RopePanel({
   side,
   disabled,
-  sound,
   onGain,
 }: {
   side: Side;
   disabled: boolean;
-  sound: Sound;
   onGain: (gain: ScoreGain) => void;
 }) {
   const t = useTranslations("games.play");
+  const { play } = useSound();
   const questions = useGameStore((state) => state.questions);
   const cursor = useGameStore((state) => state.rope?.cursor[side] ?? 0);
   const name = useGameStore((state) => state.scores[side]?.name ?? "");
   // Ko'rsatilayotgan savol: javobdan keyin pauza tugaguncha eskisi turadi.
   const [shown, setShown] = useState(cursor);
   const [result, setResult] = useState<{ id: number; correct: boolean } | null>(null);
+  const panel = useRef<HTMLElement>(null);
 
   useEffect(() => {
     if (!result) return;
+    const [animation, other] = result.correct
+      ? ["game-anim-flash", "game-anim-shake"]
+      : ["game-anim-shake", "game-anim-flash"];
+    replayAnimation(panel.current, animation, other);
     const timer = setTimeout(
       () => {
         setResult(null);
@@ -216,73 +229,51 @@ function RopePanel({
   const blocked = result !== null && !result.correct;
 
   return (
-    <m.section
+    <section
+      ref={panel}
       data-team={TEAM_COLORS[side]}
       aria-label={t("rope.panelLabel", { team: name })}
       data-testid={`rope-panel-${side}`}
       data-blocked={blocked || undefined}
-      animate={
-        result?.correct
-          ? {
-              boxShadow: [
-                "0 0 0 0 var(--team)",
-                "0 0 0 14px color-mix(in srgb, var(--team) 35%, transparent)",
-                "0 0 0 0 transparent",
-              ],
-              transition: { duration: 0.7 },
-            }
-          : blocked
-            ? { x: [0, -10, 10, -10, 10, 0], transition: { duration: 0.45 } }
-            : { x: 0 }
-      }
-      className={cn(
-        "bg-surface relative flex flex-col gap-4 rounded-[2rem] border-[3px] border-[var(--team)] p-4 sm:p-5",
-        side === 0 ? "max-lg:order-2" : "max-lg:order-3",
-      )}
+      className="bg-surface relative flex flex-col gap-3 rounded-[26px] border-2 border-[var(--team)] p-6"
     >
-      <AnimatePresence>
-        {result?.correct && (
-          <m.span
-            key={result.id}
-            aria-hidden
-            initial={{ opacity: 0, y: 10, scale: 0.8 }}
-            animate={{ opacity: [0, 1, 1, 0], y: -60, scale: 1 }}
-            transition={{ duration: 1.1, ease: "easeOut" }}
-            className="text-team-green-deep dark:text-team-green pointer-events-none absolute top-6 left-1/2 z-10 -translate-x-1/2 text-3xl font-extrabold whitespace-nowrap"
-          >
-            {t("rope.pulled")}
-          </m.span>
-        )}
-      </AnimatePresence>
+      <p className="text-xs font-bold tracking-[0.3px] text-[var(--team-deep)] uppercase">{name}</p>
       {question && (
         <RopeRound
           key={shown}
           side={side}
           question={question}
           disabled={disabled}
-          onResolved={(correct) => {
-            useGameStore.getState().ropeAnswer(side, correct);
-            sound.play(correct ? "correct" : "wrong");
+          onResolved={(correct, ms) => {
+            const store = useGameStore.getState();
+            store.ropeAnswer(side, correct);
+            if (correct) store.noteFastest(side, ms);
+            play(correct ? "pull" : "wrong");
             if (correct) onGain({ id: nextGainId(), points: 1 });
             setResult({ id: nextGainId(), correct });
           }}
         />
       )}
+      {result?.correct && (
+        <span
+          key={result.id}
+          aria-hidden
+          className="game-anim-pull border-game-ok-ring bg-game-ok-soft text-game-ok-dark pointer-events-none absolute top-[38%] left-1/2 z-[3] rounded-full border-2 px-5 py-2 text-[30px] font-extrabold whitespace-nowrap"
+        >
+          {t("rope.pulled")}
+        </span>
+      )}
       {blocked && (
         <div
-          className="bg-surface/70 absolute inset-0 flex items-center justify-center rounded-[1.8rem] backdrop-blur-[2px]"
+          className="bg-surface/60 game-anim-fade absolute inset-0 z-[2] flex items-center justify-center rounded-[24px]"
           role="status"
         >
-          <span className="bg-team-red-deep inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-lg font-extrabold text-white">
-            <Lock className="size-5" aria-hidden />
+          <span className="bg-game-err-dark rounded-full px-[18px] py-2.5 text-base font-extrabold text-white">
             {t("rope.blocked")}
           </span>
         </div>
       )}
-      <p className="text-muted hidden text-sm font-semibold lg:block">
-        {t("rope.keys", { keys: side === 0 ? "1–4" : "6–9" })}
-      </p>
-    </m.section>
+    </section>
   );
 }
 
@@ -295,7 +286,7 @@ function RopeRound({
   side: Side;
   question: GameQuestion;
   disabled: boolean;
-  onResolved: (correct: boolean) => void;
+  onResolved: (correct: boolean, ms: number) => void;
 }) {
   const locale = useLocale() as Locale;
   const round = useQuestionRound({
@@ -308,7 +299,7 @@ function RopeRound({
   return (
     <>
       <h2
-        className="min-h-[3em] text-[clamp(1.25rem,0.9rem+1.2vw,2rem)] leading-tight font-extrabold text-balance"
+        className="game-anim-up text-lg leading-[1.4] font-bold min-[641px]:text-[21px]"
         data-testid={`rope-question-${side}`}
       >
         {getLocalized(question.text, locale)}
@@ -318,10 +309,10 @@ function RopeRound({
         <img
           src={question.image}
           alt=""
-          className="max-h-[18vh] w-auto self-center rounded-[1rem] object-contain"
+          className="max-h-[18vh] w-auto self-center rounded-[16px] object-contain"
         />
       )}
-      <OptionGrid question={question} round={round} compact />
+      <OptionGrid question={question} round={round} className="mt-auto gap-3" />
     </>
   );
 }
@@ -331,7 +322,7 @@ function PositionDots({ position }: { position: number }) {
   const t = useTranslations("games.play");
   return (
     <div
-      className="flex items-center justify-center gap-1.5 sm:gap-3"
+      className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-2.5 min-[1001px]:bottom-10"
       role="img"
       aria-label={t("rope.position", { position })}
       data-testid="rope-dots"
@@ -347,13 +338,8 @@ function PositionDots({ position }: { position: number }) {
             className={cn(
               "rounded-full transition-all duration-300",
               current
-                ? "size-6 bg-[var(--team,var(--color-foreground))] ring-4 ring-[color-mix(in_srgb,var(--team,var(--color-foreground))_30%,transparent)] sm:size-8"
-                : cn(
-                    "size-3 sm:size-4",
-                    side
-                      ? "bg-[color-mix(in_srgb,var(--team)_35%,var(--color-surface))]"
-                      : "bg-muted",
-                  ),
+                ? cn("size-4", side ? "bg-[var(--team)]" : "bg-game-indigo")
+                : "size-2.5 bg-[var(--game-strong)]",
             )}
           />
         );
@@ -362,62 +348,66 @@ function PositionDots({ position }: { position: number }) {
   );
 }
 
-/** G'olib modali: g'olib rangida konfetti, kubok pop; "Qayta o'ynash" yoki "Natijani ko'rish". */
+/** G'olib oynasi: konfetti, kubok; "Qayta o'ynash" yoki "Natijani ko'rish". */
 function RopeWinner() {
   const t = useTranslations("games");
+  const { play } = useSound();
   const router = useRouter();
   const titleId = useId();
   const { rope, scores, topic } = useGameStore();
   const [replay, setReplay] = useState(false);
-  const winner = ropeFinalWinner(rope?.position ?? 0);
+  const position = rope?.position ?? 0;
+  const winner = ropeFinalWinner(position);
   const resultRef = useRef<HTMLButtonElement>(null);
-  useEffect(() => resultRef.current?.focus(), []);
+  useEffect(() => {
+    play("win");
+    resultRef.current?.focus();
+  }, [play]);
   if (!topic) return null;
 
+  const description =
+    winner === null
+      ? t("play.rope.timeDraw")
+      : Math.abs(position) >= ROPE_LIMIT
+        ? t("play.rope.pulledAll", { steps: ROPE_LIMIT })
+        : t("play.rope.timeSide");
+
   return (
-    <GameDialog labelledBy={titleId} className="max-w-lg" testId="rope-winner">
-      {winner !== null && <Confetti colors={WINNER_COLORS[winner]} />}
-      <div
-        className="flex flex-col items-center gap-5 px-6 py-8 text-center sm:px-10"
-        data-team={winner === null ? undefined : TEAM_COLORS[winner]}
-      >
-        <m.span
-          initial={{ scale: 0, rotate: -15 }}
-          animate={{
-            scale: 1,
-            rotate: 0,
-            transition: { type: "spring", stiffness: 360, damping: 11, delay: 0.1 },
-          }}
-          className={cn(
-            "flex size-28 items-center justify-center rounded-[2rem] text-white",
-            winner === null
-              ? "bg-[linear-gradient(135deg,var(--game-from),var(--game-to))]"
-              : "bg-[var(--team-deep)]",
-          )}
+    <GameDialog labelledBy={titleId} className="max-w-[520px] rounded-[28px]" testId="rope-winner">
+      <Confetti colors={winner === null ? undefined : WINNER_COLORS[winner]} />
+      <div className="flex flex-col items-center gap-3 p-9 text-center">
+        <span
+          data-team={winner === null ? undefined : TEAM_COLORS[winner]}
+          className="game-anim-pop-in flex size-[88px] items-center justify-center rounded-full bg-[var(--team,var(--color-game-indigo))] text-white [animation-delay:.4s]"
         >
-          <Trophy className="size-14" aria-hidden />
-        </m.span>
+          <Trophy className="size-11" strokeWidth={2} aria-hidden />
+        </span>
         <h2
           id={titleId}
-          className="text-[clamp(2rem,1.5rem+2vw,3rem)] leading-tight font-extrabold text-balance"
+          className="text-[32px] leading-tight font-extrabold tracking-[-0.5px]"
           data-testid="game-headline"
         >
           {winner === null ? t("result.draw") : t("result.winner", { team: scores[winner]?.name })}
         </h2>
-        <p className="text-muted text-lg font-bold">
-          {scores
-            .map((team) => t("play.score", { team: team.name, score: team.score }))
-            .join(" · ")}
+        <p className="text-muted">{description}</p>
+        <p className="mt-1 flex items-center gap-3.5 text-[22px] font-extrabold">
+          <span className="text-team-blue">{scores[0]?.score}</span>
+          <span className="text-muted">:</span>
+          <span className="text-team-red">{scores[1]?.score}</span>
         </p>
-        <div className="flex w-full flex-col gap-3 sm:flex-row sm:justify-center">
-          <button type="button" onClick={() => setReplay(true)} className={primaryButton}>
+        <div className="mt-3 flex flex-wrap justify-center gap-3">
+          <button
+            type="button"
+            onClick={() => setReplay(true)}
+            className={cn(primaryButton, "h-[46px] rounded-[14px] px-5 text-[15px]")}
+          >
             {t("result.playAgain")}
           </button>
           <button
             ref={resultRef}
             type="button"
             onClick={() => router.push(gameResultPath(topic.slug))}
-            className="game-press border-border bg-surface text-foreground focus-visible:ring-game-indigo/50 inline-flex h-14 items-center justify-center rounded-[1.125rem] border-2 px-6 text-lg font-extrabold [--press-deep:var(--color-border)] focus-visible:ring-4 focus-visible:outline-none"
+            className={cn(ghostButton, "h-[46px] rounded-[14px] px-5 text-[15px]")}
             data-testid="rope-see-result"
           >
             {t("play.seeResult")}

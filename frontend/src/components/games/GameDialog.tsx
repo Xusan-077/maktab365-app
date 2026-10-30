@@ -1,21 +1,23 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
-import { m } from "@/components/ui/motion";
 import { cn } from "@/lib/utils/cn";
 
 /**
- * O'yin ichidagi modal (quti savoli, arqon g'olibi): native `<dialog>` — fokus tuzog'i va fon
- * `inert`. Esc bilan yopilmaydi (javobsiz chiqib bo'lmaydi), faqat ichidagi tugma bilan.
- * Mount bo'lganda ochiladi; unmount'da yopiladi (Next `<Activity>` yashirgan sahifa `inert` qolmasin).
+ * O'yin ichidagi modal (natija oynalari): native `<dialog>` — fokus tuzog'i va fon `inert`, Esc bilan
+ * yopilmaydi. `underBanner` — Sirli quti savoli: banner ostida, modal emas (ovoz tugmasi va chiqish
+ * ishlaydi; Esc'ni o'yin o'zi ushlaydi). Mount bo'lganda ochiladi; unmount'da yopiladi (Next
+ * `<Activity>` yashirgan sahifa `inert` qolmasin).
  */
 export function GameDialog({
   labelledBy,
+  underBanner = false,
   className,
   children,
   testId,
 }: {
   labelledBy: string;
+  underBanner?: boolean;
   className?: string;
   children: ReactNode;
   testId?: string;
@@ -24,40 +26,40 @@ export function GameDialog({
 
   useEffect(() => {
     const dialog = ref.current;
-    if (dialog && !dialog.open) dialog.showModal();
+    if (dialog && !dialog.open) {
+      if (underBanner) dialog.show();
+      else dialog.showModal();
+    }
     return () => dialog?.close();
-  }, []);
+  }, [underBanner]);
 
   return (
     <dialog
       ref={ref}
       aria-labelledby={labelledBy}
       onCancel={(event) => event.preventDefault()}
-      className="font-game m-0 h-dvh max-h-none w-full max-w-none overflow-y-auto bg-transparent p-0 backdrop:bg-transparent"
+      className={cn(
+        "font-game game-anim-fade m-0 max-h-none w-full max-w-none overflow-y-auto bg-[rgb(15_23_42/0.6)] backdrop:bg-transparent",
+        underBanner
+          ? "fixed inset-x-0 top-[110px] bottom-0 z-20 h-auto p-2.5 min-[721px]:top-[130px] min-[721px]:px-7 min-[721px]:py-3.5"
+          : "h-dvh p-4",
+      )}
       data-testid={testId}
     >
-      <m.div
-        aria-hidden
-        className="bg-overlay fixed inset-0 backdrop-blur-sm"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1, transition: { duration: 0.2 } }}
-      />
-      <div className="relative flex min-h-full items-center justify-center p-3 sm:p-6">
-        <m.div
-          initial={{ opacity: 0, y: 24, scale: 0.96 }}
-          animate={{
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            transition: { type: "spring", stiffness: 380, damping: 30 },
-          }}
+      <div
+        className={cn(
+          "flex min-h-full justify-center",
+          underBanner ? "items-start" : "items-center",
+        )}
+      >
+        <div
           className={cn(
-            "bg-surface text-foreground w-full overflow-hidden rounded-[2rem] shadow-[0_30px_80px_-30px_rgb(15_23_42/0.6)]",
+            "game-anim-modal bg-surface text-foreground relative w-full overflow-hidden shadow-[0_10px_30px_rgb(0_0_0/0.3)]",
             className,
           )}
         >
           {children}
-        </m.div>
+        </div>
       </div>
     </dialog>
   );

@@ -4,7 +4,12 @@
  * o'yinlardagi eski mehmon hisobi.
  * Ularga endi hech narsa tayanmaydi, shuning uchun bir marta o'chiriladi.
  */
-const LEGACY_KEYS = ["maktab365-guest", "maktab365-reading", "maktab365-games-guest"] as const;
+const LEGACY_KEYS = [
+  "maktab365-guest",
+  "maktab365-reading",
+  "maktab365-games-guest",
+  "maktab365-game-sound",
+] as const;
 const LEGACY_PREFIXES = ["maktab365-sync:"] as const;
 
 type LegacyStorage = Pick<Storage, "length" | "key" | "removeItem">;

@@ -187,4 +187,18 @@ javob serverda `answer_token` bilan tekshiriladi, klaviatura 1–4/A–D. Mavzu 
 - *Omad charhi* — 8 sektor (1–6 savol, «×2» — 2 ball, «Bonus» — savolsiz +2), 4 s aylanish; navbat 1→2→3; savollar tugasa natija.
 - *Arqon tortish* — ikki jamoa bir vaqtda, har biriga o'z savoli (juft/toq), chap 1–4, o'ng 6–9 klavishlari; xato — 1.5 s blok;
   5 qadam yoki 3:00 tugaganda oldindagi jamoa yutadi (teng — durang), g'olib modali. Bolalar rasmi — vaqtinchalik SVG
-  (`components/games/TugOfWarArt.tsx`, rasm bilan almashtiriladi).
+  (`components/games/RopeScene.tsx`, rasm bilan almashtiriladi).
+
+**Interaktiv o'yinlar: dizayn va ovoz.** Tekis ranglar (gradient, nuqtali naqsh, rangli glow yo'q; charx sektorlari — keskin chegarali `conic-gradient`). Animatsiyalar `globals.css` da (`game-*`), `prefers-reduced-motion` da o'chadi, ovoz qoladi. Ovoz — `hooks/useSound.ts` (WebAudio, fayllarsiz): tugma har o'yin ekranida, holat `localStorage` `d365-sound`, `AudioContext` birinchi bosishda ochiladi, balandlik 0.35.
+
+| Hodisa | Ovoz |
+| --- | --- |
+| karta/tile tanlash, modal qadami | `tap` |
+| modal yoki quti ochilishi | `open` |
+| to'g'ri / xato javob | `correct` / `wrong` |
+| charx ko'rsatkichi urilishi / charx to'xtadi | `tick` / `land` |
+| bonus (+2) / bomba (−1) | `bonus` / `bomb` |
+| arqon tortildi | `pull` |
+| oxirgi 5 s (charx) va 10 s (arqon) | `beep` |
+| g'alaba, o'yin tugadi, natija sahifasi | `win` |
+

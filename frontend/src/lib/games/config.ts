@@ -36,7 +36,7 @@ export const QUESTION_COUNTS = [8, 12, 16, 24] as const;
 export const DEFAULT_QUESTION_COUNT = 16;
 export const SECONDS_PER_QUESTION = 30;
 /** Savoldan tashqari vaqt (o'qish, javobni ko'rsatish, navbat almashishi) — taxminiy. */
-const SECONDS_OVERHEAD = 12;
+const SECONDS_OVERHEAD = 10;
 
 /** "~11 daqiqa": savollar soni bo'yicha o'yin davomiyligi (butun daqiqa, kamida 1). */
 export const estimateMinutes = (questionCount: number) =>

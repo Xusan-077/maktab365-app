@@ -1,247 +1,232 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { Bomb, Check, Gift, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { m } from "@/components/ui/motion";
-import type { useSound } from "@/hooks/useSound";
+import { useSound } from "@/hooks/useSound";
 import type { GameQuestion } from "@/lib/games/api";
 import { allOpened, specialPoints, type BoxCell } from "@/lib/games/box";
-import { SECONDS_PER_QUESTION, TEAM_COLORS } from "@/lib/games/config";
+import { SECONDS_PER_QUESTION, TEAM_COLORS, type TeamColor } from "@/lib/games/config";
 import type { Locale } from "@/lib/i18n/config";
 import { getLocalized } from "@/lib/i18n/localized";
+import { Link } from "@/lib/i18n/navigation";
 import { cn } from "@/lib/utils/cn";
+import { gameResultPath } from "@/lib/utils/routes";
 import { useGameStore } from "@/stores/game.store";
-import { AnswerFeedback, OptionGrid, primaryButton } from "./AnswerFeedback";
+import { AnswerFeedback, OptionGrid, primaryButton, Sparks, whiteButton } from "./AnswerFeedback";
+import { Confetti } from "./Confetti";
 import { GameDialog } from "./GameDialog";
 import { GameShell } from "./GameShell";
-import { QuestionTimer } from "./QuestionTimer";
 import { ScoreNumber, nextGainId, type ScoreGain } from "./TeamScore";
+import { TimeBar } from "./TimeBar";
 import { useQuestionRound } from "./useQuestionRound";
 
-/** Bonus/bomba qutisi ochilgach navbat shuncha vaqtdan keyin o'tadi (animatsiya ko'rinsin). */
-const SPECIAL_PAUSE_MS = 1400;
 const COLUMNS = 4;
 
-type Sound = ReturnType<typeof useSound>;
+type TeamGain = ScoreGain & { team: number };
 
 /**
- * Sirli quti: raqamli qutilar to'ri. Savolli quti — savol modali (30 s), javobdan keyin
- * "Davom etish" bilan navbat keyingi jamoaga. Bonus (+2) / Bomba (−1) — savolsiz, navbat o'zi o'tadi.
- * Hamma quti ochilsa o'yin tugaydi.
+ * Sirli quti: raqamli qutilar to'ri. Savolli quti — savol kartasi (30 s), Bonus (+2) / Bomba (−1) —
+ * savolsiz karta; "Davom etish" bilan navbat keyingi jamoaga. Javobsiz yopilsa quti sarflanmaydi.
+ * Hamma quti ochilsa "O'yin tugadi" oynasi.
  */
-export function BoxGame({ title, sound }: { title: string; sound: Sound }) {
+export function BoxGame() {
   const t = useTranslations("games.play");
+  const sound = useSound();
   const state = useGameStore();
   const [openCell, setOpenCell] = useState<number | null>(null);
-  const [pending, setPending] = useState<number | null>(null);
-  const [gain, setGain] = useState<(ScoreGain & { team: number }) | null>(null);
-  const [notice, setNotice] = useState("");
+  const [last, setLast] = useState<number | null>(null);
+  const [gain, setGain] = useState<TeamGain | null>(null);
+  const earned = useRef(0);
   const team = state.scores[state.turn];
   const finished = state.finishedAt !== null;
 
-  // Bonus/bomba: pauzadan keyin navbat o'tadi.
-  useEffect(() => {
-    if (pending === null) return;
-    const timer = setTimeout(() => {
-      setPending(null);
-      useGameStore.getState().next();
-    }, SPECIAL_PAUSE_MS);
-    return () => clearTimeout(timer);
-  }, [pending]);
-
   // Sahifa yangilanganda oxirgi quti ochilgan, lekin o'yin yopilmagan bo'lsa.
   useEffect(() => {
-    if (!finished && openCell === null && pending === null && allOpened(state.boxes)) {
-      useGameStore.getState().next();
-    }
-  }, [finished, openCell, pending, state.boxes]);
+    if (!finished && openCell === null && allOpened(state.boxes)) useGameStore.getState().next();
+  }, [finished, openCell, state.boxes]);
 
   const open = (index: number, box: BoxCell) => {
-    if (box.result !== null || openCell !== null || pending !== null || finished) return;
-    if (box.kind === "question") {
-      setGain(null);
-      setOpenCell(index);
-      return;
-    }
-    const points = specialPoints(box.kind);
-    state.openBox(index, box.kind);
-    state.bonus(points);
-    sound.play(points > 0 ? "correct" : "wrong");
-    setGain({ team: state.turn, id: nextGainId(), points });
-    setNotice(
-      t(box.kind === "bonus" ? "box.bonusNotice" : "box.bombNotice", {
-        team: team?.name ?? "",
-        points: Math.abs(points),
-      }),
-    );
-    setPending(index);
+    if (box.result !== null || openCell !== null || finished) return;
+    sound.play("open");
+    earned.current = 0;
+    setGain(null);
+    setOpenCell(index);
   };
 
-  const rows = Math.ceil(state.boxes.length / COLUMNS);
-  const question =
-    openCell !== null ? state.questions[state.boxes[openCell]?.question ?? -1] : undefined;
+  const close = (index: number) => {
+    setLast(index);
+    setOpenCell(null);
+    setGain({ team: state.turn, id: nextGainId(), points: earned.current });
+    state.next();
+  };
+
+  const finishSpecial = (index: number, kind: "bonus" | "bomb") => {
+    const points = specialPoints(kind);
+    earned.current = points < 0 && (team?.score ?? 0) === 0 ? 0 : points;
+    state.openBox(index, kind);
+    state.bonus(points);
+    close(index);
+  };
+
+  const box = openCell !== null ? state.boxes[openCell] : undefined;
+  const question = box?.kind === "question" ? state.questions[box.question ?? -1] : undefined;
+  const teamColor = TEAM_COLORS[state.turn];
 
   return (
     <GameShell
       game="sirli-quti"
-      title={title}
-      sound={sound}
-      header={(controls) => (
-        <BoxBanner title={title} controls={controls} gain={gain} finished={finished} />
-      )}
+      variant="round"
+      className="bg-surface"
+      header={(controls) => <BoxBanner controls={controls} gain={gain} finished={finished} />}
     >
-      <p className="sr-only" aria-live="polite">
-        {notice}
-      </p>
-      <div
-        className="mx-auto grid w-full max-w-6xl flex-1 grid-cols-4 gap-2.5 pt-4 sm:gap-4 sm:pt-6"
-        style={{ gridTemplateRows: `repeat(${rows}, minmax(4.25rem, 1fr))` }}
-        role="group"
+      <main
+        className="grid flex-1 [grid-auto-rows:minmax(80px,1fr)] grid-cols-4 gap-2 p-2.5 min-[721px]:[grid-auto-rows:minmax(110px,1fr)] min-[721px]:gap-2.5 min-[721px]:p-4"
         aria-label={t("box.board")}
         data-testid="box-board"
       >
-        {state.boxes.map((box, index) => (
+        {state.boxes.map((cell, index) => (
           <BoxTile
             key={index}
             number={index + 1}
-            box={box}
-            tone={(Math.floor(index / COLUMNS) + index) % 2 === 0 ? "a" : "b"}
-            disabled={openCell !== null || pending !== null || finished}
-            onOpen={() => open(index, box)}
+            box={cell}
+            tone={(Math.floor(index / COLUMNS) + (index % COLUMNS)) % 2 === 0 ? "a" : "b"}
+            flip={last === index}
+            disabled={openCell !== null || finished}
+            onOpen={() => open(index, cell)}
           />
         ))}
-      </div>
-      {openCell !== null && question && team && (
+      </main>
+      {openCell !== null && team && question && (
         <BoxQuestion
           key={openCell}
           number={openCell + 1}
           question={question}
           teamName={team.name}
-          teamColor={TEAM_COLORS[state.turn]}
-          onResolved={(correct) => {
+          teamColor={teamColor}
+          onResolved={(correct, ms) => {
             state.answer(correct);
+            if (correct) state.noteFastest(state.turn, ms);
             state.openBox(openCell, correct ? "correct" : "wrong");
             sound.play(correct ? "correct" : "wrong");
-            setGain({ team: state.turn, id: nextGainId(), points: correct ? 1 : 0 });
+            earned.current = correct ? 1 : 0;
           }}
-          onContinue={() => {
-            setOpenCell(null);
-            state.next();
-          }}
+          onCancel={() => setOpenCell(null)}
+          onContinue={() => close(openCell)}
         />
       )}
+      {openCell !== null && team && (box?.kind === "bonus" || box?.kind === "bomb") && (
+        <BoxSurprise
+          key={openCell}
+          kind={box.kind}
+          number={openCell + 1}
+          teamName={team.name}
+          teamColor={teamColor}
+          onContinue={() => finishSpecial(openCell, box.kind as "bonus" | "bomb")}
+        />
+      )}
+      {finished && <BoxEnd />}
     </GameShell>
   );
 }
 
-/** Banner: nuqtali och indigo fon; chapda navbat, markazda jamoalar (faol — rangli plashkada). */
 function BoxBanner({
-  title,
   controls,
   gain,
   finished,
 }: {
-  title: string;
   controls: ReactNode;
-  gain: (ScoreGain & { team: number }) | null;
+  gain: TeamGain | null;
   finished: boolean;
 }) {
   const t = useTranslations("games.play");
-  const { scores, turn, topic } = useGameStore();
+  const { scores, turn } = useGameStore();
   const active = scores[turn];
 
   return (
-    <header className="bg-game-banner game-dots border-border border-b-2 px-3 py-3 sm:px-8 sm:py-4">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-4 gap-y-3 lg:grid lg:grid-cols-[1fr_auto_1fr]">
-        <div className="min-w-0 flex-1 lg:flex-none">
-          <p className="text-muted truncate text-sm font-semibold sm:text-base">
-            {title} · {topic?.title}
-          </p>
-          {active && !finished && (
-            <p
-              className="text-foreground truncate text-lg font-extrabold sm:text-2xl"
-              data-testid="game-turn"
-            >
-              {t("turn", { team: active.name })}
-            </p>
-          )}
+    <header className="bg-game-banner sticky top-0 z-10 flex h-[110px] flex-none items-center justify-center pt-[22px] min-[721px]:h-[130px] min-[721px]:pt-0">
+      {active && !finished && (
+        <div className="absolute top-[22px] left-6 hidden flex-col gap-1.5 min-[1101px]:flex">
+          <b
+            className="text-game-boot rounded-full bg-white/90 px-4 py-1.5 text-lg font-bold"
+            data-testid="game-turn"
+          >
+            {t("turnLabel")} <span className="text-game-indigo">{active.name}</span>
+          </b>
+          <span className="text-muted pl-2 text-sm">{t("box.pick")}</span>
         </div>
-        <ul
-          className="order-last flex w-full flex-wrap items-center justify-center gap-1.5 sm:gap-3 lg:order-none lg:w-auto"
-          aria-label={t("scoresLabel")}
-        >
-          {scores.map((item, index) => {
-            const current = index === turn && !finished;
-            return (
-              <li
-                key={index}
-                data-team={TEAM_COLORS[index]}
-                data-active={current || undefined}
-                data-testid="team-score"
+      )}
+      <ul
+        className={cn(
+          "flex justify-center min-[721px]:gap-[clamp(40px,12vw,220px)]",
+          scores.length === 3 ? "gap-2" : "gap-6",
+        )}
+        aria-label={t("scoresLabel")}
+      >
+        {scores.map((item, index) => {
+          const current = index === turn && !finished;
+          return (
+            <li
+              key={index}
+              data-team={TEAM_COLORS[index]}
+              data-active={current || undefined}
+              data-testid="team-score"
+              className="flex min-w-0 flex-col items-center gap-1 min-[721px]:min-w-[180px]"
+            >
+              <span
                 className={cn(
-                  "relative flex items-center gap-2 rounded-full px-3 py-1.5 transition-colors duration-300 sm:gap-3 sm:px-5 sm:py-2",
-                  current ? "text-white" : "text-foreground",
+                  "rounded-[10px] px-2.5 py-0.5 text-center text-xl font-extrabold transition-colors duration-300 min-[721px]:px-4 min-[721px]:text-[clamp(24px,3vw,38px)]",
+                  scores.length === 3 && "max-[720px]:px-1.5 max-[720px]:text-[15px]",
+                  "leading-[1.15]",
+                  current && "bg-[var(--team)] text-white",
                 )}
               >
-                {current && (
-                  <m.span
-                    layoutId="box-turn-pill"
-                    aria-hidden
-                    className="absolute inset-0 rounded-full bg-[var(--team-deep)] shadow-[0_6px_16px_-6px_var(--team)]"
-                    transition={{ type: "spring", stiffness: 380, damping: 32 }}
-                  />
-                )}
-                {!current && (
-                  <span
-                    aria-hidden
-                    className="relative size-3 shrink-0 rounded-full bg-[var(--team)]"
-                  />
-                )}
-                <span className="relative max-w-[9rem] truncate text-sm font-bold sm:max-w-[14rem] sm:text-xl">
-                  {item.name}
-                </span>
-                <span className="sr-only" aria-live="polite">
-                  {t("score", { team: item.name, score: item.score })}
-                </span>
-                <span className="relative">
-                  <ScoreNumber
-                    score={item.score}
-                    gain={gain?.team === index ? gain : null}
-                    className="text-2xl sm:text-4xl"
-                  />
-                </span>
-              </li>
-            );
-          })}
-        </ul>
-        <div className="flex items-center justify-end gap-2 sm:gap-3">{controls}</div>
+                {item.name}
+              </span>
+              <span className="sr-only" aria-live="polite">
+                {t("score", { team: item.name, score: item.score })}
+              </span>
+              <ScoreNumber
+                score={item.score}
+                gain={gain?.team === index ? gain : null}
+                className="text-[30px] min-[721px]:text-[40px]"
+              />
+            </li>
+          );
+        })}
+      </ul>
+      <div className="absolute top-2 right-2 flex gap-1.5 min-[721px]:top-[18px] min-[721px]:right-[18px] min-[721px]:gap-2.5">
+        {controls}
       </div>
     </header>
   );
 }
 
-const TONE = {
-  a: "bg-[linear-gradient(145deg,var(--color-game-tile-a-from),var(--color-game-tile-a-to))]",
-  b: "bg-[linear-gradient(145deg,var(--color-game-tile-b-from),var(--color-game-tile-b-to))]",
-};
+const TILE_RESULT = {
+  correct: "border-game-ok-ring bg-game-ok-soft text-game-ok-mark",
+  wrong: "border-border bg-surface text-[var(--game-strong)]",
+  bonus: "border-game-gold-ring bg-game-bonus-soft text-game-gold-ink",
+  bomb: "border-game-err-ring bg-game-bomb-soft text-game-err-dark",
+} as const;
 
 function BoxTile({
   number,
   box,
   tone,
+  flip,
   disabled,
   onOpen,
 }: {
   number: number;
   box: BoxCell;
   tone: "a" | "b";
+  flip: boolean;
   disabled: boolean;
   onOpen: () => void;
 }) {
   const t = useTranslations("games.play.box");
   const tile =
-    "flex h-full w-full items-center justify-center rounded-[1.25rem] sm:rounded-[1.5rem]";
+    "flex items-center justify-center rounded-[22px] text-[clamp(48px,6.5vw,88px)] leading-none font-extrabold [perspective:600px] focus-visible:ring-4 focus-visible:ring-game-gold focus-visible:outline-none";
 
   if (box.result === null) {
     return (
@@ -253,9 +238,10 @@ function BoxTile({
         data-testid={`box-${number}`}
         className={cn(
           tile,
-          TONE[tone],
-          "game-press text-[clamp(1.75rem,0.8rem+4vw,4.75rem)] leading-none font-extrabold text-white [--press-deep:var(--color-game-tile-deep)] [text-shadow:0_3px_0_rgb(0_0_0/0.18)]",
-          "focus-visible:ring-game-sun transition-transform hover:-translate-y-1 focus-visible:ring-4 focus-visible:outline-none disabled:cursor-default disabled:hover:translate-y-0 motion-reduce:hover:translate-y-0",
+          "text-white transition-transform duration-[120ms] [text-shadow:0_2px_0_rgb(0_0_0/0.18)] enabled:hover:-translate-y-[3px] disabled:cursor-default motion-reduce:enabled:hover:translate-y-0",
+          tone === "a"
+            ? "bg-game-tile-a shadow-[0_6px_0_var(--color-game-tile-a-deep)]"
+            : "bg-game-tile-b shadow-[0_6px_0_var(--color-game-tile-b-deep)]",
         )}
       >
         {number}
@@ -263,40 +249,88 @@ function BoxTile({
     );
   }
 
-  const result = box.result;
-  const Icon = { correct: Check, wrong: X, bonus: Gift, bomb: Bomb }[result];
+  const { result } = box;
   return (
-    <m.div
-      role="img"
+    <button
+      type="button"
+      disabled
       aria-label={t(`opened.${result}`, { n: number })}
       data-testid={`box-${number}`}
       data-result={result}
-      style={{ transformPerspective: 600 }}
-      initial={{ rotateY: 90 }}
-      animate={{
-        rotateY: 0,
-        scale: result === "bonus" ? [1, 1.15, 1] : 1,
-        x: result === "bomb" ? [0, -10, 10, -10, 10, 0] : 0,
-        transition: {
-          rotateY: { duration: 0.45, ease: "easeOut" },
-          scale: { delay: 0.45, duration: 0.4 },
-          x: { delay: 0.45, duration: 0.45 },
-        },
-      }}
-      className={cn(
-        tile,
-        "flex-col gap-0.5 border-[3px]",
-        result === "correct" && "border-team-green bg-game-ok-soft text-team-green-deep",
-        result === "wrong" && "border-border bg-surface text-muted",
-        result === "bonus" && "bg-game-amber border-transparent text-white",
-        result === "bomb" && "bg-team-red-deep border-transparent text-white",
-      )}
+      className={cn(tile, "cursor-default border-2", TILE_RESULT[result], flip && "game-anim-flip")}
     >
-      <Icon className="size-[clamp(1.75rem,1rem+2.5vw,3.25rem)]" strokeWidth={3} aria-hidden />
-      <span className="text-sm font-extrabold sm:text-lg">
-        {result === "bonus" ? t("bonusTag") : result === "bomb" ? t("bombTag") : number}
-      </span>
-    </m.div>
+      {result === "wrong"
+        ? t("wrongTag")
+        : result === "bonus"
+          ? t("bonusTag")
+          : result === "bomb"
+            ? t("bombTag")
+            : number}
+    </button>
+  );
+}
+
+/** Savol/sovg'a kartasi: yuqori brand chiziq (jamoa, quti raqami, yopish, vaqt). */
+function BoxCard({
+  titleId,
+  testId,
+  number,
+  teamName,
+  teamColor,
+  bar,
+  onDismiss,
+  children,
+}: {
+  titleId: string;
+  testId: string;
+  number: number;
+  teamName: string;
+  teamColor: TeamColor;
+  bar?: ReactNode;
+  onDismiss: () => void;
+  children: ReactNode;
+}) {
+  const t = useTranslations("games");
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onDismiss();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onDismiss]);
+
+  return (
+    <GameDialog
+      underBanner
+      labelledBy={titleId}
+      className="max-w-[1400px] rounded-[20px]"
+      testId={testId}
+    >
+      <div className="bg-game-indigo relative flex h-[74px] items-center justify-center">
+        <span
+          data-team={teamColor}
+          className="absolute top-5 left-[18px] hidden items-center gap-2 rounded-full bg-white/15 px-3.5 py-1.5 text-[15px] font-bold text-white min-[721px]:flex"
+        >
+          <i aria-hidden className="size-3 rounded-full bg-[var(--team)]" />
+          {teamName}
+        </span>
+        <span className="text-game-gold text-[42px] font-extrabold">
+          <span className="sr-only">{t("play.box.modalLabel")} </span>
+          {number}
+        </span>
+        <button
+          type="button"
+          onClick={onDismiss}
+          aria-label={t("modal.close")}
+          data-testid="box-close"
+          className="absolute top-[18px] right-4 flex size-[38px] items-center justify-center rounded-full bg-white/20 text-white focus-visible:ring-4 focus-visible:ring-white/60 focus-visible:outline-none"
+        >
+          <X className="size-5" strokeWidth={3} aria-hidden />
+        </button>
+        {bar && <div className="absolute bottom-0 left-0 w-full">{bar}</div>}
+      </div>
+      {children}
+    </GameDialog>
   );
 }
 
@@ -306,13 +340,15 @@ function BoxQuestion({
   teamName,
   teamColor,
   onResolved,
+  onCancel,
   onContinue,
 }: {
   number: number;
   question: GameQuestion;
   teamName: string;
-  teamColor: (typeof TEAM_COLORS)[number];
-  onResolved: (correct: boolean) => void;
+  teamColor: TeamColor;
+  onResolved: (correct: boolean, ms: number) => void;
+  onCancel: () => void;
   onContinue: () => void;
 }) {
   const t = useTranslations("games.play");
@@ -323,69 +359,144 @@ function BoxQuestion({
   useEffect(() => {
     if (round.outcome) continueRef.current?.focus();
   }, [round.outcome]);
+  const correct = round.outcome?.kind === "answered" && round.outcome.correct;
 
   return (
-    <GameDialog labelledBy={titleId} className="max-w-5xl" testId="box-question">
-      <div className="bg-game-indigo px-5 pt-4 pb-5 text-white sm:px-8 sm:pt-5">
-        <div className="flex items-center justify-between gap-4">
-          <p className="flex items-baseline gap-2 font-extrabold">
-            <span className="text-lg text-white/85 sm:text-xl">{t("box.modalLabel")}</span>
-            <span className="text-game-sun text-4xl leading-none sm:text-6xl">{number}</span>
-          </p>
-          <p
-            data-team={teamColor}
-            className="truncate rounded-full bg-[var(--team-deep)] px-4 py-1.5 text-base font-extrabold sm:text-lg"
-            data-testid="game-turn"
-          >
-            {t("turn", { team: teamName })}
-          </p>
-        </div>
-        <QuestionTimer
-          remaining={round.remaining}
-          total={SECONDS_PER_QUESTION}
-          tone="sun"
-          className="mt-4"
-        />
-      </div>
-      <div className="flex flex-col gap-5 px-4 py-5 sm:px-8 sm:py-7">
-        <div className="flex flex-col items-center gap-4 text-center">
-          {question.image && (
-            // eslint-disable-next-line @next/next/no-img-element -- savol rasmi (R2), o'lchami noma'lum
-            <img
-              src={question.image}
-              alt=""
-              className="max-h-[26vh] w-auto rounded-[1.25rem] object-contain"
-            />
-          )}
-          <h1
-            id={titleId}
-            className="text-[clamp(1.5rem,1rem+2.2vw,2.75rem)] leading-tight font-extrabold text-balance"
-          >
-            {getLocalized(question.text, locale)}
-          </h1>
-        </div>
-        <OptionGrid question={question} round={round} />
+    <BoxCard
+      titleId={titleId}
+      testId="box-question"
+      number={number}
+      teamName={teamName}
+      teamColor={teamColor}
+      bar={<TimeBar remaining={round.remaining} total={SECONDS_PER_QUESTION} />}
+      onDismiss={() => {
+        if (round.outcome) onContinue();
+        else if (!round.locked) onCancel();
+      }}
+    >
+      {correct && <Sparks />}
+      <div className="flex flex-col gap-[22px] p-[18px] min-[721px]:px-8 min-[721px]:pt-[26px] min-[721px]:pb-7">
+        {question.image && (
+          // eslint-disable-next-line @next/next/no-img-element -- savol rasmi (R2), o'lchami noma'lum
+          <img src={question.image} alt="" className="max-h-[220px] self-center rounded-[16px]" />
+        )}
+        <h1
+          id={titleId}
+          className="text-center text-[clamp(26px,3.2vw,42px)] leading-[1.25] font-bold"
+        >
+          {getLocalized(question.text, locale)}
+        </h1>
+        <OptionGrid question={question} round={round} large />
         {round.outcome ? (
-          <AnswerFeedback outcome={round.outcome} correctIndex={round.correctIndex}>
+          <AnswerFeedback
+            outcome={round.outcome}
+            question={question}
+            correctIndex={round.correctIndex}
+          >
             <button
               ref={continueRef}
               type="button"
               onClick={onContinue}
-              className={primaryButton}
+              className={whiteButton}
               data-testid="game-next"
             >
               {t("continue")}
             </button>
           </AnswerFeedback>
-        ) : round.error ? (
-          <p role="alert" className="text-danger text-center text-lg font-semibold">
-            {t("checkError")}
-          </p>
         ) : (
-          <p className="text-muted hidden text-center text-sm font-semibold sm:block">
-            {t("answerHint")}
-          </p>
+          round.error && (
+            <p role="alert" className="text-game-err-dark text-center text-lg font-semibold">
+              {t("checkError")}
+            </p>
+          )
         )}
+      </div>
+    </BoxCard>
+  );
+}
+
+function BoxSurprise({
+  kind,
+  number,
+  teamName,
+  teamColor,
+  onContinue,
+}: {
+  kind: "bonus" | "bomb";
+  number: number;
+  teamName: string;
+  teamColor: TeamColor;
+  onContinue: () => void;
+}) {
+  const t = useTranslations("games.play");
+  const { play } = useSound();
+  const titleId = useId();
+  const bonus = kind === "bonus";
+  const continueRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    play(bonus ? "bonus" : "bomb");
+    continueRef.current?.focus();
+  }, [bonus, play]);
+
+  return (
+    <BoxCard
+      titleId={titleId}
+      testId="box-surprise"
+      number={number}
+      teamName={teamName}
+      teamColor={teamColor}
+      onDismiss={onContinue}
+    >
+      {bonus && <Sparks />}
+      <div className="flex flex-col items-center gap-3 px-8 py-10 text-center">
+        <div
+          className={cn(
+            "text-[120px] leading-none font-extrabold [animation-iteration-count:2]",
+            bonus ? "text-game-gold-ink game-anim-pop" : "text-game-err-dark game-anim-shake",
+          )}
+        >
+          {t(bonus ? "box.bonusTag" : "box.bombTag")}
+        </div>
+        <h2 id={titleId} className="text-[40px] leading-tight font-extrabold">
+          {t(bonus ? "box.bonusTitle" : "box.bombTitle")}
+        </h2>
+        <p className="text-muted text-xl">{t(bonus ? "box.bonusText" : "box.bombText")}</p>
+        <button
+          ref={continueRef}
+          type="button"
+          onClick={onContinue}
+          className={cn(primaryButton, "mt-3.5")}
+          data-testid="game-next"
+        >
+          {t("continue")}
+        </button>
+      </div>
+    </BoxCard>
+  );
+}
+
+function BoxEnd() {
+  const t = useTranslations("games.play");
+  const { play } = useSound();
+  const titleId = useId();
+  const slug = useGameStore((state) => state.topic?.slug ?? "");
+  useEffect(() => play("win"), [play]);
+
+  return (
+    <GameDialog labelledBy={titleId} className="max-w-[520px] rounded-[28px]" testId="box-end">
+      <Confetti />
+      <div className="flex flex-col items-center gap-3 p-9 text-center">
+        <h2 id={titleId} className="text-[44px] leading-tight font-extrabold tracking-[-1px]">
+          {t("box.endTitle")}
+        </h2>
+        <p className="text-muted text-lg">{t("box.endText")}</p>
+        <Link
+          href={gameResultPath(slug)}
+          className={cn(primaryButton, "mt-3")}
+          data-testid="game-see-result"
+        >
+          {t("seeResult")}
+        </Link>
       </div>
     </GameDialog>
   );

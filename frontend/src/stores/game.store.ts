@@ -49,6 +49,8 @@ interface GameState {
   /** Omad charhi: charxning joriy burilishi (gradus). */
   rotation: number;
   rope: RopeState | null;
+  /** Eng tez to'g'ri javob (natija sahifasi uchun). */
+  fastest: { team: number; seconds: number } | null;
   session: string | null;
   startedAt: number | null;
   finishedAt: number | null;
@@ -56,6 +58,8 @@ interface GameState {
   start: (setup: GameSetup) => void;
   /** Navbatdagi jamoa javobi: ball qo'shiladi (navbat `next` da almashadi). */
   answer: (correct: boolean, points?: number) => void;
+  /** To'g'ri javob vaqti: eng tezi eslab qolinadi. */
+  noteFastest: (team: number, ms: number) => void;
   /** Navbatdagi jamoaga savolsiz ball (Bonus/Bomba). */
   bonus: (delta: number) => void;
   /** Sirli quti: qutini natija bilan ochadi. */
@@ -84,6 +88,7 @@ const EMPTY = {
   boxes: [],
   rotation: 0,
   rope: null,
+  fastest: null,
   session: null,
   startedAt: null,
   finishedAt: null,
@@ -112,12 +117,18 @@ export const useGameStore = create<GameState>()(
             setup.game === "arqon-tortish"
               ? { position: 0, cursor: [0, 0], endsAt: Date.now() + ROPE_SECONDS * 1000 }
               : null,
+          fastest: null,
           session: setup.sessionId,
           startedAt: Date.now(),
           finishedAt: null,
         }),
       answer: (correct, points = POINTS_CORRECT) =>
         set((state) => ({ scores: applyAnswer(state.scores, state.turn, correct, points) })),
+      noteFastest: (team, ms) => {
+        const seconds = Math.max(1, Math.round(ms / 1000));
+        const { fastest } = get();
+        if (!fastest || seconds < fastest.seconds) set({ fastest: { team, seconds } });
+      },
       bonus: (delta) => set((state) => ({ scores: applyBonus(state.scores, state.turn, delta) })),
       openBox: (cell, result) => set((state) => ({ boxes: openBox(state.boxes, cell, result) })),
       spin: (rotation) => set({ rotation }),
@@ -160,6 +171,7 @@ export const useGameStore = create<GameState>()(
         boxes,
         rotation,
         rope,
+        fastest,
         session,
         startedAt,
         finishedAt,
@@ -174,6 +186,7 @@ export const useGameStore = create<GameState>()(
         boxes,
         rotation,
         rope,
+        fastest,
         session,
         startedAt,
         finishedAt,

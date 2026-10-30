@@ -2309,14 +2309,12 @@
     },
     "page": {
       "title": "Interactive games",
-      "lead": "Pick a topic and play a team quiz with your class.",
+      "lead": "Type a topic or textbook name and play together with your class. Questions come from the topic's tests.",
       "searchLabel": "Search topics",
       "searchPlaceholder": "Type a topic or textbook name…",
       "clearSearch": "Clear search",
       "gradeFilter": "Grade",
       "subjectFilter": "Subject",
-      "allGrades": "All",
-      "allSubjects": "All subjects",
       "grade": "Grade {grade}",
       "results": "{count, plural, =0 {No topics found} one {# topic} other {# topics}}",
       "empty": "No game-ready topics match these filters. Try another word or filter.",
@@ -2324,30 +2322,41 @@
       "error": "Couldn't load topics. Check your connection and try again.",
       "retry": "Try again",
       "loadMore": "Show more",
-      "loading": "Loading…"
+      "loading": "Loading…",
+      "all": "All",
+      "searching": "Searching…",
+      "resultsTitle": "Results",
+      "resultsFor": "Results for “{query}”",
+      "allTopics": "All topics",
+      "errorTitle": "Failed to load",
+      "emptyTitle": "Nothing found"
     },
     "card": {
-      "meta": "{subject} · Grade {grade} · {textbook}",
       "questions": "{count} questions",
       "play": "Play",
-      "playLabel": "Play “{topic}”",
-      "gamesLabel": "Available games"
+      "playGame": "“{topic}”: {game}"
     },
     "list": {
       "box": {
         "name": "Mystery Box",
         "tag": "1–3 teams",
-        "description": "Open the box to reveal a question. A correct answer earns the team points."
+        "description": "Open the box to reveal a question. A correct answer earns the team points.",
+        "short": "Answer the questions hidden in mystery boxes.",
+        "badge": "Top #1"
       },
       "wheel": {
         "name": "Wheel of Luck",
         "tag": "1–3 teams",
-        "description": "Spin the wheel: the sector it lands on decides the question."
+        "description": "Spin the wheel: the sector it lands on decides the question.",
+        "short": "Spin the wheel and answer the question.",
+        "badge": "New"
       },
       "rope": {
         "name": "Tug of War",
         "tag": "2 teams",
-        "description": "Two teams compete: every correct answer pulls the rope to your side."
+        "description": "Two teams compete: every correct answer pulls the rope to your side.",
+        "short": "2 teams pull the rope by answering questions.",
+        "badge": "Team game"
       }
     },
     "modal": {
@@ -2381,29 +2390,28 @@
       "errors": {
         "tooLong": "No more than {max} characters"
       },
-      "teamsNote": "Team names can also be changed during the game"
+      "teamsNote": "Team names can also be changed during the game",
+      "pickNote": "Questions come from this topic's tests",
+      "setupLead": "Choose the teams and number of questions"
     },
     "topicBlock": {
       "title": "Interactive games",
       "lead": "Reinforce the topic with your class through a game.",
       "unavailable": "This topic doesn't have enough questions for a game yet.",
-      "error": "Couldn't load game details."
+      "error": "Couldn't load game details.",
+      "leadTopic": "On “{topic}” · {count} questions"
     },
     "play": {
       "exit": "Leave game",
       "fullscreen": "Full screen",
       "exitFullscreen": "Exit full screen",
-      "soundOn": "Turn sound on",
-      "soundOff": "Turn sound off",
       "turn": "Turn: {team}",
       "answersLabel": "Answer options",
-      "answerHint": "Keyboard: 1–4 or A–D",
       "option": "{letter}: {text}",
       "correct": "Correct!",
       "wrong": "Wrong",
       "timeUp": "Time's up",
-      "correctAnswer": "Correct answer: {letter}",
-      "next": "Next question",
+      "next": "Next",
       "finish": "See results",
       "timerLabel": "Time left",
       "points": "+{points}",
@@ -2428,41 +2436,73 @@
         },
         "bonusTag": "+2",
         "bombTag": "−1",
-        "bonusNotice": "Bonus! {team} gets +{points}",
-        "bombNotice": "Bomb! {team} loses {points}"
+        "pick": "Pick a box",
+        "wrongTag": "X",
+        "bonusTitle": "Bonus box!",
+        "bonusText": "The team gets 2 points.",
+        "bombTitle": "Bomb!",
+        "bombText": "The team loses 1 point.",
+        "endTitle": "Game over!",
+        "endText": "All boxes are open."
       },
       "wheel": {
         "double": "×2",
         "bonus": "Bonus",
         "spin": "Spin",
         "spinLabel": "Spin the wheel",
-        "spinning": "The wheel is spinning…",
-        "prompt": "Spin the wheel: the sector sets the question's value.",
-        "left": "{count, plural, =0 {No questions left} one {# question left} other {# questions left}}",
+        "spinning": "Spinning…",
+        "prompt": "The sector it lands on picks the question.",
         "sector": "Sector {label}",
         "points": "{points, plural, one {# point} other {# points}}",
-        "bonusTitle": "Bonus! {team} +{points}"
+        "bonusTitle": "Bonus sector!",
+        "progress": "{topic} · Grade {grade} · Task {asked}/{total}",
+        "hint": "The ×2 sector gives 2 points for an answer. The Bonus sector gives +2 points right away.",
+        "who": "{team}'s turn",
+        "spinTitle": "Spin the wheel",
+        "bonusText": "The team gets 2 points."
       },
       "rope": {
         "timerLabel": "Time left: {time}",
         "panelLabel": "{team} question",
         "pulled": "+1 · Pulled!",
-        "blocked": "Wrong — wait",
-        "keys": "Keys: {keys}",
-        "position": "Rope marker: {position, number}"
-      }
+        "blocked": "Wrong — wait 1.5 seconds",
+        "position": "Rope marker: {position, number}",
+        "sceneLabel": "Two teams pulling a rope",
+        "pulledAll": "Pulled the rope {steps} steps to its side.",
+        "timeSide": "Time's up, the rope is on this team's side.",
+        "timeDraw": "Time's up, the rope stayed in the middle."
+      },
+      "sound": "Sound",
+      "turnLabel": "Turn:",
+      "correctPoints": "Correct! +{points} pts",
+      "wrongAnswer": "Wrong. Correct answer: {answer}",
+      "wrongShort": "Wrong. Answer: {answer}"
     },
     "result": {
       "title": "Results",
       "winner": "{team} wins!",
       "draw": "It's a draw!",
       "noWinner": "Nobody scored this time",
-      "place": "Place {place}",
-      "score": "{score} points",
       "accuracy": "{correct}/{total} correct",
       "playAgain": "Play again",
-      "otherTopic": "Another topic",
-      "saveError": "Couldn't save the result, but it stays on this page."
+      "saveError": "Couldn't save the result, but it stays on this page.",
+      "drawFull": "It's a draw! Both teams are level",
+      "subtitle": "{score} pts · {correct} correct answers",
+      "unit": "pts",
+      "teamsTitle": "Team results",
+      "fastest": "Fastest answer",
+      "seconds": "{seconds} sec",
+      "noData": "—",
+      "duration": "Duration",
+      "minutes": "{minutes} min",
+      "questions": "{count} questions",
+      "celebrate": "Show the celebration again",
+      "otherGame": "Choose another game",
+      "soloTitle": "Great result!",
+      "soloStat": "pts · {correct}/{total} correct ({percent}%)",
+      "stars3": "Excellent! You know this topic very well.",
+      "stars2": "Good! A little more practice.",
+      "stars1": "Reread the topic and try again."
     }
   }
 }

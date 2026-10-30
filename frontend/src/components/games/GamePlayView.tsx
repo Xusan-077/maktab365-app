@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import { Gamepad2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { useSound } from "@/hooks/useSound";
 import { GAME_KEYS, type GameId } from "@/lib/games/config";
 import { Link, useRouter } from "@/lib/i18n/navigation";
 import { gameResultPath, ROUTES } from "@/lib/utils/routes";
@@ -13,11 +12,10 @@ import { BoxGame } from "./BoxGame";
 import { RopeGame } from "./RopeGame";
 import { WheelGame } from "./WheelGame";
 
-/** Sirli quti: oxirgi quti ochilish animatsiyasi ko'rinsin, keyin natijaga. */
+/** Omad charhi darhol natijaga; qolganlari o'z yakuniy oynasini ko'rsatadi ("Natijani ko'rish"). */
 const RESULT_DELAY_MS: Record<GameId, number | null> = {
-  "sirli-quti": 900,
+  "sirli-quti": null,
   "omad-charhi": 0,
-  // Arqon tortish o'z g'olib modalini ko'rsatadi ("Natijani ko'rish" tugmasi).
   "arqon-tortish": null,
 };
 
@@ -29,7 +27,6 @@ export function GamePlayView({ topicSlug, game }: { topicSlug: string; game: Gam
   const t = useTranslations("games");
   const hydrated = useGameHydrated();
   const router = useRouter();
-  const sound = useSound();
   const current = useGameStore((state) => state.game);
   const topic = useGameStore((state) => state.topic);
   const questionCount = useGameStore((state) => state.questions.length);
@@ -52,9 +49,9 @@ export function GamePlayView({ topicSlug, game }: { topicSlug: string; game: Gam
   const title = t(`list.${GAME_KEYS[game]}.name`);
   // Yangi o'yin (masalan, "Qayta o'ynash") — sahna holati noldan.
   const key = startedAt ?? 0;
-  if (game === "sirli-quti") return <BoxGame key={key} title={title} sound={sound} />;
-  if (game === "omad-charhi") return <WheelGame key={key} title={title} sound={sound} />;
-  return <RopeGame key={key} title={title} sound={sound} />;
+  if (game === "sirli-quti") return <BoxGame key={key} />;
+  if (game === "omad-charhi") return <WheelGame key={key} title={title} />;
+  return <RopeGame key={key} />;
 }
 
 export function GameNotReady() {
@@ -67,7 +64,7 @@ export function GameNotReady() {
         action={
           <Link
             href={ROUTES.games}
-            className="game-press bg-game-indigo inline-flex h-12 items-center rounded-[1rem] px-6 font-bold text-white"
+            className="game-press bg-game-indigo inline-flex h-12 items-center rounded-[14px] px-6 font-bold text-white"
           >
             {t("toGames")}
           </Link>

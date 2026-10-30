@@ -33,6 +33,8 @@ export const ropePercent = (position: number, limit = ROPE_LIMIT) =>
 /** Umumiy vaqt (3:00) va oxirgi shuncha soniyada taymer qizil. */
 export const ROPE_SECONDS = 180;
 export const ROPE_WARNING_SECONDS = 30;
+/** Oxirgi shuncha soniyada har soniyada signal. */
+export const ROPE_BEEP_SECONDS = 10;
 /** Xato javobdan keyin jamoa shuncha bloklanadi. */
 export const ROPE_BLOCK_MS = 1500;
 

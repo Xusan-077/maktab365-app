@@ -1,77 +1,86 @@
 "use client";
 
 import { useRef, type ReactNode } from "react";
-import { LogOut, Maximize, Minimize, Volume2, VolumeX } from "lucide-react";
+import { Maximize, Minimize, Volume2, VolumeX, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useFullscreen } from "@/hooks/useFullscreen";
+import { useSound } from "@/hooks/useSound";
 import { GAME_KEYS, type GameId } from "@/lib/games/config";
 import { Link } from "@/lib/i18n/navigation";
+import { cn } from "@/lib/utils/cn";
 import { ROUTES } from "@/lib/utils/routes";
-import { GameIcon } from "./GameIcon";
 
-export const gameControl =
-  "border-border bg-surface text-foreground hover:bg-subtle inline-flex size-11 shrink-0 items-center sm:size-12 justify-center rounded-[1rem] border-2 transition-colors focus-visible:ring-4 focus-visible:ring-game-indigo/50 focus-visible:outline-none";
+const CONTROL = {
+  round:
+    "text-game-boot size-8 rounded-full bg-white shadow-[0_2px_0_var(--color-game-brand-ring)] min-[721px]:size-10",
+  dark: "bg-game-cloth h-[42px] w-[42px] rounded-[14px] text-white sm:h-12 sm:w-[52px]",
+};
 
 /**
- * O'yin ekrani qobig'i (proyektor uchun): o'yin nomi va mavzu, ovoz on/off, to'liq ekran, chiqish.
- * Rang `data-game` dan; ichidagi barcha o'yin komponentlari `var(--game-*)` ni oladi.
- * `header` berilsa standart sarlavha o'rniga (masalan, Sirli quti banneri) — boshqaruv tugmalari
- * argument sifatida beriladi.
+ * O'yin ekrani qobig'i (proyektor uchun): rang `data-game` dan; ovoz, to'liq ekran va chiqish
+ * tugmalari. Sarlavha har o'yinda o'zicha: `header` tugmalarni argument sifatida oladi;
+ * `toolsAtBottom` — tugmalar chap pastki burchakda (Arqon tortish).
  */
 export function GameShell({
   game,
-  title,
-  subtitle,
-  sound,
+  variant = "dark",
+  fullscreen: withFullscreen = true,
+  toolsAtBottom = false,
   exitHref = ROUTES.games,
   header,
+  className,
   children,
 }: {
   game: GameId;
-  title: string;
-  subtitle?: string;
-  sound?: { enabled: boolean; toggle: () => void };
+  variant?: keyof typeof CONTROL;
+  fullscreen?: boolean;
+  toolsAtBottom?: boolean;
   exitHref?: string;
-  header?: (controls: ReactNode) => ReactNode;
+  header: (controls: ReactNode) => ReactNode;
+  className?: string;
   children: ReactNode;
 }) {
   const t = useTranslations("games.play");
+  const { muted, toggle } = useSound();
   const ref = useRef<HTMLDivElement>(null);
   const fullscreen = useFullscreen(ref);
+  const control = cn(
+    "focus-visible:ring-game-indigo/50 inline-flex shrink-0 items-center justify-center focus-visible:ring-4 focus-visible:outline-none",
+    CONTROL[variant],
+  );
 
   const controls = (
     <>
-      {sound && (
-        <button
-          type="button"
-          onClick={sound.toggle}
-          aria-pressed={sound.enabled}
-          aria-label={sound.enabled ? t("soundOff") : t("soundOn")}
-          className={gameControl}
-        >
-          {sound.enabled ? (
-            <Volume2 className="size-6" aria-hidden />
-          ) : (
-            <VolumeX className="size-6" aria-hidden />
-          )}
-        </button>
-      )}
-      {fullscreen.supported && (
+      <button
+        type="button"
+        onClick={toggle}
+        aria-pressed={!muted}
+        aria-label={t("sound")}
+        data-testid="game-sound"
+        className={cn(control, muted && "opacity-45")}
+      >
+        {muted ? (
+          <VolumeX className="size-5" strokeWidth={2.4} aria-hidden />
+        ) : (
+          <Volume2 className="size-5" strokeWidth={2.4} aria-hidden />
+        )}
+      </button>
+      {withFullscreen && fullscreen.supported && (
         <button
           type="button"
           onClick={fullscreen.toggle}
           aria-label={fullscreen.active ? t("exitFullscreen") : t("fullscreen")}
-          className={gameControl}
+          className={cn(control, variant === "round" && "max-[720px]:hidden")}
         >
           {fullscreen.active ? (
-            <Minimize className="size-6" aria-hidden />
+            <Minimize className="size-5" strokeWidth={2.4} aria-hidden />
           ) : (
-            <Maximize className="size-6" aria-hidden />
+            <Maximize className="size-5" strokeWidth={2.4} aria-hidden />
           )}
         </button>
       )}
-      <Link href={exitHref} aria-label={t("exit")} className={gameControl} data-testid="game-exit">
-        <LogOut className="size-6" aria-hidden />
+      <Link href={exitHref} aria-label={t("exit")} className={control} data-testid="game-exit">
+        <X className="size-5" strokeWidth={2.6} aria-hidden />
       </Link>
     </>
   );
@@ -80,21 +89,14 @@ export function GameShell({
     <div
       ref={ref}
       data-game={GAME_KEYS[game]}
-      className="font-game bg-background text-foreground flex min-h-dvh flex-col overflow-x-clip bg-[radial-gradient(ellipse_at_top,color-mix(in_srgb,var(--game-from)_14%,transparent),transparent_60%)]"
-    >
-      {header ? (
-        header(controls)
-      ) : (
-        <header className="flex items-center gap-2 px-4 py-3 sm:gap-3 sm:px-8 sm:py-4">
-          <GameIcon game={game} size="md" className="max-sm:hidden" />
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-lg font-extrabold sm:text-xl">{title}</p>
-            {subtitle && <p className="text-muted truncate text-sm sm:text-base">{subtitle}</p>}
-          </div>
-          {controls}
-        </header>
+      className={cn(
+        "font-game bg-background text-foreground relative flex min-h-dvh flex-col overflow-x-clip font-semibold",
+        className,
       )}
-      <div className="flex flex-1 flex-col px-4 pb-6 sm:px-8 sm:pb-10">{children}</div>
+    >
+      {header(controls)}
+      {children}
+      {toolsAtBottom && <div className="absolute bottom-2.5 left-2.5 flex gap-2.5">{controls}</div>}
     </div>
   );
 }

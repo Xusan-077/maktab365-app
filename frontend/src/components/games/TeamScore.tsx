@@ -1,7 +1,6 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { AnimatePresence, m } from "@/components/ui/motion";
 import type { TeamColor } from "@/lib/games/config";
 import { cn } from "@/lib/utils/cn";
 
@@ -17,7 +16,7 @@ export const nextGainId = () => ++gainCounter;
 
 /**
  * Ball raqami: o'zgarganda sakraydi, yonidan "+1" (yashil) yoki "−1" (qizil) yuqoriga uchib
- * yo'qoladi. Ekran o'quvchisi uchun matn `TeamScore`/sahnada.
+ * yo'qoladi. Ekran o'quvchisi uchun matn sahnada.
  */
 export function ScoreNumber({
   score,
@@ -29,44 +28,39 @@ export function ScoreNumber({
   className?: string;
 }) {
   const t = useTranslations("games.play");
+  const changed = gain && gain.points !== 0;
   return (
-    <span aria-hidden className="relative inline-flex">
-      <m.span
-        key={score}
-        initial={{ scale: gain ? 1.45 : 1 }}
-        animate={{ scale: 1, transition: { type: "spring", stiffness: 500, damping: 14 } }}
-        className={cn("inline-block font-extrabold tabular-nums", className)}
+    <span aria-hidden className="relative inline-block">
+      <span
+        key={changed ? gain.id : "score"}
+        className={cn(
+          "inline-block font-extrabold tabular-nums",
+          changed && "game-anim-bump",
+          className,
+          "leading-none",
+        )}
         data-testid="team-score-value"
       >
         {score}
-      </m.span>
-      <AnimatePresence>
-        {gain && gain.points !== 0 && (
-          <m.span
-            key={gain.id}
-            initial={{ opacity: 1, y: 0 }}
-            animate={{ opacity: 0, y: -52, transition: { duration: 1.1, ease: "easeOut" } }}
-            className={cn(
-              "absolute right-0 bottom-[85%] text-2xl font-extrabold whitespace-nowrap",
-              gain.points > 0
-                ? "text-team-green-deep dark:text-team-green"
-                : "text-team-red-deep dark:text-team-red",
-            )}
-          >
-            {gain.points > 0
-              ? t("points", { points: gain.points })
-              : t("minusPoints", { points: -gain.points })}
-          </m.span>
-        )}
-      </AnimatePresence>
+      </span>
+      {changed && (
+        <span
+          key={gain.id}
+          className={cn(
+            "game-anim-gain pointer-events-none absolute top-0 -right-9 text-[26px] font-extrabold whitespace-nowrap",
+            gain.points > 0 ? "text-game-ok-dark" : "text-game-err-dark",
+          )}
+        >
+          {gain.points > 0
+            ? t("points", { points: gain.points })
+            : t("minusPoints", { points: -gain.points })}
+        </span>
+      )}
     </span>
   );
 }
 
-/**
- * Jamoa kartasi: rang nuqtasi, nom, katta ball va "Navbat" belgisi. Faol kartaning chegarasi va
- * soyasi jamoa rangida (silliq o'tadi).
- */
+/** Jamoa kartasi (Omad charhi): nom, "Navbat" belgisi, katta ball; faoli jamoa rangida. */
 export function TeamScore({
   name,
   color,
@@ -89,28 +83,32 @@ export function TeamScore({
       data-active={active || undefined}
       data-testid="team-score"
       className={cn(
-        "relative flex min-w-0 flex-1 items-center gap-1.5 rounded-[1.25rem] border-[3px] px-2.5 py-2.5 transition-[border-color,box-shadow,background-color] duration-300 sm:gap-3 sm:px-4 sm:py-3",
+        "bg-surface flex items-center justify-between gap-3 rounded-[22px] border-2 px-5 py-[18px] transition-[border-color,box-shadow] duration-300",
         active
-          ? "border-[var(--team)] bg-[color-mix(in_srgb,var(--team)_12%,var(--color-surface))] shadow-[0_10px_26px_-12px_var(--team)]"
-          : "border-border bg-surface",
+          ? "border-[var(--team)] shadow-[0_5px_0_color-mix(in_srgb,var(--team)_35%,transparent)]"
+          : "border-border shadow-[0_5px_0_var(--color-border)]",
         className,
       )}
     >
-      <span aria-hidden className="size-3 shrink-0 rounded-full bg-[var(--team)] sm:size-4" />
-      <span className="flex min-w-0 flex-1 flex-col">
-        <span className="text-foreground line-clamp-2 text-sm leading-tight font-bold break-words sm:text-lg">
-          {name}
-        </span>
+      <div className="min-w-0">
+        <div className="flex items-center gap-2 text-sm font-bold tracking-[0.3px] text-[var(--team)] uppercase">
+          <i aria-hidden className="size-3 shrink-0 rounded-full bg-[var(--team)]" />
+          <span className="min-w-0 break-words">{name}</span>
+        </div>
         {active && (
-          <span className="text-xs font-extrabold tracking-wide text-[var(--team-deep)] uppercase sm:text-sm dark:text-[var(--team)]">
+          <span className="mt-2 inline-block rounded-full bg-[var(--game-soft)] px-2.5 py-[3px] text-xs font-bold text-[var(--game-ink)]">
             {t("turnBadge")}
           </span>
         )}
-      </span>
+      </div>
       <span className="sr-only" aria-live="polite">
         {t("score", { team: name, score })}
       </span>
-      <ScoreNumber score={score} gain={gain} className="text-2xl sm:text-5xl" />
+      <ScoreNumber
+        score={score}
+        gain={gain}
+        className="text-[32px] tracking-[-1px] sm:text-[44px]"
+      />
     </div>
   );
 }

@@ -82,11 +82,11 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe("GameStartModal", () => {
-  it("requires a game before continuing and shows the step indicator", async () => {
+  it("preselects a game and shows the step indicator", async () => {
     setup();
     expect(await screen.findByText(t.pickTitle)).toBeTruthy();
     expect(screen.getByTestId("game-modal-step").textContent).toBe("1-qadam / 2");
-    expect((screen.getByTestId("game-continue") as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByTestId("game-option-sirli-quti").getAttribute("aria-pressed")).toBe("true");
     const form = await pickAndContinue("sirli-quti");
     expect(screen.getByTestId("game-modal-step").textContent).toBe("2-qadam / 2");
     expect(within(form).getByTestId("game-summary").textContent).toBe(

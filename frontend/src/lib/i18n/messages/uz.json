@@ -2309,14 +2309,12 @@
     },
     "page": {
       "title": "Interaktiv o'yinlar",
-      "lead": "Mavzuni tanlang va sinf bilan jamoaviy viktorina o'ynang.",
+      "lead": "Mavzu yoki darslik nomini yozing va sinf bilan birga o'ynang. Savollar mavzu testlaridan olinadi.",
       "searchLabel": "Mavzu qidirish",
       "searchPlaceholder": "Mavzu yoki darslik nomini yozing…",
       "clearSearch": "Qidiruvni tozalash",
       "gradeFilter": "Sinf",
       "subjectFilter": "Fan",
-      "allGrades": "Barchasi",
-      "allSubjects": "Barcha fanlar",
       "grade": "{grade}-sinf",
       "results": "{count, plural, =0 {Mavzu topilmadi} other {# ta mavzu}}",
       "empty": "Bu filtrlar bo'yicha o'yinga tayyor mavzu yo'q. Boshqa so'z yoki filtrni sinab ko'ring.",
@@ -2324,30 +2322,41 @@
       "error": "Mavzularni yuklab bo'lmadi. Internetni tekshirib, qayta urinib ko'ring.",
       "retry": "Qayta urinish",
       "loadMore": "Yana ko'rsatish",
-      "loading": "Yuklanmoqda…"
+      "loading": "Yuklanmoqda…",
+      "all": "Barchasi",
+      "searching": "Qidirilmoqda…",
+      "resultsTitle": "Natijalar",
+      "resultsFor": "«{query}» bo'yicha natijalar",
+      "allTopics": "Barcha mavzular",
+      "errorTitle": "Yuklashda xatolik",
+      "emptyTitle": "Hech narsa topilmadi"
     },
     "card": {
-      "meta": "{subject} · {grade}-sinf · {textbook}",
       "questions": "{count} ta savol",
       "play": "O'ynash",
-      "playLabel": "«{topic}» mavzusida o'ynash",
-      "gamesLabel": "Mavjud o'yinlar"
+      "playGame": "«{topic}»: {game}"
     },
     "list": {
       "box": {
         "name": "Sirli quti",
         "tag": "1–3 jamoa",
-        "description": "Qutini oching — ichidan savol chiqadi. To'g'ri javob jamoaga ball olib keladi."
+        "description": "Qutini oching — ichidan savol chiqadi. To'g'ri javob jamoaga ball olib keladi.",
+        "short": "Sirli qutidagi savollarga javob bering.",
+        "badge": "Top #1"
       },
       "wheel": {
         "name": "Omad charhi",
         "tag": "1–3 jamoa",
-        "description": "Charxni aylantiring: qaysi sektorga tushsa, shu savol o'ynaladi."
+        "description": "Charxni aylantiring: qaysi sektorga tushsa, shu savol o'ynaladi.",
+        "short": "Charxni aylantirib savolga javob bering.",
+        "badge": "Yangi"
       },
       "rope": {
         "name": "Arqon tortish",
         "tag": "2 jamoa",
-        "description": "Ikki jamoa bellashadi: har to'g'ri javob arqonni o'z tomoningizga tortadi."
+        "description": "Ikki jamoa bellashadi: har to'g'ri javob arqonni o'z tomoningizga tortadi.",
+        "short": "2 jamoa savol orqali arqon tortishadi.",
+        "badge": "Jamoaviy"
       }
     },
     "modal": {
@@ -2381,29 +2390,28 @@
       "errors": {
         "tooLong": "Nom {max} belgidan oshmasin"
       },
-      "teamsNote": "Jamoa nomlarini o'yin davomida ham o'zgartirish mumkin"
+      "teamsNote": "Jamoa nomlarini o'yin davomida ham o'zgartirish mumkin",
+      "pickNote": "Savollar shu mavzu testlaridan olinadi",
+      "setupLead": "Jamoalar va savollar sonini tanlang"
     },
     "topicBlock": {
       "title": "Interaktiv o'yinlar",
       "lead": "Mavzuni sinf bilan o'yin orqali mustahkamlang.",
       "unavailable": "Bu mavzuda o'yin uchun savollar hali yetarli emas.",
-      "error": "O'yinlar ma'lumotini yuklab bo'lmadi."
+      "error": "O'yinlar ma'lumotini yuklab bo'lmadi.",
+      "leadTopic": "\"{topic}\" mavzusi bo'yicha · {count} ta savol"
     },
     "play": {
       "exit": "O'yindan chiqish",
       "fullscreen": "To'liq ekran",
       "exitFullscreen": "To'liq ekrandan chiqish",
-      "soundOn": "Ovozni yoqish",
-      "soundOff": "Ovozni o'chirish",
       "turn": "Navbat: {team}",
       "answersLabel": "Javob variantlari",
-      "answerHint": "Klaviatura: 1–4 yoki A–D",
       "option": "{letter}: {text}",
       "correct": "To'g'ri!",
       "wrong": "Noto'g'ri",
       "timeUp": "Vaqt tugadi",
-      "correctAnswer": "To'g'ri javob: {letter}",
-      "next": "Keyingi savol",
+      "next": "Keyingi",
       "finish": "Natijani ko'rish",
       "timerLabel": "Qolgan vaqt",
       "points": "+{points}",
@@ -2428,41 +2436,73 @@
         },
         "bonusTag": "+2",
         "bombTag": "−1",
-        "bonusNotice": "Bonus! {team} +{points} ball oldi",
-        "bombNotice": "Bomba! {team} {points} ball yo'qotdi"
+        "pick": "Qutini tanlang",
+        "wrongTag": "X",
+        "bonusTitle": "Bonus qutisi!",
+        "bonusText": "Jamoaga 2 ball qo'shiladi.",
+        "bombTitle": "Bomba!",
+        "bombText": "Jamoadan 1 ball ayriladi.",
+        "endTitle": "O'yin tugadi!",
+        "endText": "Barcha qutilar ochildi."
       },
       "wheel": {
         "double": "×2",
         "bonus": "Bonus",
         "spin": "Aylantirish",
         "spinLabel": "Charxni aylantirish",
-        "spinning": "Charx aylanmoqda…",
-        "prompt": "Charxni aylantiring: sektor savol qiymatini belgilaydi.",
-        "left": "{count, plural, =0 {Savollar tugadi} other {# ta savol qoldi}}",
+        "spinning": "Aylanmoqda…",
+        "prompt": "Tushgan sektor savolni belgilaydi.",
         "sector": "Sektor {label}",
         "points": "{points} ball",
-        "bonusTitle": "Bonus! {team} +{points} ball"
+        "bonusTitle": "Bonus sektori!",
+        "progress": "{topic} · {grade}-sinf · Topshiriq {asked}/{total}",
+        "hint": "×2 sektori javobga 2 ball beradi. Bonus sektori darhol +2 ball.",
+        "who": "{team} navbati",
+        "spinTitle": "Charxni aylantiring",
+        "bonusText": "Jamoaga 2 ball qo'shiladi."
       },
       "rope": {
         "timerLabel": "Qolgan vaqt: {time}",
         "panelLabel": "{team} savoli",
         "pulled": "+1 · Tortdi!",
-        "blocked": "Xato — kuting",
-        "keys": "Klaviatura: {keys}",
-        "position": "Arqon belgisi: {position, number}"
-      }
+        "blocked": "Xato — 1.5 soniya kuting",
+        "position": "Arqon belgisi: {position, number}",
+        "sceneLabel": "Ikki jamoa arqon tortmoqda",
+        "pulledAll": "Arqonni {steps} qadam o'z tomoniga tortdi.",
+        "timeSide": "Vaqt tugadi, arqon shu jamoa tomonida.",
+        "timeDraw": "Vaqt tugadi, arqon o'rtada qoldi."
+      },
+      "sound": "Ovoz",
+      "turnLabel": "Navbat:",
+      "correctPoints": "To'g'ri! +{points} ball",
+      "wrongAnswer": "Noto'g'ri. To'g'ri javob: {answer}",
+      "wrongShort": "Noto'g'ri. Javob: {answer}"
     },
     "result": {
       "title": "Natijalar",
       "winner": "{team} g'olib!",
       "draw": "Durang!",
       "noWinner": "Bu safar hech kim ball olmadi",
-      "place": "{place}-o'rin",
-      "score": "{score} ball",
       "accuracy": "{correct}/{total} to'g'ri",
-      "playAgain": "Yana o'ynash",
-      "otherTopic": "Boshqa mavzu",
-      "saveError": "Natijani saqlab bo'lmadi, lekin u shu yerda ko'rinib turadi."
+      "playAgain": "Qayta o'ynash",
+      "saveError": "Natijani saqlab bo'lmadi, lekin u shu yerda ko'rinib turadi.",
+      "drawFull": "Durang! Ikkala jamoa teng",
+      "subtitle": "{score} ball · {correct} ta to'g'ri javob",
+      "unit": "ball",
+      "teamsTitle": "Jamoalar natijasi",
+      "fastest": "Eng tez javob",
+      "seconds": "{seconds} soniya",
+      "noData": "—",
+      "duration": "Davomiyligi",
+      "minutes": "{minutes} daqiqa",
+      "questions": "{count} ta savol",
+      "celebrate": "Tabriklashni qayta ko'rsatish",
+      "otherGame": "Boshqa o'yin tanlash",
+      "soloTitle": "Ajoyib natija!",
+      "soloStat": "ball · {correct}/{total} to'g'ri ({percent}%)",
+      "stars3": "Zo'r! Mavzuni a'lo bilasiz.",
+      "stars2": "Yaxshi! Yana bir oz mashq qiling.",
+      "stars1": "Mavzuni qayta o'qib chiqing va yana urinib ko'ring."
     }
   }
 }
