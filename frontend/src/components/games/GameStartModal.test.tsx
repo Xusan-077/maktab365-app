@@ -5,16 +5,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { NextIntlClientProvider } from "next-intl";
 import { MotionProvider } from "@/components/ui/motion";
 import uz from "@/lib/i18n/messages/uz.json";
-import { ApiError } from "@/lib/api/types";
 import type * as GamesApiModule from "@/lib/games/api";
 import type { GameTopic } from "@/lib/games/api";
-import { GUEST_ALLOWANCE_STORAGE_KEY, monthKey } from "@/lib/games/guest-allowance";
 import { useGameStore } from "@/stores/game.store";
 
 const api = vi.hoisted(() => ({
   questions: vi.fn(),
   startSession: vi.fn(),
-  allowance: vi.fn(),
 }));
 const auth = vi.hoisted(() => ({ status: "unauthenticated" as string }));
 const router = vi.hoisted(() => ({ push: vi.fn(), replace: vi.fn() }));
@@ -114,7 +111,7 @@ describe("GameStartModal", () => {
     expect(within(form).getByTestId("questions-12").getAttribute("aria-pressed")).toBe("true");
   });
 
-  it("starts a guest game: uses one free game, stores setup and navigates", async () => {
+  it("starts a guest game: stores setup and navigates", async () => {
     setup();
     const form = await pickAndContinue("sirli-quti");
     fireEvent.click(within(form).getByTestId("teams-3"));
@@ -137,43 +134,35 @@ describe("GameStartModal", () => {
       "Yashil jamoa",
     ]);
     expect(state.session).toBeNull();
-    expect(JSON.parse(localStorage.getItem(GUEST_ALLOWANCE_STORAGE_KEY)!)).toMatchObject({
-      used: 1,
-    });
   });
 
-  it("shows the limit state instead of starting when guest games are used up", async () => {
-    localStorage.setItem(
-      GUEST_ALLOWANCE_STORAGE_KEY,
-      JSON.stringify({ month: monthKey(new Date()), used: 10 }),
-    );
-    setup();
-    const form = await pickAndContinue("sirli-quti");
-    fireEvent.click(within(form).getByTestId("game-start"));
-    expect(await screen.findByTestId("game-limit")).toBeTruthy();
-    expect(screen.getByText(t.limitTitle)).toBeTruthy();
-    expect(api.questions).not.toHaveBeenCalled();
-    expect(router.push).not.toHaveBeenCalled();
+  it("never blocks a guest: any number of games starts", async () => {
+    for (let game = 0; game < 25; game++) {
+      setup();
+      const form = await pickAndContinue("sirli-quti");
+      fireEvent.click(within(form).getByTestId("game-start"));
+      await waitFor(() => expect(router.push).toHaveBeenCalledTimes(game + 1));
+      cleanup();
+    }
+    expect(localStorage.length).toBe(0);
   });
 
-  it("shows the limit state on server game_limit_reached", async () => {
+  it("opens a stats session when signed in and starts even if it fails", async () => {
     auth.status = "authenticated";
-    api.allowance.mockResolvedValue({
-      month: "2026-10-01",
-      free_games_limit: 10,
-      free_games_used: 10,
-      free_games_left: 0,
-      coins: 3,
-      game_cost_coins: 5,
-    });
-    api.startSession.mockRejectedValue(
-      new ApiError("No free games", 403, { code: "game_limit_reached" }),
-    );
+    api.startSession.mockRejectedValue(new Error("network"));
     setup();
     const form = await pickAndContinue("omad-charhi");
     fireEvent.click(within(form).getByTestId("game-start"));
-    const notice = await screen.findByTestId("game-limit");
-    expect(within(notice).getByText(/Balansingiz: 3 tanga/)).toBeTruthy();
-    expect(router.push).not.toHaveBeenCalled();
+    await waitFor(() => expect(router.push).toHaveBeenCalled());
+    expect(api.startSession).toHaveBeenCalledWith("omad-charhi", "kasrlar-3f2a9c1d0b4e");
+    expect(useGameStore.getState().session).toBeNull();
+  });
+
+  it("shows the team names note on step 2", async () => {
+    setup();
+    const form = await pickAndContinue("sirli-quti");
+    expect(within(form).getByTestId("game-setup-note").textContent).toBe(
+      "Jamoa nomlarini o'yin davomida ham o'zgartirish mumkin",
+    );
   });
 });

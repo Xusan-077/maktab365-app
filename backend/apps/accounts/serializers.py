@@ -139,7 +139,6 @@ class ExportLearningSerializer(serializers.Serializer):
 
 
 class ExportGamesSerializer(serializers.Serializer):
-    coins = serializers.IntegerField()
     sessions = GameSessionSerializer(many=True)
 
 

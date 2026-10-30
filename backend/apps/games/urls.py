@@ -11,7 +11,6 @@ urlpatterns = [
         name="games-topic-questions",
     ),
     path("games/check/", views.CheckAnswerView.as_view(), name="games-check"),
-    path("games/allowance/", views.AllowanceView.as_view(), name="games-allowance"),
     path("games/sessions/", views.SessionStartView.as_view(), name="games-sessions"),
     path(
         "games/sessions/<uuid:pk>/finish/",

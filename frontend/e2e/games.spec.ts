@@ -76,7 +76,6 @@ test.describe("Interaktiv o'yinlar", () => {
       page.getByRole("heading", { level: 1, name: "Interaktiv o'yinlar" }),
     ).toBeVisible();
     await expect(page.getByTestId("game-topics").locator(":scope > li")).toHaveCount(2);
-    await expect(page.getByTestId("allowance-free")).toHaveText("Bepul 10 tadan 10 ta qoldi");
 
     await page.getByLabel("Mavzu qidirish").fill("ulush");
     await expect(page).toHaveURL(/\/uz\/games\?q=ulush$/);
@@ -165,10 +164,6 @@ test.describe("Interaktiv o'yinlar", () => {
     await expect(page).toHaveURL(new RegExp(`/uz/games/${SLUG}/natija$`));
     await expect(page.getByTestId("game-ranking").getByRole("listitem")).toHaveCount(2);
     await expect(page.getByTestId("game-headline")).toBeVisible();
-
-    // Bitta bepul o'yin sarflandi (mehmon hisobi).
-    await page.goto("/uz/games");
-    await expect(page.getByTestId("allowance-free")).toHaveText("Bepul 10 tadan 9 ta qoldi");
   });
 
   test("Omad charhi: aylantirish, sektor, bonus va navbat", async ({ page }) => {

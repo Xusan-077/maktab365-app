@@ -2350,12 +2350,6 @@
         "description": "Two teams compete: every correct answer pulls the rope to your side."
       }
     },
-    "allowance": {
-      "freeLeft": "{left} of {limit} free left",
-      "coins": "{coins} coins",
-      "coinsLabel": "Coin balance: {coins}",
-      "monthlyBonus": "{coins} bonus coins every month"
-    },
     "modal": {
       "title": "Start a game",
       "step": "Step {step} / {total}",
@@ -2378,12 +2372,6 @@
       "summary": "{teams} teams · {questions} questions · {seconds} seconds each · about {minutes} min",
       "start": "Start game",
       "starting": "Getting ready…",
-      "costNote": "Free games are used up: this game costs {cost} coins.",
-      "limitTitle": "This month's free games are used up",
-      "limitText": "You need {cost} coins to play again. Your balance: {coins}. Next month you get {free} free games and {bonus} coins.",
-      "limitGuest": "Sign in to get {bonus} bonus coins every month and keep playing.",
-      "signIn": "Sign in",
-      "understood": "Got it",
       "startError": "Couldn't start the game. Please try again.",
       "teamDefault": {
         "blue": "Blue team",
@@ -2392,7 +2380,8 @@
       },
       "errors": {
         "tooLong": "No more than {max} characters"
-      }
+      },
+      "teamsNote": "Team names can also be changed during the game"
     },
     "topicBlock": {
       "title": "Interactive games",

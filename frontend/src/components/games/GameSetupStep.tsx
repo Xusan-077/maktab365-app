@@ -43,15 +43,12 @@ export function GameSetupStep({
   game,
   questionTotal,
   pending,
-  note,
   onSubmit,
 }: {
   game: GameId;
   /** Mavzudagi faol savollar soni. */
   questionTotal: number;
   pending: boolean;
-  /** Boshlash tugmasi ustidagi izoh (masalan, tanga yechilishi). */
-  note?: string | null;
   onSubmit: (result: GameSetupResult) => void;
 }) {
   const t = useTranslations("games.modal");
@@ -207,11 +204,9 @@ export function GameSetupStep({
             minutes: estimateMinutes(questionCount),
           })}
         </p>
-        {note && (
-          <p className="text-accent-soft-foreground bg-accent-soft rounded-[1rem] px-4 py-2.5 text-sm font-semibold">
-            {note}
-          </p>
-        )}
+        <p className="text-muted text-center text-sm" data-testid="game-setup-note">
+          {t("teamsNote")}
+        </p>
         <button
           type="submit"
           disabled={pending}

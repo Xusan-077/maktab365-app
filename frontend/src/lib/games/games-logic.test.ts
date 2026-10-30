@@ -15,7 +15,6 @@ import {
   specialPoints,
 } from "./box";
 import { gamesHref, parseGameFilters } from "./filters";
-import { consumeGuest, guestAllowance, monthKey, parseGuestRecord } from "./guest-allowance";
 import {
   pullRope,
   ropeDots,
@@ -222,31 +221,5 @@ describe("filters", () => {
     });
     expect(gamesHref({ grade: 5, q: "kasr" })).toBe("/games?q=kasr&grade=5");
     expect(gamesHref({})).toBe("/games");
-  });
-});
-
-describe("guest allowance", () => {
-  // 2026-10-31 20:00 UTC = 1-noyabr 01:00 Toshkent.
-  const lateOctoberUtc = new Date("2026-10-31T20:00:00Z");
-
-  it("uses the Tashkent month", () => {
-    expect(monthKey(new Date("2026-10-15T12:00:00Z"))).toBe("2026-10");
-    expect(monthKey(lateOctoberUtc)).toBe("2026-11");
-  });
-
-  it("counts games within the month and resets next month", () => {
-    const now = new Date("2026-10-15T12:00:00Z");
-    let record = null as ReturnType<typeof consumeGuest>;
-    for (let i = 0; i < 10; i++) record = consumeGuest(record, now);
-    expect(guestAllowance(record, now)).toEqual({ limit: 10, used: 10, left: 0 });
-    expect(consumeGuest(record, now)).toBeNull();
-    expect(guestAllowance(record, lateOctoberUtc).left).toBe(10);
-  });
-
-  it("ignores malformed storage", () => {
-    expect(parseGuestRecord({ month: "2026-10", used: 3 })).toEqual({ month: "2026-10", used: 3 });
-    expect(parseGuestRecord({ month: "oct", used: 3 })).toBeNull();
-    expect(parseGuestRecord({ month: "2026-10", used: -1 })).toBeNull();
-    expect(parseGuestRecord("x")).toBeNull();
   });
 });

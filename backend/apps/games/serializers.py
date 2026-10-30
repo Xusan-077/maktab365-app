@@ -90,15 +90,6 @@ class CheckAnswerSerializer(serializers.Serializer):
     correct_option_id = serializers.UUIDField()
 
 
-class AllowanceSerializer(serializers.Serializer):
-    month = serializers.DateField()
-    free_games_limit = serializers.IntegerField()
-    free_games_used = serializers.IntegerField()
-    free_games_left = serializers.IntegerField()
-    coins = serializers.IntegerField()
-    game_cost_coins = serializers.IntegerField()
-
-
 def validate_game_type(value: str) -> str:
     if not GAME_TYPE_RE.match(value):
         raise serializers.ValidationError("invalid_game_type")
@@ -126,8 +117,6 @@ class SessionStartRequestSerializer(serializers.Serializer):
 
 class SessionStartSerializer(serializers.Serializer):
     session_id = serializers.UUIDField()
-    paid_with = serializers.ChoiceField(choices=["free", "coins"])
-    allowance = AllowanceSerializer()
 
 
 class TeamResultSerializer(serializers.Serializer):
@@ -164,8 +153,6 @@ class GameSessionSerializer(serializers.ModelSerializer):
             "id",
             "game_type",
             "topic",
-            "paid_with",
-            "coins_spent",
             "started_at",
             "finished_at",
             "duration_seconds",

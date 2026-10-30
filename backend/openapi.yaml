@@ -2848,26 +2848,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/CheckAnswer'
           description: ''
-  /api/v1/games/allowance/:
-    get:
-      operationId: games_allowance
-      summary: Oylik bepul o'yinlar va tanga balansi (yangi oyda bonus beriladi)
-      tags:
-      - games
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Allowance'
-          description: ''
   /api/v1/games/sessions/:
     post:
       operationId: games_sessions_start
-      summary: 'O''yin boshlanishi: bitta urinish sarflanadi (bepul, tugagan bo''lsa
-        tanga)'
+      summary: 'O''yin boshlanishi (faqat statistika): hech narsa sarflamaydi, bloklanmaydi'
       tags:
       - games
       requestBody:
@@ -2950,29 +2934,6 @@ components:
       - recent_activity
       - recent_messages
       - subjects_count
-    Allowance:
-      type: object
-      properties:
-        month:
-          type: string
-          format: date
-        free_games_limit:
-          type: integer
-        free_games_used:
-          type: integer
-        free_games_left:
-          type: integer
-        coins:
-          type: integer
-        game_cost_coins:
-          type: integer
-      required:
-      - coins
-      - free_games_left
-      - free_games_limit
-      - free_games_used
-      - game_cost_coins
-      - month
     Annotation:
       type: object
       properties:
@@ -3529,14 +3490,11 @@ components:
     ExportGames:
       type: object
       properties:
-        coins:
-          type: integer
         sessions:
           type: array
           items:
             $ref: '#/components/schemas/GameSession'
       required:
-      - coins
       - sessions
     ExportIdentity:
       type: object
@@ -3679,13 +3637,6 @@ components:
           type: string
           nullable: true
           readOnly: true
-        paid_with:
-          allOf:
-          - $ref: '#/components/schemas/GameSessionPaidWithEnum'
-          readOnly: true
-        coins_spent:
-          type: integer
-          readOnly: true
         started_at:
           type: string
           format: date-time
@@ -3705,23 +3656,13 @@ components:
             $ref: '#/components/schemas/TeamResult'
           readOnly: true
       required:
-      - coins_spent
       - duration_seconds
       - finished_at
       - game_type
       - id
-      - paid_with
       - started_at
       - teams
       - topic
-    GameSessionPaidWithEnum:
-      enum:
-      - free
-      - coins
-      type: string
-      description: |-
-        * `free` - Free
-        * `coins` - Coins
     GameSubject:
       type: object
       properties:
@@ -5450,22 +5391,8 @@ components:
         session_id:
           type: string
           format: uuid
-        paid_with:
-          $ref: '#/components/schemas/SessionStartPaidWithEnum'
-        allowance:
-          $ref: '#/components/schemas/Allowance'
       required:
-      - allowance
-      - paid_with
       - session_id
-    SessionStartPaidWithEnum:
-      enum:
-      - free
-      - coins
-      type: string
-      description: |-
-        * `free` - free
-        * `coins` - coins
     SessionStartRequestRequest:
       type: object
       properties:

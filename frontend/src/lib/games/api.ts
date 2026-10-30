@@ -10,13 +10,9 @@ export type GameTopic = Schemas["GameTopic"];
 export type GameTopicPage = Schemas["PaginatedGameTopicList"];
 export type GameQuestion = Schemas["GameQuestion"];
 export type GameQuestions = Schemas["GameQuestions"];
-export type GameAllowance = Schemas["Allowance"];
 export type GameSessionStart = Schemas["SessionStart"];
 export type GameSession = Schemas["GameSession"];
 export type CheckAnswer = Schemas["CheckAnswer"];
-
-/** Server 403 bilan qaytaradi: oylik bepul o'yinlar tugagan va tanga yetmaydi. */
-export const GAME_LIMIT_REACHED = "game_limit_reached";
 
 export const GAME_TOPICS_PAGE_SIZE = 24;
 
@@ -61,12 +57,7 @@ export class GamesApi {
     return unwrap(result);
   }
 
-  /** Faqat kirgan foydalanuvchi uchun. */
-  async allowance(): Promise<GameAllowance> {
-    return unwrap(await this.client.GET("/api/v1/games/allowance/"));
-  }
-
-  /** Bitta urinish sarflanadi (bepul yoki tanga); limitda `ApiError` `game_limit_reached` (403). */
+  /** Faqat kirgan foydalanuvchi uchun; statistika yozuvi, hech narsa sarflamaydi. */
   async startSession(game: GameId, topicSlug: string): Promise<GameSessionStart> {
     const result = await this.client.POST("/api/v1/games/sessions/", {
       body: { game_type: game, topic: topicSlug },

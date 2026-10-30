@@ -5,22 +5,19 @@ import { useQuery } from "@tanstack/react-query";
 import { Gamepad2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { useGameAllowance } from "@/hooks/useGameAllowance";
 import { GAME_IDS, GAME_KEYS, type GameId } from "@/lib/games/config";
 import { gameQueries } from "@/lib/games/queries";
 import { gameTopicSlug } from "@/lib/utils/routes";
-import { AllowanceChips } from "./AllowanceChips";
 import { GameIcon } from "./GameIcon";
 import { GameStartModal } from "./GameStartModal";
 
 /**
- * Mavzu sahifasidagi "Interaktiv o'yinlar" bloki: 3 o'yin kartasi va limit chiplari.
+ * Mavzu sahifasidagi "Interaktiv o'yinlar" bloki: 3 o'yin kartasi.
  * Karta shu mavzu va o'yin bilan kirish modalini ochadi. Savollari yetmagan mavzuda — izoh.
  */
 export function TopicGamesBlock({ chapterId }: { chapterId: string }) {
   const t = useTranslations("games");
   const topic = useQuery(gameQueries.topic(gameTopicSlug(chapterId)));
-  const allowance = useGameAllowance();
   const [game, setGame] = useState<GameId | null>(null);
 
   return (
@@ -60,7 +57,6 @@ export function TopicGamesBlock({ chapterId }: { chapterId: string }) {
         </p>
       ) : (
         <>
-          <AllowanceChips state={allowance} />
           <ul className="flex flex-col gap-2.5">
             {GAME_IDS.map((id) => {
               const key = GAME_KEYS[id];

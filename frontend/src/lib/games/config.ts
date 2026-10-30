@@ -52,7 +52,3 @@ export const fitQuestionCount = (wanted: number, questionCount: number) => {
   if (available.includes(wanted as (typeof QUESTION_COUNTS)[number])) return wanted;
   return available.at(-1) ?? QUESTION_COUNTS[0];
 };
-
-/** Backend sozlamalari bilan bir xil (mehmon limiti va chiplar uchun). */
-export const FREE_GAMES_PER_MONTH = 10;
-export const MONTHLY_BONUS_COINS = 20;

@@ -1554,23 +1554,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/games/allowance/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Oylik bepul o'yinlar va tanga balansi (yangi oyda bonus beriladi) */
-        get: operations["games_allowance"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/games/sessions/": {
         parameters: {
             query?: never;
@@ -1580,7 +1563,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** O'yin boshlanishi: bitta urinish sarflanadi (bepul, tugagan bo'lsa tanga) */
+        /** O'yin boshlanishi (faqat statistika): hech narsa sarflamaydi, bloklanmaydi */
         post: operations["games_sessions_start"];
         delete?: never;
         options?: never;
@@ -1615,15 +1598,6 @@ export interface components {
             new_messages: number;
             recent_messages: components["schemas"]["RecentMessage"][];
             recent_activity: components["schemas"]["AuditEntry"][];
-        };
-        Allowance: {
-            /** Format: date */
-            month: string;
-            free_games_limit: number;
-            free_games_used: number;
-            free_games_left: number;
-            coins: number;
-            game_cost_coins: number;
         };
         Annotation: {
             /** Format: uuid */
@@ -1863,7 +1837,6 @@ export interface components {
             created_at: string;
         };
         ExportGames: {
-            coins: number;
             sessions: components["schemas"]["GameSession"][];
         };
         ExportIdentity: {
@@ -1918,8 +1891,6 @@ export interface components {
             readonly id: string;
             readonly game_type: string;
             readonly topic: string | null;
-            readonly paid_with: components["schemas"]["GameSessionPaidWithEnum"];
-            readonly coins_spent: number;
             /** Format: date-time */
             readonly started_at: string;
             /** Format: date-time */
@@ -1927,12 +1898,6 @@ export interface components {
             readonly duration_seconds: number | null;
             readonly teams: components["schemas"]["TeamResult"][];
         };
-        /**
-         * @description * `free` - Free
-         *     * `coins` - Coins
-         * @enum {string}
-         */
-        GameSessionPaidWithEnum: "free" | "coins";
         GameSubject: {
             slug: string;
             title: components["schemas"]["LocalizedText"];
@@ -2636,15 +2601,7 @@ export interface components {
         SessionStart: {
             /** Format: uuid */
             session_id: string;
-            paid_with: components["schemas"]["SessionStartPaidWithEnum"];
-            allowance: components["schemas"]["Allowance"];
         };
-        /**
-         * @description * `free` - free
-         *     * `coins` - coins
-         * @enum {string}
-         */
-        SessionStartPaidWithEnum: "free" | "coins";
         SessionStartRequestRequest: {
             game_type: string;
             topic?: string | null;
@@ -5484,25 +5441,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CheckAnswer"];
-                };
-            };
-        };
-    };
-    games_allowance: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Allowance"];
                 };
             };
         };

@@ -176,10 +176,6 @@ GAMES_MIN_QUESTIONS = env.int("GAMES_MIN_QUESTIONS", default=8)
 GAMES_DEFAULT_QUESTIONS = 16
 GAMES_MIN_COUNT = 4
 GAMES_MAX_COUNT = 40
-# Kirgan foydalanuvchi: oyiga bepul o'yinlar, oylik tanga bonusi, bepullar tugagach o'yin narxi.
-GAMES_FREE_PER_MONTH = env.int("GAMES_FREE_PER_MONTH", default=10)
-GAMES_MONTHLY_COINS = env.int("GAMES_MONTHLY_COINS", default=20)
-GAMES_COIN_COST = env.int("GAMES_COIN_COST", default=5)
 # `answer_token` amal qilish muddati (o'yin uzoq davom etishi mumkin).
 GAMES_ANSWER_TOKEN_MAX_AGE = env.int("GAMES_ANSWER_TOKEN_MAX_AGE", default=6 * 60 * 60)
 

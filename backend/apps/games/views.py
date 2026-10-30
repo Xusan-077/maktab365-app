@@ -13,7 +13,6 @@ from apps.core.permissions import IsLearner
 from . import services
 from .models import GameSession
 from .serializers import (
-    AllowanceSerializer,
     CheckAnswerRequestSerializer,
     CheckAnswerSerializer,
     GameQuestionsSerializer,
@@ -114,21 +113,6 @@ class CheckAnswerView(APIView):
         return Response(CheckAnswerSerializer(result).data)
 
 
-class AllowanceView(APIView):
-    permission_classes = [IsLearner]
-
-    @extend_schema(
-        operation_id="games_allowance",
-        tags=TAGS,
-        responses=AllowanceSerializer,
-        summary="Oylik bepul o'yinlar va tanga balansi (yangi oyda bonus beriladi)",
-    )
-    def get(self, request):
-        response = Response(AllowanceSerializer(services.allowance_summary(request.user)).data)
-        response["Cache-Control"] = NO_STORE
-        return response
-
-
 class SessionStartView(APIView):
     permission_classes = [IsLearner]
 
@@ -137,16 +121,15 @@ class SessionStartView(APIView):
         tags=TAGS,
         request=SessionStartRequestSerializer,
         responses={201: SessionStartSerializer},
-        summary="O'yin boshlanishi: bitta urinish sarflanadi (bepul, tugagan bo'lsa tanga)",
+        summary="O'yin boshlanishi (faqat statistika): hech narsa sarflamaydi, bloklanmaydi",
     )
     def post(self, request):
         body = SessionStartRequestSerializer(data=request.data)
         body.is_valid(raise_exception=True)
-        session, allowance = services.start_session(
+        session = services.start_session(
             request.user, body.validated_data["game_type"], body.validated_data.get("topic")
         )
-        data = {"session_id": session.pk, "paid_with": session.paid_with, "allowance": allowance}
-        return Response(SessionStartSerializer(data).data, status=201)
+        return Response(SessionStartSerializer({"session_id": session.pk}).data, status=201)
 
 
 class SessionFinishView(APIView):

@@ -7,7 +7,6 @@ export const gameKeys = {
   root: ["games"] as const,
   topics: (filters: GameFilters) => ["games", "topics", filters] as const,
   topic: (slug: string) => ["games", "topic", slug] as const,
-  allowance: () => ["games", "allowance"] as const,
 };
 
 export const gameQueries = {
@@ -33,11 +32,5 @@ export const gameQueries = {
         }
       },
       staleTime: 5 * 60_000,
-    }),
-  allowance: () =>
-    queryOptions({
-      queryKey: gameKeys.allowance(),
-      queryFn: () => getGamesApi().allowance(),
-      staleTime: 30_000,
     }),
 };

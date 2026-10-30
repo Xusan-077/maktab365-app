@@ -2350,12 +2350,6 @@
         "description": "Ikki jamoa bellashadi: har to'g'ri javob arqonni o'z tomoningizga tortadi."
       }
     },
-    "allowance": {
-      "freeLeft": "Bepul {limit} tadan {left} ta qoldi",
-      "coins": "{coins} tanga",
-      "coinsLabel": "Tanga balansi: {coins}",
-      "monthlyBonus": "Har oy {coins} tanga bonus"
-    },
     "modal": {
       "title": "O'yinni boshlash",
       "step": "{step}-qadam / {total}",
@@ -2378,12 +2372,6 @@
       "summary": "{teams} jamoa · {questions} ta savol · har biriga {seconds} soniya · taxminan {minutes} daqiqa",
       "start": "O'yinni boshlash",
       "starting": "Tayyorlanmoqda…",
-      "costNote": "Bepul o'yinlar tugagan: bu o'yin uchun {cost} tanga yechiladi.",
-      "limitTitle": "Bu oygi bepul o'yinlar tugadi",
-      "limitText": "Yana o'ynash uchun {cost} tanga kerak. Balansingiz: {coins} tanga. Yangi oyda {free} ta bepul o'yin va {bonus} tanga beriladi.",
-      "limitGuest": "Kirsangiz, har oy {bonus} tanga bonus olasiz va o'ynashda davom etasiz.",
-      "signIn": "Kirish",
-      "understood": "Tushunarli",
       "startError": "O'yinni boshlab bo'lmadi. Qayta urinib ko'ring.",
       "teamDefault": {
         "blue": "Ko'k jamoa",
@@ -2392,7 +2380,8 @@
       },
       "errors": {
         "tooLong": "Nom {max} belgidan oshmasin"
-      }
+      },
+      "teamsNote": "Jamoa nomlarini o'yin davomida ham o'zgartirish mumkin"
     },
     "topicBlock": {
       "title": "Interaktiv o'yinlar",

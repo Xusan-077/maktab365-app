@@ -97,73 +97,9 @@ class Option(UUIDModel):
         return self.text.get("uz", "")[:60]
 
 
-class GameAllowance(models.Model):
-    """Foydalanuvchining oylik o'yin hisobi (oy — `LOCAL_TIME_ZONE` bo'yicha, 1-kuni)."""
-
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="game_allowances"
-    )
-    month = models.DateField()
-    free_used = models.PositiveIntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=["user", "month"], name="games_allowance_user_month")
-        ]
-
-    def __str__(self):
-        return f"{self.user_id} {self.month:%Y-%m}"
-
-
-class CoinWallet(models.Model):
-    """Tanga balansi (o'zgarishlar `CoinTransaction` da); yozishda `select_for_update`."""
-
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="coin_wallet"
-    )
-    balance = models.PositiveIntegerField(default=0)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"{self.user_id}: {self.balance}"
-
-
-class CoinReason(models.TextChoices):
-    MONTHLY_BONUS = "monthly_bonus", "Monthly bonus"
-    GAME = "game", "Game"
-
-
-class CoinTransaction(models.Model):
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="coin_transactions"
-    )
-    amount = models.IntegerField()
-    reason = models.CharField(max_length=16, choices=CoinReason.choices)
-    month = models.DateField()
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ["-created_at"]
-        constraints = [
-            # Oylik bonus bir oyda bir marta.
-            models.UniqueConstraint(
-                fields=["user", "month"],
-                condition=models.Q(reason="monthly_bonus"),
-                name="games_coin_bonus_once_per_month",
-            )
-        ]
-
-    def __str__(self):
-        return f"{self.user_id} {self.amount:+d} {self.reason}"
-
-
-class PaidWith(models.TextChoices):
-    FREE = "free", "Free"
-    COINS = "coins", "Coins"
-
-
 class GameSession(UUIDModel):
+    """O'yin statistikasi: boshlash hech narsa sarflamaydi va bloklanmaydi."""
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="game_sessions"
     )
@@ -176,8 +112,6 @@ class GameSession(UUIDModel):
         related_name="game_sessions",
     )
     game_type = models.CharField(max_length=32)
-    paid_with = models.CharField(max_length=8, choices=PaidWith.choices)
-    coins_spent = models.PositiveIntegerField(default=0)
     started_at = models.DateTimeField(auto_now_add=True, db_index=True)
     finished_at = models.DateTimeField(null=True, blank=True)
     duration_seconds = models.PositiveIntegerField(null=True, blank=True)

@@ -1,27 +1,16 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Coins, X } from "lucide-react";
+import { ArrowLeft, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, m } from "@/components/ui/motion";
 import { useAuth } from "@/hooks/useAuth";
-import { consumeGuestGame, useGameAllowance } from "@/hooks/useGameAllowance";
-import { ApiError } from "@/lib/api/types";
-import { getGamesApi, GAME_LIMIT_REACHED, type GameTopic } from "@/lib/games/api";
-import {
-  FREE_GAMES_PER_MONTH,
-  GAME_KEYS,
-  MONTHLY_BONUS_COINS,
-  type GameId,
-} from "@/lib/games/config";
-import { gameKeys } from "@/lib/games/queries";
+import { getGamesApi, type GameTopic } from "@/lib/games/api";
+import { GAME_KEYS, type GameId } from "@/lib/games/config";
 import { useRouter } from "@/lib/i18n/navigation";
 import { cn } from "@/lib/utils/cn";
 import { gamePlayPath } from "@/lib/utils/routes";
-import { useAuthModalStore } from "@/stores/auth-modal.store";
 import { useGameStore } from "@/stores/game.store";
-import { AllowanceChips } from "./AllowanceChips";
 import { GamePickStep } from "./GamePickStep";
 import { GameSetupStep, type GameSetupResult } from "./GameSetupStep";
 
@@ -46,8 +35,8 @@ export interface GameStartModalProps {
 
 /**
  * O'yinga kirish modali: 1) o'yin tanlash, 2) jamoalar va savollar. "O'yinni boshlash" savollarni
- * oladi, urinish sarflaydi (kirgan — server sessiyasi, mehmon — `localStorage`), holatni
- * `useGameStore` ga yozadi va o'yin sahifasiga o'tadi. Native `<dialog>`: focus trap va Esc.
+ * oladi, kirgan foydalanuvchiga statistika sessiyasini ochadi, holatni `useGameStore` ga yozadi
+ * va o'yin sahifasiga o'tadi. Native `<dialog>`: focus trap va Esc.
  */
 export function GameStartModal({ topic, initialGame = null, onClose }: GameStartModalProps) {
   const ref = useRef<HTMLDialogElement>(null);
@@ -135,10 +124,7 @@ function ModalBody({
   const t = useTranslations("games.modal");
   const tl = useTranslations("games.list");
   const router = useRouter();
-  const queryClient = useQueryClient();
   const { status } = useAuth();
-  const allowance = useGameAllowance();
-  const openAuth = useAuthModalStore((state) => state.openModal);
   const startGame = useGameStore((state) => state.start);
 
   const [step, setStep] = useState<1 | 2>(1);
@@ -146,62 +132,37 @@ function ModalBody({
   const [game, setGame] = useState<GameId | null>(initialGame);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState(false);
-  const [limit, setLimit] = useState(false);
 
   const goTo = (next: 1 | 2) => {
     setDirection(next > step ? 1 : -1);
     setStep(next);
     setError(false);
-    setLimit(false);
   };
-
-  const user = allowance.kind === "user" ? allowance.allowance : null;
-  const costNote =
-    user && user.free_games_left === 0 && user.coins >= user.game_cost_coins
-      ? t("costNote", { cost: user.game_cost_coins })
-      : null;
 
   const start = async ({ teamNames, questionCount }: GameSetupResult) => {
     if (!game || pending || status === "loading") return;
-    const signedIn = status === "authenticated";
-    if (!signedIn && allowance.kind === "guest" && allowance.guest.left <= 0) {
-      setLimit(true);
-      return;
-    }
     setPending(true);
     setError(false);
     try {
       const api = getGamesApi();
-      // Avval savollar: olinmasa urinish behuda sarflanmaydi.
       const { questions } = await api.questions(topic.slug, questionCount);
-      let sessionId: string | null = null;
-      if (signedIn) {
-        const session = await api.startSession(game, topic.slug);
-        sessionId = session.session_id;
-        queryClient.setQueryData(gameKeys.allowance(), session.allowance);
-      } else if (!consumeGuestGame()) {
-        setLimit(true);
-        return;
-      }
+      // Sessiya faqat statistika uchun: yozilmasa ham o'yin boshlanadi.
+      const sessionId =
+        status === "authenticated"
+          ? await api.startSession(game, topic.slug).then(
+              (session) => session.session_id,
+              () => null,
+            )
+          : null;
       startGame({ game, topic, teamNames, questionCount, questions, sessionId });
       // Orqaga qaytilganda modal qayta ochilmasin.
       onClose();
       router.push(gamePlayPath(topic.slug, game));
-    } catch (cause) {
-      if (cause instanceof ApiError && cause.code === GAME_LIMIT_REACHED) {
-        setLimit(true);
-        void queryClient.invalidateQueries({ queryKey: gameKeys.allowance() });
-      } else {
-        setError(true);
-      }
+    } catch {
+      setError(true);
     } finally {
       setPending(false);
     }
-  };
-
-  const signIn = () => {
-    onClose();
-    openAuth({ reason: "default" });
   };
 
   return (
@@ -244,7 +205,7 @@ function ModalBody({
       <div className="overflow-x-hidden overflow-y-auto px-4 pt-3 pb-5 sm:px-8 sm:pb-8">
         <AnimatePresence mode="wait" custom={direction} initial={false}>
           <m.div
-            key={limit ? "limit" : step}
+            key={step}
             custom={direction}
             variants={slide}
             initial="enter"
@@ -252,23 +213,13 @@ function ModalBody({
             exit="exit"
             className="flex flex-col gap-5"
           >
-            {limit ? (
-              <LimitNotice
-                titleId={titleId}
-                guest={status !== "authenticated"}
-                coins={user?.coins ?? 0}
-                cost={user?.game_cost_coins ?? 0}
-                onSignIn={signIn}
-                onDone={onClose}
-              />
-            ) : step === 1 ? (
+            {step === 1 ? (
               <>
                 <div className="flex flex-col items-center gap-2 text-center">
                   <h2 id={titleId} className="text-2xl font-extrabold tracking-tight sm:text-3xl">
                     {t("pickTitle")}
                   </h2>
                   <p className="text-muted text-base">{t("pickLead", { topic: topic.title })}</p>
-                  <AllowanceChips state={allowance} showBonus={false} className="justify-center" />
                 </div>
                 <GamePickStep selected={game} onSelect={setGame} />
                 <button
@@ -297,7 +248,6 @@ function ModalBody({
                     game={game}
                     questionTotal={topic.question_count}
                     pending={pending}
-                    note={costNote}
                     onSubmit={(result) => void start(result)}
                   />
                   {error && (
@@ -311,47 +261,6 @@ function ModalBody({
           </m.div>
         </AnimatePresence>
       </div>
-    </div>
-  );
-}
-
-/** Server `game_limit_reached` (yoki mehmon limiti): xato toast emas, tushunarli holat. */
-function LimitNotice({
-  titleId,
-  guest,
-  coins,
-  cost,
-  onSignIn,
-  onDone,
-}: {
-  titleId: string;
-  guest: boolean;
-  coins: number;
-  cost: number;
-  onSignIn: () => void;
-  onDone: () => void;
-}) {
-  const t = useTranslations("games.modal");
-  return (
-    <div className="flex flex-col items-center gap-4 py-4 text-center" data-testid="game-limit">
-      <span className="bg-accent-soft text-accent-soft-foreground flex size-18 items-center justify-center rounded-[1.5rem]">
-        <Coins className="size-9" aria-hidden />
-      </span>
-      <h2 id={titleId} className="text-2xl font-extrabold tracking-tight sm:text-3xl">
-        {t("limitTitle")}
-      </h2>
-      <p className="text-muted max-w-md text-base">
-        {guest
-          ? t("limitGuest", { bonus: MONTHLY_BONUS_COINS })
-          : t("limitText", { cost, coins, free: FREE_GAMES_PER_MONTH, bonus: MONTHLY_BONUS_COINS })}
-      </p>
-      <button
-        type="button"
-        onClick={guest ? onSignIn : onDone}
-        className="game-press bg-game-indigo inline-flex h-14 min-w-48 items-center justify-center rounded-[1.125rem] px-6 text-lg font-extrabold text-white"
-      >
-        {guest ? t("signIn") : t("understood")}
-      </button>
     </div>
   );
 }

@@ -1,12 +1,11 @@
-"""O'yinlar mantiqi: mavzular, tasodifiy savollar, javob tokeni, oylik limit va tangalar."""
+"""O'yinlar mantiqi: mavzular, tasodifiy savollar, javob tokeni va o'yin statistikasi."""
 
 import random
 import uuid
-from datetime import date
 
 from django.conf import settings
 from django.core import signing
-from django.db import IntegrityError, transaction
+from django.db import transaction
 from django.db.models import Count, Q, QuerySet
 from django.utils import timezone
 from django.utils.text import slugify
@@ -16,16 +15,7 @@ from rest_framework.exceptions import APIException, NotFound
 from apps.content.models import PdfBookChapter
 from apps.content.pdf_services import public_pdf_books
 
-from .models import (
-    CoinReason,
-    CoinTransaction,
-    CoinWallet,
-    GameAllowance,
-    GameSession,
-    Option,
-    PaidWith,
-    Question,
-)
+from .models import GameSession, Option, Question
 
 ANSWER_TOKEN_SALT = "games.answer"  # noqa: S105 — signing salt, sir emas
 # Slug oxiridagi bo'lim id'si qismi (12 hex = 48 bit): nom qismi faqat chiroy uchun.
@@ -39,14 +29,6 @@ class InvalidAnswerToken(APIException):
     status_code = status.HTTP_400_BAD_REQUEST
     default_code = "invalid_answer_token"
     default_detail = "Answer token is invalid or expired."
-
-
-class GameLimitReached(APIException):
-    """Oylik bepul o'yinlar tugagan va tanga yetmaydi."""
-
-    status_code = status.HTTP_403_FORBIDDEN
-    default_code = "game_limit_reached"
-    default_detail = "No free games left this month and not enough coins."
 
 
 class SessionFinished(APIException):
@@ -162,82 +144,12 @@ def check_answer(token: str, option_id: uuid.UUID) -> dict:
     return {"correct": option_id == correct_id, "correct_option_id": correct_id}
 
 
-# --- Oylik limit va tangalar ---
+# --- Statistika ---
 
 
-def current_month() -> date:
-    """Joriy oy (mahalliy vaqt bo'yicha) — 1-kuni."""
-    from zoneinfo import ZoneInfo
-
-    today = timezone.now().astimezone(ZoneInfo(settings.LOCAL_TIME_ZONE)).date()
-    return today.replace(day=1)
-
-
-def _ensure_month(user) -> GameAllowance:
-    """Oy uchun hisob yozuvi; yangi oyning birinchi murojaatida tanga bonusi beriladi."""
-    month = current_month()
-    allowance = GameAllowance.objects.filter(user=user, month=month).first()
-    if allowance is not None:
-        return allowance
-    try:
-        with transaction.atomic():
-            allowance = GameAllowance.objects.create(user=user, month=month)
-            wallet, _ = CoinWallet.objects.select_for_update().get_or_create(user=user)
-            bonus = settings.GAMES_MONTHLY_COINS
-            if bonus:
-                CoinTransaction.objects.create(
-                    user=user, amount=bonus, reason=CoinReason.MONTHLY_BONUS, month=month
-                )
-                wallet.balance += bonus
-                wallet.save(update_fields=["balance", "updated_at"])
-    except IntegrityError:
-        # Parallel so'rov oyni allaqachon ochgan (bonus bir marta).
-        allowance = GameAllowance.objects.get(user=user, month=month)
-    return allowance
-
-
-def allowance_summary(user) -> dict:
-    allowance = _ensure_month(user)
-    wallet, _ = CoinWallet.objects.get_or_create(user=user)
-    return _summary(allowance, wallet)
-
-
-def _summary(allowance: GameAllowance, wallet: CoinWallet) -> dict:
-    limit = settings.GAMES_FREE_PER_MONTH
-    return {
-        "month": allowance.month,
-        "free_games_limit": limit,
-        "free_games_used": allowance.free_used,
-        "free_games_left": max(limit - allowance.free_used, 0),
-        "coins": wallet.balance,
-        "game_cost_coins": settings.GAMES_COIN_COST,
-    }
-
-
-def start_session(user, game_type: str, topic: PdfBookChapter | None) -> tuple[GameSession, dict]:
-    """Bitta urinishni sarflaydi: avval oylik bepul o'yin, tugagan bo'lsa tanga."""
-    _ensure_month(user)
-    with transaction.atomic():
-        allowance = GameAllowance.objects.select_for_update().get(user=user, month=current_month())
-        wallet, _ = CoinWallet.objects.select_for_update().get_or_create(user=user)
-        cost = settings.GAMES_COIN_COST
-        if allowance.free_used < settings.GAMES_FREE_PER_MONTH:
-            allowance.free_used += 1
-            allowance.save(update_fields=["free_used"])
-            paid_with, spent = PaidWith.FREE, 0
-        elif cost > 0 and wallet.balance >= cost:
-            wallet.balance -= cost
-            wallet.save(update_fields=["balance", "updated_at"])
-            CoinTransaction.objects.create(
-                user=user, amount=-cost, reason=CoinReason.GAME, month=allowance.month
-            )
-            paid_with, spent = PaidWith.COINS, cost
-        else:
-            raise GameLimitReached()
-        session = GameSession.objects.create(
-            user=user, topic=topic, game_type=game_type, paid_with=paid_with, coins_spent=spent
-        )
-    return session, _summary(allowance, wallet)
+def start_session(user, game_type: str, topic: PdfBookChapter | None) -> GameSession:
+    """Faqat statistika uchun yozuv: hech narsa sarflamaydi va hech qachon bloklanmaydi."""
+    return GameSession.objects.create(user=user, topic=topic, game_type=game_type)
 
 
 def finish_session(session: GameSession, data: dict) -> GameSession:
@@ -257,19 +169,12 @@ def finish_session(session: GameSession, data: dict) -> GameSession:
 
 
 def delete_user_data(user) -> None:
-    """`delete_account` uchun: o'yin tarixi, limit va tangalar."""
+    """`delete_account` uchun: o'yin tarixi."""
     GameSession.objects.filter(user=user).delete()
-    GameAllowance.objects.filter(user=user).delete()
-    CoinTransaction.objects.filter(user=user).delete()
-    CoinWallet.objects.filter(user=user).delete()
 
 
 def export_user_data(user) -> dict:
-    wallet = CoinWallet.objects.filter(user=user).first()
-    return {
-        "coins": wallet.balance if wallet else 0,
-        "sessions": GameSession.objects.filter(user=user).select_related("topic"),
-    }
+    return {"sessions": GameSession.objects.filter(user=user).select_related("topic")}
 
 
 # --- Kirill → lotin (qidiruv uchun) ---

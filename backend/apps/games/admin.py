@@ -18,5 +18,5 @@ class QuestionAdmin(admin.ModelAdmin):
 
 @admin.register(GameSession)
 class GameSessionAdmin(admin.ModelAdmin):
-    list_display = ["id", "user", "game_type", "paid_with", "started_at", "finished_at"]
-    list_filter = ["game_type", "paid_with"]
+    list_display = ["id", "user", "game_type", "started_at", "finished_at"]
+    list_filter = ["game_type"]

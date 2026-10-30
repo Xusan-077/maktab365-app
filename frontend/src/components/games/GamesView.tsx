@@ -8,7 +8,6 @@ import { useSearchParams } from "next/navigation";
 import { FilterChip } from "@/components/site/FilterChip";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { useGameAllowance } from "@/hooks/useGameAllowance";
 import type { GameTopic } from "@/lib/games/api";
 import {
   gamesHref,
@@ -23,7 +22,6 @@ import { getLocalized } from "@/lib/i18n/localized";
 import { useRouter } from "@/lib/i18n/navigation";
 import { pdfQueries } from "@/lib/pdf-books/queries";
 import { cn } from "@/lib/utils/cn";
-import { AllowanceChips } from "./AllowanceChips";
 import { GameStartModal } from "./GameStartModal";
 import { GameTopicCard } from "./GameTopicCard";
 
@@ -52,7 +50,6 @@ export function GamesView() {
   });
   useEffect(() => () => clearTimeout(timer.current), []);
   const [active, setActive] = useState<GameTopic | null>(null);
-  const allowance = useGameAllowance();
 
   // O'zimiz yozgan `q` — URL'ga yetib kelganda inputni qayta yozmaslik uchun (yozish davom etayotgan bo'lishi mumkin).
   const [pushedQ, setPushedQ] = useState(filters.q);
@@ -97,7 +94,6 @@ export function GamesView() {
           </h1>
           <p className="text-muted text-base sm:text-lg">{t("lead")}</p>
         </div>
-        <AllowanceChips state={allowance} className="justify-center" />
         <search className="w-full max-w-3xl">
           <form
             role="search"
