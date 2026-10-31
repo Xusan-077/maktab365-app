@@ -2,7 +2,16 @@
 
 from rest_framework import serializers
 
-from .models import Book, BookChapter, Bookmark, BookPage, UserBookProgress
+from . import annotation_validation as validation
+from .models import (
+    AnnotationType,
+    Book,
+    BookChapter,
+    Bookmark,
+    BookPage,
+    PageAnnotation,
+    UserBookProgress,
+)
 
 
 class BookSerializer(serializers.ModelSerializer):
@@ -93,3 +102,54 @@ class BookPageTextSerializer(serializers.ModelSerializer):
         model = BookPage
         fields = ["number", "text"]
         read_only_fields = fields
+
+
+class PageNoteSerializer(serializers.Serializer):
+    page = serializers.IntegerField(read_only=True)
+    text = serializers.CharField(read_only=True, allow_blank=True)
+    updated_at = serializers.DateTimeField(read_only=True, allow_null=True)
+
+
+class PageNoteWriteSerializer(serializers.Serializer):
+    text = serializers.CharField(
+        allow_blank=True, trim_whitespace=False, max_length=validation.NOTE_MAX
+    )
+
+
+class PageAnnotationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PageAnnotation
+        fields = ["id", "page", "type", "data", "created_at", "updated_at"]
+        read_only_fields = fields
+
+
+class AnnotationInputSerializer(serializers.Serializer):
+    """Mijoz `id` (UUID) beradi: optimistik yozuv va qayta yuborish idempotent bo'ladi."""
+
+    id = serializers.UUIDField(required=False)
+    type = serializers.ChoiceField(choices=AnnotationType.choices)
+    data = serializers.JSONField()
+
+    def validate(self, attrs):
+        attrs["data"] = validation.clean_data(attrs["type"], attrs["data"])
+        return attrs
+
+
+class AnnotationCreateSerializer(AnnotationInputSerializer):
+    page = serializers.IntegerField(min_value=1)
+
+
+class AnnotationUpdateSerializer(serializers.Serializer):
+    data = serializers.JSONField()
+
+
+class PageAnnotationsReplaceSerializer(serializers.Serializer):
+    annotations = AnnotationInputSerializer(many=True, allow_empty=True)
+
+    def validate_annotations(self, items):
+        if len(items) > validation.MAX_PER_PAGE:
+            raise serializers.ValidationError("too_many_annotations")
+        ids = [item["id"] for item in items if "id" in item]
+        if len(ids) != len(set(ids)):
+            raise serializers.ValidationError("duplicate_id")
+        return items

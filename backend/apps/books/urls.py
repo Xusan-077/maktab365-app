@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import me_views, views
+from . import annotation_views, me_views, views
 
 urlpatterns = [
     path("books/", views.BookListView.as_view(), name="books-list"),
@@ -31,5 +31,25 @@ urlpatterns = [
         "me/books/<uuid:pk>/bookmarks/<int:page>/",
         me_views.MyBookmarkDetailView.as_view(),
         name="me-books-bookmark",
+    ),
+    path(
+        "me/books/<uuid:pk>/pages/<int:number>/notes/",
+        annotation_views.MyPageNoteView.as_view(),
+        name="me-books-note",
+    ),
+    path(
+        "me/books/<uuid:pk>/pages/<int:number>/annotations/",
+        annotation_views.MyPageAnnotationsView.as_view(),
+        name="me-books-page-annotations",
+    ),
+    path(
+        "me/books/<uuid:pk>/annotations/",
+        annotation_views.MyAnnotationsView.as_view(),
+        name="me-books-annotations",
+    ),
+    path(
+        "me/books/<uuid:pk>/annotations/<uuid:annotation_id>/",
+        annotation_views.MyAnnotationDetailView.as_view(),
+        name="me-books-annotation",
     ),
 ]

@@ -151,3 +151,50 @@ class Bookmark(UUIDModel):
 
     def __str__(self):
         return f"{self.user_id}/{self.book_id}/{self.page}"
+
+
+class PageNote(UUIDModel, TimeStampedModel):
+    """Betga yozilgan matn (yon daftar): foydalanuvchi + kitob + bet uchun bitta."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="book_page_notes"
+    )
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name="page_notes")
+    page = models.PositiveIntegerField(validators=[MinValueValidator(1)])
+    text = models.TextField(blank=True, validators=[MaxLengthValidator(20000)])
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "book", "page"], name="books_note_once_per_page"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.user_id}/{self.book_id}/{self.page}"
+
+
+class AnnotationType(models.TextChoices):
+    DRAWING = "drawing", "Chizma"
+    HIGHLIGHT = "highlight", "Belgilash"
+    TEXT = "text", "Matn"
+
+
+class PageAnnotation(UUIDModel, TimeStampedModel):
+    """Bet ustidagi chizma/belgi/matn. Koordinatalar bet o'lchamiga nisbatan 0..1 (zoom va
+    qurilmadan mustaqil); `data` tuzilishi `type` ga bog'liq (`annotation_validation.py`)."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="book_annotations"
+    )
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name="annotations")
+    page = models.PositiveIntegerField(validators=[MinValueValidator(1)])
+    type = models.CharField(max_length=12, choices=AnnotationType.choices)
+    data = models.JSONField()
+
+    class Meta:
+        ordering = ["created_at"]
+        indexes = [models.Index(fields=["user", "book", "page"])]
+
+    def __str__(self):
+        return f"{self.user_id}/{self.book_id}/{self.page}/{self.type}"

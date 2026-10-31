@@ -2,14 +2,30 @@
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useAnnotationLoader } from "@/hooks/useAnnotationLoader";
+import { useAnnotationSync } from "@/hooks/useAnnotationSync";
+import { useAuth } from "@/hooks/useAuth";
 import { useBookBookmarks } from "@/hooks/useBookBookmarks";
 import { useBookProgress } from "@/hooks/useBookProgress";
 import { useFullscreen } from "@/hooks/useFullscreen";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { useRequireAuth } from "@/hooks/useRequireAuth";
+import { useToast } from "@/hooks/useToast";
+import type { AnnotationTool } from "@/lib/books/annotations";
+import type { SheetState } from "@/lib/books/workspace";
 import type { BookDetail, BookPage } from "@/lib/books/api";
 import { currentChapter, effectiveView, stepPage } from "@/lib/books/reader";
 import { clampPage, parsePageParam } from "@/lib/pdf/page-nav";
 import { clampZoom, DEFAULT_ZOOM, MAX_ZOOM } from "@/lib/pdf/zoom";
+import {
+  selectCanRedo,
+  selectCanUndo,
+  selectPageItems,
+  useBookAnnotationsStore,
+} from "@/stores/book-annotations.store";
 import { useBookReaderStore } from "@/stores/book-reader.store";
+import { useBookWorkspaceStore } from "@/stores/book-workspace.store";
 import { BookReaderSkeleton } from "./BookReaderSkeleton";
 import { FindDialog } from "./FindDialog";
 import { PageView } from "./PageView";
@@ -17,6 +33,11 @@ import { ReaderBottomBar, ReaderTopBar } from "./ReaderBars";
 import { TextView } from "./TextView";
 import { TocDialog } from "./TocDialog";
 import { useIdleChrome } from "./useIdleChrome";
+import { AnnotationCanvas } from "./workspace/AnnotationCanvas";
+import { NotesAside } from "./workspace/NotesAside";
+import { NotesPanel } from "./workspace/NotesPanel";
+import { NotesSheet } from "./workspace/NotesSheet";
+import { ToolBar } from "./workspace/ToolBar";
 
 const ZOOM_STEP = 0.5;
 
@@ -43,6 +64,7 @@ export function BookReader({ book, pages }: BookReaderProps) {
   const total = pages.length;
   const searchParams = useSearchParams();
   const root = useRef<HTMLDivElement>(null);
+  const pageScroller = useRef<HTMLDivElement>(null);
   const fullscreen = useFullscreen(root);
   const hydrated = useSyncExternalStore(subscribeHydration, isHydrated, () => false);
   const progress = useBookProgress(book.id);
@@ -54,12 +76,23 @@ export function BookReader({ book, pages }: BookReaderProps) {
   const lineHeight = useBookReaderStore((state) => state.lineHeight);
   const setView = useBookReaderStore((state) => state.setView);
 
+  const t = useTranslations("books.workspace");
+  const { toast } = useToast();
+  const { signedIn } = useAuth();
+  const requireAuth = useRequireAuth();
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
+  const workspace = useBookWorkspaceStore();
+  const tool = useBookAnnotationsStore((state) => state.tool);
+  const selectedId = useBookAnnotationsStore((state) => state.selectedId);
+  const drawMode = tool !== "none";
+  const [sheet, setSheet] = useState<SheetState>("closed");
+
   const [tocOpen, setTocOpen] = useState(false);
   const [tocTab, setTocTab] = useState<"contents" | "bookmarks">("contents");
   const [findOpen, setFindOpen] = useState(false);
   const [zoom, setZoom] = useState(DEFAULT_ZOOM);
   const [lookOpen, setLookOpen] = useState(false);
-  const chrome = useIdleChrome(tocOpen || findOpen || lookOpen);
+  const chrome = useIdleChrome(tocOpen || findOpen || lookOpen || drawMode);
 
   // Boshlang'ich bet: URL (`?bet=`) > saqlangan oxirgi bet > 1. Saqlangan bet aniqlangach bir marta.
   const [start, setStart] = useState<number | null>(null);
@@ -69,6 +102,18 @@ export function BookReader({ book, pages }: BookReaderProps) {
     setStart(fromUrl ?? clampPage(progress.lastPage ?? 1, total));
   }
   const page = chosen ?? start;
+  const currentPage = page ?? 1;
+
+  const sync = useAnnotationSync();
+  useEffect(() => {
+    useBookAnnotationsStore.getState().attach(book.id);
+    return () => useBookAnnotationsStore.getState().setTool("none");
+  }, [book.id]);
+  const annotationsState = useAnnotationLoader(book.id, currentPage, total);
+  const pageItems = useBookAnnotationsStore(selectPageItems(currentPage));
+  const canUndo = useBookAnnotationsStore(selectCanUndo(currentPage));
+  const canRedo = useBookAnnotationsStore(selectCanRedo(currentPage));
+  const notesOpen = isDesktop ? workspace.notesOpen : sheet !== "closed";
 
   const hasText = pages.some((item) => item.has_text);
   const activeView = effectiveView(view, hasText);
@@ -100,7 +145,13 @@ export function BookReader({ book, pages }: BookReaderProps) {
 
   useEffect(() => {
     void useBookReaderStore.persist.rehydrate();
+    void useBookWorkspaceStore.persist.rehydrate();
   }, []);
+
+  // Bet almashganda tanlov bekor qilinadi.
+  useEffect(() => {
+    useBookAnnotationsStore.getState().select(null);
+  }, [currentPage]);
 
   const { toggle: toggleBookmark } = bookmarks;
   const toggleBookmarkHere = useCallback(() => {
@@ -111,29 +162,82 @@ export function BookReader({ book, pages }: BookReaderProps) {
     setTocOpen(true);
   }, []);
 
+  const textView = activeView === "text";
+  const chooseTool = useCallback(
+    (next: AnnotationTool) => {
+      const apply = () => useBookAnnotationsStore.getState().setTool(next);
+      if (next === "none") apply();
+      else requireAuth(apply, "note");
+    },
+    [requireAuth],
+  );
+  const toggleNotes = useCallback(() => {
+    if (isDesktop) workspace.toggleNotes();
+    else setSheet((state) => (state === "closed" ? "half" : "closed"));
+  }, [isDesktop, workspace]);
+  const undo = useCallback(() => {
+    if (page !== null) useBookAnnotationsStore.getState().undo(page);
+  }, [page]);
+  const redo = useCallback(() => {
+    if (page !== null) useBookAnnotationsStore.getState().redo(page);
+  }, [page]);
+  const commitItems = useCallback(
+    (items: Parameters<ReturnType<typeof useBookAnnotationsStore.getState>["commit"]>[1]) => {
+      if (page !== null) useBookAnnotationsStore.getState().commit(page, items);
+    },
+    [page],
+  );
+  const panPage = useCallback((dx: number, dy: number) => {
+    pageScroller.current?.scrollBy({ left: dx, top: dy });
+  }, []);
+  const notifyLimit = useCallback(() => toast({ variant: "error", title: t("limit") }), [toast, t]);
+
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.altKey || event.metaKey || isTyping(event.target)) return;
+      const lower = event.key.toLowerCase();
       if (event.ctrlKey) {
-        if (event.key.toLowerCase() === "f") {
+        if (lower === "f") {
           event.preventDefault();
           setFindOpen(true);
+        } else if (lower === "z" && !tocOpen && !findOpen) {
+          event.preventDefault();
+          if (event.shiftKey) redo();
+          else undo();
+        } else if (lower === "y" && !tocOpen && !findOpen) {
+          event.preventDefault();
+          redo();
         }
         return;
       }
       if (tocOpen || findOpen) return;
       const key = event.key;
-      if (key === "ArrowRight" || key === "PageDown") step(1);
-      else if (key === "ArrowLeft" || key === "PageUp") step(-1);
-      else if (key === "Home") go(1);
-      else if (key === "End") go(total);
+      const paging = !drawMode;
+      if (paging && (key === "ArrowRight" || key === "PageDown")) step(1);
+      else if (paging && (key === "ArrowLeft" || key === "PageUp")) step(-1);
+      else if (paging && key === "Home") go(1);
+      else if (paging && key === "End") go(total);
       else if (key === "+" || key === "=") changeZoom(zoom + ZOOM_STEP);
       else if (key === "-") changeZoom(zoom - ZOOM_STEP);
       else if (key === "0") changeZoom(DEFAULT_ZOOM);
-      else if (key.toLowerCase() === "f") fullscreen.toggle();
-      else if (key.toLowerCase() === "t") openToc();
-      else if (key.toLowerCase() === "b") toggleBookmarkHere();
-      else if (key === "/") setFindOpen(true);
+      else if (lower === "f") fullscreen.toggle();
+      else if (lower === "m") openToc();
+      else if (lower === "b") toggleBookmarkHere();
+      else if (lower === "n") toggleNotes();
+      else if (!textView && lower === "p") chooseTool("pen");
+      else if (!textView && lower === "h") chooseTool("highlight");
+      else if (!textView && lower === "t") chooseTool("text");
+      else if (!textView && lower === "e") chooseTool("eraser");
+      else if (!textView && lower === "v") chooseTool("select");
+      else if (drawMode && key === "Escape") chooseTool("none");
+      else if (drawMode && selectedId && (key === "Delete" || key === "Backspace")) {
+        const { pages, commit: commitPage } = useBookAnnotationsStore.getState();
+        commitPage(
+          currentPage,
+          (pages[currentPage]?.items ?? []).filter((item) => item.id !== selectedId),
+        );
+        useBookAnnotationsStore.getState().select(null);
+      } else if (key === "/") setFindOpen(true);
       else return;
       event.preventDefault();
     };
@@ -150,6 +254,14 @@ export function BookReader({ book, pages }: BookReaderProps) {
     toggleBookmarkHere,
     tocOpen,
     findOpen,
+    drawMode,
+    textView,
+    selectedId,
+    currentPage,
+    chooseTool,
+    toggleNotes,
+    undo,
+    redo,
   ]);
 
   if (page === null) return <BookReaderSkeleton />;
@@ -161,54 +273,136 @@ export function BookReader({ book, pages }: BookReaderProps) {
       ref={root}
       data-book-reader
       data-book-theme={theme}
-      className="bg-bk-stage text-bk-ink relative flex h-dvh flex-col overflow-hidden"
+      data-draw-mode={drawMode || undefined}
+      className="bg-bk-stage text-bk-ink relative flex h-dvh flex-col overflow-hidden lg:flex-row"
     >
-      {activeView === "text" ? (
-        <TextView
+      <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
+        {activeView === "text" ? (
+          <TextView
+            bookId={book.id}
+            page={page}
+            total={total}
+            prefs={{ font, fontSize, lineHeight }}
+            onStep={step}
+            onTap={chrome.toggle}
+            onShowPage={() => setView("page")}
+          />
+        ) : (
+          <PageView
+            title={book.title}
+            pages={pages}
+            page={page}
+            zoom={zoom}
+            onZoomChange={changeZoom}
+            onStep={step}
+            onTap={chrome.toggle}
+            drawMode={drawMode}
+            scrollerRef={pageScroller}
+            overlay={(size) =>
+              annotationsState.ready ? (
+                <AnnotationCanvas
+                  key={page}
+                  size={size}
+                  theme={theme}
+                  tool={tool}
+                  items={pageItems}
+                  settings={{
+                    penColor: workspace.penColor,
+                    penWidth: workspace.penWidth,
+                    highlightColor: workspace.highlightColor,
+                    textColor: workspace.textColor,
+                    textSize: workspace.textSize,
+                  }}
+                  selectedId={selectedId}
+                  zoom={zoom}
+                  onSelect={(id) => useBookAnnotationsStore.getState().select(id)}
+                  onCommit={commitItems}
+                  onZoomChange={changeZoom}
+                  onPan={panPage}
+                  onLimit={notifyLimit}
+                />
+              ) : null
+            }
+          />
+        )}
+
+        <ReaderTopBar
+          visible={chrome.visible}
           bookId={book.id}
+          title={book.title}
+          chapterTitle={chapter?.title ?? null}
+          bookmarked={bookmarks.isBookmarked(page)}
+          fullscreen={fullscreen}
+          prefs={{ view: activeView, theme, font, fontSize, lineHeight }}
+          hasText={hasText}
+          notesOpen={notesOpen}
+          onToggleNotes={toggleNotes}
+          onLookOpenChange={setLookOpen}
+          onOpenToc={() => openToc()}
+          onOpenFind={() => setFindOpen(true)}
+          onToggleBookmark={toggleBookmarkHere}
+        />
+        <ReaderBottomBar
+          visible={chrome.visible}
           page={page}
           total={total}
-          prefs={{ font, fontSize, lineHeight }}
-          onStep={step}
-          onTap={chrome.toggle}
-          onShowPage={() => setView("page")}
+          chapterTitle={(target) => currentChapter(book.chapters, target)?.title ?? null}
+          zoom={activeView === "page" ? zoom : null}
+          onZoom={(direction) => changeZoom(zoom + direction * ZOOM_STEP)}
+          onZoomReset={() => changeZoom(DEFAULT_ZOOM)}
+          onGo={go}
         />
-      ) : (
-        <PageView
-          title={book.title}
-          pages={pages}
-          page={page}
-          zoom={zoom}
-          onZoomChange={changeZoom}
-          onStep={step}
-          onTap={chrome.toggle}
-        />
-      )}
 
-      <ReaderTopBar
-        visible={chrome.visible}
-        bookId={book.id}
-        title={book.title}
-        chapterTitle={chapter?.title ?? null}
-        bookmarked={bookmarks.isBookmarked(page)}
-        fullscreen={fullscreen}
-        prefs={{ view: activeView, theme, font, fontSize, lineHeight }}
-        hasText={hasText}
-        onLookOpenChange={setLookOpen}
-        onOpenToc={() => openToc()}
-        onOpenFind={() => setFindOpen(true)}
-        onToggleBookmark={toggleBookmarkHere}
-      />
-      <ReaderBottomBar
-        visible={chrome.visible}
-        page={page}
-        total={total}
-        chapterTitle={(target) => currentChapter(book.chapters, target)?.title ?? null}
-        zoom={activeView === "page" ? zoom : null}
-        onZoom={(direction) => changeZoom(zoom + direction * ZOOM_STEP)}
-        onZoomReset={() => changeZoom(DEFAULT_ZOOM)}
-        onGo={go}
-      />
+        {!textView && (
+          <ToolBar
+            tool={tool}
+            settings={{
+              penColor: workspace.penColor,
+              penWidth: workspace.penWidth,
+              highlightColor: workspace.highlightColor,
+              textColor: workspace.textColor,
+              textSize: workspace.textSize,
+            }}
+            recentColors={workspace.recentColors}
+            theme={theme}
+            canUndo={canUndo}
+            canRedo={canRedo}
+            visible={chrome.visible}
+            onToolChange={chooseTool}
+            onUndo={undo}
+            onRedo={redo}
+            onPenColor={workspace.setPenColor}
+            onPenWidth={workspace.setPenWidth}
+            onHighlightColor={workspace.setHighlightColor}
+            onTextColor={workspace.setTextColor}
+            onTextSize={workspace.setTextSize}
+          />
+        )}
+      </div>
+
+      {(() => {
+        const panel = (
+          <NotesPanel
+            bookId={book.id}
+            page={page}
+            signedIn={signedIn}
+            onRequireAuth={() => requireAuth(undefined, "note")}
+            onRetrySave={() => void sync.flushNow()}
+            onClose={isDesktop ? () => workspace.setNotesOpen(false) : () => setSheet("closed")}
+          />
+        );
+        return isDesktop ? (
+          workspace.notesOpen && (
+            <NotesAside width={workspace.panelWidth} onWidthChange={workspace.setPanelWidth}>
+              {panel}
+            </NotesAside>
+          )
+        ) : (
+          <NotesSheet state={sheet} onStateChange={setSheet}>
+            {panel}
+          </NotesSheet>
+        );
+      })()}
 
       <TocDialog
         open={tocOpen}

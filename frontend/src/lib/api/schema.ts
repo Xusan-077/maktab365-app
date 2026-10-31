@@ -2031,6 +2031,77 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/books/{id}/pages/{number}/notes/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Betning yon daftar yozuvi (yo'q bo'lsa bo'sh matn) */
+        get: operations["me_books_note_retrieve"];
+        /** Betning yozuvini saqlash (idempotent; bo'sh matn yozuvni o'chiradi) */
+        put: operations["me_books_note_update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/books/{id}/pages/{number}/annotations/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Bir betning barcha annotatsiyasini bitta so'rovda saqlash (almashtiradi) */
+        put: operations["me_books_page_annotations_replace"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/books/{id}/annotations/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Betlardagi annotatsiyalar (`pages=3,4,5` yoki `page=3`, ko'pi bilan 10 bet) */
+        get: operations["me_books_annotations_list"];
+        put?: never;
+        /** Annotatsiya qo'shish (mijoz `id` bergan bo'lsa idempotent) */
+        post: operations["me_books_annotations_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/books/{id}/annotations/{annotation_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Annotatsiyani o'chirish */
+        delete: operations["me_books_annotations_delete"];
+        options?: never;
+        head?: never;
+        /** Annotatsiya ma'lumotini yangilash (turi o'zgarmaydi) */
+        patch: operations["me_books_annotations_update"];
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2054,6 +2125,21 @@ export interface components {
             /** Format: date-time */
             readonly updated_at: string;
         };
+        /** @description Mijoz `id` (UUID) beradi: optimistik yozuv va qayta yuborish idempotent bo'ladi. */
+        AnnotationCreateRequest: {
+            /** Format: uuid */
+            id?: string;
+            type: components["schemas"]["AnnotationTypeEnum"];
+            data: unknown;
+            page: number;
+        };
+        /** @description Mijoz `id` (UUID) beradi: optimistik yozuv va qayta yuborish idempotent bo'ladi. */
+        AnnotationInputRequest: {
+            /** Format: uuid */
+            id?: string;
+            type: components["schemas"]["AnnotationTypeEnum"];
+            data: unknown;
+        };
         AnnotationRect: {
             /** Format: double */
             x: number;
@@ -2074,6 +2160,13 @@ export interface components {
             /** Format: double */
             h: number;
         };
+        /**
+         * @description * `drawing` - Chizma
+         *     * `highlight` - Belgilash
+         *     * `text` - Matn
+         * @enum {string}
+         */
+        AnnotationTypeEnum: "drawing" | "highlight" | "text";
         /** @description PUT: belgi (`id` yo'lda, mijozda yaratilgan UUID). */
         AnnotationWriteRequest: {
             pdf_book_id: string;
@@ -2779,6 +2872,29 @@ export interface components {
             email: string;
             code: string;
         };
+        PageAnnotation: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly page: number;
+            readonly type: components["schemas"]["AnnotationTypeEnum"];
+            readonly data: unknown;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        PageAnnotationsReplaceRequest: {
+            annotations: components["schemas"]["AnnotationInputRequest"][];
+        };
+        PageNote: {
+            readonly page: number;
+            readonly text: string;
+            /** Format: date-time */
+            readonly updated_at: string | null;
+        };
+        PageNoteWriteRequest: {
+            text: string;
+        };
         PaginatedBookAdminList: {
             /** @example 123 */
             count: number;
@@ -2925,6 +3041,9 @@ export interface components {
         };
         PasswordSetRequest: {
             new_password: string;
+        };
+        PatchedAnnotationUpdateRequest: {
+            data?: unknown;
         };
         PatchedBookAdminRequest: {
             title?: string;
@@ -7165,6 +7284,194 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    me_books_note_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                number: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PageNote"];
+                };
+            };
+        };
+    };
+    me_books_note_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                number: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PageNoteWriteRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PageNoteWriteRequest"];
+                "multipart/form-data": components["schemas"]["PageNoteWriteRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PageNote"];
+                };
+            };
+        };
+    };
+    me_books_page_annotations_replace: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                number: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PageAnnotationsReplaceRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PageAnnotationsReplaceRequest"];
+                "multipart/form-data": components["schemas"]["PageAnnotationsReplaceRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PageAnnotation"][];
+                };
+            };
+        };
+    };
+    me_books_annotations_list: {
+        parameters: {
+            query?: {
+                /** @description Bitta bet */
+                page?: number;
+                /** @description Vergul bilan: 3,4,5 */
+                pages?: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PageAnnotation"][];
+                };
+            };
+        };
+    };
+    me_books_annotations_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnnotationCreateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["AnnotationCreateRequest"];
+                "multipart/form-data": components["schemas"]["AnnotationCreateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PageAnnotation"];
+                };
+            };
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PageAnnotation"];
+                };
+            };
+        };
+    };
+    me_books_annotations_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                annotation_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    me_books_annotations_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                annotation_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedAnnotationUpdateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedAnnotationUpdateRequest"];
+                "multipart/form-data": components["schemas"]["PatchedAnnotationUpdateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PageAnnotation"];
+                };
             };
         };
     };

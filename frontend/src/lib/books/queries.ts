@@ -15,6 +15,9 @@ export const bookKeys = {
   progress: (id: string) => ["books", "progress", id] as const,
   progressList: () => ["books", "progress", "all"] as const,
   bookmarks: (id: string) => ["books", "bookmarks", id] as const,
+  note: (id: string, page: number) => ["books", "note", id, page] as const,
+  annotations: (id: string, pages: readonly number[]) =>
+    ["books", "annotations", id, pages.join(",")] as const,
 };
 
 export const bookQueries = {
@@ -49,5 +52,20 @@ export const bookQueries = {
       queryKey: bookKeys.bookmarks(id),
       queryFn: () => getMyBooksApi().bookmarks(id),
       retry: retryUnlessClientError,
+    }),
+  note: (id: string, page: number) =>
+    queryOptions({
+      queryKey: bookKeys.note(id, page),
+      queryFn: () => getMyBooksApi().note(id, page),
+      retry: retryUnlessClientError,
+    }),
+  annotations: (id: string, pages: readonly number[]) =>
+    queryOptions({
+      queryKey: bookKeys.annotations(id, pages),
+      queryFn: () => getMyBooksApi().annotations(id, pages),
+      retry: retryUnlessClientError,
+      // Server nusxasi faqat bir marta storega o'tadi; keyin store (mahalliy tarix) manba.
+      staleTime: Infinity,
+      gcTime: 60_000,
     }),
 };

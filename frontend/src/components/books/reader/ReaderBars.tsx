@@ -11,6 +11,7 @@ import {
   Maximize,
   Minimize,
   Minus,
+  NotebookPen,
   Plus,
   Search,
 } from "lucide-react";
@@ -39,6 +40,8 @@ export interface TopBarProps {
   hasText: boolean;
   /** "Ko'rinish" menyusi ochiq bo'lganda panel yashirinmasligi uchun. */
   onLookOpenChange: (open: boolean) => void;
+  notesOpen: boolean;
+  onToggleNotes: () => void;
   onOpenToc: () => void;
   onOpenFind: () => void;
   onToggleBookmark: () => void;
@@ -55,6 +58,8 @@ export function ReaderTopBar({
   prefs,
   hasText,
   onLookOpenChange,
+  notesOpen,
+  onToggleNotes,
   onOpenToc,
   onOpenFind,
   onToggleBookmark,
@@ -113,6 +118,16 @@ export function ReaderTopBar({
         ) : (
           <Bookmark className="size-5" aria-hidden />
         )}
+      </button>
+      <button
+        type="button"
+        className={BK_ICON_BUTTON}
+        onClick={onToggleNotes}
+        aria-pressed={notesOpen}
+        aria-label={notesOpen ? t("notesClose") : t("notesOpen")}
+        title={withKey(notesOpen ? t("notesClose") : t("notesOpen"), keys("notes"))}
+      >
+        <NotebookPen className="size-5" aria-hidden />
       </button>
       <AppearanceMenu
         prefs={prefs}

@@ -1,5 +1,6 @@
 import { createHttpClient, unwrap, type HttpClient } from "@/lib/api/http-client";
 import type { components } from "@/lib/api/schema";
+import type { AnnotationItem } from "./annotations";
 
 type Schemas = components["schemas"];
 
@@ -11,6 +12,8 @@ export type BookSearchHit = Schemas["BookSearchHit"];
 export type BookPageText = Schemas["BookPageText"];
 export type BookProgress = Schemas["BookProgress"];
 export type Bookmark = Schemas["Bookmark"];
+export type PageNote = Schemas["PageNote"];
+export type ServerAnnotation = Schemas["PageAnnotation"];
 export type BookType = Schemas["BookTypeEnum"];
 export type BookLanguage = Schemas["LanguageEnum"];
 
@@ -114,6 +117,43 @@ export class MyBooksApi {
     const result = await this.client.POST("/api/v1/me/books/{id}/bookmarks/", {
       params: { path: { id } },
       body: { page },
+    });
+    return unwrap(result);
+  }
+
+  /** Betning yon daftar yozuvi (yozilmagan bo'lsa bo'sh matn). */
+  async note(id: string, page: number): Promise<PageNote> {
+    const result = await this.client.GET("/api/v1/me/books/{id}/pages/{number}/notes/", {
+      params: { path: { id, number: page } },
+    });
+    return unwrap(result);
+  }
+
+  async saveNote(id: string, page: number, text: string): Promise<PageNote> {
+    const result = await this.client.PUT("/api/v1/me/books/{id}/pages/{number}/notes/", {
+      params: { path: { id, number: page } },
+      body: { text },
+    });
+    return unwrap(result);
+  }
+
+  /** Bir nechta betning annotatsiyalari bitta so'rovda (ko'pi bilan 10 bet). */
+  async annotations(id: string, pages: readonly number[]): Promise<ServerAnnotation[]> {
+    const result = await this.client.GET("/api/v1/me/books/{id}/annotations/", {
+      params: { path: { id }, query: { pages: pages.join(",") } },
+    });
+    return unwrap(result);
+  }
+
+  /** Betning barcha annotatsiyasini almashtiradi (idempotent: mijoz id'lari saqlanadi). */
+  async savePageAnnotations(
+    id: string,
+    page: number,
+    items: readonly AnnotationItem[],
+  ): Promise<ServerAnnotation[]> {
+    const result = await this.client.PUT("/api/v1/me/books/{id}/pages/{number}/annotations/", {
+      params: { path: { id, number: page } },
+      body: { annotations: [...items] },
     });
     return unwrap(result);
   }

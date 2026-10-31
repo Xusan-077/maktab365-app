@@ -2940,19 +2940,95 @@
         "textOnly": "Shrift, hajm va oraliq matn rejimida ishlaydi."
       },
       "keys": {
-        "toc": "T",
+        "toc": "M",
         "search": "/",
         "bookmark": "B",
         "fullscreen": "F",
         "prev": "←",
         "next": "→",
         "zoomIn": "+",
-        "zoomOut": "−"
-      }
+        "zoomOut": "−",
+        "notes": "N"
+      },
+      "notesOpen": "Yozuvlar panelini ochish",
+      "notesClose": "Yozuvlar panelini yopish"
     },
     "card": {
       "progress": "{percent}% o'qilgan",
       "continue": "{page}-bet"
+    },
+    "workspace": {
+      "open": "Chizish",
+      "close": "Chizishni yopish",
+      "toolbar": "Chizish asboblari",
+      "tools": {
+        "select": "Tanlash va siljitish",
+        "pen": "Qalam",
+        "highlight": "Belgilash",
+        "text": "Matn",
+        "eraser": "O'chirgich"
+      },
+      "undo": "Bekor qilish",
+      "redo": "Qaytarish",
+      "color": "Rang",
+      "width": "Chiziq qalinligi",
+      "widths": {
+        "0": "Ingichka",
+        "1": "O'rtacha",
+        "2": "Qalin"
+      },
+      "textSize": "Matn o'lchami",
+      "textSizes": {
+        "0": "Kichik",
+        "1": "O'rtacha",
+        "2": "Katta"
+      },
+      "textInput": "Matn",
+      "textPlaceholder": "Yozing…",
+      "limit": "Bu betda yozuvlar juda ko'p. Ba'zilarini o'chiring.",
+      "colors": {
+        "ink": "Qora (fonga moslashadi)",
+        "e5484d": "Qizil",
+        "3b82f6": "Ko'k",
+        "30a46c": "Yashil",
+        "f59e0b": "To'q sariq",
+        "8e4ec6": "Binafsha",
+        "fde047": "Sariq",
+        "86efac": "Och yashil",
+        "f9a8d4": "Pushti",
+        "93c5fd": "Och ko'k"
+      },
+      "keys": {
+        "select": "V",
+        "pen": "P",
+        "highlight": "H",
+        "text": "T",
+        "eraser": "E",
+        "undo": "Ctrl+Z",
+        "redo": "Ctrl+Shift+Z",
+        "close": "Esc",
+        "notes": "N"
+      },
+      "save": {
+        "saving": "Saqlanmoqda…",
+        "saved": "Saqlandi",
+        "failed": "Saqlanmadi.",
+        "retry": "Qayta urinish",
+        "tooLarge": "Bu bet uchun yozuvlar hajmi juda katta."
+      },
+      "notes": {
+        "title": "Betning yozuvlari",
+        "heading": "{page}-bet yozuvlari",
+        "label": "{page}-bet uchun yozuvlar",
+        "placeholder": "Shu bet haqida yozing: savol, xulosa, eslatma…",
+        "guestPlaceholder": "Yozuvlarni saqlash uchun kiring",
+        "loading": "Yozuvlar yuklanmoqda",
+        "loadError": "Yozuvlarni yuklab bo'lmadi.",
+        "retry": "Qayta urinish",
+        "close": "Yozuvlar panelini yopish",
+        "resize": "Panel kengligi",
+        "handle": "Yozuvlar panelini kattalashtirish yoki kichraytirish"
+      }
     }
   }
 }

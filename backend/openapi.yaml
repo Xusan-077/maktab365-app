@@ -3931,6 +3931,248 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/me/books/{id}/pages/{number}/notes/:
+    get:
+      operationId: me_books_note_retrieve
+      summary: Betning yon daftar yozuvi (yo'q bo'lsa bo'sh matn)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: number
+        schema:
+          type: integer
+        required: true
+      tags:
+      - books
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageNote'
+          description: ''
+    put:
+      operationId: me_books_note_update
+      summary: Betning yozuvini saqlash (idempotent; bo'sh matn yozuvni o'chiradi)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: number
+        schema:
+          type: integer
+        required: true
+      tags:
+      - books
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PageNoteWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PageNoteWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PageNoteWriteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageNote'
+          description: ''
+  /api/v1/me/books/{id}/pages/{number}/annotations/:
+    put:
+      operationId: me_books_page_annotations_replace
+      summary: Bir betning barcha annotatsiyasini bitta so'rovda saqlash (almashtiradi)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: number
+        schema:
+          type: integer
+        required: true
+      tags:
+      - books
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PageAnnotationsReplaceRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PageAnnotationsReplaceRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PageAnnotationsReplaceRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PageAnnotation'
+          description: ''
+  /api/v1/me/books/{id}/annotations/:
+    get:
+      operationId: me_books_annotations_list
+      summary: Betlardagi annotatsiyalar (`pages=3,4,5` yoki `page=3`, ko'pi bilan
+        10 bet)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: query
+        name: page
+        schema:
+          type: integer
+        description: Bitta bet
+      - in: query
+        name: pages
+        schema:
+          type: string
+        description: 'Vergul bilan: 3,4,5'
+      tags:
+      - books
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PageAnnotation'
+          description: ''
+    post:
+      operationId: me_books_annotations_create
+      summary: Annotatsiya qo'shish (mijoz `id` bergan bo'lsa idempotent)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - books
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnnotationCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AnnotationCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AnnotationCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageAnnotation'
+          description: ''
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageAnnotation'
+          description: ''
+  /api/v1/me/books/{id}/annotations/{annotation_id}/:
+    patch:
+      operationId: me_books_annotations_update
+      summary: Annotatsiya ma'lumotini yangilash (turi o'zgarmaydi)
+      parameters:
+      - in: path
+        name: annotation_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - books
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAnnotationUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAnnotationUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAnnotationUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageAnnotation'
+          description: ''
+    delete:
+      operationId: me_books_annotations_delete
+      summary: Annotatsiyani o'chirish
+      parameters:
+      - in: path
+        name: annotation_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - books
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
 components:
   schemas:
     AdminDashboard:
@@ -3994,6 +4236,38 @@ components:
       - pdf_book_id
       - rects
       - updated_at
+    AnnotationCreateRequest:
+      type: object
+      description: 'Mijoz `id` (UUID) beradi: optimistik yozuv va qayta yuborish idempotent
+        bo''ladi.'
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          $ref: '#/components/schemas/AnnotationTypeEnum'
+        data: {}
+        page:
+          type: integer
+          minimum: 1
+      required:
+      - data
+      - page
+      - type
+    AnnotationInputRequest:
+      type: object
+      description: 'Mijoz `id` (UUID) beradi: optimistik yozuv va qayta yuborish idempotent
+        bo''ladi.'
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          $ref: '#/components/schemas/AnnotationTypeEnum'
+        data: {}
+      required:
+      - data
+      - type
     AnnotationRect:
       type: object
       properties:
@@ -4050,6 +4324,16 @@ components:
       - w
       - x
       - y
+    AnnotationTypeEnum:
+      enum:
+      - drawing
+      - highlight
+      - text
+      type: string
+      description: |-
+        * `drawing` - Chizma
+        * `highlight` - Belgilash
+        * `text` - Matn
     AnnotationWriteRequest:
       type: object
       description: 'PUT: belgi (`id` yo''lda, mijozda yaratilgan UUID).'
@@ -5831,6 +6115,72 @@ components:
       required:
       - code
       - email
+    PageAnnotation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        page:
+          type: integer
+          readOnly: true
+        type:
+          allOf:
+          - $ref: '#/components/schemas/AnnotationTypeEnum'
+          readOnly: true
+        data:
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - data
+      - id
+      - page
+      - type
+      - updated_at
+    PageAnnotationsReplaceRequest:
+      type: object
+      properties:
+        annotations:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnnotationInputRequest'
+      required:
+      - annotations
+    PageNote:
+      type: object
+      properties:
+        page:
+          type: integer
+          readOnly: true
+        text:
+          type: string
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - page
+      - text
+      - updated_at
+    PageNoteWriteRequest:
+      type: object
+      properties:
+        text:
+          type: string
+          maxLength: 20000
+      required:
+      - text
     PaginatedBookAdminList:
       type: object
       required:
@@ -6079,6 +6429,10 @@ components:
           maxLength: 128
       required:
       - new_password
+    PatchedAnnotationUpdateRequest:
+      type: object
+      properties:
+        data: {}
     PatchedBookAdminRequest:
       type: object
       properties:

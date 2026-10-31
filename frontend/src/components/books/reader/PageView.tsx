@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState, type PointerEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type PointerEvent,
+  type ReactNode,
+  type RefObject,
+} from "react";
 import Image from "next/image";
 import { ImageOff, RotateCw } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -24,6 +31,12 @@ export interface PageViewProps {
   onStep: (direction: 1 | -1) => void;
   /** Bo'sh joyga bosilganda (panellarni ko'rsatish/yashirish). */
   onTap: () => void;
+  /** Chizish rejimi: swipe va ikki marta bosish bilan zoom o'chadi (chizishga xalaqit bermasin). */
+  drawMode?: boolean;
+  /** Bet ustiga qatlam (chizma): bet qutisining o'lchami va surish funksiyasi beriladi. */
+  overlay?: (size: { width: number; height: number }) => ReactNode;
+  /** Tashqaridan scroll qilish uchun (qatlam sahifani suradi). */
+  scrollerRef?: RefObject<HTMLDivElement | null>;
 }
 
 /** Bet kasr piksellarga yaxlitlanadi: zoom kichik o'zgarganda rasm "titramasin". */
@@ -41,9 +54,21 @@ function fitWidth(
  * Joy oldindan egallanadi (rasm o'lchami ma'lum) — CLS yo'q; keyingi 2 bet oldindan yuklanadi.
  * Swipe faqat zoom 1× da; ikki marta bosish — 1×/2×; Ctrl+g'ildirak — zoom.
  */
-export function PageView({ title, pages, page, zoom, onZoomChange, onStep, onTap }: PageViewProps) {
+export function PageView({
+  title,
+  pages,
+  page,
+  zoom,
+  onZoomChange,
+  onStep,
+  onTap,
+  drawMode = false,
+  overlay,
+  scrollerRef,
+}: PageViewProps) {
   const t = useTranslations("books.reader");
-  const scroller = useRef<HTMLDivElement>(null);
+  const ownScroller = useRef<HTMLDivElement>(null);
+  const scroller = scrollerRef ?? ownScroller;
   const size = useElementSize(scroller);
   const current = pages[page - 1];
   const swipeStart = useRef<{ x: number; y: number; at: number } | null>(null);
@@ -70,7 +95,7 @@ export function PageView({ title, pages, page, zoom, onZoomChange, onStep, onTap
   // Yangi betga o'tganda kattalashtirilgan ko'rinish boshiga qaytadi.
   useEffect(() => {
     scroller.current?.scrollTo({ top: 0, left: 0 });
-  }, [page]);
+  }, [page, scroller]);
 
   useEffect(() => {
     const element = scroller.current;
@@ -82,10 +107,10 @@ export function PageView({ title, pages, page, zoom, onZoomChange, onStep, onTap
     };
     element.addEventListener("wheel", onWheel, { passive: false });
     return () => element.removeEventListener("wheel", onWheel);
-  }, [onZoomChange]);
+  }, [onZoomChange, scroller]);
 
   const onPointerDown = (event: PointerEvent) => {
-    if (event.pointerType === "mouse") return;
+    if (event.pointerType === "mouse" || drawMode) return;
     swipeStart.current = { x: event.clientX, y: event.clientY, at: event.timeStamp };
   };
   const onPointerUp = (event: PointerEvent) => {
@@ -101,6 +126,7 @@ export function PageView({ title, pages, page, zoom, onZoomChange, onStep, onTap
   };
 
   const width = size && current ? fitWidth(size, current) * zoom : 0;
+  const pageSize = current ? { width, height: (width * current.height) / current.width } : null;
   const ready = loadedKey === imageKey;
   const failed = failedKey === imageKey || (current && !current.image);
 
@@ -112,7 +138,9 @@ export function PageView({ title, pages, page, zoom, onZoomChange, onStep, onTap
       onClick={(event) => {
         if (event.target === event.currentTarget) onTap();
       }}
-      onDoubleClick={() => onZoomChange(doubleTapZoom(zoomRef.current))}
+      onDoubleClick={() => {
+        if (!drawMode) onZoomChange(doubleTapZoom(zoomRef.current));
+      }}
       className="flex min-h-0 flex-1 touch-pan-x touch-pan-y overflow-auto overscroll-contain"
       style={{ paddingBlock: BAR_INSET, paddingInline: SIDE_INSET }}
     >
@@ -166,6 +194,7 @@ export function PageView({ title, pages, page, zoom, onZoomChange, onStep, onTap
               )}
             />
           )}
+          {overlay && pageSize && ready && overlay(pageSize)}
         </div>
       )}
     </div>

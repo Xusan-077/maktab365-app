@@ -2940,19 +2940,95 @@
         "textOnly": "Typeface, size and spacing apply in text view."
       },
       "keys": {
-        "toc": "T",
+        "toc": "M",
         "search": "/",
         "bookmark": "B",
         "fullscreen": "F",
         "prev": "←",
         "next": "→",
         "zoomIn": "+",
-        "zoomOut": "−"
-      }
+        "zoomOut": "−",
+        "notes": "N"
+      },
+      "notesOpen": "Open notes",
+      "notesClose": "Close notes"
     },
     "card": {
       "progress": "{percent}% read",
       "continue": "Page {page}"
+    },
+    "workspace": {
+      "open": "Draw",
+      "close": "Close drawing tools",
+      "toolbar": "Drawing tools",
+      "tools": {
+        "select": "Select and move",
+        "pen": "Pen",
+        "highlight": "Highlighter",
+        "text": "Text",
+        "eraser": "Eraser"
+      },
+      "undo": "Undo",
+      "redo": "Redo",
+      "color": "Color",
+      "width": "Line width",
+      "widths": {
+        "0": "Thin",
+        "1": "Medium",
+        "2": "Thick"
+      },
+      "textSize": "Text size",
+      "textSizes": {
+        "0": "Small",
+        "1": "Medium",
+        "2": "Large"
+      },
+      "textInput": "Text",
+      "textPlaceholder": "Type here…",
+      "limit": "This page has too many marks. Delete some to add more.",
+      "colors": {
+        "ink": "Black (adapts to the background)",
+        "e5484d": "Red",
+        "3b82f6": "Blue",
+        "30a46c": "Green",
+        "f59e0b": "Orange",
+        "8e4ec6": "Purple",
+        "fde047": "Yellow",
+        "86efac": "Light green",
+        "f9a8d4": "Pink",
+        "93c5fd": "Light blue"
+      },
+      "keys": {
+        "select": "V",
+        "pen": "P",
+        "highlight": "H",
+        "text": "T",
+        "eraser": "E",
+        "undo": "Ctrl+Z",
+        "redo": "Ctrl+Shift+Z",
+        "close": "Esc",
+        "notes": "N"
+      },
+      "save": {
+        "saving": "Saving…",
+        "saved": "Saved",
+        "failed": "Not saved.",
+        "retry": "Try again",
+        "tooLarge": "The marks on this page are too large to save."
+      },
+      "notes": {
+        "title": "Page notes",
+        "heading": "Notes for page {page}",
+        "label": "Notes for page {page}",
+        "placeholder": "Write a question, a summary or a reminder about this page…",
+        "guestPlaceholder": "Sign in to save your notes",
+        "loading": "Loading notes",
+        "loadError": "Couldn't load your notes.",
+        "retry": "Try again",
+        "close": "Close notes panel",
+        "resize": "Panel width",
+        "handle": "Expand or collapse the notes panel"
+      }
     }
   }
 }

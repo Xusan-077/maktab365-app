@@ -288,6 +288,7 @@ SPECTACULAR_SETTINGS = {
         "SupportStatusEnum": "apps.support.models.Status.choices",
         "BookTypeEnum": "apps.books.models.BookType.choices",
         "BookStatusEnum": "apps.books.models.BookStatus.choices",
+        "AnnotationTypeEnum": "apps.books.models.AnnotationType.choices",
     },
 }
 
