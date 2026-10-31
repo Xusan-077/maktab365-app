@@ -1,7 +1,7 @@
 import createClient from "openapi-fetch";
 import { BFF_PREFIX } from "@/lib/auth/config";
 import { toBffUrl } from "@/lib/auth/request-guards";
-import { recoverSession, redirectToLogin, shouldRecover } from "@/lib/auth/session-recovery";
+import { endSession, recoverSession, shouldRecover } from "@/lib/auth/session-recovery";
 import type { paths } from "./schema";
 import { ApiError, type ApiErrorBody } from "./types";
 
@@ -87,7 +87,7 @@ export function createFetch(options: HttpClientOptions = {}): typeof fetch {
               continue;
             }
           }
-          redirectToLogin();
+          await endSession();
         }
         return response;
       } catch (error) {

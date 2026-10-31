@@ -1,4 +1,5 @@
-import { getApiSession } from "@/lib/api/session";
+import { getApiSession, setApiSession } from "@/lib/api/session";
+import { broadcastSessionEvent } from "./session-sync";
 import { isLocale } from "@/lib/i18n/config";
 import { ROUTES } from "@/lib/utils/routes";
 
@@ -25,6 +26,28 @@ export function recoverSession(): Promise<boolean> {
     }
   })();
   return inflight;
+}
+
+/**
+ * Tiklab bo'lmaydigan 401 (backend token/foydalanuvchini tanimaydi, lekin cookie hali "yaroqli":
+ * kalit o'zgargan, baza tozalangan, sessiya bekor qilingan). Cookie ham tozalanadi, aks holda proxy
+ * `/kirish` dan paneliga qaytaradi va aylana hosil bo'ladi. Parallel so'rovlar uchun bitta marta.
+ */
+let ending: Promise<void> | null = null;
+
+export function endSession(): Promise<void> {
+  ending ??= (async () => {
+    try {
+      const { signOut } = await import("next-auth/react");
+      await signOut({ redirect: false });
+    } catch {
+      // Cookie tozalanmasa ham kirish sahifasiga o'tiladi.
+    }
+    setApiSession(null);
+    broadcastSessionEvent("signed-out");
+    redirectToLogin();
+  })();
+  return ending;
 }
 
 /** Kirgan foydalanuvchi uchun 401 qayta urinishga loyiqmi (mehmonning 401'i oddiy holat). */
