@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.validators import MaxLengthValidator, MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
@@ -108,3 +109,45 @@ class BookChapter(UUIDModel):
 
     class Meta:
         ordering = ["order", "start_page"]
+
+
+class UserBookProgress(UUIDModel, TimeStampedModel):
+    """Kitobda oxirgi ochilgan bet (foydalanuvchi + kitob uchun bitta yozuv)."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="book_progress"
+    )
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name="progress")
+    last_page = models.PositiveIntegerField(validators=[MinValueValidator(1)])
+    # Faqat shu vaqtdan yangiroq mijoz yozuvi betni almashtiradi: kech kelgan eski yozuv
+    # (boshqa qurilma, oflayn) yangisini bosmaydi.
+    client_updated_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user", "book"], name="books_progress_once_per_book"),
+        ]
+        indexes = [models.Index(fields=["user", "-updated_at"])]
+
+    def __str__(self):
+        return f"{self.user_id}/{self.book_id}/{self.last_page}"
+
+
+class Bookmark(UUIDModel):
+    """Kitobdagi xatcho'p: foydalanuvchi + kitob + bet (bir betga bitta)."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="book_bookmarks"
+    )
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name="bookmarks")
+    page = models.PositiveIntegerField(validators=[MinValueValidator(1)])
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["page"]
+        constraints = [
+            models.UniqueConstraint(fields=["user", "book", "page"], name="books_bookmark_once")
+        ]
+
+    def __str__(self):
+        return f"{self.user_id}/{self.book_id}/{self.page}"

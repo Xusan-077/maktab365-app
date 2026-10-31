@@ -2,7 +2,7 @@
 
 from rest_framework import serializers
 
-from .models import Book, BookChapter, BookPage
+from .models import Book, BookChapter, Bookmark, BookPage, UserBookProgress
 
 
 class BookSerializer(serializers.ModelSerializer):
@@ -53,3 +53,43 @@ class BookPageSerializer(serializers.ModelSerializer):
 
     def get_has_text(self, page: BookPage) -> bool:
         return bool(page.text)
+
+
+class BookSearchHitSerializer(serializers.Serializer):
+    page = serializers.IntegerField(read_only=True)
+    snippet = serializers.CharField(read_only=True, help_text="Moslik atrofidagi matn parchasi")
+
+
+class BookProgressSerializer(serializers.ModelSerializer):
+    book_id = serializers.UUIDField(read_only=True)
+    page_count = serializers.IntegerField(source="book.page_count", read_only=True)
+
+    class Meta:
+        model = UserBookProgress
+        fields = ["book_id", "last_page", "page_count", "updated_at"]
+        read_only_fields = fields
+
+
+class BookProgressWriteSerializer(serializers.Serializer):
+    last_page = serializers.IntegerField(min_value=1)
+    updated_at = serializers.DateTimeField(
+        required=False, help_text="Mijozda bet o'zgargan vaqt (kech kelgan eski yozuv bosmaydi)"
+    )
+
+
+class BookmarkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Bookmark
+        fields = ["id", "page", "created_at"]
+        read_only_fields = fields
+
+
+class BookmarkWriteSerializer(serializers.Serializer):
+    page = serializers.IntegerField(min_value=1)
+
+
+class BookPageTextSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BookPage
+        fields = ["number", "text"]
+        read_only_fields = fields

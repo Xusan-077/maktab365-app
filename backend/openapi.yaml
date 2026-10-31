@@ -3711,6 +3711,226 @@ paths:
                 items:
                   $ref: '#/components/schemas/BookPage'
           description: ''
+  /api/v1/books/{id}/pages/{number}/text/:
+    get:
+      operationId: books_page_text
+      description: Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi
+        o'rniga kesh ishlaydi.
+      summary: Sahifa matni (badiiy kitobning matnli o'qish rejimi)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: number
+        schema:
+          type: integer
+        required: true
+      tags:
+      - books
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookPageText'
+          description: ''
+  /api/v1/books/{id}/search/:
+    get:
+      operationId: books_search
+      description: Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi
+        o'rniga kesh ishlaydi.
+      summary: 'Kitob ichida qidirish: moslik topilgan betlar va matn parchalari'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Kamida 2 belgi
+        required: true
+      tags:
+      - books
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookSearchHit'
+          description: ''
+  /api/v1/me/books/progress/:
+    get:
+      operationId: me_books_progress_list
+      summary: Kitoblar bo'yicha oxirgi betlar (eng yangisi birinchi)
+      tags:
+      - books
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookProgress'
+          description: ''
+  /api/v1/me/books/{id}/progress/:
+    get:
+      operationId: me_books_progress_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - books
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookProgress'
+          description: ''
+    put:
+      operationId: me_books_progress_update
+      summary: Oxirgi betni yozish (idempotent; qat'iy yangiroq mijoz vaqti yutadi)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - books
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookProgressWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BookProgressWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BookProgressWriteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookProgress'
+          description: ''
+  /api/v1/me/books/{id}/bookmarks/:
+    get:
+      operationId: me_books_bookmarks_list
+      summary: Kitobdagi xatcho'plar (bet bo'yicha)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - books
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Bookmark'
+          description: ''
+    post:
+      operationId: me_books_bookmarks_create
+      summary: Betga xatcho'p qo'yish (idempotent)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - books
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookmarkWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BookmarkWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BookmarkWriteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bookmark'
+          description: ''
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bookmark'
+          description: ''
+  /api/v1/me/books/{id}/bookmarks/{page}/:
+    delete:
+      operationId: me_books_bookmarks_delete
+      summary: Xatcho'pni olib tashlash (idempotent)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: page
+        schema:
+          type: integer
+        required: true
+      tags:
+      - books
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
 components:
   schemas:
     AdminDashboard:
@@ -4313,6 +4533,65 @@ components:
       - number
       - thumbnail
       - width
+    BookPageText:
+      type: object
+      properties:
+        number:
+          type: integer
+          readOnly: true
+        text:
+          type: string
+          readOnly: true
+      required:
+      - number
+      - text
+    BookProgress:
+      type: object
+      properties:
+        book_id:
+          type: string
+          format: uuid
+          readOnly: true
+        last_page:
+          type: integer
+          readOnly: true
+        page_count:
+          type: integer
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - book_id
+      - last_page
+      - page_count
+      - updated_at
+    BookProgressWriteRequest:
+      type: object
+      properties:
+        last_page:
+          type: integer
+          minimum: 1
+        updated_at:
+          type: string
+          format: date-time
+          description: Mijozda bet o'zgargan vaqt (kech kelgan eski yozuv bosmaydi)
+      required:
+      - last_page
+    BookSearchHit:
+      type: object
+      properties:
+        page:
+          type: integer
+          readOnly: true
+        snippet:
+          type: string
+          readOnly: true
+          description: Moslik atrofidagi matn parchasi
+      required:
+      - page
+      - snippet
     BookStatusEnum:
       enum:
       - processing
@@ -4344,6 +4623,32 @@ components:
         * `math` - Matematika
         * `test` - Test to'plami
         * `other` - Boshqa
+    Bookmark:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        page:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - page
+    BookmarkWriteRequest:
+      type: object
+      properties:
+        page:
+          type: integer
+          minimum: 1
+      required:
+      - page
     BotBook:
       type: object
       properties:

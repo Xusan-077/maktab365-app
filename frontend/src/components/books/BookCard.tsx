@@ -3,6 +3,7 @@ import type { Book } from "@/lib/books/api";
 import { Link } from "@/lib/i18n/navigation";
 import { bookPath } from "@/lib/utils/routes";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { BookCardProgress } from "./BookCardProgress";
 import { BookCover } from "./BookCover";
 
 export interface BookCardProps {
@@ -22,14 +23,17 @@ export function BookCard({ book, priority, sizes }: BookCardProps) {
       data-testid="book-card"
       className="group flex flex-col gap-3 rounded-xl focus-visible:outline-offset-4"
     >
-      <BookCover
-        title={book.title}
-        type={book.type}
-        src={book.cover}
-        priority={priority}
-        sizes={sizes}
-        className="transition-transform duration-200 motion-safe:group-hover:-translate-y-0.5"
-      />
+      <span className="relative block">
+        <BookCover
+          title={book.title}
+          type={book.type}
+          src={book.cover}
+          priority={priority}
+          sizes={sizes}
+          className="transition-transform duration-200 motion-safe:group-hover:-translate-y-0.5"
+        />
+        <BookCardProgress bookId={book.id} pageCount={book.page_count} />
+      </span>
       <span className="flex flex-col gap-0.5">
         <span className="group-hover:text-link line-clamp-2 text-base leading-snug font-bold text-balance transition-colors">
           {book.title}

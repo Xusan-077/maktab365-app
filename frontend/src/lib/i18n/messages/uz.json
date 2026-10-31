@@ -1542,7 +1542,8 @@
       "errors": {
         "no_file": "PDF yuklanmagan.",
         "invalid_pdf": "PDF fayl buzilgan yoki ochilmadi. Boshqa fayl yuklang.",
-        "render_failed": "Sahifalarni tayyorlashda xato bo'ldi."
+        "render_failed": "Sahifalarni tayyorlashda xato bo'ldi.",
+        "timeout": "Tayyorlash juda uzoq cho'zildi. Qayta tayyorlashni bosing."
       },
       "form": {
         "newTitle": "Yangi kitob",
@@ -2860,7 +2861,98 @@
       "notFoundTitle": "Kitob topilmadi",
       "notFoundText": "Kitob olib tashlangan yoki havola noto'g'ri.",
       "backToList": "Barcha kitoblar",
-      "loadError": "Kitobni yuklab bo'lmadi. Qayta urinib ko'ring."
+      "loadError": "Kitobni yuklab bo'lmadi. Qayta urinib ko'ring.",
+      "resumeAt": "Davom ettirish ({page}-bet)",
+      "read": "Qayta o'qish",
+      "progress": "{percent}% o'qilgan"
+    },
+    "reader": {
+      "back": "Kitob sahifasiga qaytish",
+      "toolbar": "O'qish boshqaruvi",
+      "toc": "Mundarija va xatcho'plar",
+      "search": "Kitob ichida qidirish",
+      "bookmarkAdd": "Betga xatcho'p qo'yish",
+      "bookmarkRemove": "Xatcho'pni olib tashlash",
+      "appearance": "Ko'rinish",
+      "fullscreen": "To'liq ekran",
+      "exitFullscreen": "To'liq ekrandan chiqish",
+      "prev": "Oldingi bet",
+      "next": "Keyingi bet",
+      "slider": "Betga o'tish",
+      "sliderValue": "{page}-bet · {chapter}",
+      "percent": "{percent}% o'qilgan",
+      "zoomIn": "Kattalashtirish",
+      "zoomOut": "Kichraytirish",
+      "zoomReset": "Moslash",
+      "pageAlt": "{title}, {page}-bet",
+      "pageLoading": "Bet yuklanmoqda…",
+      "pageError": "Bet rasmini yuklab bo'lmadi.",
+      "retry": "Qayta urinish",
+      "textEmpty": "Bu betda matn yo'q.",
+      "textEmptyHint": "Rasmli ko'rinishga o'ting.",
+      "switchToPage": "Rasmli ko'rinish",
+      "textError": "Bet matnini yuklab bo'lmadi.",
+      "withKey": "{label} ({key})",
+      "skeleton": "Kitob ochilmoqda",
+      "emptyTitle": "Kitob hali tayyor emas",
+      "emptyText": "Sahifalar tayyorlanmoqda yoki kitob olib tashlangan.",
+      "tocPanel": {
+        "title": "Kitob bo'ylab",
+        "tabs": "Mundarija va xatcho'plar",
+        "tabContents": "Mundarija",
+        "tabBookmarks": "Xatcho'plar",
+        "noContents": "Bu kitobda mundarija yo'q.",
+        "noBookmarks": "Xatcho'p yo'q. Kerakli betda xatcho'p tugmasini bosing.",
+        "page": "{page}-bet",
+        "current": "Hozirgi bo'lim",
+        "removeBookmark": "{page}-bet xatcho'pini olib tashlash",
+        "bookmarkChapter": "{chapter}"
+      },
+      "find": {
+        "title": "Kitob ichida qidirish",
+        "label": "Qidiruv so'zi",
+        "placeholder": "So'z yoki ibora",
+        "hint": "Kamida 2 ta belgi kiriting.",
+        "searching": "Qidirilmoqda…",
+        "count": "{count} ta bet topildi",
+        "none": "«{query}» topilmadi.",
+        "error": "Qidirib bo'lmadi. Qayta urinib ko'ring.",
+        "unavailable": "Bu kitobda matn qatlami yo'q (skanerlangan), shuning uchun qidiruv ishlamaydi.",
+        "result": "{page}-bet"
+      },
+      "look": {
+        "title": "Ko'rinish",
+        "view": "O'qish ko'rinishi",
+        "viewPage": "Bet rasmi",
+        "viewText": "Matn",
+        "textUnavailable": "Bu kitobda matn rejimi yo'q.",
+        "theme": "Fon",
+        "themePaper": "Qog'oz",
+        "themeSepia": "Sepiya",
+        "themeNight": "Tun",
+        "font": "Shrift",
+        "fontSerif": "Serif",
+        "fontSans": "Sans",
+        "size": "Matn hajmi",
+        "sizeUp": "Kattaroq",
+        "sizeDown": "Kichikroq",
+        "lineHeight": "Qator oralig'i",
+        "textOnly": "Shrift, hajm va oraliq matn rejimida ishlaydi."
+      },
+      "keys": {
+        "toc": "T",
+        "search": "/",
+        "bookmark": "B",
+        "fullscreen": "F",
+        "prev": "←",
+        "next": "→",
+        "zoomIn": "+",
+        "zoomOut": "−"
+      }
+    },
+    "card": {
+      "progress": "{percent}% o'qilgan",
+      "continue": "{page}-bet"
     }
   }
 }

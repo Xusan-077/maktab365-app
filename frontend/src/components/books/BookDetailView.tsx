@@ -1,11 +1,10 @@
-import { BookOpen } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/Badge";
-import { buttonVariants } from "@/components/ui/Button";
 import type { BookDetail } from "@/lib/books/api";
 import { Link } from "@/lib/i18n/navigation";
 import { bookReaderPath } from "@/lib/utils/routes";
 import { BookCover } from "./BookCover";
+import { BookReadButton } from "./BookReadButton";
 
 /**
  * Kitob sahifasi: chapda muqova, o'ngda nom, muallif, qisqa ma'lumotlar, "O'qishni boshlash",
@@ -44,13 +43,7 @@ export function BookDetailView({ book }: { book: BookDetail }) {
         </header>
 
         <div>
-          <Link
-            href={bookReaderPath(book.id)}
-            className={buttonVariants({ size: "lg", className: "w-full sm:w-auto" })}
-          >
-            <BookOpen className="size-5" aria-hidden />
-            {td("start")}
-          </Link>
+          <BookReadButton bookId={book.id} pageCount={book.page_count} />
         </div>
 
         {book.description.trim() && (

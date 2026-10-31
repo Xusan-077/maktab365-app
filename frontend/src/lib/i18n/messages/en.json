@@ -1542,7 +1542,8 @@
       "errors": {
         "no_file": "No PDF uploaded.",
         "invalid_pdf": "The PDF is damaged or cannot be opened. Upload another file.",
-        "render_failed": "Preparing the pages failed."
+        "render_failed": "Preparing the pages failed.",
+        "timeout": "Preparing took too long. Press Prepare again."
       },
       "form": {
         "newTitle": "New book",
@@ -2860,7 +2861,98 @@
       "notFoundTitle": "Book not found",
       "notFoundText": "The book was removed or the link is wrong.",
       "backToList": "All books",
-      "loadError": "Could not load the book. Try again."
+      "loadError": "Could not load the book. Try again.",
+      "resumeAt": "Continue (page {page})",
+      "read": "Read again",
+      "progress": "{percent}% read"
+    },
+    "reader": {
+      "back": "Back to the book page",
+      "toolbar": "Reading controls",
+      "toc": "Contents and bookmarks",
+      "search": "Search in book",
+      "bookmarkAdd": "Bookmark this page",
+      "bookmarkRemove": "Remove bookmark",
+      "appearance": "Appearance",
+      "fullscreen": "Full screen",
+      "exitFullscreen": "Exit full screen",
+      "prev": "Previous page",
+      "next": "Next page",
+      "slider": "Go to page",
+      "sliderValue": "Page {page} · {chapter}",
+      "percent": "{percent}% read",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "zoomReset": "Fit",
+      "pageAlt": "{title}, page {page}",
+      "pageLoading": "Loading page…",
+      "pageError": "Couldn't load the page image.",
+      "retry": "Try again",
+      "textEmpty": "There is no text on this page.",
+      "textEmptyHint": "Switch to the page view.",
+      "switchToPage": "Page view",
+      "textError": "Couldn't load the page text.",
+      "withKey": "{label} ({key})",
+      "skeleton": "Opening the book",
+      "emptyTitle": "This book isn't ready yet",
+      "emptyText": "Its pages are still being prepared, or it was unpublished.",
+      "tocPanel": {
+        "title": "In this book",
+        "tabs": "Contents and bookmarks",
+        "tabContents": "Contents",
+        "tabBookmarks": "Bookmarks",
+        "noContents": "This book has no table of contents.",
+        "noBookmarks": "No bookmarks yet. Press the bookmark button on a page.",
+        "page": "Page {page}",
+        "current": "Current section",
+        "removeBookmark": "Remove the bookmark on page {page}",
+        "bookmarkChapter": "{chapter}"
+      },
+      "find": {
+        "title": "Search in book",
+        "label": "Search term",
+        "placeholder": "A word or phrase",
+        "hint": "Enter at least 2 characters.",
+        "searching": "Searching…",
+        "count": "{count} pages found",
+        "none": "Nothing found for “{query}”.",
+        "error": "Search failed. Try again.",
+        "unavailable": "This book has no text layer (scanned), so search isn't available.",
+        "result": "Page {page}"
+      },
+      "look": {
+        "title": "Appearance",
+        "view": "Reading view",
+        "viewPage": "Page image",
+        "viewText": "Text",
+        "textUnavailable": "This book has no text view.",
+        "theme": "Background",
+        "themePaper": "Paper",
+        "themeSepia": "Sepia",
+        "themeNight": "Night",
+        "font": "Typeface",
+        "fontSerif": "Serif",
+        "fontSans": "Sans",
+        "size": "Text size",
+        "sizeUp": "Larger",
+        "sizeDown": "Smaller",
+        "lineHeight": "Line spacing",
+        "textOnly": "Typeface, size and spacing apply in text view."
+      },
+      "keys": {
+        "toc": "T",
+        "search": "/",
+        "bookmark": "B",
+        "fullscreen": "F",
+        "prev": "←",
+        "next": "→",
+        "zoomIn": "+",
+        "zoomOut": "−"
+      }
+    },
+    "card": {
+      "progress": "{percent}% read",
+      "continue": "Page {page}"
     }
   }
 }

@@ -13,7 +13,13 @@ from apps.content.models import BookLanguage
 from apps.content.views import GRADE_PARAM, PublicView, _int_param
 
 from .models import Book, BookStatus, BookType
-from .serializers import BookDetailSerializer, BookPageSerializer, BookSerializer
+from .serializers import (
+    BookDetailSerializer,
+    BookPageSerializer,
+    BookPageTextSerializer,
+    BookSearchHitSerializer,
+    BookSerializer,
+)
 
 TAGS = ["books"]
 
@@ -103,3 +109,60 @@ class BookPagesView(PublicView, APIView):
             raise NotFound
         pages = book.pages.order_by("number")
         return Response(BookPageSerializer(pages, many=True, context={"request": request}).data)
+
+
+SEARCH_MIN_LENGTH = 2
+SEARCH_LIMIT = 50
+SNIPPET_RADIUS = 40
+
+
+def snippet_around(text: str, query: str) -> str:
+    """Birinchi moslik atrofidagi qisqa parcha (bo'shliqlar bitta qilinadi)."""
+    flat = " ".join(text.split())
+    at = flat.lower().find(query.lower())
+    if at < 0:
+        return flat[: SNIPPET_RADIUS * 2]
+    start = max(0, at - SNIPPET_RADIUS)
+    end = min(len(flat), at + len(query) + SNIPPET_RADIUS)
+    return f"{'…' if start else ''}{flat[start:end]}{'…' if end < len(flat) else ''}"
+
+
+class BookSearchView(PublicView, APIView):
+    @extend_schema(
+        operation_id="books_search",
+        parameters=[
+            OpenApiParameter("q", OpenApiTypes.STR, required=True, description="Kamida 2 belgi")
+        ],
+        responses=BookSearchHitSerializer(many=True),
+        summary="Kitob ichida qidirish: moslik topilgan betlar va matn parchalari",
+        tags=TAGS,
+    )
+    @public_cached
+    def get(self, request, pk):
+        book = visible_book(request, pk)
+        query = request.query_params.get("q", "").strip()
+        if len(query) < SEARCH_MIN_LENGTH:
+            raise ValidationError({"q": ["too_short"]})
+        pages = (
+            book.pages.filter(text__icontains=query)
+            .order_by("number")
+            .values_list("number", "text")[:SEARCH_LIMIT]
+        )
+        hits = [{"page": number, "snippet": snippet_around(text, query)} for number, text in pages]
+        return Response(BookSearchHitSerializer(hits, many=True).data)
+
+
+class BookPageTextView(PublicView, APIView):
+    @extend_schema(
+        operation_id="books_page_text",
+        responses=BookPageTextSerializer,
+        summary="Sahifa matni (badiiy kitobning matnli o'qish rejimi)",
+        tags=TAGS,
+    )
+    @public_cached
+    def get(self, request, pk, number):
+        book = visible_book(request, pk)
+        page = book.pages.filter(number=number).first()
+        if page is None:
+            raise NotFound
+        return Response(BookPageTextSerializer(page).data)

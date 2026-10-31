@@ -14,6 +14,8 @@ vi.mock("@/lib/i18n/navigation", () => ({
   ),
 }));
 
+vi.mock("./BookCardProgress", () => ({ BookCardProgress: () => null }));
+
 import { BookCard } from "./BookCard";
 
 const book = (over: Partial<Book> = {}): Book => ({

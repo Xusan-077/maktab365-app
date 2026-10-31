@@ -1922,6 +1922,115 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/books/{id}/pages/{number}/text/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Sahifa matni (badiiy kitobning matnli o'qish rejimi)
+         * @description Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi o'rniga kesh ishlaydi.
+         */
+        get: operations["books_page_text"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/books/{id}/search/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Kitob ichida qidirish: moslik topilgan betlar va matn parchalari
+         * @description Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi o'rniga kesh ishlaydi.
+         */
+        get: operations["books_search"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/books/progress/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Kitoblar bo'yicha oxirgi betlar (eng yangisi birinchi) */
+        get: operations["me_books_progress_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/books/{id}/progress/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["me_books_progress_retrieve"];
+        /** Oxirgi betni yozish (idempotent; qat'iy yangiroq mijoz vaqti yutadi) */
+        put: operations["me_books_progress_update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/books/{id}/bookmarks/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Kitobdagi xatcho'plar (bet bo'yicha) */
+        get: operations["me_books_bookmarks_list"];
+        put?: never;
+        /** Betga xatcho'p qo'yish (idempotent) */
+        post: operations["me_books_bookmarks_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/books/{id}/bookmarks/{page}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Xatcho'pni olib tashlash (idempotent) */
+        delete: operations["me_books_bookmarks_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2126,6 +2235,31 @@ export interface components {
             /** @description Sahifada matn qatlami bor (badiiy matnli rejim, kitob ichida qidiruv) */
             readonly has_text: boolean;
         };
+        BookPageText: {
+            readonly number: number;
+            readonly text: string;
+        };
+        BookProgress: {
+            /** Format: uuid */
+            readonly book_id: string;
+            readonly last_page: number;
+            readonly page_count: number;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        BookProgressWriteRequest: {
+            last_page: number;
+            /**
+             * Format: date-time
+             * @description Mijozda bet o'zgargan vaqt (kech kelgan eski yozuv bosmaydi)
+             */
+            updated_at?: string;
+        };
+        BookSearchHit: {
+            readonly page: number;
+            /** @description Moslik atrofidagi matn parchasi */
+            readonly snippet: string;
+        };
         /**
          * @description * `processing` - Tayyorlanmoqda
          *     * `ready` - Tayyor
@@ -2145,6 +2279,16 @@ export interface components {
          * @enum {string}
          */
         BookTypeEnum: "textbook" | "fiction" | "math" | "test" | "other";
+        Bookmark: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly page: number;
+            /** Format: date-time */
+            readonly created_at: string;
+        };
+        BookmarkWriteRequest: {
+            page: number;
+        };
         BotBook: {
             /** Format: uuid */
             id: string;
@@ -6831,6 +6975,196 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["BookPage"][];
                 };
+            };
+        };
+    };
+    books_page_text: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                number: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookPageText"];
+                };
+            };
+        };
+    };
+    books_search: {
+        parameters: {
+            query: {
+                /** @description Kamida 2 belgi */
+                q: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookSearchHit"][];
+                };
+            };
+        };
+    };
+    me_books_progress_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookProgress"][];
+                };
+            };
+        };
+    };
+    me_books_progress_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookProgress"];
+                };
+            };
+        };
+    };
+    me_books_progress_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BookProgressWriteRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["BookProgressWriteRequest"];
+                "multipart/form-data": components["schemas"]["BookProgressWriteRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookProgress"];
+                };
+            };
+        };
+    };
+    me_books_bookmarks_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Bookmark"][];
+                };
+            };
+        };
+    };
+    me_books_bookmarks_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BookmarkWriteRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["BookmarkWriteRequest"];
+                "multipart/form-data": components["schemas"]["BookmarkWriteRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Bookmark"];
+                };
+            };
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Bookmark"];
+                };
+            };
+        };
+    };
+    me_books_bookmarks_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                page: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

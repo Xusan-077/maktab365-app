@@ -216,6 +216,16 @@
   --color-ds-ok: var(--ds-ok);
   --color-ds-on-ok: var(--ds-on-ok);
 
+  /* Kitoblar o'qish oynasi (`data-book-theme`): sahna, varaq, matn, chiziq, urg'u. */
+  --color-bk-stage: var(--bk-stage);
+  --color-bk-paper: var(--bk-paper);
+  --color-bk-bar: var(--bk-bar);
+  --color-bk-ink: var(--bk-ink);
+  --color-bk-muted: var(--bk-muted);
+  --color-bk-line: var(--bk-line);
+  --color-bk-accent: var(--bk-accent);
+  --color-bk-accent-soft: var(--bk-accent-soft);
+
   --font-ui: var(--font-manrope), var(--font-onest), ui-sans-serif, system-ui, sans-serif;
   --font-book: var(--font-source-serif), Georgia, "Times New Roman", serif;
   --font-game: var(--font-jakarta), var(--font-onest), ui-sans-serif, system-ui, sans-serif;
@@ -1651,5 +1661,49 @@ html[data-book-lock] body {
   .game-press:active:not(:disabled),
   .game-opt:hover:not(:disabled) {
     transform: none;
+  }
+}
+
+/* Kitoblar o'qish oynasi: uchta fon rejimi (qog'oz / sepiya / tun). Bet rasmlari filtr bilan moslanadi. */
+[data-book-theme="paper"] {
+  --bk-stage: #e9e7e1;
+  --bk-paper: #fbfaf7;
+  --bk-bar: #f4f2ed;
+  --bk-ink: #1d2026;
+  --bk-muted: #5d6270;
+  --bk-line: #d8d5cc;
+  --bk-accent: #1f4fb8;
+  --bk-accent-soft: #dfe7f8;
+  --bk-page-filter: none;
+}
+[data-book-theme="sepia"] {
+  --bk-stage: #d6c9ae;
+  --bk-paper: #f1e5ca;
+  --bk-bar: #e7d9bb;
+  --bk-ink: #3a2e1e;
+  --bk-muted: #6e5e45;
+  --bk-line: #c9b992;
+  --bk-accent: #8a4b12;
+  --bk-accent-soft: #e6d2a8;
+  --bk-page-filter: sepia(0.42) saturate(0.9) brightness(0.97);
+}
+[data-book-theme="night"] {
+  --bk-stage: #0c0e13;
+  --bk-paper: #171a21;
+  --bk-bar: #12151b;
+  --bk-ink: #d2d6df;
+  --bk-muted: #8f97a8;
+  --bk-line: #2a2f3b;
+  --bk-accent: #8fb0ff;
+  --bk-accent-soft: #232b40;
+  --bk-page-filter: invert(0.9) hue-rotate(180deg) brightness(0.92) contrast(0.95);
+}
+.book-page-img {
+  filter: var(--bk-page-filter, none);
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-layout="reader"] [data-book-reader] * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
   }
 }
