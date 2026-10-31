@@ -166,7 +166,8 @@
     "home": "Bosh sahifa",
     "goToCabinet": "Kabinetga o'tish",
     "goToTeacher": "Ustoz paneliga o'tish",
-    "games": "O'yinlar"
+    "games": "O'yinlar",
+    "books": "Kitoblar"
   },
   "search": {
     "label": "Saytdan qidirish",
@@ -681,7 +682,8 @@
       "stats": "Statistika",
       "messages": "Xabarlar",
       "openSite": "Saytni ochish",
-      "newMessages": "{count} ta yangi xabar"
+      "newMessages": "{count} ta yangi xabar",
+      "library": "Kutubxona"
     },
     "roles": {
       "student": "O'quvchi",
@@ -909,7 +911,8 @@
         "grade_has_books": "Fanning kitobi bor sinfni olib tashlab bo'lmaydi. Avval kitoblarni boshqa fanga ko'chiring yoki o'chiring.",
         "ocr_disabled": "OCR serverda hali yoqilmagan.",
         "ocr_not_needed": "Bu kitobda matn qatlami bor — OCR kerak emas.",
-        "ocr_in_progress": "OCR allaqachon navbatda yoki bajarilmoqda."
+        "ocr_in_progress": "OCR allaqachon navbatda yoki bajarilmoqda.",
+        "processing_in_progress": "Sahifalar hozir tayyorlanmoqda. Tugashini kuting."
       },
       "fields": {
         "invalid": "Noto'g'ri qiymat",
@@ -936,7 +939,8 @@
         "options_count": "Aniq 4 ta variant bo‘lishi kerak",
         "options_one_correct": "Aniq bitta to‘g‘ri javob bo‘lishi kerak",
         "text_too_long": "Matn juda uzun",
-        "ids_mismatch": "Ro‘yxat eskirgan — sahifani yangilang"
+        "ids_mismatch": "Ro‘yxat eskirgan — sahifani yangilang",
+        "title_required": "Nom kiriting."
       },
       "gradeHasBooks": "Bu fanning {grade}-sinfda {count} ta kitobi bor, avval kitoblarni boshqa fanga ko'chiring yoki o'chiring."
     },
@@ -1510,6 +1514,105 @@
         "correctRequired": "To‘g‘ri javobni tanlang",
         "optionsCount": "Aniq 4 ta variant bo‘lishi kerak",
         "invalid": "Qiymat noto‘g‘ri"
+      }
+    },
+    "library": {
+      "title": "Kutubxona",
+      "description": "Badiiy, matematika, test va boshqa kitoblar. PDF yuklanadi, sahifalar rasmga aylantiriladi.",
+      "metaTitle": "Kutubxona",
+      "add": "Kitob qo'shish",
+      "searchLabel": "Kitob yoki muallif qidirish",
+      "filters": {
+        "allTypes": "Barcha turlar",
+        "allStatuses": "Barcha holatlar"
+      },
+      "empty": "Hali kitob yo'q. Birinchi kitobni qo'shing.",
+      "emptyFiltered": "Bu filtrlarga mos kitob yo'q.",
+      "edit": "Tahrirlash",
+      "untitled": "Nomsiz",
+      "statusLabel": "Holat",
+      "status": {
+        "processing": "Tayyorlanmoqda",
+        "ready": "Tayyor",
+        "failed": "Xato",
+        "noFile": "PDF yuklanmagan"
+      },
+      "progress": "{done} / {total} bet",
+      "progressLabel": "Sahifalar tayyorlanmoqda",
+      "errors": {
+        "no_file": "PDF yuklanmagan.",
+        "invalid_pdf": "PDF fayl buzilgan yoki ochilmadi. Boshqa fayl yuklang.",
+        "render_failed": "Sahifalarni tayyorlashda xato bo'ldi."
+      },
+      "form": {
+        "newTitle": "Yangi kitob",
+        "editTitle": "Kitobni tahrirlash",
+        "back": "Kutubxonaga qaytish",
+        "details": "Ma'lumotlar",
+        "titleLabel": "Nomi",
+        "authorLabel": "Muallif",
+        "typeLabel": "Turi",
+        "gradeLabel": "Sinf",
+        "noGrade": "Sinfsiz",
+        "languageLabel": "Til",
+        "descriptionLabel": "Tavsif",
+        "save": "Saqlash",
+        "saveAndContinue": "Saqlash va PDF yuklash",
+        "saved": "Saqlandi",
+        "created": "Kitob yaratildi. Endi PDF yuklang.",
+        "titleRequired": "Nom kiriting",
+        "titleTooLong": "Nom 255 belgidan oshmasin",
+        "authorTooLong": "Muallif 255 belgidan oshmasin",
+        "descriptionTooLong": "Tavsif 4000 belgidan oshmasin",
+        "chapterTitleRequired": "Bo'lim nomini kiriting",
+        "chapterTitleTooLong": "Bo'lim nomi 200 belgidan oshmasin",
+        "chapterPageInvalid": "Bet raqami 1 dan boshlanadi"
+      },
+      "file": {
+        "title": "PDF fayl",
+        "choose": "PDF tanlash",
+        "replace": "PDF almashtirish",
+        "uploading": "Yuklanmoqda… {percent}%",
+        "cancel": "Bekor qilish",
+        "uploaded": "PDF yuklandi. Sahifalar tayyorlanmoqda.",
+        "ready": "{pages} bet · {size}",
+        "reprocess": "Qayta tayyorlash",
+        "reprocessStarted": "Sahifalar qayta tayyorlanmoqda.",
+        "hint": "Faqat PDF. Sahifalar WebP rasmga aylantiriladi, bu bir necha daqiqa olishi mumkin.",
+        "notPdf": "Faqat PDF fayl tanlang."
+      },
+      "cover": {
+        "title": "Muqova",
+        "auto": "Birinchi betdan avtomatik",
+        "upload": "Rasm yuklash",
+        "useAuto": "Avtomatik muqova",
+        "hint": "JPG, PNG yoki WebP, 5 MB gacha. Nisbat 2:3 bo'lsa yaxshi.",
+        "invalid": "Faqat JPG, PNG yoki WebP rasm, 5 MB gacha."
+      },
+      "chapters": {
+        "title": "Mundarija",
+        "add": "Bo'lim qo'shish",
+        "remove": "Bo'limni o'chirish",
+        "titleLabel": "Bo'lim nomi",
+        "pageLabel": "Boshlanish beti",
+        "empty": "Mundarija bo'sh. Bo'limlar o'quvchiga tez o'tish uchun kerak."
+      },
+      "publish": {
+        "title": "Nashr",
+        "published": "Kitob saytda ko'rinadi.",
+        "draft": "Kitob hali saytda ko'rinmaydi.",
+        "notReady": "Nashr qilish uchun PDF yuklab, sahifalar tayyor bo'lishini kuting.",
+        "publish": "Nashr qilish",
+        "unpublish": "Nashrdan qaytarish",
+        "publishedToast": "Kitob nashr qilindi",
+        "unpublishedToast": "Kitob nashrdan qaytarildi"
+      },
+      "delete": {
+        "button": "Kitobni o'chirish",
+        "title": "Kitob o'chirilsinmi?",
+        "description": "«{title}» va uning barcha sahifalari o'chadi. Buni qaytarib bo'lmaydi.",
+        "confirm": "O'chirish",
+        "done": "Kitob o'chirildi"
       }
     }
   },
@@ -2701,6 +2804,63 @@
       "timer": "har savolga {seconds} soniya",
       "start": "Boshlash",
       "notSaved": "Bu ochiq test: natijangiz saqlanmaydi."
+    }
+  },
+  "books": {
+    "metaTitle": "Kitoblar",
+    "metaDescription": "Badiiy kitoblar, matematika to'plamlari, testlar va darsliklar. Onlayn o'qing, kitob yoniga yozing, sahifa ustiga chizing. Bepul.",
+    "title": "Kitoblar",
+    "searchLabel": "Kitob yoki muallif qidirish",
+    "searchPlaceholder": "Kitob yoki muallif",
+    "typesLabel": "Kitob turi",
+    "types": {
+      "all": "Barchasi",
+      "textbook": "Darsliklar",
+      "fiction": "Badiiy",
+      "math": "Matematika",
+      "test": "Testlar",
+      "other": "Boshqa"
+    },
+    "typeName": {
+      "textbook": "Darslik",
+      "fiction": "Badiiy kitob",
+      "math": "Matematika",
+      "test": "Test to'plami",
+      "other": "Boshqa"
+    },
+    "grade": "Sinf",
+    "allGrades": "Barcha sinflar",
+    "gradeLabel": "{grade}-sinf",
+    "language": "Til",
+    "allLanguages": "Barcha tillar",
+    "languages": {
+      "uz": "O'zbekcha",
+      "ru": "Ruscha",
+      "en": "Inglizcha"
+    },
+    "count": "{count, plural, other {# ta kitob}}",
+    "results": "Natijalar",
+    "emptyTitle": "Kitob topilmadi",
+    "emptyText": "Filtrlarni o'zgartirib ko'ring yoki barchasini tozalang.",
+    "emptyAll": "Kitoblar tez orada qo'shiladi.",
+    "reset": "Filtrlarni tozalash",
+    "errorText": "Kitoblarni yuklab bo'lmadi. Internetni tekshirib, qayta urinib ko'ring.",
+    "retry": "Qayta urinish",
+    "pages": "{count, plural, other {# bet}}",
+    "cover": "{title} muqovasi",
+    "detail": {
+      "metaDescription": "{title} — {author}. Onlayn o'qing.",
+      "by": "Muallif: {author}",
+      "start": "O'qishni boshlash",
+      "about": "Kitob haqida",
+      "contents": "Mundarija",
+      "contentsPage": "{page}-bet",
+      "noContents": "Bu kitobda mundarija yo'q.",
+      "facts": "Kitob ma'lumotlari",
+      "notFoundTitle": "Kitob topilmadi",
+      "notFoundText": "Kitob olib tashlangan yoki havola noto'g'ri.",
+      "backToList": "Barcha kitoblar",
+      "loadError": "Kitobni yuklab bo'lmadi. Qayta urinib ko'ring."
     }
   }
 }

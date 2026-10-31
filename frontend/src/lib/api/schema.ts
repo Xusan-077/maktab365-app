@@ -1001,6 +1001,143 @@ export interface paths {
         patch: operations["admin_questions_update"];
         trace?: never;
     };
+    "/api/v1/admin/books/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
+        get: operations["admin_books_list"];
+        put?: never;
+        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
+        post: operations["admin_books_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/books/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
+        get: operations["admin_books_retrieve"];
+        put?: never;
+        post?: never;
+        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
+        delete: operations["admin_books_delete"];
+        options?: never;
+        head?: never;
+        /** @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin. */
+        patch: operations["admin_books_update"];
+        trace?: never;
+    };
+    "/api/v1/admin/books/{id}/reprocess/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Sahifalarni qayta tayyorlash (xato yoki PDF o'zgargandan keyin)
+         * @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin.
+         */
+        post: operations["admin_books_reprocess"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/books/{id}/transition/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Nashr: tayyor kitobni chiqarish (editor/admin), qaytarish (admin)
+         * @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin.
+         */
+        post: operations["admin_books_transition"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/books/{id}/upload/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Lokal (dev) rejim: PDF'ni backend orqali yuklash
+         * @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin.
+         */
+        post: operations["admin_books_upload_file"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/books/{id}/upload-complete/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * S3 multipart yuklashni yakunlash: tekshiruv va sahifalarni tayyorlashni boshlash
+         * @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin.
+         */
+        post: operations["admin_books_upload_complete"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/books/{id}/upload-init/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * PDF yuklashni boshlash (yangi fayl yoki almashtirish)
+         * @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin.
+         */
+        post: operations["admin_books_upload_init"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/bot/books/": {
         parameters: {
             query?: never;
@@ -1725,6 +1862,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/books/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Kitoblar katalogi (sahifalangan)
+         * @description Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi o'rniga kesh ishlaydi.
+         */
+        get: operations["books_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/books/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Kitob tafsiloti (tavsif, mundarija)
+         * @description Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi o'rniga kesh ishlaydi.
+         */
+        get: operations["books_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/books/{id}/pages/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Kitob sahifalari: rasm, eskiz va o'lchamlar (tartib bilan)
+         * @description Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi o'rniga kesh ishlaydi.
+         */
+        get: operations["books_pages"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1838,11 +2035,116 @@ export interface components {
         };
         /** @enum {unknown} */
         BlankEnum: "";
+        Book: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly title: string;
+            readonly author: string;
+            readonly type: components["schemas"]["BookTypeEnum"];
+            readonly grade_level: number | null;
+            readonly language: components["schemas"]["LanguageEnum"];
+            readonly page_count: number;
+            /** Format: uri */
+            readonly cover: string | null;
+            /** Format: date-time */
+            readonly created_at: string;
+        };
+        BookAdmin: {
+            /** Format: uuid */
+            readonly id: string;
+            title: string;
+            author?: string;
+            type?: components["schemas"]["BookTypeEnum"];
+            grade_level?: number | null;
+            language?: components["schemas"]["LanguageEnum"];
+            description?: string;
+            cover_image?: string;
+            /** Format: uri */
+            readonly cover_url: string | null;
+            chapters?: components["schemas"]["ChapterInput"][];
+            readonly has_file: boolean;
+            readonly size_bytes: number;
+            readonly page_count: number;
+            readonly processed_pages: number;
+            readonly status: components["schemas"]["BookStatusEnum"];
+            readonly status_error: string;
+            readonly is_published: boolean;
+            /** Format: date-time */
+            readonly published_at: string | null;
+            readonly upload_pending: boolean;
+            readonly allowed_transitions: string[];
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        BookAdminRequest: {
+            title: string;
+            author?: string;
+            type?: components["schemas"]["BookTypeEnum"];
+            grade_level?: number | null;
+            language?: components["schemas"]["LanguageEnum"];
+            description?: string;
+            cover_image?: string;
+            chapters?: components["schemas"]["ChapterInputRequest"][];
+        };
+        BookChapter: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly title: string;
+            readonly start_page: number;
+        };
         BookCounts: {
             total: number;
             draft: number;
             published: number;
         };
+        BookDetail: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly title: string;
+            readonly author: string;
+            readonly type: components["schemas"]["BookTypeEnum"];
+            readonly grade_level: number | null;
+            readonly language: components["schemas"]["LanguageEnum"];
+            readonly page_count: number;
+            /** Format: uri */
+            readonly cover: string | null;
+            /** Format: date-time */
+            readonly created_at: string;
+            readonly description: string;
+            readonly chapters: components["schemas"]["BookChapter"][];
+        };
+        BookPage: {
+            readonly number: number;
+            /** Format: uri */
+            readonly image: string | null;
+            /** Format: uri */
+            readonly thumbnail: string | null;
+            readonly width: number;
+            readonly height: number;
+            /** @description Sahifada matn qatlami bor (badiiy matnli rejim, kitob ichida qidiruv) */
+            readonly has_text: boolean;
+        };
+        /**
+         * @description * `processing` - Tayyorlanmoqda
+         *     * `ready` - Tayyor
+         *     * `failed` - Xato
+         * @enum {string}
+         */
+        BookStatusEnum: "processing" | "ready" | "failed";
+        BookTransitionRequest: {
+            to: components["schemas"]["ToEnum"];
+        };
+        /**
+         * @description * `textbook` - Darslik
+         *     * `fiction` - Badiiy kitob
+         *     * `math` - Matematika
+         *     * `test` - Test to'plami
+         *     * `other` - Boshqa
+         * @enum {string}
+         */
+        BookTypeEnum: "textbook" | "fiction" | "math" | "test" | "other";
         BotBook: {
             /** Format: uuid */
             id: string;
@@ -1896,6 +2198,16 @@ export interface components {
             slug: string;
             grade: number;
             title: components["schemas"]["LocalizedText"];
+        };
+        /** @description Mundarija qatori; qiymatlar `services.chapter_errors` da tekshiriladi. */
+        ChapterInput: {
+            title: string;
+            start_page: number;
+        };
+        /** @description Mundarija qatori; qiymatlar `services.chapter_errors` da tekshiriladi. */
+        ChapterInputRequest: {
+            title: string;
+            start_page: number;
         };
         /**
          * @description Mundarija qatori. Qiymatlar `pdf_services.chapter_errors` da tekshiriladi.
@@ -2323,6 +2635,36 @@ export interface components {
             email: string;
             code: string;
         };
+        PaginatedBookAdminList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["BookAdmin"][];
+        };
+        PaginatedBookList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["Book"][];
+        };
         PaginatedGameTopicList: {
             /** @example 123 */
             count: number;
@@ -2439,6 +2781,16 @@ export interface components {
         };
         PasswordSetRequest: {
             new_password: string;
+        };
+        PatchedBookAdminRequest: {
+            title?: string;
+            author?: string;
+            type?: components["schemas"]["BookTypeEnum"];
+            grade_level?: number | null;
+            language?: components["schemas"]["LanguageEnum"];
+            description?: string;
+            cover_image?: string;
+            chapters?: components["schemas"]["ChapterInputRequest"][];
         };
         /** @description POST: title (+ kitob, muddat). PATCH: istalgan maydon; `done` bajarildi/qaytarildi. */
         PatchedGoalWriteRequest: {
@@ -4941,6 +5293,264 @@ export interface operations {
             };
         };
     };
+    admin_books_list: {
+        parameters: {
+            query?: {
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                published?: boolean;
+                /** @description A search term. */
+                search?: string;
+                status?: "failed" | "processing" | "ready";
+                type?: "fiction" | "math" | "other" | "test" | "textbook";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedBookAdminList"];
+                };
+            };
+        };
+    };
+    admin_books_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BookAdminRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["BookAdminRequest"];
+                "multipart/form-data": components["schemas"]["BookAdminRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookAdmin"];
+                };
+            };
+        };
+    };
+    admin_books_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this book. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookAdmin"];
+                };
+            };
+        };
+    };
+    admin_books_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this book. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    admin_books_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this book. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedBookAdminRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedBookAdminRequest"];
+                "multipart/form-data": components["schemas"]["PatchedBookAdminRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookAdmin"];
+                };
+            };
+        };
+    };
+    admin_books_reprocess: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this book. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookAdmin"];
+                };
+            };
+        };
+    };
+    admin_books_transition: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this book. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BookTransitionRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["BookTransitionRequest"];
+                "multipart/form-data": components["schemas"]["BookTransitionRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookAdmin"];
+                };
+            };
+        };
+    };
+    admin_books_upload_file: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this book. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["PdfUploadFileRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookAdmin"];
+                };
+            };
+        };
+    };
+    admin_books_upload_complete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this book. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PdfUploadCompleteRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PdfUploadCompleteRequest"];
+                "multipart/form-data": components["schemas"]["PdfUploadCompleteRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookAdmin"];
+                };
+            };
+        };
+    };
+    admin_books_upload_init: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this book. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PdfUploadInitRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PdfUploadInitRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PdfUploadPlan"];
+                };
+            };
+        };
+    };
     bot_books_search: {
         parameters: {
             query?: {
@@ -6146,6 +6756,80 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Attempt"];
+                };
+            };
+        };
+    };
+    books_list: {
+        parameters: {
+            query?: {
+                /** @description Sinf (1–11) */
+                grade?: number;
+                language?: "en" | "ru" | "uz";
+                /** @description `title` — alifbo bo'yicha (standart: yangilari birinchi) */
+                ordering?: "title";
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /** @description Nom yoki muallif bo'yicha */
+                q?: string;
+                type?: "fiction" | "math" | "other" | "test" | "textbook";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedBookList"];
+                };
+            };
+        };
+    };
+    books_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookDetail"];
+                };
+            };
+        };
+    };
+    books_pages: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookPage"][];
                 };
             };
         };

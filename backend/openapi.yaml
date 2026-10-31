@@ -1916,6 +1916,338 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/admin/books/:
+    get:
+      operationId: admin_books_list
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: published
+        schema:
+          type: boolean
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - failed
+          - processing
+          - ready
+      - in: query
+        name: type
+        schema:
+          type: string
+          enum:
+          - fiction
+          - math
+          - other
+          - test
+          - textbook
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBookAdminList'
+          description: ''
+    post:
+      operationId: admin_books_create
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookAdminRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BookAdminRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BookAdminRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookAdmin'
+          description: ''
+  /api/v1/admin/books/{id}/:
+    get:
+      operationId: admin_books_retrieve
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this book.
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookAdmin'
+          description: ''
+    patch:
+      operationId: admin_books_update
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this book.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBookAdminRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBookAdminRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBookAdminRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookAdmin'
+          description: ''
+    delete:
+      operationId: admin_books_delete
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this book.
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/admin/books/{id}/reprocess/:
+    post:
+      operationId: admin_books_reprocess
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      summary: Sahifalarni qayta tayyorlash (xato yoki PDF o'zgargandan keyin)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this book.
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookAdmin'
+          description: ''
+  /api/v1/admin/books/{id}/transition/:
+    post:
+      operationId: admin_books_transition
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      summary: 'Nashr: tayyor kitobni chiqarish (editor/admin), qaytarish (admin)'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this book.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookTransitionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BookTransitionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BookTransitionRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookAdmin'
+          description: ''
+  /api/v1/admin/books/{id}/upload/:
+    post:
+      operationId: admin_books_upload_file
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      summary: 'Lokal (dev) rejim: PDF''ni backend orqali yuklash'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this book.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PdfUploadFileRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookAdmin'
+          description: ''
+  /api/v1/admin/books/{id}/upload-complete/:
+    post:
+      operationId: admin_books_upload_complete
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      summary: 'S3 multipart yuklashni yakunlash: tekshiruv va sahifalarni tayyorlashni
+        boshlash'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this book.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PdfUploadCompleteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PdfUploadCompleteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PdfUploadCompleteRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookAdmin'
+          description: ''
+  /api/v1/admin/books/{id}/upload-init/:
+    post:
+      operationId: admin_books_upload_init
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      summary: PDF yuklashni boshlash (yangi fayl yoki almashtirish)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this book.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PdfUploadInitRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PdfUploadInitRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PdfUploadPlan'
+          description: ''
   /api/v1/bot/books/:
     get:
       operationId: bot_books_search
@@ -3261,6 +3593,124 @@ paths:
               schema:
                 $ref: '#/components/schemas/Attempt'
           description: ''
+  /api/v1/books/:
+    get:
+      operationId: books_list
+      description: Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi
+        o'rniga kesh ishlaydi.
+      summary: Kitoblar katalogi (sahifalangan)
+      parameters:
+      - in: query
+        name: grade
+        schema:
+          type: integer
+        description: Sinf (1–11)
+      - in: query
+        name: language
+        schema:
+          type: string
+          enum:
+          - en
+          - ru
+          - uz
+      - in: query
+        name: ordering
+        schema:
+          type: string
+          enum:
+          - title
+        description: '`title` — alifbo bo''yicha (standart: yangilari birinchi)'
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Nom yoki muallif bo'yicha
+      - in: query
+        name: type
+        schema:
+          type: string
+          enum:
+          - fiction
+          - math
+          - other
+          - test
+          - textbook
+      tags:
+      - books
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBookList'
+          description: ''
+  /api/v1/books/{id}/:
+    get:
+      operationId: books_retrieve
+      description: Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi
+        o'rniga kesh ishlaydi.
+      summary: Kitob tafsiloti (tavsif, mundarija)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - books
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookDetail'
+          description: ''
+  /api/v1/books/{id}/pages/:
+    get:
+      operationId: books_pages
+      description: Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi
+        o'rniga kesh ishlaydi.
+      summary: 'Kitob sahifalari: rasm, eskiz va o''lchamlar (tartib bilan)'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - books
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookPage'
+          description: ''
 components:
   schemas:
     AdminDashboard:
@@ -3570,6 +4020,195 @@ components:
     BlankEnum:
       enum:
       - ''
+    Book:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+        author:
+          type: string
+          readOnly: true
+        type:
+          allOf:
+          - $ref: '#/components/schemas/BookTypeEnum'
+          readOnly: true
+        grade_level:
+          type: integer
+          readOnly: true
+          nullable: true
+        language:
+          allOf:
+          - $ref: '#/components/schemas/LanguageEnum'
+          readOnly: true
+        page_count:
+          type: integer
+          readOnly: true
+        cover:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - author
+      - cover
+      - created_at
+      - grade_level
+      - id
+      - language
+      - page_count
+      - title
+      - type
+    BookAdmin:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          maxLength: 255
+        author:
+          type: string
+          maxLength: 255
+        type:
+          $ref: '#/components/schemas/BookTypeEnum'
+        grade_level:
+          type: integer
+          maximum: 11
+          minimum: 1
+          nullable: true
+        language:
+          $ref: '#/components/schemas/LanguageEnum'
+        description:
+          type: string
+          maxLength: 4000
+        cover_image:
+          type: string
+        cover_url:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        chapters:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChapterInput'
+        has_file:
+          type: boolean
+          readOnly: true
+        size_bytes:
+          type: integer
+          readOnly: true
+        page_count:
+          type: integer
+          readOnly: true
+        processed_pages:
+          type: integer
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/BookStatusEnum'
+          readOnly: true
+        status_error:
+          type: string
+          readOnly: true
+        is_published:
+          type: boolean
+          readOnly: true
+        published_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        upload_pending:
+          type: boolean
+          readOnly: true
+        allowed_transitions:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - allowed_transitions
+      - cover_url
+      - created_at
+      - has_file
+      - id
+      - is_published
+      - page_count
+      - processed_pages
+      - published_at
+      - size_bytes
+      - status
+      - status_error
+      - title
+      - updated_at
+      - upload_pending
+    BookAdminRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        author:
+          type: string
+          maxLength: 255
+        type:
+          $ref: '#/components/schemas/BookTypeEnum'
+        grade_level:
+          type: integer
+          maximum: 11
+          minimum: 1
+          nullable: true
+        language:
+          $ref: '#/components/schemas/LanguageEnum'
+        description:
+          type: string
+          maxLength: 4000
+        cover_image:
+          type: string
+        chapters:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChapterInputRequest'
+      required:
+      - title
+    BookChapter:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+        start_page:
+          type: integer
+          readOnly: true
+      required:
+      - id
+      - start_page
+      - title
     BookCounts:
       type: object
       properties:
@@ -3583,6 +4222,128 @@ components:
       - draft
       - published
       - total
+    BookDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+        author:
+          type: string
+          readOnly: true
+        type:
+          allOf:
+          - $ref: '#/components/schemas/BookTypeEnum'
+          readOnly: true
+        grade_level:
+          type: integer
+          readOnly: true
+          nullable: true
+        language:
+          allOf:
+          - $ref: '#/components/schemas/LanguageEnum'
+          readOnly: true
+        page_count:
+          type: integer
+          readOnly: true
+        cover:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        description:
+          type: string
+          readOnly: true
+        chapters:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookChapter'
+          readOnly: true
+      required:
+      - author
+      - chapters
+      - cover
+      - created_at
+      - description
+      - grade_level
+      - id
+      - language
+      - page_count
+      - title
+      - type
+    BookPage:
+      type: object
+      properties:
+        number:
+          type: integer
+          readOnly: true
+        image:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        thumbnail:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        width:
+          type: integer
+          readOnly: true
+        height:
+          type: integer
+          readOnly: true
+        has_text:
+          type: boolean
+          readOnly: true
+          description: Sahifada matn qatlami bor (badiiy matnli rejim, kitob ichida
+            qidiruv)
+      required:
+      - has_text
+      - height
+      - image
+      - number
+      - thumbnail
+      - width
+    BookStatusEnum:
+      enum:
+      - processing
+      - ready
+      - failed
+      type: string
+      description: |-
+        * `processing` - Tayyorlanmoqda
+        * `ready` - Tayyor
+        * `failed` - Xato
+    BookTransitionRequest:
+      type: object
+      properties:
+        to:
+          $ref: '#/components/schemas/ToEnum'
+      required:
+      - to
+    BookTypeEnum:
+      enum:
+      - textbook
+      - fiction
+      - math
+      - test
+      - other
+      type: string
+      description: |-
+        * `textbook` - Darslik
+        * `fiction` - Badiiy kitob
+        * `math` - Matematika
+        * `test` - Test to'plami
+        * `other` - Boshqa
     BotBook:
       type: object
       properties:
@@ -3706,6 +4467,28 @@ components:
       - grade
       - id
       - slug
+      - title
+    ChapterInput:
+      type: object
+      description: Mundarija qatori; qiymatlar `services.chapter_errors` da tekshiriladi.
+      properties:
+        title:
+          type: string
+        start_page:
+          type: integer
+      required:
+      - start_page
+      - title
+    ChapterInputRequest:
+      type: object
+      description: Mundarija qatori; qiymatlar `services.chapter_errors` da tekshiriladi.
+      properties:
+        title:
+          type: string
+        start_page:
+          type: integer
+      required:
+      - start_page
       - title
     ChapterLeaf:
       type: object
@@ -4743,6 +5526,52 @@ components:
       required:
       - code
       - email
+    PaginatedBookAdminList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookAdmin'
+    PaginatedBookList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Book'
     PaginatedGameTopicList:
       type: object
       required:
@@ -4945,6 +5774,34 @@ components:
           maxLength: 128
       required:
       - new_password
+    PatchedBookAdminRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        author:
+          type: string
+          maxLength: 255
+        type:
+          $ref: '#/components/schemas/BookTypeEnum'
+        grade_level:
+          type: integer
+          maximum: 11
+          minimum: 1
+          nullable: true
+        language:
+          $ref: '#/components/schemas/LanguageEnum'
+        description:
+          type: string
+          maxLength: 4000
+        cover_image:
+          type: string
+        chapters:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChapterInputRequest'
     PatchedGoalWriteRequest:
       type: object
       description: 'POST: title (+ kitob, muddat). PATCH: istalgan maydon; `done`

@@ -5,8 +5,23 @@ const keys = (role: "editor" | "admin") => adminNavFor(role).map((item) => item.
 
 describe("adminNavFor", () => {
   it("foydalanuvchilar bo'limi faqat admin'ga", () => {
-    expect(keys("admin")).toEqual(["dashboard", "books", "messages", "subjects", "stats", "users"]);
-    expect(keys("editor")).toEqual(["dashboard", "books", "messages", "subjects", "stats"]);
+    expect(keys("admin")).toEqual([
+      "dashboard",
+      "books",
+      "library",
+      "messages",
+      "subjects",
+      "stats",
+      "users",
+    ]);
+    expect(keys("editor")).toEqual([
+      "dashboard",
+      "books",
+      "library",
+      "messages",
+      "subjects",
+      "stats",
+    ]);
   });
 
   it("kitob sahifalari Kitoblar bo'limini faol qiladi", () => {
