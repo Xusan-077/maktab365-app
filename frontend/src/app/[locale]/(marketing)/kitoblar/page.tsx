@@ -61,8 +61,8 @@ async function BooksContent({ params, searchParams }: Props) {
           {t("title")}
         </h1>
       </div>
-      <BooksFilterBar key={bookQuery(filters)} filters={filters} />
-      <Suspense key={bookQuery(filters)} fallback={<BooksResultsSkeleton />}>
+      <BooksFilterBar filters={filters} />
+      <Suspense key={`list:${bookQuery(filters)}`} fallback={<BooksResultsSkeleton />}>
         <BooksResults filters={filters} />
       </Suspense>
     </div>
