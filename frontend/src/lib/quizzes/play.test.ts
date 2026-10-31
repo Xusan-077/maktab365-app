@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildPlayQuestions,
   buildReview,
+  canSubmitAttempt,
   formatClock,
   INITIAL_PLAY_STATE,
   percentOf,
@@ -96,6 +97,18 @@ describe("natija", () => {
       ],
       time_spent: 12,
     });
+  });
+  it("attempt_id so'rovga qo'shiladi", () => {
+    expect(toAttemptInput(questions, picks, 3, "id-1")).toMatchObject({ attempt_id: "id-1" });
+    expect(toAttemptInput(questions, picks, 3)).not.toHaveProperty("attempt_id");
+  });
+  it("natija faqat to'liq o'yindan keyin yuboriladi", () => {
+    expect(canSubmitAttempt(questions, [])).toBe(false);
+    expect(canSubmitAttempt(questions, [picks[0]])).toBe(false);
+    expect(canSubmitAttempt(questions, [picks[0], picks[0]])).toBe(false);
+    expect(canSubmitAttempt(questions, [picks[0], { ...picks[1], questionId: "x" }])).toBe(false);
+    expect(canSubmitAttempt([], [])).toBe(false);
+    expect(canSubmitAttempt(questions, picks)).toBe(true);
   });
   it("soat formati", () => {
     expect(formatClock(83)).toBe("1:23");

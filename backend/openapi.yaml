@@ -3223,6 +3223,7 @@ paths:
           description: ''
     post:
       operationId: quizzes_attempts_create
+      description: '`attempt_id` bir xil bo''lsa, natija qayta yaratilmaydi (200).'
       summary: 'Natijani saqlash: javoblar serverda tekshiriladi, ball hisoblanadi'
       parameters:
       - in: path
@@ -3249,6 +3250,12 @@ paths:
       - jwtAuth: []
       responses:
         '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Attempt'
+          description: ''
+        '200':
           content:
             application/json:
               schema:
@@ -3457,6 +3464,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AttemptAnswerRequest'
+        attempt_id:
+          type: string
+          format: uuid
         time_spent:
           type: integer
           maximum: 86400

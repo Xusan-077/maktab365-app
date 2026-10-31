@@ -121,13 +121,26 @@ export function buildReview(
 }
 
 /** Serverga ketadigan natija: javobsiz savollar ham `null` bilan yuboriladi. */
+/**
+ * Natija faqat o'yin haqiqatan tugaganda yuboriladi: har savolga bittadan javob (yoki vaqt tugashi)
+ * qayd etilgan bo'lsa. Bo'sh yoki chala o'yin (masalan, unmount) hech qachon natija bo'lmaydi.
+ */
+export function canSubmitAttempt(questions: readonly PlayQuestion[], picks: readonly Pick[]) {
+  if (questions.length === 0 || picks.length !== questions.length) return false;
+  const known = new Set(questions.map((q) => q.id));
+  const seen = new Set(picks.map((p) => p.questionId));
+  return seen.size === picks.length && picks.every((p) => known.has(p.questionId));
+}
+
 export function toAttemptInput(
   questions: readonly PlayQuestion[],
   picks: readonly Pick[],
   timeSpent: number,
+  attemptId?: string,
 ): AttemptInput {
   const byQuestion = new Map(picks.map((p) => [p.questionId, p]));
   return {
+    ...(attemptId ? { attempt_id: attemptId } : {}),
     answers: questions.map((q) => ({
       question_id: q.id,
       option_id: byQuestion.get(q.id)?.optionId ?? null,

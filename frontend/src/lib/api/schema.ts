@@ -1714,7 +1714,10 @@ export interface paths {
         /** Test bo'yicha natijalar tarixi (yangilari avval) */
         get: operations["quizzes_attempts_list"];
         put?: never;
-        /** Natijani saqlash: javoblar serverda tekshiriladi, ball hisoblanadi */
+        /**
+         * Natijani saqlash: javoblar serverda tekshiriladi, ball hisoblanadi
+         * @description `attempt_id` bir xil bo'lsa, natija qayta yaratilmaydi (200).
+         */
         post: operations["quizzes_attempts_create"];
         delete?: never;
         options?: never;
@@ -1794,6 +1797,8 @@ export interface components {
         };
         AttemptCreateRequest: {
             answers: components["schemas"]["AttemptAnswerRequest"][];
+            /** Format: uuid */
+            attempt_id?: string;
             time_spent: number;
         };
         AttemptReview: {
@@ -6127,6 +6132,14 @@ export interface operations {
             };
         };
         responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Attempt"];
+                };
+            };
             201: {
                 headers: {
                     [name: string]: unknown;

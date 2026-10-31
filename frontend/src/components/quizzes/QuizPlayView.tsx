@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { History, ListChecks } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -15,6 +15,7 @@ import { Link } from "@/lib/i18n/navigation";
 import {
   buildPlayQuestions,
   buildReview,
+  canSubmitAttempt,
   scoreOf,
   toAttemptInput,
   type PlayQuestion,
@@ -40,6 +41,13 @@ function PlaySession({ quiz }: { quiz: Quiz }) {
   const [run, setRun] = useState(0);
   const [result, setResult] = useState<PlayerResult | null>(null);
   const save = useSaveAttempt(quiz.id);
+  // Har o'yin (`run`) uchun bitta id: qayta yuborish/ikki marta chaqirish serverda dublikat bermaydi.
+  const attemptId = useMemo(
+    () => crypto.randomUUID(),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [quiz, run],
+  );
+  const submittedFor = useRef<string | null>(null);
 
   // `run` o'zgarsa savollar qayta aralashadi.
   const questions = useMemo(
@@ -54,11 +62,14 @@ function PlaySession({ quiz }: { quiz: Quiz }) {
 
   const finish = useCallback(
     (finished: PlayerResult) => {
+      if (!canSubmitAttempt(questions, finished.picks)) return;
+      if (submittedFor.current === attemptId) return;
+      submittedFor.current = attemptId;
       setResult(finished);
-      save.mutate(toAttemptInput(questions, finished.picks, finished.timeSpent));
+      save.mutate(toAttemptInput(questions, finished.picks, finished.timeSpent, attemptId));
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [questions],
+    [questions, attemptId],
   );
 
   function replay() {
@@ -97,7 +108,7 @@ function PlaySession({ quiz }: { quiz: Quiz }) {
                 variant="ghost"
                 size="sm"
                 onClick={() =>
-                  save.mutate(toAttemptInput(questions, result.picks, result.timeSpent))
+                  save.mutate(toAttemptInput(questions, result.picks, result.timeSpent, attemptId))
                 }
               >
                 {t("retrySave")}

@@ -136,8 +136,17 @@ class QuizAttempt(UUIDModel):
     total = models.PositiveSmallIntegerField()
     time_spent = models.PositiveIntegerField(default=0)
     answers = models.JSONField(default=list, blank=True)
+    # Klient bergan o'yin identifikatori: qayta yuborish dublikat yaratmasin (idempotentlik).
+    client_id = models.UUIDField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:
         ordering = ["-created_at"]
         indexes = [models.Index(fields=["quiz", "-created_at"])]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["quiz", "teacher", "client_id"],
+                condition=models.Q(client_id__isnull=False),
+                name="quizzes_attempt_unique_client_id",
+            )
+        ]

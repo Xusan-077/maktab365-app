@@ -181,10 +181,37 @@ def test_attempt_rejects_foreign_option_and_unanswered_is_wrong(teacher):
         format="json",
     )
     assert bad.status_code == 400
+    unanswered = teacher.post(
+        f"/api/v1/quizzes/{quiz['id']}/attempts/",
+        {"answers": [{"question_id": q1["id"], "option_id": None}], "time_spent": 1},
+        format="json",
+    )
+    assert unanswered.data["score"] == 0
+    assert QuizAttempt.objects.count() == 1
+
+
+def test_attempt_without_answers_is_rejected(teacher):
+    quiz = create(teacher)
     empty = teacher.post(
         f"/api/v1/quizzes/{quiz['id']}/attempts/", {"answers": [], "time_spent": 1}, format="json"
     )
-    assert empty.data["score"] == 0
+    assert empty.status_code == 400
+    assert QuizAttempt.objects.count() == 0
+
+
+def test_attempt_is_idempotent_per_attempt_id(teacher):
+    quiz = create(teacher)
+    q1 = quiz["questions"][0]
+    body = {
+        "attempt_id": "5b0f6b0e-0c53-4b3c-9d49-0e6f3c2a1d10",
+        "answers": [{"question_id": q1["id"], "option_id": q1["options"][1]["id"]}],
+        "time_spent": 5,
+    }
+    url = f"/api/v1/quizzes/{quiz['id']}/attempts/"
+    first = teacher.post(url, body, format="json")
+    second = teacher.post(url, body, format="json")
+    assert (first.status_code, second.status_code) == (201, 200)
+    assert first.data["id"] == second.data["id"]
     assert QuizAttempt.objects.count() == 1
 
 

@@ -220,7 +220,9 @@ class AttemptAnswerSerializer(serializers.Serializer):
 
 
 class AttemptCreateSerializer(serializers.Serializer):
-    answers = AttemptAnswerSerializer(many=True, max_length=QUESTIONS_MAX)
+    answers = AttemptAnswerSerializer(many=True, min_length=1, max_length=QUESTIONS_MAX)
+    # Bir o'yin uchun bitta natija: bir xil `attempt_id` qayta yuborilsa, mavjud natija qaytadi.
+    attempt_id = serializers.UUIDField(required=False)
     time_spent = serializers.IntegerField(min_value=0, max_value=24 * 60 * 60)
 
 

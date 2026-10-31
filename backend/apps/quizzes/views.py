@@ -207,20 +207,22 @@ class AttemptListCreateView(GenericAPIView):
         operation_id="quizzes_attempts_create",
         tags=TAGS,
         request=AttemptCreateSerializer,
-        responses={201: AttemptSerializer},
+        responses={201: AttemptSerializer, 200: AttemptSerializer},
         summary="Natijani saqlash: javoblar serverda tekshiriladi, ball hisoblanadi",
+        description="`attempt_id` bir xil bo'lsa, natija qayta yaratilmaydi (200).",
     )
     def post(self, request, pk):
         quiz = self.get_quiz()
         body = AttemptCreateSerializer(data=request.data)
         body.is_valid(raise_exception=True)
-        attempt = services.create_attempt(
+        attempt, created = services.create_attempt(
             quiz,
             request.user,
             body.validated_data["answers"],
             body.validated_data["time_spent"],
+            body.validated_data.get("attempt_id"),
         )
-        return Response(AttemptSerializer(attempt).data, status=201)
+        return Response(AttemptSerializer(attempt).data, status=201 if created else 200)
 
 
 class PublicQuizView(APIView):

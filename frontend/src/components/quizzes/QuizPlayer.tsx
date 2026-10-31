@@ -37,13 +37,16 @@ export function QuizPlayer({ questions, timePerQuestion, check, onFinish }: Prop
   const [checkFailed, setCheckFailed] = useState(false);
   const [startedAt] = useState(() => Date.now());
   const finished = useRef(false);
+  // Sinxron qulf: taymer tugashi va bosish bir vaqtda kelsa, faqat birinchisi o'tadi (state kechikadi).
+  const inFlight = useRef(false);
 
   const question = questions[state.index];
   const pick = state.phase === "revealed" ? (state.picks[state.picks.length - 1] ?? null) : null;
   const isLast = state.index === questions.length - 1;
 
   async function answer(optionId: string | null) {
-    if (state.phase !== "answering" || busy) return;
+    if (state.phase !== "answering" || busy || inFlight.current) return;
+    inFlight.current = true;
     setBusy(true);
     setCheckFailed(false);
     try {
@@ -61,6 +64,7 @@ export function QuizPlayer({ questions, timePerQuestion, check, onFinish }: Prop
     } catch {
       setCheckFailed(true);
     } finally {
+      inFlight.current = false;
       setBusy(false);
     }
   }

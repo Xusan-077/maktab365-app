@@ -126,8 +126,18 @@ def check_answer(quiz: Quiz, question_id, option_id) -> dict:
 
 
 @transaction.atomic
-def create_attempt(quiz: Quiz, teacher, answers: list[dict], time_spent: int) -> QuizAttempt:
-    """Javoblarni serverda tekshiradi va ballni hisoblaydi (javobsiz savol — noto'g'ri)."""
+def create_attempt(
+    quiz: Quiz, teacher, answers: list[dict], time_spent: int, client_id=None
+) -> tuple[QuizAttempt, bool]:
+    """Javoblarni serverda tekshiradi va ballni hisoblaydi (javobsiz savol — noto'g'ri).
+
+    `client_id` bo'yicha idempotent: mavjud natija `(attempt, False)` bilan qaytadi."""
+    if client_id is not None:
+        existing = QuizAttempt.objects.filter(
+            quiz=quiz, teacher=teacher, client_id=client_id
+        ).first()
+        if existing:
+            return existing, False
     questions = list(quiz.questions.prefetch_related("options"))
     by_id = {q.pk: q for q in questions}
     given: dict = {}
@@ -161,11 +171,13 @@ def create_attempt(quiz: Quiz, teacher, answers: list[dict], time_spent: int) ->
                 "correct": is_correct,
             }
         )
-    return QuizAttempt.objects.create(
+    attempt = QuizAttempt.objects.create(
         quiz=quiz,
         teacher=teacher,
         score=score,
         total=len(questions),
         time_spent=min(max(time_spent, 0), MAX_TIME_SPENT),
         answers=review,
+        client_id=client_id,
     )
+    return attempt, True
