@@ -428,7 +428,8 @@
       "textbooks": "Darsliklar",
       "saved": "Saqlanganlar",
       "subjects": "Fanlarim",
-      "results": "Natijalar"
+      "results": "Natijalar",
+      "entries": "Yozuvlarim"
     }
   },
   "teacher": {
@@ -440,7 +441,8 @@
       "saved": "Saqlanganlar",
       "home": "Bosh sahifa",
       "textbooks": "Darsliklar",
-      "quizzes": "Mening testlarim"
+      "quizzes": "Mening testlarim",
+      "entries": "Yozuvlarim"
     }
   },
   "panel": {
@@ -2951,7 +2953,14 @@
         "notes": "N"
       },
       "notesOpen": "Yozuvlar panelini ochish",
-      "notesClose": "Yozuvlar panelini yopish"
+      "notesClose": "Yozuvlar panelini yopish",
+      "export": {
+        "menu": "Yuklab olish",
+        "page": "Betni yuklab olish (PNG)",
+        "notes": "Yon daftarni yuklab olish (.md)",
+        "failed": "Yuklab bo'lmadi. Qayta urinib ko'ring.",
+        "pageHeading": "{page}-bet"
+      }
     },
     "card": {
       "progress": "{percent}% o'qilgan",
@@ -3028,6 +3037,66 @@
         "close": "Yozuvlar panelini yopish",
         "resize": "Panel kengligi",
         "handle": "Yozuvlar panelini kattalashtirish yoki kichraytirish"
+      }
+    },
+    "entries": {
+      "metaTitle": "Mening yozuvlarim",
+      "metaDescription": "Kitoblardagi barcha yon daftar yozuvlaringiz, belgilashlaringiz, chizmalaringiz va xatcho'plaringiz bir joyda.",
+      "title": "Mening yozuvlarim",
+      "lead": "Kitoblarga yozganlaringiz, belgilagan va chizgan betlaringiz bir joyda. Bosing — o'sha betda o'qishni davom ettirasiz.",
+      "searchLabel": "Yozuvlar ichidan qidirish",
+      "searchPlaceholder": "Yozuvlardan qidirish",
+      "book": "Kitob",
+      "allBooks": "Barcha kitoblar",
+      "typeLabel": "Yozuv turi",
+      "types": {
+        "all": "Barchasi",
+        "note": "Yon daftar",
+        "highlight": "Belgilash",
+        "drawing": "Chizma",
+        "text": "Matn",
+        "bookmark": "Xatcho'p"
+      },
+      "colorLabel": "Belgilash rangi",
+      "reset": "Filtrlarni tozalash",
+      "count": "{count} ta bet",
+      "more": "Yana ko'rsatish",
+      "page": "{page}-bet",
+      "open": "{page}-betni o'qish oynasida ochish",
+      "thumbAlt": "{page}-bet va unga qilingan yozuvlar",
+      "counts": {
+        "highlights": "{count} ta belgilash",
+        "drawings": "{count} ta chizma",
+        "texts": "{count} ta matn",
+        "bookmark": "Xatcho'p"
+      },
+      "recolor": "Belgilash rangini almashtirish",
+      "recolorFailed": "Rangni almashtirib bo'lmadi.",
+      "delete": {
+        "action": "{page}-bet yozuvlarini o'chirish",
+        "title": "{page}-bet yozuvlari o'chirilsinmi?",
+        "text": "Yon daftar, belgilash, chizma, matn va xatcho'p o'chadi. Buni qaytarib bo'lmaydi.",
+        "cancel": "Bekor qilish",
+        "confirm": "O'chirish",
+        "failed": "Yozuvlarni o'chirib bo'lmadi."
+      },
+      "emptyText": "Hali yozuvlaringiz yo'q. Kitob o'qiyotganda betga chizing, matnni belgilang yoki yon daftarga yozing — hammasi shu yerda to'planadi.",
+      "emptyAction": "Kitoblarga o'tish",
+      "noMatch": "Bu filtrlarga mos yozuv topilmadi.",
+      "errorText": "Yozuvlarni yuklab bo'lmadi.",
+      "retry": "Qayta urinish",
+      "guestText": "Yozuvlaringiz akkauntingizda saqlanadi. Ularni ko'rish uchun kiring.",
+      "guestAction": "Kirish",
+      "export": {
+        "action": "Kitob yozuvlarini yuklab olish",
+        "progress": "Tayyorlanmoqda: {done}/{total}",
+        "cancel": "Bekor qilish",
+        "done": "Yuklab olindi.",
+        "truncated": "Faqat dastlabki {max} bet yuklandi. Qolganini kitobning o'zidan yuklab oling.",
+        "failed": "Yuklab bo'lmadi. Qayta urinib ko'ring.",
+        "pageHeading": "{page}-bet",
+        "texts": "Betdagi matnlar",
+        "notesFile": "yon-daftar.md"
       }
     }
   }

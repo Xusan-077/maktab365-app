@@ -22,7 +22,9 @@ import { formatZoom } from "@/lib/pdf/zoom";
 import { progressPercent } from "@/lib/books/reader";
 import { bookPath } from "@/lib/utils/routes";
 import { cn } from "@/lib/utils/cn";
+import type { Annotation } from "@/lib/books/annotations";
 import { AppearanceMenu } from "./AppearanceMenu";
+import { ExportMenu } from "./ExportMenu";
 import { BK_ICON_BUTTON, withKey } from "./reader-styles";
 import type { BookReaderPrefs } from "@/lib/books/reader";
 
@@ -45,6 +47,8 @@ export interface TopBarProps {
   onOpenToc: () => void;
   onOpenFind: () => void;
   onToggleBookmark: () => void;
+  page: number;
+  pageItems: readonly Annotation[];
 }
 
 /** Ingichka tepa panel: orqaga, kitob nomi va bo'lim, mundarija, qidiruv, xatcho'p, ko'rinish, to'liq ekran. */
@@ -63,6 +67,8 @@ export function ReaderTopBar({
   onOpenToc,
   onOpenFind,
   onToggleBookmark,
+  page,
+  pageItems,
 }: TopBarProps) {
   const t = useTranslations("books.reader");
   const keys = useTranslations("books.reader.keys");
@@ -129,6 +135,13 @@ export function ReaderTopBar({
       >
         <NotebookPen className="size-5" aria-hidden />
       </button>
+      <ExportMenu
+        bookId={bookId}
+        title={title}
+        page={page}
+        items={pageItems}
+        onOpenChange={onLookOpenChange}
+      />
       <AppearanceMenu
         prefs={prefs}
         hasText={hasText}

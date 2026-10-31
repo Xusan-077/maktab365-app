@@ -2,19 +2,21 @@ import { describe, expect, it } from "vitest";
 import { appNavFor } from "./app-nav";
 
 describe("appNavFor", () => {
-  it("o'quvchi: Bosh sahifa, Darsliklar, Fanlarim, Natijalar, Saqlanganlar; ustoz: Bosh sahifa, Darsliklar, Mening testlarim, Saqlanganlar", () => {
+  it("o'quvchi: Bosh sahifa, Darsliklar, Fanlarim, Natijalar, Saqlanganlar, Yozuvlarim; ustoz: Bosh sahifa, Darsliklar, Mening testlarim, Saqlanganlar, Yozuvlarim", () => {
     expect(appNavFor("kabinet").map((item) => item.href)).toEqual([
       "/kabinet",
       "/darsliklar",
       "/kabinet/fanlar",
       "/kabinet/natijalar",
       "/kabinet/saqlanganlar",
+      "/kitoblar/yozuvlarim",
     ]);
     expect(appNavFor("ustoz").map((item) => item.href)).toEqual([
       "/ustoz",
       "/darsliklar",
       "/ustoz/testlar",
       "/ustoz/saqlanganlar",
+      "/kitoblar/yozuvlarim",
     ]);
   });
 

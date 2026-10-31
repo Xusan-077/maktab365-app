@@ -1,4 +1,4 @@
-import { createHttpClient, unwrap, type HttpClient } from "@/lib/api/http-client";
+import { createHttpClient, toApiError, unwrap, type HttpClient } from "@/lib/api/http-client";
 import type { components } from "@/lib/api/schema";
 import type { AnnotationItem } from "./annotations";
 
@@ -14,6 +14,10 @@ export type BookProgress = Schemas["BookProgress"];
 export type Bookmark = Schemas["Bookmark"];
 export type PageNote = Schemas["PageNote"];
 export type ServerAnnotation = Schemas["PageAnnotation"];
+export type PageEntry = Schemas["PageEntry"];
+export type PageEntryList = Schemas["PageEntryList"];
+export type EntryBookCount = Schemas["EntryBookCount"];
+export type PageEntryType = "note" | "highlight" | "drawing" | "text" | "bookmark";
 export type BookType = Schemas["BookTypeEnum"];
 export type BookLanguage = Schemas["LanguageEnum"];
 
@@ -156,6 +160,52 @@ export class MyBooksApi {
       body: { annotations: [...items] },
     });
     return unwrap(result);
+  }
+
+  /** Mening yozuvlarim: bet bo'yicha jamlangan, filtr va sahifalash bilan. */
+  async entries(query: {
+    book?: string;
+    type?: PageEntryType;
+    color?: string;
+    q?: string;
+    page?: number;
+    page_size?: number;
+  }): Promise<PageEntryList> {
+    const result = await this.client.GET("/api/v1/me/annotations/", { params: { query } });
+    return unwrap(result);
+  }
+
+  async entryBooks(): Promise<EntryBookCount[]> {
+    return unwrap(await this.client.GET("/api/v1/me/annotations/books/"));
+  }
+
+  /** Sahifa rasmi baytlari (eksport: boshqa origin'dagi rasm canvas'ni ifloslantirmasin). */
+  async pageImage(id: string, page: number): Promise<Blob> {
+    // openapi-typescript ikkilik javobni `string` deb tiplaydi; haqiqatda `parseAs: "blob"` Blob beradi.
+    const result = (await this.client.GET("/api/v1/me/books/{id}/pages/{number}/image/", {
+      params: { path: { id, number: page } },
+      parseAs: "blob",
+    })) as unknown as { data?: Blob; error?: unknown; response: Response };
+    if (result.error !== undefined || result.data === undefined) {
+      throw toApiError(result.response, result.error);
+    }
+    return result.data;
+  }
+
+  async updateAnnotation(id: string, annotationId: string, data: unknown): Promise<void> {
+    const result = await this.client.PATCH("/api/v1/me/books/{id}/annotations/{annotation_id}/", {
+      params: { path: { id, annotation_id: annotationId } },
+      body: { data },
+    });
+    unwrap(result);
+  }
+
+  async deleteAnnotation(id: string, annotationId: string): Promise<void> {
+    const result: { error?: unknown; response: Response } = await this.client.DELETE(
+      "/api/v1/me/books/{id}/annotations/{annotation_id}/",
+      { params: { path: { id, annotation_id: annotationId } } },
+    );
+    if (result.error !== undefined) unwrap({ error: result.error, response: result.response });
   }
 
   async removeBookmark(id: string, page: number): Promise<void> {

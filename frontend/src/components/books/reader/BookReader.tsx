@@ -107,7 +107,16 @@ export function BookReader({ book, pages }: BookReaderProps) {
   const sync = useAnnotationSync();
   useEffect(() => {
     useBookAnnotationsStore.getState().attach(book.id);
-    return () => useBookAnnotationsStore.getState().setTool("none");
+    return () => {
+      // Boshqa sahifada (masalan, "Mening yozuvlarim") o'zgargan yozuvlar eskirgan nusxa bo'lib qolmasin.
+      useBookAnnotationsStore.setState({
+        bookId: null,
+        tool: "none",
+        selectedId: null,
+        pages: {},
+        lastChange: null,
+      });
+    };
   }, [book.id]);
   const annotationsState = useAnnotationLoader(book.id, currentPage, total);
   const pageItems = useBookAnnotationsStore(selectPageItems(currentPage));
@@ -341,6 +350,8 @@ export function BookReader({ book, pages }: BookReaderProps) {
           onOpenToc={() => openToc()}
           onOpenFind={() => setFindOpen(true)}
           onToggleBookmark={toggleBookmarkHere}
+          page={page}
+          pageItems={pageItems}
         />
         <ReaderBottomBar
           visible={chrome.visible}

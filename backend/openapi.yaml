@@ -4173,6 +4173,108 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/me/annotations/:
+    get:
+      operationId: me_annotations_list
+      summary: 'Mening yozuvlarim: bet bo''yicha jamlangan (yon daftar, annotatsiya,
+        xatcho''p)'
+      parameters:
+      - in: query
+        name: book
+        schema:
+          type: string
+          format: uuid
+        description: Kitob bo'yicha
+      - in: query
+        name: color
+        schema:
+          type: string
+        description: Belgilash rangi (#rrggbb)
+      - in: query
+        name: page
+        schema:
+          type: integer
+        description: Sahifa raqami (1 dan)
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+        description: 1..50, standart 20
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Yon daftar va matn bo'yicha
+      - in: query
+        name: type
+        schema:
+          type: string
+          enum:
+          - bookmark
+          - drawing
+          - highlight
+          - note
+          - text
+        description: Yozuv turi
+      tags:
+      - books
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageEntryList'
+          description: ''
+  /api/v1/me/annotations/books/:
+    get:
+      operationId: me_annotations_books
+      summary: Yozuvi bor kitoblar (filtr ro'yxati uchun)
+      tags:
+      - books
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EntryBookCount'
+          description: ''
+  /api/v1/me/books/{id}/pages/{number}/image/:
+    get:
+      operationId: me_books_page_image
+      description: |-
+        Sahifa rasmi (eksport uchun): brauzer canvas'i boshqa origin'dagi rasmni o'qiy olmaydi
+        (CORS), shuning uchun rasm shu API orqali, BFF bilan bir origin'da beriladi.
+      summary: Sahifa rasmi baytlari (yozuvli eksport uchun)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: number
+        schema:
+          type: integer
+        required: true
+      tags:
+      - books
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            image/*:
+              schema:
+                type: string
+                format: binary
+          description: ''
 components:
   schemas:
     AdminDashboard:
@@ -5286,6 +5388,77 @@ components:
           maxLength: 254
       required:
       - email
+    EntryAnnotation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          $ref: '#/components/schemas/AnnotationTypeEnum'
+        data: {}
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - data
+      - id
+      - type
+      - updated_at
+    EntryBook:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        cover:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+      required:
+      - cover
+      - id
+      - title
+    EntryBookCount:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        count:
+          type: integer
+          description: Yozuvi bor betlar soni
+      required:
+      - count
+      - id
+      - title
+    EntryPage:
+      type: object
+      properties:
+        image:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        thumbnail:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        width:
+          type: integer
+        height:
+          type: integer
+      required:
+      - height
+      - image
+      - thumbnail
+      - width
     EventKindEnum:
       enum:
       - book_opened
@@ -6155,6 +6328,59 @@ components:
             $ref: '#/components/schemas/AnnotationInputRequest'
       required:
       - annotations
+    PageEntry:
+      type: object
+      properties:
+        book:
+          $ref: '#/components/schemas/EntryBook'
+        page:
+          type: integer
+        image:
+          allOf:
+          - $ref: '#/components/schemas/EntryPage'
+          nullable: true
+        note:
+          type: string
+        note_updated_at:
+          type: string
+          format: date-time
+          nullable: true
+        annotations:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntryAnnotation'
+        bookmarked:
+          type: boolean
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - annotations
+      - book
+      - bookmarked
+      - image
+      - note
+      - note_updated_at
+      - page
+      - updated_at
+    PageEntryList:
+      type: object
+      properties:
+        count:
+          type: integer
+        page:
+          type: integer
+        page_size:
+          type: integer
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PageEntry'
+      required:
+      - count
+      - page
+      - page_size
+      - results
     PageNote:
       type: object
       properties:

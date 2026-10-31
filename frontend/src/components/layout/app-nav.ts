@@ -7,6 +7,7 @@ import {
   GraduationCap,
   House,
   type LucideIcon,
+  NotebookPen,
 } from "lucide-react";
 import { ROUTES, type PanelBase } from "@/lib/utils/routes";
 
@@ -28,6 +29,14 @@ const textbooks = (labelKey: string): AppNavItem => ({
   labelKey,
   href: ROUTES.textbooks,
   icon: FileText,
+  isActive: () => false,
+});
+
+/** "Yozuvlarim" Kitoblar bo'limidagi ochiq sahifaga olib boradi (panel qobig'idan tashqarida). */
+const entries = (labelKey: string): AppNavItem => ({
+  labelKey,
+  href: ROUTES.myEntries,
+  icon: NotebookPen,
   isActive: () => false,
 });
 
@@ -58,6 +67,7 @@ const STUDENT_NAV: AppNavItem[] = [
     icon: Bookmark,
     isActive: within(ROUTES.cabinetSaved),
   },
+  entries("cabinet.nav.entries"),
 ];
 
 /** O'qituvchi: Bosh sahifa · Darsliklar · Mening testlarim · Saqlanganlar. */
@@ -81,6 +91,7 @@ const TEACHER_NAV: AppNavItem[] = [
     icon: Bookmark,
     isActive: within(ROUTES.teacherSaved),
   },
+  entries("teacher.nav.entries"),
 ];
 
 export const appNavFor = (base: PanelBase) => (base === "ustoz" ? TEACHER_NAV : STUDENT_NAV);

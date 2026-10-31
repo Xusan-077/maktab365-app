@@ -12,6 +12,7 @@ import { GOOGLE_PROVIDER } from "@/lib/auth/config";
 import { Link } from "@/lib/i18n/navigation";
 import { ROUTES } from "@/lib/utils/routes";
 import { useAuthModalStore } from "@/stores/auth-modal.store";
+import { saveReturnTo } from "@/lib/auth/return-to";
 import { GoogleIcon } from "./GoogleIcon";
 import { TelegramLoginPanel } from "./TelegramLoginPanel";
 
@@ -47,6 +48,8 @@ export function AuthModal() {
 
   const google = () => {
     setGooglePending(true);
+    // OAuth sahifadan chiqarib yuboradi: kirgach shu sahifaga qaytish uchun joyni eslab qolamiz.
+    saveReturnTo(`${window.location.pathname}${window.location.search}`);
     void signIn(GOOGLE_PROVIDER, { redirectTo: `/${locale}${ROUTES.onboarding}` });
   };
 

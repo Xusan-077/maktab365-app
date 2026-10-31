@@ -5,6 +5,7 @@ import {
   type DrawingData,
   type NormRect,
   type StrokePoint,
+  type TextData,
 } from "./annotations";
 import type { BookTheme } from "./reader";
 
@@ -147,4 +148,78 @@ export function fitCanvas(
   if (!ctx) return null;
   ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
   return ctx;
+}
+
+/** Matn qatlami (DOM) bilan bir xil: qator balandligi 1.35 × shrift. */
+export const TEXT_LINE_HEIGHT = 1.35;
+
+/** Matnni `maxWidth` ga sig'dirib qatorlarga bo'ladi (yangi qator saqlanadi; juda uzun so'z bo'linmaydi). */
+export function wrapLines(
+  measure: (text: string) => number,
+  text: string,
+  maxWidth: number,
+): string[] {
+  const lines: string[] = [];
+  for (const paragraph of text.split("\n")) {
+    let line = "";
+    for (const word of paragraph.split(" ")) {
+      const next = line === "" ? word : `${line} ${word}`;
+      if (line !== "" && measure(next) > maxWidth) {
+        lines.push(line);
+        line = word;
+      } else {
+        line = next;
+      }
+    }
+    lines.push(line);
+  }
+  return lines;
+}
+
+/** Matn annotatsiyasini canvas'ga chizadi (eksport va eskizlar; chizish oynasida DOM ishlatiladi). */
+export function drawTextAnnotation(
+  ctx: CanvasRenderingContext2D,
+  data: TextData,
+  size: CanvasSize,
+  theme: BookTheme,
+  fontFamily = "system-ui, sans-serif",
+): void {
+  const fontSize = data.size * size.width;
+  const lineHeight = fontSize * TEXT_LINE_HEIGHT;
+  ctx.save();
+  ctx.font = `${fontSize}px ${fontFamily}`;
+  ctx.fillStyle = resolveColor(data.color, theme);
+  ctx.textBaseline = "top";
+  const maxWidth = (1 - data.x) * size.width;
+  const lines = wrapLines((value) => ctx.measureText(value).width, data.text, maxWidth);
+  lines.forEach((line, index) => {
+    ctx.fillText(
+      line,
+      data.x * size.width,
+      data.y * size.height + index * lineHeight + (lineHeight - fontSize) / 2,
+    );
+  });
+  ctx.restore();
+}
+
+/** Barcha annotatsiyalarni tartib bilan (belgilash → chizma → matn) bitta canvas'ga chizadi. */
+export function renderAll(
+  ctx: CanvasRenderingContext2D,
+  items: readonly Annotation[],
+  size: CanvasSize,
+  theme: BookTheme,
+  fontFamily?: string,
+): void {
+  ctx.save();
+  // Qog'ozda belgilash matn ustida ko'rinishi uchun ko'paytirish (chizish oynasidagi CSS `multiply` kabi).
+  if (theme !== "night") ctx.globalCompositeOperation = "multiply";
+  for (const item of items) {
+    if (item.type === "highlight")
+      drawHighlightRects(ctx, item.data.color, item.data.rects, size, theme);
+  }
+  ctx.restore();
+  for (const item of items) if (item.type === "drawing") drawStroke(ctx, item.data, size, theme);
+  for (const item of items) {
+    if (item.type === "text") drawTextAnnotation(ctx, item.data, size, theme, fontFamily);
+  }
 }

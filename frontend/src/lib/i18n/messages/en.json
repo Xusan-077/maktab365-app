@@ -428,7 +428,8 @@
       "textbooks": "Textbooks",
       "saved": "Saved",
       "subjects": "My subjects",
-      "results": "Results"
+      "results": "Results",
+      "entries": "My notes"
     }
   },
   "teacher": {
@@ -440,7 +441,8 @@
       "saved": "Saved",
       "home": "Home",
       "textbooks": "Textbooks",
-      "quizzes": "My quizzes"
+      "quizzes": "My quizzes",
+      "entries": "My notes"
     }
   },
   "panel": {
@@ -2951,7 +2953,14 @@
         "notes": "N"
       },
       "notesOpen": "Open notes",
-      "notesClose": "Close notes"
+      "notesClose": "Close notes",
+      "export": {
+        "menu": "Download",
+        "page": "Download page (PNG)",
+        "notes": "Download side notes (.md)",
+        "failed": "Download failed. Try again.",
+        "pageHeading": "Page {page}"
+      }
     },
     "card": {
       "progress": "{percent}% read",
@@ -3028,6 +3037,66 @@
         "close": "Close notes panel",
         "resize": "Panel width",
         "handle": "Expand or collapse the notes panel"
+      }
+    },
+    "entries": {
+      "metaTitle": "My notes",
+      "metaDescription": "All your notes, highlights, drawings and bookmarks from your books in one place.",
+      "title": "My notes",
+      "lead": "Everything you wrote, highlighted and drew in your books. Open a page to pick up reading from there.",
+      "searchLabel": "Search your notes",
+      "searchPlaceholder": "Search notes",
+      "book": "Book",
+      "allBooks": "All books",
+      "typeLabel": "Entry type",
+      "types": {
+        "all": "All",
+        "note": "Notes",
+        "highlight": "Highlights",
+        "drawing": "Drawings",
+        "text": "Text",
+        "bookmark": "Bookmarks"
+      },
+      "colorLabel": "Highlight color",
+      "reset": "Clear filters",
+      "count": "{count, plural, one {# page} other {# pages}}",
+      "more": "Show more",
+      "page": "Page {page}",
+      "open": "Open page {page} in the reader",
+      "thumbAlt": "Page {page} with your notes",
+      "counts": {
+        "highlights": "{count, plural, one {# highlight} other {# highlights}}",
+        "drawings": "{count, plural, one {# drawing} other {# drawings}}",
+        "texts": "{count, plural, one {# text} other {# texts}}",
+        "bookmark": "Bookmark"
+      },
+      "recolor": "Change highlight color",
+      "recolorFailed": "Couldn't change the color.",
+      "delete": {
+        "action": "Delete notes on page {page}",
+        "title": "Delete notes on page {page}?",
+        "text": "The side note, highlights, drawings, text and bookmark will be removed. This can't be undone.",
+        "cancel": "Cancel",
+        "confirm": "Delete",
+        "failed": "Couldn't delete the notes."
+      },
+      "emptyText": "You have no notes yet. Draw on a page, highlight text or write in the side notebook while reading, and it all collects here.",
+      "emptyAction": "Browse books",
+      "noMatch": "No notes match these filters.",
+      "errorText": "Couldn't load your notes.",
+      "retry": "Try again",
+      "guestText": "Your notes are saved to your account. Sign in to see them.",
+      "guestAction": "Sign in",
+      "export": {
+        "action": "Download book notes",
+        "progress": "Preparing: {done}/{total}",
+        "cancel": "Cancel",
+        "done": "Downloaded.",
+        "truncated": "Only the first {max} pages were downloaded. Download the rest from the book itself.",
+        "failed": "Download failed. Try again.",
+        "pageHeading": "Page {page}",
+        "texts": "Text on the page",
+        "notesFile": "side-notes.md"
       }
     }
   }

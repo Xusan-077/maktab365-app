@@ -2102,6 +2102,61 @@ export interface paths {
         patch: operations["me_books_annotations_update"];
         trace?: never;
     };
+    "/api/v1/me/annotations/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Mening yozuvlarim: bet bo'yicha jamlangan (yon daftar, annotatsiya, xatcho'p) */
+        get: operations["me_annotations_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/annotations/books/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Yozuvi bor kitoblar (filtr ro'yxati uchun) */
+        get: operations["me_annotations_books"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/books/{id}/pages/{number}/image/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Sahifa rasmi baytlari (yozuvli eksport uchun)
+         * @description Sahifa rasmi (eksport uchun): brauzer canvas'i boshqa origin'dagi rasmni o'qiy olmaydi
+         *     (CORS), shuning uchun rasm shu API orqali, BFF bilan bir origin'da beriladi.
+         */
+        get: operations["me_books_page_image"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2547,6 +2602,36 @@ export interface components {
             /** Format: email */
             email: string;
         };
+        EntryAnnotation: {
+            /** Format: uuid */
+            id: string;
+            type: components["schemas"]["AnnotationTypeEnum"];
+            data: unknown;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        EntryBook: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            /** Format: uri */
+            readonly cover: string | null;
+        };
+        EntryBookCount: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            /** @description Yozuvi bor betlar soni */
+            count: number;
+        };
+        EntryPage: {
+            /** Format: uri */
+            readonly image: string | null;
+            /** Format: uri */
+            readonly thumbnail: string | null;
+            width: number;
+            height: number;
+        };
         /**
          * @description * `book_opened` - book_opened
          *     * `book_read` - book_read
@@ -2885,6 +2970,24 @@ export interface components {
         };
         PageAnnotationsReplaceRequest: {
             annotations: components["schemas"]["AnnotationInputRequest"][];
+        };
+        PageEntry: {
+            book: components["schemas"]["EntryBook"];
+            page: number;
+            image: components["schemas"]["EntryPage"] | null;
+            note: string;
+            /** Format: date-time */
+            note_updated_at: string | null;
+            annotations: components["schemas"]["EntryAnnotation"][];
+            bookmarked: boolean;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        PageEntryList: {
+            count: number;
+            page: number;
+            page_size: number;
+            results: components["schemas"]["PageEntry"][];
         };
         PageNote: {
             readonly page: number;
@@ -7471,6 +7574,79 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PageAnnotation"];
+                };
+            };
+        };
+    };
+    me_annotations_list: {
+        parameters: {
+            query?: {
+                /** @description Kitob bo'yicha */
+                book?: string;
+                /** @description Belgilash rangi (#rrggbb) */
+                color?: string;
+                /** @description Sahifa raqami (1 dan) */
+                page?: number;
+                /** @description 1..50, standart 20 */
+                page_size?: number;
+                /** @description Yon daftar va matn bo'yicha */
+                q?: string;
+                /** @description Yozuv turi */
+                type?: "bookmark" | "drawing" | "highlight" | "note" | "text";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PageEntryList"];
+                };
+            };
+        };
+    };
+    me_annotations_books: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EntryBookCount"][];
+                };
+            };
+        };
+    };
+    me_books_page_image: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                number: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/*": string;
                 };
             };
         };

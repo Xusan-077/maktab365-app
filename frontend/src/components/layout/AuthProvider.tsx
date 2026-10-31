@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { Suspense, useEffect, useRef, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { SessionProvider, useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
@@ -18,6 +18,7 @@ import {
   getBookmarkOverrides,
   invalidateReadingData,
 } from "@/lib/pdf-books/cache";
+import { ReturnToRestorer } from "./ReturnToRestorer";
 import { usePdfAnnotationsGuestStore } from "@/stores/pdf-annotations-guest.store";
 import { usePdfGuestStore } from "@/stores/pdf-guest.store";
 
@@ -178,7 +179,14 @@ function AuthBridge({ children }: { children: ReactNode }) {
     };
   }, [userId, queryClient]);
 
-  return children;
+  return (
+    <>
+      <Suspense fallback={null}>
+        <ReturnToRestorer />
+      </Suspense>
+      {children}
+    </>
+  );
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {

@@ -1,6 +1,7 @@
-import { queryOptions } from "@tanstack/react-query";
+import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import { retryUnlessClientError } from "@/lib/api/retry";
 import { getBooksApi, getMyBooksApi } from "./api";
+import { toEntriesApiParams, type EntryFilters } from "./entries";
 
 /** Qidiruv so'rovi shuncha belgidan boshlanadi (backend bilan bir xil). */
 export const BOOK_SEARCH_MIN_LENGTH = 2;
@@ -18,6 +19,9 @@ export const bookKeys = {
   note: (id: string, page: number) => ["books", "note", id, page] as const,
   annotations: (id: string, pages: readonly number[]) =>
     ["books", "annotations", id, pages.join(",")] as const,
+  entriesRoot: () => ["books", "entries"] as const,
+  entries: (filters: EntryFilters) => ["books", "entries", "list", filters] as const,
+  entryBooks: () => ["books", "entries", "books"] as const,
 };
 
 export const bookQueries = {
@@ -67,5 +71,22 @@ export const bookQueries = {
       // Server nusxasi faqat bir marta storega o'tadi; keyin store (mahalliy tarix) manba.
       staleTime: Infinity,
       gcTime: 60_000,
+    }),
+  entries: (filters: EntryFilters) =>
+    infiniteQueryOptions({
+      queryKey: bookKeys.entries(filters),
+      queryFn: ({ pageParam }) => getMyBooksApi().entries(toEntriesApiParams(filters, pageParam)),
+      initialPageParam: 1,
+      getNextPageParam: (last) =>
+        last.page * last.page_size < last.count ? last.page + 1 : undefined,
+      retry: retryUnlessClientError,
+      staleTime: 30_000,
+    }),
+  entryBooks: () =>
+    queryOptions({
+      queryKey: bookKeys.entryBooks(),
+      queryFn: () => getMyBooksApi().entryBooks(),
+      retry: retryUnlessClientError,
+      staleTime: 30_000,
     }),
 };

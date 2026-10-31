@@ -30,6 +30,7 @@ export const ROUTES = {
   offline: "/oflayn",
   games: "/games",
   books: "/kitoblar",
+  myEntries: "/kitoblar/yozuvlarim",
 } as const;
 
 /** Faqat shu yo'llar (va ichkilari) sessiya talab qiladi; qolgan hamma sahifa ochiq. */
