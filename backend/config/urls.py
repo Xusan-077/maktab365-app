@@ -16,6 +16,7 @@ urlpatterns = [
     path("api/v1/", include("apps.support.urls")),
     path("api/v1/", include("apps.analytics.urls")),
     path("api/v1/", include("apps.games.urls")),
+    path("api/v1/", include("apps.quizzes.urls")),
 ]
 
 # Dev: yuklangan fayllar (muqova rasmlari) lokal `media/` dan beriladi; prod'da S3-mos saqlash.

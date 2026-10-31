@@ -18,6 +18,8 @@ export const ROUTES = {
   teacher: "/ustoz",
   teacherSaved: "/ustoz/saqlanganlar",
   teacherHelp: "/ustoz/yordam",
+  teacherQuizzes: "/ustoz/testlar",
+  teacherQuizNew: "/ustoz/testlar/yangi",
   settings: "/sozlamalar",
   admin: "/admin",
   search: "/qidiruv",
@@ -112,3 +114,14 @@ export const gamePlayPath = (topicSlug: string, game: string) =>
 
 /** O'yin natijasi: `/games/<mavzu>/natija`. */
 export const gameResultPath = (topicSlug: string) => `${ROUTES.games}/${topicSlug}/natija`;
+
+/** Ustozning shaxsiy testlari: `/ustoz/testlar/<id>/oynash` va h.k. */
+export const quizPaths = {
+  list: () => ROUTES.teacherQuizzes,
+  create: () => ROUTES.teacherQuizNew,
+  edit: (id: string) => `${ROUTES.teacherQuizzes}/${id}/tahrirlash`,
+  play: (id: string) => `${ROUTES.teacherQuizzes}/${id}/oynash`,
+  results: (id: string) => `${ROUTES.teacherQuizzes}/${id}/natijalar`,
+  /** Havola orqali ochiladigan ommaviy test (login shart emas). */
+  publicQuiz: (id: string) => `/test/${id}`,
+};

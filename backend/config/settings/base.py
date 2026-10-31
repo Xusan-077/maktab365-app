@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "apps.support",
     "apps.analytics",
     "apps.games",
+    "apps.quizzes",
 ]
 
 MIDDLEWARE = [

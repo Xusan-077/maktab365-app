@@ -1588,6 +1588,140 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/quizzes/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["quizzes_list"];
+        put?: never;
+        post: operations["quizzes_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/quizzes/categories/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["quizzes_categories_list"];
+        put?: never;
+        post: operations["quizzes_categories_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/quizzes/uploads/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Muqova/savol rasmi: ustoz yuklaydi, natijadagi `path` test yozilganda beriladi. */
+        post: operations["quizzes_uploads_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/quizzes/public/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Ochiq test (havola orqali, login shart emas); shaxsiy test — 404 */
+        get: operations["quizzes_public_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/quizzes/public/{id}/check/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ochiq testda bitta javobni tekshirish (natija saqlanmaydi) */
+        post: operations["quizzes_public_check"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/quizzes/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["quizzes_retrieve"];
+        put: operations["quizzes_update"];
+        post?: never;
+        delete: operations["quizzes_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/quizzes/{id}/duplicate/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Testni nusxalash (nusxa shaxsiy bo'ladi, urinishlar ko'chmaydi) */
+        post: operations["quizzes_duplicate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/quizzes/{id}/attempts/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Test bo'yicha natijalar tarixi (yangilari avval) */
+        get: operations["quizzes_attempts_list"];
+        put?: never;
+        /** Natijani saqlash: javoblar serverda tekshiriladi, ball hisoblanadi */
+        post: operations["quizzes_attempts_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1640,6 +1774,40 @@ export interface components {
             /** @default  */
             note: string;
         };
+        Attempt: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly quiz: string;
+            readonly score: number;
+            readonly total: number;
+            readonly time_spent: number;
+            readonly answers: components["schemas"]["AttemptReview"][];
+            /** Format: date-time */
+            readonly created_at: string;
+        };
+        AttemptAnswerRequest: {
+            /** Format: uuid */
+            question_id: string;
+            /** Format: uuid */
+            option_id: string | null;
+        };
+        AttemptCreateRequest: {
+            answers: components["schemas"]["AttemptAnswerRequest"][];
+            time_spent: number;
+        };
+        AttemptReview: {
+            /** Format: uuid */
+            question_id: string;
+            question: string;
+            /** Format: uuid */
+            option_id: string | null;
+            option_text: string | null;
+            /** Format: uuid */
+            correct_option_id: string | null;
+            correct_option_text: string | null;
+            correct: boolean;
+        };
         AuditEntry: {
             /** Format: uuid */
             readonly id: string;
@@ -1691,6 +1859,15 @@ export interface components {
              * @description Onlayn o'qish oynasi
              */
             read_url: string;
+        };
+        Category: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly name: string;
+            readonly is_preset: boolean;
+        };
+        CategoryCreateRequest: {
+            name: string;
         };
         /** @description Yuqori daraja; `children` — ichki bo'limlar (ular uchun `children` yo'q: 2 daraja). */
         Chapter: {
@@ -1757,6 +1934,17 @@ export interface components {
             answer_token: string;
             /** Format: uuid */
             option_id: string;
+        };
+        CheckRequestRequest: {
+            /** Format: uuid */
+            question_id: string;
+            /** Format: uuid */
+            option_id: string;
+        };
+        CheckResult: {
+            correct: boolean;
+            /** Format: uuid */
+            correct_option_id: string;
         };
         /**
          * @description * `ok` - ok
@@ -2068,6 +2256,8 @@ export interface components {
          * @enum {string}
          */
         ModeEnum: "direct" | "proxy";
+        /** @enum {unknown} */
+        NullEnum: null;
         /**
          * @description * `none` - Not requested
          *     * `queued` - Queued
@@ -2094,6 +2284,12 @@ export interface components {
          * @enum {string}
          */
         OnboardingRoleEnum: "student" | "teacher";
+        Option: {
+            /** Format: uuid */
+            id?: string;
+            text: string;
+            is_correct?: boolean;
+        };
         OptionAdmin: {
             /** Format: uuid */
             readonly id: string;
@@ -2103,6 +2299,12 @@ export interface components {
         };
         OptionAdminRequest: {
             text: components["schemas"]["LocalizedTextRequest"];
+            is_correct?: boolean;
+        };
+        OptionRequest: {
+            /** Format: uuid */
+            id?: string;
+            text: string;
             is_correct?: boolean;
         };
         OtpRequestRequest: {
@@ -2507,6 +2709,40 @@ export interface components {
             page: number;
             slides: components["schemas"]["SlidesPublic"] | null;
         };
+        PublicOption: {
+            /** Format: uuid */
+            id: string;
+            text: string;
+        };
+        PublicQuestion: {
+            /** Format: uuid */
+            id: string;
+            text: string;
+            readonly image_url: string | null;
+            options: components["schemas"]["PublicOption"][];
+        };
+        /** @description Ochiq test: `is_correct` yo'q, javob `check/` orqali serverda tekshiriladi. */
+        PublicQuiz: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            description: string;
+            category: components["schemas"]["Category"] | null;
+            readonly cover_url: string | null;
+            time_per_question: number | null;
+            shuffle_questions: boolean;
+            shuffle_options: boolean;
+            questions: components["schemas"]["PublicQuestion"][];
+        };
+        Question: {
+            /** Format: uuid */
+            id?: string;
+            text: string;
+            image?: string | null;
+            /** Format: uri */
+            readonly image_url: string | null;
+            options: components["schemas"]["Option"][];
+        };
         /** @description Savol + aniq 4 variant (tartib A..D ro'yxat tartibidan), aniq 1 to'g'ri javob. */
         QuestionAdmin: {
             /** Format: uuid */
@@ -2553,6 +2789,88 @@ export interface components {
         };
         QuestionReorderRequestRequest: {
             ids: string[];
+        };
+        QuestionRequest: {
+            /** Format: uuid */
+            id?: string;
+            text: string;
+            image?: string | null;
+            options: components["schemas"]["OptionRequest"][];
+        };
+        /** @description To'liq test (ustoz): savollar va variantlar `is_correct` bilan, nested yoziladi. */
+        Quiz: {
+            /** Format: uuid */
+            readonly id: string;
+            title: string;
+            description?: string;
+            readonly category: components["schemas"]["Category"] | null;
+            cover_image?: string | null;
+            /** Format: uri */
+            readonly cover_url: string | null;
+            visibility?: components["schemas"]["VisibilityEnum"];
+            time_per_question?: (components["schemas"]["QuizTimePerQuestionEnum"] | components["schemas"]["NullEnum"]) | null;
+            shuffle_questions?: boolean;
+            shuffle_options?: boolean;
+            questions: components["schemas"]["Question"][];
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        QuizList: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly title: string;
+            readonly description: string;
+            readonly category: components["schemas"]["Category"] | null;
+            /** Format: uri */
+            readonly cover_url: string | null;
+            readonly visibility: components["schemas"]["VisibilityEnum"];
+            readonly time_per_question: (components["schemas"]["QuizListTimePerQuestionEnum"] | components["schemas"]["NullEnum"]) | null;
+            readonly shuffle_questions: boolean;
+            readonly shuffle_options: boolean;
+            readonly question_count: number;
+            readonly attempts_count: number;
+            readonly best_percent: number | null;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        /**
+         * @description * `15` - 15
+         *     * `30` - 30
+         *     * `60` - 60
+         * @enum {integer}
+         */
+        QuizListTimePerQuestionEnum: 15 | 30 | 60;
+        /** @description To'liq test (ustoz): savollar va variantlar `is_correct` bilan, nested yoziladi. */
+        QuizRequest: {
+            title: string;
+            description?: string;
+            /** Format: uuid */
+            category_id?: string | null;
+            cover_image?: string | null;
+            visibility?: components["schemas"]["VisibilityEnum"];
+            time_per_question?: (components["schemas"]["QuizTimePerQuestionEnum"] | components["schemas"]["NullEnum"]) | null;
+            shuffle_questions?: boolean;
+            shuffle_options?: boolean;
+            questions: components["schemas"]["QuestionRequest"][];
+        };
+        /**
+         * @description * `15` - 15
+         *     * `30` - 30
+         *     * `60` - 60
+         * @enum {integer}
+         */
+        QuizTimePerQuestionEnum: 15 | 30 | 60;
+        QuizUploadRequestRequest: {
+            /** Format: binary */
+            file: string;
+        };
+        QuizUploadResult: {
+            path: string;
+            url: string;
         };
         /**
          * @description * `in_progress` - In progress
@@ -2927,6 +3245,12 @@ export interface components {
             /** @description Parol berilmasa yaratilgan vaqtinchalik parol (faqat shu javobda, bir marta). */
             readonly temporary_password: string | null;
         };
+        /**
+         * @description * `private` - Private
+         *     * `public` - Public
+         * @enum {string}
+         */
+        VisibilityEnum: "private" | "public";
         Week: {
             /** @description Shu hafta birinchi marta ochilgan kitoblar */
             opened: number;
@@ -5493,6 +5817,312 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["GameSession"];
+                };
+            };
+        };
+    };
+    quizzes_list: {
+        parameters: {
+            query?: {
+                /** @description Kategoriya id */
+                category?: string;
+                /** @description Sarlavha yoki tavsif bo'yicha */
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuizList"][];
+                };
+            };
+        };
+    };
+    quizzes_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuizRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["QuizRequest"];
+                "multipart/form-data": components["schemas"]["QuizRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Quiz"];
+                };
+            };
+        };
+    };
+    quizzes_categories_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Category"][];
+                };
+            };
+        };
+    };
+    quizzes_categories_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CategoryCreateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["CategoryCreateRequest"];
+                "multipart/form-data": components["schemas"]["CategoryCreateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Category"];
+                };
+            };
+        };
+    };
+    quizzes_uploads_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["QuizUploadRequestRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuizUploadResult"];
+                };
+            };
+        };
+    };
+    quizzes_public_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicQuiz"];
+                };
+            };
+        };
+    };
+    quizzes_public_check: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["CheckRequestRequest"];
+                "multipart/form-data": components["schemas"]["CheckRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheckResult"];
+                };
+            };
+        };
+    };
+    quizzes_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Quiz"];
+                };
+            };
+        };
+    };
+    quizzes_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuizRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["QuizRequest"];
+                "multipart/form-data": components["schemas"]["QuizRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Quiz"];
+                };
+            };
+        };
+    };
+    quizzes_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    quizzes_duplicate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Quiz"];
+                };
+            };
+        };
+    };
+    quizzes_attempts_list: {
+        parameters: {
+            query?: {
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A search term. */
+                search?: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Attempt"][];
+                };
+            };
+        };
+    };
+    quizzes_attempts_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AttemptCreateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["AttemptCreateRequest"];
+                "multipart/form-data": components["schemas"]["AttemptCreateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Attempt"];
                 };
             };
         };

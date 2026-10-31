@@ -436,7 +436,8 @@
       "label": "Teacher panel sections",
       "saved": "Saved",
       "home": "Home",
-      "textbooks": "Textbooks"
+      "textbooks": "Textbooks",
+      "quizzes": "My quizzes"
     }
   },
   "panel": {
@@ -2503,6 +2504,201 @@
       "stars3": "Excellent! You know this topic very well.",
       "stars2": "Good! A little more practice.",
       "stars1": "Reread the topic and try again."
+    }
+  },
+  "quizzes": {
+    "list": {
+      "title": "My quizzes",
+      "description": "Light quizzes you create yourself: trivia, IQ, logic and more.",
+      "new": "New quiz",
+      "searchLabel": "Search quizzes",
+      "searchPlaceholder": "Search by quiz title",
+      "categoryFilter": "By category",
+      "allCategories": "All",
+      "loading": "Loading quizzes",
+      "noResults": "Nothing found. Try changing the search or category.",
+      "emptyTitle": "You have no quizzes yet",
+      "emptyHint": "Create your first quiz and play it yourself."
+    },
+    "card": {
+      "meta": "{count, plural, one {# question} other {# questions}}",
+      "public": "Public",
+      "private": "Private",
+      "noAttempts": "Not played yet",
+      "best": "Best result: {percent}%",
+      "play": "Play",
+      "edit": "Edit",
+      "duplicate": "Duplicate",
+      "deleteLabel": "Delete quiz “{title}”",
+      "results": "Results",
+      "copyLink": "Copy link",
+      "linkCopied": "Link copied",
+      "linkCopyFailed": "Could not copy the link",
+      "copyTitle": "{title} (copy)",
+      "duplicated": "Quiz duplicated",
+      "duplicateFailed": "Could not duplicate the quiz"
+    },
+    "delete": {
+      "title": "Delete this quiz?",
+      "description": "“{title}” and all its results will be deleted permanently. This cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Delete",
+      "done": "Quiz deleted",
+      "failed": "Could not delete the quiz"
+    },
+    "form": {
+      "newTitle": "New quiz",
+      "editTitle": "Edit quiz",
+      "lead": "Enter the title, settings and questions. Each question has 2–6 options and one correct answer.",
+      "loading": "Loading quiz",
+      "saved": "Changes saved",
+      "created": "Quiz created",
+      "saveFailed": "Could not save the quiz",
+      "fixErrors": "Fix the fields marked in red.",
+      "cancel": "Cancel",
+      "saveChanges": "Save",
+      "create": "Create quiz",
+      "basics": {
+        "title": "Basics",
+        "name": "Title",
+        "namePlaceholder": "For example, Trivia: Round 1",
+        "description": "Description (optional)",
+        "descriptionPlaceholder": "A short note about the quiz",
+        "cover": "Cover image (optional)"
+      },
+      "category": {
+        "label": "Category",
+        "none": "No category",
+        "add": "New category",
+        "added": "Category added",
+        "nameLabel": "Category name",
+        "namePlaceholder": "For example, Movies",
+        "save": "Add",
+        "cancel": "Cancel",
+        "errors": {
+          "required": "Enter a category name",
+          "exists": "This category already exists",
+          "failed": "Could not add the category"
+        }
+      },
+      "image": {
+        "add": "Choose image",
+        "replace": "Replace",
+        "remove": "Remove",
+        "hint": "JPG, PNG or WebP, up to 5 MB.",
+        "errors": {
+          "type": "Only JPG, PNG or WebP images can be uploaded",
+          "size": "The image must not exceed 5 MB",
+          "upload": "Could not upload the image. Please try again."
+        }
+      },
+      "settings": {
+        "title": "Settings",
+        "timer": "Time per question",
+        "timerOff": "No timer",
+        "seconds": "{seconds} s",
+        "shuffleQuestions": "Shuffle questions",
+        "shuffleQuestionsHint": "The question order changes every time you play",
+        "shuffleOptions": "Shuffle options",
+        "shuffleOptionsHint": "Options change places in every question",
+        "visibility": "Who can see it",
+        "private": "Private",
+        "public": "Open by link",
+        "privateHint": "Only you can see and play it.",
+        "publicHint": "Anyone with the link can play (no sign-in needed); results are not saved."
+      },
+      "questions": {
+        "title": "Questions ({count})",
+        "add": "Add question"
+      },
+      "question": {
+        "heading": "Question {number}",
+        "moveUp": "Move question up",
+        "moveDown": "Move question down",
+        "remove": "Delete question",
+        "text": "Question text",
+        "textPlaceholder": "Write the question",
+        "image": "Question image (optional)"
+      },
+      "options": {
+        "legend": "Answer options",
+        "markCorrect": "Option {number} is the correct answer",
+        "label": "Option {number}",
+        "placeholder": "Option {number} text",
+        "remove": "Remove option {number}",
+        "hint": "Pick the correct answer with the mark on the left.",
+        "add": "Add option"
+      },
+      "errors": {
+        "titleRequired": "Enter a title",
+        "titleTooLong": "The title is too long",
+        "descriptionTooLong": "The description is too long",
+        "questionsMin": "Add at least one question",
+        "questionsMax": "No more than {max} questions",
+        "questionRequired": "Enter the question text",
+        "questionTooLong": "The question text is too long",
+        "optionRequired": "Enter the option text",
+        "optionTooLong": "The option text is too long",
+        "optionsMin": "At least {min} options are required",
+        "optionsMax": "No more than {max} options",
+        "correctRequired": "Mark exactly one correct answer",
+        "quizzes_limit": "You have reached the quiz limit. Delete the ones you no longer need."
+      }
+    },
+    "play": {
+      "title": "Play quiz",
+      "loadingTitle": "Quiz",
+      "loading": "Loading quiz",
+      "options": "Answer options",
+      "correctMark": "(correct answer)",
+      "wrongMark": "(your wrong answer)",
+      "correct": "Correct! Well done!",
+      "wrong": "Wrong. The correct answer is shown in green.",
+      "timeUp": "Time is up. The correct answer is shown in green.",
+      "progress": "Question {current} of {total}",
+      "progressLabel": "Quiz progress",
+      "timeLeft": "{seconds} s left",
+      "next": "Next question",
+      "finish": "See result",
+      "checkFailed": "Could not check the answer. Check your connection and tap again.",
+      "history": "Results history",
+      "backToList": "Back to my quizzes",
+      "saving": "Saving result…",
+      "saved": "Result saved",
+      "saveFailed": "Could not save the result.",
+      "retrySave": "Try again"
+    },
+    "result": {
+      "yourScore": "Your score",
+      "time": "Time spent: {time}",
+      "message": {
+        "great": "Excellent result!",
+        "good": "Good, try once more!",
+        "retry": "Not this time — play again."
+      },
+      "replay": "Play again",
+      "mistakes": "Mistakes ({count})",
+      "correctList": "Correct answers ({count})",
+      "yourAnswer": "Your answer",
+      "noAnswer": "no answer",
+      "correctAnswer": "Correct answer"
+    },
+    "results": {
+      "title": "Results history",
+      "loading": "Loading results",
+      "empty": "This quiz has not been played yet. Start your first attempt.",
+      "play": "Play",
+      "best": "Best result: {score} of {total} ({percent}%)",
+      "bestBadge": "Best",
+      "time": "{time}"
+    },
+    "public": {
+      "title": "Quiz",
+      "loading": "Loading quiz",
+      "meta": "{count, plural, one {# question} other {# questions}}",
+      "timer": "{seconds} s per question",
+      "start": "Start",
+      "notSaved": "This is an open quiz: your result is not saved."
     }
   }
 }

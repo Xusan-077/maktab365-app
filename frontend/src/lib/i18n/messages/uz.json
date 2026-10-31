@@ -436,7 +436,8 @@
       "label": "Ustoz paneli bo'limlari",
       "saved": "Saqlanganlar",
       "home": "Bosh sahifa",
-      "textbooks": "Darsliklar"
+      "textbooks": "Darsliklar",
+      "quizzes": "Mening testlarim"
     }
   },
   "panel": {
@@ -2503,6 +2504,201 @@
       "stars3": "Zo'r! Mavzuni a'lo bilasiz.",
       "stars2": "Yaxshi! Yana bir oz mashq qiling.",
       "stars1": "Mavzuni qayta o'qib chiqing va yana urinib ko'ring."
+    }
+  },
+  "quizzes": {
+    "list": {
+      "title": "Mening testlarim",
+      "description": "O'zingiz yaratgan yengil testlar — zakovat, IQ, mantiq va boshqalar.",
+      "new": "Yangi test",
+      "searchLabel": "Testlarni qidirish",
+      "searchPlaceholder": "Test nomi bo'yicha qidirish",
+      "categoryFilter": "Kategoriya bo'yicha",
+      "allCategories": "Barchasi",
+      "loading": "Testlar yuklanmoqda",
+      "noResults": "Hech narsa topilmadi. Qidiruv yoki kategoriyani o'zgartirib ko'ring.",
+      "emptyTitle": "Hali testlaringiz yo'q",
+      "emptyHint": "Birinchi testingizni yarating va o'zingiz o'ynab ko'ring."
+    },
+    "card": {
+      "meta": "{count} ta savol",
+      "public": "Ochiq",
+      "private": "Shaxsiy",
+      "noAttempts": "Hali o'ynalmagan",
+      "best": "Eng yaxshi natija: {percent}%",
+      "play": "O'ynash",
+      "edit": "Tahrirlash",
+      "duplicate": "Nusxalash",
+      "deleteLabel": "«{title}» testini o'chirish",
+      "results": "Natijalar",
+      "copyLink": "Havolani nusxalash",
+      "linkCopied": "Havola nusxalandi",
+      "linkCopyFailed": "Havolani nusxalab bo'lmadi",
+      "copyTitle": "{title} (nusxa)",
+      "duplicated": "Test nusxalandi",
+      "duplicateFailed": "Testni nusxalab bo'lmadi"
+    },
+    "delete": {
+      "title": "Testni o'chirasizmi?",
+      "description": "«{title}» va uning barcha natijalari butunlay o'chadi. Buni qaytarib bo'lmaydi.",
+      "cancel": "Bekor qilish",
+      "confirm": "O'chirish",
+      "done": "Test o'chirildi",
+      "failed": "Testni o'chirib bo'lmadi"
+    },
+    "form": {
+      "newTitle": "Yangi test",
+      "editTitle": "Testni tahrirlash",
+      "lead": "Sarlavha, sozlamalar va savollarni kiriting. Har savolda 2–6 variant va bitta to'g'ri javob bo'ladi.",
+      "loading": "Test yuklanmoqda",
+      "saved": "O'zgarishlar saqlandi",
+      "created": "Test yaratildi",
+      "saveFailed": "Testni saqlab bo'lmadi",
+      "fixErrors": "Qizil bilan belgilangan maydonlarni to'g'rilang.",
+      "cancel": "Bekor qilish",
+      "saveChanges": "Saqlash",
+      "create": "Testni yaratish",
+      "basics": {
+        "title": "Asosiy ma'lumotlar",
+        "name": "Sarlavha",
+        "namePlaceholder": "Masalan, Zakovat: 1-tur",
+        "description": "Tavsif (ixtiyoriy)",
+        "descriptionPlaceholder": "Test haqida qisqacha",
+        "cover": "Muqova rasmi (ixtiyoriy)"
+      },
+      "category": {
+        "label": "Kategoriya",
+        "none": "Kategoriyasiz",
+        "add": "Yangi kategoriya",
+        "added": "Kategoriya qo'shildi",
+        "nameLabel": "Kategoriya nomi",
+        "namePlaceholder": "Masalan, Kino",
+        "save": "Qo'shish",
+        "cancel": "Bekor qilish",
+        "errors": {
+          "required": "Kategoriya nomini kiriting",
+          "exists": "Bunday kategoriya allaqachon bor",
+          "failed": "Kategoriyani qo'shib bo'lmadi"
+        }
+      },
+      "image": {
+        "add": "Rasm tanlash",
+        "replace": "Almashtirish",
+        "remove": "Olib tashlash",
+        "hint": "JPG, PNG yoki WebP, 5 MB gacha.",
+        "errors": {
+          "type": "Faqat JPG, PNG yoki WebP rasm yuklash mumkin",
+          "size": "Rasm 5 MB dan oshmasligi kerak",
+          "upload": "Rasmni yuklab bo'lmadi. Qayta urinib ko'ring."
+        }
+      },
+      "settings": {
+        "title": "Sozlamalar",
+        "timer": "Har savolga vaqt",
+        "timerOff": "Taymersiz",
+        "seconds": "{seconds} soniya",
+        "shuffleQuestions": "Savollarni aralashtirish",
+        "shuffleQuestionsHint": "Har o'ynashda savollar tartibi o'zgaradi",
+        "shuffleOptions": "Variantlarni aralashtirish",
+        "shuffleOptionsHint": "Har savolda variantlar joyi o'zgaradi",
+        "visibility": "Kim ko'ra oladi",
+        "private": "Shaxsiy",
+        "public": "Havola orqali ochiq",
+        "privateHint": "Faqat siz ko'rasiz va o'ynaysiz.",
+        "publicHint": "Havolasi bor har kim o'ynay oladi (kirish shart emas); natijalari saqlanmaydi."
+      },
+      "questions": {
+        "title": "Savollar ({count})",
+        "add": "Savol qo'shish"
+      },
+      "question": {
+        "heading": "{number}-savol",
+        "moveUp": "Savolni yuqoriga ko'chirish",
+        "moveDown": "Savolni pastga ko'chirish",
+        "remove": "Savolni o'chirish",
+        "text": "Savol matni",
+        "textPlaceholder": "Savolni yozing",
+        "image": "Savol rasmi (ixtiyoriy)"
+      },
+      "options": {
+        "legend": "Javob variantlari",
+        "markCorrect": "{number}-variant to'g'ri javob",
+        "label": "{number}-variant",
+        "placeholder": "{number}-variant matni",
+        "remove": "{number}-variantni olib tashlash",
+        "hint": "To'g'ri javobni chap tomondagi belgi bilan tanlang.",
+        "add": "Variant qo'shish"
+      },
+      "errors": {
+        "titleRequired": "Sarlavhani kiriting",
+        "titleTooLong": "Sarlavha juda uzun",
+        "descriptionTooLong": "Tavsif juda uzun",
+        "questionsMin": "Kamida 1 ta savol qo'shing",
+        "questionsMax": "Savollar soni {max} tadan oshmasligi kerak",
+        "questionRequired": "Savol matnini kiriting",
+        "questionTooLong": "Savol matni juda uzun",
+        "optionRequired": "Variant matnini kiriting",
+        "optionTooLong": "Variant matni juda uzun",
+        "optionsMin": "Kamida {min} ta variant bo'lishi kerak",
+        "optionsMax": "Variantlar {max} tadan oshmasligi kerak",
+        "correctRequired": "Aynan bitta to'g'ri javobni belgilang",
+        "quizzes_limit": "Testlar soni chegarasiga yetdingiz. Keraksizlarini o'chiring."
+      }
+    },
+    "play": {
+      "title": "Testni o'ynash",
+      "loadingTitle": "Test",
+      "loading": "Test yuklanmoqda",
+      "options": "Javob variantlari",
+      "correctMark": "(to'g'ri javob)",
+      "wrongMark": "(sizning noto'g'ri javobingiz)",
+      "correct": "To'g'ri! Barakalla!",
+      "wrong": "Noto'g'ri. To'g'ri javob yashil bilan ko'rsatildi.",
+      "timeUp": "Vaqt tugadi. To'g'ri javob yashil bilan ko'rsatildi.",
+      "progress": "{current}-savol / {total}",
+      "progressLabel": "Test bo'yicha jarayon",
+      "timeLeft": "{seconds} soniya qoldi",
+      "next": "Keyingi savol",
+      "finish": "Natijani ko'rish",
+      "checkFailed": "Javobni tekshirib bo'lmadi. Aloqani tekshirib, qayta bosing.",
+      "history": "Natijalar tarixi",
+      "backToList": "Testlarimga qaytish",
+      "saving": "Natija saqlanmoqda…",
+      "saved": "Natija saqlandi",
+      "saveFailed": "Natijani saqlab bo'lmadi.",
+      "retrySave": "Qayta urinish"
+    },
+    "result": {
+      "yourScore": "Sizning natijangiz",
+      "time": "Sarflangan vaqt: {time}",
+      "message": {
+        "great": "Ajoyib natija!",
+        "good": "Yaxshi, yana urinib ko'ring!",
+        "retry": "Bu safar bo'lmadi — qayta o'ynab ko'ring."
+      },
+      "replay": "Qayta o'ynash",
+      "mistakes": "Xatolar ({count})",
+      "correctList": "To'g'ri javoblar ({count})",
+      "yourAnswer": "Sizning javobingiz",
+      "noAnswer": "javob berilmadi",
+      "correctAnswer": "To'g'ri javob"
+    },
+    "results": {
+      "title": "Natijalar tarixi",
+      "loading": "Natijalar yuklanmoqda",
+      "empty": "Bu test hali o'ynalmagan. Birinchi urinishingizni boshlang.",
+      "play": "O'ynash",
+      "best": "Eng yaxshi natija: {score} / {total} ({percent}%)",
+      "bestBadge": "Eng yaxshi",
+      "time": "{time}"
+    },
+    "public": {
+      "title": "Test",
+      "loading": "Test yuklanmoqda",
+      "meta": "{count} ta savol",
+      "timer": "har savolga {seconds} soniya",
+      "start": "Boshlash",
+      "notSaved": "Bu ochiq test: natijangiz saqlanmaydi."
     }
   }
 }

@@ -8,7 +8,7 @@ Bitta Django monolit: Python 3.12 · Django 5.2 · DRF · drf-spectacular · sim
 
 - `config/settings/{base,dev,prod,test}.py` — barcha sozlama env orqali (`django-environ`, `.env`). `dev` default (`manage.py`), `prod` — wsgi/asgi, `test` — pytest.
 - `config/{urls,celery,asgi,wsgi}.py`.
-- `apps/core` — qayta ishlatiladigan poydevor (quyida). `apps/accounts` — foydalanuvchi va profil (quyida). `apps/content` — kontent (quyida). `apps/learning` — o'qish jarayoni (quyida). `apps/support` — murojaatlar. `apps/games` — mavzu testlari va interaktiv o'yinlar (quyida). `apps/analytics` — kitob/sahifa kunlik sanagichlari (anonim, faqat son): `BookDailyStat`, `PageDailyStat`, `POST pdf-books/{id}/stats/` (throttle `STATS_THROTTLE_RATE`), admin `GET /admin/stats/?days=7|30`, `manage.py purge_stats`.
+- `apps/core` — qayta ishlatiladigan poydevor (quyida). `apps/accounts` — foydalanuvchi va profil (quyida). `apps/content` — kontent (quyida). `apps/learning` — o'qish jarayoni (quyida). `apps/support` — murojaatlar. `apps/games` — mavzu testlari va interaktiv o'yinlar (quyida). `apps/quizzes` — ustozning shaxsiy testlari (quyida). `apps/analytics` — kitob/sahifa kunlik sanagichlari (anonim, faqat son): `BookDailyStat`, `PageDailyStat`, `POST pdf-books/{id}/stats/` (throttle `STATS_THROTTLE_RATE`), admin `GET /admin/stats/?days=7|30`, `manage.py purge_stats`.
 
 ## `apps/core` poydevori
 
@@ -85,6 +85,13 @@ Bitta Django monolit: Python 3.12 · Django 5.2 · DRF · drf-spectacular · sim
 - Ochiq: `GET games/topics/?q=&grade=&subject=` (paginatsiya; nashr qilingan kitob, ≥ `GAMES_MIN_QUESTIONS` faol savol; qidiruv bo'lim nomi + kitob va fan nomlari uz/ru/en, kirill so'rov lotinga ham o'giriladi — `services.cyr_to_lat`), `GET games/topics/{slug}/questions/?count=` (4..40, standart 16; savollar va variantlar aralashgan, `answer_token`, `no-store`), `POST games/check/` → `{correct, correct_option_id}` (`invalid_answer_token`). Slug `services.topic_slug` — `<nom>-<bo'lim id'sining 12 hex boshi>`, nom qismi faqat chiroy (qidiruv id prefiksi bo'yicha).
 - Statistika (kirgan foydalanuvchi, `IsLearner`): `POST games/sessions/` (`{game_type, topic?}` → `{session_id}`; `GameSession` faqat statistika uchun — hech narsa sarflamaydi, hech qachon bloklanmaydi), `POST games/sessions/{id}/finish/` (`teams` [{name, score, correct, total}] 1..8, `duration_seconds`; bir marta — 409 `session_finished`; begonaniki 404). O'yinlar hamma uchun bepul va cheksiz; mehmon uchun server yozuvi yo'q. `delete_account` o'yin ma'lumotlarini o'chiradi, `export_data` `games.sessions` ni beradi.
 - Testlar: `apps/games/tests/` (`Topics` — o'ynaladigan bo'lim yaratuvchi).
+
+## `apps/quizzes`
+
+- Ustozning shaxsiy testlari (o'quvchilar bazasiga bog'lanmaydi): `QuizCategory` (`teacher=null` — tayyor: Zakovat, IQ, Umumiy bilim, Mantiq, Tarix, Sport, Boshqa — migratsiya 0002; ustoz o'zinikini qo'shadi, nom katta-kichik harfsiz unique), `Quiz` (`visibility` private|public, `time_per_question` null|15|30|60, `shuffle_*`, `cover_image` — `covers` saqlash), `QuizQuestion`, `QuizOption` (2..6 variant, aynan bitta to'g'ri — serializer + partial unique), `QuizAttempt` (`answers` — o'sha paytdagi matnlar nusxasi).
+- Hammasi `IsRole("teacher")`, queryset `teacher=request.user` (begonaniki 404), ro'yxat paginatsiyasiz: `GET/POST quizzes/` (`?category=&q=`; `question_count`, `attempts_count`, `best_percent`), `GET/PUT/DELETE quizzes/{id}/` (nested; `id` berilgan savol/variant joyida yangilanadi, qolgani o'chadi), `POST quizzes/{id}/duplicate/` (nusxa doim private), `GET/POST quizzes/{id}/attempts/` (javoblar serverda tekshiriladi, javobsiz savol — noto'g'ri), `GET/POST quizzes/categories/`, `POST quizzes/uploads/` (rasm). Chegaralar: 100 savol, 200 test, 30 kategoriya. Kodlar: `questions_required`, `options_count`, `options_one_correct`, `category_exists`, `invalid_category`, `quizzes_limit`.
+- Ochiq (`AllowAny`, natija saqlanmaydi): `GET quizzes/public/{id}/` (`is_correct` yo'q; private — 404), `POST quizzes/public/{id}/check/` → `{correct, correct_option_id}`.
+- Testlar: `apps/quizzes/tests/`.
 
 ## Admin API
 

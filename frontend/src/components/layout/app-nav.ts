@@ -2,6 +2,7 @@ import {
   Bookmark,
   BookOpen,
   ChartColumn,
+  ClipboardList,
   FileText,
   GraduationCap,
   House,
@@ -59,7 +60,7 @@ const STUDENT_NAV: AppNavItem[] = [
   },
 ];
 
-/** O'qituvchi: Bosh sahifa · Darsliklar · Saqlanganlar. */
+/** O'qituvchi: Bosh sahifa · Darsliklar · Mening testlarim · Saqlanganlar. */
 const TEACHER_NAV: AppNavItem[] = [
   {
     labelKey: "teacher.nav.home",
@@ -68,6 +69,12 @@ const TEACHER_NAV: AppNavItem[] = [
     isActive: exact(ROUTES.teacher),
   },
   textbooks("teacher.nav.textbooks"),
+  {
+    labelKey: "teacher.nav.quizzes",
+    href: ROUTES.teacherQuizzes,
+    icon: ClipboardList,
+    isActive: within(ROUTES.teacherQuizzes),
+  },
   {
     labelKey: "teacher.nav.saved",
     href: ROUTES.teacherSaved,

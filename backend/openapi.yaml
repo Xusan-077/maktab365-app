@@ -2909,6 +2909,340 @@ paths:
               schema:
                 $ref: '#/components/schemas/GameSession'
           description: ''
+  /api/v1/quizzes/:
+    get:
+      operationId: quizzes_list
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: string
+          format: uuid
+        description: Kategoriya id
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Sarlavha yoki tavsif bo'yicha
+      tags:
+      - quizzes
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuizList'
+          description: ''
+    post:
+      operationId: quizzes_create
+      tags:
+      - quizzes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuizRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/QuizRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/QuizRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quiz'
+          description: ''
+  /api/v1/quizzes/categories/:
+    get:
+      operationId: quizzes_categories_list
+      tags:
+      - quizzes
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+          description: ''
+    post:
+      operationId: quizzes_categories_create
+      tags:
+      - quizzes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CategoryCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CategoryCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+          description: ''
+  /api/v1/quizzes/uploads/:
+    post:
+      operationId: quizzes_uploads_create
+      description: 'Muqova/savol rasmi: ustoz yuklaydi, natijadagi `path` test yozilganda
+        beriladi.'
+      tags:
+      - quizzes
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/QuizUploadRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuizUploadResult'
+          description: ''
+  /api/v1/quizzes/public/{id}/:
+    get:
+      operationId: quizzes_public_retrieve
+      summary: Ochiq test (havola orqali, login shart emas); shaxsiy test — 404
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - quizzes
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicQuiz'
+          description: ''
+  /api/v1/quizzes/public/{id}/check/:
+    post:
+      operationId: quizzes_public_check
+      summary: Ochiq testda bitta javobni tekshirish (natija saqlanmaydi)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - quizzes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CheckRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CheckRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckResult'
+          description: ''
+  /api/v1/quizzes/{id}/:
+    get:
+      operationId: quizzes_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - quizzes
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quiz'
+          description: ''
+    put:
+      operationId: quizzes_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - quizzes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuizRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/QuizRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/QuizRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quiz'
+          description: ''
+    delete:
+      operationId: quizzes_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - quizzes
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/quizzes/{id}/duplicate/:
+    post:
+      operationId: quizzes_duplicate
+      summary: Testni nusxalash (nusxa shaxsiy bo'ladi, urinishlar ko'chmaydi)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - quizzes
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quiz'
+          description: ''
+  /api/v1/quizzes/{id}/attempts/:
+    get:
+      operationId: quizzes_attempts_list
+      summary: Test bo'yicha natijalar tarixi (yangilari avval)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - quizzes
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Attempt'
+          description: ''
+    post:
+      operationId: quizzes_attempts_create
+      summary: 'Natijani saqlash: javoblar serverda tekshiriladi, ball hisoblanadi'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - quizzes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AttemptCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AttemptCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AttemptCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Attempt'
+          description: ''
 components:
   schemas:
     AdminDashboard:
@@ -3055,6 +3389,102 @@ components:
       - page
       - pdf_book_id
       - rects
+    Attempt:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        quiz:
+          type: string
+          format: uuid
+          readOnly: true
+        score:
+          type: integer
+          readOnly: true
+        total:
+          type: integer
+          readOnly: true
+        time_spent:
+          type: integer
+          readOnly: true
+        answers:
+          type: array
+          items:
+            $ref: '#/components/schemas/AttemptReview'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - answers
+      - created_at
+      - id
+      - quiz
+      - score
+      - time_spent
+      - total
+    AttemptAnswerRequest:
+      type: object
+      properties:
+        question_id:
+          type: string
+          format: uuid
+        option_id:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - option_id
+      - question_id
+    AttemptCreateRequest:
+      type: object
+      properties:
+        answers:
+          type: array
+          items:
+            $ref: '#/components/schemas/AttemptAnswerRequest'
+        time_spent:
+          type: integer
+          maximum: 86400
+          minimum: 0
+      required:
+      - answers
+      - time_spent
+    AttemptReview:
+      type: object
+      properties:
+        question_id:
+          type: string
+          format: uuid
+        question:
+          type: string
+        option_id:
+          type: string
+          format: uuid
+          nullable: true
+        option_text:
+          type: string
+          nullable: true
+        correct_option_id:
+          type: string
+          format: uuid
+          nullable: true
+        correct_option_text:
+          type: string
+          nullable: true
+        correct:
+          type: boolean
+      required:
+      - correct
+      - correct_option_id
+      - correct_option_text
+      - option_id
+      - option_text
+      - question
+      - question_id
     AuditEntry:
       type: object
       properties:
@@ -3170,6 +3600,32 @@ components:
       - subject
       - title
       - url
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        is_preset:
+          type: boolean
+          readOnly: true
+      required:
+      - id
+      - is_preset
+      - name
+    CategoryCreateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 40
+      required:
+      - name
     Chapter:
       type: object
       description: 'Yuqori daraja; `children` — ichki bo''limlar (ular uchun `children`
@@ -3315,6 +3771,29 @@ components:
       required:
       - answer_token
       - option_id
+    CheckRequestRequest:
+      type: object
+      properties:
+        question_id:
+          type: string
+          format: uuid
+        option_id:
+          type: string
+          format: uuid
+      required:
+      - option_id
+      - question_id
+    CheckResult:
+      type: object
+      properties:
+        correct:
+          type: boolean
+        correct_option_id:
+          type: string
+          format: uuid
+      required:
+      - correct
+      - correct_option_id
     CheckStatusEnum:
       enum:
       - ok
@@ -4095,6 +4574,9 @@ components:
       description: |-
         * `direct` - direct
         * `proxy` - proxy
+    NullEnum:
+      enum:
+      - null
     OcrStatusEnum:
       enum:
       - none
@@ -4156,6 +4638,19 @@ components:
       description: |-
         * `student` - student
         * `teacher` - teacher
+    Option:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        text:
+          type: string
+          maxLength: 200
+        is_correct:
+          type: boolean
+      required:
+      - text
     OptionAdmin:
       type: object
       properties:
@@ -4179,6 +4674,20 @@ components:
       properties:
         text:
           $ref: '#/components/schemas/LocalizedTextRequest'
+        is_correct:
+          type: boolean
+      required:
+      - text
+    OptionRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        text:
+          type: string
+          minLength: 1
+          maxLength: 200
         is_correct:
           type: boolean
       required:
@@ -5151,6 +5660,104 @@ components:
       - page
       - slides
       - title
+    PublicOption:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        text:
+          type: string
+      required:
+      - id
+      - text
+    PublicQuestion:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        text:
+          type: string
+        image_url:
+          type: string
+          nullable: true
+          readOnly: true
+        options:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicOption'
+      required:
+      - id
+      - image_url
+      - options
+      - text
+    PublicQuiz:
+      type: object
+      description: 'Ochiq test: `is_correct` yo''q, javob `check/` orqali serverda
+        tekshiriladi.'
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          allOf:
+          - $ref: '#/components/schemas/Category'
+          nullable: true
+        cover_url:
+          type: string
+          nullable: true
+          readOnly: true
+        time_per_question:
+          type: integer
+          nullable: true
+        shuffle_questions:
+          type: boolean
+        shuffle_options:
+          type: boolean
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicQuestion'
+      required:
+      - category
+      - cover_url
+      - description
+      - id
+      - questions
+      - shuffle_options
+      - shuffle_questions
+      - time_per_question
+      - title
+    Question:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        text:
+          type: string
+          maxLength: 500
+        image:
+          type: string
+          nullable: true
+        image_url:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        options:
+          type: array
+          items:
+            $ref: '#/components/schemas/Option'
+      required:
+      - image_url
+      - options
+      - text
     QuestionAdmin:
       type: object
       description: Savol + aniq 4 variant (tartib A..D ro'yxat tartibidan), aniq 1
@@ -5272,6 +5879,233 @@ components:
             format: uuid
       required:
       - ids
+    QuestionRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        text:
+          type: string
+          minLength: 1
+          maxLength: 500
+        image:
+          type: string
+          nullable: true
+        options:
+          type: array
+          items:
+            $ref: '#/components/schemas/OptionRequest'
+      required:
+      - options
+      - text
+    Quiz:
+      type: object
+      description: 'To''liq test (ustoz): savollar va variantlar `is_correct` bilan,
+        nested yoziladi.'
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          maxLength: 120
+        description:
+          type: string
+          maxLength: 1000
+        category:
+          allOf:
+          - $ref: '#/components/schemas/Category'
+          readOnly: true
+          nullable: true
+        cover_image:
+          type: string
+          nullable: true
+        cover_url:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        visibility:
+          $ref: '#/components/schemas/VisibilityEnum'
+        time_per_question:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/QuizTimePerQuestionEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        shuffle_questions:
+          type: boolean
+        shuffle_options:
+          type: boolean
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Question'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - category
+      - cover_url
+      - created_at
+      - id
+      - questions
+      - title
+      - updated_at
+    QuizList:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          readOnly: true
+        category:
+          allOf:
+          - $ref: '#/components/schemas/Category'
+          readOnly: true
+          nullable: true
+        cover_url:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        visibility:
+          allOf:
+          - $ref: '#/components/schemas/VisibilityEnum'
+          readOnly: true
+        time_per_question:
+          readOnly: true
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/QuizListTimePerQuestionEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        shuffle_questions:
+          type: boolean
+          readOnly: true
+        shuffle_options:
+          type: boolean
+          readOnly: true
+        question_count:
+          type: integer
+          readOnly: true
+        attempts_count:
+          type: integer
+          readOnly: true
+        best_percent:
+          type: integer
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - attempts_count
+      - best_percent
+      - category
+      - cover_url
+      - created_at
+      - description
+      - id
+      - question_count
+      - shuffle_options
+      - shuffle_questions
+      - time_per_question
+      - title
+      - updated_at
+      - visibility
+    QuizListTimePerQuestionEnum:
+      enum:
+      - 15
+      - 30
+      - 60
+      type: integer
+      description: |-
+        * `15` - 15
+        * `30` - 30
+        * `60` - 60
+    QuizRequest:
+      type: object
+      description: 'To''liq test (ustoz): savollar va variantlar `is_correct` bilan,
+        nested yoziladi.'
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 120
+        description:
+          type: string
+          maxLength: 1000
+        category_id:
+          type: string
+          format: uuid
+          writeOnly: true
+          nullable: true
+        cover_image:
+          type: string
+          nullable: true
+        visibility:
+          $ref: '#/components/schemas/VisibilityEnum'
+        time_per_question:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/QuizTimePerQuestionEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        shuffle_questions:
+          type: boolean
+        shuffle_options:
+          type: boolean
+        questions:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionRequest'
+      required:
+      - questions
+      - title
+    QuizTimePerQuestionEnum:
+      enum:
+      - 15
+      - 30
+      - 60
+      type: integer
+      description: |-
+        * `15` - 15
+        * `30` - 30
+        * `60` - 60
+    QuizUploadRequestRequest:
+      type: object
+      properties:
+        file:
+          type: string
+          format: binary
+      required:
+      - file
+    QuizUploadResult:
+      type: object
+      properties:
+        path:
+          type: string
+        url:
+          type: string
+      required:
+      - path
+      - url
     ReadStatusEnum:
       enum:
       - in_progress
@@ -6276,6 +7110,14 @@ components:
       - is_env_admin
       - role
       - temporary_password
+    VisibilityEnum:
+      enum:
+      - private
+      - public
+      type: string
+      description: |-
+        * `private` - Private
+        * `public` - Public
     Week:
       type: object
       properties:
