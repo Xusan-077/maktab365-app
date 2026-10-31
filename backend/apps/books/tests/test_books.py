@@ -1,6 +1,9 @@
+from datetime import timedelta
+
 import pytest
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.utils import timezone
 
 from apps.accounts.models import AuditLog
 from apps.books import services
@@ -203,6 +206,36 @@ def test_reprocess_requires_file_and_runs_again(editor):
     assert again.json()["status"] == "ready" and again.json()["page_count"] == 2
 
 
+def test_reprocess_refuses_active_but_retries_stalled_processing(editor):
+    book = make_book()
+    editor.post(f"{ADMIN}/{book.pk}/upload/", pdf_upload(blank_pdf(2)), format="multipart")
+    # Worker hozir ishlayapti (yangi progress): qayta boshlash mumkin emas.
+    Book.objects.filter(pk=book.pk).update(status=BookStatus.PROCESSING)
+    assert editor.post(f"{ADMIN}/{book.pk}/reprocess/").status_code == 409
+
+    # Progress ancha vaqt o'zgarmagan (worker o'ldi): qayta ishlashga ruxsat.
+    long_ago = timezone.now() - timedelta(seconds=services.STALL_AFTER_SECONDS + 60)
+    Book.objects.filter(pk=book.pk).update(updated_at=long_ago)
+    again = editor.post(f"{ADMIN}/{book.pk}/reprocess/")
+    assert again.status_code == 202
+    assert again.json()["status"] == "ready"
+
+
+def test_time_limit_marks_book_failed_with_timeout(monkeypatch):
+    from celery.exceptions import SoftTimeLimitExceeded
+
+    book = make_book(source_file=ContentFile(blank_pdf(2), name="book-sources/t.pdf"))
+
+    def too_slow(*args, **kwargs):
+        raise SoftTimeLimitExceeded
+
+    monkeypatch.setattr(services.rasterize, "render_page", too_slow)
+    services.process_book(book.pk)
+    book.refresh_from_db()
+    assert book.status == BookStatus.FAILED and book.status_error == "timeout"
+    assert not book.pages.exists()
+
+
 # --- Nashr ---
 
 
@@ -281,3 +314,25 @@ def test_public_cache_is_invalidated_on_change(anon, admin):
     assert anon.get(f"{PUBLIC}/{book.pk}/").json()["title"] == "Eski nom"
     admin.patch(f"{ADMIN}/{book.pk}/", {"title": "Yangi nom"}, format="json")
     assert anon.get(f"{PUBLIC}/{book.pk}/").json()["title"] == "Yangi nom"
+
+
+# --- Qotgan kitoblarni qayta yuborish ---
+
+
+def test_reprocess_books_command_requeues_only_stalled(editor):
+    from django.core.management import call_command
+
+    fresh = make_book(title="Yangi")
+    stalled = make_book(title="Qotgan")
+    for book in (fresh, stalled):
+        editor.post(f"{ADMIN}/{book.pk}/upload/", pdf_upload(blank_pdf(2)), format="multipart")
+        Book.objects.filter(pk=book.pk).update(status=BookStatus.PROCESSING, processed_pages=0)
+    long_ago = timezone.now() - timedelta(minutes=30)
+    Book.objects.filter(pk=stalled.pk).update(updated_at=long_ago)
+
+    call_command("reprocess_books", "--dry-run")
+    assert Book.objects.get(pk=stalled.pk).status == BookStatus.PROCESSING
+
+    call_command("reprocess_books")
+    assert Book.objects.get(pk=stalled.pk).status == BookStatus.READY  # eager: darhol tayyor
+    assert Book.objects.get(pk=fresh.pk).status == BookStatus.PROCESSING  # faol, tegilmadi

@@ -5,7 +5,7 @@ import os
 # Frontend `frontend/backend-revision.json` dagi `min` shu qiymatdan oshmasligi kerak (prod build
 # backend'ning shu versiyasi chiqquncha kutadi). API shartnomasi frontend uchun muhim darajada
 # o'zgarganda (yangi endpoint/maydon yangi frontend'siz ishlamasa) oshiring va frontend'dagini ham.
-API_REVISION = 2
+API_REVISION = 3
 
 _COMMIT_VARS = ("RAILWAY_GIT_COMMIT_SHA", "GIT_COMMIT_SHA", "SOURCE_VERSION")
 

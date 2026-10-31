@@ -132,7 +132,7 @@ class BookAdminViewSet(AdminViewSet):
         book = self.get_object()
         if not book.source_file:
             raise UploadError("no_file", 409)
-        if book.status == BookStatus.PROCESSING:
+        if book.status == BookStatus.PROCESSING and not services.is_stalled(book):
             raise UploadError("processing_in_progress", 409)
         before = self.snap(book)
         with transaction.atomic():

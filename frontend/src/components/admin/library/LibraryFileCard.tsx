@@ -14,7 +14,7 @@ import { formatBytes } from "@/lib/utils/bytes";
 import { LibraryProgress } from "./LibraryStatus";
 import { useBookPdfUpload } from "./useBookPdfUpload";
 
-const BOOK_ERRORS = ["no_file", "invalid_pdf", "render_failed"] as const;
+const BOOK_ERRORS = ["no_file", "invalid_pdf", "render_failed", "timeout"] as const;
 
 /** PDF yuklash, sahifalarni tayyorlash holati va qayta tayyorlash. */
 export function LibraryFileCard({ book }: { book: AdminBook }) {
@@ -119,7 +119,7 @@ export function LibraryFileCard({ book }: { book: AdminBook }) {
           <Button
             variant="secondary"
             size="sm"
-            disabled={uploading || processing}
+            disabled={uploading}
             loading={reprocess.isPending}
             onClick={() => reprocess.mutate()}
           >

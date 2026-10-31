@@ -5,11 +5,14 @@ PDF saqlash/multipart mexanizmi `apps.content.pdf_storage` dan qayta ishlatiladi
 """
 
 import uuid
+from datetime import timedelta
 
 import structlog
+from celery.exceptions import SoftTimeLimitExceeded
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.db import transaction
+from django.utils import timezone
 from pypdfium2 import PdfiumError
 
 from apps.content import pdf_services as pdf
@@ -25,6 +28,7 @@ logger = structlog.get_logger(__name__)
 SOURCE_PREFIX = "book-sources"
 FLUSH_EVERY = 10  # shuncha sahifadan keyin bazaga yoziladi va jarayon ko'rsatkichi yangilanadi
 CHAPTERS_MAX = 300
+STALL_AFTER_SECONDS = 3 * 60  # progress shuncha vaqt o'zgarmasa, qayta ishlash qotgan hisoblanadi
 
 
 # --- Yuklash ---
@@ -173,6 +177,11 @@ def process_book(book_id) -> None:
         _purge_pages(book)
         _fail(book.pk, "invalid_pdf")
         return
+    except SoftTimeLimitExceeded:
+        logger.error("book_render_timeout", book=str(book.pk))
+        _purge_pages(book)
+        _fail(book.pk, "timeout")
+        return
     except Exception:
         logger.exception("book_render_failed", book=str(book.pk))
         _purge_pages(book)
@@ -187,7 +196,15 @@ def process_book(book_id) -> None:
 def _flush(book: Book, rows: list[BookPage], processed: int) -> None:
     if rows:
         BookPage.objects.bulk_create(rows)
-    Book.objects.filter(pk=book.pk).update(processed_pages=processed)
+    # `updated_at` ham yangilanadi: progress to'xtab qolgan (qotgan) kitobni `is_stalled` ajratadi.
+    Book.objects.filter(pk=book.pk).update(processed_pages=processed, updated_at=timezone.now())
+
+
+def is_stalled(book: Book) -> bool:
+    """Qayta ishlanmoqda, lekin `STALL_AFTER` dan beri jarayon yo'q (worker o'ldi/yo'q)."""
+    return book.status == BookStatus.PROCESSING and timezone.now() - book.updated_at > timedelta(
+        seconds=STALL_AFTER_SECONDS
+    )
 
 
 # --- Nashr ---
