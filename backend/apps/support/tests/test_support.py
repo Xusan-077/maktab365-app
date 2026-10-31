@@ -189,12 +189,41 @@ class TestMine:
 class TestQuality:
     """Juda qisqa yoki ma'nosiz xabar saqlanmaydi (400), kontrakt — frontend bilan bir xil."""
 
-    @pytest.mark.parametrize("text", ["Dnxdnxdnxdnx", "asdasdasdasdasdasd", "qwrt psdf ghjk lzxc"])
+    # Har bir matn kamida MIN_MESSAGE_LENGTH (15): qisqasi uzunlik xatosi bilan rad etiladi.
+    @pytest.mark.parametrize(
+        "text", ["Dnxdnxdnxdnxdnx", "asdasdasdasdasdasd", "qwrt psdf ghjk lzxc"]
+    )
     def test_meaningless_message_is_rejected(self, send, text):
         response = send({**PAYLOAD, "message": text})
         assert response.status_code == 400
         assert response.json()["details"]["message"] == ["message_meaningless"]
         assert not SupportMessage.objects.exists()
+
+    def test_short_gibberish_gets_length_error(self, send):
+        response = send({**PAYLOAD, "message": "Dnxdnxdnxdnx"})  # 12 belgi
+        assert response.status_code == 400
+        assert "message" in response.json()["details"]
+
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "Parolni unutdim",
+            "mmmm yaxshi",
+            "Salom, yordam kerak",
+            "Кнопка не работает",
+            "Page 12 is blurry",
+            "Savol 5 va 6 xato",
+        ],
+    )
+    def test_real_messages_are_not_meaningless(self, text):
+        assert quality.is_meaningless(text) is False
+
+    @pytest.mark.parametrize(
+        "text",
+        ["Salom", "Dnxdnxdnxdnx", "!!!! ???? 1234", "aaaa aaaa aaaa", "bcdfg hjklm npqrs"],
+    )
+    def test_gibberish_is_meaningless(self, text):
+        assert quality.is_meaningless(text) is True
 
     def test_too_short_message_is_rejected(self, send):
         response = send({**PAYLOAD, "message": "Xato bor ekan"})  # 13 belgi
