@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "apps.analytics",
     "apps.games",
     "apps.quizzes",
+    "apps.books",
 ]
 
 MIDDLEWARE = [
@@ -285,6 +286,8 @@ SPECTACULAR_SETTINGS = {
         "LocaleEnum": "apps.accounts.models.Locale.choices",
         "SupportKindEnum": "apps.support.models.Kind.choices",
         "SupportStatusEnum": "apps.support.models.Status.choices",
+        "BookTypeEnum": "apps.books.models.BookType.choices",
+        "BookStatusEnum": "apps.books.models.BookStatus.choices",
     },
 }
 

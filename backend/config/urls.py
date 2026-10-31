@@ -11,12 +11,14 @@ urlpatterns = [
     path("api/v1/", include("apps.core.urls")),
     path("api/v1/admin/", include("apps.content.admin_urls")),
     path("api/v1/admin/", include("apps.games.admin_urls")),
+    path("api/v1/admin/", include("apps.books.admin_urls")),
     path("api/v1/", include("apps.content.urls")),
     path("api/v1/", include("apps.learning.urls")),
     path("api/v1/", include("apps.support.urls")),
     path("api/v1/", include("apps.analytics.urls")),
     path("api/v1/", include("apps.games.urls")),
     path("api/v1/", include("apps.quizzes.urls")),
+    path("api/v1/", include("apps.books.urls")),
 ]
 
 # Dev: yuklangan fayllar (muqova rasmlari) lokal `media/` dan beriladi; prod'da S3-mos saqlash.

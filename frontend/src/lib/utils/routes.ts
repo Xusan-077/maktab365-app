@@ -29,6 +29,7 @@ export const ROUTES = {
   privacy: "/maxfiylik",
   offline: "/oflayn",
   games: "/games",
+  books: "/kitoblar",
 } as const;
 
 /** Faqat shu yo'llar (va ichkilari) sessiya talab qiladi; qolgan hamma sahifa ochiq. */
@@ -125,3 +126,9 @@ export const quizPaths = {
   /** Havola orqali ochiladigan ommaviy test (login shart emas). */
   publicQuiz: (id: string) => `/test/${id}`,
 };
+/** Kitob sahifasi (Kitoblar bo'limi): `/kitoblar/<id>`. */
+export const bookPath = (id: string) => `${ROUTES.books}/${id}`;
+
+/** Kitoblar o'qish oynasi: `/kitoblar/<id>/oqish[?bet=N]`. */
+export const bookReaderPath = (id: string, page?: number) =>
+  `${bookPath(id)}/oqish${page && page > 1 ? `?bet=${page}` : ""}`;

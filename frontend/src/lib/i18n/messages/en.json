@@ -166,7 +166,8 @@
     "home": "Home",
     "goToCabinet": "Go to dashboard",
     "goToTeacher": "Go to teacher panel",
-    "games": "Games"
+    "games": "Games",
+    "books": "Books"
   },
   "search": {
     "label": "Search the site",
@@ -681,7 +682,8 @@
       "stats": "Statistics",
       "messages": "Messages",
       "openSite": "Open site",
-      "newMessages": "{count, plural, one {# new message} other {# new messages}}"
+      "newMessages": "{count, plural, one {# new message} other {# new messages}}",
+      "library": "Library"
     },
     "roles": {
       "student": "Student",
@@ -909,7 +911,8 @@
         "grade_has_books": "You can't remove a grade where the subject has books. Move or delete the books first.",
         "ocr_disabled": "OCR is not enabled on the server yet.",
         "ocr_not_needed": "This book already has a text layer — OCR is not needed.",
-        "ocr_in_progress": "OCR is already queued or running."
+        "ocr_in_progress": "OCR is already queued or running.",
+        "processing_in_progress": "Pages are being prepared right now. Wait until it finishes."
       },
       "fields": {
         "invalid": "Invalid value",
@@ -936,7 +939,8 @@
         "options_count": "Exactly 4 options are required",
         "options_one_correct": "Exactly one correct answer is required",
         "text_too_long": "Text is too long",
-        "ids_mismatch": "The list is out of date — reload the page"
+        "ids_mismatch": "The list is out of date — reload the page",
+        "title_required": "Enter a title."
       },
       "gradeHasBooks": "This subject has {count} book(s) in grade {grade}: move them to another subject or delete them first."
     },
@@ -1510,6 +1514,105 @@
         "correctRequired": "Choose the correct answer",
         "optionsCount": "Exactly 4 options are required",
         "invalid": "Invalid value"
+      }
+    },
+    "library": {
+      "title": "Library",
+      "description": "Fiction, maths, test and other books. Upload a PDF and the pages are turned into images.",
+      "metaTitle": "Library",
+      "add": "Add a book",
+      "searchLabel": "Search by title or author",
+      "filters": {
+        "allTypes": "All types",
+        "allStatuses": "All statuses"
+      },
+      "empty": "No books yet. Add the first one.",
+      "emptyFiltered": "No books match these filters.",
+      "edit": "Edit",
+      "untitled": "Untitled",
+      "statusLabel": "Status",
+      "status": {
+        "processing": "Processing",
+        "ready": "Ready",
+        "failed": "Failed",
+        "noFile": "No PDF uploaded"
+      },
+      "progress": "{done} / {total} pages",
+      "progressLabel": "Preparing pages",
+      "errors": {
+        "no_file": "No PDF uploaded.",
+        "invalid_pdf": "The PDF is damaged or cannot be opened. Upload another file.",
+        "render_failed": "Preparing the pages failed."
+      },
+      "form": {
+        "newTitle": "New book",
+        "editTitle": "Edit book",
+        "back": "Back to the library",
+        "details": "Details",
+        "titleLabel": "Title",
+        "authorLabel": "Author",
+        "typeLabel": "Type",
+        "gradeLabel": "Grade",
+        "noGrade": "No grade",
+        "languageLabel": "Language",
+        "descriptionLabel": "Description",
+        "save": "Save",
+        "saveAndContinue": "Save and upload PDF",
+        "saved": "Saved",
+        "created": "Book created. Now upload the PDF.",
+        "titleRequired": "Enter a title",
+        "titleTooLong": "Up to 255 characters",
+        "authorTooLong": "Up to 255 characters",
+        "descriptionTooLong": "Up to 4000 characters",
+        "chapterTitleRequired": "Enter a section title",
+        "chapterTitleTooLong": "Up to 200 characters",
+        "chapterPageInvalid": "Page numbers start at 1"
+      },
+      "file": {
+        "title": "PDF file",
+        "choose": "Choose PDF",
+        "replace": "Replace PDF",
+        "uploading": "Uploading… {percent}%",
+        "cancel": "Cancel",
+        "uploaded": "PDF uploaded. Pages are being prepared.",
+        "ready": "{pages} pages · {size}",
+        "reprocess": "Prepare again",
+        "reprocessStarted": "Pages are being prepared again.",
+        "hint": "PDF only. Pages are converted to WebP images, which can take a few minutes.",
+        "notPdf": "Choose a PDF file."
+      },
+      "cover": {
+        "title": "Cover",
+        "auto": "Automatic, from the first page",
+        "upload": "Upload an image",
+        "useAuto": "Automatic cover",
+        "hint": "JPG, PNG or WebP, up to 5 MB. A 2:3 ratio works best.",
+        "invalid": "Only a JPG, PNG or WebP image up to 5 MB."
+      },
+      "chapters": {
+        "title": "Contents",
+        "add": "Add a section",
+        "remove": "Remove section",
+        "titleLabel": "Section title",
+        "pageLabel": "Starting page",
+        "empty": "No contents yet. Sections let readers jump straight to a place."
+      },
+      "publish": {
+        "title": "Publishing",
+        "published": "The book is visible on the site.",
+        "draft": "The book is not visible on the site yet.",
+        "notReady": "To publish, upload a PDF and wait until the pages are ready.",
+        "publish": "Publish",
+        "unpublish": "Unpublish",
+        "publishedToast": "Book published",
+        "unpublishedToast": "Book unpublished"
+      },
+      "delete": {
+        "button": "Delete book",
+        "title": "Delete this book?",
+        "description": "“{title}” and all its pages will be removed. This cannot be undone.",
+        "confirm": "Delete",
+        "done": "Book deleted"
       }
     }
   },
@@ -2701,6 +2804,63 @@
       "timer": "{seconds} s per question",
       "start": "Start",
       "notSaved": "This is an open quiz: your result is not saved."
+    }
+  },
+  "books": {
+    "metaTitle": "Books",
+    "metaDescription": "Fiction, maths collections, tests and textbooks. Read online, write beside the book and draw on the page. Free.",
+    "title": "Books",
+    "searchLabel": "Search by title or author",
+    "searchPlaceholder": "Title or author",
+    "typesLabel": "Book type",
+    "types": {
+      "all": "All",
+      "textbook": "Textbooks",
+      "fiction": "Fiction",
+      "math": "Maths",
+      "test": "Tests",
+      "other": "Other"
+    },
+    "typeName": {
+      "textbook": "Textbook",
+      "fiction": "Fiction",
+      "math": "Maths",
+      "test": "Test collection",
+      "other": "Other"
+    },
+    "grade": "Grade",
+    "allGrades": "All grades",
+    "gradeLabel": "Grade {grade}",
+    "language": "Language",
+    "allLanguages": "All languages",
+    "languages": {
+      "uz": "Uzbek",
+      "ru": "Russian",
+      "en": "English"
+    },
+    "count": "{count, plural, one {# book} other {# books}}",
+    "results": "Results",
+    "emptyTitle": "No books found",
+    "emptyText": "Change the filters or clear them all.",
+    "emptyAll": "Books will be added soon.",
+    "reset": "Clear filters",
+    "errorText": "Could not load the books. Check your connection and try again.",
+    "retry": "Try again",
+    "pages": "{count, plural, one {# page} other {# pages}}",
+    "cover": "Cover of {title}",
+    "detail": {
+      "metaDescription": "{title} by {author}. Read online.",
+      "by": "By {author}",
+      "start": "Start reading",
+      "about": "About this book",
+      "contents": "Contents",
+      "contentsPage": "page {page}",
+      "noContents": "This book has no table of contents.",
+      "facts": "Book details",
+      "notFoundTitle": "Book not found",
+      "notFoundText": "The book was removed or the link is wrong.",
+      "backToList": "All books",
+      "loadError": "Could not load the book. Try again."
     }
   }
 }

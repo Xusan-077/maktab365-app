@@ -6,6 +6,8 @@ export const ADMIN_ROUTES = {
   pdfBooks: `${ROUTES.admin}/kitoblar`,
   newPdfBook: `${ROUTES.admin}/kitoblar/yangi`,
   bulkPdfBooks: `${ROUTES.admin}/kitoblar/ommaviy`,
+  library: `${ROUTES.admin}/kutubxona`,
+  newLibraryBook: `${ROUTES.admin}/kutubxona/yangi`,
   subjects: `${ROUTES.admin}/fanlar`,
   stats: `${ROUTES.admin}/statistika`,
   users: `${ROUTES.admin}/foydalanuvchilar`,
@@ -18,3 +20,6 @@ export const adminPdfBookPreviewPath = (id: string) => `${adminPdfBookPath(id)}/
 /** Mavzu (mundarija bo'limi) materiallari: Xulosa, Taqdimot… */
 export const adminTopicPath = (bookId: string, topicId: string) =>
   `${adminPdfBookPath(bookId)}/mavzu/${topicId}`;
+
+/** Kutubxona (kitoblar bo'limi) kitobi: `/admin/kutubxona/<id>`. */
+export const adminLibraryBookPath = (id: string) => `${ADMIN_ROUTES.library}/${id}`;

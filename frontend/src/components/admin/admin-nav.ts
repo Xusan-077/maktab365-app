@@ -1,5 +1,6 @@
 import {
   BarChart3,
+  BookMarked,
   FileText,
   Inbox,
   LayoutDashboard,
@@ -37,6 +38,13 @@ const ITEMS: AdminNavItem[] = [
     href: ADMIN_ROUTES.pdfBooks,
     icon: FileText,
     isActive: within(ADMIN_ROUTES.pdfBooks),
+    allowed: () => true,
+  },
+  {
+    key: "library",
+    href: ADMIN_ROUTES.library,
+    icon: BookMarked,
+    isActive: within(ADMIN_ROUTES.library),
     allowed: () => true,
   },
   {
