@@ -922,6 +922,85 @@ export interface paths {
         patch: operations["admin_support_update"];
         trace?: never;
     };
+    "/api/v1/admin/topics/{topic_id}/questions/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Mavzu savollari (hammasi, nofaollari ham), tartib bo'yicha */
+        get: operations["admin_topic_questions_list"];
+        put?: never;
+        post: operations["admin_topic_questions_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/topics/{topic_id}/questions/reorder/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Tartib: mavzuning barcha savollari aynan bir martadan, yangi tartibda */
+        post: operations["admin_topic_questions_reorder"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/topics/{topic_id}/questions/import/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ommaviy import (hammasi yoki hech biri); `dry_run` — faqat tekshirish */
+        post: operations["admin_topic_questions_import"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/questions/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Bitta savol: tahrirlash (variantlar bilan), faol/nofaol, o'chirish (faqat admin).
+         *     Ro'yxat va yaratish mavzu ostida (`topics/{id}/questions/`), shuning uchun `list` ulanmagan.
+         */
+        get: operations["admin_questions_retrieve"];
+        put?: never;
+        post?: never;
+        /**
+         * @description Bitta savol: tahrirlash (variantlar bilan), faol/nofaol, o'chirish (faqat admin).
+         *     Ro'yxat va yaratish mavzu ostida (`topics/{id}/questions/`), shuning uchun `list` ulanmagan.
+         */
+        delete: operations["admin_questions_delete"];
+        options?: never;
+        head?: never;
+        /**
+         * @description Bitta savol: tahrirlash (variantlar bilan), faol/nofaol, o'chirish (faqat admin).
+         *     Ro'yxat va yaratish mavzu ostida (`topics/{id}/questions/`), shuning uchun `list` ulanmagan.
+         */
+        patch: operations["admin_questions_update"];
+        trace?: never;
+    };
     "/api/v1/bot/books/": {
         parameters: {
             query?: never;
@@ -1408,6 +1487,107 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/games/topics/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description O'yin uchun mavzular: kamida `GAMES_MIN_QUESTIONS` faol savol, nashr qilingan kitobda. */
+        get: operations["games_topics_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/games/topics/{slug}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Bitta o'yin mavzusi va savollar soni (o'ynab bo'lmasa — 404) */
+        get: operations["games_topic_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/games/topics/{slug}/questions/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Tasodifiy savollar (variantlar aralashgan); `is_correct` o'rniga `answer_token` */
+        get: operations["games_topic_questions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/games/check/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["games_check_answer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/games/sessions/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** O'yin boshlanishi (faqat statistika): hech narsa sarflamaydi, bloklanmaydi */
+        post: operations["games_sessions_start"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/games/sessions/{id}/finish/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Natijani saqlash (bir marta; qayta — 409 `session_finished`) */
+        post: operations["games_sessions_finish"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1568,6 +1748,16 @@ export interface components {
             page: number;
             children?: components["schemas"]["ChapterLeafRequest"][];
         };
+        CheckAnswer: {
+            correct: boolean;
+            /** Format: uuid */
+            correct_option_id: string;
+        };
+        CheckAnswerRequestRequest: {
+            answer_token: string;
+            /** Format: uuid */
+            option_id: string;
+        };
         /**
          * @description * `ok` - ok
          *     * `error` - error
@@ -1604,6 +1794,13 @@ export interface components {
             books_opened: number;
             books_read: number;
         };
+        /**
+         * @description * `easy` - Easy
+         *     * `medium` - Medium
+         *     * `hard` - Hard
+         * @enum {string}
+         */
+        DifficultyEnum: "easy" | "medium" | "hard";
         EmailRequest: {
             /** Format: email */
             email: string;
@@ -1627,6 +1824,7 @@ export interface components {
             identities: components["schemas"]["ExportIdentity"][];
             auth_events: components["schemas"]["ExportEvent"][];
             learning: components["schemas"]["ExportLearning"];
+            games: components["schemas"]["ExportGames"];
         };
         ExportEvent: {
             type: string;
@@ -1637,6 +1835,9 @@ export interface components {
             };
             /** Format: date-time */
             created_at: string;
+        };
+        ExportGames: {
+            sessions: components["schemas"]["GameSession"][];
         };
         ExportIdentity: {
             provider: string;
@@ -1664,6 +1865,59 @@ export interface components {
             date_joined: string;
             /** Format: date-time */
             last_login: string | null;
+        };
+        GameOption: {
+            /** Format: uuid */
+            id: string;
+            text: components["schemas"]["LocalizedText"];
+        };
+        /** @description Savol o'yin uchun: `is_correct` yo'q, javob `answer_token` bilan serverda tekshiriladi. */
+        GameQuestion: {
+            /** Format: uuid */
+            id: string;
+            text: components["schemas"]["LocalizedText"];
+            /** Format: uri */
+            image: string | null;
+            difficulty: components["schemas"]["DifficultyEnum"];
+            options: components["schemas"]["GameOption"][];
+            readonly answer_token: string;
+        };
+        GameQuestions: {
+            topic: components["schemas"]["GameTopic"];
+            questions: components["schemas"]["GameQuestion"][];
+        };
+        GameSession: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly game_type: string;
+            readonly topic: string | null;
+            /** Format: date-time */
+            readonly started_at: string;
+            /** Format: date-time */
+            readonly finished_at: string | null;
+            readonly duration_seconds: number | null;
+            readonly teams: components["schemas"]["TeamResult"][];
+        };
+        GameSubject: {
+            slug: string;
+            title: components["schemas"]["LocalizedText"];
+        };
+        GameTextbook: {
+            /** Format: uuid */
+            id: string;
+            slug: string;
+            title: components["schemas"]["LocalizedText"];
+        };
+        /** @description O'yin uchun mavzu (mundarija bo'limi): nom — bo'lim nomi, kitob tilida (tarjimasiz). */
+        GameTopic: {
+            /** Format: uuid */
+            id: string;
+            readonly slug: string;
+            title: string;
+            readonly subject: components["schemas"]["GameSubject"];
+            grade: number;
+            readonly textbook: components["schemas"]["GameTextbook"];
+            question_count: number;
         };
         Goal: {
             /** Format: uuid */
@@ -1840,6 +2094,17 @@ export interface components {
          * @enum {string}
          */
         OnboardingRoleEnum: "student" | "teacher";
+        OptionAdmin: {
+            /** Format: uuid */
+            readonly id: string;
+            text: components["schemas"]["LocalizedText"];
+            is_correct?: boolean;
+            readonly order: number;
+        };
+        OptionAdminRequest: {
+            text: components["schemas"]["LocalizedTextRequest"];
+            is_correct?: boolean;
+        };
         OtpRequestRequest: {
             locale?: components["schemas"]["LocaleEnum"];
             /** Format: email */
@@ -1850,6 +2115,21 @@ export interface components {
             /** Format: email */
             email: string;
             code: string;
+        };
+        PaginatedGameTopicList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["GameTopic"][];
         };
         PaginatedPdfBookAdminList: {
             /** @example 123 */
@@ -1979,6 +2259,14 @@ export interface components {
             grade?: number | null;
             subjects?: string[];
             grades?: number[];
+        };
+        /** @description Savol + aniq 4 variant (tartib A..D ro'yxat tartibidan), aniq 1 to'g'ri javob. */
+        PatchedQuestionAdminRequest: {
+            text?: components["schemas"]["LocalizedTextRequest"];
+            image?: string;
+            difficulty?: components["schemas"]["DifficultyEnum"];
+            is_active?: boolean;
+            options?: components["schemas"]["OptionAdminRequest"][];
         };
         PatchedRoleRequest: {
             role?: components["schemas"]["RoleEnum"];
@@ -2219,6 +2507,53 @@ export interface components {
             page: number;
             slides: components["schemas"]["SlidesPublic"] | null;
         };
+        /** @description Savol + aniq 4 variant (tartib A..D ro'yxat tartibidan), aniq 1 to'g'ri javob. */
+        QuestionAdmin: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly topic: string;
+            text: components["schemas"]["LocalizedText"];
+            image?: string;
+            /** Format: uri */
+            readonly image_url: string | null;
+            difficulty?: components["schemas"]["DifficultyEnum"];
+            readonly order: number;
+            is_active?: boolean;
+            options: components["schemas"]["OptionAdmin"][];
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        /** @description Savol + aniq 4 variant (tartib A..D ro'yxat tartibidan), aniq 1 to'g'ri javob. */
+        QuestionAdminRequest: {
+            text: components["schemas"]["LocalizedTextRequest"];
+            image?: string;
+            difficulty?: components["schemas"]["DifficultyEnum"];
+            is_active?: boolean;
+            options: components["schemas"]["OptionAdminRequest"][];
+        };
+        /** @description Savol + aniq 4 variant (tartib A..D ro'yxat tartibidan), aniq 1 to'g'ri javob. */
+        QuestionImportItemRequest: {
+            text: components["schemas"]["LocalizedTextRequest"];
+            difficulty?: components["schemas"]["DifficultyEnum"];
+            options: components["schemas"]["OptionAdminRequest"][];
+            /** @default true */
+            is_active: boolean;
+        };
+        QuestionImportRequestRequest: {
+            questions: components["schemas"]["QuestionImportItemRequest"][];
+            /** @default false */
+            dry_run: boolean;
+        };
+        QuestionImportResult: {
+            created: number;
+            dry_run: boolean;
+        };
+        QuestionReorderRequestRequest: {
+            ids: string[];
+        };
         /**
          * @description * `in_progress` - In progress
          *     * `read` - Read
@@ -2257,6 +2592,20 @@ export interface components {
          * @enum {string}
          */
         RoleEnum: "student" | "teacher" | "editor" | "admin";
+        SessionFinishRequestRequest: {
+            game_type?: string;
+            topic?: string | null;
+            teams: components["schemas"]["TeamResultRequest"][];
+            duration_seconds: number;
+        };
+        SessionStart: {
+            /** Format: uuid */
+            session_id: string;
+        };
+        SessionStartRequestRequest: {
+            game_type: string;
+            topic?: string | null;
+        };
         /** @description Bo'lim prezentatsiyasi (admin): fayl nomi, slaydlar soni, hajm. Fayl kaliti chiqmaydi. */
         SlidesAdmin: {
             name: string;
@@ -2465,6 +2814,18 @@ export interface components {
             grade: number;
             books_total: number;
             books_opened: number;
+        };
+        TeamResult: {
+            name: string;
+            score: number;
+            correct: number;
+            total: number;
+        };
+        TeamResultRequest: {
+            name: string;
+            score: number;
+            correct: number;
+            total: number;
         };
         /** @description Telegram Login Widget qaytargan maydonlar (imzo tekshiruvi providers/telegram.py da). */
         TelegramAuthRequest: {
@@ -4071,6 +4432,176 @@ export interface operations {
             };
         };
     };
+    admin_topic_questions_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                topic_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuestionAdmin"][];
+                };
+            };
+        };
+    };
+    admin_topic_questions_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                topic_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuestionAdminRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["QuestionAdminRequest"];
+                "multipart/form-data": components["schemas"]["QuestionAdminRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuestionAdmin"];
+                };
+            };
+        };
+    };
+    admin_topic_questions_reorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                topic_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuestionReorderRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["QuestionReorderRequestRequest"];
+                "multipart/form-data": components["schemas"]["QuestionReorderRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuestionAdmin"][];
+                };
+            };
+        };
+    };
+    admin_topic_questions_import: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                topic_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuestionImportRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["QuestionImportRequestRequest"];
+                "multipart/form-data": components["schemas"]["QuestionImportRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuestionImportResult"];
+                };
+            };
+        };
+    };
+    admin_questions_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuestionAdmin"];
+                };
+            };
+        };
+    };
+    admin_questions_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    admin_questions_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedQuestionAdminRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedQuestionAdminRequest"];
+                "multipart/form-data": components["schemas"]["PatchedQuestionAdminRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuestionAdmin"];
+                };
+            };
+        };
+    };
     bot_books_search: {
         parameters: {
             query?: {
@@ -4811,6 +5342,158 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    games_topics_list: {
+        parameters: {
+            query?: {
+                /** @description Sinf (1–11) */
+                grade?: number;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /** @description Mavzu, fan yoki darslik nomi (barcha tillarda) */
+                q?: string;
+                /** @description Fan slug'i */
+                subject?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedGameTopicList"];
+                };
+            };
+        };
+    };
+    games_topic_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GameTopic"];
+                };
+            };
+        };
+    };
+    games_topic_questions: {
+        parameters: {
+            query?: {
+                /** @description Savollar soni (4–40, standart 16) */
+                count?: number;
+            };
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GameQuestions"];
+                };
+            };
+        };
+    };
+    games_check_answer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckAnswerRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["CheckAnswerRequestRequest"];
+                "multipart/form-data": components["schemas"]["CheckAnswerRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheckAnswer"];
+                };
+            };
+        };
+    };
+    games_sessions_start: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SessionStartRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["SessionStartRequestRequest"];
+                "multipart/form-data": components["schemas"]["SessionStartRequestRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionStart"];
+                };
+            };
+        };
+    };
+    games_sessions_finish: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SessionFinishRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["SessionFinishRequestRequest"];
+                "multipart/form-data": components["schemas"]["SessionFinishRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GameSession"];
+                };
             };
         };
     };

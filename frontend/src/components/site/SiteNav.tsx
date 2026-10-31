@@ -10,6 +10,7 @@ const ITEMS = [
   { key: "home", href: ROUTES.home },
   { key: "subjects", href: ROUTES.subjects },
   { key: "textbooks", href: ROUTES.textbooks },
+  { key: "games", href: ROUTES.games },
 ] as const;
 
 export interface SiteNavProps {

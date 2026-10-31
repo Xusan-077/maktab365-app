@@ -44,7 +44,7 @@ Yoki ildizdan: `make dev`. Boshqa buyruqlar: `make test`, `make lint`, `make sch
 - E2E: `make e2e` (yoki `cd frontend && npx playwright test`; birinchi marta `npx playwright install chromium`).
 - Ma'lum cheklovlar: parol almashtirilgach boshqa qurilmalardagi access token o'z muddatigacha (≤15 daq) ishlaydi; refresh single-flight bitta jarayon ichida — bir nechta server instansiyasida bir vaqtdagi refresh'da sessiya kamdan-kam yo'qolishi mumkin. Mijoz IP (throttle/audit): backend `X-Forwarded-For` ga faqat Next serveridan umumiy sir bilan kelganda ishonadi (`FORWARDED_IP_SECRET` = frontend `BACKEND_FORWARD_SECRET`); prod'da ikkalasiga kuchli qiymat bering, proxy ortida bo'lsa `TRUSTED_PROXY_HOPS` ni sozlang.
 
-**Docker portlari:** host'da 5432/6379 band bo'lsa (masalan, lokal Postgres), ildizdagi `.env` ga `POSTGRES_PORT=55432` (yoki `REDIS_PORT`) yozing va `backend/.env` dagi `DATABASE_URL` portini mos qiling. Konteynerlar ichida portlar o'zgarmaydi.
+**Docker portlari:** host'da 5432/6379 band bo'lsa (masalan, lokal Postgres), ildizdagi `.env` ga `POSTGRES_PORT=54329` (yoki `REDIS_PORT`) yozing va `backend/.env` dagi `DATABASE_URL` portini mos qiling. Windows'da 55432 kabi portlar Hyper-V band oralig'iga tushishi mumkin (`netsh interface ipv4 show excludedportrange protocol=tcp`); 54329 unga kirmaydi. Konteynerlar ichida portlar o'zgarmaydi.
 
 **M9 (yordam va aloqa):** backend `apps/support` — `POST /api/v1/support/` (mehmon ham yuboradi; IP bo'yicha 5/soat, honeypot, uzunlik limiti, oddiy spam filtri, yangi xabar staff'ga Celery orqali `SUPPORT_NOTIFY_EMAILS` ga yuboriladi) va `GET /api/v1/me/support/` (o'z murojaatlari va holati). Admin'da `SupportMessage` holati (`new/in_progress/resolved/spam`) va `staff_note` boshqariladi. Frontend: marketing `/yordam` ("Yordam va aloqa" — FAQ + forma), panel `/kabinet/yordam` va `/ustoz/yordam` (forma + "Mening xabarlarim"), mavzu sahifasida "Xato topdingizmi?" dialogi (mavzu va sahifa manzili avtomatik qo'shiladi). Murojaat metodlari (`sendSupport`, `getMySupport`) `NEXT_PUBLIC_BACKEND_AUTH=true` da mock rejimida ham haqiqiy backend'ga boradi. E2E: `frontend/e2e/support.spec.ts`.
 
@@ -171,3 +171,34 @@ Yozuvlar (sahifa, xatcho'p, hodisa) `lib/offline/write-queue.ts` orqali: TanStac
 brauzerda (`maktab365-writes:<user>`) navbatga tushadi va internet qaytganda/taymerda qayta yuboriladi, 4xx bo'lsa o'zgarish qaytariladi.
 Mehmon ma'lumoti kirgach merge qilinadi; xatoda saqlanadi va oshib boruvchi oraliq bilan qayta uriniladi. E2E: `frontend/e2e/learning.spec.ts`.
 Rejalar (goals) navbatsiz: optimistic + rollback, offline'da xato ko'rsatiladi.
+
+**Interaktiv o'yinlar (2-bosqich, frontend):** `/games` — mavzu qidiruvi (300 ms debounce) va sinf/fan chiplari URL'da
+(`?q=&grade=&subject=`), o'yinga tayyor mavzu kartalari (backend `GET games/topics/`). Karta 2 qadamli kirish modalini ochadi:
+o'yin (Sirli quti, Omad charhi, Arqon tortish — faqat 2 jamoa), jamoalar soni va nomlari, savollar soni (8/12/16/24; mavzuda
+yetmaydigani o'chiq). «O'yinni boshlash» savollarni oladi; kirganda statistika uchun server sessiyasi ochiladi (hech narsa sarflamaydi, o'yinni
+bloklamaydi). O'yinlar hamma uchun cheksiz. Holat `stores/game.store.ts`
+(sessionStorage — sahifa yangilansa tiklanadi). O'yin ekrani `/games/<mavzu>/<o'yin>` va natija `/games/<mavzu>/natija`:
+javob serverda `answer_token` bilan tekshiriladi, klaviatura 1–4/A–D. Mavzu panelining «Test» tabida «Interaktiv o'yinlar» bloki
+(mavzu ma'lumoti `GET games/topics/<slug>/`). E2E: `frontend/e2e/games.spec.ts` (o'yin API'si mock qilinadi).
+
+**Interaktiv o'yinlar (3-bosqich, o'yin sahnalari):** to'g'ri javob +1 ball.
+- *Sirli quti* — 4 ustunli raqamli qutilar; savol modali (30 s); har 16 qutidan 1 Bonus (+2) va 1 Bomba (−1), joyi tasodifiy;
+  hamma quti ochilsa natija.
+- *Omad charhi* — 8 sektor (1–6 savol, «×2» — 2 ball, «Bonus» — savolsiz +2), 4 s aylanish; navbat 1→2→3; savollar tugasa natija.
+- *Arqon tortish* — ikki jamoa bir vaqtda, har biriga o'z savoli (juft/toq), chap 1–4, o'ng 6–9 klavishlari; xato — 1.5 s blok;
+  5 qadam yoki 3:00 tugaganda oldindagi jamoa yutadi (teng — durang), g'olib modali. Bolalar rasmi — vaqtinchalik SVG
+  (`components/games/RopeScene.tsx`, rasm bilan almashtiriladi).
+
+**Interaktiv o'yinlar: dizayn va ovoz.** Tekis ranglar (gradient, nuqtali naqsh, rangli glow yo'q; charx sektorlari — keskin chegarali `conic-gradient`). Animatsiyalar `globals.css` da (`game-*`), `prefers-reduced-motion` da o'chadi, ovoz qoladi. Ovoz — `hooks/useSound.ts` (WebAudio, fayllarsiz): tugma har o'yin ekranida, holat `localStorage` `d365-sound`, `AudioContext` birinchi bosishda ochiladi, balandlik 0.35.
+
+| Hodisa | Ovoz |
+| --- | --- |
+| karta/tile tanlash, modal qadami | `tap` |
+| modal yoki quti ochilishi | `open` |
+| to'g'ri / xato javob | `correct` / `wrong` |
+| charx ko'rsatkichi urilishi / charx to'xtadi | `tick` / `land` |
+| bonus (+2) / bomba (−1) | `bonus` / `bomb` |
+| arqon tortildi | `pull` |
+| oxirgi 5 s (charx) va 10 s (arqon) | `beep` |
+| g'alaba, o'yin tugadi, natija sahifasi | `win` |
+

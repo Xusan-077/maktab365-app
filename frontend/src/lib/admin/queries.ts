@@ -17,6 +17,7 @@ export const adminKeys = {
   supportSummary: () => [...ADMIN_ROOT_KEY, "support", "summary"] as const,
   pdfBook: (id: string) => [...ADMIN_ROOT_KEY, "pdf-book", id] as const,
   users: (params: UserListParams) => [...ADMIN_ROOT_KEY, "users", params] as const,
+  topicQuestions: (topicId: string) => [...ADMIN_ROOT_KEY, "topic-questions", topicId] as const,
 };
 
 export const adminQueries = {
@@ -49,6 +50,11 @@ export const adminQueries = {
       queryKey: adminKeys.supportSummary(),
       queryFn: () => getAdminApi().supportSummary(),
       refetchInterval: SUMMARY_REFRESH_MS,
+    }),
+  topicQuestions: (topicId: string) =>
+    queryOptions({
+      queryKey: adminKeys.topicQuestions(topicId),
+      queryFn: () => getAdminApi().topicQuestions(topicId),
     }),
   users: (params: UserListParams) =>
     queryOptions({

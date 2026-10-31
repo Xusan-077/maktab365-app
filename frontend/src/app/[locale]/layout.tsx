@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Manrope, Onest, Source_Serif_4 } from "next/font/google";
+import { Inter, Manrope, Onest, Plus_Jakarta_Sans, Source_Serif_4 } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -50,6 +50,15 @@ const sourceSerif = Source_Serif_4({
   preload: false,
 });
 
+/** Interaktiv o'yinlar (`font-game`): faqat lotin — kirill matni Onest'ga tushadi. */
+const jakarta = Plus_Jakarta_Sans({
+  variable: "--font-jakarta",
+  subsets: ["latin", "latin-ext"],
+  weight: ["500", "600", "700", "800"],
+  display: "swap",
+  preload: false,
+});
+
 /**
  * Brend ko'k rangi: brauzer interfeysi va PWA manifest uchun. `viewportFit: "cover"` — iOS'da
  * `env(safe-area-inset-*)` qiymat oladi (pastki panellar "home indicator" ustida turadi).
@@ -81,7 +90,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[lo
   return (
     <html
       lang={locale}
-      className={`${onest.variable} ${inter.variable} ${manrope.variable} ${sourceSerif.variable} h-full`}
+      className={`${onest.variable} ${inter.variable} ${manrope.variable} ${sourceSerif.variable} ${jakarta.variable} h-full`}
       suppressHydrationWarning
     >
       <head>

@@ -1,9 +1,15 @@
 /**
  * Mavzu tizimi olib tashlanishidan oldin brauzerda qolgan kalitlar: mehmon mavzu progressi va
- * xatcho'plari, o'qish pozitsiyalari, oflayn yozuvlar navbati (`maktab365-sync:<foydalanuvchi>`).
+ * xatcho'plari, o'qish pozitsiyalari, oflayn yozuvlar navbati (`maktab365-sync:<foydalanuvchi>`),
+ * o'yinlardagi eski mehmon hisobi.
  * Ularga endi hech narsa tayanmaydi, shuning uchun bir marta o'chiriladi.
  */
-const LEGACY_KEYS = ["maktab365-guest", "maktab365-reading"] as const;
+const LEGACY_KEYS = [
+  "maktab365-guest",
+  "maktab365-reading",
+  "maktab365-games-guest",
+  "maktab365-game-sound",
+] as const;
 const LEGACY_PREFIXES = ["maktab365-sync:"] as const;
 
 type LegacyStorage = Pick<Storage, "length" | "key" | "removeItem">;

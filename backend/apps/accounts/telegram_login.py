@@ -22,6 +22,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any
 
+import structlog
 from django.conf import settings
 from django.core.cache import cache
 from rest_framework.exceptions import APIException
@@ -42,6 +43,8 @@ NONCE_HEADER = "X-Telegram-Nonce"
 CONFIRMED_TEXT = "✅ Tasdiqlandi. Saytga qayting."
 EXPIRED_TEXT = "Havola eskirgan, saytdan qayta urinib ko'ring."
 HINT_TEXT = "Kirish uchun saytda «Telegram bilan kirish» tugmasini bosing."
+
+log = structlog.get_logger()
 
 _START = re.compile(r"^/start(?:@\w+)?(?:\s+(\S+))?\s*$")
 
@@ -92,6 +95,7 @@ def start() -> LoginStart:
     ttl = settings.TELEGRAM_LOGIN_TTL_SECONDS
     entry = {"status": PENDING, "nonce": _digest(nonce), "expires_at": time.time() + ttl}
     cache.set(_key(token), entry, timeout=ttl)
+    log.info("telegram_login_created", key=_digest(token)[:12])
     return LoginStart(
         token=token,
         nonce=nonce,
@@ -169,7 +173,10 @@ def handle_update(update: Mapping[str, Any]) -> dict | None:
     if token is None:
         reply = HINT_TEXT
     else:
-        reply = CONFIRMED_TEXT if confirm(token, sender) else EXPIRED_TEXT
+        confirmed = confirm(token, sender)
+        # Diagnostika: token emas, faqat xeshining boshi (start'dagi `key` bilan solishtiriladi).
+        log.info("telegram_login_start", key=_digest(token)[:12], confirmed=confirmed)
+        reply = CONFIRMED_TEXT if confirmed else EXPIRED_TEXT
     return {"method": "sendMessage", "chat_id": chat["id"], "text": reply}
 
 

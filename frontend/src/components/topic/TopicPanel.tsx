@@ -10,6 +10,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import { TopicGamesBlock } from "@/components/games/TopicGamesBlock";
 import { Button } from "@/components/ui/Button";
 import { Dialog } from "@/components/ui/Dialog";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -225,7 +226,12 @@ export function TopicPanel({
               {
                 id: "test",
                 label: t("tabs.test"),
-                content: <EmptyState icon={ClipboardCheck}>{t("testSoon")}</EmptyState>,
+                content: (
+                  <div className="flex flex-col gap-6">
+                    <TopicGamesBlock chapterId={topic.id} />
+                    <EmptyState icon={ClipboardCheck}>{t("testSoon")}</EmptyState>
+                  </div>
+                ),
               },
             ]}
           />

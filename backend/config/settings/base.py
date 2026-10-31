@@ -8,7 +8,9 @@ from corsheaders.defaults import default_headers
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 env = environ.Env()
-environ.Env.read_env(BASE_DIR / ".env")
+# `DJANGO_READ_DOTENV=0` — `.env` o'qilmaydi (sozlamalarni faqat berilgan env bilan tekshirish).
+if os.environ.get("DJANGO_READ_DOTENV", "1") != "0":
+    environ.Env.read_env(BASE_DIR / ".env")
 
 SECRET_KEY = env("SECRET_KEY")
 DEBUG = env.bool("DEBUG", default=False)
@@ -33,6 +35,7 @@ INSTALLED_APPS = [
     "apps.learning",
     "apps.support",
     "apps.analytics",
+    "apps.games",
 ]
 
 MIDDLEWARE = [
@@ -166,6 +169,15 @@ PDF_UPLOAD_THROTTLE_RATE = env("PDF_UPLOAD_THROTTLE_RATE", default="60/hour")
 CONTENT_CACHE_MAX_AGE = env.int("CONTENT_CACHE_MAX_AGE", default=60)
 # Telegram bot API (`/api/v1/bot/books/`): bo'sh bo'lsa o'chiq (404); sarlavha `X-Bot-Token`.
 BOT_API_TOKEN = env("BOT_API_TOKEN", default="")
+
+# --- Interaktiv o'yinlar (`apps/games`) ---
+# Mavzu o'yinlar ro'yxatiga kirishi uchun kamida shuncha faol savol.
+GAMES_MIN_QUESTIONS = env.int("GAMES_MIN_QUESTIONS", default=8)
+GAMES_DEFAULT_QUESTIONS = 16
+GAMES_MIN_COUNT = 4
+GAMES_MAX_COUNT = 40
+# `answer_token` amal qilish muddati (o'yin uzoq davom etishi mumkin).
+GAMES_ANSWER_TOKEN_MAX_AGE = env.int("GAMES_ANSWER_TOKEN_MAX_AGE", default=6 * 60 * 60)
 
 # --- DRF ---
 REST_FRAMEWORK = {

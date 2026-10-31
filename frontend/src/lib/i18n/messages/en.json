@@ -165,7 +165,8 @@
     "mobile": "Mobile navigation",
     "home": "Home",
     "goToCabinet": "Go to dashboard",
-    "goToTeacher": "Go to teacher panel"
+    "goToTeacher": "Go to teacher panel",
+    "games": "Games"
   },
   "search": {
     "label": "Search the site",
@@ -928,7 +929,11 @@
         "grades_invalid": "Grades must be from 1 to 11",
         "grades_duplicate": "Grades must not repeat",
         "subject_not_in_grade": "This subject is not taught in the selected grade",
-        "chapter_page_order": "Contents page numbers are out of order: a row can't be lower than the previous one"
+        "chapter_page_order": "Contents page numbers are out of order: a row can't be lower than the previous one",
+        "options_count": "Exactly 4 options are required",
+        "options_one_correct": "Exactly one correct answer is required",
+        "text_too_long": "Text is too long",
+        "ids_mismatch": "The list is out of date — reload the page"
       },
       "gradeHasBooks": "This subject has {count} book(s) in grade {grade}: move them to another subject or delete them first."
     },
@@ -1297,11 +1302,10 @@
         "summary": "Summary",
         "slides": "Slides",
         "notes": "Notes",
-        "test": "Test"
+        "test": "Tests"
       },
       "soon": {
-        "notes": "Note templates are coming in the next stage.",
-        "test": "Topic tests are coming in the next stage."
+        "notes": "Note templates are coming in the next stage."
       },
       "main": {
         "title": "Title",
@@ -1418,6 +1422,91 @@
         "countPdf": "{total} slides",
         "previewLoading": "Loading slides…",
         "previewError": "Couldn’t open the slides."
+      }
+    },
+    "questions": {
+      "count": "{active} active / {total} questions",
+      "ready": "Ready for games",
+      "notReady": "{n} more active questions needed for games",
+      "add": "Add question",
+      "importButton": "Import (CSV/JSON)",
+      "import": {
+        "title": "Import questions",
+        "formatCsv": "CSV: each row is question, A, B, C, D, correct answer (A–D or 1–4) and optional difficulty (easy/medium/hard). The header row is optional; comma or semicolon separated.",
+        "exampleCsv": "savol;A;B;C;D;to‘g‘ri_javob;qiyinlik",
+        "formatJson": "JSON: [{\"question\": \"…\", \"A\": \"…\", \"B\": \"…\", \"C\": \"…\", \"D\": \"…\", \"answer\": \"B\"}] — texts may also be {\"uz\", \"ru\", \"en\"} objects.",
+        "file": "Choose file (.csv, .json)",
+        "paste": "Or paste the text here",
+        "preview": "Preview",
+        "validCount": "{n} valid",
+        "invalidCount": "{n} with errors",
+        "valid": "Valid",
+        "invalid": "Error",
+        "line": "Line {line}",
+        "skipInvalid": "Rows with errors will be skipped — fix them and import again.",
+        "submit": "Add {n} questions",
+        "done": "{n} questions added",
+        "errors": {
+          "invalidJson": "Invalid JSON: an array of questions is expected",
+          "empty": "No questions found",
+          "tooMany": "At most {max} questions at once",
+          "fileTooLarge": "File is too large (up to 2 MB)",
+          "questionRequired": "Question text is missing",
+          "optionsCount": "Exactly 4 options are required",
+          "optionRequired": "An option is empty",
+          "answerInvalid": "Correct answer must be A–D (or 1–4)",
+          "difficultyInvalid": "Difficulty: easy, medium or hard",
+          "tooLong": "Text is too long",
+          "invalidRow": "Invalid row",
+          "server": "The server rejected this row"
+        }
+      },
+      "empty": "No questions yet. Add at least {min} active questions for this topic to appear in games.",
+      "listLabel": "Topic questions",
+      "drag": "Move question {n}",
+      "edit": "Edit question {n}",
+      "remove": "Delete question {n}",
+      "removeTitle": "Delete question",
+      "removeDescription": "Question {n} and its options will be permanently deleted.",
+      "removeConfirm": "Delete",
+      "active": "Active",
+      "inactive": "Inactive",
+      "answer": "Answer: {letter}",
+      "hasImage": "Question with image",
+      "difficulty": {
+        "label": "Difficulty",
+        "easy": "Easy",
+        "medium": "Medium",
+        "hard": "Hard"
+      },
+      "dnd": {
+        "instructions": "To move, press Space or Enter, choose a position with the arrow keys and press Space again. Esc cancels.",
+        "pickedUp": "Picked up question {n}",
+        "over": "Question {n} is over position {to}",
+        "dropped": "Question {n} moved to position {to}",
+        "cancelled": "Move cancelled, question {n} stays in place"
+      },
+      "form": {
+        "createTitle": "New question",
+        "editTitle": "Edit question",
+        "text": "Question text",
+        "image": "Image (optional)",
+        "imagePick": "Choose image",
+        "imageReplace": "Replace image",
+        "imageRemove": "Remove",
+        "options": "Answer options",
+        "correctHint": "Mark the correct answer — there is exactly one.",
+        "correctOption": "{letter} is correct",
+        "option": "Option {letter}",
+        "active": "Active",
+        "activeHint": "Inactive questions are not used in games."
+      },
+      "errors": {
+        "required": "Required",
+        "tooLong": "Text is too long",
+        "correctRequired": "Choose the correct answer",
+        "optionsCount": "Exactly 4 options are required",
+        "invalid": "Invalid value"
       }
     }
   },
@@ -2212,5 +2301,208 @@
     },
     "guestNote": "You can read textbooks without an account.",
     "otherMethods": "Sign in with email"
+  },
+  "games": {
+    "meta": {
+      "title": "Interactive games",
+      "description": "Team games for the classroom based on textbook topics: Mystery Box, Wheel of Luck and Tug of War."
+    },
+    "page": {
+      "title": "Interactive games",
+      "lead": "Type a topic or textbook name and play together with your class. Questions come from the topic's tests.",
+      "searchLabel": "Search topics",
+      "searchPlaceholder": "Type a topic or textbook name…",
+      "clearSearch": "Clear search",
+      "gradeFilter": "Grade",
+      "subjectFilter": "Subject",
+      "grade": "Grade {grade}",
+      "results": "{count, plural, =0 {No topics found} one {# topic} other {# topics}}",
+      "empty": "No game-ready topics match these filters. Try another word or filter.",
+      "resetFilters": "Reset filters",
+      "error": "Couldn't load topics. Check your connection and try again.",
+      "retry": "Try again",
+      "loadMore": "Show more",
+      "loading": "Loading…",
+      "all": "All",
+      "searching": "Searching…",
+      "resultsTitle": "Results",
+      "resultsFor": "Results for “{query}”",
+      "allTopics": "All topics",
+      "errorTitle": "Failed to load",
+      "emptyTitle": "Nothing found"
+    },
+    "card": {
+      "questions": "{count} questions",
+      "play": "Play",
+      "playGame": "“{topic}”: {game}"
+    },
+    "list": {
+      "box": {
+        "name": "Mystery Box",
+        "tag": "1–3 teams",
+        "description": "Open the box to reveal a question. A correct answer earns the team points.",
+        "short": "Answer the questions hidden in mystery boxes.",
+        "badge": "Top #1"
+      },
+      "wheel": {
+        "name": "Wheel of Luck",
+        "tag": "1–3 teams",
+        "description": "Spin the wheel: the sector it lands on decides the question.",
+        "short": "Spin the wheel and answer the question.",
+        "badge": "New"
+      },
+      "rope": {
+        "name": "Tug of War",
+        "tag": "2 teams",
+        "description": "Two teams compete: every correct answer pulls the rope to your side.",
+        "short": "2 teams pull the rope by answering questions.",
+        "badge": "Team game"
+      }
+    },
+    "modal": {
+      "title": "Start a game",
+      "step": "Step {step} / {total}",
+      "back": "Back",
+      "close": "Close",
+      "pickTitle": "Which game shall we play?",
+      "pickLead": "Topic: {topic}",
+      "continue": "Continue",
+      "selected": "Selected",
+      "setupTitle": "Set up the game",
+      "teams": "Number of teams",
+      "teamsOption": "{count, plural, one {# team} other {# teams}}",
+      "ropeOnlyTwo": "This game is for 2 teams only",
+      "teamNames": "Team names",
+      "teamNameLabel": "Team {n} name",
+      "questions": "Number of questions",
+      "questionsOption": "{count}",
+      "minutes": "~{minutes} min",
+      "notEnough": "The topic has {count} questions",
+      "summary": "{teams} teams · {questions} questions · {seconds} seconds each · about {minutes} min",
+      "start": "Start game",
+      "starting": "Getting ready…",
+      "startError": "Couldn't start the game. Please try again.",
+      "teamDefault": {
+        "blue": "Blue team",
+        "red": "Red team",
+        "green": "Green team"
+      },
+      "errors": {
+        "tooLong": "No more than {max} characters"
+      },
+      "teamsNote": "Team names can also be changed during the game",
+      "pickNote": "Questions come from this topic's tests",
+      "setupLead": "Choose the teams and number of questions"
+    },
+    "topicBlock": {
+      "title": "Interactive games",
+      "lead": "Reinforce the topic with your class through a game.",
+      "unavailable": "This topic doesn't have enough questions for a game yet.",
+      "error": "Couldn't load game details.",
+      "leadTopic": "On “{topic}” · {count} questions"
+    },
+    "play": {
+      "exit": "Leave game",
+      "fullscreen": "Full screen",
+      "exitFullscreen": "Exit full screen",
+      "turn": "Turn: {team}",
+      "answersLabel": "Answer options",
+      "option": "{letter}: {text}",
+      "correct": "Correct!",
+      "wrong": "Wrong",
+      "timeUp": "Time's up",
+      "next": "Next",
+      "finish": "See results",
+      "timerLabel": "Time left",
+      "points": "+{points}",
+      "score": "{team}: {score} points",
+      "scoresLabel": "Team scores",
+      "notReady": "Game not found. Start it again from the games page.",
+      "toGames": "Back to games",
+      "checkError": "Couldn't check the answer. Please choose again.",
+      "turnBadge": "Turn",
+      "minusPoints": "−{points}",
+      "continue": "Continue",
+      "seeResult": "See results",
+      "box": {
+        "board": "Mystery boxes",
+        "label": "Box {n}",
+        "modalLabel": "Box",
+        "opened": {
+          "correct": "Box {n}: correct answer",
+          "wrong": "Box {n}: wrong answer",
+          "bonus": "Box {n}: bonus",
+          "bomb": "Box {n}: bomb"
+        },
+        "bonusTag": "+2",
+        "bombTag": "−1",
+        "pick": "Pick a box",
+        "wrongTag": "X",
+        "bonusTitle": "Bonus box!",
+        "bonusText": "The team gets 2 points.",
+        "bombTitle": "Bomb!",
+        "bombText": "The team loses 1 point.",
+        "endTitle": "Game over!",
+        "endText": "All boxes are open."
+      },
+      "wheel": {
+        "double": "×2",
+        "bonus": "Bonus",
+        "spin": "Spin",
+        "spinLabel": "Spin the wheel",
+        "spinning": "Spinning…",
+        "prompt": "The sector it lands on picks the question.",
+        "sector": "Sector {label}",
+        "points": "{points, plural, one {# point} other {# points}}",
+        "bonusTitle": "Bonus sector!",
+        "progress": "{topic} · Grade {grade} · Task {asked}/{total}",
+        "hint": "The ×2 sector gives 2 points for an answer. The Bonus sector gives +2 points right away.",
+        "who": "{team}'s turn",
+        "spinTitle": "Spin the wheel",
+        "bonusText": "The team gets 2 points."
+      },
+      "rope": {
+        "timerLabel": "Time left: {time}",
+        "panelLabel": "{team} question",
+        "pulled": "+1 · Pulled!",
+        "blocked": "Wrong — wait 1.5 seconds",
+        "position": "Rope marker: {position, number}",
+        "sceneLabel": "Two teams pulling a rope",
+        "pulledAll": "Pulled the rope {steps} steps to its side.",
+        "timeSide": "Time's up, the rope is on this team's side.",
+        "timeDraw": "Time's up, the rope stayed in the middle."
+      },
+      "sound": "Sound",
+      "turnLabel": "Turn:",
+      "correctPoints": "Correct! +{points} pts",
+      "wrongAnswer": "Wrong. Correct answer: {answer}",
+      "wrongShort": "Wrong. Answer: {answer}"
+    },
+    "result": {
+      "title": "Results",
+      "winner": "{team} wins!",
+      "draw": "It's a draw!",
+      "noWinner": "Nobody scored this time",
+      "accuracy": "{correct}/{total} correct",
+      "playAgain": "Play again",
+      "saveError": "Couldn't save the result, but it stays on this page.",
+      "drawFull": "It's a draw! Both teams are level",
+      "subtitle": "{score} pts · {correct} correct answers",
+      "unit": "pts",
+      "teamsTitle": "Team results",
+      "fastest": "Fastest answer",
+      "seconds": "{seconds} sec",
+      "noData": "—",
+      "duration": "Duration",
+      "minutes": "{minutes} min",
+      "questions": "{count} questions",
+      "celebrate": "Show the celebration again",
+      "otherGame": "Choose another game",
+      "soloTitle": "Great result!",
+      "soloStat": "pts · {correct}/{total} correct ({percent}%)",
+      "stars3": "Excellent! You know this topic very well.",
+      "stars2": "Good! A little more practice.",
+      "stars1": "Reread the topic and try again."
+    }
   }
 }

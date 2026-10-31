@@ -1,6 +1,7 @@
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
+from apps.games.serializers import GameSessionSerializer
 from apps.learning.serializers import (
     AnnotationSerializer,
     GoalSerializer,
@@ -137,6 +138,10 @@ class ExportLearningSerializer(serializers.Serializer):
     goals = GoalSerializer(many=True)
 
 
+class ExportGamesSerializer(serializers.Serializer):
+    sessions = GameSessionSerializer(many=True)
+
+
 class ExportSerializer(serializers.Serializer):
     exported_at = serializers.DateTimeField()
     user = ExportUserSerializer()
@@ -144,3 +149,4 @@ class ExportSerializer(serializers.Serializer):
     identities = ExportIdentitySerializer(many=True)
     auth_events = ExportEventSerializer(many=True)
     learning = ExportLearningSerializer()
+    games = ExportGamesSerializer()

@@ -26,6 +26,7 @@ export const ROUTES = {
   terms: "/shartlar",
   privacy: "/maxfiylik",
   offline: "/oflayn",
+  games: "/games",
 } as const;
 
 /** Faqat shu yo'llar (va ichkilari) sessiya talab qiladi; qolgan hamma sahifa ochiq. */
@@ -101,3 +102,13 @@ export function safeCallbackPath(value: string | null | undefined): string | und
     ? value
     : undefined;
 }
+
+/** Mavzu slug'i bo'limning UUID'sidan: backend nomsiz `3f2a9c1d0b4e` (12 hex) ni ham qabul qiladi. */
+export const gameTopicSlug = (chapterId: string) => chapterId.replaceAll("-", "").slice(0, 12);
+
+/** O'yin ekrani: `/games/kvadrat-tenglamalar-3f2a9c1d0b4e/sirli-quti`. */
+export const gamePlayPath = (topicSlug: string, game: string) =>
+  `${ROUTES.games}/${topicSlug}/${game}`;
+
+/** O'yin natijasi: `/games/<mavzu>/natija`. */
+export const gameResultPath = (topicSlug: string) => `${ROUTES.games}/${topicSlug}/natija`;

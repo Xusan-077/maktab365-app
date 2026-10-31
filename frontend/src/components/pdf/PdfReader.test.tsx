@@ -46,6 +46,7 @@ vi.mock("@/lib/pdf-books/api", () => ({
 }));
 vi.mock("./PdfBookmarkButton", () => ({ PdfBookmarkButton: () => null }));
 vi.mock("@/components/support/ReportErrorLink", () => ({ ReportErrorLink: () => null }));
+vi.mock("@/components/games/TopicGamesBlock", () => ({ TopicGamesBlock: () => null }));
 vi.mock("./usePdfDocument", () => ({
   usePdfDocument: () => ({ doc: pdfDoc, loading: false, error: null, reload: vi.fn() }),
   useSlidesDocument: () => ({ doc: { numPages: 8 }, loading: false, error: null, reload: vi.fn() }),

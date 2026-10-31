@@ -187,6 +187,7 @@ export class MockApi implements MaktabApi {
             pdf_annotations: [],
             goals: [],
           },
+          games: { sessions: [] },
         };
       }),
     );
