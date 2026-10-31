@@ -301,7 +301,9 @@
     "notFoundCode": "404",
     "toTextbooks": "Browse textbooks",
     "searchLabel": "Search textbooks",
-    "searchPlaceholder": "Textbook title…"
+    "searchPlaceholder": "Textbook title…",
+    "forbiddenTitle": "Access denied",
+    "forbiddenText": "This page isn't available for your account. Go back to your own home page."
   },
   "auth": {
     "signInGoogle": "Sign in with Google",

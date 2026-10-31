@@ -1,6 +1,7 @@
 import createClient from "openapi-fetch";
 import { BFF_PREFIX } from "@/lib/auth/config";
 import { toBffUrl } from "@/lib/auth/request-guards";
+import { recoverSession, redirectToLogin, shouldRecover } from "@/lib/auth/session-recovery";
 import type { paths } from "./schema";
 import { ApiError, type ApiErrorBody } from "./types";
 
@@ -67,14 +68,28 @@ export function createFetch(options: HttpClientOptions = {}): typeof fetch {
     // Faqat o'qish so'rovlari tarmoq uzilishida qayta uriniladi (backend qayta ishga tushayotgan bo'lishi mumkin).
     const attempts =
       request.method === "GET" || request.method === "HEAD" ? 1 + NETWORK_RETRIES : 1;
+    let recovered = false;
     for (let attempt = 1; ; attempt += 1) {
       try {
-        return await baseFetch(url, {
+        const response = await baseFetch(url, {
           method: request.method,
           headers: request.headers,
           body,
           signal,
         });
+        // Kirgan foydalanuvchining 401'i: sessiya jim yangilanadi va so'rov bir marta takrorlanadi;
+        // yangilanmasa — kirish sahifasiga (`callbackUrl` bilan).
+        if (shouldRecover(response.status)) {
+          if (!recovered) {
+            recovered = true;
+            if (await recoverSession()) {
+              attempt -= 1;
+              continue;
+            }
+          }
+          redirectToLogin();
+        }
+        return response;
       } catch (error) {
         if (timeout.aborted) {
           throw new ApiError("So'rov vaqti tugadi", 0, { code: "timeout", requestId });

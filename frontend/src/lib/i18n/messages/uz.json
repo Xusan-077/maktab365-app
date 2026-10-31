@@ -301,7 +301,9 @@
     "notFoundCode": "404",
     "toTextbooks": "Darsliklarga",
     "searchLabel": "Darslik qidirish",
-    "searchPlaceholder": "Darslik nomi…"
+    "searchPlaceholder": "Darslik nomi…",
+    "forbiddenTitle": "Ruxsat yo'q",
+    "forbiddenText": "Bu sahifa sizning hisobingiz uchun mavjud emas. O'z bosh sahifangizga qayting."
   },
   "auth": {
     "signInGoogle": "Google bilan kirish",

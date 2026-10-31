@@ -274,6 +274,17 @@ paths:
       summary: 'Telegram bot orqali kirish: bir martalik havola (5 daqiqa)'
       tags:
       - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TelegramLoginStartRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TelegramLoginStartRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TelegramLoginStartRequestRequest'
       security:
       - {}
       responses:
@@ -6935,6 +6946,12 @@ components:
       - expires_in
       - nonce
       - token
+    TelegramLoginStartRequestRequest:
+      type: object
+      properties:
+        with_phone:
+          type: boolean
+          default: false
     TelegramLoginStatus:
       type: object
       properties:

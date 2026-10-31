@@ -161,14 +161,16 @@ class TestNoPasswordLeak:
         assert ENV_PASSWORD not in stored and wrong not in stored
 
 
-class TestAdminCannotUseLearnerApi:
-    def test_admin_gets_403_on_learner_endpoints(self):
+class TestAdminUsesLearnerApi:
+    """`IsLearner` — har qanday kirgan rol (admin ham kitob o'qiydi; ma'lumot o'ziniki)."""
+
+    def test_admin_can_use_learner_endpoints(self):
         access = login().json()["access"]
         client = APIClient()
         client.credentials(HTTP_AUTHORIZATION=f"Bearer {access}")
-        assert client.get("/api/v1/me/library/").status_code == 403
-        assert client.get("/api/v1/me/goals/").status_code == 403
-        assert client.get("/api/v1/me/pdf-bookmarks/").status_code == 403
+        assert client.get("/api/v1/me/library/").status_code == 200
+        assert client.get("/api/v1/me/goals/").status_code == 200
+        assert client.get("/api/v1/me/pdf-bookmarks/").status_code == 200
         assert client.get("/api/v1/me/").status_code == 200
 
     def test_student_still_allowed(self):

@@ -43,7 +43,9 @@ function backendErrorResponse(error: unknown): Response {
 export async function handleTelegramStart(request: Request): Promise<Response> {
   if (!isSameOrigin(request)) return errorResponse(403, "csrf_failed", "Cross-site request.");
   try {
-    const { nonce, ...link } = await startTelegramLogin(clientInfoFrom(request.headers));
+    // `?phone=1`: bot `/start` dan keyin telefon raqamini ham so'raydi (`request_contact`).
+    const withPhone = new URL(request.url).searchParams.get("phone") === "1";
+    const { nonce, ...link } = await startTelegramLogin(clientInfoFrom(request.headers), withPhone);
     const headers = new Headers({ "Cache-Control": "no-store" });
     headers.append("Set-Cookie", nonceCookie(nonce, link.expires_in));
     return Response.json(link, { headers });

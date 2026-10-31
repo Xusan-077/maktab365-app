@@ -350,3 +350,121 @@ class TestPollCommand:
         settings.TELEGRAM_WEBHOOK_SECRET = ""
         with pytest.raises(CommandError):
             call_command("telegram_poll", "--once")
+
+
+def contact(phone, user_id=777, contact_user_id=777):
+    body = update("", user_id=user_id)
+    body["message"].pop("text")
+    body["message"]["contact"] = {"phone_number": phone, "user_id": contact_user_id}
+    return body
+
+
+def start_with_phone(api):
+    response = api.post("/api/v1/auth/telegram/start/", {"with_phone": True}, format="json")
+    assert response.status_code == 200
+    return response.json()
+
+
+class TestPhoneLogin:
+    def test_start_asks_for_contact_and_stays_pending(self, api):
+        body = start_with_phone(api)
+        reply = webhook(api, update(f"/start {body['token']}")).json()
+        button = reply["reply_markup"]["keyboard"][0][0]
+        assert button["request_contact"] is True
+        assert status(api, body["token"], body["nonce"]).json() == {"status": "pending"}
+        assert complete(api, body["token"], body["nonce"]).status_code == 409
+
+    def test_own_contact_confirms_and_stores_phone(self, api):
+        body = start_with_phone(api)
+        webhook(api, update(f"/start {body['token']}"))
+        reply = webhook(api, contact("+998 90 123-45-67")).json()
+        assert reply["reply_markup"] == {"remove_keyboard": True}
+        assert status(api, body["token"], body["nonce"]).json() == {"status": "confirmed"}
+        assert complete(api, body["token"], body["nonce"]).status_code == 200
+        identity = Identity.objects.get(provider=Provider.TELEGRAM, provider_uid="777")
+        assert identity.user.profile.phone == "+998901234567"
+
+    def test_foreign_contact_is_rejected(self, api):
+        body = start_with_phone(api)
+        webhook(api, update(f"/start {body['token']}"))
+        reply = webhook(api, contact("+998901234567", contact_user_id=999)).json()
+        assert reply["text"] == telegram_login.PHONE_FOREIGN_TEXT
+        assert status(api, body["token"], body["nonce"]).json() == {"status": "pending"}
+
+    def test_non_uzbek_number_is_rejected(self, api):
+        body = start_with_phone(api)
+        webhook(api, update(f"/start {body['token']}"))
+        reply = webhook(api, contact("+79001234567")).json()
+        assert reply["text"] == telegram_login.PHONE_INVALID_TEXT
+        assert status(api, body["token"], body["nonce"]).json() == {"status": "pending"}
+
+    def test_contact_without_pending_login(self, api):
+        reply = webhook(api, contact("+998901234567")).json()
+        assert reply["text"] == telegram_login.PHONE_NONE_TEXT
+
+    def test_phone_links_to_existing_account(self, api):
+        first = start_with_phone(api)
+        webhook(api, update(f"/start {first['token']}", user_id=111))
+        webhook(api, contact("901234567", user_id=111, contact_user_id=111))
+        user_id = complete(api, first["token"], first["nonce"]).json()["user"]["id"]
+        second = start_with_phone(api)
+        webhook(api, update(f"/start {second['token']}", user_id=222))
+        webhook(api, contact("+998901234567", user_id=222, contact_user_id=222))
+        data = complete(api, second["token"], second["nonce"]).json()
+        assert data["user"]["id"] == user_id
+        assert Identity.objects.filter(user_id=user_id, provider=Provider.TELEGRAM).count() == 2
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        ("+998901234567", "+998901234567"),
+        ("998 90 123 45 67", "+998901234567"),
+        ("90-123-45-67", "+998901234567"),
+        ("+79001234567", None),
+        ("12345", None),
+        (None, None),
+    ],
+)
+def test_normalize_phone(raw, expected):
+    assert telegram_login.normalize_phone(raw) == expected
+
+
+@pytest.mark.parametrize("raw", ["+998901234567", "998901234567", "901234567"])
+def test_phone_formats_end_to_end(api, raw):
+    body = start_with_phone(api)
+    webhook(api, update(f"/start {body['token']}"))
+    webhook(api, contact(raw))
+    assert complete(api, body["token"], body["nonce"]).status_code == 200
+    assert Identity.objects.get(provider_uid="777").user.profile.phone == "+998901234567"
+
+
+def test_repeat_phone_login_creates_no_duplicates(api):
+    from apps.accounts.models import Profile, User
+
+    for _ in range(2):
+        body = start_with_phone(api)
+        webhook(api, update(f"/start {body['token']}"))
+        webhook(api, contact("+998901234567"))
+        assert complete(api, body["token"], body["nonce"]).status_code == 200
+    assert User.objects.count() == 1
+    assert Identity.objects.filter(provider=Provider.TELEGRAM).count() == 1
+    assert Profile.objects.filter(phone="+998901234567").count() == 1
+
+
+def test_phone_taken_by_other_account_is_not_overwritten(api):
+    from apps.accounts.models import Profile
+
+    first = start_with_phone(api)
+    webhook(api, update(f"/start {first['token']}", user_id=111))
+    webhook(api, contact("+998901234567", user_id=111, contact_user_id=111))
+    complete(api, first["token"], first["nonce"])
+    # Telegram 222 allaqachon akkauntga ega (raqamsiz), keyin 111 ning raqamini yuboradi.
+    plain = start(api)
+    webhook(api, update(f"/start {plain['token']}", user_id=222))
+    complete(api, plain["token"], plain["nonce"])
+    second = start_with_phone(api)
+    webhook(api, update(f"/start {second['token']}", user_id=222))
+    webhook(api, contact("+998901234567", user_id=222, contact_user_id=222))
+    assert complete(api, second["token"], second["nonce"]).status_code == 200
+    assert Profile.objects.filter(phone="+998901234567").count() == 1

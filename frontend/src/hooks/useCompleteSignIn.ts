@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { getSession } from "next-auth/react";
 import { useLocale } from "next-intl";
+import { broadcastSessionEvent } from "@/lib/auth/session-sync";
 import { dashboardPath, ROUTES, safeCallbackPath } from "@/lib/utils/routes";
 
 /**
@@ -15,6 +16,7 @@ export function useCompleteSignIn() {
   return useCallback(
     async (callbackUrl?: string | null) => {
       const user = (await getSession())?.user;
+      broadcastSessionEvent("signed-in");
       const callback = safeCallbackPath(callbackUrl);
       const target =
         user?.staff === "admin"

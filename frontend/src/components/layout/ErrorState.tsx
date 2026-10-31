@@ -45,7 +45,7 @@ export function ErrorState({
   onRetry,
   standalone = true,
 }: {
-  variant: "error" | "notFound";
+  variant: "error" | "notFound" | "forbidden";
   onRetry?: () => void;
   standalone?: boolean;
 }) {
@@ -53,6 +53,7 @@ export function ErrorState({
   const base = useAppBase();
   const panel = base !== "marketing";
   const notFound = variant === "notFound";
+  const forbidden = variant === "forbidden";
 
   const content = (
     <div className="mx-auto flex w-full max-w-xl flex-col items-center gap-6 px-4 py-16 text-center sm:px-6 sm:py-24">
@@ -64,10 +65,10 @@ export function ErrorState({
       )}
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-bold tracking-tight text-balance sm:text-3xl">
-          {notFound ? t("notFoundTitle") : t("title")}
+          {notFound ? t("notFoundTitle") : forbidden ? t("forbiddenTitle") : t("title")}
         </h1>
         <p className="text-muted text-base text-pretty sm:text-lg">
-          {notFound ? t("notFoundText") : t("text")}
+          {notFound ? t("notFoundText") : forbidden ? t("forbiddenText") : t("text")}
         </p>
       </div>
       {notFound && <NotFoundSearch />}

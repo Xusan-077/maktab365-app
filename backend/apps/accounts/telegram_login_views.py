@@ -20,6 +20,7 @@ from .auth_serializers import (
     TELEGRAM_LOGIN_PATTERN,
     TelegramLoginCompleteSerializer,
     TelegramLoginSessionSerializer,
+    TelegramLoginStartRequestSerializer,
     TelegramLoginStartSerializer,
     TelegramLoginStatusSerializer,
 )
@@ -54,12 +55,13 @@ class TelegramLoginStartView(PublicAuthView):
     @extend_schema(
         operation_id="auth_telegram_start",
         summary="Telegram bot orqali kirish: bir martalik havola (5 daqiqa)",
-        request=None,
+        request=TelegramLoginStartRequestSerializer,
         responses=TelegramLoginStartSerializer,
         tags=["auth"],
     )
     def post(self, request):
-        login = telegram_login.start()
+        data = validated(TelegramLoginStartRequestSerializer, request)
+        login = telegram_login.start(with_phone=data["with_phone"])
         response = Response(
             {
                 "token": login.token,

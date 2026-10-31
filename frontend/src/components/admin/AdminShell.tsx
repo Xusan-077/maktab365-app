@@ -3,8 +3,8 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ExternalLink, LogOut, Search } from "lucide-react";
-import { signOut } from "next-auth/react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useSignOut } from "@/hooks/useSignOut";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { Logo } from "@/components/layout/Logo";
 import { MAIN_CONTENT_ID } from "@/components/layout/SkipLink";
@@ -51,10 +51,10 @@ function NewBadge({ count, compact = false }: { count: number; compact?: boolean
 
 function AdminSidebar() {
   const t = useTranslations("admin");
-  const locale = useLocale();
   const pathname = usePathname();
   const { role, email } = useAdminIdentity();
   const newMessages = useNewMessages();
+  const signOut = useSignOut();
 
   return (
     <aside
@@ -107,7 +107,7 @@ function AdminSidebar() {
         </div>
         <button
           type="button"
-          onClick={() => void signOut({ redirectTo: `/${locale}` })}
+          onClick={() => void signOut()}
           className={cn(linkClasses, idleClasses, "w-full text-left")}
         >
           <LogOut className="size-5 shrink-0" aria-hidden />

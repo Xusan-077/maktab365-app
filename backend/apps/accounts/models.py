@@ -113,12 +113,19 @@ class Profile(UUIDModel):
     grades = models.JSONField(default=list, blank=True)
     # null — onboarding tugamagan
     onboarded_at = models.DateTimeField(null=True, blank=True)
+    # Telegram bot `request_contact` orqali tasdiqlangan raqam (+998XXXXXXXXX); bo'sh — yo'q.
+    phone = models.CharField(max_length=13, blank=True, default="")
 
     class Meta:
         constraints = [
             models.CheckConstraint(
                 condition=models.Q(grade__isnull=True) | models.Q(grade__gte=1, grade__lte=11),
                 name="accounts_profile_grade_range",
+            ),
+            models.UniqueConstraint(
+                fields=["phone"],
+                condition=~models.Q(phone=""),
+                name="auth_profile_phone_unique",
             ),
         ]
 

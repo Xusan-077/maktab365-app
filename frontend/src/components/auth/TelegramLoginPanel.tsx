@@ -32,7 +32,10 @@ export function TelegramLoginPanel({
 }) {
   const t = useTranslations("telegramLogin");
   const errorText = useAuthErrorText();
-  const { phase, error, link, remainingMs, start, retry } = useTelegramLogin({ onSignedIn });
+  const { phase, error, link, remainingMs, start, retry } = useTelegramLogin({
+    onSignedIn,
+    withPhone: process.env.NEXT_PUBLIC_TELEGRAM_REQUIRE_PHONE === "1",
+  });
   const started = useRef(false);
 
   useEffect(() => {

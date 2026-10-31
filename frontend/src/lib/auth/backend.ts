@@ -116,8 +116,9 @@ export async function loginWithOtp(input: OtpVerify, info?: ClientInfo) {
 }
 
 /** Telegram bot orqali kirish: bir martalik havola (`nonce` Next cookie'siga yoziladi, brauzerga emas). */
-export async function startTelegramLogin(info?: ClientInfo) {
+export async function startTelegramLogin(info?: ClientInfo, withPhone = false) {
   const result = await backend().POST("/api/v1/auth/telegram/start/", {
+    body: { with_phone: withPhone },
     headers: forwardHeaders(info),
   });
   return unwrap(result);

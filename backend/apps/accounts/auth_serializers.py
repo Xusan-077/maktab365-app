@@ -124,6 +124,11 @@ class PasswordSetSerializer(serializers.Serializer):
 TELEGRAM_LOGIN_PATTERN = r"^[A-Za-z0-9_-]{16,64}$"
 
 
+class TelegramLoginStartRequestSerializer(serializers.Serializer):
+    # Bot `/start` dan keyin telefon raqamini ham so'raydi (`request_contact`).
+    with_phone = serializers.BooleanField(required=False, default=False)
+
+
 class TelegramLoginStartSerializer(serializers.Serializer):
     token = serializers.CharField()
     bot_url = serializers.URLField()

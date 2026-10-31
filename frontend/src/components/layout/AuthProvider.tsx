@@ -7,6 +7,8 @@ import { useTranslations } from "next-intl";
 import { queryKeys } from "@/lib/api/query-keys";
 import { setApiSession } from "@/lib/api/session";
 import { useToast } from "@/hooks/useToast";
+import { onSessionEvent } from "@/lib/auth/session-sync";
+import { PROTECTED_ROUTES, ROUTES } from "@/lib/utils/routes";
 import { clearLegacyStorage } from "@/lib/legacy-storage";
 import { getWriteQueue, onWriteSent } from "@/lib/offline/pdf-write-queue";
 import { mergePdfGuestData, mergeRetryDelay } from "@/lib/pdf/guest-merge";
@@ -40,7 +42,7 @@ export const QUEUE_RETRY_MS = 30_000;
  * shuning uchun bolalarning birinchi so'rovlari allaqachon to'g'ri akkaunt bilan ketadi.
  */
 function AuthBridge({ children }: { children: ReactNode }) {
-  const { data, status } = useSession();
+  const { data, status, update } = useSession();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const t = useTranslations("auth");
@@ -57,6 +59,31 @@ function AuthBridge({ children }: { children: ReactNode }) {
     toastRef.current = toast;
     tRef.current = t;
   });
+
+  // Boshqa tabda chiqilsa: shu tabdagi shaxsiy ma'lumot keshi tozalanadi va himoyalangan/kirish
+  // sahifasidan bosh sahifaga o'tiladi; kirilsa — sessiya qayta o'qiladi (kirish sahifasi panelga o'tadi).
+  useEffect(
+    () =>
+      onSessionEvent((message) => {
+        const path = window.location.pathname.replace(/^\/[^/]+(?=\/)/, "") || "/";
+        const isUnder = (route: string) => path === route || path.startsWith(`${route}/`);
+        if (message === "signed-out") {
+          setApiSession(null);
+          queryClient.clear();
+          if ([...PROTECTED_ROUTES, ROUTES.onboarding].some(isUnder)) {
+            // Qattiq o'tish ataylab: eski sessiya holati xotirada qolmasin.
+            // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+            window.location.href = `/${window.location.pathname.split("/")[1]}`;
+            return;
+          }
+        } else if (isUnder(ROUTES.login) || isUnder(ROUTES.register) || isUnder(ROUTES.otp)) {
+          window.location.reload();
+          return;
+        }
+        void update();
+      }),
+    [queryClient, update],
+  );
 
   useEffect(() => {
     clearLegacyStorage();

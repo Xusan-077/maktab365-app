@@ -3174,6 +3174,10 @@ export interface components {
             expires_in: number;
             nonce: string;
         };
+        TelegramLoginStartRequestRequest: {
+            /** @default false */
+            with_phone: boolean;
+        };
         TelegramLoginStatus: {
             status: components["schemas"]["TelegramLoginStatusStatusEnum"];
         };
@@ -3545,7 +3549,13 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["TelegramLoginStartRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["TelegramLoginStartRequestRequest"];
+                "multipart/form-data": components["schemas"]["TelegramLoginStartRequestRequest"];
+            };
+        };
         responses: {
             200: {
                 headers: {

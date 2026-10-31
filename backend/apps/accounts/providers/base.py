@@ -51,6 +51,8 @@ class ProviderIdentity:
     email_verified: bool = False
     display_name: str = ""
     avatar_url: str = ""
+    # Bot orqali tasdiqlangan telefon (+998XXXXXXXXX); faqat Telegram bot oqimida.
+    phone: str = ""
 
 
 class AuthProvider(ABC):

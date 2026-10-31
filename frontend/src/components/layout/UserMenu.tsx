@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { signOut } from "next-auth/react";
 import { LayoutDashboard, LifeBuoy, LogOut, Settings } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { AnimatePresence, m, popover } from "@/components/ui/motion";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAppBase } from "@/hooks/useAppBase";
 import { useAuth } from "@/hooks/useAuth";
+import { useSignOut } from "@/hooks/useSignOut";
 import { useMe } from "@/hooks/useMe";
 import { Link } from "@/lib/i18n/navigation";
 import { cn } from "@/lib/utils/cn";
@@ -77,9 +77,9 @@ export function UserMenu({
   const t = useTranslations("auth");
   const tn = useTranslations("nav");
   const tp = useTranslations("panel");
-  const locale = useLocale();
   const base = useAppBase();
   const { status, sessionUser } = useAuth();
+  const signOut = useSignOut();
   const { data: me } = useMe();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -230,7 +230,7 @@ export function UserMenu({
               <button
                 type="button"
                 role="menuitem"
-                onClick={() => void signOut({ redirectTo: `/${locale}` })}
+                onClick={() => void signOut()}
                 className={itemClasses}
               >
                 <LogOut className="size-4" aria-hidden />

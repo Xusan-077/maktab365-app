@@ -301,7 +301,9 @@
     "notFoundCode": "404",
     "toTextbooks": "Дарсликларга",
     "searchLabel": "Дарслик қидириш",
-    "searchPlaceholder": "Дарслик номи…"
+    "searchPlaceholder": "Дарслик номи…",
+    "forbiddenTitle": "Рухсат йўқ",
+    "forbiddenText": "Бу саҳифа сизнинг ҳисобингиз учун мавжуд эмас. Ўз бош саҳифангизга қайтинг."
   },
   "auth": {
     "signInGoogle": "Google билан кириш",

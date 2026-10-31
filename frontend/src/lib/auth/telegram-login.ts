@@ -36,8 +36,10 @@ async function send<T>(input: string, init?: RequestInit): Promise<T> {
   return parse<T>(response);
 }
 
-export const requestTelegramLogin = () =>
-  send<TelegramLoginLink>("/api/auth/telegram/start", { method: "POST" });
+export const requestTelegramLogin = (withPhone = false) =>
+  send<TelegramLoginLink>(`/api/auth/telegram/start${withPhone ? "?phone=1" : ""}`, {
+    method: "POST",
+  });
 
 export const fetchTelegramLoginStatus = async (token: string) =>
   (

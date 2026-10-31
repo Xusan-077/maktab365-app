@@ -301,7 +301,9 @@
     "notFoundCode": "404",
     "toTextbooks": "К учебникам",
     "searchLabel": "Поиск учебника",
-    "searchPlaceholder": "Название учебника…"
+    "searchPlaceholder": "Название учебника…",
+    "forbiddenTitle": "Нет доступа",
+    "forbiddenText": "Эта страница недоступна для вашей учётной записи. Вернитесь на свою главную страницу."
   },
   "auth": {
     "signInGoogle": "Войти через Google",

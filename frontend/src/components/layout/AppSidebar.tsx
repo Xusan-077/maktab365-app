@@ -1,10 +1,10 @@
 "use client";
 
 import { LifeBuoy, LogOut, Settings } from "lucide-react";
-import { signOut } from "next-auth/react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useAppBase } from "@/hooks/useAppBase";
 import { useAuth } from "@/hooks/useAuth";
+import { useSignOut } from "@/hooks/useSignOut";
 import { useMe } from "@/hooks/useMe";
 import { Link, usePathname } from "@/lib/i18n/navigation";
 import { cn } from "@/lib/utils/cn";
@@ -21,10 +21,10 @@ const activeClasses = "bg-primary-soft text-primary-soft-foreground";
 /** Desktopdagi chap sidebar: logo, rolga mos menyu, pastda yordam/sozlamalar/profil/chiqish. */
 export function AppSidebar({ panel }: { panel: PanelBase }) {
   const t = useTranslations();
-  const locale = useLocale();
   const pathname = usePathname();
   const base = useAppBase();
   const { sessionUser } = useAuth();
+  const signOut = useSignOut();
   const { data: me } = useMe();
   const items = appNavFor(panel);
   const name = me?.name ?? sessionUser?.name ?? sessionUser?.email ?? "";
@@ -86,7 +86,7 @@ export function AppSidebar({ panel }: { panel: PanelBase }) {
         </div>
         <button
           type="button"
-          onClick={() => void signOut({ redirectTo: `/${locale}` })}
+          onClick={() => void signOut()}
           className={cn(linkClasses, idleClasses, "w-full text-left")}
         >
           <LogOut className="size-5 shrink-0" aria-hidden />

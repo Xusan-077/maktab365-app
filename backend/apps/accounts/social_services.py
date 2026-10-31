@@ -135,6 +135,20 @@ def _resolve(identity: ProviderIdentity, locale: str | None, request) -> tuple[U
         return user, False
 
 
+def _user_by_phone(phone: str) -> User | None:
+    profile = Profile.objects.select_related("user").filter(phone=phone).first()
+    return profile.user if profile is not None else None
+
+
+def _store_phone(user: User, phone: str) -> None:
+    """Raqamni profilga yozadi (profilda raqam bor yoki raqam band bo'lsa — tegmaydi)."""
+    try:
+        with transaction.atomic():
+            Profile.objects.filter(user=user, phone="").update(phone=phone)
+    except IntegrityError:
+        pass
+
+
 def sign_in(
     identity: ProviderIdentity, *, locale: str | None = None, request=None
 ) -> tuple[User, bool]:
@@ -146,6 +160,12 @@ def sign_in(
     )
     if found is not None:
         user, is_new = found.user, False
+    elif identity.phone and (by_phone := _user_by_phone(identity.phone)) is not None:
+        # Raqam Telegram tomonidan egasiga tasdiqlangan: mavjud akkauntga kirish usuli qo'shiladi.
+        with transaction.atomic():
+            _attach(by_phone, identity)
+            log_event(by_phone, AuthEventType.IDENTITY_LINKED, request, provider=identity.provider)
+        user, is_new = by_phone, False
     else:
         try:
             user, is_new = _resolve(identity, locale, request)
@@ -153,6 +173,8 @@ def sign_in(
             return sign_in(identity, locale=locale, request=request)
     if not user.is_active or user.deleted_at is not None:
         raise InvalidCredentials()
+    if identity.phone:
+        _store_phone(user, identity.phone)
     update_last_login(None, user)
     if is_new:
         log_event(user, AuthEventType.REGISTERED, request, method=identity.provider)
