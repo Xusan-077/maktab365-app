@@ -64,6 +64,8 @@ class Book(UUIDModel, TimeStampedModel):
     processed_pages = models.PositiveIntegerField(default=0, editable=False)
     # PDF'da matn qatlami bor (qidiruv, matnli rejim); `None` — noma'lum (eski yozuv).
     has_text_layer = models.BooleanField(null=True, blank=True, editable=False)
+    # PDF yuklashda qayta yozilgan (object streams): Range bilan tez ochiladi.
+    is_optimized = models.BooleanField(default=False, editable=False)
     # Fayl yuklanmaguncha kitob "tayyor" emas (`no_file`).
     status = models.CharField(
         max_length=16, choices=BookStatus.choices, default=BookStatus.FAILED, db_index=True

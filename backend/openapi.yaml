@@ -4247,37 +4247,6 @@ paths:
                 items:
                   $ref: '#/components/schemas/EntryBookCount'
           description: ''
-  /api/v1/me/books/{id}/pages/{number}/image/:
-    get:
-      operationId: me_books_page_image
-      description: |-
-        Sahifa rasmi (eksport uchun): brauzer canvas'i boshqa origin'dagi rasmni o'qiy olmaydi
-        (CORS), shuning uchun rasm shu API orqali, BFF bilan bir origin'da beriladi.
-      summary: Sahifa rasmi baytlari (yozuvli eksport uchun)
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: string
-          format: uuid
-        required: true
-      - in: path
-        name: number
-        schema:
-          type: integer
-        required: true
-      tags:
-      - books
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            image/*:
-              schema:
-                type: string
-                format: binary
-          description: ''
 components:
   schemas:
     AdminDashboard:
@@ -4725,6 +4694,14 @@ components:
           type: boolean
           readOnly: true
           nullable: true
+        is_optimized:
+          type: boolean
+          readOnly: true
+        open_warning:
+          type: boolean
+          description: 'Katta PDF optimallashtirilmagan: sahifalar sekin ochilishi
+            mumkin.'
+          readOnly: true
         status:
           allOf:
           - $ref: '#/components/schemas/BookStatusEnum'
@@ -4763,7 +4740,9 @@ components:
       - has_file
       - has_text_layer
       - id
+      - is_optimized
       - is_published
+      - open_warning
       - page_count
       - published_at
       - size_bytes

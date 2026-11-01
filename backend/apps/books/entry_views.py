@@ -11,19 +11,16 @@ from collections import defaultdict
 from uuid import UUID
 
 from django.db.models import Max, Q
-from django.http import FileResponse
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import serializers
-from rest_framework.exceptions import NotFound, ValidationError
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.core.permissions import IsLearner
 
-from .me_views import valid_page
 from .models import AnnotationType, Book, Bookmark, BookPage, BookStatus, PageAnnotation, PageNote
-from .views import visible_book
 
 TAGS = ["books"]
 ENTRY_TYPES = ("note", "highlight", "drawing", "text", "bookmark")
@@ -33,13 +30,6 @@ MAX_QUERY_LENGTH = 100
 COLOR_RE = re.compile(r"^#[0-9a-fA-F]{6}$")
 
 Key = tuple[UUID, int]
-
-IMAGE_TYPES = {
-    ".webp": "image/webp",
-    ".png": "image/png",
-    ".jpg": "image/jpeg",
-    ".jpeg": "image/jpeg",
-}
 
 
 class EntryBookSerializer(serializers.Serializer):
@@ -271,28 +261,3 @@ class MyEntryBooksView(APIView):
         ]
         rows.sort(key=lambda row: row["title"].lower())
         return Response(EntryBookCountSerializer(rows, many=True).data)
-
-
-class MyPageImageView(APIView):
-    """Sahifa rasmi (eksport uchun): brauzer canvas'i boshqa origin'dagi rasmni o'qiy olmaydi
-    (CORS), shuning uchun rasm shu API orqali, BFF bilan bir origin'da beriladi."""
-
-    permission_classes = [IsLearner]
-
-    @extend_schema(
-        operation_id="me_books_page_image",
-        tags=TAGS,
-        summary="Sahifa rasmi baytlari (yozuvli eksport uchun)",
-        responses={(200, "image/*"): OpenApiTypes.BINARY},
-    )
-    def get(self, request, pk, number):
-        book = visible_book(request, pk)
-        page = valid_page(book, number)
-        row = BookPage.objects.filter(book=book, number=page).first()
-        if row is None or not row.image:
-            raise NotFound
-        suffix = "." + row.image.name.rsplit(".", 1)[-1].lower()
-        content_type = IMAGE_TYPES.get(suffix, "application/octet-stream")
-        response = FileResponse(row.image.open("rb"), content_type=content_type)
-        response["Cache-Control"] = "private, max-age=3600"
-        return response

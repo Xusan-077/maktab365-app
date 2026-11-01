@@ -1575,7 +1575,8 @@
         "uploaded": "PDF yuklandi va tekshirildi.",
         "ready": "{pages} bet · {size}",
         "hint": "Faqat PDF, 200 MB gacha. Yuklangach sahifalar soni va muqova avtomatik aniqlanadi.",
-        "notPdf": "Faqat PDF fayl tanlang."
+        "notPdf": "Faqat PDF fayl tanlang.",
+        "slowOpen": "Bu PDF juda katta yoki tuzilmasi nostandart bo'lgani uchun tez ochish uchun optimallashtirilmadi: sahifalar sekin ochilishi mumkin. Rasm sifatini kamaytirib (hajmini qisqartirib) qayta saqlang va yangidan yuklang."
       },
       "cover": {
         "title": "Muqova",

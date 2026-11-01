@@ -64,9 +64,4 @@ urlpatterns = [
         entry_views.MyEntryBooksView.as_view(),
         name="me-annotations-books",
     ),
-    path(
-        "me/books/<uuid:pk>/pages/<int:number>/image/",
-        entry_views.MyPageImageView.as_view(),
-        name="me-books-page-image",
-    ),
 ]

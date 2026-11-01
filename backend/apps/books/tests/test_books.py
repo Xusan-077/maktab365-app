@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -246,6 +248,91 @@ def test_upload_size_limit(editor, settings):
         format="json",
     )
     assert init.status_code == 413 and init.json()["code"] == "file_too_large"
+
+
+def stored_pdf(book) -> bytes:
+    with book.source_file.open("rb") as handle:
+        return handle.read()
+
+
+def test_upload_rewrites_pdf_without_linearizing_and_keeps_text(editor, settings):
+    import io
+
+    import pikepdf
+
+    book = make_book()
+    response = editor.post(
+        f"{ADMIN}/{book.pk}/upload/",
+        pdf_upload(text_pdf(["Birinchi sahifa matni bu yerda", "Ikkinchi sahifa matni ham bor"])),
+        format="multipart",
+    )
+    assert response.status_code == 200, response.content
+    body = response.json()
+    assert body["is_optimized"] is True and body["open_warning"] is False
+    assert body["page_count"] == 2 and body["has_text_layer"] is True
+    book.refresh_from_db()
+    data = stored_pdf(book)
+    assert book.size_bytes == len(data)
+    with pikepdf.open(io.BytesIO(data)) as document:
+        assert not document.is_linearized  # PDF.js linearize qilingan faylni to'liq yuklaydi
+        assert len(document.pages) == 2
+    stored = list((Path(settings.MEDIA_ROOT) / "book-sources").glob("*.pdf"))
+    assert len(stored) == 1  # asl nusxa o'chdi
+
+
+def test_uploaded_linearized_pdf_is_rewritten_to_plain_form(editor):
+    import io
+
+    import pikepdf
+
+    source = io.BytesIO()
+    with pikepdf.open(io.BytesIO(blank_pdf(4))) as document:
+        document.save(source, linearize=True)
+    with pikepdf.open(io.BytesIO(source.getvalue())) as document:
+        assert document.is_linearized
+    book = make_book()
+    body = editor.post(
+        f"{ADMIN}/{book.pk}/upload/", pdf_upload(source.getvalue()), format="multipart"
+    ).json()
+    assert body["is_optimized"] is True and body["page_count"] == 4
+    book.refresh_from_db()
+    with pikepdf.open(io.BytesIO(stored_pdf(book))) as document:
+        assert not document.is_linearized
+
+
+def test_oversized_pdf_skips_optimize_and_warns_admin(editor, settings):
+    settings.BOOK_OPTIMIZE_MAX_BYTES = 10
+    settings.BOOK_OPTIMIZE_WARN_BYTES = 100
+    book = make_book()
+    body = editor.post(
+        f"{ADMIN}/{book.pk}/upload/", pdf_upload(blank_pdf(40)), format="multipart"
+    ).json()
+    assert body["status"] == "ready" and body["is_optimized"] is False
+    assert body["size_bytes"] > 100 and body["open_warning"] is True
+    assert editor.get(f"{ADMIN}/{book.pk}/").json()["open_warning"] is True
+
+
+def test_small_unoptimized_pdf_gets_no_warning(editor, settings):
+    settings.BOOK_OPTIMIZE_MAX_BYTES = 10  # qayta yozish o'tkazib yuborildi, lekin fayl kichik
+    book = make_book()
+    body = editor.post(
+        f"{ADMIN}/{book.pk}/upload/", pdf_upload(blank_pdf(2)), format="multipart"
+    ).json()
+    assert body["is_optimized"] is False and body["open_warning"] is False
+
+
+def test_optimize_failure_keeps_original_pdf(editor, monkeypatch):
+    from apps.books import pdfmeta
+
+    monkeypatch.setattr(pdfmeta, "optimize", lambda handle, dest: False)
+    book = make_book()
+    original = blank_pdf(3)
+    body = editor.post(
+        f"{ADMIN}/{book.pk}/upload/", pdf_upload(original), format="multipart"
+    ).json()
+    assert body["status"] == "ready" and body["is_optimized"] is False
+    book.refresh_from_db()
+    assert stored_pdf(book) == original
 
 
 def test_no_reprocess_endpoint(editor):

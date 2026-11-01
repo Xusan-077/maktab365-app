@@ -49,6 +49,14 @@ export function LibraryFileCard({ book }: { book: AdminBook }) {
           {t("file.ready", { pages: book.page_count, size: formatBytes(book.size_bytes) })}
         </p>
       )}
+      {book.open_warning && !uploading && (
+        <p
+          role="status"
+          className="border-accent-400 bg-accent-50 text-on-accent rounded-lg border p-2 text-sm"
+        >
+          {t("file.slowOpen")}
+        </p>
+      )}
       {book.status === "failed" && book.has_file && failedCode && (
         <p role="alert" className="text-danger text-sm">
           {t(`errors.${failedCode}`)}

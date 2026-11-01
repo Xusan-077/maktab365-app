@@ -6,6 +6,7 @@ Sahifa rasmlari tayyorlanmaydi: o'quvchi PDF'ni brauzerda PDF.js bilan chizadi.
 import io
 from dataclasses import dataclass
 
+import pikepdf
 import pypdfium2 as pdfium
 import pypdfium2.raw as pdfium_c
 from pypdfium2 import PdfiumError
@@ -89,3 +90,22 @@ def inspect_pdf(handle, *, want_cover: bool) -> PdfInfo:
         return PdfInfo(page_count=count, has_text_layer=has_text, cover=cover)
     finally:
         document.close()
+
+
+def optimize(handle, dest_path: str) -> bool:
+    """PDF'ni PDF.js Range bilan tez ochadigan shaklda qayta yozadi (pikepdf/qpdf): `True` — bo'ldi.
+
+    Obyektlar qayta tartiblanadi va sahifa lug'atlari object stream'larga yig'iladi (bir necha
+    bo'lak), mazmun/rasm/matn o'zgarmaydi. Linearize QILINMAYDI: PDF.js hint jadvallaridan
+    foydalanmaydi va linearize qilingan faylni deyarli to'liq yuklaydi; yuklangan linearize qilingan
+    fayl ham shu yerda oddiy shaklga qaytadi.
+
+    Xato (buzuq tuzilma, qpdf tiklay olmagan fayl) kitobni rad etish uchun sabab emas: pdfium uni
+    o'qiy olgan, shuning uchun `False` qaytadi va asl fayl o'z holicha qoladi.
+    """
+    try:
+        with pikepdf.open(handle) as document:
+            document.save(dest_path, object_stream_mode=pikepdf.ObjectStreamMode.generate)
+    except (pikepdf.PikepdfError, OSError, ValueError, RuntimeError):
+        return False
+    return True

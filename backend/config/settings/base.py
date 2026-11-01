@@ -168,6 +168,13 @@ PDF_UPLOAD_THROTTLE_RATE = env("PDF_UPLOAD_THROTTLE_RATE", default="60/hour")
 # Kitoblar kutubxonasi (`apps/books`): PDF hajmi chegarasi. PDF yuklash tugagach so'rov ichida
 # sinxron tekshiriladi, shuning uchun cheksiz emas.
 BOOK_PDF_MAX_BYTES = env.int("BOOK_PDF_MAX_BYTES", default=200 * 1024 * 1024)
+# Yuklashda PDF qayta yoziladi (qpdf/pikepdf, object streams): sahifa lug'atlari bir joyga yig'iladi
+# va PDF.js Range bilan faqat kerakli bo'laklarni oladi. (Linearize QILINMAYDI: PDF.js hint
+# jadvallaridan foydalanmaydi va linearize qilingan faylni deyarli to'liq yuklaydi.) MAX dan kattasi
+# so'rov vaqt chegarasi (gunicorn) uchun qayta yozilmaydi; optimallashtirilmagan va WARN dan katta
+# kitob uchun adminga ogohlantirish chiqadi.
+BOOK_OPTIMIZE_MAX_BYTES = env.int("BOOK_OPTIMIZE_MAX_BYTES", default=120 * 1024 * 1024)
+BOOK_OPTIMIZE_WARN_BYTES = env.int("BOOK_OPTIMIZE_WARN_BYTES", default=20 * 1024 * 1024)
 
 # --- Ochiq kontent API ---
 # Ochiq ro'yxatlar doim faqat nashr qilingan kitoblar (`PdfBook.objects.published()`); draft'ni

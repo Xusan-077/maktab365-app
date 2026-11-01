@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import transaction
 from rest_framework import serializers
 
@@ -23,6 +24,7 @@ class BookAdminSerializer(serializers.ModelSerializer):
     )
     chapters = ChapterInputSerializer(source="chapter_rows", many=True, required=False)
     has_file = serializers.SerializerMethodField()
+    open_warning = serializers.SerializerMethodField()
     upload_pending = serializers.SerializerMethodField()
     allowed_transitions = serializers.SerializerMethodField()
 
@@ -43,6 +45,8 @@ class BookAdminSerializer(serializers.ModelSerializer):
             "size_bytes",
             "page_count",
             "has_text_layer",
+            "is_optimized",
+            "open_warning",
             "status",
             "status_error",
             "is_published",
@@ -57,6 +61,7 @@ class BookAdminSerializer(serializers.ModelSerializer):
             "size_bytes",
             "page_count",
             "has_text_layer",
+            "is_optimized",
             "status",
             "status_error",
             "is_published",
@@ -108,6 +113,14 @@ class BookAdminSerializer(serializers.ModelSerializer):
 
     def get_has_file(self, book) -> bool:
         return bool(book.source_file)
+
+    def get_open_warning(self, book) -> bool:
+        """Katta PDF optimallashtirilmagan: sahifalar sekin ochilishi mumkin."""
+        return (
+            bool(book.source_file)
+            and not book.is_optimized
+            and book.size_bytes > settings.BOOK_OPTIMIZE_WARN_BYTES
+        )
 
     def get_upload_pending(self, book) -> bool:
         return bool(book.pending_file)

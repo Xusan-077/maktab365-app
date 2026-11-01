@@ -5,8 +5,11 @@ PDF saqlash/multipart mexanizmi `apps.content.pdf_storage` dan qayta ishlatiladi
 bilan kitob `ready`.
 """
 
+import os
+import tempfile
 import uuid
 
+import structlog
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
@@ -19,6 +22,8 @@ from apps.content.storage import covers_storage
 
 from . import pdfmeta
 from .models import Book, BookChapter, BookPage, BookStatus
+
+logger = structlog.get_logger(__name__)
 
 SOURCE_PREFIX = "book-sources"
 CHAPTERS_MAX = 300
@@ -58,6 +63,30 @@ def wants_auto_cover(book: Book) -> bool:
     return not book.cover_image or book.cover_generated
 
 
+def _optimized_copy(handle, key: str, size: int) -> tuple[str, bool]:
+    """PDF'ning optimallashtirilgan nusxasini yangi kalit bilan saqlaydi: `(kalit, bo'ldimi)`.
+
+    Katta (`BOOK_OPTIMIZE_MAX_BYTES`dan ortiq) fayl so'rov vaqtini oshirmasligi uchun qayta
+    yozilmaydi. Qayta yozish yoki saqlash muvaffaqiyatsiz bo'lsa asl fayl o'z holicha qoladi.
+    """
+    if size > settings.BOOK_OPTIMIZE_MAX_BYTES:
+        return key, False
+    new_key = storage.new_key(SOURCE_PREFIX)
+    with tempfile.TemporaryDirectory() as folder:
+        path = os.path.join(folder, "optimized.pdf")
+        handle.seek(0)
+        if not pdfmeta.optimize(handle, path):
+            logger.warning("book_optimize_failed", key=key)
+            return key, False
+        try:
+            storage.save_local_file(new_key, path)
+        except Exception:  # noqa: BLE001 — saqlash xatosi yuklashni to'xtatmaydi: asl fayl qoladi
+            logger.warning("book_optimize_store_failed", key=key)
+            storage.delete(new_key)
+            return key, False
+        return new_key, True
+
+
 def activate(book: Book, key: str, upload_id: str = "") -> Book:
     """Saqlangan PDF'ni sinxron tekshiradi (sahifalar soni, matn qatlami, muqova) va biriktiradi.
 
@@ -65,6 +94,7 @@ def activate(book: Book, key: str, upload_id: str = "") -> Book:
     kitobda oldingi fayl o'z holicha qoladi.
     """
     cover_name = ""
+    final_key, optimized = key, False
     try:
         if not storage.exists(key):
             raise UploadError("upload_incomplete")
@@ -77,6 +107,7 @@ def activate(book: Book, key: str, upload_id: str = "") -> Book:
         current = Book.objects.get(pk=book.pk)
         with storage.opened(key) as handle:
             info = pdfmeta.inspect_pdf(handle, want_cover=wants_auto_cover(current))
+            final_key, optimized = _optimized_copy(handle, key, size)
         if info.cover:
             cover_name = covers_storage().save(
                 f"covers/{book.pk}-{uuid.uuid4().hex[:8]}.webp", ContentFile(info.cover)
@@ -89,9 +120,11 @@ def activate(book: Book, key: str, upload_id: str = "") -> Book:
         book = Book.objects.select_for_update().get(pk=book.pk)
         old_key = book.source_file.name if book.source_file else ""
         old_cover = ""
-        book.source_file = key
+        book.source_file = final_key
+        if optimized:
+            size = storage.stored_size(final_key)
         book.size_bytes, book.page_count = size, info.page_count
-        book.has_text_layer = info.has_text_layer
+        book.has_text_layer, book.is_optimized = info.has_text_layer, optimized
         book.status, book.status_error = BookStatus.READY, ""
         book.pending_file = book.pending_upload_id = ""
         if cover_name and wants_auto_cover(book):
@@ -100,8 +133,10 @@ def activate(book: Book, key: str, upload_id: str = "") -> Book:
         elif cover_name:  # yuklash paytida admin muqova qo'ydi: avtomatigi kerak emas
             transaction.on_commit(lambda: storage.delete(cover_name, covers_storage()))
         book.save()
-        if old_key and old_key != key:
+        if old_key and old_key != final_key:
             transaction.on_commit(lambda: storage.delete(old_key))
+        if final_key != key:  # asl yuklangan nusxa endi kerak emas
+            transaction.on_commit(lambda: storage.delete(key))
         if old_cover:
             transaction.on_commit(lambda: storage.delete(old_cover, covers_storage()))
     return book

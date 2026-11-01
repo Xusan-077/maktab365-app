@@ -1,7 +1,6 @@
 "use client";
 
-import { ApiError } from "@/lib/api/types";
-import { getBooksApi, getMyBooksApi } from "@/lib/books/api";
+import { getBooksApi } from "@/lib/books/api";
 import {
   loadPdfjs,
   pdfjsAssetOptions,
@@ -96,15 +95,7 @@ export async function renderPageBlob(
   }
 }
 
-/**
- * Bet rasmi (eksport uchun). Eski kitoblarda serverda tayyor rasm bor; yangi kitoblarda (PDF
- * o'qish) u yo'q (404) — bet PDF'ning o'zidan brauzerda chiziladi.
- */
+/** Bet rasmi (eksport uchun): bet PDF'ning o'zidan brauzerda chiziladi (serverda tayyor rasm yo'q). */
 export async function fetchPageImage(bookId: string, page: number): Promise<Blob> {
-  try {
-    return await getMyBooksApi().pageImage(bookId, page);
-  } catch (error) {
-    if (!(error instanceof ApiError) || error.status !== 404) throw error;
-  }
   return renderPageBlob(await libraryDocument(bookId), page, EXPORT_PAGE_WIDTH);
 }

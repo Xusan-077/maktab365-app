@@ -3,7 +3,6 @@
 from datetime import timedelta
 
 import pytest
-from django.core.files.base import ContentFile
 from django.utils import timezone
 
 from apps.books.models import Bookmark, BookPage, PageAnnotation, PageNote
@@ -224,23 +223,3 @@ class TestBooksFacet:
         note(user, second, 1, "y")
         rows = client.get(BOOKS_URL).json()
         assert [(r["title"], r["count"]) for r in rows] == [("A kitob", 1), ("B kitob", 2)]
-
-
-class TestPageImage:
-    def test_serves_bytes_and_requires_login(self, me, anon, settings, tmp_path):
-        settings.MEDIA_ROOT = tmp_path
-        book = ready_book()
-        row = BookPage.objects.get(book=book, number=1)
-        row.image.save("p1.webp", ContentFile(b"RIFFxxxxWEBP"), save=True)
-        url = f"/api/v1/me/books/{book.pk}/pages/1/image/"
-        assert anon.get(url).status_code in (401, 403)
-        response = me[1].get(url)
-        assert response.status_code == 200
-        assert response["Content-Type"] == "image/webp"
-        assert b"".join(response.streaming_content) == b"RIFFxxxxWEBP"
-
-    def test_unknown_page_and_hidden_book(self, me):
-        book = ready_book()
-        assert me[1].get(f"/api/v1/me/books/{book.pk}/pages/9/image/").status_code == 400
-        draft = make_book(title="Qoralama")
-        assert me[1].get(f"/api/v1/me/books/{draft.pk}/pages/1/image/").status_code == 404

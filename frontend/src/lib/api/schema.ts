@@ -2139,27 +2139,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/me/books/{id}/pages/{number}/image/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Sahifa rasmi baytlari (yozuvli eksport uchun)
-         * @description Sahifa rasmi (eksport uchun): brauzer canvas'i boshqa origin'dagi rasmni o'qiy olmaydi
-         *     (CORS), shuning uchun rasm shu API orqali, BFF bilan bir origin'da beriladi.
-         */
-        get: operations["me_books_page_image"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2326,6 +2305,9 @@ export interface components {
             readonly size_bytes: number;
             readonly page_count: number;
             readonly has_text_layer: boolean | null;
+            readonly is_optimized: boolean;
+            /** @description Katta PDF optimallashtirilmagan: sahifalar sekin ochilishi mumkin. */
+            readonly open_warning: boolean;
             readonly status: components["schemas"]["BookStatusEnum"];
             readonly status_error: string;
             readonly is_published: boolean;
@@ -7628,28 +7610,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EntryBookCount"][];
-                };
-            };
-        };
-    };
-    me_books_page_image: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-                number: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "image/*": string;
                 };
             };
         };

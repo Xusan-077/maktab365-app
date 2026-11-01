@@ -1575,7 +1575,8 @@
         "uploaded": "PDF uploaded and checked.",
         "ready": "{pages} pages · {size}",
         "hint": "PDF only, up to 200 MB. Page count and cover are detected automatically after upload.",
-        "notPdf": "Choose a PDF file."
+        "notPdf": "Choose a PDF file.",
+        "slowOpen": "This PDF is very large or has a non-standard structure, so it wasn't optimized for fast opening and pages may open slowly. Reduce its size (e.g. lower the image quality), re-save it and upload it again."
       },
       "cover": {
         "title": "Cover",

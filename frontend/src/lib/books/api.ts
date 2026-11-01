@@ -1,4 +1,4 @@
-import { createHttpClient, toApiError, unwrap, type HttpClient } from "@/lib/api/http-client";
+import { createHttpClient, unwrap, type HttpClient } from "@/lib/api/http-client";
 import type { components } from "@/lib/api/schema";
 import type { AnnotationItem } from "./annotations";
 
@@ -162,19 +162,6 @@ export class MyBooksApi {
 
   async entryBooks(): Promise<EntryBookCount[]> {
     return unwrap(await this.client.GET("/api/v1/me/annotations/books/"));
-  }
-
-  /** Sahifa rasmi baytlari (eksport: boshqa origin'dagi rasm canvas'ni ifloslantirmasin). */
-  async pageImage(id: string, page: number): Promise<Blob> {
-    // openapi-typescript ikkilik javobni `string` deb tiplaydi; haqiqatda `parseAs: "blob"` Blob beradi.
-    const result = (await this.client.GET("/api/v1/me/books/{id}/pages/{number}/image/", {
-      params: { path: { id, number: page } },
-      parseAs: "blob",
-    })) as unknown as { data?: Blob; error?: unknown; response: Response };
-    if (result.error !== undefined || result.data === undefined) {
-      throw toApiError(result.response, result.error);
-    }
-    return result.data;
   }
 
   async updateAnnotation(id: string, annotationId: string, data: unknown): Promise<void> {

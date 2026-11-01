@@ -54,12 +54,39 @@ yangi URL bilan hujjatni qayta ochadi (yoki foydalanuvchi "Qayta urinish" tugmas
 
 ### Ixtiyoriy (kitoblar)
 
-| O'zgaruvchi                  | Sukut   | Izoh                                                              |
-| ---------------------------- | ------- | ----------------------------------------------------------------- |
-| `BOOK_PDF_MAX_BYTES`         | 200 MiB | Kitob PDF'ining eng katta hajmi (yuklashda `413 file_too_large`). |
-| `ADMIN_UPLOAD_MAX_PDF_BYTES` | 50 MB   | Faqat backend orqali (proxy, lokal) yuklashda chegara.            |
-| `PDF_UPLOAD_PART_BYTES`      | 8 MiB   | Multipart bo'lak hajmi (R2 kamida 5 MiB).                         |
-| `PDF_SIGNED_URL_SECONDS`     | 900     | Imzolangan URL muddati.                                           |
+| O'zgaruvchi                  | Sukut   | Izoh                                                                  |
+| ---------------------------- | ------- | --------------------------------------------------------------------- |
+| `BOOK_PDF_MAX_BYTES`         | 200 MiB | Kitob PDF'ining eng katta hajmi (yuklashda `413 file_too_large`).     |
+| `BOOK_OPTIMIZE_MAX_BYTES`    | 120 MiB | Shundan katta PDF yuklashda qayta yozilmaydi (so'rov vaqti uchun).    |
+| `BOOK_OPTIMIZE_WARN_BYTES`   | 20 MiB  | Optimallashtirilmagan PDF shundan katta bo'lsa admin ogohlantiriladi. |
+| `ADMIN_UPLOAD_MAX_PDF_BYTES` | 50 MB   | Faqat backend orqali (proxy, lokal) yuklashda chegara.                |
+| `PDF_UPLOAD_PART_BYTES`      | 8 MiB   | Multipart bo'lak hajmi (R2 kamida 5 MiB).                             |
+| `PDF_SIGNED_URL_SECONDS`     | 900     | Imzolangan URL muddati.                                               |
+
+### PDF optimallashtirish (yuklashda)
+
+Yuklash tugagach PDF `pikepdf` (qpdf) bilan **qayta yoziladi**: obyektlar tartiblanadi, sahifa lug'atlari
+object stream'larga yig'iladi. Mazmun, rasm va matn qatlami o'zgarmaydi. Sabab — PDF.js Range bilan faqat kerakli
+bo'laklarni olishi uchun: sahifa lug'atlari rasmlar orasiga sochilgan skaner PDF'da (ko'p skanerlar shunday) PDF.js
+har bir sahifa uchun alohida bo'lak so'raydi va butun faylni yuklab oladi.
+
+O'lchov (PDF.js 6.4, 120 bet, 30 MB skaner; Range so'rovlar soni, 1-bet + 60-bet):
+
+| Fayl                                | So'rovlar        |
+| ----------------------------------- | ---------------- |
+| Asl (sahifa lug'atlari sochilgan)   | 116 (butun fayl) |
+| **Linearize** ("Fast Web View")     | 116 (butun fayl) |
+| **Qayta yozilgan (object streams)** | 5–6, ~1,5 MB     |
+
+**Linearize qilinmaydi:** PDF.js linearize jadvallaridan (hint tables) foydalanmaydi va linearize qilingan faylni
+ham to'liq yuklaydi; adminning "Fast Web View" bilan yuklagan fayli ham shu yerda oddiy shaklga qaytadi.
+
+- Optimallashtirish bo'lmasa (fayl `BOOK_OPTIMIZE_MAX_BYTES` dan katta yoki qpdf tiklay olmagan tuzilma) kitob
+  baribir `ready` bo'ladi; fayl `BOOK_OPTIMIZE_WARN_BYTES` dan katta bo'lsa admin kartasida ogohlantirish chiqadi.
+- **Yangi tizim bog'liqligi yo'q:** `pikepdf` Python paketi (`uv.lock`'da), uning wheel'i qpdf'ni ichiga o'rab
+  keladi (manylinux, `python:3.12-slim` va Railway'da `apt install` kerak emas). Litsenziya: pikepdf — MPL-2.0,
+  qpdf — Apache-2.0 (ikkalasi ham tijoriy loyihada xavfsiz; pdfium BSD/Apache, o'zgarmagan).
+- Eski kitoblar qayta yozilmagan (`is_optimized=false`): ularni adminda PDF'ni qayta yuklab optimallashtirish mumkin.
 
 Tekshiruv yuklash tugagach **so'rov ichida** (sinxron) bajariladi: gunicorn `--timeout 60` — juda katta
 (~150 MB+) skaner PDF'larda vaqt yetmasligi mumkin; shunday kitoblar bo'lsa `BOOK_PDF_MAX_BYTES` ni kamaytiring
