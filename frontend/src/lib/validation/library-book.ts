@@ -39,6 +39,22 @@ export const libraryBookSchema = object({
 });
 
 export type LibraryBookValues = InferType<typeof libraryBookSchema>;
+export type LibraryChapterValue = LibraryBookValues["chapters"][number];
+
+/**
+ * «Ommaviy kiritish» natijasini Kutubxona mundarijasiga qo'shadi: u tekis (darajasiz), shuning uchun
+ * bob va uning bo'limlari hujjat tartibida ketma-ket qator bo'ladi. Sarlavhasi bo'sh qatorlar
+ * (qo'shib qo'yilgan, to'ldirilmagan) tashlanadi.
+ */
+export function appendBulkChapters(
+  current: readonly LibraryChapterValue[],
+  drafts: readonly { title: string; page: string; children: { title: string; page: string }[] }[],
+): LibraryChapterValue[] {
+  const added = drafts.flatMap((draft) =>
+    [draft, ...draft.children].map((row) => ({ title: row.title, page: Number(row.page) })),
+  );
+  return [...current.filter((row) => row.title.trim()), ...added];
+}
 
 export const EMPTY_LIBRARY_BOOK: LibraryBookValues = {
   title: "",

@@ -1602,7 +1602,9 @@
         "remove": "Remove section",
         "titleLabel": "Section title",
         "pageLabel": "Starting page",
-        "empty": "No contents yet. Sections let readers jump straight to a place."
+        "empty": "No contents yet. Sections let readers jump straight to a place.",
+        "bulkHint": "One per line: the title with its starting page at the end — “1. Introduction ........ 5”. You can paste the contents from a PDF or document; lines are added to the end of the list.",
+        "bulkPlaceholder": "Introduction ........ 3\nChapter I. Basic ideas ... 7\n1.1. Definitions ... 8\nChapter II. Exercises ... 24"
       },
       "publish": {
         "title": "Publishing",

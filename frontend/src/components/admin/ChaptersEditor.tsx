@@ -129,12 +129,20 @@ function RowFields({
   );
 }
 
-function BulkInput({
+/**
+ * «Ommaviy kiritish»: «1. Kirish ........ 5» qatorlarini `parseBulk` bilan ajratib `onApply` ga beradi.
+ * Darslik mundarijasi va Kutubxona (tekis ro'yxat — `hint`/`placeholder` o'zgacha) ishlatadi.
+ */
+export function ChaptersBulkInput({
   onApply,
   disabled,
+  hint,
+  placeholder,
 }: {
   onApply: (rows: ChapterDraft[]) => void;
   disabled?: boolean;
+  hint?: string;
+  placeholder?: string;
 }) {
   const t = useTranslations("admin.toc.bulk");
   const [text, setText] = useState("");
@@ -157,8 +165,8 @@ function BulkInput({
       <div className="mt-3 flex flex-col gap-3">
         <Textarea
           aria-label={t("title")}
-          hint={t("hint")}
-          placeholder={t("placeholder")}
+          hint={hint ?? t("hint")}
+          placeholder={placeholder ?? t("placeholder")}
           rows={6}
           value={text}
           disabled={disabled}
@@ -427,7 +435,7 @@ export function ChaptersEditor({
         </Button>
       </div>
 
-      <BulkInput onApply={applyBulk} disabled={disabled} />
+      <ChaptersBulkInput onApply={applyBulk} disabled={disabled} />
     </section>
   );
 }

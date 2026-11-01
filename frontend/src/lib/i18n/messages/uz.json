@@ -1602,7 +1602,9 @@
         "remove": "Bo'limni o'chirish",
         "titleLabel": "Bo'lim nomi",
         "pageLabel": "Boshlanish beti",
-        "empty": "Mundarija bo'sh. Bo'limlar o'quvchiga tez o'tish uchun kerak."
+        "empty": "Mundarija bo'sh. Bo'limlar o'quvchiga tez o'tish uchun kerak.",
+        "bulkHint": "Har qatorga bittadan: nomi va oxirida boshlanish beti — «1. Kirish ........ 5». Mundarijani PDF yoki hujjatdan nusxalab qo'yish mumkin; qatorlar ro'yxat oxiriga qo'shiladi.",
+        "bulkPlaceholder": "Kirish ........ 3\nI bob. Asosiy tushunchalar ... 7\n1.1. Ta'riflar ... 8\nII bob. Mashqlar ... 24"
       },
       "publish": {
         "title": "Nashr",

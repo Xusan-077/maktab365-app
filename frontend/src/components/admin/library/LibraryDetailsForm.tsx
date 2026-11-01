@@ -5,6 +5,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import { Controller, useFieldArray, useForm, type Resolver } from "react-hook-form";
+import { ChaptersBulkInput } from "@/components/admin/ChaptersEditor";
 import { useAdminErrorText } from "@/components/admin/useAdminErrorText";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -15,6 +16,7 @@ import { getLocalized } from "@/lib/i18n/localized";
 import type { Locale } from "@/lib/i18n/config";
 import { libraryQueries } from "@/lib/library/admin-queries";
 import {
+  appendBulkChapters,
   libraryBookSchema,
   READING_MODES,
   toPayload,
@@ -42,7 +44,7 @@ export function LibraryDetailsForm({ initial, submitLabel, onSubmit }: LibraryDe
     resolver: yupResolver(libraryBookSchema) as unknown as Resolver<LibraryBookValues>,
     defaultValues: initial,
   });
-  const { register, control, handleSubmit, setError, formState } = form;
+  const { register, control, handleSubmit, setError, getValues, formState } = form;
   const chapters = useFieldArray({ control, name: "chapters" });
   const { errors, isSubmitting } = formState;
   const rootError = errors.root?.message;
@@ -217,6 +219,12 @@ export function LibraryDetailsForm({ initial, submitLabel, onSubmit }: LibraryDe
           <Plus className="size-4" aria-hidden />
           {t("chapters.add")}
         </Button>
+        <ChaptersBulkInput
+          disabled={isSubmitting}
+          hint={t("chapters.bulkHint")}
+          placeholder={t("chapters.bulkPlaceholder")}
+          onApply={(rows) => chapters.replace(appendBulkChapters(getValues("chapters"), rows))}
+        />
       </section>
 
       {rootError && (
