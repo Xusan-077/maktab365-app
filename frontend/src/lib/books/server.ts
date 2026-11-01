@@ -2,6 +2,7 @@ import { cacheLife, cacheTag } from "next/cache";
 import { ApiError } from "@/lib/api/types";
 import {
   BooksApi,
+  type Book,
   type BookDetail,
   type BookFilters,
   type BooksPage,
@@ -58,3 +59,24 @@ export async function getBookTypes(): Promise<BookTypeInfo[]> {
     return [];
   }
 }
+
+/** Sitemap uchun: barcha nashr qilingan kitoblar (sahifalab; xatoda bo'sh ro'yxat). */
+export async function getAllLibraryBooks(): Promise<Book[]> {
+  "use cache";
+  lifetime();
+  const api = new BooksApi();
+  const all: Book[] = [];
+  try {
+    for (let page = 1; page <= SITEMAP_MAX_PAGES; page += 1) {
+      const chunk = await api.list({ page, pageSize: SITEMAP_PAGE_SIZE });
+      all.push(...chunk.results);
+      if (all.length >= chunk.count) break;
+    }
+  } catch {
+    return all;
+  }
+  return all;
+}
+
+const SITEMAP_PAGE_SIZE = 100;
+const SITEMAP_MAX_PAGES = 100;

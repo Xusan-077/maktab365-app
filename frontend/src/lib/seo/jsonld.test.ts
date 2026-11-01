@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { BookDetail } from "@/lib/books/api";
 import type { PdfBook, PdfBookDetail } from "@/lib/pdf-books/api";
 import { absoluteUrl, bookItemList, bookJsonLd, breadcrumbList, serializeJsonLd } from "./jsonld";
 
@@ -78,5 +79,65 @@ describe("jsonld", () => {
 
   it("serializeJsonLd '<' belgisini qochiradi", () => {
     expect(serializeJsonLd({ a: "</script><b>" })).not.toContain("<");
+  });
+});
+
+describe("jsonld: Organization, WebSite, kutubxona kitobi", () => {
+  it("Organization va WebSite (qidiruv oynasi bilan) to'g'ri bog'langan", async () => {
+    const { organizationJsonLd, websiteJsonLd } = await import("./jsonld");
+    const org = organizationJsonLd(SITE, "darslik365", "Tavsif");
+    expect(org["@type"]).toBe("Organization");
+    expect(org.logo).toBe("https://maktab365.uz/icon-512.png");
+    const site = websiteJsonLd(SITE, "uz", "darslik365");
+    expect(site["@type"]).toBe("WebSite");
+    expect(site.publisher["@id"]).toBe(org["@id"]);
+    expect(site.potentialAction.target.urlTemplate).toBe(
+      "https://maktab365.uz/uz/darsliklar?q={search_term_string}",
+    );
+    expect(site.potentialAction["query-input"]).toContain("search_term_string");
+  });
+
+  it("libraryBookJsonLd: muallif, til, rasm, daraja; bo'sh maydonlar yozilmaydi", async () => {
+    const { libraryBookJsonLd } = await import("./jsonld");
+    const base = {
+      id: "1",
+      slug: "otkan-kunlar",
+      title: "O'tkan kunlar",
+      author: "Abdulla Qodiriy",
+      book_type: { id: "t", slug: "badiiy-kitoblar", name: { uz: "Badiiy kitoblar" } },
+      reading_mode: "fiction",
+      grade_level: 9,
+      language: "uz",
+      page_count: 300,
+      cover: "https://cdn/x.webp",
+      created_at: "2026-10-01T00:00:00Z",
+      description: "",
+      chapters: [],
+      has_text_layer: true,
+    } satisfies BookDetail;
+    const full = libraryBookJsonLd(SITE, "uz", base);
+    expect(full).toMatchObject({
+      "@type": "Book",
+      name: "O'tkan kunlar",
+      inLanguage: "uz",
+      educationalLevel: "9",
+      image: "https://cdn/x.webp",
+      author: { "@type": "Person", name: "Abdulla Qodiriy" },
+      url: "https://maktab365.uz/uz/kutubxona/otkan-kunlar",
+    });
+    expect("description" in full).toBe(false);
+    const bare = libraryBookJsonLd(SITE, "uz", {
+      ...base,
+      author: "",
+      cover: null,
+      grade_level: null,
+    });
+    expect("author" in bare || "image" in bare || "educationalLevel" in bare).toBe(false);
+  });
+
+  it("JSON-LD '<' belgisini qochiradi va to'g'ri JSON bo'lib qoladi", () => {
+    const text = serializeJsonLd({ name: "</script><b>" });
+    expect(text).not.toContain("<");
+    expect(JSON.parse(text).name).toBe("</script><b>");
   });
 });

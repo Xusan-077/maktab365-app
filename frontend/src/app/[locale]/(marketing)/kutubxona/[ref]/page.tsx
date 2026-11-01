@@ -7,8 +7,11 @@ import { BookDetailSkeleton, BookDetailView } from "@/components/books/BookDetai
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { parseBookRef, SAMPLE_REF } from "@/lib/books/ref";
 import { getBook, getBookBySlug } from "@/lib/books/server";
+import { JsonLd } from "@/components/pdf/JsonLd";
 import { routing } from "@/lib/i18n/routing";
-import { getAlternates } from "@/lib/i18n/seo";
+import { SITE_URL } from "@/lib/i18n/seo";
+import { breadcrumbList, libraryBookJsonLd } from "@/lib/seo/jsonld";
+import { buildMetadata, splitKeywords } from "@/lib/seo/metadata";
 import { libraryBookPath, ROUTES } from "@/lib/utils/routes";
 
 type Props = PageProps<"/[locale]/kutubxona/[ref]">;
@@ -33,19 +36,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const description =
     book.description.trim().slice(0, 200) ||
     t("metaDescription", { title: book.title, author: book.author || "—" });
-  return {
-    title: book.title,
+  const tm = await getTranslations({ locale, namespace: "meta" });
+  return buildMetadata({
+    locale,
+    path: libraryBookPath(book.slug),
+    title: book.author ? `${book.title} — ${book.author}` : book.title,
     description,
-    alternates: getAlternates(locale, libraryBookPath(book.slug)),
-    openGraph: {
-      title: book.title,
-      description,
-      type: "book",
-      ...(book.cover
-        ? { images: [{ url: book.cover, width: 400, height: 600, alt: book.title }] }
-        : {}),
-    },
-  };
+    type: "book",
+    keywords: [
+      book.title,
+      ...(book.author ? [book.author] : []),
+      ...splitKeywords(tm("libraryKeywords")),
+    ],
+    ...(book.cover ? { image: { url: book.cover, width: 400, height: 600, alt: book.title } } : {}),
+  });
 }
 
 export default function BookPage({ params }: Props) {
@@ -82,6 +86,14 @@ async function BookContent({ params }: Pick<Props, "params">) {
         ]}
       />
       <BookDetailView book={book} />
+      <JsonLd
+        data={breadcrumbList(SITE_URL, locale, [
+          { name: tn("home"), path: ROUTES.home },
+          { name: t("title"), path: ROUTES.books },
+          { name: book.title, path: libraryBookPath(book.slug) },
+        ])}
+      />
+      <JsonLd data={libraryBookJsonLd(SITE_URL, locale, book)} />
     </>
   );
 }

@@ -11,6 +11,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { parseBookRef, SAMPLE_REF } from "@/lib/books/ref";
 import { getBook, getBookBySlug } from "@/lib/books/server";
 import { Link } from "@/lib/i18n/navigation";
+import { NOINDEX } from "@/lib/seo/metadata";
 import { routing } from "@/lib/i18n/routing";
 import { libraryReaderPath, ROUTES } from "@/lib/utils/routes";
 
@@ -33,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const book = await findBook(ref);
   if (!book) notFound();
   // O'qish oynasi qidiruv indeksiga kirmaydi: indekslanadigan sahifa — kitob sahifasi.
-  return { title: book.title, robots: { index: false, follow: false } };
+  return { title: book.title, robots: NOINDEX };
 }
 
 /** `params` faqat `<Suspense>` ichida o'qiladi (App Shell bitta kitobga bog'lanmasin). */

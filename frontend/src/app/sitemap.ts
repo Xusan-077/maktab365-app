@@ -1,10 +1,11 @@
 import type { MetadataRoute } from "next";
 import { locales } from "@/lib/i18n/config";
 import { SITE_URL } from "@/lib/i18n/seo";
+import { getAllLibraryBooks } from "@/lib/books/server";
 import { getAllBooks } from "@/lib/pdf-books/server";
 import { absoluteUrl } from "@/lib/seo/jsonld";
 import { GRADES } from "@/types/catalog";
-import { gradePath, pdfBookPath, ROUTES } from "@/lib/utils/routes";
+import { gradePath, libraryBookPath, pdfBookPath, ROUTES } from "@/lib/utils/routes";
 
 type Entry = { path: string; lastModified?: string; priority: number };
 
@@ -22,7 +23,7 @@ function localized({ path, lastModified, priority }: Entry): MetadataRoute.Sitem
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const books = await getAllBooks();
+  const [books, libraryBooks] = await Promise.all([getAllBooks(), getAllLibraryBooks()]);
   const entries: Entry[] = [
     { path: ROUTES.home, priority: 1 },
     { path: ROUTES.textbooks, priority: 0.9 },
@@ -41,6 +42,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified: book.published_at ?? undefined,
         priority: 0.7,
       })),
+    // Kutubxona kitoblari (faqat nashr qilinganlar); lastModified — yaratilgan sana.
+    ...libraryBooks.map((book) => ({
+      path: libraryBookPath(book.slug),
+      lastModified: book.created_at,
+      priority: 0.6,
+    })),
   ];
   return entries.flatMap(localized);
 }

@@ -8,8 +8,9 @@ import { BooksResults, BooksResultsSkeleton } from "@/components/books/BooksResu
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { bookQuery, parseBookFilters } from "@/lib/books/filters";
 import { getBookTypes } from "@/lib/books/server";
+import { SectionJsonLd } from "@/components/seo/SectionJsonLd";
 import { routing } from "@/lib/i18n/routing";
-import { getAlternates } from "@/lib/i18n/seo";
+import { buildMetadata, splitKeywords } from "@/lib/seo/metadata";
 import { ROUTES } from "@/lib/utils/routes";
 
 type Props = PageProps<"/[locale]/kutubxona">;
@@ -18,11 +19,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   const t = await getTranslations({ locale, namespace: "books" });
-  return {
+  const tm = await getTranslations({ locale, namespace: "meta" });
+  return buildMetadata({
+    locale,
+    path: ROUTES.books,
     title: t("metaTitle"),
     description: t("metaDescription"),
-    alternates: getAlternates(locale, ROUTES.books),
-  };
+    keywords: splitKeywords(tm("libraryKeywords")),
+  });
 }
 
 /** `params` va `searchParams` faqat `<Suspense>` ichida o'qiladi (App Shell bitta URL'ga bog'lanmasin). */
@@ -61,6 +65,7 @@ async function LibraryContent({ params, searchParams }: Props) {
 
   return (
     <div className={SHELL}>
+      <SectionJsonLd locale={locale} name={t("title")} path={ROUTES.books} />
       <div className="flex flex-col gap-2.5">
         <Breadcrumbs items={[{ label: tn("home"), href: ROUTES.home }, { label: t("title") }]} />
         <h1 className="text-[2rem] font-extrabold tracking-[-0.03em] sm:text-[2.75rem]">

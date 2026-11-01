@@ -24,7 +24,8 @@ import {
 import { ReportErrorLink } from "@/components/support/ReportErrorLink";
 import { getLocalized } from "@/lib/i18n/localized";
 import { routing } from "@/lib/i18n/routing";
-import { getAlternates, OG_IMAGES, SITE_URL } from "@/lib/i18n/seo";
+import { SITE_URL } from "@/lib/i18n/seo";
+import { buildMetadata, splitKeywords } from "@/lib/seo/metadata";
 import { buildBookContents } from "@/lib/pdf/book-contents";
 import { parseGradeParam } from "@/lib/pdf/grade-groups";
 import { toRecent } from "@/lib/pdf/recent";
@@ -64,15 +65,17 @@ export async function generateMetadata({
     });
   // OG rasm: 600px muqova (3:4); muqova yo'q bo'lsa saytning umumiy rasmi.
   const cover = book.cover_large ?? book.cover;
-  const images = cover ? [{ url: cover, width: 600, height: 800, alt: title }] : OG_IMAGES;
-  return {
+  const tm = await getTranslations({ locale, namespace: "meta" });
+  const metadata = buildMetadata({
+    locale,
+    path: pdfBookPath(book),
     title: pageTitle,
     description,
-    alternates: getAlternates(locale, pdfBookPath(book)),
-    openGraph: { title: pageTitle, description, type: "book", images },
-    twitter: { card: cover ? "summary_large_image" : "summary", title: pageTitle, description },
-    ...(book.unverified ? { robots: { index: false, follow: true } } : {}),
-  };
+    type: "book",
+    keywords: [title, getLocalized(book.subject_title, locale), ...splitKeywords(tm("keywords"))],
+    ...(cover ? { image: { url: cover, width: 600, height: 800, alt: title } } : {}),
+  });
+  return book.unverified ? { ...metadata, robots: { index: false, follow: true } } : metadata;
 }
 
 type Props = PageProps<"/[locale]/darsliklar/[sinf]/[slug]">;

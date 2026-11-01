@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ContinueSection } from "@/components/home/ContinueSection";
 import { HomeHero } from "@/components/home/HomeHero";
 import { HomeSkeleton } from "@/components/home/HomeSkeleton";
@@ -12,8 +12,11 @@ import {
   LatestSection,
   TelegramBand,
 } from "@/components/home/HomeSections";
+import { JsonLd } from "@/components/pdf/JsonLd";
 import { routing } from "@/lib/i18n/routing";
-import { getAlternates } from "@/lib/i18n/seo";
+import { SITE_URL } from "@/lib/i18n/seo";
+import { organizationJsonLd, websiteJsonLd } from "@/lib/seo/jsonld";
+import { buildMetadata, splitKeywords } from "@/lib/seo/metadata";
 import { countBooksByGrade } from "@/lib/pdf/grade-groups";
 import { getAllBooks, getLatestBooks, getSubjects } from "@/lib/pdf-books/server";
 import { ROUTES } from "@/lib/utils/routes";
@@ -21,7 +24,15 @@ import { ROUTES } from "@/lib/utils/routes";
 export async function generateMetadata({ params }: PageProps<"/[locale]">): Promise<Metadata> {
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
-  return { alternates: getAlternates(locale, ROUTES.home) };
+  const t = await getTranslations({ locale, namespace: "meta" });
+  return buildMetadata({
+    locale,
+    path: ROUTES.home,
+    title: t("title"),
+    description: t("description"),
+    keywords: splitKeywords(t("keywords")),
+    absoluteTitle: true,
+  });
 }
 
 /** Ro'yxatga 6 ta; hero kollaji muqovasi borlarini birinchi tanlaydi, shuning uchun ko'proq olinadi. */
@@ -57,9 +68,13 @@ async function HomeContent({ params }: Pick<PageProps<"/[locale]">, "params">) {
     settled(getAllBooks()),
   ]);
   const gradeCounts = allBooks ? countBooksByGrade(allBooks) : null;
+  const tm = await getTranslations({ locale, namespace: "meta" });
+  const brand = await getTranslations({ locale, namespace: "brand" });
 
   return (
     <>
+      <JsonLd data={organizationJsonLd(SITE_URL, brand("name"), tm("description"))} />
+      <JsonLd data={websiteJsonLd(SITE_URL, locale, brand("name"))} />
       {/* O'qishni boshlagan foydalanuvchiga birinchi ekranda: hero'dan oldin. Bo'lmasa bo'sh va yashirin. */}
       <div className="max-w-site mx-auto w-full px-4 pt-6 pb-2 empty:hidden sm:px-8 sm:pt-8">
         <ContinueSection />

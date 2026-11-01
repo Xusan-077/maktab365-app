@@ -12,7 +12,8 @@ import { SkipLink } from "@/components/layout/SkipLink";
 import { MotionProvider } from "@/components/ui/motion";
 import { Toaster } from "@/components/ui/Toast";
 import { routing } from "@/lib/i18n/routing";
-import { SITE_URL } from "@/lib/i18n/seo";
+import { OG_IMAGES, SITE_URL } from "@/lib/i18n/seo";
+import { OG_LOCALES, splitKeywords, TITLE_SUFFIX } from "@/lib/seo/metadata";
 import { PREFERENCES_INIT_SCRIPT } from "@/lib/utils/preferences";
 import "../globals.css";
 
@@ -74,11 +75,29 @@ export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Pr
   if (!hasLocale(routing.locales, locale)) notFound();
   const t = await getTranslations({ locale, namespace: "meta" });
   const brand = await getTranslations({ locale, namespace: "brand" });
+  // Google Search Console / Yandex Webmaster tasdiqlash qiymatlari env'dan (bo'sh bo'lsa teg chiqmaydi).
+  const google = process.env.GOOGLE_SITE_VERIFICATION?.trim();
+  const yandex = process.env.YANDEX_VERIFICATION?.trim();
   return {
     metadataBase: new URL(SITE_URL),
-    title: { default: t("title"), template: `%s — ${brand("name")}` },
+    title: { default: t("title"), template: `%s${TITLE_SUFFIX}` },
     description: t("description"),
+    keywords: splitKeywords(t("keywords")),
+    applicationName: brand("name"),
     manifest: "/manifest.webmanifest",
+    // Sahifa o'z `openGraph`ini bermasa shu ishlatiladi; sahifadagisi to'liq almashtiradi (`buildMetadata`).
+    openGraph: {
+      type: "website",
+      siteName: brand("name"),
+      title: t("title"),
+      description: t("description"),
+      locale: OG_LOCALES[locale],
+      images: OG_IMAGES,
+    },
+    twitter: { card: "summary_large_image", title: t("title"), description: t("description") },
+    ...(google || yandex
+      ? { verification: { ...(google ? { google } : {}), ...(yandex ? { yandex } : {}) } }
+      : {}),
   };
 }
 

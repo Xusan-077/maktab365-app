@@ -1,7 +1,9 @@
 {
   "meta": {
     "title": "darslik365 — 1–11-sinf darsliklari",
-    "description": "1–11-sinf darsliklarini sahifa-sahifa onlayn o'qing. Bepul, o'quvchi va o'qituvchi uchun."
+    "description": "1–11-sinf darsliklarini sahifa-sahifa onlayn o'qing. Bepul, o'quvchi va o'qituvchi uchun.",
+    "keywords": "maktab darsliklari, 1-11 sinf darsliklari, bepul onlayn darsliklar, matematika darsligi, konspekt, test, IDC",
+    "libraryKeywords": "kutubxona, onlayn kitoblar, bepul kitoblar, badiiy kitoblar, o'zbek adabiyoti, PDF kitob o'qish"
   },
   "brand": {
     "name": "darslik365",
@@ -2379,8 +2381,8 @@
   },
   "catalogPage": {
     "title": "Darsliklar",
-    "metaTitle": "Darsliklar",
-    "metaDescription": "1–11-sinf darsliklari: sinf, yo'nalish va til bo'yicha toping, onlayn o'qing. Bepul.",
+    "metaTitle": "Maktab darsliklari — 1–11-sinf, bepul onlayn",
+    "metaDescription": "1–11-sinf maktab darsliklari: sinf, fan va til bo'yicha toping, onlayn o'qing. Matematika, ona tili, fizika va boshqa fanlar — bepul.",
     "searchLabel": "Darslik qidirish",
     "searchPlaceholder": "Darslik qidirish",
     "filters": "Filtrlar",
@@ -2877,8 +2879,8 @@
     }
   },
   "books": {
-    "metaTitle": "Kitoblar",
-    "metaDescription": "Badiiy kitoblar, matematika to'plamlari, testlar va darsliklar. Onlayn o'qing, kitob yoniga yozing, sahifa ustiga chizing. Bepul.",
+    "metaTitle": "Kutubxona — bepul onlayn kitoblar",
+    "metaDescription": "Badiiy kitoblar, o'quv qo'llanmalar, matematika va test to'plamlari. Onlayn o'qing, yon daftarga yozing, sahifa ustiga chizing. Bepul.",
     "title": "Kitoblar",
     "searchLabel": "Kitob yoki muallif qidirish",
     "searchPlaceholder": "Kitob yoki muallif",

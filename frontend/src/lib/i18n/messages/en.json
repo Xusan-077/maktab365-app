@@ -1,7 +1,9 @@
 {
   "meta": {
     "title": "darslik365 — textbooks for grades 1–11",
-    "description": "Read grade 1–11 textbooks online, page by page. Free, for students and teachers."
+    "description": "Read grade 1–11 textbooks online, page by page. Free, for students and teachers.",
+    "keywords": "school textbooks, grade 1-11 textbooks, free online textbooks, math textbook, study notes, tests, IDC",
+    "libraryKeywords": "online library, free books, fiction books, read books online, Uzbek literature"
   },
   "brand": {
     "name": "darslik365",
@@ -2379,8 +2381,8 @@
   },
   "catalogPage": {
     "title": "Textbooks",
-    "metaTitle": "Textbooks",
-    "metaDescription": "Grade 1–11 textbooks: find them by grade, subject area and language, and read online. Free.",
+    "metaTitle": "School textbooks, grades 1–11 — free online",
+    "metaDescription": "School textbooks for grades 1–11: find them by grade, subject and language and read online. Math, native language, physics and more — free.",
     "searchLabel": "Search textbooks",
     "searchPlaceholder": "Search textbooks",
     "filters": "Filters",
@@ -2877,8 +2879,8 @@
     }
   },
   "books": {
-    "metaTitle": "Books",
-    "metaDescription": "Fiction, maths collections, tests and textbooks. Read online, write beside the book and draw on the page. Free.",
+    "metaTitle": "Library — free books online",
+    "metaDescription": "Fiction, study aids, math and test collections. Read online, take notes and draw on the pages. Free.",
     "title": "Books",
     "searchLabel": "Search by title or author",
     "searchPlaceholder": "Title or author",

@@ -47,6 +47,32 @@ const MOVED: { source: string; destination: string }[] = [
  * havolalar va qidiruv indeksi uchun). Query (`?bet=`) saqlanadi; `/kitoblar/<uuid>` sahifaning
  * o'zida slug'ga yo'naltiriladi.
  */
+/**
+ * Bitta kanonik domen: `www` bilan ishlasak, `www`siz domen 301 bilan `www`ga o'tadi (https ni
+ * Vercel o'zi majburlaydi). Domen `NEXT_PUBLIC_SITE_URL` dan; lokal/preview'da qoida yo'q.
+ */
+function canonicalHostRedirects() {
+  const site = (process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://www.darslik365.uz").replace(
+    /\/+$/,
+    "",
+  );
+  let host = "";
+  try {
+    host = new URL(site).hostname;
+  } catch {
+    return [];
+  }
+  if (!host.startsWith("www.")) return [];
+  return [
+    {
+      source: "/:path*",
+      has: [{ type: "host" as const, value: host.slice(4) }],
+      destination: `${site}/:path*`,
+      statusCode: 301 as const,
+    },
+  ];
+}
+
 const MOVED_301: { source: string; destination: string }[] = [
   { source: `/${LOCALE}/kitoblar`, destination: "/:locale/kutubxona" },
   { source: `/${LOCALE}/kitoblar/:path*`, destination: "/:locale/kutubxona/:path*" },
@@ -64,12 +90,18 @@ const nextConfig: NextConfig = {
     },
   },
   redirects: async () => [
+    ...canonicalHostRedirects(),
     ...MOVED_301.map((rule) => ({ ...rule, statusCode: 301 as const })),
     ...MOVED.map((rule) => ({ ...rule, permanent: true })),
   ],
   // Kirish sahifalari brauzer keshida turmasin: kirgan foydalanuvchini proxy har safar o'z paneliga
   // yo'naltiradi (aks holda `s-maxage`/`stale-while-revalidate` bilan eski "kirish" sahifasi ko'rinib qoladi).
   headers: async () => [
+    // https ni brauzer eslab qoladi (HSTS); kanonik domen http'da ochilmasin.
+    {
+      source: "/:path*",
+      headers: [{ key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" }],
+    },
     {
       source: `/${LOCALE}/:page(kirish|kod|onboarding)`,
       headers: [{ key: "Cache-Control", value: "private, no-cache, no-store, max-age=0" }],

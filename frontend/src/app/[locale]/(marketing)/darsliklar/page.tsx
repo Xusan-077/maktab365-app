@@ -8,8 +8,9 @@ import { CatalogFilters } from "@/components/catalog/CatalogFilters";
 import { CatalogResults } from "@/components/catalog/CatalogResults";
 import { CatalogResultsSkeleton, CatalogSkeleton } from "@/components/catalog/CatalogSkeleton";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
+import { SectionJsonLd } from "@/components/seo/SectionJsonLd";
 import { routing } from "@/lib/i18n/routing";
-import { getAlternates } from "@/lib/i18n/seo";
+import { buildMetadata, splitKeywords } from "@/lib/seo/metadata";
 import { catalogFiltersKey, parseCatalogFilters } from "@/lib/pdf/catalog-filters";
 import { getGradeBooks } from "@/lib/pdf-books/server";
 import { gradePath, ROUTES } from "@/lib/utils/routes";
@@ -22,22 +23,28 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   const { grade } = parseCatalogFilters(await searchParams);
   // `?sinf=9` — sinf sahifasi o'rnidagi kanonik manzil (o'z sarlavhasi bilan); qolgan filtrlar katalogga kanonik.
   if (grade) {
-    const [t, books] = await Promise.all([
+    const [t, tm, books] = await Promise.all([
       getTranslations({ locale, namespace: "pdfBooks.grade.meta" }),
+      getTranslations({ locale, namespace: "meta" }),
       getGradeBooks(grade),
     ]);
-    return {
+    return buildMetadata({
+      locale,
+      path: gradePath(grade),
       title: t("title", { grade }),
       description: t("description", { grade, count: books.length }),
-      alternates: getAlternates(locale, gradePath(grade)),
-    };
+      keywords: splitKeywords(tm("keywords")),
+    });
   }
   const t = await getTranslations({ locale, namespace: "catalogPage" });
-  return {
+  const tm = await getTranslations({ locale, namespace: "meta" });
+  return buildMetadata({
+    locale,
+    path: ROUTES.textbooks,
     title: t("metaTitle"),
     description: t("metaDescription"),
-    alternates: getAlternates(locale, ROUTES.textbooks),
-  };
+    keywords: splitKeywords(tm("keywords")),
+  });
 }
 
 /**
@@ -63,6 +70,7 @@ async function CatalogContent({ params, searchParams }: Props) {
 
   return (
     <div className="max-w-site mx-auto flex w-full flex-col gap-8 px-4 pt-10 pb-20 sm:px-8 sm:pt-12 sm:pb-24">
+      <SectionJsonLd locale={locale} name={t("title")} path={ROUTES.textbooks} />
       <div className="flex flex-col gap-2.5">
         <Breadcrumbs items={[{ label: tn("home"), href: ROUTES.home }, { label: t("title") }]} />
         <h1 className="text-[2rem] font-extrabold tracking-[-0.03em] sm:text-[2.75rem]">

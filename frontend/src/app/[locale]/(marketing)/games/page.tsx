@@ -4,8 +4,9 @@ import { notFound } from "next/navigation";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { GamesView } from "@/components/games/GamesView";
+import { SectionJsonLd } from "@/components/seo/SectionJsonLd";
 import { routing } from "@/lib/i18n/routing";
-import { getAlternates } from "@/lib/i18n/seo";
+import { buildMetadata, splitKeywords } from "@/lib/seo/metadata";
 import { ROUTES } from "@/lib/utils/routes";
 
 export async function generateMetadata({
@@ -14,11 +15,14 @@ export async function generateMetadata({
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   const t = await getTranslations({ locale, namespace: "games.meta" });
-  return {
+  const tm = await getTranslations({ locale, namespace: "meta" });
+  return buildMetadata({
+    locale,
+    path: ROUTES.games,
     title: t("title"),
     description: t("description"),
-    alternates: getAlternates(locale, ROUTES.games),
-  };
+    keywords: splitKeywords(tm("keywords")),
+  });
 }
 
 /** Interaktiv o'yinlar: qidiruv va filtrlar URL'da (`?q=&grade=&subject=`), natijalar mijozda. */
@@ -27,8 +31,15 @@ export default async function GamesPage({ params }: PageProps<"/[locale]/games">
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
   return (
-    <Suspense>
-      <GamesView />
-    </Suspense>
+    <>
+      <SectionJsonLd
+        locale={locale}
+        name={(await getTranslations({ locale, namespace: "games.meta" }))("title")}
+        path={ROUTES.games}
+      />
+      <Suspense>
+        <GamesView />
+      </Suspense>
+    </>
   );
 }

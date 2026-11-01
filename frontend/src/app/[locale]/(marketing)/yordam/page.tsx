@@ -7,8 +7,9 @@ import { pageShellClass } from "@/components/layout/containers";
 import { SupportForm } from "@/components/support/SupportForm";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
+import { SectionJsonLd } from "@/components/seo/SectionJsonLd";
 import { routing } from "@/lib/i18n/routing";
-import { getAlternates } from "@/lib/i18n/seo";
+import { buildMetadata, splitKeywords } from "@/lib/seo/metadata";
 import { ROUTES } from "@/lib/utils/routes";
 
 export async function generateMetadata({
@@ -17,11 +18,14 @@ export async function generateMetadata({
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   const t = await getTranslations({ locale, namespace: "helpPage" });
-  return {
+  const tm = await getTranslations({ locale, namespace: "meta" });
+  return buildMetadata({
+    locale,
+    path: ROUTES.help,
     title: t("title"),
     description: t("lead"),
-    alternates: getAlternates(locale, ROUTES.help),
-  };
+    keywords: splitKeywords(tm("keywords")),
+  });
 }
 
 function HelpContent() {
@@ -51,5 +55,11 @@ export default async function HelpPage({ params }: PageProps<"/[locale]/yordam">
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
-  return <HelpContent />;
+  const t = await getTranslations({ locale, namespace: "helpPage" });
+  return (
+    <>
+      <SectionJsonLd locale={locale} name={t("title")} path={ROUTES.help} />
+      <HelpContent />
+    </>
+  );
 }

@@ -7,8 +7,9 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { buttonVariants } from "@/components/ui/Button";
 import { Link } from "@/lib/i18n/navigation";
+import { SectionJsonLd } from "@/components/seo/SectionJsonLd";
 import { routing } from "@/lib/i18n/routing";
-import { getAlternates } from "@/lib/i18n/seo";
+import { buildMetadata, splitKeywords } from "@/lib/seo/metadata";
 import { ROUTES } from "@/lib/utils/routes";
 
 const POINT_KEYS = ["free", "topics", "roles", "languages"] as const;
@@ -19,11 +20,14 @@ export async function generateMetadata({
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   const t = await getTranslations({ locale, namespace: "aboutPage" });
-  return {
+  const tm = await getTranslations({ locale, namespace: "meta" });
+  return buildMetadata({
+    locale,
+    path: ROUTES.about,
     title: t("title"),
     description: t("lead"),
-    alternates: getAlternates(locale, ROUTES.about),
-  };
+    keywords: splitKeywords(tm("keywords")),
+  });
 }
 
 function AboutContent() {
@@ -54,5 +58,11 @@ export default async function AboutPage({ params }: PageProps<"/[locale]/loyiha-
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
-  return <AboutContent />;
+  const t = await getTranslations({ locale, namespace: "aboutPage" });
+  return (
+    <>
+      <SectionJsonLd locale={locale} name={t("title")} path={ROUTES.about} />
+      <AboutContent />
+    </>
+  );
 }

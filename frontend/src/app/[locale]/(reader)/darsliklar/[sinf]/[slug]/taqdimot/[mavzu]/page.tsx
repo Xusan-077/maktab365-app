@@ -6,6 +6,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { PageSkeleton } from "@/components/layout/PageSkeleton";
 import { PresentationViewer } from "@/components/topic/PresentationViewer";
 import { getLocalized } from "@/lib/i18n/localized";
+import { NOINDEX } from "@/lib/seo/metadata";
 import { routing } from "@/lib/i18n/routing";
 import { parseGradeParam } from "@/lib/pdf/grade-groups";
 import { flattenToc } from "@/lib/pdf/toc";
@@ -38,7 +39,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       book && topic
         ? t("metaTitle", { topic: topic.title, book: getLocalized(book.title, locale) })
         : t("title"),
-    robots: { index: false, follow: true },
+    robots: NOINDEX,
   };
 }
 

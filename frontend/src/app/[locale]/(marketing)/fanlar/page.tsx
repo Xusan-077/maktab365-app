@@ -6,8 +6,9 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { SubjectsExplorer } from "@/components/subjects/SubjectsExplorer";
 import { SubjectsSkeleton } from "@/components/subjects/SubjectsSkeleton";
+import { SectionJsonLd } from "@/components/seo/SectionJsonLd";
 import { routing } from "@/lib/i18n/routing";
-import { getAlternates } from "@/lib/i18n/seo";
+import { buildMetadata, splitKeywords } from "@/lib/seo/metadata";
 import { getSubjects } from "@/lib/pdf-books/server";
 import { ROUTES } from "@/lib/utils/routes";
 
@@ -17,11 +18,14 @@ export async function generateMetadata({
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   const t = await getTranslations({ locale, namespace: "subjectsPage" });
-  return {
+  const tm = await getTranslations({ locale, namespace: "meta" });
+  return buildMetadata({
+    locale,
+    path: ROUTES.subjects,
     title: t("metaTitle"),
     description: t("metaDescription"),
-    alternates: getAlternates(locale, ROUTES.subjects),
-  };
+    keywords: splitKeywords(tm("keywords")),
+  });
 }
 
 /**
@@ -48,6 +52,7 @@ async function SubjectsContent({ params }: Pick<PageProps<"/[locale]/fanlar">, "
 
   return (
     <div className="max-w-site mx-auto flex w-full flex-col gap-10 px-4 pt-10 pb-20 sm:px-8 sm:pt-12 sm:pb-24">
+      <SectionJsonLd locale={locale} name={t("title")} path={ROUTES.subjects} />
       <div className="flex flex-col gap-2.5">
         <Breadcrumbs items={[{ label: tn("home"), href: ROUTES.home }, { label: t("title") }]} />
         <h1 className="text-[2rem] font-extrabold tracking-[-0.03em] sm:text-[2.75rem]">
