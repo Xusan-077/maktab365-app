@@ -952,6 +952,11 @@ html[data-book-lock] body {
   overflow: hidden;
   overscroll-behavior: none;
 }
+/* O'qish oynasi (ikkala rejim): gorizontal overscroll brauzer navigatsiyasiga o'tmaydi. */
+html[data-reader-open],
+html[data-reader-open] body {
+  overscroll-behavior-x: none;
+}
 .book-desk {
   background-color: var(--book-desk);
   background-image: radial-gradient(ellipse at 50% 42%, rgb(255 255 255 / 0.22), transparent 70%);

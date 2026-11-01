@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { NextIntlClientProvider } from "next-intl";
 import uz from "@/lib/i18n/messages/uz.json";
@@ -19,6 +19,8 @@ const pdfDoc = vi.hoisted(() => ({
   numPages: 240,
   getPage: async () => ({ getViewport: () => ({ width: 600, height: 800 }) }),
 }));
+/** Hujjat ochilmagan holat (xato testlari uchun): `null` — odatdagidek ochilgan. */
+const docFailure = vi.hoisted(() => ({ error: null as unknown, reload: vi.fn() }));
 
 vi.mock("next/navigation", () => ({ useSearchParams: () => nav.params }));
 vi.mock("@/lib/i18n/navigation", () => ({
@@ -30,6 +32,10 @@ vi.mock("@/lib/i18n/navigation", () => ({
 }));
 vi.mock("@/hooks/usePdfProgress", () => ({ usePdfProgress: () => progress.state }));
 vi.mock("@/hooks/useBookStats", () => ({ useBookStats: vi.fn() }));
+// Sessiya: mehmon (chizmalar qurilmada, `useDrawings`).
+vi.mock("@/hooks/useAuth", () => ({
+  useAuth: () => ({ status: "unauthenticated", signedIn: false, sessionUser: null }),
+}));
 // Kutubxona kitobi (`library`) yo'li bu testlarda ishlatilmaydi.
 vi.mock("@/hooks/useBookProgress", () => ({
   useBookProgress: () => ({ ready: true, lastPage: null, position: null, save: vi.fn() }),
@@ -52,13 +58,26 @@ vi.mock("./PdfBookmarkButton", () => ({ PdfBookmarkButton: () => null }));
 vi.mock("@/components/support/ReportErrorLink", () => ({ ReportErrorLink: () => null }));
 vi.mock("@/components/games/TopicGamesBlock", () => ({ TopicGamesBlock: () => null }));
 vi.mock("./usePdfDocument", () => ({
-  usePdfDocument: () => ({ doc: pdfDoc, loading: false, error: null, reload: vi.fn() }),
+  usePdfDocument: () =>
+    docFailure.error
+      ? { doc: null, loading: false, error: docFailure.error, reload: docFailure.reload }
+      : { doc: pdfDoc, loading: false, error: null, reload: vi.fn() },
   useSlidesDocument: () => ({ doc: { numPages: 8 }, loading: false, error: null, reload: vi.fn() }),
   useLibraryBookDocument: () => ({ doc: null, loading: false, error: null, reload: vi.fn() }),
 }));
 vi.mock("./PdfPageCanvas", () => ({
-  PdfPageCanvas: ({ pageNumber, current }: { pageNumber: number; current?: boolean }) => (
-    <div data-testid="pdf-canvas" data-page={pageNumber} data-current={current || undefined} />
+  PdfPageCanvas: ({
+    pageNumber,
+    current,
+    overlay,
+  }: {
+    pageNumber: number;
+    current?: boolean;
+    overlay?: ReactNode;
+  }) => (
+    <div data-testid="pdf-canvas" data-page={pageNumber} data-current={current || undefined}>
+      {overlay}
+    </div>
   ),
 }));
 
@@ -118,6 +137,7 @@ const setViewport = (wide: boolean) => {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  docFailure.error = null;
   // Mundarija paneli (useMediaQuery) uchun: jsdom'da matchMedia yo'q; <dialog> usullari ham.
   setViewport(false);
   // Mavjud testlar bitta betli kitob rejimida (mobil + saqlangan "b").
@@ -242,6 +262,47 @@ describe("PdfReader", () => {
     setup("page=9");
     await currentPage();
     await waitFor(() => expect(progress.state.record).toHaveBeenCalledWith(9));
+  });
+
+  it("PDF ochilmasa: sababi tushunarli, «Qayta urinish» — va brauzerda ochish yo'li umuman yo'q", async () => {
+    const errors = uz.pdfBooks.reader.loadErrors;
+    const openSpy = vi.spyOn(window, "open").mockReturnValue(null);
+    for (const mode of ["b", "v"] as const) {
+      storeMode(mode);
+      docFailure.error = Object.assign(new Error("x"), { name: "InvalidPDFException" });
+      setup("page=5");
+      const alert = await screen.findByTestId("pdf-load-error");
+      expect(alert.dataset.problem).toBe("damaged");
+      expect(alert.textContent).toContain(errors.title);
+      expect(alert.textContent).toContain(errors.damaged);
+      // Faqat ikkita harakat: qayta urinish va darsliklar ro'yxati — PDF fayliga havola yo'q.
+      expect(
+        within(alert)
+          .getAllByRole("button")
+          .map((node) => node.textContent),
+      ).toEqual([uz.pdfBooks.reader.retry]);
+      expect(
+        within(alert)
+          .getAllByRole("link")
+          .map((node) => node.textContent),
+      ).toEqual([errors.catalog]);
+      expect(within(alert).getByRole("link").getAttribute("href")).not.toMatch(/\.pdf|file|blob/i);
+      fireEvent.click(screen.getByTestId("pdf-load-retry"));
+      expect(docFailure.reload).toHaveBeenCalled();
+      cleanup();
+      docFailure.reload.mockClear();
+    }
+    expect(openSpy).not.toHaveBeenCalled();
+    expect(document.body.textContent).not.toContain("PDFni yangi oynada");
+  });
+
+  it("PDF juda uzoq yuklansa — «sekin internet» xabari", async () => {
+    const { PdfLoadTimeoutError } = await import("@/lib/pdf/load-error");
+    docFailure.error = new PdfLoadTimeoutError();
+    setup("page=5");
+    const alert = await screen.findByTestId("pdf-load-error");
+    expect(alert.dataset.problem).toBe("timeout");
+    expect(alert.textContent).toContain(uz.pdfBooks.reader.loadErrors.timeout);
   });
 
   it("topilmagan kitob uchun xabar ko'rsatadi", async () => {
@@ -505,21 +566,21 @@ describe("PdfReader: zoom, pinch va sahifa boshi", () => {
     const reset = screen.getByTestId("reader-zoom-reset");
     const menu = within(reset.parentElement as HTMLElement);
     fireEvent.click(menu.getByRole("button", { name: uz.pdfBooks.appearance.zoomIn }));
-    expect(zoomOf()).toBe("1.1");
-    expect(reset.textContent).toBe("110%");
+    expect(zoomOf()).toBe("1.25");
+    expect(reset.textContent).toBe("125%");
     fireEvent.click(reset);
     expect(zoomOf()).toBe("1");
   });
 
-  it("klaviatura + − 0: 10% qadam, 0 — «Moslash»; zoom shu kitob uchun xotiraga yoziladi", async () => {
+  it("klaviatura + − 0: 25% qadam, 0 — «Moslash»; zoom shu kitob uchun xotiraga yoziladi", async () => {
     setup("page=5");
     await currentPage();
     fireEvent.keyDown(window, { key: "+" });
     fireEvent.keyDown(window, { key: "+" });
-    expect(zoomOf()).toBe("1.2");
+    expect(zoomOf()).toBe("1.5");
     fireEvent.keyDown(window, { key: "-" });
-    expect(zoomOf()).toBe("1.1");
-    expect(window.localStorage.getItem(ZOOM_MEMORY_KEY)).toContain('"book-1":1.1');
+    expect(zoomOf()).toBe("1.25");
+    expect(window.localStorage.getItem(ZOOM_MEMORY_KEY)).toContain('"book-1":1.25');
     fireEvent.keyDown(window, { key: "0" });
     expect(zoomOf()).toBe("1");
   });
@@ -540,22 +601,31 @@ describe("PdfReader: zoom, pinch va sahifa boshi", () => {
     expect(nav.replace).not.toHaveBeenCalledWith("/darsliklar/book-1?page=6", { scroll: false });
   });
 
-  it("uzluksiz rejimda ikki barmoq (pinch): harakat paytida CSS scale, qo'yilganda zoom", async () => {
+  it("uzluksiz rejimda ikki barmoq (pinch): harakat paytida faqat CSS scale (holat o'zgarmaydi), qo'yilganda bir marta zoom", async () => {
     storeMode("v");
     setup("page=5");
     await currentPage();
     const area = screen.getByTestId("pdf-page-area");
+    const content = () => screen.getByTestId("pdf-zoom-content");
+    const nextFrame = () =>
+      act(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())));
     const touches = (gap: number) => [
       { clientX: 100, clientY: 200 },
       { clientX: 100 + gap, clientY: 200 },
     ];
     fireEvent.touchStart(area, { touches: touches(100) });
+    fireEvent.touchMove(area, { touches: touches(150) });
     fireEvent.touchMove(area, { touches: touches(200) });
-    expect(screen.getByTestId("pdf-zoom-content").style.transform).toBe("scale(2)");
+    await nextFrame();
+    // Bir kadrda bir marta, oxirgi qiymat bilan; GPU qatlami; layout (eni) va holat o'zgarmagan.
+    expect(content().style.transform).toBe("scale(2)");
+    expect(content().style.willChange).toBe("transform");
+    expect(zoomOf()).toBe("1");
     fireEvent.touchMove(area, { touches: touches(500) });
     fireEvent.touchEnd(area, { touches: [] });
     expect(zoomOf()).toBe("4");
-    expect(screen.getByTestId("pdf-zoom-content").style.transform).toBe("");
+    expect(content().style.transform).toBe("");
+    expect(content().style.willChange).toBe("");
     // Pinch tugagan barmoq ko'tarilishi swipe/tap hisoblanmaydi.
     fireEvent.pointerUp(area, { pointerType: "touch", clientX: 300, clientY: 200 });
     expect(nav.replace).not.toHaveBeenCalledWith("/darsliklar/book-1?page=6", { scroll: false });
@@ -788,10 +858,154 @@ describe("PdfReader: zoom kitob bo'yicha eslab qolinadi", () => {
     expect(zoomOf()).toBe("2.5");
   });
 
+  it("kitob kattalashganda swipe, chekka va sichqoncha bilan sudrash bet almashtirmaydi", async () => {
+    window.localStorage.setItem(ZOOM_MEMORY_KEY, JSON.stringify({ "book-1": 2 }));
+    setup("page=5");
+    await currentPage();
+    expect(zoomOf()).toBe("2");
+    // Chekka tugmalari yo'q: surish ular ustidan boshlansa «bosish» bo'lib qolardi.
+    expect(screen.queryByTestId("pdf-edge-next")).toBeNull();
+    expect(screen.queryByTestId("pdf-edge-prev")).toBeNull();
+    const area = screen.getByTestId("pdf-page-area");
+    for (const pointerType of ["touch", "mouse"]) {
+      for (const [fromX, toX] of [
+        [300, 20],
+        [20, 300],
+        [2, 2],
+      ]) {
+        fireEvent.pointerDown(area, { pointerType, pointerId: 1, clientX: fromX, clientY: 100 });
+        fireEvent.pointerMove(area, { pointerType, pointerId: 1, clientX: toX, clientY: 104 });
+        fireEvent.pointerUp(area, { pointerType, pointerId: 1, clientX: toX, clientY: 104 });
+      }
+    }
+    expect(nav.replace).not.toHaveBeenCalled();
+  });
+
+  const wheel = (target: EventTarget, init: WheelEventInit) => {
+    const event = new WheelEvent("wheel", { bubbles: true, cancelable: true, ...init });
+    act(() => void target.dispatchEvent(event));
+    return event;
+  };
+
+  it("Ctrl/⌘+g'ildirak (trackpad pinch) brauzer zoom'ini to'xtatadi — ikkala rejimda, sarlavha ustida ham", async () => {
+    for (const mode of ["b", "v"] as const) {
+      storeMode(mode);
+      setup("page=5");
+      await currentPage();
+      const area = screen.getByTestId("pdf-page-area");
+      expect(wheel(area, { ctrlKey: true, deltaY: -40 }).defaultPrevented).toBe(true);
+      expect(wheel(area, { metaKey: true, deltaY: 40 }).defaultPrevented).toBe(true);
+      expect(wheel(document.body, { ctrlKey: true, deltaY: -40 }).defaultPrevented).toBe(true);
+      // Safari: trackpad pinch — `gesture*` hodisalari.
+      const gesture = new Event("gesturestart", { cancelable: true });
+      act(() => void window.dispatchEvent(gesture));
+      expect(gesture.defaultPrevented).toBe(true);
+      act(() => void window.dispatchEvent(new Event("gestureend", { cancelable: true })));
+      expect(nav.replace).not.toHaveBeenCalled();
+      cleanup();
+    }
+  });
+
+  it("uzluksiz rejimda Safari pinch (gesture*) zoom'ni o'zgartiradi, bet almashmaydi", async () => {
+    storeMode("v");
+    setup("page=5");
+    await currentPage();
+    const gesture = (type: string, scale: number) =>
+      act(() => {
+        const event = Object.assign(new Event(type, { cancelable: true }), {
+          scale,
+          clientX: 100,
+          clientY: 200,
+        });
+        window.dispatchEvent(event);
+      });
+    gesture("gesturestart", 1);
+    gesture("gesturechange", 2);
+    gesture("gestureend", 2);
+    expect(zoomOf()).toBe("2");
+    expect(nav.replace).not.toHaveBeenCalled();
+  });
+
+  it("kitob 100% dan katta: g'ildirak/trackpad faqat betni suradi, varaq ag'darilmaydi", async () => {
+    window.localStorage.setItem(ZOOM_MEMORY_KEY, JSON.stringify({ "book-1": 2 }));
+    setup("page=5");
+    await currentPage();
+    const area = screen.getByTestId("pdf-page-area");
+    for (const init of [{ deltaY: 900 }, { deltaY: -900 }, { deltaX: 900 }, { deltaX: -900 }]) {
+      expect(wheel(area, init).defaultPrevented).toBe(true);
+    }
+    expect(nav.replace).not.toHaveBeenCalled();
+  });
+
+  it("swipe o'rtasida ikkinchi barmoq (pinch) tegsa — swipe bekor, qolgan barmoq ham swipe emas", async () => {
+    setup("page=5");
+    await currentPage();
+    const area = screen.getByTestId("pdf-page-area");
+    fireEvent.pointerDown(area, { pointerType: "touch", pointerId: 1, clientX: 300, clientY: 200 });
+    // Ikkinchi barmoqning `pointerdown` i kelmagan holat ham (faqat `touchstart`).
+    fireEvent.touchStart(area, {
+      touches: [
+        { clientX: 300, clientY: 200 },
+        { clientX: 400, clientY: 200 },
+      ],
+    });
+    fireEvent.pointerMove(area, { pointerType: "touch", pointerId: 1, clientX: 200, clientY: 200 });
+    fireEvent.touchEnd(area, { touches: [{ clientX: 200, clientY: 200 }] });
+    fireEvent.pointerUp(area, { pointerType: "touch", pointerId: 1, clientX: 60, clientY: 200 });
+    expect(nav.replace).not.toHaveBeenCalled();
+  });
+
+  it("kitob kichraytirilganda (100% dan past) ham swipe bet almashtirmaydi", async () => {
+    window.localStorage.setItem(ZOOM_MEMORY_KEY, JSON.stringify({ "book-1": 0.7 }));
+    setup("page=5");
+    await currentPage();
+    const area = screen.getByTestId("pdf-page-area");
+    fireEvent.pointerDown(area, { pointerType: "touch", clientX: 300, clientY: 100 });
+    fireEvent.pointerUp(area, { pointerType: "touch", clientX: 100, clientY: 105 });
+    expect(nav.replace).not.toHaveBeenCalled();
+    // Tugmalar (kitob chetni yopmaydi) ishlaydi.
+    fireEvent.click(screen.getByTestId("pdf-edge-next"));
+    expect(nav.replace).toHaveBeenCalledWith("/darsliklar/book-1?page=6", { scroll: false });
+  });
+
   it("boshqa kitobning zoom'i bu kitobga o'tmaydi", async () => {
     window.localStorage.setItem(ZOOM_MEMORY_KEY, JSON.stringify({ "book-2": 3 }));
     setup("page=5");
     await currentPage();
     expect(zoomOf()).toBe("1");
+  });
+});
+
+describe("PdfReader: chizish rejimi", () => {
+  it("tugma panelni ochadi (pastki navigatsiya o'rnida), Esc yopadi", async () => {
+    setup("page=5");
+    await currentPage();
+    expect(screen.queryByTestId("draw-toolbar")).toBeNull();
+    fireEvent.click(screen.getByTestId("draw-toggle"));
+    expect(screen.getByTestId("draw-toggle").getAttribute("aria-pressed")).toBe("true");
+    const toolbar = await screen.findByTestId("draw-toolbar");
+    expect(screen.queryByTestId("reader-floating-nav")).toBeNull();
+    // Qalam, marker, o'chirgich; 6 ta rang va 3 ta qalinlik.
+    expect(within(toolbar).getByTestId("draw-tool-pen").getAttribute("aria-pressed")).toBe("true");
+    expect(within(toolbar).getAllByTestId("draw-color")).toHaveLength(6);
+    expect(within(toolbar).getAllByTestId("draw-width")).toHaveLength(3);
+    fireEvent.click(within(toolbar).getByTestId("draw-tool-marker"));
+    expect(within(toolbar).getAllByTestId("draw-color")).toHaveLength(6);
+    // Mehmon: yumshoq «Saqlash uchun kiring».
+    expect(within(toolbar).getByTestId("draw-sign-in")).toBeTruthy();
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(screen.queryByTestId("draw-toolbar")).toBeNull();
+    expect(screen.getByTestId("reader-floating-nav")).toBeTruthy();
+  });
+
+  it("chizish qatlami faqat joriy bet ±1 da (rejim yoqilganda)", async () => {
+    storeMode("v");
+    setup("page=5");
+    await currentPage();
+    fireEvent.click(screen.getByTestId("draw-toggle"));
+    await waitFor(() =>
+      expect(document.querySelectorAll("[data-draw-layer]").length).toBeGreaterThan(0),
+    );
+    expect(document.querySelectorAll("[data-draw-layer]").length).toBeLessThanOrEqual(3);
   });
 });

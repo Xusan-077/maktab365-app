@@ -9,7 +9,7 @@ import {
   useState,
   type PointerEvent,
 } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   ArrowLeft,
   BookOpenText,
@@ -19,6 +19,7 @@ import {
   Keyboard,
   Maximize,
   Minimize,
+  PenLine,
   Search,
   Share2,
   WifiOff,
@@ -77,6 +78,8 @@ import { RecordRecentBook } from "./RecordRecentBook";
 import { PdfBookmarkButton } from "./PdfBookmarkButton";
 import { AnnotationDialog } from "./AnnotationDialog";
 import { AnnotationLayer } from "./AnnotationLayer";
+import { DrawToolbar } from "./draw/DrawToolbar";
+import { PageDrawing, useDrawMode } from "./draw/useDrawMode";
 import { PdfFindDialog } from "./PdfFindDialog";
 import { PdfPageCanvas } from "./PdfPageCanvas";
 import { PdfTocDrawer } from "./PdfTocDrawer";
@@ -91,11 +94,10 @@ import { READER_ICON_BUTTON } from "./reader/reader-styles";
 import { SelectionMenu, type TextSelection } from "./reader/SelectionMenu";
 import { ThumbnailStrip } from "./reader/ThumbnailStrip";
 import { VerticalView } from "./reader/VerticalView";
-import { resolveFileUrl } from "@/lib/pdf/file-url";
+import { PdfLoadError } from "./reader/PdfLoadError";
 import { usePdfDocument, useLibraryBookDocument } from "./usePdfDocument";
 import { useBookProgress } from "@/hooks/useBookProgress";
 import type { BookDetail } from "@/lib/books/api";
-import { bookQueries } from "@/lib/books/queries";
 import { libraryAsPdfBook } from "@/lib/reader/library-adapter";
 import type { PdfPosition } from "@/lib/pdf/progress";
 
@@ -127,39 +129,6 @@ function ReaderMessage({ message, action }: { message: string; action?: React.Re
   );
 }
 
-/** Xato holatidagi zaxira: PDF'ni brauzerning o'z ko'rgichida yangi oynada ochadi. */
-function OpenInNewWindowButton({
-  bookId,
-  label,
-  library = false,
-}: {
-  bookId: string;
-  label: string;
-  library?: boolean;
-}) {
-  const queryClient = useQueryClient();
-  const open = async () => {
-    // Oyna bosish onida (bloklanmasligi uchun) ochiladi, URL keyin qo'yiladi.
-    const popup = window.open("", "_blank");
-    try {
-      const { url } = await (library
-        ? queryClient.fetchQuery(bookQueries.fileUrl(bookId))
-        : queryClient.fetchQuery(pdfQueries.fileUrl(bookId)));
-      const target = resolveFileUrl(url, window.location.origin);
-      if (popup) popup.location.href = target;
-      else window.location.assign(target);
-    } catch (error) {
-      console.error("[pdf] yangi oynada ochib bo'lmadi", error);
-      popup?.close();
-    }
-  };
-  return (
-    <Button variant="ghost" onClick={() => void open()}>
-      {label}
-    </Button>
-  );
-}
-
 /**
  * PDF darslik o'qish oynasi — «fokus rejimi»: yupqa sarlavha (orqaga, kitob nomi + joriy bo'lim →
  * Mundarija, bet raqami, qidiruv, Aa, Mavzu, Saqlash, «⋯») va 3px progress, pastda suzuvchi
@@ -184,6 +153,7 @@ export function PdfReader({
   const tc = useTranslations("pdfBooks.card");
   const tf = useTranslations("pdfBooks.find");
   const tcontrols = useTranslations("pdfBooks.controls");
+  const td = useTranslations("pdfBooks.draw");
   const ts = useTranslations("pdfBooks.selection");
   const tb = useTranslations("brand");
   const locale = useLocale() as Locale;
@@ -255,7 +225,9 @@ export function PdfReader({
     void Promise.resolve(useReaderPrefsStore.persist.rehydrate()).finally(() => {
       if (!active) return;
       // Zoom — har kitob uchun: saqlangan bo'lmasa «Moslash» (muqova/1-bet ekranga to'liq sig'adi).
-      useReaderPrefsStore.getState().setZoom(loadBookZoom(bookId, browserStorage()) ?? DEFAULT_ZOOM);
+      useReaderPrefsStore
+        .getState()
+        .setZoom(loadBookZoom(bookId, browserStorage()) ?? DEFAULT_ZOOM);
       setPrefsReady(true);
     });
     return () => {
@@ -294,7 +266,7 @@ export function PdfReader({
 
   const {
     zoom,
-    live: liveZoom,
+    isZooming,
     stepZoom,
     nudge: nudgeZoomLevel,
     setZoomLevel,
@@ -305,6 +277,17 @@ export function PdfReader({
     scrollerRef: zoomScrollerRef,
     contentRef: zoomContentRef,
   } = useReaderZoom({ stageRef, fullscreen: fullscreen.active });
+
+  // Chizish rejimi (qalam, marker, o'chirgich): darslik ham, Kutubxona kitobi ham.
+  const draw = useDrawMode({ bookId, page, total, tone: prefs.tone });
+  /** Uzluksiz rejimda chizish yoqiq: ikki barmoq (yoki stylusdan keyin bitta barmoq) bilan surish. */
+  const panVertical = useCallback(
+    (dx: number, dy: number) => {
+      if (dx !== 0) zoomScrollerRef.current?.scrollBy(dx, 0);
+      if (dy !== 0) (fullscreen.active ? stageRef.current : window)?.scrollBy(0, dy);
+    },
+    [fullscreen.active, zoomScrollerRef],
+  );
   const setPageArea = useCallback(
     (element: HTMLDivElement | null) => {
       pageBoxRef.current = element;
@@ -429,6 +412,15 @@ export function PdfReader({
       delete root.dataset.bookLock;
     };
   }, [bookMode]);
+  // Ikkala rejimda: trackpad/sichqonchaning gorizontal surishi chegarada brauzerning «orqaga /
+  // oldinga» navigatsiyasiga aylanmasin (zoom qilingan betni surayotganda sahifadan chiqib ketardi).
+  useLayoutEffect(() => {
+    const root = window.document.documentElement;
+    root.dataset.readerOpen = "";
+    return () => {
+      delete root.dataset.readerOpen;
+    };
+  }, []);
 
   useEffect(() => {
     if (page === null) return;
@@ -609,7 +601,8 @@ export function PdfReader({
         variant={bookMode ? "book" : "sheet"}
         renderScale={options.renderScale}
         pool={options.pool}
-        priority={options.priority}
+        // Uzluksiz rejim: joriy bet birinchi chiziladi (zoom'dan keyin ham).
+        priority={options.priority ?? (options.current ? 0 : 1)}
         textLayer={textLayer}
         highlight={findTerm || undefined}
         overlay={
@@ -620,6 +613,15 @@ export function PdfReader({
               onDraw={(rect) => setDraft({ kind: "new", rect, page: pageNumber })}
               onSelect={(annotation) => setDraft({ kind: "edit", annotation })}
             />
+            {/* Chizmalar: faqat joriy bet ±1 da (200 betli kitobda ham xotira tejaladi). */}
+            {page !== null && Math.abs(pageNumber - page) <= 1 && !options.prefetch && (
+              <PageDrawing
+                draw={draw}
+                pageNumber={pageNumber}
+                pixelScale={options.renderScale}
+                onPan={bookMode ? undefined : panVertical}
+              />
+            )}
             {/* Suv belgisi: bet burchagida kichik (rasmning o'ziga tegilmaydi). */}
             <span aria-hidden className="pdf-page-mark">
               {tb("name")}
@@ -811,10 +813,28 @@ export function PdfReader({
             <Skeleton className="h-11 w-28 max-sm:hidden" />
           )}
 
+          {document.doc && (
+            <button
+              type="button"
+              aria-label={td("toggle")}
+              title={td("toggle")}
+              aria-pressed={draw.on}
+              data-testid="draw-toggle"
+              onClick={() => {
+                setDrawing(false);
+                draw.toggle();
+              }}
+              className={READER_ICON_BUTTON}
+            >
+              <PenLine className="size-5" aria-hidden />
+            </button>
+          )}
+
           {prefsReady && (
             <BookZoomControls
               zoom={zoom}
               onZoom={setZoomLevel}
+              onNudge={nudgeZoomLevel}
               compact={!desktop}
               className="mx-1"
             />
@@ -845,6 +865,7 @@ export function PdfReader({
                 onMode={changeMode}
                 onFit={prefs.setFit}
                 onZoom={setZoomLevel}
+                onNudge={nudgeZoomLevel}
                 onWarm={prefs.setWarm}
               />
             )}
@@ -893,42 +914,15 @@ export function PdfReader({
               </button>
             </div>
           )}
+          {/* PDF'ni brauzer ko'rgichida («yangi oynada») ochish yo'li ataylab yo'q. */}
           {document.error && !document.doc ? (
-            <div className="px-4">
-              <ReaderMessage
-                message={t("loadError")}
-                action={
-                  <>
-                    <Button variant="secondary" onClick={retry}>
-                      {t("retry")}
-                    </Button>
-                    <OpenInNewWindowButton
-                      bookId={bookId}
-                      label={t("openInNewWindow")}
-                      library={isLibrary}
-                    />
-                  </>
-                }
-              />
-            </div>
+            <PdfLoadError
+              error={document.error}
+              onRetry={retry}
+              className="h-full justify-center"
+            />
           ) : renderFailed ? (
-            <div className="px-4">
-              <ReaderMessage
-                message={t("pageError")}
-                action={
-                  <>
-                    <Button variant="secondary" onClick={retry}>
-                      {t("retry")}
-                    </Button>
-                    <OpenInNewWindowButton
-                      bookId={bookId}
-                      label={t("openInNewWindow")}
-                      library={isLibrary}
-                    />
-                  </>
-                }
-              />
-            </div>
+            <PdfLoadError render onRetry={retry} className="h-full justify-center" />
           ) : document.doc && page !== null && prefsReady ? (
             <BookView
               doc={document.doc}
@@ -982,44 +976,16 @@ export function PdfReader({
             onPointerCancel={() => (touch.current = null)}
           >
             {document.error && !document.doc ? (
-              <ReaderMessage
-                message={t("loadError")}
-                action={
-                  <>
-                    <Button variant="secondary" onClick={retry}>
-                      {t("retry")}
-                    </Button>
-                    <OpenInNewWindowButton
-                      bookId={bookId}
-                      label={t("openInNewWindow")}
-                      library={isLibrary}
-                    />
-                  </>
-                }
-              />
+              <PdfLoadError error={document.error} onRetry={retry} />
             ) : renderFailed ? (
-              <ReaderMessage
-                message={t("pageError")}
-                action={
-                  <>
-                    <Button variant="secondary" onClick={retry}>
-                      {t("retry")}
-                    </Button>
-                    <OpenInNewWindowButton
-                      bookId={bookId}
-                      label={t("openInNewWindow")}
-                      library={isLibrary}
-                    />
-                  </>
-                }
-              />
+              <PdfLoadError render onRetry={retry} />
             ) : document.doc && page !== null && prefsReady ? (
               <VerticalView
                 doc={document.doc}
                 page={page}
                 total={total}
                 zoom={zoom}
-                live={liveZoom}
+                isZooming={isZooming}
                 fullscreen={fullscreen.active}
                 stageRef={stageRef}
                 scrollerRef={zoomScrollerRef}
@@ -1044,7 +1010,28 @@ export function PdfReader({
         </div>
       )}
 
-      {page !== null && total > 0 && (
+      {draw.on && (
+        <DrawToolbar
+          tool={draw.activeTool}
+          colors={draw.colors}
+          color={draw.color}
+          widthIndex={draw.widthIndex}
+          theme={draw.theme}
+          canUndo={draw.canUndo}
+          canRedo={draw.canRedo}
+          save={draw.save}
+          onTool={draw.setTool}
+          onColor={draw.setColor}
+          onWidth={draw.setWidth}
+          onUndo={draw.undo}
+          onRedo={draw.redo}
+          onRetry={draw.retry}
+          onSignIn={draw.signIn}
+          onClose={draw.close}
+        />
+      )}
+
+      {page !== null && total > 0 && !draw.on && (
         <ReaderFloatingNav
           page={page}
           total={total}

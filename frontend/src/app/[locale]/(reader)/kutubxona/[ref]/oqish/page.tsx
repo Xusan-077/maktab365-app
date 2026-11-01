@@ -4,10 +4,10 @@ import { notFound, permanentRedirect } from "next/navigation";
 import { BookX } from "lucide-react";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { BookReaderSkeleton } from "@/components/books/reader/BookReaderSkeleton";
 import { PdfReaderLoader } from "@/components/pdf/PdfReaderLoader";
 import { buttonVariants } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { parseBookRef, SAMPLE_REF } from "@/lib/books/ref";
 import { getBook, getBookBySlug } from "@/lib/books/server";
 import { Link } from "@/lib/i18n/navigation";
@@ -40,7 +40,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 /** `params` faqat `<Suspense>` ichida o'qiladi (App Shell bitta kitobga bog'lanmasin). */
 export default function BookReaderPage({ params, searchParams }: Props) {
   return (
-    <Suspense fallback={<BookReaderSkeleton />}>
+    <Suspense fallback={<Skeleton className="h-dvh rounded-none" />}>
       <ReaderContent params={params} searchParams={searchParams} />
     </Suspense>
   );

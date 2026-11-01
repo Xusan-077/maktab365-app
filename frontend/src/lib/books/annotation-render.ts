@@ -1,5 +1,6 @@
 import {
   highlightFill,
+  MARKER_ALPHA,
   resolveColor,
   type Annotation,
   type DrawingData,
@@ -40,7 +41,10 @@ export function drawStroke(
   if (points.length === 0) return;
   const color = resolveColor(data.color, theme);
   const base = Math.max(data.width * size.width, 0.6);
+  const marker = data.tool === "marker";
   ctx.save();
+  // Marker: bitta yo'l (path) sifatida yarim shaffof — o'z ustidan o'tsa ham qoraymaydi.
+  if (marker) ctx.globalAlpha = MARKER_ALPHA;
   ctx.strokeStyle = color;
   ctx.fillStyle = color;
   ctx.lineCap = "round";
@@ -57,7 +61,7 @@ export function drawStroke(
     return;
   }
 
-  if (hasPressureVariation(points)) {
+  if (!marker && hasPressureVariation(points)) {
     for (let index = 1; index < points.length; index += 1) {
       const [x0, y0] = px(points[index - 1]);
       const [x1, y1] = px(points[index]);

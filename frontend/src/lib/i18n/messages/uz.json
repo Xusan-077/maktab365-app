@@ -1621,44 +1621,6 @@
         "confirm": "O'chirish",
         "done": "Kitob o'chirildi"
       },
-      "answerKey": {
-        "title": "Javoblar kaliti",
-        "needFile": "Avval PDF yuklang: kalit betlar soniga qarab tekshiriladi.",
-        "loading": "Yuklanmoqda…",
-        "count": "Kiritilgan savollar: {count}",
-        "inputLabel": "Kalitni kiriting yoki qo'shing",
-        "placeholder": "1, 1, A\n1, 2, C\n2, 1, B\n2, 2, 12,5",
-        "help": "Har qator: bet, savol, javob (vergul, nuqta-vergul, tab yoki bo'shliq bilan). Variant harfi A–E, boshqa javob matn bo'ladi. Bet 1–{pages}. Sarlavha qatori va # bilan boshlangan qatorlar o'tkaziladi.",
-        "modeLabel": "Saqlash usuli",
-        "mode": {
-          "replace": "Butun kalitni almashtirish",
-          "merge": "Mavjud kalitga qo'shish va yangilash"
-        },
-        "save": "Saqlash",
-        "load": "Hozirgi kalitni matnga yuklash",
-        "clear": "Kalitni tozalash",
-        "saved": "Kalit saqlandi: {count} ta qator, jami {total} ta savol.",
-        "cleared": "Kalit tozalandi.",
-        "clearTitle": "Kalit tozalansinmi?",
-        "clearDescription": "Barcha savollar va o'quvchilarning shu kitobdagi javoblari o'chadi. O'quvchilarning avvalgi natijalari tarixda qoladi.",
-        "clearConfirm": "Tozalash",
-        "errors": {
-          "lines": "Xato qatorlar: {count}. Hech narsa saqlanmadi.",
-          "line": "{line}-qator: {reason}",
-          "more": "Yana {count} ta xato bor.",
-          "codes": {
-            "invalid_line": "format noto'g'ri (bet, savol, javob kerak)",
-            "page_out_of_range": "bet raqami kitobda yo'q",
-            "question_out_of_range": "savol raqami 1–999 bo'lishi kerak",
-            "answer_empty": "javob bo'sh",
-            "answer_too_long": "javob juda uzun",
-            "duplicate": "bu bet va savol takrorlangan",
-            "too_many_rows": "qatorlar juda ko'p",
-            "empty": "kiritilgan qator yo'q",
-            "not_test_book": "bu kitob turi «test» emas"
-          }
-        }
-      },
       "manageTypes": "Turlarni boshqarish",
       "addTextbook": "Maktab darsligi qo'shish",
       "textbooksHint": "Maktab darsliklari alohida, batafsil boshqaruvga ega (sinf, fan, mundarija).",
@@ -1736,7 +1698,6 @@
       "loading": "Sahifa yuklanmoqda",
       "loadError": "Darslikni ochib bo'lmadi. Internetni tekshirib, qayta urinib ko'ring.",
       "pageError": "Sahifani ko'rsatib bo'lmadi.",
-      "openInNewWindow": "PDFni yangi oynada ochish",
       "notFound": "Bunday darslik topilmadi yoki u hali nashr qilinmagan.",
       "retry": "Qayta urinish",
       "panel": "Mundarija",
@@ -1762,7 +1723,22 @@
       "topic": "Mavzu",
       "book": "Kitob",
       "bookPages": "{from}–{to}-betlar",
-      "bookPage": "{page}-bet"
+      "bookPage": "{page}-bet",
+      "loadErrors": {
+        "title": "Darslik ochilmadi",
+        "renderTitle": "Sahifa ko'rsatilmadi",
+        "offline": "Internet aloqasi yo'q. Ulanish tiklanishi bilan darslik o'zi qayta yuklanadi.",
+        "network": "Serverga ulanib bo'lmadi. Internet aloqasini tekshirib, qayta urinib ko'ring.",
+        "timeout": "Darslik juda uzoq yuklanyapti — internet sekin bo'lishi mumkin. Qayta urinib ko'ring.",
+        "notFound": "Darslik fayli topilmadi: u o'chirilgan yoki hali yuklanmagan bo'lishi mumkin.",
+        "forbidden": "Bu darslikni ochishga ruxsat yo'q. Akkauntingizga kirganingizni tekshiring.",
+        "expired": "Darslikka kirish havolasining muddati tugadi. «Qayta urinish» tugmasini bosing.",
+        "damaged": "Darslik fayli shikastlangan yoki uni o'qib bo'lmaydi. Bu bizning tomondagi muammo — iltimos, xabar bering.",
+        "server": "Serverda vaqtinchalik nosozlik. Birozdan keyin qayta urinib ko'ring.",
+        "unknown": "Kutilmagan xato yuz berdi. Qayta urinib ko'ring.",
+        "render": "Bu sahifani chizib bo'lmadi. Qayta urinib ko'ring yoki boshqa sahifaga o'ting.",
+        "catalog": "Darsliklar ro'yxatiga"
+      }
     },
     "bookmark": {
       "save": "Saqlash",
@@ -2111,6 +2087,49 @@
         "item": "{roman} bob"
       },
       "reportAction": "Xabar berish"
+    },
+    "draw": {
+      "toggle": "Chizish rejimi",
+      "toolbar": "Chizish asboblari",
+      "pen": "Qalam",
+      "marker": "Marker",
+      "eraser": "O'chirgich",
+      "undo": "Bekor qilish",
+      "redo": "Qaytarish",
+      "color": "Rang",
+      "width": "Qalinlik",
+      "widths": {
+        "0": "Ingichka",
+        "1": "O'rtacha",
+        "2": "Qalin"
+      },
+      "close": "Chizishni tugatish",
+      "colors": {
+        "ink": "Qora",
+        "e5484d": "Qizil",
+        "3b82f6": "Ko'k",
+        "30a46c": "Yashil",
+        "f59e0b": "To'q sariq",
+        "8e4ec6": "Binafsha",
+        "fde047": "Sariq",
+        "86efac": "Och yashil",
+        "f9a8d4": "Pushti",
+        "93c5fd": "Och ko'k",
+        "fdba74": "Shaftoli",
+        "c4b5fd": "Lavanda"
+      },
+      "status": {
+        "saving": "Saqlanmoqda…",
+        "saved": "Saqlandi",
+        "offline": "Internet yo'q — qurilmada saqlandi",
+        "failed": "Saqlanmadi",
+        "retry": "Qayta urinish",
+        "tooLarge": "Bu betda chizma juda ko'p",
+        "guest": "Faqat shu qurilmada saqlandi",
+        "signIn": "Saqlash uchun kiring",
+        "loadError": "Chizmalar yuklanmadi"
+      },
+      "limit": "Bu betda chizmalar juda ko'p. Ba'zilarini o'chiring."
     }
   },
   "library": {
@@ -2938,134 +2957,14 @@
       "progress": "{percent}% o'qilgan"
     },
     "reader": {
-      "back": "Kitob sahifasiga qaytish",
-      "toolbar": "O'qish boshqaruvi",
-      "toc": "Mundarija va xatcho'plar",
-      "search": "Kitob ichida qidirish",
-      "bookmarkAdd": "Betga xatcho'p qo'yish",
-      "bookmarkRemove": "Xatcho'pni olib tashlash",
-      "appearance": "Ko'rinish",
-      "fullscreen": "To'liq ekran",
-      "exitFullscreen": "To'liq ekrandan chiqish",
-      "prev": "Oldingi bet",
-      "next": "Keyingi bet",
-      "slider": "Betga o'tish",
-      "sliderValue": "{page}-bet · {chapter}",
-      "percent": "{percent}% o'qilgan",
-      "zoomIn": "Kattalashtirish",
-      "zoomOut": "Kichraytirish",
-      "zoomReset": "Moslash",
-      "pageAlt": "{title}, {page}-bet",
-      "pageLoading": "Bet yuklanmoqda…",
-      "pageError": "Bet rasmini yuklab bo'lmadi.",
-      "retry": "Qayta urinish",
-      "textEmpty": "Bu betda matn yo'q.",
-      "textEmptyHint": "Rasmli ko'rinishga o'ting.",
-      "switchToPage": "Rasmli ko'rinish",
-      "textError": "Bet matnini yuklab bo'lmadi.",
-      "withKey": "{label} ({key})",
-      "skeleton": "Kitob ochilmoqda",
       "emptyTitle": "Kitob hali tayyor emas",
-      "emptyText": "Sahifalar tayyorlanmoqda yoki kitob olib tashlangan.",
-      "tocPanel": {
-        "title": "Kitob bo'ylab",
-        "tabs": "Mundarija va xatcho'plar",
-        "tabContents": "Mundarija",
-        "tabBookmarks": "Xatcho'plar",
-        "noContents": "Bu kitobda mundarija yo'q.",
-        "noBookmarks": "Xatcho'p yo'q. Kerakli betda xatcho'p tugmasini bosing.",
-        "page": "{page}-bet",
-        "current": "Hozirgi bo'lim",
-        "removeBookmark": "{page}-bet xatcho'pini olib tashlash",
-        "bookmarkChapter": "{chapter}"
-      },
-      "find": {
-        "title": "Kitob ichida qidirish",
-        "label": "Qidiruv so'zi",
-        "placeholder": "So'z yoki ibora",
-        "hint": "Kamida 2 ta belgi kiriting.",
-        "searching": "Qidirilmoqda…",
-        "count": "{count} ta bet topildi",
-        "none": "«{query}» topilmadi.",
-        "error": "Qidirib bo'lmadi. Qayta urinib ko'ring.",
-        "unavailable": "Bu kitobda qidiruv mavjud emas (skanerlangan, matn qatlami yo'q).",
-        "result": "{page}-bet"
-      },
-      "look": {
-        "title": "Ko'rinish",
-        "view": "O'qish ko'rinishi",
-        "viewPage": "Bet rasmi",
-        "viewText": "Matn",
-        "textUnavailable": "Bu kitobda matn rejimi yo'q.",
-        "theme": "Fon",
-        "themePaper": "Qog'oz",
-        "themeSepia": "Sepiya",
-        "themeNight": "Tun",
-        "font": "Shrift",
-        "fontSerif": "Serif",
-        "fontSans": "Sans",
-        "size": "Matn hajmi",
-        "sizeUp": "Kattaroq",
-        "sizeDown": "Kichikroq",
-        "lineHeight": "Qator oralig'i",
-        "textOnly": "Shrift, hajm va oraliq matn rejimida ishlaydi."
-      },
-      "keys": {
-        "toc": "M",
-        "search": "/",
-        "bookmark": "B",
-        "fullscreen": "F",
-        "prev": "←",
-        "next": "→",
-        "zoomIn": "+",
-        "zoomOut": "−",
-        "notes": "N"
-      },
-      "notesOpen": "Yozuvlar panelini ochish",
-      "notesClose": "Yozuvlar panelini yopish",
-      "export": {
-        "menu": "Yuklab olish",
-        "notes": "Yon daftarni yuklab olish (.md)",
-        "failed": "Yuklab bo'lmadi. Qayta urinib ko'ring.",
-        "pageHeading": "{page}-bet"
-      },
-      "gradeSubject": "{grade}-sinf · {subject}",
-      "notFound": "Bunday kitob topilmadi yoki u hali nashr qilinmagan."
+      "emptyText": "Sahifalar tayyorlanmoqda yoki kitob olib tashlangan."
     },
     "card": {
       "progress": "{percent}% o'qilgan",
       "continue": "{page}-bet"
     },
     "workspace": {
-      "open": "Chizish",
-      "close": "Chizishni yopish",
-      "toolbar": "Chizish asboblari",
-      "tools": {
-        "select": "Tanlash va siljitish",
-        "pen": "Qalam",
-        "highlight": "Belgilash",
-        "text": "Matn",
-        "eraser": "O'chirgich",
-        "solution": "Misol yechimi"
-      },
-      "undo": "Bekor qilish",
-      "redo": "Qaytarish",
-      "color": "Rang",
-      "width": "Chiziq qalinligi",
-      "widths": {
-        "0": "Ingichka",
-        "1": "O'rtacha",
-        "2": "Qalin"
-      },
-      "textSize": "Matn o'lchami",
-      "textSizes": {
-        "0": "Kichik",
-        "1": "O'rtacha",
-        "2": "Katta"
-      },
-      "textInput": "Matn",
-      "textPlaceholder": "Yozing…",
-      "limit": "Bu betda yozuvlar juda ko'p. Ba'zilarini o'chiring.",
       "colors": {
         "ink": "Qora (fonga moslashadi)",
         "e5484d": "Qizil",
@@ -3077,42 +2976,7 @@
         "86efac": "Och yashil",
         "f9a8d4": "Pushti",
         "93c5fd": "Och ko'k"
-      },
-      "keys": {
-        "select": "V",
-        "pen": "P",
-        "highlight": "H",
-        "text": "T",
-        "eraser": "E",
-        "undo": "Ctrl+Z",
-        "redo": "Ctrl+Shift+Z",
-        "close": "Esc",
-        "notes": "N",
-        "solution": "Y"
-      },
-      "save": {
-        "saving": "Saqlanmoqda…",
-        "saved": "Saqlandi",
-        "failed": "Saqlanmadi.",
-        "retry": "Qayta urinish",
-        "tooLarge": "Bu bet uchun yozuvlar hajmi juda katta."
-      },
-      "notes": {
-        "title": "Betning yozuvlari",
-        "heading": "{page}-bet yozuvlari",
-        "label": "{page}-bet uchun yozuvlar",
-        "placeholder": "Shu bet haqida yozing: savol, xulosa, eslatma…",
-        "guestPlaceholder": "Yozuvlarni saqlash uchun kiring",
-        "loading": "Yozuvlar yuklanmoqda",
-        "loadError": "Yozuvlarni yuklab bo'lmadi.",
-        "retry": "Qayta urinish",
-        "close": "Yozuvlar panelini yopish",
-        "resize": "Panel kengligi",
-        "handle": "Yozuvlar panelini kattalashtirish yoki kichraytirish",
-        "tab": "Yozuv",
-        "tabs": "Yon daftar bo'limlari"
-      },
-      "done": "Tayyor"
+      }
     },
     "entries": {
       "metaTitle": "Mening yozuvlarim",
@@ -3176,104 +3040,6 @@
         "notesFile": "yon-daftar.md"
       },
       "solutionUntitled": "Misol {number}"
-    },
-    "math": {
-      "tab": "Yechimlar",
-      "dialog": {
-        "createTitle": "{page}-bet: yangi yechim",
-        "editTitle": "{page}-bet: yechimni tahrirlash",
-        "titleLabel": "Misol raqami yoki nomi",
-        "titlePlaceholder": "Masalan: 12-misol",
-        "bodyLabel": "Yechim",
-        "bodyPlaceholder": "Yechimni yozing. Formulalar $ belgilari orasida: $x^2+1$",
-        "preview": "Ko'rinishi",
-        "previewEmpty": "Yozganingiz shu yerda ko'rinadi.",
-        "save": "Saqlash",
-        "cancel": "Bekor qilish",
-        "delete": "Yechimni o'chirish"
-      },
-      "pad": {
-        "label": "Formula belgilari",
-        "groups": {
-          "structure": "Amallar",
-          "greek": "Yunon harflari"
-        },
-        "items": {
-          "fraction": "Kasr",
-          "root": "Ildiz",
-          "power": "Daraja",
-          "subscript": "Pastki indeks",
-          "integral": "Integral",
-          "sum": "Yig'indi",
-          "pm": "Plyus-minus",
-          "leq": "Kichik yoki teng",
-          "geq": "Katta yoki teng",
-          "neq": "Teng emas",
-          "alpha": "Alfa",
-          "beta": "Beta",
-          "gamma": "Gamma",
-          "delta": "Delta",
-          "theta": "Teta",
-          "lambda": "Lambda",
-          "pi": "Pi",
-          "sigma": "Sigma",
-          "phi": "Fi",
-          "omega": "Omega"
-        }
-      },
-      "panel": {
-        "guest": "Yechimlarni saqlash uchun hisobingizga kiring.",
-        "signIn": "Kirish",
-        "empty": "{page}-betda yechim yo'q. «Misol yechimi» asbobi bilan misolni to'rtburchakka oling va yechimini yozing.",
-        "list": "{page}-betdagi yechimlar",
-        "untitled": "Misol {number}",
-        "emptyBody": "Yechim hali yozilmagan.",
-        "edit": "{title}: tahrirlash"
-      }
-    },
-    "test": {
-      "tab": "Javoblar",
-      "answerLabel": "{question}-savol javobi",
-      "choice": "{letter} variant",
-      "textPlaceholder": "Javobni yozing",
-      "quick": {
-        "label": "{page}-bet savollariga tez javob",
-        "previous": "Oldingi savol",
-        "next": "Keyingi savol",
-        "question": "Savol",
-        "openSheet": "Javoblar varag'i: {answered} / {total} javob berildi"
-      },
-      "panel": {
-        "guest": "Javoblarni belgilash va tekshirish uchun hisobingizga kiring.",
-        "signIn": "Kirish",
-        "loading": "Savollar yuklanmoqda…",
-        "loadError": "Javoblar varag'ini yuklab bo'lmadi.",
-        "retry": "Qayta urinish",
-        "noKey": "Bu test uchun javoblar kaliti hali kiritilmagan, shuning uchun tekshirib bo'lmaydi.",
-        "progress": "{answered} / {total} savolga javob berildi",
-        "check": "Tekshirish",
-        "checkFailed": "Tekshirib bo'lmadi. Qayta urinib ko'ring.",
-        "answerFailed": "Javob saqlanmadi. Internetni tekshirib, qayta belgilang.",
-        "page": "{page}-bet",
-        "history": "Urinishlar tarixi",
-        "historyEmpty": "Hali tekshirilmagan."
-      },
-      "result": {
-        "title": "Test natijasi",
-        "percent": "{percent}%",
-        "wrongHeading": "Xatolar: {count}",
-        "allCorrect": "Hammasi to'g'ri!",
-        "wrongHint": "Savolni bossangiz, shu betga o'tasiz.",
-        "where": "{page}-bet, {question}-savol",
-        "notAnswered": "javob berilmagan",
-        "yourAnswer": "Javobingiz: {answer}",
-        "unansweredNote": "Javobsiz savollar xato hisoblanadi ({count} ta).",
-        "correctHeading": "To'g'ri javoblar: {count}",
-        "short": "{page}/{question}",
-        "close": "Yopish",
-        "loading": "Natija yuklanmoqda…",
-        "loadError": "Natijani yuklab bo'lmadi."
-      }
     },
     "intro": "Badiiy kitoblar, o'quv qo'llanmalar va boshqa nashrlar — onlayn va bepul o'qing."
   }

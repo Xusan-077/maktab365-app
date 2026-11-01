@@ -2,8 +2,9 @@
 
 import { useEffect, useEffectEvent, useRef, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
-import { renderPixelRatio } from "@/lib/pdf/book";
+import { deviceCanvasPixelBudget, renderPixelRatio } from "@/lib/pdf/book";
 import { matchRects, type NormalizedRect, type PositionedItem } from "@/lib/pdf/find";
+import { pageRenderLimiter, type RenderSlot } from "@/lib/pdf/render-limiter";
 import type { PageRenderPool } from "@/lib/pdf/render-pool";
 import {
   loadPdfjs,
@@ -104,21 +105,35 @@ export function PdfPageCanvas({
   useEffect(() => {
     const element = wrapRef.current;
     if (!element) return;
-    const observer = new ResizeObserver(([entry]) =>
-      setSize({
+    const observer = new ResizeObserver(([entry]) => {
+      const next = {
         width: Math.floor(entry.contentRect.width),
         height: Math.floor(entry.contentRect.height),
-      }),
-    );
+      };
+      // Zoom qo'llandi (bet eni o'zgardi): chizilgan tasvir shu kadrning o'zida yangi o'lchamga
+      // cho'ziladi (ResizeObserver paint'dan oldin) — aniqrog'i chizilguncha eski tasvir ko'rinib
+      // turadi, bo'sh joy yoki kichik tasvir «sakrashi» bo'lmaydi.
+      const canvas = canvasRef.current;
+      if (!contain && canvas?.dataset.drawn && next.width > 0) {
+        const previous = parseFloat(canvas.style.width);
+        if (previous > 0 && Math.abs(next.width - previous) >= 1) {
+          const ratio = next.width / previous;
+          canvas.style.width = `${next.width}px`;
+          canvas.style.height = `${parseFloat(canvas.style.height) * ratio}px`;
+        }
+      }
+      setSize(next);
+    });
     observer.observe(element);
     return () => observer.disconnect();
-  }, []);
+  }, [contain]);
 
   useEffect(() => {
     if (!width || (contain && !height)) return;
     let cancelled = false;
     let task: RenderTask | undefined;
     let request: { cancel(): void } | undefined;
+    let slot: RenderSlot | undefined;
     let page: PDFPageProxy | undefined;
     const target = canvasRef.current;
     void (async () => {
@@ -128,10 +143,12 @@ export function PdfPageCanvas({
         const natural = page.getViewport({ scale: 1 });
         const scale = fitScale(natural, width, height, contain);
         const css = { width: natural.width * scale, height: natural.height * scale };
+        // Maydon chegarasi: iOS Safari 16.7 MP dan katta canvas'ni chizmaydi; telefonda — 8 MP.
         const ratio = renderPixelRatio(
           Math.min(window.devicePixelRatio || 1, MAX_PIXEL_RATIO),
           renderScale,
           css,
+          deviceCanvasPixelBudget(),
         );
         const viewport = page.getViewport({ scale: scale * ratio });
         const show = (source: HTMLCanvasElement) => {
@@ -163,6 +180,11 @@ export function PdfPageCanvas({
           if (!cancelled) notifyRendered();
           return;
         }
+        // Navbat: bir vaqtda 2 ta bet, joriy bet birinchi (zoom qo'llanganda 5 ta katta bet birdan
+        // chizilib qotmasin). Effekt bekor bo'lsa (yangi zoom, bet chiqib ketdi) — navbatdan olinadi.
+        slot = pageRenderLimiter.acquire(queuePriority());
+        await slot.ready;
+        if (cancelled) return;
         // Sahifa ekrandan tashqari canvas'da chiziladi: tayyor bo'lgach bir zumda almashadi
         // (joriy sahifa bo'sh oq kadrsiz turadi, o'lcham sakramaydi).
         const buffer = document.createElement("canvas");
@@ -171,8 +193,16 @@ export function PdfPageCanvas({
         const context = buffer.getContext("2d");
         if (!context) throw new Error("Canvas is not available");
         task = page.render({ canvas: buffer, canvasContext: context, viewport });
-        await task.promise;
-        if (cancelled || !show(buffer)) return;
+        try {
+          await task.promise;
+        } finally {
+          slot.release();
+        }
+        if (cancelled || !show(buffer)) {
+          buffer.width = 0;
+          buffer.height = 0;
+          return;
+        }
         buffer.width = 0;
         buffer.height = 0;
         const canvas = canvasRef.current;
@@ -194,6 +224,7 @@ export function PdfPageCanvas({
       cancelled = true;
       task?.cancel();
       request?.cancel();
+      slot?.release();
       // Navbat (pool) o'zi chizgandan keyin tozalaydi; bu yerda faqat o'zimiz chizgan bet.
       if (!pool) page?.cleanup();
       // Canvas xotirasi darhol bo'shaydi (virtualizatsiyada bet ro'yxatdan chiqqanda).

@@ -219,7 +219,19 @@ export function BookView({
   const bookSize = useMemo(() => ({ width: twoPage ? 2 * W : W, height: H }), [twoPage, W, H]);
   const spineX = twoPage ? W : 0;
 
-  const view = useBookZoom({ stage, book: bookSize, zoom, setZoom, instant: simple });
+  // Gesture paytida kitob GPU qatlamida (silliq), tugagach odatiy — yangi masshtabda aniq chiziladi.
+  const setLayerHint = useCallback((active: boolean) => {
+    const element = bookRef.current;
+    if (element) element.style.willChange = active ? "transform" : "";
+  }, []);
+  const view = useBookZoom({
+    stage,
+    book: bookSize,
+    zoom,
+    setZoom,
+    instant: simple,
+    onLayerHint: setLayerHint,
+  });
   if (view.stageSize.width > 0 && view.stageSize.height > 0 && base?.key !== layoutKey) {
     setBase({ key: layoutKey, size: view.stageSize });
   }
@@ -507,7 +519,7 @@ export function BookView({
       startY: event.clientY,
       at: event.timeStamp,
     };
-    if (view.panMode) {
+    if (view.panMode || view.isZoomed()) {
       event.preventDefault();
       capture(event);
       event.currentTarget.style.cursor = "grabbing";
@@ -529,6 +541,12 @@ export function BookView({
   const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
     const current = gesture.current;
     if (!current || current.id !== event.pointerId) return;
+    // Ikkinchi barmoq tegdi (pinch) — ba'zi brauzerlarda uning `pointerdown` i kechikadi yoki
+    // kelmaydi, `touchstart` esa zoom'ni «live» qiladi: bitta barmoqli swipe/varaq bekor.
+    if (current.kind !== "pan" && (view.isLive() || pointers.current.size > 1)) {
+      cancelGesture();
+      return;
+    }
     const dx = event.clientX - current.startX;
     const dy = event.clientY - current.startY;
     if (current.kind === "pan" && current.pan) {
@@ -587,6 +605,7 @@ export function BookView({
     }
 
     if (current.kind === "pending") {
+      if (view.isLive() || view.isZoomed()) return;
       // Chekkani bosish: shu burchakdan ag'dariladi.
       setCornerHint(current.corner ?? null);
       const neighbour = current.side === 1 ? nextStart : prevStart;
@@ -607,7 +626,7 @@ export function BookView({
       return;
     }
     // Pinch shu teginish davomida (yoki hozirgina) bo'lgan bo'lsa — swipe emas.
-    if (flipRef.current || view.isLive() || view.panMode) return;
+    if (flipRef.current || view.isLive() || view.panMode || view.isZoomed()) return;
     const direction = swipeDirection(dx, dy, event.timeStamp - current.at);
     if (direction === "next" && nextStart !== null) onGo(nextStart);
     if (direction === "prev" && prevStart !== null) onGo(prevStart);
@@ -623,7 +642,9 @@ export function BookView({
     if ((event.target as Element).closest("button, a, input")) return;
     // So'zni ikki marta bosib belgilash — zoom emas; chekka — varaqlash.
     if (window.getSelection?.()?.isCollapsed === false) return;
-    if (!view.panMode && edgeZone(toLocal(event.clientX, event.clientY))) return;
+    if (!view.panMode && !view.isZoomed() && edgeZone(toLocal(event.clientX, event.clientY))) {
+      return;
+    }
     view.toggleAt({ x: event.clientX, y: event.clientY });
   };
 
@@ -723,7 +744,9 @@ export function BookView({
                     current: number === page,
                     align: twoPage ? (side === "left" ? "end" : "start") : "center",
                     prefetch: !visible,
-                    renderScale: view.renderScale,
+                    // Zoom'dan keyin aniq qayta chizish faqat ko'rinib turgan betlarda (oldindan
+                    // chiziladigan qo'shnilar oddiy aniqlikda; ochilganda keshdagi nusxa darhol).
+                    renderScale: visible ? view.renderScale : 1,
                     pool,
                     priority: visible ? 0 : 1,
                   })}
@@ -779,26 +802,33 @@ export function BookView({
         {announce}
       </p>
 
-      <button
-        type="button"
-        aria-label={t("prev")}
-        data-testid="pdf-edge-prev"
-        disabled={prevStart === null}
-        onClick={() => prevStart !== null && onGo(prevStart)}
-        className="pdf-edge-button left-1 lg:left-3"
-      >
-        <ChevronLeft className="size-6" aria-hidden />
-      </button>
-      <button
-        type="button"
-        aria-label={t("next")}
-        data-testid="pdf-edge-next"
-        disabled={nextStart === null}
-        onClick={() => nextStart !== null && onGo(nextStart)}
-        className="pdf-edge-button right-1 lg:right-3"
-      >
-        <ChevronRight className="size-6" aria-hidden />
-      </button>
+      {/* Kattalashganda chekka tugmalari kitob ustida qoladi: surish shu tugmadan boshlansa
+          brauzer uni «bosish» deb hisoblab varaqni ag'darardi. Shuning uchun ular yashiriladi
+          (pastki panel va klaviatura ishlaydi). */}
+      {!view.panMode && (
+        <>
+          <button
+            type="button"
+            aria-label={t("prev")}
+            data-testid="pdf-edge-prev"
+            disabled={prevStart === null}
+            onClick={() => prevStart !== null && !view.isLive() && onGo(prevStart)}
+            className="pdf-edge-button left-1 lg:left-3"
+          >
+            <ChevronLeft className="size-6" aria-hidden />
+          </button>
+          <button
+            type="button"
+            aria-label={t("next")}
+            data-testid="pdf-edge-next"
+            disabled={nextStart === null}
+            onClick={() => nextStart !== null && !view.isLive() && onGo(nextStart)}
+            className="pdf-edge-button right-1 lg:right-3"
+          >
+            <ChevronRight className="size-6" aria-hidden />
+          </button>
+        </>
+      )}
     </div>
   );
 }

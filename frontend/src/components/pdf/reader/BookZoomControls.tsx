@@ -14,11 +14,14 @@ import { READER_ICON_BUTTON } from "./reader-styles";
 export function BookZoomControls({
   zoom,
   onZoom,
+  onNudge,
   className,
   compact = false,
 }: {
   zoom: number;
   onZoom: (zoom: number) => void;
+  /** −/+ (25% qadam): berilsa animatsiya davomida ketma-ket bosishlar ham yig'iladi. */
+  onNudge?: (direction: 1 | -1) => void;
   className?: string;
   compact?: boolean;
 }) {
@@ -35,7 +38,7 @@ export function BookZoomControls({
         aria-label={t("zoomOut")}
         aria-keyshortcuts="-"
         disabled={zoom <= MIN_ZOOM}
-        onClick={() => onZoom(nudgeZoom(zoom, -1))}
+        onClick={() => (onNudge ? onNudge(-1) : onZoom(nudgeZoom(zoom, -1)))}
         className={cn(READER_ICON_BUTTON, "disabled:opacity-40")}
       >
         <Minus className="size-4" aria-hidden />
@@ -55,7 +58,7 @@ export function BookZoomControls({
         aria-label={t("zoomIn")}
         aria-keyshortcuts="+"
         disabled={zoom >= MAX_ZOOM}
-        onClick={() => onZoom(nudgeZoom(zoom, 1))}
+        onClick={() => (onNudge ? onNudge(1) : onZoom(nudgeZoom(zoom, 1)))}
         className={cn(READER_ICON_BUTTON, "disabled:opacity-40")}
       >
         <Plus className="size-4" aria-hidden />
@@ -67,10 +70,7 @@ export function BookZoomControls({
         data-testid="book-zoom-fit"
         aria-pressed={zoom === DEFAULT_ZOOM}
         onClick={() => onZoom(DEFAULT_ZOOM)}
-        className={cn(
-          READER_ICON_BUTTON,
-          !compact && "w-auto gap-1.5 px-3 text-sm font-semibold",
-        )}
+        className={cn(READER_ICON_BUTTON, !compact && "w-auto gap-1.5 px-3 text-sm font-semibold")}
       >
         <Maximize2 className="size-4" aria-hidden />
         {!compact && <span>{t("fit")}</span>}

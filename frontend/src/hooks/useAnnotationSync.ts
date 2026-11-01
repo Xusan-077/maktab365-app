@@ -6,8 +6,8 @@ import { toItem } from "@/lib/books/annotations";
 import { useBookAnnotationsStore } from "@/stores/book-annotations.store";
 import { useAuth } from "./useAuth";
 
-/** Chizish tugagach serverga yuborishdan oldingi kutish (ketma-ket chiziqlar bitta so'rovga tushadi). */
-export const ANNOTATION_SAVE_DEBOUNCE_MS = 700;
+/** Chizish tugagach serverga yuborishdan oldingi kutish: 2 s (ketma-ket chiziqlar bitta so'rovga tushadi). */
+export const ANNOTATION_SAVE_DEBOUNCE_MS = 2_000;
 /** Tarmoq xatosidan keyingi qayta urinish: 2 s dan boshlab, 30 s gacha ikki barobar. */
 const RETRY_BASE_MS = 2_000;
 const RETRY_MAX_MS = 30_000;

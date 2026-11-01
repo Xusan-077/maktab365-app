@@ -11,9 +11,9 @@ import {
   type ReactNode,
   type RefObject,
 } from "react";
-import type { LiveZoom } from "@/hooks/useReaderZoom";
 import type { PDFDocumentProxy } from "@/lib/pdf/pdfjs";
 import { pageAtCenter, pageOffsets, renderWindow } from "@/lib/pdf/reading-mode";
+import { ZOOM_SETTLE_LOCK_MS } from "@/lib/pdf/zoom";
 import { cn } from "@/lib/utils/cn";
 
 /** Betlar orasidagi bo'shliq (px). */
@@ -35,7 +35,8 @@ export interface VerticalViewProps {
   page: number;
   total: number;
   zoom: number;
-  live: LiveZoom | null;
+  /** Zoom gesture'i / tugma animatsiyasi davom etmoqda (`useReaderZoom`; ref — qayta render yo'q). */
+  isZooming?: () => boolean;
   /** Scroll konteyneri: oddiy holatda oyna, to'liq ekranda — stage. */
   fullscreen: boolean;
   stageRef: RefObject<HTMLElement | null>;
@@ -64,7 +65,7 @@ export function VerticalView({
   page,
   total,
   zoom,
-  live,
+  isZooming,
   fullscreen,
   stageRef,
   scrollerRef,
@@ -106,7 +107,11 @@ export function VerticalView({
     fit === "page" && viewportHeight > pageReserve
       ? Math.min(fitWidth, Math.floor((viewportHeight - pageReserve) / aspects.base))
       : fitWidth;
-  const pageWidth = Math.floor(baseWidth * zoom);
+  // Layout zoom'ga aniq mutanosib (eni, balandlik va oraliq yaxlitlanmaydi): gesture paytidagi CSS
+  // `scale` zoom qo'llangandagi yangi layout bilan piksel-piksel mos keladi — almashganda betlar
+  // (fokusdan uzoqdagilari ham) siljimaydi.
+  const pageWidth = baseWidth * zoom;
+  const gap = GAP * zoom;
 
   // 1-bet nisbati — barcha betlar uchun standart.
   useEffect(() => {
@@ -160,12 +165,13 @@ export function VerticalView({
 
   const heights = useMemo(
     () =>
-      Array.from({ length: total }, (_, index) =>
-        Math.round(pageWidth * (aspects.pages.get(index + 1) ?? aspects.base)),
+      Array.from(
+        { length: total },
+        (_, index) => pageWidth * (aspects.pages.get(index + 1) ?? aspects.base),
       ),
     [total, pageWidth, aspects],
   );
-  const layout = useMemo(() => pageOffsets(heights, GAP), [heights]);
+  const layout = useMemo(() => pageOffsets(heights, gap), [heights, gap]);
 
   const scrollRoot = useCallback(
     (): HTMLElement | Window | null => (fullscreen ? stageRef.current : window),
@@ -194,9 +200,23 @@ export function VerticalView({
     if (slot) anchor.current = { page: number, top: slot.getBoundingClientRect().top };
   }, []);
 
+  // Zoom qulfi: gesture / tugma animatsiyasi paytida (kontent CSS `scale` da — o'lchamlar
+  // transformlangan; `isZooming` — ref, React holati emas) va zoom qo'llangandan keyin
+  // `ZOOM_SETTLE_LOCK_MS` davomida joriy bet zoom boshlangandagi betda turadi, keyin qayta o'lchanadi.
+  const lastCenter = useRef(page);
+  const zoomLock = useRef<{ page: number } | null>(null);
+  const lockTimer = useRef<number | undefined>(undefined);
+  const zoomSeen = useRef(zoom);
+
   const measure = useEffectEvent(() => {
     const list = contentRef.current;
-    if (!list) return;
+    if (!list || isZooming?.()) return;
+    const locked = zoomLock.current;
+    if (locked) {
+      // Faqat joy eslab qolinadi (haqiqiy nisbatlar kelsa shu bet joyida qolsin), bet yozilmaydi.
+      rememberAnchor(locked.page);
+      return;
+    }
     const root = scrollRoot();
     const top =
       root instanceof HTMLElement
@@ -204,6 +224,7 @@ export function VerticalView({
         : window.innerHeight / 2;
     const middle = top - list.getBoundingClientRect().top;
     const next = pageAtCenter(layout.tops, heights, middle);
+    lastCenter.current = next;
     setCenter(next);
     rememberAnchor(next);
     const pending = target.current;
@@ -215,6 +236,22 @@ export function VerticalView({
     }
     report(next);
   });
+
+  // Zoom qo'llandi → qulf (kutilayotgan bet yozuvi ham bekor); 400 ms dan keyin qulf ochiladi va
+  // joriy bet bir marta qayta o'lchanadi. Gesture paytida `measure` o'zi o'tkazib yuboriladi
+  // (`isZooming`), shuning uchun `lastCenter` — gesture boshlangandagi bet.
+  useLayoutEffect(() => {
+    if (zoomSeen.current === zoom) return;
+    zoomSeen.current = zoom;
+    zoomLock.current = { page: zoomLock.current?.page ?? lastCenter.current };
+    window.clearTimeout(timer.current);
+    window.clearTimeout(lockTimer.current);
+    lockTimer.current = window.setTimeout(() => {
+      zoomLock.current = null;
+      measure();
+    }, ZOOM_SETTLE_LOCK_MS);
+  }, [zoom]);
+  useEffect(() => () => window.clearTimeout(lockTimer.current), []);
 
   useEffect(() => {
     const root = scrollRoot();
@@ -251,6 +288,7 @@ export function VerticalView({
     if (!slot) return;
     const smooth = !first && !window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     target.current = { page, until: performance.now() + (smooth ? 1500 : 300), smooth };
+    lastCenter.current = page;
     setCenter(page);
     slot.scrollIntoView?.({ behavior: smooth ? "smooth" : "auto", block: "start" });
     if (!smooth) rememberAnchor(page);
@@ -294,17 +332,25 @@ export function VerticalView({
 
   return (
     <div ref={outerRef} className="w-full" data-testid="pdf-vertical">
-      <div ref={scrollerRef} className={cn((zoom > 1 || live) && "overflow-x-auto")}>
+      {/* `overscroll-x-contain` scroll konteynerining o'zida (aks holda trackpad'ning gorizontal
+          surishi chegarada oynaga o'tib, brauzerning «orqaga» navigatsiyasini ishga tushiradi);
+          `overflow-anchor: none` — zoom scroll'ini faqat `useReaderZoom` tuzatadi. 100% gacha
+          `overflow-x-clip`: gesture paytidagi CSS `scale` oynaga gorizontal scroll qo'shmasin.
+          Gesture transform'i (`transform`, `transform-origin`, `will-change`) React style'ida emas —
+          `useReaderZoom` uni to'g'ridan-to'g'ri DOM'ga yozadi (har kadrda qayta render yo'q). */}
+      <div
+        ref={scrollerRef}
+        className={cn(
+          "overscroll-x-contain [overflow-anchor:none]",
+          zoom > 1 ? "overflow-x-auto" : "overflow-x-clip",
+        )}
+      >
         <div
           ref={contentRef}
           data-testid="pdf-zoom-content"
           data-zoom={zoom}
-          className="mx-auto flex flex-col"
-          style={{
-            width: pageWidth || undefined,
-            gap: GAP,
-            ...(live && { transform: `scale(${live.scale})`, transformOrigin: live.origin }),
-          }}
+          className="mx-auto flex flex-col [overflow-anchor:none]"
+          style={{ width: pageWidth || undefined, gap }}
         >
           {heights.map((height, index) => {
             const number = index + 1;

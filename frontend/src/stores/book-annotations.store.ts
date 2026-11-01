@@ -20,13 +20,15 @@ export interface AnnotationChange {
 
 interface AnnotationsState {
   bookId: string | null;
+  /** Kimning chizmalari: foydalanuvchi id'si yoki `"guest"` (kirganda betlar qayta yuklanadi). */
+  owner: string | null;
   tool: AnnotationTool;
   selectedId: string | null;
   /** Yuklangan betlar: ro'yxat + undo/redo tarixi. Bet almashganda tarix saqlanadi. */
   pages: Record<number, PageHistory>;
   lastChange: AnnotationChange | null;
 
-  attach: (bookId: string) => void;
+  attach: (bookId: string, owner?: string) => void;
   setTool: (tool: AnnotationTool) => void;
   select: (id: string | null) => void;
   /** Serverdan kelgan ro'yxat (tarixsiz, faqat bet hali yuklanmagan bo'lsa). */
@@ -53,14 +55,18 @@ export const useBookAnnotationsStore = create<AnnotationsState>()((set, get) => 
 
   return {
     bookId: null,
+    owner: null,
     tool: "none",
     selectedId: null,
     pages: {},
     lastChange: null,
 
-    attach: (bookId) => {
-      if (get().bookId === bookId) return;
-      set({ bookId, tool: "none", selectedId: null, pages: {}, lastChange: null });
+    attach: (bookId, owner) => {
+      const state = get();
+      if (state.bookId === bookId && state.owner === (owner ?? null)) return;
+      // Kitob almashsa asbob o'chadi; faqat egasi (mehmon → akkaunt) almashsa asbob saqlanadi.
+      const tool = state.bookId === bookId ? state.tool : "none";
+      set({ bookId, owner: owner ?? null, tool, selectedId: null, pages: {}, lastChange: null });
     },
     setTool: (tool) => set({ tool, selectedId: null }),
     select: (selectedId) => set({ selectedId }),

@@ -31,13 +31,6 @@ const annotations = (page: number, count = 1): AnnotationOp => ({
   items: Array.from({ length: count }, (_, i) => ({ id: `${page}-${i}`, type: "text", data: {} })),
   at: "2026-10-31T10:00:00Z",
 });
-const note = (page: number, text: string): AnnotationOp => ({
-  kind: "note",
-  bookId: "book",
-  page,
-  text,
-  at: "2026-10-31T10:00:00Z",
-});
 
 function makeQueue(send: (op: AnnotationOp) => Promise<unknown>, storage = memoryStorage()) {
   const states: AnnotationQueueState[] = [];
@@ -63,11 +56,8 @@ describe("AnnotationSaveQueue", () => {
     queue.enqueue(annotations(3, 1));
     queue.enqueue(annotations(3, 4));
     queue.enqueue(annotations(4));
-    queue.enqueue(note(3, "a"));
-    queue.enqueue(note(3, "ab"));
-    expect(queue.size).toBe(3);
+    expect(queue.size).toBe(2);
     expect(queue.find("annotations", "book", 3)?.items).toHaveLength(4);
-    expect(queue.find("note", "book", 3)?.text).toBe("ab");
   });
 
   it("flush amallarni tartib bilan yuboradi va navbatni tozalaydi", async () => {
@@ -77,9 +67,9 @@ describe("AnnotationSaveQueue", () => {
       return Promise.resolve();
     });
     queue.enqueue(annotations(1));
-    queue.enqueue(note(2, "x"));
+    queue.enqueue(annotations(2));
     await expect(queue.flush()).resolves.toBe("done");
-    expect(sent).toEqual(["annotations:1", "note:2"]);
+    expect(sent).toEqual(["annotations:1", "annotations:2"]);
     expect(queue.size).toBe(0);
     expect(storage.data.size).toBe(0);
   });
@@ -145,10 +135,21 @@ describe("AnnotationSaveQueue", () => {
 
   it("sahifa qayta ochilganda saqlangan navbat tiklanadi", () => {
     const storage = memoryStorage();
-    makeQueue(() => Promise.resolve(), storage).queue.enqueue(note(7, "yo'qolmasin"));
+    makeQueue(() => Promise.resolve(), storage).queue.enqueue(annotations(7, 2));
     const { queue } = makeQueue(() => Promise.resolve(), storage);
     expect(queue.size).toBe(1);
-    expect(queue.find("note", "book", 7)?.text).toBe("yo'qolmasin");
+    expect(queue.find("annotations", "book", 7)?.items).toHaveLength(2);
+  });
+
+  it("eski versiyadagi yon daftar (`note`) amallari tashlanadi", () => {
+    const storage = memoryStorage();
+    storage.setItem(
+      `${ANNOTATION_QUEUE_PREFIX}u1`,
+      JSON.stringify([{ kind: "note", bookId: "book", page: 1, text: "x" }, annotations(2)]),
+    );
+    const { queue } = makeQueue(() => Promise.resolve(), storage);
+    expect(queue.size).toBe(1);
+    expect(queue.find("annotations", "book", 2)).toBeDefined();
   });
 
   it("buzilgan saqlangan ma'lumot navbatni buzmaydi", () => {
@@ -160,5 +161,59 @@ describe("AnnotationSaveQueue", () => {
   it("bo'sh navbatda flush 'idle' beradi", async () => {
     const { queue } = makeQueue(() => Promise.resolve());
     await expect(queue.flush()).resolves.toBe("idle");
+  });
+});
+
+describe("AnnotationSaveQueue: IndexedDB (durable) ombori", () => {
+  function durableStore(initial: AnnotationOp[] | undefined) {
+    const saved: AnnotationOp[][] = [];
+    return {
+      saved,
+      load: vi.fn(async () => initial),
+      save: vi.fn(async (_key: string, ops: AnnotationOp[]) => void saved.push(ops)),
+    };
+  }
+
+  it("saqlangan navbatni o'qiydi; shu sessiyadagi yangi amal ustun", async () => {
+    const durable = durableStore([annotations(1), annotations(2, 1)]);
+    const queue = new AnnotationSaveQueue({
+      userId: "u",
+      send: vi.fn(),
+      storage: memoryStorage(),
+      durable,
+    });
+    queue.enqueue(annotations(2, 3));
+    await queue.ready;
+    expect(queue.size).toBe(2);
+    expect(queue.find("annotations", "book", 2)?.items).toHaveLength(3);
+    expect(queue.find("annotations", "book", 1)).toBeDefined();
+  });
+
+  it("internet qaytganda yuboriladi va ombor bo'shatiladi; localStorage nusxasi ko'chiriladi", async () => {
+    const storage = memoryStorage();
+    storage.setItem(`${ANNOTATION_QUEUE_PREFIX}u`, JSON.stringify([annotations(5)]));
+    const durable = durableStore(undefined);
+    const send = vi.fn().mockRejectedValueOnce(offline()).mockResolvedValue({});
+    const queue = new AnnotationSaveQueue({ userId: "u", send, storage, durable });
+    expect(await queue.flush()).toBe("retry");
+    expect(queue.size).toBe(1);
+    expect(await queue.flush()).toBe("done");
+    expect(queue.size).toBe(0);
+    await vi.waitFor(() => expect(durable.saved.at(-1)).toEqual([]));
+    expect(storage.data.size).toBe(0);
+  });
+
+  it("IndexedDB yozolmasa localStorage'ga yozadi", async () => {
+    const storage = memoryStorage();
+    const durable = {
+      load: vi.fn(async () => undefined),
+      save: vi.fn(async () => {
+        throw new Error("quota");
+      }),
+    };
+    const queue = new AnnotationSaveQueue({ userId: "u", send: vi.fn(), storage, durable });
+    await queue.ready;
+    queue.enqueue(annotations(7));
+    await vi.waitFor(() => expect(storage.data.get(`${ANNOTATION_QUEUE_PREFIX}u`)).toBeDefined());
   });
 });

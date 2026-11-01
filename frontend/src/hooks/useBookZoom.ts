@@ -11,24 +11,42 @@ import {
   zoomAround,
   type Size,
 } from "@/lib/pdf/book";
-import { clampZoomSmooth, doubleTapZoom, MAX_ZOOM, MIN_ZOOM, wheelZoomSmooth } from "@/lib/pdf/zoom";
+import {
+  clampZoomSmooth,
+  doubleTapZoom,
+  MAX_ZOOM,
+  MIN_ZOOM,
+  wheelZoomSmooth,
+  ZOOM_BUTTON_ANIMATION_MS,
+  ZOOM_COMMIT_DEBOUNCE_MS,
+  ZOOM_SETTLE_LOCK_MS,
+} from "@/lib/pdf/zoom";
 
 interface Point {
   x: number;
   y: number;
 }
 
-/** Zoom/fit animatsiyasi: so'nuvchi prujina (sakramaydi), ~300ms. */
-const SPRING = { type: "spring", duration: 0.3, bounce: 0 } as const;
+/** Zoom/fit animatsiyasi (tugma, klaviatura, ikki marta bosish): so'nuvchi prujina, 180 ms. */
+const SPRING = { type: "spring", duration: ZOOM_BUTTON_ANIMATION_MS / 1000, bounce: 0 } as const;
 /** Ctrl+g'ildirak to'xtagach shuncha ms dan keyin zoom holatga yoziladi. */
-const WHEEL_COMMIT_MS = 150;
+const WHEEL_COMMIT_MS = ZOOM_COMMIT_DEBOUNCE_MS;
 /** Zoom tinchigach betlar shuncha ms dan keyin aniqroq qayta chiziladi. */
 const RERENDER_DEBOUNCE_MS = 150;
 /**
- * Pinch tugagach shuncha ms davomida swipe/varaq ag'darish qabul qilinmaydi: barmoqlar bir vaqtda
- * ko'tarilmaydi va qolgan barmoq harakati boshqa betga o'tkazib yubormasin.
+ * Pinch/g'ildirak/tugma zoom'i tugagach shuncha ms davomida swipe/varaq ag'darish qabul qilinmaydi:
+ * barmoqlar bir vaqtda ko'tarilmaydi va qolgan barmoq harakati boshqa betga o'tkazib yubormasin.
  */
-const GESTURE_COOLDOWN_MS = 350;
+const GESTURE_COOLDOWN_MS = ZOOM_SETTLE_LOCK_MS;
+/** Tugma/klaviatura zoom'ining prujina animatsiyasi (`SPRING.duration`), ms. */
+const SPRING_MS = ZOOM_BUTTON_ANIMATION_MS;
+
+/** Safari'ning trackpad / iOS pinch hodisasi (standart `lib.dom` da yo'q). */
+interface GestureLike extends UIEvent {
+  scale: number;
+  clientX: number;
+  clientY: number;
+}
 
 const distance = (touches: TouchList) =>
   Math.hypot(touches[0].clientX - touches[1].clientX, touches[0].clientY - touches[1].clientY);
@@ -51,7 +69,13 @@ export function useBookZoom({
   zoom,
   setZoom,
   instant,
+  onLayerHint,
 }: {
+  /**
+   * Transform qilinadigan element (kitob) uchun: gesture paytida `true` — `will-change: transform`
+   * (GPU qatlami, silliq), tugagach `false` — brauzer qatlamni yangi masshtabda aniq qayta chizadi.
+   */
+  onLayerHint?: (active: boolean) => void;
   stage: HTMLElement | null;
   /** Kitobning joylashuv o'lchami (transform'siz). */
   book: Size;
@@ -120,6 +144,11 @@ export function useBookZoom({
       bounds(target),
     );
     stop();
+    // Har qanday manbadan zoom (tugma, klaviatura, Aa, pinch commit): animatsiya va undan keyingi
+    // `GESTURE_COOLDOWN_MS` davomida swipe/varaq ag'darish yo'q.
+    if (initialized.current) {
+      liveEndedAt.current = Math.max(liveEndedAt.current, performance.now() + SPRING_MS);
+    }
     if (instant || !initialized.current) {
       initialized.current = true;
       scale.set(target);
@@ -182,18 +211,20 @@ export function useBookZoom({
           }
         : zoomAround({ x: x.get(), y: y.get() }, point, scale.get(), value);
       const clamped = clampPan(pan, bounds(value));
+      onLayerHint?.(true);
       scale.set(value);
       x.set(clamped.x);
       y.set(clamped.y);
     },
-    [fit, toFocal, bounds, scale, x, y, stop],
+    [fit, toFocal, bounds, scale, x, y, stop, onLayerHint],
   );
 
   const commitLive = useCallback(() => {
     live.current = false;
     liveEndedAt.current = performance.now();
+    onLayerHint?.(false);
     if (fit) setZoom(scale.get() / fit);
-  }, [fit, scale, setZoom]);
+  }, [fit, scale, setZoom, onLayerHint]);
 
   // Ctrl/⌘+g'ildirak (va trackpad pinch'i): brauzer zoomi o'rniga kitob; oddiy g'ildirak — pan.
   useEffect(() => {
@@ -252,11 +283,46 @@ export function useBookZoom({
       start = null;
       commitLive();
     };
+    // Safari: macOS trackpad pinch `ctrlKey` li wheel emas, `gesture*` hodisalari. Bekor qilinmasa
+    // brauzer butun sahifani kattalashtiradi. iOS'da pinch touch orqali (`start`) — bu yerda faqat
+    // brauzer zoom'i to'xtatiladi.
+    let gesture: { scale: number; pan: Point; focal: Point; client: Point | null } | null = null;
+    const onGestureStart = (event: Event) => {
+      event.preventDefault();
+      if (start) return;
+      const { clientX, clientY } = event as GestureLike;
+      const inside = event.target instanceof Node && stage.contains(event.target);
+      const client = inside && Number.isFinite(clientX) ? { x: clientX, y: clientY } : null;
+      live.current = true;
+      gesture = {
+        scale: scale.get(),
+        pan: { x: x.get(), y: y.get() },
+        focal: toFocal(client ?? undefined) ?? { x: 0, y: 0 },
+        client,
+      };
+    };
+    const onGestureChange = (event: Event) => {
+      event.preventDefault();
+      if (!gesture || start) return;
+      liveScale(gesture.scale * ((event as GestureLike).scale || 1), gesture.client, gesture);
+    };
+    const onGestureEnd = (event: Event) => {
+      event.preventDefault();
+      const current = gesture;
+      gesture = null;
+      if (current && !start) commitLive();
+    };
+    window.addEventListener("gesturestart", onGestureStart, { passive: false });
+    window.addEventListener("gesturechange", onGestureChange, { passive: false });
+    window.addEventListener("gestureend", onGestureEnd, { passive: false });
     stage.addEventListener("touchstart", onStart, { passive: true });
     stage.addEventListener("touchmove", onMove, { passive: false });
     stage.addEventListener("touchend", onEnd);
     stage.addEventListener("touchcancel", onEnd);
     return () => {
+      window.removeEventListener("gesturestart", onGestureStart);
+      window.removeEventListener("gesturechange", onGestureChange);
+      window.removeEventListener("gestureend", onGestureEnd);
       stage.removeEventListener("touchstart", onStart);
       stage.removeEventListener("touchmove", onMove);
       stage.removeEventListener("touchend", onEnd);
@@ -283,6 +349,13 @@ export function useBookZoom({
     panMode: zoom > BOOK_PAN_ZOOM,
     /** Pinch yoki Ctrl+g'ildirak davom etmoqda yoki hozirgina tugadi (swipe qabul qilinmaydi). */
     isLive: () => live.current || performance.now() - liveEndedAt.current < GESTURE_COOLDOWN_MS,
+    /**
+     * «Moslash» dan farqli masshtab (kattalashgan yoki kichraygan, animatsiya davomida ham):
+     * swipe va chekkadan varaqlash o'chadi — sahifa faqat tugma/klaviatura bilan almashadi.
+     */
+    isZoomed: () =>
+      Math.abs(zoom - 1) > BOOK_PAN_ZOOM - 1 ||
+      (fit > 0 && Math.abs(scale.get() / fit - 1) > BOOK_PAN_ZOOM - 1),
     zoomTo,
     toggleAt,
     panTo,

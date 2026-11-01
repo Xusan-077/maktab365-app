@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { loadOfflinePdf } from "@/lib/offline/pdf-cache";
 import { resolveFileUrl } from "@/lib/pdf/file-url";
+import { autoRetriable, classifyPdfError, PdfLoadTimeoutError } from "@/lib/pdf/load-error";
 import {
   loadPdfjs,
   pdfjsAssetOptions,
@@ -15,6 +16,11 @@ import { pdfQueries } from "@/lib/pdf-books/queries";
 
 /** Bir so'rovda shuncha bayt (HTTP Range): kitob to'liq yuklanishini kutmaydi. */
 const RANGE_CHUNK_BYTES = 256 * 1024;
+/**
+ * Hujjat (URL olish + PDF sarlavhasi va 1-bo'lak) shu vaqt ichida ochilmasa — tushunarli
+ * «juda uzoq yuklanyapti» xatosi (aks holda skelet cheksiz aylanib turardi).
+ */
+export const PDF_LOAD_TIMEOUT_MS = 30_000;
 
 interface DocumentState {
   doc: PDFDocumentProxy | null;
@@ -40,11 +46,29 @@ function usePdfFromUrl(
     loader.current = fetchSource;
   });
 
+  /** Imzolangan URL eskirgan bo'lsa bir marta jim qayta uriniladi (har yangi manba uchun). */
+  const silentRetries = useRef(0);
+  useEffect(() => {
+    silentRetries.current = 0;
+  }, [sourceKey]);
+
   useEffect(() => {
     // O'chiq: boshqa turdagi kitob uchun hook chaqirilgan, hech narsa yuklanmaydi (holati ishlatilmaydi).
     if (!enabled) return;
     let cancelled = false;
     let task: PDFDocumentLoadingTask | undefined;
+    const fail = (error: unknown) => {
+      if (cancelled) return;
+      cancelled = true;
+      void task?.destroy();
+      if (autoRetriable(classifyPdfError(error)) && silentRetries.current < 1) {
+        silentRetries.current += 1;
+        setAttempt((count) => count + 1);
+        return;
+      }
+      setState({ doc: null, loading: false, error });
+    };
+    const timer = window.setTimeout(() => fail(new PdfLoadTimeoutError()), PDF_LOAD_TIMEOUT_MS);
     void (async () => {
       try {
         const [pdfjs, file] = await Promise.all([loadPdfjs(), loader.current()]);
@@ -66,14 +90,19 @@ function usePdfFromUrl(
           void task.destroy();
           return;
         }
+        window.clearTimeout(timer);
+        silentRetries.current = 0;
         setState({ doc, loading: false, error: null });
       } catch (error) {
+        window.clearTimeout(timer);
+        if (cancelled) return;
         console.error("[pdf] hujjatni ochib bo'lmadi", error);
-        if (!cancelled) setState({ doc: null, loading: false, error });
+        fail(error);
       }
     })();
     return () => {
       cancelled = true;
+      window.clearTimeout(timer);
       void task?.destroy();
       // Yo'q qilingan hujjat state'da qolmasin: Next `<Activity>` sahifani yashirib keyin qaytarganda
       // (orqaga navigatsiya) bolalar eski `doc.getPage` ni chaqirib yiqilardi.
@@ -85,6 +114,14 @@ function usePdfFromUrl(
     setState((current) => ({ ...current, loading: true, error: null }));
     setAttempt((count) => count + 1);
   }, []);
+
+  // Xato holatida internet qaytsa — o'zi qayta yuklanadi (foydalanuvchi tugma bosishi shart emas).
+  const failed = enabled && state.error !== null && state.doc === null;
+  useEffect(() => {
+    if (!failed) return;
+    window.addEventListener("online", reload);
+    return () => window.removeEventListener("online", reload);
+  }, [failed, reload]);
 
   return { ...state, reload };
 }

@@ -10,6 +10,7 @@ import {
   nudgeZoom,
   pinchZoom,
   wheelZoom,
+  ZOOM_NUDGE,
 } from "./zoom";
 
 describe("zoom chegaralari", () => {
@@ -72,12 +73,15 @@ describe("anchorOffset", () => {
 });
 
 describe("nudgeZoom", () => {
-  it("10% qadam, chegaralar ichida", () => {
-    expect(nudgeZoom(1, 1)).toBe(1.1);
-    expect(nudgeZoom(1.1, -1)).toBe(1);
-    expect(nudgeZoom(1.23, 1)).toBe(1.3);
+  it("25% qadam, oraliq qiymatdan — keyingi pog'ona, chegaralar ichida", () => {
+    expect(ZOOM_NUDGE).toBe(0.25);
+    expect(nudgeZoom(1, 1)).toBe(1.25);
+    expect(nudgeZoom(1.25, -1)).toBe(1);
+    expect(nudgeZoom(1.3, 1)).toBe(1.5);
+    expect(nudgeZoom(1.3, -1)).toBe(1.25);
     expect(nudgeZoom(3.9, 1)).toBe(4);
     expect(nudgeZoom(4, 1)).toBe(4);
     expect(nudgeZoom(0.5, -1)).toBe(0.5);
+    expect(nudgeZoom(0.6, -1)).toBe(0.5);
   });
 });

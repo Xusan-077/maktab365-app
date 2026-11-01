@@ -160,8 +160,50 @@ export function prefersSimpleFlip({
 /** Qayta chizish o'lchami: bitta canvas tomoni shu px dan oshmaydi (xotira). */
 export const MAX_CANVAS_SIDE = 4096;
 
-/** Canvas piksel zichligi: `devicePixelRatio × zoom`, eng katta tomon ≤ `MAX_CANVAS_SIDE`. */
-export function renderPixelRatio(baseRatio: number, zoom: number, cssSize: Size): number {
+/**
+ * Bitta canvas maydoni (px): iOS Safari 16 777 216 dan kattasini umuman chizmaydi (bo'sh qoladi).
+ * Telefon / kam xotirali qurilmada — yarmi (bir vaqtda 5–12 ta canvas bo'ladi, umumiy limit bor).
+ * 8 MP telefonda 400% da ham ~1.3 fizik px / CSS px — matn xira emas.
+ */
+export const MAX_CANVAS_PIXELS = 16_777_216;
+export const LOW_END_CANVAS_PIXELS = 8_388_608;
+
+/** Qurilma uchun canvas maydoni chegarasi (sensorli asosiy ko'rsatkich yoki ≤ 4 GB xotira). */
+export function canvasPixelBudget({
+  coarse,
+  memory,
+}: {
+  coarse?: boolean;
+  memory?: number;
+}): number {
+  return coarse || (memory !== undefined && memory <= 4)
+    ? LOW_END_CANVAS_PIXELS
+    : MAX_CANVAS_PIXELS;
+}
+
+/** Brauzerda: `canvasPixelBudget` joriy qurilma uchun. */
+export function deviceCanvasPixelBudget(): number {
+  if (typeof window === "undefined") return MAX_CANVAS_PIXELS;
+  return canvasPixelBudget({
+    coarse: window.matchMedia?.("(pointer: coarse)")?.matches ?? false,
+    memory: (navigator as Navigator & { deviceMemory?: number }).deviceMemory,
+  });
+}
+
+/**
+ * Canvas piksel zichligi: `devicePixelRatio × zoom`, eng katta tomon ≤ `MAX_CANVAS_SIDE` va maydon
+ * ≤ `maxPixels`.
+ */
+export function renderPixelRatio(
+  baseRatio: number,
+  zoom: number,
+  cssSize: Size,
+  maxPixels: number = MAX_CANVAS_PIXELS,
+): number {
   const side = Math.max(cssSize.width, cssSize.height, 1);
-  return Math.max(0.5, Math.min(baseRatio * Math.max(1, zoom), MAX_CANVAS_SIDE / side));
+  const area = Math.max(cssSize.width * cssSize.height, 1);
+  return Math.max(
+    0.5,
+    Math.min(baseRatio * Math.max(1, zoom), MAX_CANVAS_SIDE / side, Math.sqrt(maxPixels / area)),
+  );
 }

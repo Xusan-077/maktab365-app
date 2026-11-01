@@ -31,8 +31,11 @@ export interface NormRect {
   h: number;
 }
 
+/** Erkin chiziq asbobi: qalam (to'liq rang, bosim bilan) yoki marker (yarim shaffof, qalin). */
+export type StrokeTool = "pen" | "marker";
+
 export interface DrawingData {
-  tool: "pen";
+  tool: StrokeTool;
   color: string;
   width: number;
   points: StrokePoint[];
@@ -367,9 +370,22 @@ export function rectFromDrag(
 export const INK = "ink";
 export const PEN_COLORS = [INK, "#e5484d", "#3b82f6", "#30a46c", "#f59e0b", "#8e4ec6"] as const;
 export const HIGHLIGHT_COLORS = ["#fde047", "#86efac", "#f9a8d4", "#93c5fd"] as const;
+/** Marker ranglari (6 ta, och — yarim shaffof chiziladi). */
+export const MARKER_COLORS = [
+  "#fde047",
+  "#86efac",
+  "#f9a8d4",
+  "#93c5fd",
+  "#fdba74",
+  "#c4b5fd",
+] as const;
 
 /** Chiziq qalinligi va matn hajmi: bet eniga nisbatan. */
 export const PEN_WIDTHS = [0.0025, 0.0045, 0.008] as const;
+/** Marker qalinligi (yupqa / o'rta / qalin): qalamdan ancha qalin, backend chegarasi 0.06 gacha. */
+export const MARKER_WIDTHS = [0.012, 0.02, 0.032] as const;
+/** Marker shaffofligi (qog'ozda matn ko'rinib tursin). */
+export const MARKER_ALPHA = 0.38;
 export const TEXT_SIZES = [0.018, 0.026, 0.038] as const;
 
 export const DEFAULT_PEN_COLOR = INK;
@@ -457,7 +473,12 @@ export function parseAnnotation(row: {
     return {
       id: row.id,
       type: "drawing",
-      data: { tool: "pen", color: data.color, width: data.width, points },
+      data: {
+        tool: data.tool === "marker" ? "marker" : "pen",
+        color: data.color,
+        width: data.width,
+        points,
+      },
     };
   }
   if (row.type === "highlight") {

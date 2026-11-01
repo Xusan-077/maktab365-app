@@ -23,6 +23,8 @@ export interface AppearanceSettingsProps {
   onMode: (mode: ReadingMode) => void;
   onFit: (fit: ReaderFit) => void;
   onZoom: (zoom: number) => void;
+  /** −/+ (25% qadam): berilsa animatsiya davomida ketma-ket bosishlar ham yig'iladi. */
+  onNudge?: (direction: 1 | -1) => void;
   onWarm: (warm: boolean) => void;
 }
 
@@ -69,7 +71,9 @@ export function AppearanceSettings(props: AppearanceSettingsProps) {
             className={ZOOM_BUTTON}
             aria-label={t("zoomOut")}
             disabled={props.zoom <= MIN_ZOOM}
-            onClick={() => props.onZoom(nudgeZoom(props.zoom, -1))}
+            onClick={() =>
+              props.onNudge ? props.onNudge(-1) : props.onZoom(nudgeZoom(props.zoom, -1))
+            }
           >
             <Minus className="size-4" aria-hidden />
           </button>
@@ -88,7 +92,9 @@ export function AppearanceSettings(props: AppearanceSettingsProps) {
             className={ZOOM_BUTTON}
             aria-label={t("zoomIn")}
             disabled={props.zoom >= MAX_ZOOM}
-            onClick={() => props.onZoom(nudgeZoom(props.zoom, 1))}
+            onClick={() =>
+              props.onNudge ? props.onNudge(1) : props.onZoom(nudgeZoom(props.zoom, 1))
+            }
           >
             <Plus className="size-4" aria-hidden />
           </button>

@@ -13,7 +13,8 @@ from typing import Any
 from rest_framework.exceptions import ValidationError
 
 COLOR_RE = re.compile(r"^(#[0-9a-fA-F]{6}|ink)$")
-PEN_TOOLS = ("pen",)
+# `marker` — yarim shaffof qalin chiziq (shaffoflik mijozda; tuzilishi qalam bilan bir xil).
+PEN_TOOLS = ("pen", "marker")
 
 MAX_POINTS = 5000
 MAX_RECTS = 200

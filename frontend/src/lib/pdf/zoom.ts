@@ -8,6 +8,34 @@ export const DEFAULT_ZOOM = 1;
 export const ZOOM_STEPS = [1, 1.5, 2, 3, 4] as const;
 /** Ikki marta bosilganda kattalashish darajasi. */
 export const DOUBLE_TAP_ZOOM = 2;
+/**
+ * Zoom (pinch, g'ildirak, tugma) tugagach shuncha ms davomida bet almashmaydi: kitobda swipe/varaq
+ * ag'darish, uzluksiz rejimda «joriy bet» qayta hisoblanmaydi (barmoqlar bir vaqtda ko'tarilmaydi,
+ * scroll tuzatishi va betlar o'lchami tinchishi kerak).
+ */
+export const ZOOM_SETTLE_LOCK_MS = 400;
+
+/**
+ * Zoom sezgirligi — **sozlash shu yerda**. G'ildirak/trackpad: har hodisada `zoom × exp(−deltaY × k)`
+ * (`deltaY` — px; Firefox qatorlari ×16). `k` kattaroq — tezroq.
+ * - `mouseWheel` — sichqoncha g'ildiragi (diskret, ~100 px qadam): 0.0033 → bir qadam ≈ ×1.39.
+ * - `trackpad` — trackpad pinch / mayda uzluksiz `deltaY` (Chrome, Edge, Firefox `ctrlKey` bilan):
+ *   0.0045 (oldingidan 2×).
+ * - `maxDeltaPx` — bitta hodisada ko'pi bilan shuncha px (g'ildirak tez aylantirilganda sakramasin).
+ * - `discreteMinPx` — butun va shundan katta `deltaY` sichqoncha qadami deb olinadi.
+ */
+export const ZOOM_SENSITIVITY = {
+  mouseWheel: 0.0033,
+  trackpad: 0.0045,
+  maxDeltaPx: 160,
+  discreteMinPx: 40,
+} as const;
+/** −/+ tugmasi va klaviatura `+`/`−` qadami (25%). */
+export const ZOOM_NUDGE = 0.25;
+/** −/+ va pog'ona tugmalari zoom animatsiyasi (ms). */
+export const ZOOM_BUTTON_ANIMATION_MS = 180;
+/** G'ildirak/trackpad to'xtagach shuncha ms dan keyin zoom holatga yoziladi va betlar qayta chiziladi. */
+export const ZOOM_COMMIT_DEBOUNCE_MS = 150;
 
 /** 0.5..4 oralig'iga va 0.05 qadamga keltiradi (sahifa kengligi tez-tez qayta chizilmasin). */
 export function clampZoom(value: number): number {
@@ -45,12 +73,11 @@ export function anchorOffset(offset: number, focal: number, ratio: number): numb
   return Math.max(0, (offset + focal) * ratio - focal);
 }
 
-/** −/+ (Aa menyusi, zoom guruhi, klaviatura `+`/`−`) qadami: 10%. */
-export const ZOOM_NUDGE = 0.1;
-
-/** −/+ : eng yaqin 10% pog'onasiga, chegaralar ichida. */
+/** −/+ : eng yaqin `ZOOM_NUDGE` (25%) pog'onasiga, chegaralar ichida. */
 export function nudgeZoom(zoom: number, direction: 1 | -1): number {
-  const steps = Math.round(zoom / ZOOM_NUDGE) + direction;
+  // Oraliq qiymatdan (masalan 1.3 dan +) — keyingi pog'onaga (1.5), keyingidan keyingisiga emas.
+  const position = zoom / ZOOM_NUDGE;
+  const steps = direction > 0 ? Math.floor(position + 1e-6) + 1 : Math.ceil(position - 1e-6) - 1;
   return clampZoom(steps * ZOOM_NUDGE);
 }
 
@@ -63,10 +90,25 @@ export function clampZoomSmooth(value: number, min = MIN_ZOOM, max = MAX_ZOOM): 
   return Math.min(max, Math.max(min, value));
 }
 
-/** Ctrl+g'ildirak: `deltaMode` qatorlarda (Firefox) bo'lsa pikselga keltiriladi; uzluksiz ko'paytma. */
+/** Sichqoncha g'ildiragi (diskret qadam) mi yoki trackpad (mayda uzluksiz `deltaY`). */
+export function isDiscreteWheel(deltaY: number, deltaMode = 0): boolean {
+  if (deltaMode !== 0) return true;
+  const size = Math.abs(deltaY);
+  return size >= ZOOM_SENSITIVITY.discreteMinPx && Number.isInteger(size);
+}
+
+/**
+ * Ctrl+g'ildirak / trackpad pinch: `deltaY` ga mutanosib uzluksiz ko'paytma `exp(−deltaY × k)`;
+ * `k` — sichqoncha yoki trackpad (`ZOOM_SENSITIVITY`). `deltaMode` qatorlarda (Firefox) — px ga.
+ */
 export function wheelZoomSmooth(zoom: number, deltaY: number, deltaMode = 0): number {
   const pixels = deltaMode === 1 ? deltaY * 16 : deltaMode === 2 ? deltaY * 400 : deltaY;
-  return zoom * Math.exp(-pixels * 0.0022);
+  const limit = ZOOM_SENSITIVITY.maxDeltaPx;
+  const clamped = Math.max(-limit, Math.min(limit, pixels));
+  const k = isDiscreteWheel(deltaY, deltaMode)
+    ? ZOOM_SENSITIVITY.mouseWheel
+    : ZOOM_SENSITIVITY.trackpad;
+  return zoom * Math.exp(-clamped * k);
 }
 
 /**

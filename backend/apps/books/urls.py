@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import annotation_views, entry_views, me_views, testmode_views, views
+from . import annotation_views, entry_views, me_views, views
 
 urlpatterns = [
     path("books/", views.BookListView.as_view(), name="books-list"),
@@ -65,30 +65,5 @@ urlpatterns = [
         "me/annotations/books/",
         entry_views.MyEntryBooksView.as_view(),
         name="me-annotations-books",
-    ),
-    path(
-        "me/books/<uuid:pk>/test/",
-        testmode_views.MyTestSheetView.as_view(),
-        name="me-books-test",
-    ),
-    path(
-        "me/books/<uuid:pk>/test/answer/",
-        testmode_views.MyTestAnswerView.as_view(),
-        name="me-books-test-answer",
-    ),
-    path(
-        "me/books/<uuid:pk>/test/check/",
-        testmode_views.MyTestCheckView.as_view(),
-        name="me-books-test-check",
-    ),
-    path(
-        "me/books/<uuid:pk>/test/attempts/",
-        testmode_views.MyTestAttemptsView.as_view(),
-        name="me-books-test-attempts",
-    ),
-    path(
-        "me/books/<uuid:pk>/test/attempts/<uuid:attempt_id>/",
-        testmode_views.MyTestAttemptDetailView.as_view(),
-        name="me-books-test-attempt",
     ),
 ]

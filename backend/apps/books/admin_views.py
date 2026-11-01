@@ -4,9 +4,8 @@ from django.conf import settings
 from django.db import transaction
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
-from rest_framework import serializers
 from rest_framework.decorators import action
-from rest_framework.exceptions import APIException, NotFound, ValidationError
+from rest_framework.exceptions import APIException, NotFound
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 
@@ -24,29 +23,13 @@ from apps.content.pdf_serializers import (
 from apps.core.admin_download import cover_response, safe_filename
 from apps.core.throttling import PdfUploadThrottle
 
-from . import services, testmode
+from . import services
 from .admin_serializers import (
     BookAdminSerializer,
     BookTransitionSerializer,
     BookTypeAdminSerializer,
 )
-from .models import AnswerKeyItem, Book, BookStatus, BookType, ReadingMode
-
-
-class AnswerKeyItemSerializer(serializers.Serializer):
-    page = serializers.IntegerField()
-    question = serializers.IntegerField()
-    answer = serializers.CharField()
-
-
-class AnswerKeyImportSerializer(serializers.Serializer):
-    text = serializers.CharField(max_length=400_000, trim_whitespace=False)
-    mode = serializers.ChoiceField(choices=["replace", "merge"], default="replace")
-
-
-class AnswerKeySavedSerializer(serializers.Serializer):
-    saved = serializers.IntegerField()
-    total = serializers.IntegerField()
+from .models import Book, BookStatus, BookType, ReadingMode
 
 
 @extend_schema_view(
@@ -259,71 +242,6 @@ class BookAdminViewSet(AdminViewSet):
         book = self.get_object()
         self.log("download_cover", book)
         return cover_response(book.cover_image, book.title)
-
-    def _test_book(self) -> Book:
-        book = self.get_object()
-        if book.reading_mode != ReadingMode.TEST:
-            raise ValidationError({"detail": ["not_test_book"]})
-        return book
-
-    @extend_schema(
-        methods=["GET"],
-        operation_id="admin_books_answer_key",
-        tags=TAG,
-        summary="Test kitob: javoblar kaliti (faqat editor/admin)",
-        responses=AnswerKeyItemSerializer(many=True),
-    )
-    @extend_schema(
-        methods=["DELETE"],
-        operation_id="admin_books_answer_key_clear",
-        tags=TAG,
-        summary="Kalitni to'liq o'chirish (foydalanuvchi javoblari ham tozalanadi)",
-        responses={204: None},
-    )
-    @action(
-        detail=True,
-        methods=["get", "delete"],
-        url_path="answer-key",
-        pagination_class=None,
-    )
-    def answer_key(self, request, pk=None):
-        book = self._test_book()
-        if request.method == "DELETE":
-            before = {"items": AnswerKeyItem.objects.filter(book=book).count()}
-            with transaction.atomic():
-                testmode.save_key(book, [], replace=True)
-                self.log("answer_key_clear", book, before=before, after={"items": 0})
-            return Response(status=204)
-        rows = AnswerKeyItem.objects.filter(book=book)
-        return Response(
-            [{"page": r.page, "question": r.question, "answer": r.answer} for r in rows]
-        )
-
-    @extend_schema(
-        operation_id="admin_books_answer_key_import",
-        tags=TAG,
-        summary="Kalitni ommaviy kiritish: har qator `bet, savol, javob`",
-        request=AnswerKeyImportSerializer,
-        responses=AnswerKeySavedSerializer,
-    )
-    @action(detail=True, methods=["post"], url_path="answer-key/import")
-    def answer_key_import(self, request, pk=None):
-        book = self._test_book()
-        body = AnswerKeyImportSerializer(data=request.data)
-        body.is_valid(raise_exception=True)
-        rows, errors = testmode.parse_key_text(body.validated_data["text"], book.page_count)
-        if errors:
-            shown = [f"{e.line}: {e.code}" for e in errors[:50]]
-            raise ValidationError({"text": shown})
-        if not rows:
-            raise ValidationError({"text": ["empty"]})
-        replace = body.validated_data["mode"] == "replace"
-        before = {"items": AnswerKeyItem.objects.filter(book=book).count()}
-        with transaction.atomic():
-            saved = testmode.save_key(book, rows, replace=replace)
-            total = AnswerKeyItem.objects.filter(book=book).count()
-            self.log("answer_key_import", book, before=before, after={"items": total})
-        return Response({"saved": saved, "total": total})
 
 
 @extend_schema_view(

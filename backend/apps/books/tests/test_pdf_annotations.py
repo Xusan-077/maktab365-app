@@ -109,3 +109,12 @@ def test_unknown_book_is_404(reader):
         ).status_code
         == 404
     )
+
+
+def test_marker_stroke_is_saved_with_its_tool(reader, textbook):
+    marker = {**drawing(), "tool": "marker", "color": "#fde047", "width": 0.02}
+    response = put_page(reader, textbook, 3, [{"type": "drawing", "data": marker}])
+    assert response.status_code == 200
+    saved = PdfPageAnnotation.objects.get(pdf_book=textbook, page=3)
+    assert saved.data["tool"] == "marker"
+    assert saved.data["width"] == 0.02

@@ -13,9 +13,6 @@ export type AdminBookTypePatch = Schemas["PatchedBookTypeAdminRequest"];
 export type LibraryRow = Schemas["LibraryRow"];
 export type ReadingMode = Schemas["ReadingModeEnum"];
 export type AdminBookStatus = Schemas["BookStatusEnum"];
-export type AnswerKeyRow = Schemas["AnswerKeyItem"];
-export type AnswerKeyMode = Schemas["AnswerKeyImportModeEnum"];
-export type AnswerKeySaved = Schemas["AnswerKeySaved"];
 
 export const LIBRARY_PAGE_SIZE = 20;
 
@@ -122,29 +119,6 @@ export class AdminLibraryApi {
       body: { to },
     });
     return unwrap(result);
-  }
-
-  /** Test kitob: javoblar kaliti (faqat editor/admin ko'radi). */
-  async answerKey(id: string): Promise<AnswerKeyRow[]> {
-    return unwrap(
-      await this.client.GET("/api/v1/admin/books/{id}/answer-key/", { params: { path: { id } } }),
-    );
-  }
-
-  async importAnswerKey(id: string, text: string, mode: AnswerKeyMode): Promise<AnswerKeySaved> {
-    const result = await this.client.POST("/api/v1/admin/books/{id}/answer-key/import/", {
-      params: { path: { id } },
-      body: { text, mode },
-    });
-    return unwrap(result);
-  }
-
-  async clearAnswerKey(id: string): Promise<void> {
-    const result: { error?: unknown; response: Response } = await this.client.DELETE(
-      "/api/v1/admin/books/{id}/answer-key/",
-      { params: { path: { id } } },
-    );
-    if (result.error !== undefined) unwrap({ error: result.error, response: result.response });
   }
 
   async initUpload(

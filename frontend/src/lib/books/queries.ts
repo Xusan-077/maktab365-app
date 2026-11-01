@@ -9,16 +9,11 @@ export const bookKeys = {
   progress: (id: string) => ["books", "progress", id] as const,
   progressList: () => ["books", "progress", "all"] as const,
   bookmarks: (id: string) => ["books", "bookmarks", id] as const,
-  note: (id: string, page: number) => ["books", "note", id, page] as const,
   annotations: (id: string, pages: readonly number[]) =>
     ["books", "annotations", id, pages.join(",")] as const,
   entriesRoot: () => ["books", "entries"] as const,
   entries: (filters: EntryFilters) => ["books", "entries", "list", filters] as const,
   entryBooks: () => ["books", "entries", "books"] as const,
-  testSheet: (id: string) => ["books", "test", id, "sheet"] as const,
-  testAttempts: (id: string) => ["books", "test", id, "attempts"] as const,
-  testAttempt: (id: string, attemptId: string) =>
-    ["books", "test", id, "attempt", attemptId] as const,
 };
 
 export const bookQueries = {
@@ -49,12 +44,6 @@ export const bookQueries = {
       queryFn: () => getMyBooksApi().bookmarks(id),
       retry: retryUnlessClientError,
     }),
-  note: (id: string, page: number) =>
-    queryOptions({
-      queryKey: bookKeys.note(id, page),
-      queryFn: () => getMyBooksApi().note(id, page),
-      retry: retryUnlessClientError,
-    }),
   annotations: (id: string, pages: readonly number[]) =>
     queryOptions({
       queryKey: bookKeys.annotations(id, pages),
@@ -80,25 +69,5 @@ export const bookQueries = {
       queryFn: () => getMyBooksApi().entryBooks(),
       retry: retryUnlessClientError,
       staleTime: 30_000,
-    }),
-  testSheet: (id: string) =>
-    queryOptions({
-      queryKey: bookKeys.testSheet(id),
-      queryFn: () => getMyBooksApi().testSheet(id),
-      retry: retryUnlessClientError,
-      staleTime: 60_000,
-    }),
-  testAttempts: (id: string) =>
-    queryOptions({
-      queryKey: bookKeys.testAttempts(id),
-      queryFn: () => getMyBooksApi().testAttempts(id),
-      retry: retryUnlessClientError,
-    }),
-  testAttempt: (id: string, attemptId: string) =>
-    queryOptions({
-      queryKey: bookKeys.testAttempt(id, attemptId),
-      queryFn: () => getMyBooksApi().testAttempt(id, attemptId),
-      retry: retryUnlessClientError,
-      staleTime: Infinity,
     }),
 };

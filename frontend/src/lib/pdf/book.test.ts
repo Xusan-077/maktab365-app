@@ -9,6 +9,9 @@ import {
   panBounds,
   prefersSimpleFlip,
   renderPixelRatio,
+  canvasPixelBudget,
+  LOW_END_CANVAS_PIXELS,
+  MAX_CANVAS_PIXELS,
   spreadRange,
   stackDepths,
   stackShadow,
@@ -145,5 +148,24 @@ describe("animatsiya va aniqlik", () => {
     expect(renderPixelRatio(2, 2, { width: 500, height: 700 })).toBe(4);
     expect(renderPixelRatio(2, 3, { width: 500, height: 700 })).toBeCloseTo(4096 / 700, 5);
     expect(renderPixelRatio(1, 0.5, { width: 500, height: 700 })).toBe(1);
+  });
+
+  it("maydon chegarasi: iOS 16.7 MP; telefonda 8 MP — 400% da ham ≥1 fizik px / CSS px", () => {
+    // 400% uzluksiz rejim telefonda: bet 1500×2121 CSS px, DPR 2.
+    const css = { width: 1500, height: 2121 };
+    const desktop = renderPixelRatio(2, 1, css);
+    expect(css.width * desktop * css.height * desktop).toBeLessThanOrEqual(MAX_CANVAS_PIXELS + 1);
+    const phone = renderPixelRatio(2, 1, css, LOW_END_CANVAS_PIXELS);
+    expect(css.width * phone * css.height * phone).toBeLessThanOrEqual(LOW_END_CANVAS_PIXELS + 1);
+    expect(phone).toBeGreaterThan(1.3);
+    // Kichik bet chegaraga yetmaydi.
+    expect(renderPixelRatio(2, 1, { width: 390, height: 550 }, LOW_END_CANVAS_PIXELS)).toBe(2);
+  });
+
+  it("canvasPixelBudget: sensorli yoki ≤ 4 GB xotira — kichik chegara", () => {
+    expect(canvasPixelBudget({ coarse: true })).toBe(LOW_END_CANVAS_PIXELS);
+    expect(canvasPixelBudget({ memory: 4 })).toBe(LOW_END_CANVAS_PIXELS);
+    expect(canvasPixelBudget({ coarse: false, memory: 8 })).toBe(MAX_CANVAS_PIXELS);
+    expect(canvasPixelBudget({})).toBe(MAX_CANVAS_PIXELS);
   });
 });

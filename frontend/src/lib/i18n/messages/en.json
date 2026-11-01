@@ -1621,44 +1621,6 @@
         "confirm": "Delete",
         "done": "Book deleted"
       },
-      "answerKey": {
-        "title": "Answer key",
-        "needFile": "Upload the PDF first: the key is checked against the page count.",
-        "loading": "Loading…",
-        "count": "Questions entered: {count}",
-        "inputLabel": "Enter or add to the key",
-        "placeholder": "1, 1, A\n1, 2, C\n2, 1, B\n2, 2, 12.5",
-        "help": "One line per answer: page, question, answer (separated by comma, semicolon, tab or space). Letters A–E are choices; anything else is a text answer. Pages 1–{pages}. A header line and lines starting with # are skipped.",
-        "modeLabel": "How to save",
-        "mode": {
-          "replace": "Replace the whole key",
-          "merge": "Add to and update the current key"
-        },
-        "save": "Save key",
-        "load": "Load current key into the box",
-        "clear": "Clear key",
-        "saved": "Key saved: {count} lines, {total} questions in total.",
-        "cleared": "Key cleared.",
-        "clearTitle": "Clear the key?",
-        "clearDescription": "All questions and students' answers for this book are removed. Past results stay in their history.",
-        "clearConfirm": "Clear",
-        "errors": {
-          "lines": "Lines with errors: {count}. Nothing was saved.",
-          "line": "Line {line}: {reason}",
-          "more": "{count} more errors.",
-          "codes": {
-            "invalid_line": "wrong format (needs page, question, answer)",
-            "page_out_of_range": "the book has no such page",
-            "question_out_of_range": "question number must be 1–999",
-            "answer_empty": "empty answer",
-            "answer_too_long": "answer is too long",
-            "duplicate": "page and question repeated",
-            "too_many_rows": "too many lines",
-            "empty": "no lines entered",
-            "not_test_book": "the book type is not Test"
-          }
-        }
-      },
       "manageTypes": "Manage types",
       "addTextbook": "Add school textbook",
       "textbooksHint": "School textbooks have their own detailed management (grade, subject, contents).",
@@ -1736,7 +1698,6 @@
       "loading": "Loading page",
       "loadError": "Could not open the textbook. Check your connection and try again.",
       "pageError": "Could not show the page.",
-      "openInNewWindow": "Open PDF in a new window",
       "notFound": "This textbook was not found or is not published yet.",
       "retry": "Try again",
       "panel": "Contents",
@@ -1762,7 +1723,22 @@
       "topic": "Topic",
       "book": "Book",
       "bookPages": "Pages {from}–{to}",
-      "bookPage": "Page {page}"
+      "bookPage": "Page {page}",
+      "loadErrors": {
+        "title": "The textbook didn't open",
+        "renderTitle": "The page couldn't be shown",
+        "offline": "You're offline. The textbook will reload by itself once you're back online.",
+        "network": "Couldn't reach the server. Check your connection and try again.",
+        "timeout": "The textbook is taking too long to load — your connection may be slow. Try again.",
+        "notFound": "The textbook file wasn't found: it may have been removed or not uploaded yet.",
+        "forbidden": "You don't have access to this textbook. Check that you're signed in.",
+        "expired": "The link to the textbook has expired. Press “Try again”.",
+        "damaged": "The textbook file is damaged or can't be read. This is on our side — please let us know.",
+        "server": "Temporary server problem. Please try again a bit later.",
+        "unknown": "Something unexpected went wrong. Try again.",
+        "render": "This page couldn't be drawn. Try again or go to another page.",
+        "catalog": "Back to textbooks"
+      }
     },
     "bookmark": {
       "save": "Save",
@@ -2111,6 +2087,49 @@
         "item": "Chapter {roman}"
       },
       "reportAction": "Report"
+    },
+    "draw": {
+      "toggle": "Drawing mode",
+      "toolbar": "Drawing tools",
+      "pen": "Pen",
+      "marker": "Marker",
+      "eraser": "Eraser",
+      "undo": "Undo",
+      "redo": "Redo",
+      "color": "Color",
+      "width": "Thickness",
+      "widths": {
+        "0": "Thin",
+        "1": "Medium",
+        "2": "Thick"
+      },
+      "close": "Finish drawing",
+      "colors": {
+        "ink": "Black",
+        "e5484d": "Red",
+        "3b82f6": "Blue",
+        "30a46c": "Green",
+        "f59e0b": "Orange",
+        "8e4ec6": "Purple",
+        "fde047": "Yellow",
+        "86efac": "Light green",
+        "f9a8d4": "Pink",
+        "93c5fd": "Light blue",
+        "fdba74": "Peach",
+        "c4b5fd": "Lavender"
+      },
+      "status": {
+        "saving": "Saving…",
+        "saved": "Saved",
+        "offline": "Offline — saved on this device",
+        "failed": "Not saved",
+        "retry": "Retry",
+        "tooLarge": "Too many drawings on this page",
+        "guest": "Saved on this device only",
+        "signIn": "Sign in to save",
+        "loadError": "Drawings failed to load"
+      },
+      "limit": "Too many drawings on this page. Erase some first."
     }
   },
   "library": {
@@ -2938,134 +2957,14 @@
       "progress": "{percent}% read"
     },
     "reader": {
-      "back": "Back to the book page",
-      "toolbar": "Reading controls",
-      "toc": "Contents and bookmarks",
-      "search": "Search in book",
-      "bookmarkAdd": "Bookmark this page",
-      "bookmarkRemove": "Remove bookmark",
-      "appearance": "Appearance",
-      "fullscreen": "Full screen",
-      "exitFullscreen": "Exit full screen",
-      "prev": "Previous page",
-      "next": "Next page",
-      "slider": "Go to page",
-      "sliderValue": "Page {page} · {chapter}",
-      "percent": "{percent}% read",
-      "zoomIn": "Zoom in",
-      "zoomOut": "Zoom out",
-      "zoomReset": "Fit",
-      "pageAlt": "{title}, page {page}",
-      "pageLoading": "Loading page…",
-      "pageError": "Couldn't load the page image.",
-      "retry": "Try again",
-      "textEmpty": "There is no text on this page.",
-      "textEmptyHint": "Switch to the page view.",
-      "switchToPage": "Page view",
-      "textError": "Couldn't load the page text.",
-      "withKey": "{label} ({key})",
-      "skeleton": "Opening the book",
       "emptyTitle": "This book isn't ready yet",
-      "emptyText": "Its pages are still being prepared, or it was unpublished.",
-      "tocPanel": {
-        "title": "In this book",
-        "tabs": "Contents and bookmarks",
-        "tabContents": "Contents",
-        "tabBookmarks": "Bookmarks",
-        "noContents": "This book has no table of contents.",
-        "noBookmarks": "No bookmarks yet. Press the bookmark button on a page.",
-        "page": "Page {page}",
-        "current": "Current section",
-        "removeBookmark": "Remove the bookmark on page {page}",
-        "bookmarkChapter": "{chapter}"
-      },
-      "find": {
-        "title": "Search in book",
-        "label": "Search term",
-        "placeholder": "A word or phrase",
-        "hint": "Enter at least 2 characters.",
-        "searching": "Searching…",
-        "count": "{count} pages found",
-        "none": "Nothing found for “{query}”.",
-        "error": "Search failed. Try again.",
-        "unavailable": "Search is not available in this book (scanned, no text layer).",
-        "result": "Page {page}"
-      },
-      "look": {
-        "title": "Appearance",
-        "view": "Reading view",
-        "viewPage": "Page image",
-        "viewText": "Text",
-        "textUnavailable": "This book has no text view.",
-        "theme": "Background",
-        "themePaper": "Paper",
-        "themeSepia": "Sepia",
-        "themeNight": "Night",
-        "font": "Typeface",
-        "fontSerif": "Serif",
-        "fontSans": "Sans",
-        "size": "Text size",
-        "sizeUp": "Larger",
-        "sizeDown": "Smaller",
-        "lineHeight": "Line spacing",
-        "textOnly": "Typeface, size and spacing apply in text view."
-      },
-      "keys": {
-        "toc": "M",
-        "search": "/",
-        "bookmark": "B",
-        "fullscreen": "F",
-        "prev": "←",
-        "next": "→",
-        "zoomIn": "+",
-        "zoomOut": "−",
-        "notes": "N"
-      },
-      "notesOpen": "Open notes",
-      "notesClose": "Close notes",
-      "export": {
-        "menu": "Download",
-        "notes": "Download side notes (.md)",
-        "failed": "Download failed. Try again.",
-        "pageHeading": "Page {page}"
-      },
-      "gradeSubject": "Grade {grade} · {subject}",
-      "notFound": "This book was not found or has not been published yet."
+      "emptyText": "Its pages are still being prepared, or it was unpublished."
     },
     "card": {
       "progress": "{percent}% read",
       "continue": "Page {page}"
     },
     "workspace": {
-      "open": "Draw",
-      "close": "Close drawing tools",
-      "toolbar": "Drawing tools",
-      "tools": {
-        "select": "Select and move",
-        "pen": "Pen",
-        "highlight": "Highlighter",
-        "text": "Text",
-        "eraser": "Eraser",
-        "solution": "Worked solution"
-      },
-      "undo": "Undo",
-      "redo": "Redo",
-      "color": "Color",
-      "width": "Line width",
-      "widths": {
-        "0": "Thin",
-        "1": "Medium",
-        "2": "Thick"
-      },
-      "textSize": "Text size",
-      "textSizes": {
-        "0": "Small",
-        "1": "Medium",
-        "2": "Large"
-      },
-      "textInput": "Text",
-      "textPlaceholder": "Type here…",
-      "limit": "This page has too many marks. Delete some to add more.",
       "colors": {
         "ink": "Black (adapts to the background)",
         "e5484d": "Red",
@@ -3077,42 +2976,7 @@
         "86efac": "Light green",
         "f9a8d4": "Pink",
         "93c5fd": "Light blue"
-      },
-      "keys": {
-        "select": "V",
-        "pen": "P",
-        "highlight": "H",
-        "text": "T",
-        "eraser": "E",
-        "undo": "Ctrl+Z",
-        "redo": "Ctrl+Shift+Z",
-        "close": "Esc",
-        "notes": "N",
-        "solution": "Y"
-      },
-      "save": {
-        "saving": "Saving…",
-        "saved": "Saved",
-        "failed": "Not saved.",
-        "retry": "Try again",
-        "tooLarge": "The marks on this page are too large to save."
-      },
-      "notes": {
-        "title": "Page notes",
-        "heading": "Notes for page {page}",
-        "label": "Notes for page {page}",
-        "placeholder": "Write a question, a summary or a reminder about this page…",
-        "guestPlaceholder": "Sign in to save your notes",
-        "loading": "Loading notes",
-        "loadError": "Couldn't load your notes.",
-        "retry": "Try again",
-        "close": "Close notes panel",
-        "resize": "Panel width",
-        "handle": "Expand or collapse the notes panel",
-        "tab": "Notes",
-        "tabs": "Notebook sections"
-      },
-      "done": "Done"
+      }
     },
     "entries": {
       "metaTitle": "My notes",
@@ -3176,104 +3040,6 @@
         "notesFile": "side-notes.md"
       },
       "solutionUntitled": "Problem {number}"
-    },
-    "math": {
-      "tab": "Solutions",
-      "dialog": {
-        "createTitle": "Page {page}: new solution",
-        "editTitle": "Page {page}: edit solution",
-        "titleLabel": "Problem number or name",
-        "titlePlaceholder": "For example: Problem 12",
-        "bodyLabel": "Solution",
-        "bodyPlaceholder": "Write your solution. Put formulas between $ signs: $x^2+1$",
-        "preview": "Preview",
-        "previewEmpty": "What you write appears here.",
-        "save": "Save",
-        "cancel": "Cancel",
-        "delete": "Delete solution"
-      },
-      "pad": {
-        "label": "Formula symbols",
-        "groups": {
-          "structure": "Operations",
-          "greek": "Greek letters"
-        },
-        "items": {
-          "fraction": "Fraction",
-          "root": "Square root",
-          "power": "Power",
-          "subscript": "Subscript",
-          "integral": "Integral",
-          "sum": "Sum",
-          "pm": "Plus-minus",
-          "leq": "Less than or equal",
-          "geq": "Greater than or equal",
-          "neq": "Not equal",
-          "alpha": "Alpha",
-          "beta": "Beta",
-          "gamma": "Gamma",
-          "delta": "Delta",
-          "theta": "Theta",
-          "lambda": "Lambda",
-          "pi": "Pi",
-          "sigma": "Sigma",
-          "phi": "Phi",
-          "omega": "Omega"
-        }
-      },
-      "panel": {
-        "guest": "Sign in to save solutions.",
-        "signIn": "Sign in",
-        "empty": "No solutions on page {page}. Use the Worked solution tool to box a problem, then write its solution.",
-        "list": "Solutions on page {page}",
-        "untitled": "Problem {number}",
-        "emptyBody": "No solution written yet.",
-        "edit": "Edit {title}"
-      }
-    },
-    "test": {
-      "tab": "Answers",
-      "answerLabel": "Answer to question {question}",
-      "choice": "Option {letter}",
-      "textPlaceholder": "Type the answer",
-      "quick": {
-        "label": "Quick answers for page {page}",
-        "previous": "Previous question",
-        "next": "Next question",
-        "question": "Question",
-        "openSheet": "Answer sheet: {answered} of {total} answered"
-      },
-      "panel": {
-        "guest": "Sign in to mark answers and check them.",
-        "signIn": "Sign in",
-        "loading": "Loading questions…",
-        "loadError": "Could not load the answer sheet.",
-        "retry": "Try again",
-        "noKey": "This test has no answer key yet, so it can't be checked.",
-        "progress": "{answered} of {total} answered",
-        "check": "Check answers",
-        "checkFailed": "Could not check. Please try again.",
-        "answerFailed": "Answer not saved. Check your connection and mark it again.",
-        "page": "Page {page}",
-        "history": "Attempt history",
-        "historyEmpty": "Not checked yet."
-      },
-      "result": {
-        "title": "Test result",
-        "percent": "{percent}%",
-        "wrongHeading": "Wrong: {count}",
-        "allCorrect": "All correct!",
-        "wrongHint": "Select a question to jump to its page.",
-        "where": "Page {page}, question {question}",
-        "notAnswered": "not answered",
-        "yourAnswer": "Your answer: {answer}",
-        "unansweredNote": "Unanswered questions count as wrong ({count}).",
-        "correctHeading": "Correct: {count}",
-        "short": "{page}/{question}",
-        "close": "Close",
-        "loading": "Loading result…",
-        "loadError": "Could not load the result."
-      }
     },
     "intro": "Fiction, study aids and other publications — read online for free."
   }

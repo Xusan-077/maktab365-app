@@ -1,89 +1,100 @@
 // @vitest-environment jsdom
-import { Activity } from "react";
+import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { act, cleanup, render, waitFor } from "@testing-library/react";
+import { act, cleanup, renderHook } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { PdfLoadTimeoutError } from "@/lib/pdf/load-error";
+import { PDF_LOAD_TIMEOUT_MS, usePdfDocument } from "./usePdfDocument";
 
-interface FakeDoc {
-  id: number;
-  destroyed: boolean;
-}
-
-const pdf = vi.hoisted(() => ({ opened: [] as FakeDoc[] }));
-
-vi.mock("@/lib/offline/pdf-cache", () => ({ loadOfflinePdf: async () => null }));
-vi.mock("@/lib/pdf-books/queries", () => ({
-  pdfQueries: {
-    fileUrl: (bookId: string) => ({
-      queryKey: ["pdf-file", bookId],
-      queryFn: async () => ({ url: "/files/book.pdf" }),
-    }),
-  },
+const pdf = vi.hoisted(() => ({
+  /** Har `getDocument` chaqiruvi shu navbatdagi natijani oladi (yo'q bo'lsa — osilib qoladi). */
+  results: [] as Array<{ ok: unknown } | { fail: unknown }>,
+  calls: 0,
+  fileUrl: vi.fn(async () => ({ url: "https://files.test/book.pdf?sig=1" })),
 }));
+
 vi.mock("@/lib/pdf/pdfjs", () => ({
   pdfjsAssetOptions: () => ({}),
   loadPdfjs: async () => ({
     getDocument: () => {
-      const doc: FakeDoc = { id: pdf.opened.length + 1, destroyed: false };
-      pdf.opened.push(doc);
-      return {
-        promise: Promise.resolve(doc),
-        destroy: async () => {
-          doc.destroyed = true;
-        },
-      };
+      pdf.calls += 1;
+      const next = pdf.results.shift();
+      const promise =
+        next === undefined
+          ? new Promise(() => undefined)
+          : "ok" in next
+            ? Promise.resolve(next.ok)
+            : Promise.reject(next.fail);
+      return { promise, destroy: async () => undefined };
     },
   }),
 }));
+vi.mock("@/lib/offline/pdf-cache", () => ({ loadOfflinePdf: async () => null }));
+vi.mock("@/lib/pdf-books/api", () => ({ getPdfBooksApi: () => ({ fileUrl: pdf.fileUrl }) }));
 
-import { usePdfDocument } from "./usePdfDocument";
-
-/** Har render'da qaysi hujjat berilgani va u o'sha paytda yo'q qilingan-qilinmagani. */
-const renders: { id: number | null; destroyed: boolean }[] = [];
-
-function Reader() {
-  const { doc } = usePdfDocument("book-1");
-  const fake = doc as unknown as FakeDoc | null;
-  renders.push({ id: fake?.id ?? null, destroyed: fake?.destroyed ?? false });
-  return null;
-}
-
-function setup() {
+function wrapper({ children }: { children: ReactNode }) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  const view = (mode: "visible" | "hidden") => (
-    <QueryClientProvider client={client}>
-      <Activity mode={mode}>
-        <Reader />
-      </Activity>
-    </QueryClientProvider>
-  );
-  const { rerender } = render(view("visible"));
-  return (mode: "visible" | "hidden") => rerender(view(mode));
+  return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
 }
+const settle = () => act(async () => void (await vi.advanceTimersByTimeAsync(0)));
 
 beforeEach(() => {
-  pdf.opened.length = 0;
-  renders.length = 0;
+  vi.useFakeTimers();
+  pdf.results = [];
+  pdf.calls = 0;
   vi.spyOn(console, "error").mockImplementation(() => undefined);
 });
 afterEach(() => {
   cleanup();
+  vi.useRealTimers();
   vi.restoreAllMocks();
 });
 
-describe("usePdfDocument: <Activity> yashirib qaytarganda", () => {
-  it("yo'q qilingan hujjat bolalarga berilmaydi, hujjat qayta ochiladi", async () => {
-    const setMode = setup();
-    await waitFor(() => expect(renders.at(-1)?.id).toBe(1));
+describe("usePdfDocument: tushunarli xatolar", () => {
+  it("PDF 30 s da ochilmasa — timeout xatosi (skelet cheksiz aylanmaydi)", async () => {
+    const { result } = renderHook(() => usePdfDocument("b1"), { wrapper });
+    await settle();
+    expect(result.current.loading).toBe(true);
+    await act(async () => void (await vi.advanceTimersByTimeAsync(PDF_LOAD_TIMEOUT_MS)));
+    expect(result.current.loading).toBe(false);
+    expect(result.current.error).toBeInstanceOf(PdfLoadTimeoutError);
+  });
 
-    // Orqaga navigatsiya: Next sahifani `<Activity mode="hidden">` qiladi — effekt tozalanadi.
-    await act(async () => setMode("hidden"));
-    expect(pdf.opened[0].destroyed).toBe(true);
+  it("imzolangan URL eskirgan (403) — bir marta jim, yangi URL bilan qayta ochiladi", async () => {
+    const doc = { numPages: 3 };
+    pdf.results = [
+      { fail: Object.assign(new Error("x"), { name: "ResponseException", status: 403 }) },
+      { ok: doc },
+    ];
+    const { result } = renderHook(() => usePdfDocument("b1"), { wrapper });
+    await settle();
+    await settle();
+    expect(pdf.calls).toBe(2);
+    expect(pdf.fileUrl).toHaveBeenCalledTimes(2);
+    expect(result.current.error).toBeNull();
+    expect(result.current.doc).toBe(doc);
+  });
 
-    await act(async () => setMode("visible"));
-    await waitFor(() => expect(renders.at(-1)?.id).toBe(2));
+  it("ikkinchi marta ham rad etilsa — xato ko'rsatiladi (cheksiz takror yo'q)", async () => {
+    const denied = () => Object.assign(new Error("x"), { name: "ResponseException", status: 403 });
+    pdf.results = [{ fail: denied() }, { fail: denied() }];
+    const { result } = renderHook(() => usePdfDocument("b1"), { wrapper });
+    await settle();
+    await settle();
+    expect(pdf.calls).toBe(2);
+    expect(result.current.error).toMatchObject({ name: "ResponseException" });
+  });
 
-    // Regressiya: avval 1-hujjat (yo'q qilingan) state'da qolib, `doc.getPage` yiqilardi.
-    expect(renders.filter((entry) => entry.destroyed)).toEqual([]);
+  it("xatodan keyin internet qaytsa — o'zi qayta yuklanadi", async () => {
+    const doc = { numPages: 3 };
+    pdf.results = [{ fail: new TypeError("Failed to fetch") }, { ok: doc }];
+    const { result } = renderHook(() => usePdfDocument("b1"), { wrapper });
+    await settle();
+    expect(result.current.error).toBeInstanceOf(TypeError);
+    act(() => void window.dispatchEvent(new Event("online")));
+    await settle();
+    await settle();
+    expect(pdf.calls).toBe(2);
+    expect(result.current.doc).toBe(doc);
   });
 });

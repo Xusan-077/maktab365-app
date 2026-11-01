@@ -20,7 +20,6 @@ import { getAdminLibraryApi, type AdminBookInput } from "@/lib/library/admin-api
 import { libraryKeys, libraryQueries } from "@/lib/library/admin-queries";
 import { EMPTY_LIBRARY_BOOK, toFormValues } from "@/lib/validation/library-book";
 import { LibraryDetailsForm } from "./LibraryDetailsForm";
-import { LibraryAnswerKeyCard } from "./LibraryAnswerKeyCard";
 import { LibraryFileCard } from "./LibraryFileCard";
 import { LibraryCoverCard, LibraryPublishCard } from "./LibrarySideCards";
 import { LibraryStatusBadge } from "./LibraryStatus";
@@ -139,7 +138,6 @@ export function LibraryEditView({ id }: { id: string }) {
             hasCover={Boolean(book.cover_url)}
           />
           <LibraryFileCard book={book} />
-          {book.reading_mode === "test" && <LibraryAnswerKeyCard book={book} />}
           <LibraryCoverCard book={book} />
           <LibraryPublishCard book={book} />
           {canDelete(role) && (

@@ -11,7 +11,7 @@ import type { PageEntry } from "@/lib/books/api";
 import { solutionsOf, summarizeEntry } from "@/lib/books/entries";
 import { Link } from "@/lib/i18n/navigation";
 import { bookReaderPath } from "@/lib/utils/routes";
-import { MathText } from "@/components/books/reader/modes/MathText";
+import { MathText } from "./MathText";
 import { EntryThumb } from "./EntryThumb";
 import { HighlightColors } from "./HighlightColors";
 

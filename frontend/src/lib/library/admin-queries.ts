@@ -8,7 +8,6 @@ export const libraryKeys = {
   list: (params: LibraryListParams) => [...ADMIN_ROOT_KEY, "library", "list", params] as const,
   book: (id: string) => [...ADMIN_ROOT_KEY, "library", "book", id] as const,
   types: [...ADMIN_ROOT_KEY, "library", "types"] as const,
-  answerKey: (id: string) => [...ADMIN_ROOT_KEY, "library", "answer-key", id] as const,
 };
 
 export const libraryQueries = {
@@ -27,10 +26,5 @@ export const libraryQueries = {
     queryOptions({
       queryKey: libraryKeys.book(id),
       queryFn: () => getAdminLibraryApi().get(id),
-    }),
-  answerKey: (id: string) =>
-    queryOptions({
-      queryKey: libraryKeys.answerKey(id),
-      queryFn: () => getAdminLibraryApi().answerKey(id),
     }),
 };
