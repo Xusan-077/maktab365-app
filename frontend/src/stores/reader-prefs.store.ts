@@ -6,7 +6,7 @@ import {
   sanitizePrefs,
   type ReaderPrefs,
 } from "@/lib/pdf/reader-prefs";
-import { clampZoom } from "@/lib/pdf/zoom";
+import { commitZoom } from "@/lib/pdf/zoom";
 
 export const READER_PREFS_STORAGE_KEY = "maktab365-reader-prefs";
 
@@ -21,7 +21,8 @@ interface ReaderPrefsState extends ReaderPrefs {
 
 /**
  * O'qish oynasi sozlamalari (qurilma bo'yicha, localStorage): fon, o'qish rejimi (kitob / uzluksiz),
- * masshtab asosi, zoom (kitob ostidagi guruh, Aa menyusi, klaviatura — bitta holat) va iliq rang.
+ * masshtab asosi, zoom (kitob ostidagi guruh, Aa menyusi, klaviatura — bitta holat; saqlanishi —
+ * kitob bo'yicha, `zoom-memory.ts`) va iliq rang.
  */
 export const useReaderPrefsStore = create<ReaderPrefsState>()(
   persist(
@@ -31,7 +32,8 @@ export const useReaderPrefsStore = create<ReaderPrefsState>()(
       setTone: (tone) => set({ tone }),
       setMode: (mode) => set({ mode }),
       setFit: (fit) => set({ fit }),
-      setZoom: (zoom) => set({ zoom: clampZoom(zoom) }),
+      // 0.01 qadam: pinch/g'ildirak qo'yib yuborilganda ko'rinish yaxlitlash tufayli sakramaydi.
+      setZoom: (zoom) => set({ zoom: commitZoom(zoom) }),
       setWarm: (warm) => set({ warm }),
     }),
     {
@@ -41,7 +43,7 @@ export const useReaderPrefsStore = create<ReaderPrefsState>()(
         tone: state.tone,
         mode: state.mode,
         fit: state.fit,
-        zoom: state.zoom,
+        // Zoom bu yerda emas: har kitob uchun alohida (`lib/pdf/zoom-memory.ts`).
         warm: state.warm,
       }),
       merge: (persisted, current) => ({ ...current, ...sanitizePrefs(persisted) }),

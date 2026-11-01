@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Check,
   Eraser,
   Highlighter,
   MousePointer2,
@@ -10,7 +11,6 @@ import {
   Sigma,
   Type,
   Undo2,
-  X,
   type LucideIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -19,6 +19,7 @@ import {
   HIGHLIGHT_COLORS,
   PEN_COLORS,
   PEN_WIDTHS,
+  resolveColor,
   TEXT_SIZES,
   type AnnotationTool,
 } from "@/lib/books/annotations";
@@ -42,6 +43,9 @@ const TOOLS: { tool: ActiveTool; icon: LucideIcon }[] = [
 const SOLUTION_TOOL: { tool: ActiveTool; icon: LucideIcon } = { tool: "solution", icon: Sigma };
 const MATH_TOOLS = [...TOOLS.slice(0, 4), SOLUTION_TOOL, ...TOOLS.slice(4)];
 
+/** Chiziq namunasi uchun taxminiy bet eni (px): qalinlik betga nisbatan berilgan. */
+const SAMPLE_PAGE_PX = 640;
+
 export interface ToolBarProps {
   tool: AnnotationTool;
   settings: DrawSettings;
@@ -51,7 +55,7 @@ export interface ToolBarProps {
   canRedo: boolean;
   /** Matematika kitob: «Misol yechimi» asbobi ko'rinadi. */
   mathMode?: boolean;
-  /** Asboblar yig'iq turganda (panellar yashirilganda) ko'rinmaydi; asbob tanlangan bo'lsa doim ko'rinadi. */
+  /** Panellar yig'iq turganda «Chizish» tugmasi ko'rinmaydi; asbob tanlangan bo'lsa panel doim ko'rinadi. */
   visible: boolean;
   onToolChange: (tool: AnnotationTool) => void;
   onUndo: () => void;
@@ -63,14 +67,46 @@ export interface ToolBarProps {
   onTextSize: (size: number) => void;
 }
 
-const PILL =
-  "bg-bk-bar/95 border-bk-line text-bk-ink rounded-2xl border shadow-[0_8px_30px_-8px_rgb(0_0_0/0.35)] backdrop-blur";
+const SURFACE =
+  "bg-bk-bar border-bk-line text-bk-ink border shadow-[0_10px_32px_-10px_rgb(0_0_0/0.4)]";
 
-/** O'lcham tanlash (3 ta nuqta/«A» harfi): `radiogroup`. */
-function SizePicker({
+/** Siyoh namunasi: tanlangan rang va qalinlikda to'lqinsimon chiziq — nima chizilishini oldindan ko'rsatadi. */
+function InkSample({
+  color,
+  width,
+  highlight,
+}: {
+  color: string;
+  width: number;
+  highlight?: boolean;
+}) {
+  const stroke = highlight ? 14 : Math.max(1.5, width * SAMPLE_PAGE_PX);
+  return (
+    <svg
+      viewBox="0 0 64 24"
+      className="h-6 w-16 shrink-0"
+      role="presentation"
+      aria-hidden
+      data-ink-sample
+    >
+      <path
+        d="M4 14 C 14 2, 22 2, 32 12 S 50 22, 60 8"
+        fill="none"
+        stroke={color}
+        strokeWidth={stroke}
+        strokeLinecap={highlight ? "butt" : "round"}
+        strokeOpacity={highlight ? 0.55 : 1}
+      />
+    </svg>
+  );
+}
+
+/** Qalinlik/o'lcham: har qadam o'z o'lchamida (`radiogroup`); tanlangani rangda ko'rinadi. */
+function StepPicker({
   label,
   values,
   value,
+  color,
   onChange,
   describe,
   letters,
@@ -78,12 +114,13 @@ function SizePicker({
   label: string;
   values: readonly number[];
   value: number;
+  color: string;
   onChange: (value: number) => void;
   describe: (index: number) => string;
   letters?: boolean;
 }) {
   return (
-    <div role="radiogroup" aria-label={label} className="flex items-center gap-1">
+    <div role="radiogroup" aria-label={label} className="flex items-center">
       {values.map((item, index) => {
         const selected = item === value;
         return (
@@ -96,18 +133,27 @@ function SizePicker({
             title={describe(index)}
             onClick={() => onChange(item)}
             className={cn(
-              "inline-flex size-11 items-center justify-center rounded-lg transition-colors sm:size-9",
-              selected ? "bg-bk-accent-soft text-bk-accent" : "hover:bg-bk-accent-soft",
+              "inline-flex size-11 items-center justify-center rounded-xl transition-colors sm:size-10",
+              selected ? "bg-bk-accent-soft" : "hover:bg-bk-accent-soft/60",
             )}
           >
             {letters ? (
-              <span className="font-semibold" style={{ fontSize: 11 + index * 4 }} aria-hidden>
+              <span
+                className="leading-none font-semibold"
+                style={{ fontSize: 12 + index * 5, color: selected ? color : undefined }}
+                aria-hidden
+              >
                 A
               </span>
             ) : (
               <span
-                className="rounded-full bg-current"
-                style={{ width: 4 + index * 3, height: 4 + index * 3 }}
+                className="rounded-full"
+                style={{
+                  width: 5 + index * 4,
+                  height: 5 + index * 4,
+                  backgroundColor: selected ? color : "currentColor",
+                  opacity: selected ? 1 : 0.55,
+                }}
                 aria-hidden
               />
             )}
@@ -119,8 +165,9 @@ function SizePicker({
 }
 
 /**
- * Chizish asboblari: asbob tanlanmaguncha bitta «Chizish» tugmasi; tanlangach ixcham ustun (desktop,
- * chapda) yoki satr (mobil, pastki panel ustida) ochiladi. Tanlangan asbobning rangi/qalinligi alohida qatorda.
+ * Chizish «qalamdoni»: ekran pastida markazda. Asbob tanlanmaguncha bitta «Chizish» tugmasi; tanlangach
+ * asboblar qatori ochiladi — tanlangani yuqoriga ko'tarilib, uchida joriy siyoh rangini ko'rsatadi.
+ * Tanlangan asbobning rangi va qalinligi qator ustida, chiziq namunasi bilan; «Tayyor» chizishni yopadi.
  */
 export function ToolBar({
   tool,
@@ -145,12 +192,21 @@ export function ToolBar({
   const active = tool !== "none";
 
   const label = (value: ActiveTool) => t(`tools.${value}`);
+  const inkOf = (color: string) => resolveColor(color, theme);
+  /** Asbob uchidagi rang: faqat rangli asboblarda. */
+  const tipColor = (value: ActiveTool): string | null => {
+    if (value === "pen") return inkOf(settings.penColor);
+    if (value === "highlight") return inkOf(settings.highlightColor);
+    if (value === "text") return inkOf(settings.textColor);
+    return null;
+  };
 
   const options = (() => {
     switch (tool) {
       case "pen":
         return (
           <>
+            <InkSample color={inkOf(settings.penColor)} width={settings.penWidth} />
             <ColorPicker
               label={t("color")}
               colors={PEN_COLORS}
@@ -159,10 +215,11 @@ export function ToolBar({
               recent={recentColors}
               onChange={onPenColor}
             />
-            <SizePicker
+            <StepPicker
               label={t("width")}
               values={PEN_WIDTHS}
               value={settings.penWidth}
+              color={inkOf(settings.penColor)}
               onChange={onPenWidth}
               describe={(index) => t(`widths.${index}`)}
             />
@@ -170,13 +227,16 @@ export function ToolBar({
         );
       case "highlight":
         return (
-          <ColorPicker
-            label={t("color")}
-            colors={HIGHLIGHT_COLORS}
-            value={settings.highlightColor}
-            theme={theme}
-            onChange={onHighlightColor}
-          />
+          <>
+            <InkSample color={inkOf(settings.highlightColor)} width={0} highlight />
+            <ColorPicker
+              label={t("color")}
+              colors={HIGHLIGHT_COLORS}
+              value={settings.highlightColor}
+              theme={theme}
+              onChange={onHighlightColor}
+            />
+          </>
         );
       case "text":
         return (
@@ -189,10 +249,11 @@ export function ToolBar({
               recent={recentColors}
               onChange={onTextColor}
             />
-            <SizePicker
+            <StepPicker
               label={t("textSize")}
               values={TEXT_SIZES}
               value={settings.textSize}
+              color={inkOf(settings.textColor)}
               onChange={onTextSize}
               describe={(index) => t(`textSizes.${index}`)}
               letters
@@ -209,39 +270,55 @@ export function ToolBar({
       data-workspace-toolbar
       data-active={active || undefined}
       className={cn(
-        "pointer-events-none absolute z-30 flex transition-[opacity,translate] duration-250 ease-out",
-        "inset-x-0 bottom-[4.5rem] justify-center px-1",
-        "lg:inset-x-auto lg:top-1/2 lg:bottom-auto lg:left-3 lg:-translate-y-1/2 lg:px-0",
-        !visible &&
-          !active &&
-          "pointer-events-none translate-y-3 opacity-0 lg:translate-x-[-0.75rem] lg:translate-y-[-50%]",
+        "pointer-events-none absolute inset-x-0 bottom-[4.5rem] z-30 flex justify-center px-2",
+        "transition-[opacity,translate] duration-250 ease-out",
+        !visible && !active && "translate-y-3 opacity-0",
       )}
     >
       <div
         className={cn(
-          "relative flex max-w-full items-center lg:flex-col",
+          "relative flex max-w-full flex-col items-center gap-2",
           (visible || active) && "pointer-events-auto",
         )}
       >
+        <AnimatePresence initial={false}>
+          {options && (
+            <m.div
+              key={tool}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 8 }}
+              transition={{ duration: 0.18, ease: EASE_OUT }}
+              className={cn(
+                SURFACE,
+                "flex max-w-full flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-2xl py-1.5 pr-2 pl-3.5",
+              )}
+              data-tool-options={tool}
+            >
+              {options}
+            </m.div>
+          )}
+        </AnimatePresence>
+
         <AnimatePresence initial={false} mode="wait">
           {!active ? (
             <m.button
               key="open"
               type="button"
-              initial={{ opacity: 0, scale: 0.92 }}
+              initial={{ opacity: 0, scale: 0.94 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.92 }}
-              transition={{ duration: 0.2, ease: EASE_OUT }}
+              exit={{ opacity: 0, scale: 0.94 }}
+              transition={{ duration: 0.18, ease: EASE_OUT }}
               onClick={() => onToolChange("pen")}
               aria-label={t("open")}
               title={withKey(t("open"), keys("pen"))}
               className={cn(
-                PILL,
-                "hover:bg-bk-accent-soft inline-flex h-11 items-center gap-2 px-3.5 text-sm font-medium",
+                SURFACE,
+                "hover:bg-bk-accent-soft inline-flex h-12 items-center gap-2.5 rounded-full pr-5 pl-4 text-[0.9375rem] font-medium transition-colors",
               )}
             >
               <PenLine className="size-5" aria-hidden />
-              <span className="max-sm:sr-only lg:sr-only xl:not-sr-only">{t("open")}</span>
+              {t("open")}
             </m.button>
           ) : (
             <m.div
@@ -249,36 +326,57 @@ export function ToolBar({
               role="toolbar"
               aria-label={t("toolbar")}
               aria-orientation="horizontal"
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.96 }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
               transition={{ duration: 0.2, ease: EASE_OUT }}
               className={cn(
-                PILL,
-                "flex max-w-full [scrollbar-width:none] items-center gap-0 overflow-x-auto p-0.5 lg:flex-col lg:gap-0.5 lg:overflow-visible lg:p-1",
+                SURFACE,
+                "flex max-w-full [scrollbar-width:none] items-end gap-0.5 overflow-x-auto rounded-2xl px-1.5 pt-2 pb-1.5",
               )}
             >
-              {(mathMode ? MATH_TOOLS : TOOLS).map(({ tool: item, icon: Icon }) => (
-                <button
-                  key={item}
-                  type="button"
-                  className={BK_ICON_BUTTON}
-                  aria-pressed={tool === item}
-                  aria-label={label(item)}
-                  title={withKey(label(item), keys(item))}
-                  data-tool-button={item}
-                  onClick={() => onToolChange(item)}
-                >
-                  <Icon className="size-5" aria-hidden />
-                </button>
-              ))}
-              <span
-                className="bg-bk-line mx-1 hidden h-6 w-px lg:mx-0 lg:my-1 lg:block lg:h-px lg:w-6"
-                aria-hidden
-              />
+              {(mathMode ? MATH_TOOLS : TOOLS).map(({ tool: item, icon: Icon }) => {
+                const selected = tool === item;
+                const tip = tipColor(item);
+                return (
+                  <button
+                    key={item}
+                    type="button"
+                    aria-pressed={selected}
+                    aria-label={label(item)}
+                    title={withKey(label(item), keys(item))}
+                    data-tool-button={item}
+                    onClick={() => onToolChange(item)}
+                    className={cn(
+                      "group relative flex h-12 min-w-11 shrink-0 flex-col items-center justify-center gap-0.5 rounded-xl px-2 transition-[background-color,translate] duration-200 ease-out",
+                      selected
+                        ? "bg-bk-accent-soft text-bk-accent -translate-y-1"
+                        : "text-bk-ink hover:bg-bk-accent-soft/60",
+                    )}
+                  >
+                    <Icon className="size-5" aria-hidden />
+                    {selected ? (
+                      <span className="text-[0.6875rem] leading-none font-medium">
+                        {label(item)}
+                      </span>
+                    ) : null}
+                    {tip && (
+                      <span
+                        aria-hidden
+                        className={cn(
+                          "absolute bottom-1 h-[3px] rounded-full transition-[width,opacity]",
+                          selected ? "w-5 opacity-0" : "w-4 opacity-100",
+                        )}
+                        style={{ backgroundColor: tip }}
+                      />
+                    )}
+                  </button>
+                );
+              })}
+              <span className="bg-bk-line mx-1 mb-2.5 h-6 w-px shrink-0" aria-hidden />
               <button
                 type="button"
-                className={BK_ICON_BUTTON}
+                className={cn(BK_ICON_BUTTON, "mb-0.5")}
                 disabled={!canUndo}
                 onClick={onUndo}
                 aria-label={t("undo")}
@@ -288,7 +386,7 @@ export function ToolBar({
               </button>
               <button
                 type="button"
-                className={BK_ICON_BUTTON}
+                className={cn(BK_ICON_BUTTON, "mb-0.5")}
                 disabled={!canRedo}
                 onClick={onRedo}
                 aria-label={t("redo")}
@@ -296,38 +394,17 @@ export function ToolBar({
               >
                 <Redo2 className="size-5" aria-hidden />
               </button>
-              <span
-                className="bg-bk-line mx-1 hidden h-6 w-px lg:mx-0 lg:my-1 lg:block lg:h-px lg:w-6"
-                aria-hidden
-              />
+              <span className="bg-bk-line mx-1 mb-2.5 h-6 w-px shrink-0" aria-hidden />
               <button
                 type="button"
-                className={BK_ICON_BUTTON}
                 onClick={() => onToolChange("none")}
-                aria-label={t("close")}
-                title={withKey(t("close"), keys("close"))}
+                aria-label={t("done")}
+                title={withKey(t("done"), keys("close"))}
+                className="bg-bk-accent text-bk-paper mb-0.5 inline-flex h-11 shrink-0 items-center gap-1.5 rounded-xl px-3.5 text-sm font-semibold transition-opacity hover:opacity-90"
               >
-                <X className="size-5" aria-hidden />
+                <Check className="size-4" aria-hidden />
+                {t("done")}
               </button>
-            </m.div>
-          )}
-        </AnimatePresence>
-
-        <AnimatePresence initial={false}>
-          {options && (
-            <m.div
-              key={tool}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 6 }}
-              transition={{ duration: 0.2, ease: EASE_OUT }}
-              className={cn(
-                PILL,
-                "absolute bottom-full mb-2 flex max-w-[calc(100vw-1rem)] flex-wrap items-center justify-center gap-x-2 p-1.5",
-                "lg:bottom-auto lg:left-full lg:mb-0 lg:ml-2 lg:w-max lg:max-w-60 lg:justify-start",
-              )}
-            >
-              {options}
             </m.div>
           )}
         </AnimatePresence>

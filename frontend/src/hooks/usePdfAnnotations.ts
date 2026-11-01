@@ -19,7 +19,7 @@ const key = (bookId: string) => ["pdf-annotations", bookId] as const;
  * Kitobdagi belgilar: kirgan foydalanuvchida server (optimistic yangilanish, xatoda qaytariladi),
  * mehmonda shu brauzerning `localStorage`i. Kirgach mehmon belgilari `merge-guest-data/` bilan ko'chadi.
  */
-export function usePdfAnnotations(bookId: string) {
+export function usePdfAnnotations(bookId: string, enabled = true) {
   const { signedIn } = useAuth();
   const queryClient = useQueryClient();
   const guestItems = usePdfAnnotationsGuestStore((state) => state.items);
@@ -31,7 +31,7 @@ export function usePdfAnnotations(bookId: string) {
   const account = useQuery({
     queryKey: key(bookId),
     queryFn: async () => sanitizeAnnotations(await getPdfBooksApi().listAnnotations(bookId)),
-    enabled: signedIn,
+    enabled: signedIn && enabled,
     staleTime: 60_000,
     retry: retryUnlessClientError,
   });

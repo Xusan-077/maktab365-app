@@ -606,7 +606,8 @@ export function BookView({
       }
       return;
     }
-    if (flipRef.current) return;
+    // Pinch shu teginish davomida (yoki hozirgina) bo'lgan bo'lsa — swipe emas.
+    if (flipRef.current || view.isLive() || view.panMode) return;
     const direction = swipeDirection(dx, dy, event.timeStamp - current.at);
     if (direction === "next" && nextStart !== null) onGo(nextStart);
     if (direction === "prev" && prevStart !== null) onGo(prevStart);

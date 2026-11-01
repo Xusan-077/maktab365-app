@@ -5,6 +5,7 @@ yozuvi (`id` bo'yicha ham) 404.
 """
 
 import uuid
+from typing import Any, NamedTuple
 
 from django.db import transaction
 from django.utils import timezone
@@ -15,11 +16,13 @@ from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.content.cache import is_staff
+from apps.content.pdf_services import visible_pdf_books
 from apps.core.permissions import IsLearner
 
 from . import annotation_validation as validation
 from .me_views import valid_page
-from .models import PageAnnotation, PageNote
+from .models import Book, PageAnnotation, PageNote, PdfPageAnnotation, PdfPageNote
 from .serializers import (
     AnnotationCreateSerializer,
     AnnotationUpdateSerializer,
@@ -28,14 +31,43 @@ from .serializers import (
     PageNoteSerializer,
     PageNoteWriteSerializer,
 )
-from .views import visible_book
 
 TAGS = ["books"]
 MAX_PAGES_PER_REQUEST = 10
 
 
-def _page_sizes(book, user, page, exclude_id=None) -> list[int]:
-    rows = PageAnnotation.objects.filter(user=user, book=book, page=page)
+class Target(NamedTuple):
+    """Yozuv qayerga tegishli: Kutubxona kitobi (`Book`) yoki maktab darsligi (`PdfBook`).
+    ID'lar (UUID) ikkala jadvalda bir-biridan farq qiladi, shuning uchun manzil bitta."""
+
+    book: Any
+    annotations: type
+    notes: type
+    fk: str
+
+    def owner(self, user, page=None) -> dict:
+        lookup = {"user": user, self.fk: self.book}
+        if page is not None:
+            lookup["page"] = page
+        return lookup
+
+
+def resolve_target(request, pk) -> Target:
+    book = (
+        (Book.objects.all() if is_staff(request.user) else Book.objects.public())
+        .filter(pk=pk)
+        .first()
+    )
+    if book is not None:
+        return Target(book, PageAnnotation, PageNote, "book")
+    pdf_book = visible_pdf_books(request).filter(pk=pk).first()
+    if pdf_book is None:
+        raise NotFound
+    return Target(pdf_book, PdfPageAnnotation, PdfPageNote, "pdf_book")
+
+
+def _page_sizes(target, user, page, exclude_id=None) -> list[int]:
+    rows = target.annotations.objects.filter(**target.owner(user, page))
     if exclude_id is not None:
         rows = rows.exclude(pk=exclude_id)
     return [validation.data_size(row.data) for row in rows.only("data")]
@@ -51,9 +83,9 @@ class MyPageNoteView(APIView):
         responses=PageNoteSerializer,
     )
     def get(self, request, pk, number):
-        book = visible_book(request, pk)
-        page = valid_page(book, number)
-        note = PageNote.objects.filter(user=request.user, book=book, page=page).first()
+        target = resolve_target(request, pk)
+        page = valid_page(target.book, number)
+        note = target.notes.objects.filter(**target.owner(request.user, page)).first()
         data = {"page": page, "text": note.text if note else "", "updated_at": None}
         if note:
             data["updated_at"] = note.updated_at
@@ -69,15 +101,15 @@ class MyPageNoteView(APIView):
     def put(self, request, pk, number):
         serializer = PageNoteWriteSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        book = visible_book(request, pk)
-        page = valid_page(book, number)
+        target = resolve_target(request, pk)
+        page = valid_page(target.book, number)
         text = serializer.validated_data["text"]
-        mine = PageNote.objects.filter(user=request.user, book=book, page=page)
+        mine = target.notes.objects.filter(**target.owner(request.user, page))
         if not text.strip():
             mine.delete()
             return Response(PageNoteSerializer({"page": page, "text": "", "updated_at": None}).data)
-        note, _ = PageNote.objects.update_or_create(
-            user=request.user, book=book, page=page, defaults={"text": text}
+        note, _ = target.notes.objects.update_or_create(
+            **target.owner(request.user, page), defaults={"text": text}
         )
         return Response(
             PageNoteSerializer(
@@ -86,7 +118,7 @@ class MyPageNoteView(APIView):
         )
 
 
-def _parse_pages(request, book) -> list[int]:
+def _parse_pages(book, request) -> list[int]:
     raw = request.query_params.get("pages") or request.query_params.get("page") or ""
     try:
         pages = sorted({int(part) for part in raw.split(",") if part.strip()})
@@ -117,11 +149,11 @@ class MyAnnotationsView(APIView):
         responses=PageAnnotationSerializer(many=True),
     )
     def get(self, request, pk):
-        book = visible_book(request, pk)
-        pages = _parse_pages(request, book)
-        rows = PageAnnotation.objects.filter(user=request.user, book=book, page__in=pages).order_by(
-            "page", "created_at"
-        )
+        target = resolve_target(request, pk)
+        pages = _parse_pages(target.book, request)
+        rows = target.annotations.objects.filter(
+            **target.owner(request.user), page__in=pages
+        ).order_by("page", "created_at")
         return Response(PageAnnotationSerializer(rows, many=True).data)
 
     @extend_schema(
@@ -134,28 +166,27 @@ class MyAnnotationsView(APIView):
     def post(self, request, pk):
         serializer = AnnotationCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        book = visible_book(request, pk)
+        target = resolve_target(request, pk)
         data = serializer.validated_data
-        page = valid_page(book, data["page"])
-        validation.ensure_type_allowed(book, data["type"])
+        page = valid_page(target.book, data["page"])
+        validation.ensure_type_allowed(target.book, data["type"])
         annotation_id = data.get("id") or uuid.uuid4()
 
-        existing = PageAnnotation.objects.filter(pk=annotation_id).first()
+        existing = target.annotations.objects.filter(pk=annotation_id).first()
         if existing is not None:
-            if (existing.user_id, existing.book_id, existing.page) != (
+            if (existing.user_id, getattr(existing, target.fk + "_id"), existing.page) != (
                 request.user.pk,
-                book.pk,
+                target.book.pk,
                 page,
             ):
                 raise ValidationError({"id": ["id_conflict"]})
             return Response(PageAnnotationSerializer(existing).data)
 
-        sizes = _page_sizes(book, request.user, page) + [validation.data_size(data["data"])]
+        sizes = _page_sizes(target, request.user, page) + [validation.data_size(data["data"])]
         validation.check_page_budget(sizes)
-        created = PageAnnotation.objects.create(
+        created = target.annotations.objects.create(
             pk=annotation_id,
-            user=request.user,
-            book=book,
+            **target.owner(request.user),
             page=page,
             type=data["type"],
             data=data["data"],
@@ -166,12 +197,14 @@ class MyAnnotationsView(APIView):
 class MyAnnotationDetailView(APIView):
     permission_classes = [IsLearner]
 
-    def _get(self, request, pk, annotation_id) -> PageAnnotation:
-        book = visible_book(request, pk)
-        row = PageAnnotation.objects.filter(pk=annotation_id, user=request.user, book=book).first()
+    def _get(self, request, pk, annotation_id):
+        target = resolve_target(request, pk)
+        row = target.annotations.objects.filter(
+            pk=annotation_id, **target.owner(request.user)
+        ).first()
         if row is None:
             raise NotFound
-        return row
+        return target, row
 
     @extend_schema(
         operation_id="me_books_annotations_update",
@@ -183,9 +216,9 @@ class MyAnnotationDetailView(APIView):
     def patch(self, request, pk, annotation_id):
         serializer = AnnotationUpdateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        row = self._get(request, pk, annotation_id)
+        target, row = self._get(request, pk, annotation_id)
         data = validation.clean_data(row.type, serializer.validated_data["data"])
-        sizes = _page_sizes(row.book, request.user, row.page, exclude_id=row.pk)
+        sizes = _page_sizes(target, request.user, row.page, exclude_id=row.pk)
         validation.check_page_budget([*sizes, validation.data_size(data)])
         row.data = data
         row.save(update_fields=["data", "updated_at"])
@@ -198,7 +231,7 @@ class MyAnnotationDetailView(APIView):
         responses={204: None},
     )
     def delete(self, request, pk, annotation_id):
-        self._get(request, pk, annotation_id).delete()
+        self._get(request, pk, annotation_id)[1].delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -215,7 +248,8 @@ class MyPageAnnotationsView(APIView):
     def put(self, request, pk, number):
         serializer = PageAnnotationsReplaceSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        book = visible_book(request, pk)
+        target = resolve_target(request, pk)
+        book, model = target.book, target.annotations
         page = valid_page(book, number)
         items = serializer.validated_data["annotations"]
         for item in items:
@@ -224,33 +258,27 @@ class MyPageAnnotationsView(APIView):
 
         user = request.user
         with transaction.atomic():
-            current = {
-                row.pk: row
-                for row in PageAnnotation.objects.filter(user=user, book=book, page=page)
-            }
+            current = {row.pk: row for row in model.objects.filter(**target.owner(user, page))}
             ids = [item.get("id") or uuid.uuid4() for item in items]
             foreign = (
-                PageAnnotation.objects.filter(pk__in=[i for i in ids if i not in current])
-                .exclude(user=user, book=book, page=page)
+                model.objects.filter(pk__in=[i for i in ids if i not in current])
+                .exclude(**target.owner(user, page))
                 .exists()
             )
             if foreign:
                 raise ValidationError({"annotations": ["id_conflict"]})
 
             kept = set(ids)
-            PageAnnotation.objects.filter(
-                pk__in=[key for key in current if key not in kept]
-            ).delete()
+            model.objects.filter(pk__in=[key for key in current if key not in kept]).delete()
             now = timezone.now()
             changed, created = [], []
             for annotation_id, item in zip(ids, items, strict=True):
                 row = current.get(annotation_id)
                 if row is None:
                     created.append(
-                        PageAnnotation(
+                        model(
                             pk=annotation_id,
-                            user=user,
-                            book=book,
+                            **target.owner(user),
                             page=page,
                             type=item["type"],
                             data=item["data"],
@@ -260,8 +288,8 @@ class MyPageAnnotationsView(APIView):
                     row.type, row.data, row.updated_at = item["type"], item["data"], now
                     changed.append(row)
             if changed:
-                PageAnnotation.objects.bulk_update(changed, ["type", "data", "updated_at"])
+                model.objects.bulk_update(changed, ["type", "data", "updated_at"])
             if created:
-                PageAnnotation.objects.bulk_create(created)
-        rows = PageAnnotation.objects.filter(user=user, book=book, page=page).order_by("created_at")
+                model.objects.bulk_create(created)
+        rows = model.objects.filter(**target.owner(user, page)).order_by("created_at")
         return Response(PageAnnotationSerializer(rows, many=True).data)

@@ -29,7 +29,7 @@ describe("reader prefs", () => {
       zoom: 1.85,
       warm: true,
     });
-    expect(sanitizePrefs({ zoom: 9 }).zoom).toBe(3);
+    expect(sanitizePrefs({ zoom: 9 }).zoom).toBe(4);
     expect(sanitizePrefs({ fit: "zoom", zoom: "2", warm: 1 })).toEqual(DEFAULT_READER_PREFS);
   });
 });

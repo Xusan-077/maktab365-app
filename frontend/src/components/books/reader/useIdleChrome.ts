@@ -21,7 +21,9 @@ export function useIdleChrome(pinned: boolean) {
   const schedule = useCallback(() => {
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => {
-      if (!pinnedRef.current) setVisible(false);
+      // Yuqori paneldagi ochiq menyu (`aria-expanded`): panel o'zi yashirinib menyuni uzib qo'ymasin.
+      const menuOpen = document.querySelector('[data-book-reader] header [aria-expanded="true"]');
+      if (!pinnedRef.current && !menuOpen) setVisible(false);
     }, HIDE_AFTER_MS);
   }, []);
 

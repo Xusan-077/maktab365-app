@@ -143,7 +143,7 @@ def clean_solution(data: Any) -> dict:
 
 def ensure_type_allowed(book, annotation_type: str) -> None:
     """Maxsus rejim turlari faqat o'z kitob turida: `solution` — faqat math kitobda."""
-    if annotation_type == "solution" and book.reading_mode != "math":
+    if annotation_type == "solution" and getattr(book, "reading_mode", None) != "math":
         raise ValidationError({"type": ["solution_not_allowed"]})
 
 

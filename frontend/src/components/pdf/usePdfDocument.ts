@@ -31,6 +31,7 @@ interface DocumentState {
 function usePdfFromUrl(
   sourceKey: string,
   fetchSource: () => Promise<{ url: string } | { data: Uint8Array }>,
+  enabled = true,
 ) {
   const [state, setState] = useState<DocumentState>({ doc: null, loading: true, error: null });
   const [attempt, setAttempt] = useState(0);
@@ -40,6 +41,8 @@ function usePdfFromUrl(
   });
 
   useEffect(() => {
+    // O'chiq: boshqa turdagi kitob uchun hook chaqirilgan, hech narsa yuklanmaydi (holati ishlatilmaydi).
+    if (!enabled) return;
     let cancelled = false;
     let task: PDFDocumentLoadingTask | undefined;
     void (async () => {
@@ -76,7 +79,7 @@ function usePdfFromUrl(
       // (orqaga navigatsiya) bolalar eski `doc.getPage` ni chaqirib yiqilardi.
       setState({ doc: null, loading: true, error: null });
     };
-  }, [sourceKey, attempt]);
+  }, [sourceKey, attempt, enabled]);
 
   const reload = useCallback(() => {
     setState((current) => ({ ...current, loading: true, error: null }));
@@ -87,24 +90,30 @@ function usePdfFromUrl(
 }
 
 /** Kitob PDF'i. */
-export function usePdfDocument(bookId: string) {
+export function usePdfDocument(bookId: string, enabled = true) {
   const queryClient = useQueryClient();
-  return usePdfFromUrl(`book:${bookId}`, async () => {
-    // Oflayn saqlangan bo'lsa tarmoqsiz va trafiksiz shu nusxa ochiladi.
-    const saved = await loadOfflinePdf(bookId);
-    if (saved) return { data: saved };
-    return queryClient.fetchQuery(pdfQueries.fileUrl(bookId));
-  });
+  return usePdfFromUrl(
+    `book:${bookId}`,
+    async () => {
+      // Oflayn saqlangan bo'lsa tarmoqsiz va trafiksiz shu nusxa ochiladi.
+      const saved = await loadOfflinePdf(bookId);
+      if (saved) return { data: saved };
+      return queryClient.fetchQuery(pdfQueries.fileUrl(bookId));
+    },
+    enabled,
+  );
 }
 
 /**
  * Kutubxona kitobi (`/kitoblar`): shu mexanizm, lekin imzolangan URL `books/<id>/file-url/` dan.
  * Oflayn nusxa yo'q.
  */
-export function useLibraryBookDocument(bookId: string) {
+export function useLibraryBookDocument(bookId: string, enabled = true) {
   const queryClient = useQueryClient();
-  return usePdfFromUrl(`library:${bookId}`, () =>
-    queryClient.fetchQuery(bookQueries.fileUrl(bookId)),
+  return usePdfFromUrl(
+    `library:${bookId}`,
+    () => queryClient.fetchQuery(bookQueries.fileUrl(bookId)),
+    enabled,
   );
 }
 

@@ -4,8 +4,8 @@ import { notFound, permanentRedirect } from "next/navigation";
 import { BookX } from "lucide-react";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { BookReader } from "@/components/books/reader/BookReader";
 import { BookReaderSkeleton } from "@/components/books/reader/BookReaderSkeleton";
+import { PdfReaderLoader } from "@/components/pdf/PdfReaderLoader";
 import { buttonVariants } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { parseBookRef, SAMPLE_REF } from "@/lib/books/ref";
@@ -79,5 +79,5 @@ async function ReaderContent({ params, searchParams }: Pick<Props, "params" | "s
     );
   }
 
-  return <BookReader book={book} />;
+  return <PdfReaderLoader library={book} />;
 }

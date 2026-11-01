@@ -30,6 +30,10 @@ vi.mock("@/lib/i18n/navigation", () => ({
 }));
 vi.mock("@/hooks/usePdfProgress", () => ({ usePdfProgress: () => progress.state }));
 vi.mock("@/hooks/useBookStats", () => ({ useBookStats: vi.fn() }));
+// Kutubxona kitobi (`library`) yo'li bu testlarda ishlatilmaydi.
+vi.mock("@/hooks/useBookProgress", () => ({
+  useBookProgress: () => ({ ready: true, lastPage: null, position: null, save: vi.fn() }),
+}));
 // Kirgan foydalanuvchi: saqlash amallari darhol bajariladi.
 vi.mock("@/hooks/useRequireAuth", () => ({
   useRequireAuth: () => (action?: () => void) => {
@@ -50,6 +54,7 @@ vi.mock("@/components/games/TopicGamesBlock", () => ({ TopicGamesBlock: () => nu
 vi.mock("./usePdfDocument", () => ({
   usePdfDocument: () => ({ doc: pdfDoc, loading: false, error: null, reload: vi.fn() }),
   useSlidesDocument: () => ({ doc: { numPages: 8 }, loading: false, error: null, reload: vi.fn() }),
+  useLibraryBookDocument: () => ({ doc: null, loading: false, error: null, reload: vi.fn() }),
 }));
 vi.mock("./PdfPageCanvas", () => ({
   PdfPageCanvas: ({ pageNumber, current }: { pageNumber: number; current?: boolean }) => (
@@ -93,6 +98,7 @@ const renderedPages = () =>
   screen.queryAllByTestId("pdf-canvas").map((node) => Number(node.dataset.page));
 
 const PREFS_KEY = "maktab365-reader-prefs";
+const ZOOM_MEMORY_KEY = "maktab365-zoom";
 const storeMode = (mode: "b" | "h" | "v" | null, extra: Record<string, unknown> = {}) =>
   window.localStorage.setItem(
     PREFS_KEY,
@@ -116,6 +122,8 @@ beforeEach(() => {
   setViewport(false);
   // Mavjud testlar bitta betli kitob rejimida (mobil + saqlangan "b").
   storeMode("b");
+  // Zoom kitob bo'yicha saqlanadi: oldingi testning zoom'i keyingisiga o'tmasin.
+  window.localStorage.removeItem(ZOOM_MEMORY_KEY);
   HTMLDialogElement.prototype.showModal = function showModal() {
     this.setAttribute("open", "");
   };
@@ -481,27 +489,29 @@ describe("PdfReader: zoom, pinch va sahifa boshi", () => {
     );
   });
 
-  it("Z klavishi: 100% → 150% → 200% → 300% → 100%; Aa menyusida −/+ va 100%", async () => {
+  it("Z klavishi: 100% → 150% → 200% → 300% → 400% → 100%; Aa menyusida −/+ va 100%", async () => {
     setup("page=5");
     await currentPage();
     expect(zoomOf()).toBe("1");
     const seen = [];
-    for (let i = 0; i < 4; i += 1) {
+    for (let i = 0; i < 5; i += 1) {
       fireEvent.keyDown(window, { key: "z" });
       seen.push(zoomOf());
     }
-    expect(seen).toEqual(["1.5", "2", "3", "1"]);
+    expect(seen).toEqual(["1.5", "2", "3", "4", "1"]);
 
     fireEvent.click(screen.getByTestId("pdf-view-open"));
-    fireEvent.click(screen.getByRole("button", { name: uz.pdfBooks.appearance.zoomIn }));
-    expect(zoomOf()).toBe("1.1");
+    // Sarlavhadagi zoom guruhida ham «Kattalashtirish» bor: Aa menyusidagisi olinadi.
     const reset = screen.getByTestId("reader-zoom-reset");
+    const menu = within(reset.parentElement as HTMLElement);
+    fireEvent.click(menu.getByRole("button", { name: uz.pdfBooks.appearance.zoomIn }));
+    expect(zoomOf()).toBe("1.1");
     expect(reset.textContent).toBe("110%");
     fireEvent.click(reset);
     expect(zoomOf()).toBe("1");
   });
 
-  it("klaviatura + − 0: 10% qadam, 0 — «Moslash»; tanlov xotiraga yoziladi", async () => {
+  it("klaviatura + − 0: 10% qadam, 0 — «Moslash»; zoom shu kitob uchun xotiraga yoziladi", async () => {
     setup("page=5");
     await currentPage();
     fireEvent.keyDown(window, { key: "+" });
@@ -509,12 +519,12 @@ describe("PdfReader: zoom, pinch va sahifa boshi", () => {
     expect(zoomOf()).toBe("1.2");
     fireEvent.keyDown(window, { key: "-" });
     expect(zoomOf()).toBe("1.1");
-    expect(window.localStorage.getItem(PREFS_KEY)).toContain('"zoom":1.1');
+    expect(window.localStorage.getItem(ZOOM_MEMORY_KEY)).toContain('"book-1":1.1');
     fireEvent.keyDown(window, { key: "0" });
     expect(zoomOf()).toBe("1");
   });
 
-  it("kitobda pinch qo'yib yuborilganda zoom holatga yoziladi (3× gacha), swipe bo'lmaydi", async () => {
+  it("kitobda pinch qo'yib yuborilganda zoom holatga yoziladi (4× gacha), swipe bo'lmaydi", async () => {
     setup("page=5");
     await currentPage();
     const area = screen.getByTestId("pdf-page-area");
@@ -525,7 +535,7 @@ describe("PdfReader: zoom, pinch va sahifa boshi", () => {
     fireEvent.touchStart(area, { touches: touches(100) });
     fireEvent.touchMove(area, { touches: touches(500) });
     fireEvent.touchEnd(area, { touches: [] });
-    expect(zoomOf()).toBe("3");
+    expect(zoomOf()).toBe("4");
     fireEvent.pointerUp(area, { pointerType: "touch", clientX: 300, clientY: 200 });
     expect(nav.replace).not.toHaveBeenCalledWith("/darsliklar/book-1?page=6", { scroll: false });
   });
@@ -544,7 +554,7 @@ describe("PdfReader: zoom, pinch va sahifa boshi", () => {
     expect(screen.getByTestId("pdf-zoom-content").style.transform).toBe("scale(2)");
     fireEvent.touchMove(area, { touches: touches(500) });
     fireEvent.touchEnd(area, { touches: [] });
-    expect(zoomOf()).toBe("3");
+    expect(zoomOf()).toBe("4");
     expect(screen.getByTestId("pdf-zoom-content").style.transform).toBe("");
     // Pinch tugagan barmoq ko'tarilishi swipe/tap hisoblanmaydi.
     fireEvent.pointerUp(area, { pointerType: "touch", clientX: 300, clientY: 200 });
@@ -766,5 +776,22 @@ describe("PdfReader: fokus rejimi, mavzu paneli, suzuvchi panel", () => {
     const stored = window.localStorage.getItem(PREFS_KEY) ?? "";
     expect(stored).toContain('"tone":"sepia"');
     expect(stored).toContain('"warm":true');
+  });
+});
+
+describe("PdfReader: zoom kitob bo'yicha eslab qolinadi", () => {
+  const zoomOf = () => screen.getByTestId("pdf-zoom-content").dataset.zoom;
+  it("saqlangan zoom bilan ochiladi, saqlanmagan kitob — «Moslash» (100%)", async () => {
+    window.localStorage.setItem(ZOOM_MEMORY_KEY, JSON.stringify({ "book-1": 2.5 }));
+    setup("page=5");
+    await currentPage();
+    expect(zoomOf()).toBe("2.5");
+  });
+
+  it("boshqa kitobning zoom'i bu kitobga o'tmaydi", async () => {
+    window.localStorage.setItem(ZOOM_MEMORY_KEY, JSON.stringify({ "book-2": 3 }));
+    setup("page=5");
+    await currentPage();
+    expect(zoomOf()).toBe("1");
   });
 });

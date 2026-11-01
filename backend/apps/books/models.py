@@ -4,7 +4,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
 
-from apps.content.models import BookLanguage
+from apps.content.models import BookLanguage, PdfBook
 from apps.content.storage import covers_storage
 from apps.core.fields import LocalizedTextField
 from apps.core.models import TimeStampedModel, UUIDModel
@@ -367,3 +367,44 @@ class AnswerAttempt(UUIDModel):
 
     def __str__(self):
         return f"{self.user_id}/{self.book_id}: {self.score}/{self.total}"
+
+
+class PdfPageNote(UUIDModel, TimeStampedModel):
+    """Maktab darsligi (`PdfBook`) betining yon daftar yozuvi: `PageNote` ning darslik varianti."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="pdf_page_notes"
+    )
+    pdf_book = models.ForeignKey(PdfBook, on_delete=models.CASCADE, related_name="page_notes")
+    page = models.PositiveIntegerField(validators=[MinValueValidator(1)])
+    text = models.TextField(blank=True, validators=[MaxLengthValidator(20000)])
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "pdf_book", "page"], name="books_pdf_note_once_per_page"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.user_id}/{self.pdf_book_id}/{self.page}"
+
+
+class PdfPageAnnotation(UUIDModel, TimeStampedModel):
+    """Maktab darsligi betidagi chizma/belgi/matn: `PageAnnotation` ning darslik varianti
+    (koordinatalar 0..1, `data` tuzilishi `annotation_validation.py` da)."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="pdf_page_annotations"
+    )
+    pdf_book = models.ForeignKey(PdfBook, on_delete=models.CASCADE, related_name="annotations")
+    page = models.PositiveIntegerField(validators=[MinValueValidator(1)])
+    type = models.CharField(max_length=12, choices=AnnotationType.choices)
+    data = models.JSONField()
+
+    class Meta:
+        ordering = ["created_at"]
+        indexes = [models.Index(fields=["user", "pdf_book", "page"])]
+
+    def __str__(self):
+        return f"{self.user_id}/{self.pdf_book_id}/{self.page}/{self.type}"

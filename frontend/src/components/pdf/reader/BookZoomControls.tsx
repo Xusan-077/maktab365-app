@@ -7,17 +7,20 @@ import { cn } from "@/lib/utils/cn";
 import { READER_ICON_BUTTON } from "./reader-styles";
 
 /**
- * Kitob rejimidagi kichik zoom guruhi (sarlavhada): −, foiz, +, «Moslash». Aa menyusi va klaviatura
- * (+ − 0) bilan bitta holat (`reader-prefs.store` `zoom`).
+ * O'qish oynasi sarlavhasidagi zoom guruhi (ikkala rejimda): −, foiz, +, «Moslash» (= 100%). Aa
+ * menyusi va klaviatura (+ − 0) bilan bitta holat (`reader-prefs.store` `zoom`). `compact` — telefon:
+ * foiz yozuvi tor, «Moslash» faqat ikonka.
  */
 export function BookZoomControls({
   zoom,
   onZoom,
   className,
+  compact = false,
 }: {
   zoom: number;
   onZoom: (zoom: number) => void;
   className?: string;
+  compact?: boolean;
 }) {
   const t = useTranslations("pdfBooks.appearance");
   return (
@@ -40,7 +43,10 @@ export function BookZoomControls({
       <span
         aria-live="polite"
         data-testid="book-zoom-value"
-        className="w-12 text-center text-sm font-semibold tabular-nums"
+        className={cn(
+          "text-center font-semibold tabular-nums",
+          compact ? "w-10 text-xs" : "w-12 text-sm",
+        )}
       >
         {formatZoom(zoom)}
       </span>
@@ -61,10 +67,13 @@ export function BookZoomControls({
         data-testid="book-zoom-fit"
         aria-pressed={zoom === DEFAULT_ZOOM}
         onClick={() => onZoom(DEFAULT_ZOOM)}
-        className={cn(READER_ICON_BUTTON, "w-auto gap-1.5 px-3 text-sm font-semibold")}
+        className={cn(
+          READER_ICON_BUTTON,
+          !compact && "w-auto gap-1.5 px-3 text-sm font-semibold",
+        )}
       >
         <Maximize2 className="size-4" aria-hidden />
-        <span>{t("fit")}</span>
+        {!compact && <span>{t("fit")}</span>}
       </button>
     </div>
   );

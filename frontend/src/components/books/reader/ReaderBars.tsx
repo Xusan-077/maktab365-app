@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import {
   ArrowLeft,
   Bookmark,
@@ -20,7 +20,6 @@ import { Link } from "@/lib/i18n/navigation";
 import { PageNumberInput } from "@/components/pdf/reader/PageNumberInput";
 import { formatZoom } from "@/lib/pdf/zoom";
 import { progressPercent } from "@/lib/books/reader";
-import { bookPath } from "@/lib/utils/routes";
 import { cn } from "@/lib/utils/cn";
 import { AppearanceMenu } from "./AppearanceMenu";
 import { ExportMenu } from "./ExportMenu";
@@ -33,6 +32,8 @@ const BAR =
 export interface TopBarProps {
   visible: boolean;
   bookId: string;
+  backHref: string;
+  subtitle?: string | null;
   title: string;
   chapterTitle: string | null;
   bookmarked: boolean;
@@ -47,12 +48,16 @@ export interface TopBarProps {
   onOpenFind: () => void;
   onToggleBookmark: () => void;
   page: number;
+  /** Kitob turiga xos qo'shimcha tugmalar (darslik: Mavzu, Saqlash, «Yana»). */
+  actions?: ReactNode;
 }
 
 /** Ingichka tepa panel: orqaga, kitob nomi va bo'lim, mundarija, qidiruv, xatcho'p, ko'rinish, to'liq ekran. */
 export function ReaderTopBar({
   visible,
   bookId,
+  backHref,
+  subtitle = null,
   title,
   chapterTitle,
   bookmarked,
@@ -66,6 +71,7 @@ export function ReaderTopBar({
   onOpenFind,
   onToggleBookmark,
   page,
+  actions,
 }: TopBarProps) {
   const t = useTranslations("books.reader");
   const keys = useTranslations("books.reader.keys");
@@ -76,18 +82,13 @@ export function ReaderTopBar({
       className={cn(BAR, "top-0", !visible && "-translate-y-full")}
       data-hidden={!visible || undefined}
     >
-      <Link
-        href={bookPath(bookId)}
-        className={BK_ICON_BUTTON}
-        aria-label={t("back")}
-        title={t("back")}
-      >
+      <Link href={backHref} className={BK_ICON_BUTTON} aria-label={t("back")} title={t("back")}>
         <ArrowLeft className="size-5" aria-hidden />
       </Link>
       <div className="min-w-0 flex-1 px-1">
         <p className="truncate text-[0.9375rem] leading-tight font-semibold">{title}</p>
-        {chapterTitle && (
-          <p className="text-bk-muted truncate text-xs leading-tight">{chapterTitle}</p>
+        {(chapterTitle ?? subtitle) && (
+          <p className="text-bk-muted truncate text-xs leading-tight">{chapterTitle ?? subtitle}</p>
         )}
       </div>
       <button
@@ -132,6 +133,7 @@ export function ReaderTopBar({
       >
         <NotebookPen className="size-5" aria-hidden />
       </button>
+      {actions}
       <ExportMenu bookId={bookId} title={title} page={page} onOpenChange={onLookOpenChange} />
       <AppearanceMenu
         prefs={prefs}

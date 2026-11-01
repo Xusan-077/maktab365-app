@@ -10,7 +10,7 @@ export const BOOK_SPREAD_MIN_WIDTH = 1024;
 /** Kitob stage chetidan shuncha px ichkarida. */
 export const BOOK_PADDING = 28;
 /** Zoom shundan katta bo'lsa sudrash varaq ag'darmaydi — faqat pan. */
-export const BOOK_PAN_ZOOM = 1.05;
+export const BOOK_PAN_ZOOM = 1.001;
 /** A4 nisbati — 1-bet o'lchami kelguncha. */
 export const DEFAULT_PAGE_ASPECT = 1.414;
 

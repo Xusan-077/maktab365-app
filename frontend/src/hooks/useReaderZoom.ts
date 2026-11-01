@@ -3,13 +3,13 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
 import {
   anchorOffset,
-  clampZoom,
+  clampZoomSmooth,
+  commitZoom,
   DEFAULT_ZOOM,
   doubleTapZoom,
   nextZoomStep,
   nudgeZoom,
-  pinchZoom,
-  wheelZoom,
+  wheelZoomSmooth,
 } from "@/lib/pdf/zoom";
 import { useReaderPrefsStore } from "@/stores/reader-prefs.store";
 
@@ -27,7 +27,7 @@ interface PendingAnchor {
 }
 
 /** Ctrl+g'ildirak to'xtagach shuncha ms dan keyin zoom qo'llanadi (har qadamda qayta chizilmaydi). */
-const WHEEL_SETTLE_MS = 160;
+const WHEEL_SETTLE_MS = 150;
 
 /** Pinch paytidagi oldindan ko'rish: canvas qayta chizilmaydi, CSS `scale` (barmoqlar markazida). */
 export interface LiveZoom {
@@ -43,7 +43,7 @@ const center = (touches: TouchList): Point => ({
 });
 
 /**
- * O'qish oynasi zoom'i (50%–300%): tugma/klaviatura pog'onalari, ikki marta bosish, ikki barmoq
+ * O'qish oynasi zoom'i (50%–400%): tugma/klaviatura pog'onalari, ikki marta bosish, ikki barmoq
  * (pinch) va Ctrl+g'ildirak (trackpad pinch ham shu). Zoom o'zgarganda fokus nuqtasi ekranda joyida
  * qoladi: gorizontal — sahifa konteyneri scroll'i, vertikal — oyna (to'liq ekranda — stage) yoki,
  * `panY: "scroller"` bo'lsa (gorizontal rejim: balandligi qat'iy quti), konteynerning o'zi.
@@ -79,7 +79,7 @@ export function useReaderZoom({
   const applyZoom = useCallback(
     (next: number, point?: Point) => {
       const previous = zoomRef.current;
-      const target = clampZoom(next);
+      const target = commitZoom(next);
       if (target === previous) return;
       const scroller = scrollerRef.current;
       const content = contentRef.current;
@@ -133,7 +133,9 @@ export function useReaderZoom({
     const onMove = (event: TouchEvent) => {
       if (!start || event.touches.length !== 2) return;
       event.preventDefault();
-      scale = pinchZoom(start.zoom, start.distance, distance(event.touches));
+      // Jonli ko'rinish yaxlitlanmaydi (0.05 qadam pinch'ni "zinapoya" qilardi); commit — `applyZoom`.
+      const ratioRaw = start.distance > 0 ? distance(event.touches) / start.distance : 1;
+      scale = clampZoomSmooth(start.zoom * ratioRaw);
       const ratio = scale / start.zoom;
       setLive((current) => (current ? { ...current, scale: ratio } : current));
     };
@@ -161,7 +163,9 @@ export function useReaderZoom({
         });
       }
       const current = wheel;
-      current.scale = wheelZoom(current.scale, event.deltaY);
+      current.scale = clampZoomSmooth(
+        wheelZoomSmooth(current.scale, event.deltaY, event.deltaMode),
+      );
       const ratio = current.scale / zoomRef.current;
       setLive((live) => (live ? { ...live, scale: ratio } : live));
       current.timer = window.setTimeout(() => {

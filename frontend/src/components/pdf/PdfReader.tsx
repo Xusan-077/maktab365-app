@@ -65,9 +65,10 @@ import {
 import { parseSlidesParams, readSlidesProgress, withSlidesParams } from "@/lib/pdf/slides";
 import { currentTocItem, flattenToc } from "@/lib/pdf/toc";
 import { DEFAULT_ZOOM } from "@/lib/pdf/zoom";
+import { browserStorage, loadBookZoom, saveBookZoom } from "@/lib/pdf/zoom-memory";
 import { pdfQueries } from "@/lib/pdf-books/queries";
 import { cn } from "@/lib/utils/cn";
-import { pdfBookPath, ROUTES } from "@/lib/utils/routes";
+import { bookPath, pdfBookPath, ROUTES } from "@/lib/utils/routes";
 import { useReaderPrefsStore } from "@/stores/reader-prefs.store";
 import { useTopicNotesStore } from "@/stores/topic-notes.store";
 import { ReportErrorLink } from "@/components/support/ReportErrorLink";
@@ -91,7 +92,12 @@ import { SelectionMenu, type TextSelection } from "./reader/SelectionMenu";
 import { ThumbnailStrip } from "./reader/ThumbnailStrip";
 import { VerticalView } from "./reader/VerticalView";
 import { resolveFileUrl } from "@/lib/pdf/file-url";
-import { usePdfDocument } from "./usePdfDocument";
+import { usePdfDocument, useLibraryBookDocument } from "./usePdfDocument";
+import { useBookProgress } from "@/hooks/useBookProgress";
+import type { BookDetail } from "@/lib/books/api";
+import { bookQueries } from "@/lib/books/queries";
+import { libraryAsPdfBook } from "@/lib/reader/library-adapter";
+import type { PdfPosition } from "@/lib/pdf/progress";
 
 const isTypingTarget = (target: EventTarget | null) =>
   target instanceof HTMLElement &&
@@ -122,13 +128,23 @@ function ReaderMessage({ message, action }: { message: string; action?: React.Re
 }
 
 /** Xato holatidagi zaxira: PDF'ni brauzerning o'z ko'rgichida yangi oynada ochadi. */
-function OpenInNewWindowButton({ bookId, label }: { bookId: string; label: string }) {
+function OpenInNewWindowButton({
+  bookId,
+  label,
+  library = false,
+}: {
+  bookId: string;
+  label: string;
+  library?: boolean;
+}) {
   const queryClient = useQueryClient();
   const open = async () => {
     // Oyna bosish onida (bloklanmasligi uchun) ochiladi, URL keyin qo'yiladi.
     const popup = window.open("", "_blank");
     try {
-      const { url } = await queryClient.fetchQuery(pdfQueries.fileUrl(bookId));
+      const { url } = await (library
+        ? queryClient.fetchQuery(bookQueries.fileUrl(bookId))
+        : queryClient.fetchQuery(pdfQueries.fileUrl(bookId)));
       const target = resolveFileUrl(url, window.location.origin);
       if (popup) popup.location.href = target;
       else window.location.assign(target);
@@ -155,8 +171,11 @@ export function PdfReader({
   bookId,
   backHref,
   preview = false,
+  library,
 }: {
   bookId: string;
+  /** Kutubxona kitobi: shu oynada o'qiladi (darslikka xos imkoniyatlar yashiriladi). */
+  library?: BookDetail;
   backHref?: string;
   /** Admin oldindan ko'rishi: progress, statistika va "oxirgi ko'rilganlar" yuborilmaydi. */
   preview?: boolean;
@@ -170,10 +189,31 @@ export function PdfReader({
   const locale = useLocale() as Locale;
   const searchParams = useSearchParams();
   const { toast } = useToast();
-  const book = useQuery(pdfQueries.book(bookId));
+  const isLibrary = library !== undefined;
+  const textbook = useQuery({ ...pdfQueries.book(bookId), enabled: !isLibrary });
+  const libraryData = useMemo(() => (library ? libraryAsPdfBook(library) : undefined), [library]);
+  const book = (
+    isLibrary
+      ? { data: libraryData, error: null, refetch: async () => undefined, isPending: false }
+      : textbook
+  ) as typeof textbook;
   const total = book.data?.page_count ?? 0;
-  const progress = usePdfProgress(bookId, total, { track: !preview });
-  const document = usePdfDocument(bookId);
+  const textbookProgress = usePdfProgress(bookId, total, { track: !preview && !isLibrary });
+  const libraryProgress = useBookProgress(bookId, isLibrary);
+  const lastPage = libraryProgress.lastPage;
+  const progress = (
+    isLibrary
+      ? {
+          ready: libraryProgress.ready,
+          position: (lastPage ? { page: lastPage } : null) as PdfPosition | null,
+          resume: lastPage ? clampPage(lastPage, total) : 1,
+          record: libraryProgress.save,
+        }
+      : textbookProgress
+  ) as typeof textbookProgress;
+  const textbookDocument = usePdfDocument(bookId, !isLibrary);
+  const libraryDocument = useLibraryBookDocument(bookId, isLibrary);
+  const document = isLibrary ? libraryDocument : textbookDocument;
   const [renderFailed, setRenderFailed] = useState(false);
   const desktop = useMediaQuery("(min-width: 1024px)");
   const twoPageWide = useMediaQuery(`(min-width: ${BOOK_SPREAD_MIN_WIDTH}px)`);
@@ -191,7 +231,7 @@ export function PdfReader({
   const [prefsReady, setPrefsReady] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [findOpen, setFindOpen] = useState(false);
-  const annotations = usePdfAnnotations(bookId);
+  const annotations = usePdfAnnotations(bookId, !isLibrary);
   const addNote = useTopicNotesStore((state) => state.add);
   const requireAuth = useRequireAuth();
   const [drawing, setDrawing] = useState(false);
@@ -211,17 +251,32 @@ export function PdfReader({
   const { cycleTone } = prefs;
 
   useEffect(() => {
-    void Promise.resolve(useReaderPrefsStore.persist.rehydrate()).finally(() =>
-      setPrefsReady(true),
-    );
-  }, []);
+    let active = true;
+    void Promise.resolve(useReaderPrefsStore.persist.rehydrate()).finally(() => {
+      if (!active) return;
+      // Zoom — har kitob uchun: saqlangan bo'lmasa «Moslash» (muqova/1-bet ekranga to'liq sig'adi).
+      useReaderPrefsStore.getState().setZoom(loadBookZoom(bookId, browserStorage()) ?? DEFAULT_ZOOM);
+      setPrefsReady(true);
+    });
+    return () => {
+      active = false;
+    };
+  }, [bookId]);
+
+  // Zoom o'zgarsa shu kitob uchun eslab qolinadi (keyingi ochilishda tiklanadi).
+  useEffect(() => {
+    if (!prefsReady) return;
+    return useReaderPrefsStore.subscribe((state, previous) => {
+      if (state.zoom !== previous.zoom) saveBookZoom(bookId, state.zoom, browserStorage());
+    });
+  }, [prefsReady, bookId]);
 
   const mode: ReadingMode = resolveMode(parseModeParam(searchParams.get("mode")), prefs.mode);
   const bookMode = mode === "b";
   // Ochiq kitob (2 bet) — «Kitob» rejimida ≥1024px; aks holda bitta bet.
   const spread = bookMode && twoPageWide;
 
-  const rawPage = searchParams.get("page");
+  const rawPage = searchParams.get("page") ?? searchParams.get("bet");
   const urlPage = total > 0 ? parsePageParam(rawPage, total) : null;
   // Tez varaqlashda (klaviatura, swipe) URL yangilanishi (`useSearchParams`) kechikadi: so'ralgan bet
   // URL unga yetguncha darhol ko'rsatiladi, keyingi bosish shu betdan hisoblanadi — bosish yo'qolmaydi.
@@ -263,7 +318,7 @@ export function PdfReader({
   }, []);
 
   // Admin oldindan ko'rishi statistika va "oxirgi ko'rilganlar"ga yozilmaydi.
-  const counted = book.data && !book.data.unverified && !preview;
+  const counted = book.data && !book.data.unverified && !preview && !isLibrary;
   useBookStats(counted ? bookId : undefined, page);
 
   // Boshqa parametrlar (`slides`, `slide`) saqlanadi: sahifa almashganda ko'rgich yopilmaydi.
@@ -528,9 +583,15 @@ export function PdfReader({
   const subjectTitle = book.data ? getLocalized(book.data.subject_title, locale) : "";
   const subtitle =
     currentItem?.title ??
-    (book.data ? tc("meta", { grade: book.data.grade, subject: subjectTitle }) : "");
+    (isLibrary
+      ? (library?.author ?? "")
+      : book.data
+        ? tc("meta", { grade: book.data.grade, subject: subjectTitle })
+        : "");
   const percent = page !== null && total > 0 ? Math.max(1, Math.round((page / total) * 100)) : 0;
-  const backLink = backHref ?? (book.data ? pdfBookPath(book.data) : ROUTES.textbooks);
+  const backLink =
+    backHref ??
+    (library ? bookPath(library.slug) : book.data ? pdfBookPath(book.data) : ROUTES.textbooks);
   // Matnli kitobda (backend `has_text_layer` — `false` emas) betlar ustida tanlanadigan matn qatlami.
   const textLayer = book.data?.has_text_layer !== false;
   const renderPage = (
@@ -579,7 +640,7 @@ export function PdfReader({
     }
   };
   const offlineBook =
-    book.data && !backHref
+    book.data && !backHref && !isLibrary
       ? {
           id: bookId,
           slug: book.data.slug,
@@ -609,7 +670,7 @@ export function PdfReader({
     toast({ variant: "success", title: ts("highlighted") });
   };
 
-  const moreItems: OverflowMenuItem[] = [
+  const allMoreItems: OverflowMenuItem[] = [
     ...(searchable && !desktop
       ? [
           {
@@ -685,6 +746,10 @@ export function PdfReader({
         ]
       : []),
   ];
+  // Belgilash (to'rtburchak) darslik yozuvlari bilan bog'liq: kutubxona kitobida yo'q.
+  const moreItems = isLibrary
+    ? allMoreItems.filter((item) => item.id !== "highlight")
+    : allMoreItems;
 
   return (
     <div
@@ -746,8 +811,13 @@ export function PdfReader({
             <Skeleton className="h-11 w-28 max-sm:hidden" />
           )}
 
-          {bookMode && prefsReady && desktop && (
-            <BookZoomControls zoom={zoom} onZoom={setZoomLevel} className="mx-1" />
+          {prefsReady && (
+            <BookZoomControls
+              zoom={zoom}
+              onZoom={setZoomLevel}
+              compact={!desktop}
+              className="mx-1"
+            />
           )}
 
           <div className="flex shrink-0 items-center gap-0.5">
@@ -778,7 +848,7 @@ export function PdfReader({
                 onWarm={prefs.setWarm}
               />
             )}
-            {currentItem && (
+            {currentItem && !isLibrary && (
               <button
                 type="button"
                 aria-haspopup="dialog"
@@ -794,7 +864,7 @@ export function PdfReader({
                 <span className="max-lg:sr-only">{t("topic")}</span>
               </button>
             )}
-            {book.data && <PdfBookmarkButton bookId={bookId} compact />}
+            {book.data && !isLibrary && <PdfBookmarkButton bookId={bookId} compact />}
             <OverflowMenu items={moreItems} label={t("more")} testId="pdf-more" />
           </div>
         </div>
@@ -832,7 +902,11 @@ export function PdfReader({
                     <Button variant="secondary" onClick={retry}>
                       {t("retry")}
                     </Button>
-                    <OpenInNewWindowButton bookId={bookId} label={t("openInNewWindow")} />
+                    <OpenInNewWindowButton
+                      bookId={bookId}
+                      label={t("openInNewWindow")}
+                      library={isLibrary}
+                    />
                   </>
                 }
               />
@@ -846,7 +920,11 @@ export function PdfReader({
                     <Button variant="secondary" onClick={retry}>
                       {t("retry")}
                     </Button>
-                    <OpenInNewWindowButton bookId={bookId} label={t("openInNewWindow")} />
+                    <OpenInNewWindowButton
+                      bookId={bookId}
+                      label={t("openInNewWindow")}
+                      library={isLibrary}
+                    />
                   </>
                 }
               />
@@ -867,7 +945,7 @@ export function PdfReader({
               <Skeleton className="aspect-[1/1.4] h-full max-h-[calc(100%-4.5rem)]" />
             </div>
           )}
-          {book.data && (
+          {book.data && !isLibrary && (
             <div className="absolute bottom-[4.75rem] left-3 z-10 max-sm:hidden">
               <ReportErrorLink topicId={bookId} page={page ?? undefined} />
             </div>
@@ -896,7 +974,7 @@ export function PdfReader({
             data-testid="pdf-page-area"
             data-mode={prefsReady ? mode : undefined}
             className={cn(
-              "pdf-page-area mx-auto w-full select-none",
+              "pdf-page-area mx-auto w-full overscroll-x-contain select-none",
               zoom > DEFAULT_ZOOM ? "touch-pan-x touch-pan-y" : "touch-pan-y",
             )}
             onPointerDown={onPointerDown}
@@ -911,7 +989,11 @@ export function PdfReader({
                     <Button variant="secondary" onClick={retry}>
                       {t("retry")}
                     </Button>
-                    <OpenInNewWindowButton bookId={bookId} label={t("openInNewWindow")} />
+                    <OpenInNewWindowButton
+                      bookId={bookId}
+                      label={t("openInNewWindow")}
+                      library={isLibrary}
+                    />
                   </>
                 }
               />
@@ -923,7 +1005,11 @@ export function PdfReader({
                     <Button variant="secondary" onClick={retry}>
                       {t("retry")}
                     </Button>
-                    <OpenInNewWindowButton bookId={bookId} label={t("openInNewWindow")} />
+                    <OpenInNewWindowButton
+                      bookId={bookId}
+                      label={t("openInNewWindow")}
+                      library={isLibrary}
+                    />
                   </>
                 }
               />
@@ -950,7 +1036,7 @@ export function PdfReader({
             )}
           </div>
 
-          {book.data && (
+          {book.data && !isLibrary && (
             <div className="mx-auto mt-6 max-w-[53.75rem]">
               <ReportErrorLink topicId={bookId} page={page ?? undefined} />
             </div>
@@ -967,11 +1053,11 @@ export function PdfReader({
           nextPage={nextPage}
           onGo={goTo}
           exercisePage={exercisePage}
-          onTest={currentItem ? () => openTopic("test") : undefined}
+          onTest={currentItem && !isLibrary ? () => openTopic("test") : undefined}
         />
       )}
 
-      {textLayer && document.doc && (
+      {textLayer && document.doc && !isLibrary && (
         <SelectionMenu
           areaRef={pageBoxRef}
           onSolution={() => openTopic("summary")}
@@ -995,7 +1081,7 @@ export function PdfReader({
         />
       )}
 
-      {currentItem && book.data && (
+      {currentItem && book.data && !isLibrary && (
         <TopicPanel
           open={topicOpen}
           onOpenChange={setTopicOpen}

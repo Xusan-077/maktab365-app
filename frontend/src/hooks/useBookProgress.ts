@@ -17,14 +17,14 @@ const SAVE_DEBOUNCE_MS = 800;
  *
  * `lastPage` — saqlangan bet (`null` — hali o'qilmagan yoki hali aniqlanmagan, `ready` bilan farqlang).
  */
-export function useBookProgress(bookId: string) {
+export function useBookProgress(bookId: string, enabled = true) {
   const { status, signedIn } = useAuth();
   const queryClient = useQueryClient();
   const guestPage = useBookGuestStore((state) => state.positions[bookId]);
   const setGuestPosition = useBookGuestStore((state) => state.setPosition);
   const account = useQuery({
     ...bookQueries.progress(bookId),
-    enabled: signedIn,
+    enabled: signedIn && enabled,
     retry: retryUnlessClientError,
   });
 

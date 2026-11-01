@@ -11,7 +11,7 @@ import {
   zoomAround,
   type Size,
 } from "@/lib/pdf/book";
-import { doubleTapZoom, MAX_ZOOM, MIN_ZOOM, wheelZoom } from "@/lib/pdf/zoom";
+import { clampZoomSmooth, doubleTapZoom, MAX_ZOOM, MIN_ZOOM, wheelZoomSmooth } from "@/lib/pdf/zoom";
 
 interface Point {
   x: number;
@@ -23,7 +23,12 @@ const SPRING = { type: "spring", duration: 0.3, bounce: 0 } as const;
 /** Ctrl+g'ildirak to'xtagach shuncha ms dan keyin zoom holatga yoziladi. */
 const WHEEL_COMMIT_MS = 150;
 /** Zoom tinchigach betlar shuncha ms dan keyin aniqroq qayta chiziladi. */
-const RERENDER_DEBOUNCE_MS = 200;
+const RERENDER_DEBOUNCE_MS = 150;
+/**
+ * Pinch tugagach shuncha ms davomida swipe/varaq ag'darish qabul qilinmaydi: barmoqlar bir vaqtda
+ * ko'tarilmaydi va qolgan barmoq harakati boshqa betga o'tkazib yubormasin.
+ */
+const GESTURE_COOLDOWN_MS = 350;
 
 const distance = (touches: TouchList) =>
   Math.hypot(touches[0].clientX - touches[1].clientX, touches[0].clientY - touches[1].clientY);
@@ -66,6 +71,8 @@ export function useBookZoom({
   const initialized = useRef(false);
   /** Pinch / g'ildirak davom etmoqda: varaq ag'darish va pan to'xtaydi. */
   const live = useRef(false);
+  /** Oxirgi pinch / g'ildirak zoom tugagan vaqt (`performance.now()`). */
+  const liveEndedAt = useRef(0);
 
   const fit = fitScale(book, stageSize, BOOK_PADDING);
   const target = fit * zoom;
@@ -184,6 +191,7 @@ export function useBookZoom({
 
   const commitLive = useCallback(() => {
     live.current = false;
+    liveEndedAt.current = performance.now();
     if (fit) setZoom(scale.get() / fit);
   }, [fit, scale, setZoom]);
 
@@ -197,9 +205,10 @@ export function useBookZoom({
         if (!fit) return;
         live.current = true;
         const inside = stage.contains(event.target as Node);
+        // Uzluksiz: har hodisada 0.05 ga yaxlitlanmaydi (trackpad'ning mayda qadamlari to'planadi).
         const current = scale.get() / fit;
         liveScale(
-          fit * wheelZoom(current, event.deltaY),
+          fit * clampZoomSmooth(wheelZoomSmooth(current, event.deltaY, event.deltaMode)),
           inside ? { x: event.clientX, y: event.clientY } : null,
         );
         window.clearTimeout(timer);
@@ -272,8 +281,8 @@ export function useBookZoom({
     renderScale,
     /** Kattalashgan: sudrash — pan (varaq ag'darilmaydi). */
     panMode: zoom > BOOK_PAN_ZOOM,
-    /** Pinch yoki Ctrl+g'ildirak davom etmoqda. */
-    isLive: () => live.current,
+    /** Pinch yoki Ctrl+g'ildirak davom etmoqda yoki hozirgina tugadi (swipe qabul qilinmaydi). */
+    isLive: () => live.current || performance.now() - liveEndedAt.current < GESTURE_COOLDOWN_MS,
     zoomTo,
     toggleAt,
     panTo,

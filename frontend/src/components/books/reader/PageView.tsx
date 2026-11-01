@@ -20,7 +20,9 @@ import { pageCanvasScale, useNaturalPageSize } from "@/lib/books/pdf-page";
 import type { PDFDocumentProxy } from "@/lib/pdf/pdfjs";
 import { PageRenderPool, type RenderRequest } from "@/lib/pdf/render-pool";
 import { swipeDirection } from "@/lib/pdf/swipe";
-import { doubleTapZoom, wheelZoom } from "@/lib/pdf/zoom";
+import { usePageZoom } from "@/hooks/usePageZoom";
+import { DEFAULT_ZOOM, MAX_ZOOM } from "@/lib/pdf/zoom";
+import { cn } from "@/lib/utils/cn";
 import { BAR_INSET } from "./reader-styles";
 
 const SIDE_INSET = 16;
@@ -117,23 +119,29 @@ export function PageView({
     scroller.current?.scrollTo({ top: 0, left: 0 });
   }, [page, scroller]);
 
-  useEffect(() => {
-    const element = scroller.current;
-    if (!element) return;
-    const onWheel = (event: WheelEvent) => {
-      if (!event.ctrlKey) return;
-      event.preventDefault();
-      onZoomChange(wheelZoom(zoomRef.current, event.deltaY));
-    };
-    element.addEventListener("wheel", onWheel, { passive: false });
-    return () => element.removeEventListener("wheel", onWheel);
-  }, [onZoomChange, scroller]);
+  const pageBox = useRef<HTMLDivElement>(null);
+  const { zoomAtPoint, panHandlers } = usePageZoom({
+    scrollerRef: scroller,
+    pageRef: pageBox,
+    zoom,
+    minZoom: DEFAULT_ZOOM,
+    maxZoom: MAX_ZOOM,
+    onZoom: onZoomChange,
+    drawMode,
+  });
 
-  const onPointerDown = (event: PointerEvent) => {
+  const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    panHandlers.onPointerDown(event);
+    // Ikkinchi barmoq (pinch) sahifa almashtirish emas.
+    if (!event.isPrimary) {
+      swipeStart.current = null;
+      return;
+    }
     if (event.pointerType === "mouse" || drawMode) return;
     swipeStart.current = { x: event.clientX, y: event.clientY, at: event.timeStamp };
   };
-  const onPointerUp = (event: PointerEvent) => {
+  const onPointerUp = (event: PointerEvent<HTMLDivElement>) => {
+    panHandlers.onPointerUp(event);
     const start = swipeStart.current;
     swipeStart.current = null;
     if (!start || zoomRef.current > 1) return;
@@ -199,18 +207,27 @@ export function PageView({
     <div
       ref={scroller}
       onPointerDown={onPointerDown}
+      onPointerMove={panHandlers.onPointerMove}
       onPointerUp={onPointerUp}
+      onPointerCancel={panHandlers.onPointerCancel}
       onClick={(event) => {
         if (event.target === event.currentTarget) onTap();
       }}
-      onDoubleClick={() => {
-        if (!drawMode) onZoomChange(doubleTapZoom(zoomRef.current));
+      onDoubleClick={(event) => {
+        if (!drawMode) zoomAtPoint({ x: event.clientX, y: event.clientY });
       }}
-      className="flex min-h-0 flex-1 touch-pan-x touch-pan-y overflow-auto overscroll-contain"
+      data-zoomed={zoom > 1 || undefined}
+      className={cn(
+        "flex min-h-0 flex-1 touch-pan-x touch-pan-y overflow-auto overscroll-contain",
+        zoom > 1 &&
+          !drawMode &&
+          "cursor-grab data-[panning]:cursor-grabbing data-[panning]:select-none",
+      )}
       style={{ paddingBlock: BAR_INSET, paddingInline: SIDE_INSET }}
     >
       {pageSize && (
         <div
+          ref={pageBox}
           data-testid="book-page"
           data-page={page}
           className="bg-bk-paper relative m-auto shrink-0 overflow-hidden rounded-sm shadow-[0_1px_2px_rgb(0_0_0/0.08),0_12px_40px_-12px_rgb(0_0_0/0.28)]"

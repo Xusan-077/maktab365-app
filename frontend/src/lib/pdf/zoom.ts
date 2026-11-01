@@ -1,15 +1,15 @@
-/** O'qish oynasi zoom'i (0.5×–3×; sof funksiyalar). */
+/** O'qish oynasi zoom'i (0.5×–4×; sof funksiyalar). */
 
 export const MIN_ZOOM = 0.5;
-export const MAX_ZOOM = 3;
+export const MAX_ZOOM = 4;
 /** Sahifa moslangan holat (100%): undan kattasi — kattalashgan (surish, swipe o'chadi). */
 export const DEFAULT_ZOOM = 1;
 /** "Zoom" tugmasi shu pog'onalar bo'yicha aylanadi. */
-export const ZOOM_STEPS = [1, 1.5, 2, 3] as const;
+export const ZOOM_STEPS = [1, 1.5, 2, 3, 4] as const;
 /** Ikki marta bosilganda kattalashish darajasi. */
 export const DOUBLE_TAP_ZOOM = 2;
 
-/** 0.5..3 oralig'iga va 0.05 qadamga keltiradi (sahifa kengligi tez-tez qayta chizilmasin). */
+/** 0.5..4 oralig'iga va 0.05 qadamga keltiradi (sahifa kengligi tez-tez qayta chizilmasin). */
 export function clampZoom(value: number): number {
   if (!Number.isFinite(value)) return DEFAULT_ZOOM;
   const stepped = Math.round(value * 20) / 20;
@@ -52,4 +52,27 @@ export const ZOOM_NUDGE = 0.1;
 export function nudgeZoom(zoom: number, direction: 1 | -1): number {
   const steps = Math.round(zoom / ZOOM_NUDGE) + direction;
   return clampZoom(steps * ZOOM_NUDGE);
+}
+
+/**
+ * Qadamsiz (uzluksiz) zoom: g'ildirak va pinch paytida har kichik o'zgarish to'planishi uchun
+ * 0.05 ga yaxlitlanmaydi (aks holda trackpad'ning mayda `deltaY` qiymatlari zoom'ni qotirib qo'yadi).
+ */
+export function clampZoomSmooth(value: number, min = MIN_ZOOM, max = MAX_ZOOM): number {
+  if (!Number.isFinite(value)) return DEFAULT_ZOOM;
+  return Math.min(max, Math.max(min, value));
+}
+
+/** Ctrl+g'ildirak: `deltaMode` qatorlarda (Firefox) bo'lsa pikselga keltiriladi; uzluksiz ko'paytma. */
+export function wheelZoomSmooth(zoom: number, deltaY: number, deltaMode = 0): number {
+  const pixels = deltaMode === 1 ? deltaY * 16 : deltaMode === 2 ? deltaY * 400 : deltaY;
+  return zoom * Math.exp(-pixels * 0.0022);
+}
+
+/**
+ * Gesture (pinch / g'ildirak) tugagach holatga yoziladigan qiymat: chegaralar ichida, 0.01 ga
+ * yaxlitlangan. 0.05 qadam bu yerda ishlatilmaydi — qo'yib yuborilganda ko'rinish sakramasin.
+ */
+export function commitZoom(value: number): number {
+  return clampZoomSmooth(Math.round(clampZoomSmooth(value) * 100) / 100);
 }

@@ -3028,7 +3028,9 @@
         "notes": "Yon daftarni yuklab olish (.md)",
         "failed": "Yuklab bo'lmadi. Qayta urinib ko'ring.",
         "pageHeading": "{page}-bet"
-      }
+      },
+      "gradeSubject": "{grade}-sinf · {subject}",
+      "notFound": "Bunday kitob topilmadi yoki u hali nashr qilinmagan."
     },
     "card": {
       "progress": "{percent}% o'qilgan",
@@ -3109,7 +3111,8 @@
         "handle": "Yozuvlar panelini kattalashtirish yoki kichraytirish",
         "tab": "Yozuv",
         "tabs": "Yon daftar bo'limlari"
-      }
+      },
+      "done": "Tayyor"
     },
     "entries": {
       "metaTitle": "Mening yozuvlarim",

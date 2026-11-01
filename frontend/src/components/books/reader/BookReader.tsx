@@ -3,12 +3,9 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useLibraryBookDocument } from "@/components/pdf/usePdfDocument";
 import { useAnnotationLoader } from "@/hooks/useAnnotationLoader";
 import { useAnnotationSync } from "@/hooks/useAnnotationSync";
 import { useAuth } from "@/hooks/useAuth";
-import { useBookBookmarks } from "@/hooks/useBookBookmarks";
-import { useBookProgress } from "@/hooks/useBookProgress";
 import { useFullscreen } from "@/hooks/useFullscreen";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
@@ -16,10 +13,10 @@ import { useTestSheet } from "@/hooks/useTestSheet";
 import { useToast } from "@/hooks/useToast";
 import type { AnnotationTool } from "@/lib/books/annotations";
 import type { SheetState } from "@/lib/books/workspace";
-import type { BookDetail } from "@/lib/books/api";
+import type { ReaderContext, ReaderSource } from "@/lib/reader/source";
 import { currentChapter, effectiveView, stepPage } from "@/lib/books/reader";
 import { clampPage, parsePageParam } from "@/lib/pdf/page-nav";
-import { clampZoom, DEFAULT_ZOOM, MAX_ZOOM } from "@/lib/pdf/zoom";
+import { clampZoomSmooth, DEFAULT_ZOOM, MAX_ZOOM } from "@/lib/pdf/zoom";
 import {
   selectCanRedo,
   selectCanUndo,
@@ -60,7 +57,7 @@ function isTyping(target: EventTarget | null): boolean {
 }
 
 export interface BookReaderProps {
-  book: BookDetail;
+  source: ReaderSource;
 }
 
 /**
@@ -68,17 +65,15 @@ export interface BookReaderProps {
  * yashiriladi), mundarija + xatcho'plar, kitob ichida qidirish, zoom, to'liq ekran, klaviatura va
  * swipe. Oxirgi bet avtomatik saqlanadi (kirgan — server, mehmon — brauzer); URL'da `?bet=N`.
  */
-export function BookReader({ book }: BookReaderProps) {
-  const pdf = useLibraryBookDocument(book.id);
-  const total = pdf.doc?.numPages ?? book.page_count;
+export function BookReader({ source }: BookReaderProps) {
+  const { pdf, progress, bookmarks } = source;
+  const total = pdf.doc?.numPages ?? source.pageCount;
   const searchParams = useSearchParams();
   const root = useRef<HTMLDivElement>(null);
   useReaderProtection(root);
   const pageScroller = useRef<HTMLDivElement>(null);
   const fullscreen = useFullscreen(root);
   const hydrated = useSyncExternalStore(subscribeHydration, isHydrated, () => false);
-  const progress = useBookProgress(book.id);
-  const bookmarks = useBookBookmarks(book.id);
   const view = useBookReaderStore((state) => state.view);
   const theme = useBookReaderStore((state) => state.theme);
   const font = useBookReaderStore((state) => state.font);
@@ -98,10 +93,10 @@ export function BookReader({ book }: BookReaderProps) {
   const drawMode = tool !== "none";
   const [sheet, setSheet] = useState<SheetState>("closed");
   // Kitob turiga xos rejimlar: faqat `math` va `test`; boshqa turlar o'zgarmaydi.
-  const mathMode = book.reading_mode === "math";
-  const testMode = book.reading_mode === "test";
+  const mathMode = source.readingMode === "math";
+  const testMode = source.readingMode === "test";
   const [notesTab, setNotesTab] = useState<string>(NOTE_TAB);
-  const testSheet = useTestSheet(book.id, testMode && signedIn);
+  const testSheet = useTestSheet(source.id, testMode && signedIn);
 
   const [tocOpen, setTocOpen] = useState(false);
   const [tocTab, setTocTab] = useState<"contents" | "bookmarks">("contents");
@@ -114,7 +109,8 @@ export function BookReader({ book }: BookReaderProps) {
   const [start, setStart] = useState<number | null>(null);
   const [chosen, setChosen] = useState<number | null>(null);
   if (start === null && hydrated && progress.ready) {
-    const fromUrl = parsePageParam(searchParams.get("bet"), total);
+    // `?page=` — darsliklarning eski havolalari (admin xabarlari, ulashilgan havolalar).
+    const fromUrl = parsePageParam(searchParams.get("bet") ?? searchParams.get("page"), total);
     setStart(fromUrl ?? clampPage(progress.lastPage ?? 1, total));
   }
   const page = chosen ?? start;
@@ -122,7 +118,7 @@ export function BookReader({ book }: BookReaderProps) {
 
   const sync = useAnnotationSync();
   useEffect(() => {
-    useBookAnnotationsStore.getState().attach(book.id);
+    useBookAnnotationsStore.getState().attach(source.id);
     return () => {
       // Boshqa sahifada (masalan, "Mening yozuvlarim") o'zgargan yozuvlar eskirgan nusxa bo'lib qolmasin.
       useBookAnnotationsStore.setState({
@@ -133,15 +129,15 @@ export function BookReader({ book }: BookReaderProps) {
         lastChange: null,
       });
     };
-  }, [book.id]);
-  const annotationsState = useAnnotationLoader(book.id, currentPage, total);
+  }, [source.id]);
+  const annotationsState = useAnnotationLoader(source.id, currentPage, total);
   const pageItems = useBookAnnotationsStore(selectPageItems(currentPage));
   const canUndo = useBookAnnotationsStore(selectCanUndo(currentPage));
   const canRedo = useBookAnnotationsStore(selectCanRedo(currentPage));
   const notesOpen = isDesktop ? workspace.notesOpen : sheet !== "closed";
 
   // Matn qatlami: backend yuklashda aniqlaydi (`null` — eski yozuv, noma'lum: mavjud deb olinadi).
-  const hasText = book.has_text_layer !== false;
+  const hasText = source.hasTextLayer !== false;
   const [highlight, setHighlight] = useState("");
   const activeView = effectiveView(view, hasText);
   const { save } = progress;
@@ -162,13 +158,14 @@ export function BookReader({ book }: BookReaderProps) {
     [total],
   );
   const changeZoom = useCallback((value: number) => {
-    setZoom(Math.min(MAX_ZOOM, Math.max(DEFAULT_ZOOM, clampZoom(value))));
+    setZoom(clampZoomSmooth(value, DEFAULT_ZOOM, MAX_ZOOM));
   }, []);
 
   // Joriy bet URL'ga va saqlashga yoziladi (sahifa yangilansa / havola ulashilsa shu betdan ochiladi).
   useEffect(() => {
     if (page === null) return;
     const url = new URL(window.location.href);
+    url.searchParams.delete("page");
     url.searchParams.set("bet", String(page));
     window.history.replaceState(window.history.state, "", url);
     save(page);
@@ -309,7 +306,8 @@ export function BookReader({ book }: BookReaderProps) {
 
   if (page === null) return <BookReaderSkeleton />;
 
-  const chapter = currentChapter(book.chapters, page);
+  const chapter = currentChapter(source.chapters, page);
+  const readerContext: ReaderContext = { page, total, go, isDesktop };
 
   return (
     <div
@@ -334,7 +332,7 @@ export function BookReader({ book }: BookReaderProps) {
           />
         ) : (
           <PageView
-            title={book.title}
+            title={source.title}
             doc={pdf.doc}
             docLoading={pdf.loading}
             docError={Boolean(pdf.error)}
@@ -379,8 +377,10 @@ export function BookReader({ book }: BookReaderProps) {
 
         <ReaderTopBar
           visible={chrome.visible}
-          bookId={book.id}
-          title={book.title}
+          bookId={source.id}
+          backHref={source.backHref}
+          subtitle={source.subtitle}
+          title={source.title}
           chapterTitle={chapter?.title ?? null}
           bookmarked={bookmarks.isBookmarked(page)}
           fullscreen={fullscreen}
@@ -393,12 +393,13 @@ export function BookReader({ book }: BookReaderProps) {
           onOpenFind={() => setFindOpen(true)}
           onToggleBookmark={toggleBookmarkHere}
           page={page}
+          actions={source.slot?.actions?.(readerContext)}
         />
         <ReaderBottomBar
           visible={chrome.visible}
           page={page}
           total={total}
-          chapterTitle={(target) => currentChapter(book.chapters, target)?.title ?? null}
+          chapterTitle={(target) => currentChapter(source.chapters, target)?.title ?? null}
           zoom={activeView === "page" ? zoom : null}
           onZoom={(direction) => changeZoom(zoom + direction * ZOOM_STEP)}
           onZoomReset={() => changeZoom(DEFAULT_ZOOM)}
@@ -467,7 +468,7 @@ export function BookReader({ book }: BookReaderProps) {
             label: modeT("test.tab"),
             content: (
               <AnswerSheetPanel
-                bookId={book.id}
+                bookId={source.id}
                 signedIn={signedIn}
                 sheet={testSheet}
                 page={page}
@@ -482,7 +483,7 @@ export function BookReader({ book }: BookReaderProps) {
             tabs={tabs}
             tab={notesTab}
             onTabChange={setNotesTab}
-            bookId={book.id}
+            bookId={source.id}
             page={page}
             signedIn={signedIn}
             onRequireAuth={() => requireAuth(undefined, "note")}
@@ -517,7 +518,7 @@ export function BookReader({ book }: BookReaderProps) {
       <TocDialog
         open={tocOpen}
         onOpenChange={setTocOpen}
-        chapters={book.chapters}
+        chapters={source.chapters}
         bookmarks={bookmarks.pages}
         page={page}
         onGo={go}
@@ -525,6 +526,7 @@ export function BookReader({ book }: BookReaderProps) {
         tab={tocTab}
         onTabChange={setTocTab}
       />
+      {source.slot?.overlays?.(readerContext)}
       <FindDialog
         open={findOpen}
         onOpenChange={setFindOpen}
