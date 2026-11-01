@@ -42,7 +42,7 @@ class BookAdminSerializer(serializers.ModelSerializer):
             "has_file",
             "size_bytes",
             "page_count",
-            "processed_pages",
+            "has_text_layer",
             "status",
             "status_error",
             "is_published",
@@ -56,7 +56,7 @@ class BookAdminSerializer(serializers.ModelSerializer):
             "id",
             "size_bytes",
             "page_count",
-            "processed_pages",
+            "has_text_layer",
             "status",
             "status_error",
             "is_published",
@@ -94,7 +94,11 @@ class BookAdminSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         chapters = validated_data.pop("chapter_rows", None)
         old_cover = instance.cover_image.name if instance.cover_image else ""
+        if "cover_image" in validated_data:  # qo'lda yuklangan muqova avto muqovadan ustun
+            validated_data["cover_generated"] = False
         book = super().update(instance, validated_data)
+        if "cover_image" in validated_data and not book.cover_image:
+            services.regenerate_cover(book)  # "Avtomatik muqova": PDF 1-betidan
         new_cover = book.cover_image.name if book.cover_image else ""
         if old_cover and old_cover != new_cover:
             transaction.on_commit(lambda: storage.delete(old_cover, covers_storage()))

@@ -8,10 +8,14 @@ from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.content import pdf_storage as storage
 from apps.content.cache import is_staff, public_cached
 from apps.content.models import BookLanguage
+from apps.content.pdf_serializers import PdfFileUrlSerializer
+from apps.content.pdf_views import _serve_ranged
 from apps.content.views import GRADE_PARAM, PublicView, _int_param
 
+from . import services
 from .models import Book, BookStatus, BookType
 from .serializers import (
     BookDetailSerializer,
@@ -95,11 +99,53 @@ class BookDetailView(PublicView, APIView):
         return Response(BookDetailSerializer(book, context={"request": request}).data)
 
 
+class BookFileUrlView(PublicView, APIView):
+    throttle_classes = APIView.throttle_classes  # imzo berish: umumiy tezlik chegarasida
+
+    @extend_schema(
+        operation_id="books_file_url",
+        responses=PdfFileUrlSerializer,
+        summary="PDF o'qish URL'i: qisqa muddatli, keshlanmaydi, HTTP Range ishlaydi",
+        tags=TAGS,
+    )
+    def get(self, request, pk):
+        book = visible_book(request, pk)
+        if not book.source_file:
+            raise NotFound
+        response = Response(PdfFileUrlSerializer(services.read_url(book)).data)
+        response["Cache-Control"] = "private, no-store"
+        return response
+
+
+class BookFileView(APIView):
+    """Faqat lokal (dev) saqlashda: imzolangan token bilan PDF, HTTP Range (206/416) bilan.
+
+    S3-mos saqlashda PDF obyekt saqlashning o'zidan imzolangan URL bilan beriladi.
+    """
+
+    authentication_classes: list = []
+    permission_classes: list = []
+    throttle_classes: list = []
+
+    @extend_schema(exclude=True)
+    def get(self, request, pk):
+        if storage.is_remote():
+            raise NotFound
+        book = Book.objects.filter(pk=pk).exclude(source_file="").first()
+        token = request.query_params.get("token", "")
+        if book is None or not storage.check_key_token(token, book.pk, book.source_file.name):
+            raise NotFound
+        return _serve_ranged(
+            request, book.source_file.name, book.pk.hex, book.updated_at.timestamp()
+        )
+
+
 class BookPagesView(PublicView, APIView):
     @extend_schema(
         operation_id="books_pages",
         responses=BookPageSerializer(many=True),
-        summary="Kitob sahifalari: rasm, eskiz va o'lchamlar (tartib bilan)",
+        deprecated=True,
+        summary="ESKI: sahifa rasmlari (faqat avval tayyorlangan kitoblar; endi PDF.js)",
         tags=TAGS,
     )
     @public_cached
@@ -130,6 +176,7 @@ def snippet_around(text: str, query: str) -> str:
 class BookSearchView(PublicView, APIView):
     @extend_schema(
         operation_id="books_search",
+        deprecated=True,
         parameters=[
             OpenApiParameter("q", OpenApiTypes.STR, required=True, description="Kamida 2 belgi")
         ],
@@ -155,6 +202,7 @@ class BookSearchView(PublicView, APIView):
 class BookPageTextView(PublicView, APIView):
     @extend_schema(
         operation_id="books_page_text",
+        deprecated=True,
         responses=BookPageTextSerializer,
         summary="Sahifa matni (badiiy kitobning matnli o'qish rejimi)",
         tags=TAGS,

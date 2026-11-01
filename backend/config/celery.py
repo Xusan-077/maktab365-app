@@ -9,8 +9,6 @@ app = Celery("maktab365")
 app.config_from_object("django.conf:settings", namespace="CELERY")
 app.autodiscover_tasks()
 
-REQUIRED_TASKS = ("apps.books.tasks.process_book",)
-
 
 @worker_ready.connect
 def report_worker_setup(sender=None, **_):
@@ -34,9 +32,6 @@ def report_worker_setup(sender=None, **_):
         broker=str(app.conf.broker_url).rsplit("@", 1)[-1],
         tasks=registered,
     )
-    for name in REQUIRED_TASKS:
-        if name not in app.tasks:
-            logger.error("worker_task_missing", task=name)
     if not settings.DEBUG and "FileSystem" in default_backend:
         logger.error(
             "worker_local_storage",

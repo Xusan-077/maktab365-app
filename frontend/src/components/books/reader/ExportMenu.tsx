@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import { Popover } from "@/components/ui/Popover";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
 import type { Annotation } from "@/lib/books/annotations";
-import { getMyBooksApi, type PageNote } from "@/lib/books/api";
+import type { PageNote } from "@/lib/books/api";
 import {
   downloadBlob,
   pageFileName,
@@ -15,6 +15,7 @@ import {
   renderAnnotatedPage,
   textBlob,
 } from "@/lib/books/export";
+import { fetchPageImage } from "@/lib/books/page-image";
 import { bookKeys, bookQueries } from "@/lib/books/queries";
 import { BK_ICON_BUTTON } from "./reader-styles";
 
@@ -52,7 +53,7 @@ export function ExportMenu({ bookId, title, page, items, onOpenChange }: Props) 
     setError(false);
     try {
       if (job === "image") {
-        const image = await getMyBooksApi().pageImage(bookId, page);
+        const image = await fetchPageImage(bookId, page);
         downloadBlob(await renderAnnotatedPage(image, items), pageFileName(title, page, "png"));
       } else {
         const note =

@@ -75,13 +75,6 @@ export class AdminLibraryApi {
     return unwrap(result);
   }
 
-  async reprocess(id: string): Promise<AdminBook> {
-    const result = await this.client.POST("/api/v1/admin/books/{id}/reprocess/", {
-      params: { path: { id } },
-    });
-    return unwrap(result);
-  }
-
   async initUpload(
     id: string,
     file: { name: string; size: number; type: string },

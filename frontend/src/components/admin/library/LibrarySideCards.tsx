@@ -34,10 +34,8 @@ export function LibraryCoverCard({ book }: { book: AdminBook }) {
     onSuccess: () => void refresh(),
   });
   const auto = useMutation({
-    mutationFn: async () => {
-      await getAdminLibraryApi().update(book.id, { cover_image: "" });
-      return getAdminLibraryApi().reprocess(book.id);
-    },
+    // Backend bo'sh muqovada uni PDF'ning 1-betidan sinxron qayta oladi.
+    mutationFn: () => getAdminLibraryApi().update(book.id, { cover_image: "" }),
     onSuccess: () => {
       toast({ variant: "success", title: t("auto") });
       void refresh();
@@ -88,7 +86,7 @@ export function LibraryCoverCard({ book }: { book: AdminBook }) {
           variant="ghost"
           size="sm"
           loading={auto.isPending}
-          disabled={!book.has_file || book.status === "processing"}
+          disabled={!book.has_file}
           onClick={() => auto.mutate()}
         >
           <RotateCcw className="size-4" aria-hidden />

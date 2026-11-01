@@ -54,11 +54,16 @@ const release = (canvas: HTMLCanvasElement) => {
  * saqlanadi (12 tagacha; chiqarilgani 0×0 qilinadi). Har chizishdan keyin `page.cleanup()`.
  */
 export class PageRenderPool {
-  private readonly cache = new LruCache<string, Entry>(CAPACITY, (entry) => release(entry.canvas));
+  private readonly cache: LruCache<string, Entry>;
   private readonly jobs = new Map<string, Job>();
   private readonly running = new Set<Job>();
 
-  constructor(private readonly doc: PDFDocumentProxy) {}
+  constructor(
+    private readonly doc: PDFDocumentProxy,
+    capacity: number = CAPACITY,
+  ) {
+    this.cache = new LruCache<string, Entry>(capacity, (entry) => release(entry.canvas));
+  }
 
   /** Bet `scale` (CSS × piksel zichligi) masshtabida; kichik `priority` — oldinroq. */
   request(page: number, scale: number, priority = 0): RenderRequest {

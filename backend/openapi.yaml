@@ -2083,31 +2083,6 @@ paths:
       responses:
         '204':
           description: No response body
-  /api/v1/admin/books/{id}/reprocess/:
-    post:
-      operationId: admin_books_reprocess
-      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
-        — faqat admin.'
-      summary: Sahifalarni qayta tayyorlash (xato yoki PDF o'zgargandan keyin)
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: string
-          format: uuid
-        description: A UUID string identifying this book.
-        required: true
-      tags:
-      - admin
-      security:
-      - jwtAuth: []
-      responses:
-        '202':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BookAdmin'
-          description: ''
   /api/v1/admin/books/{id}/transition/:
     post:
       operationId: admin_books_transition
@@ -2181,8 +2156,8 @@ paths:
       operationId: admin_books_upload_complete
       description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
         — faqat admin.'
-      summary: 'S3 multipart yuklashni yakunlash: tekshiruv va sahifalarni tayyorlashni
-        boshlash'
+      summary: 'S3 multipart yuklashni yakunlash: PDF sinxron tekshiriladi, kitob
+        darhol tayyor'
       parameters:
       - in: path
         name: id
@@ -3684,12 +3659,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/BookDetail'
           description: ''
-  /api/v1/books/{id}/pages/:
+  /api/v1/books/{id}/file-url/:
     get:
-      operationId: books_pages
+      operationId: books_file_url
       description: Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi
         o'rniga kesh ishlaydi.
-      summary: 'Kitob sahifalari: rasm, eskiz va o''lchamlar (tartib bilan)'
+      summary: 'PDF o''qish URL''i: qisqa muddatli, keshlanmaydi, HTTP Range ishlaydi'
       parameters:
       - in: path
         name: id
@@ -3702,6 +3677,32 @@ paths:
       security:
       - jwtAuth: []
       - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PdfFileUrl'
+          description: ''
+  /api/v1/books/{id}/pages/:
+    get:
+      operationId: books_pages
+      description: Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi
+        o'rniga kesh ishlaydi.
+      summary: 'ESKI: sahifa rasmlari (faqat avval tayyorlangan kitoblar; endi PDF.js)'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - books
+      security:
+      - jwtAuth: []
+      - {}
+      deprecated: true
       responses:
         '200':
           content:
@@ -3734,6 +3735,7 @@ paths:
       security:
       - jwtAuth: []
       - {}
+      deprecated: true
       responses:
         '200':
           content:
@@ -3765,6 +3767,7 @@ paths:
       security:
       - jwtAuth: []
       - {}
+      deprecated: true
       responses:
         '200':
           content:
@@ -4718,9 +4721,10 @@ components:
         page_count:
           type: integer
           readOnly: true
-        processed_pages:
-          type: integer
+        has_text_layer:
+          type: boolean
           readOnly: true
+          nullable: true
         status:
           allOf:
           - $ref: '#/components/schemas/BookStatusEnum'
@@ -4757,10 +4761,10 @@ components:
       - cover_url
       - created_at
       - has_file
+      - has_text_layer
       - id
       - is_published
       - page_count
-      - processed_pages
       - published_at
       - size_bytes
       - status
@@ -4873,6 +4877,10 @@ components:
           items:
             $ref: '#/components/schemas/BookChapter'
           readOnly: true
+        has_text_layer:
+          type: boolean
+          readOnly: true
+          nullable: true
       required:
       - author
       - chapters
@@ -4880,6 +4888,7 @@ components:
       - created_at
       - description
       - grade_level
+      - has_text_layer
       - id
       - language
       - page_count

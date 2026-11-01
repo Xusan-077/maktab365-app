@@ -8,7 +8,7 @@ import { BookReader } from "@/components/books/reader/BookReader";
 import { BookReaderSkeleton } from "@/components/books/reader/BookReaderSkeleton";
 import { buttonVariants } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { getBook, getBookPages } from "@/lib/books/server";
+import { getBook } from "@/lib/books/server";
 import { Link } from "@/lib/i18n/navigation";
 import { routing } from "@/lib/i18n/routing";
 import { ROUTES } from "@/lib/utils/routes";
@@ -44,10 +44,10 @@ async function ReaderContent({ params }: Pick<Props, "params">) {
   const { locale, id } = await params;
   if (!hasLocale(routing.locales, locale) || !UUID.test(id)) notFound();
   setRequestLocale(locale);
-  const [book, pages] = await Promise.all([getBook(id), getBookPages(id)]);
+  const book = await getBook(id);
   if (!book) notFound();
 
-  if (pages.length === 0) {
+  if (book.page_count === 0) {
     const t = await getTranslations({ locale, namespace: "books.reader" });
     const td = await getTranslations({ locale, namespace: "books.detail" });
     return (
@@ -68,5 +68,5 @@ async function ReaderContent({ params }: Pick<Props, "params">) {
     );
   }
 
-  return <BookReader book={book} pages={pages} />;
+  return <BookReader book={book} />;
 }

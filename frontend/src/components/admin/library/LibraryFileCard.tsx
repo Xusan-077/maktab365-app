@@ -1,39 +1,26 @@
 "use client";
 
 import { useRef } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { FileUp, RefreshCw, X } from "lucide-react";
+import { FileUp, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useAdminErrorText } from "@/components/admin/useAdminErrorText";
 import { Button } from "@/components/ui/Button";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { useToast } from "@/hooks/useToast";
-import { getAdminLibraryApi, type AdminBook } from "@/lib/library/admin-api";
-import { libraryKeys } from "@/lib/library/admin-queries";
+import type { AdminBook } from "@/lib/library/admin-api";
 import { formatBytes } from "@/lib/utils/bytes";
-import { LibraryProgress } from "./LibraryStatus";
 import { useBookPdfUpload } from "./useBookPdfUpload";
 
-const BOOK_ERRORS = ["no_file", "invalid_pdf", "render_failed", "timeout"] as const;
+const BOOK_ERRORS = ["no_file", "invalid_pdf"] as const;
 
-/** PDF yuklash, sahifalarni tayyorlash holati va qayta tayyorlash. */
+/** PDF yuklash: tekshiruv (sahifalar soni, muqova) yuklash tugashi bilan sinxron bajariladi. */
 export function LibraryFileCard({ book }: { book: AdminBook }) {
   const t = useTranslations("admin.library");
   const errorText = useAdminErrorText();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   const inputRef = useRef<HTMLInputElement>(null);
   const upload = useBookPdfUpload(book.id);
   const uploading = upload.state.phase === "uploading";
-  const processing = book.status === "processing";
-
-  const reprocess = useMutation({
-    mutationFn: () => getAdminLibraryApi().reprocess(book.id),
-    onSuccess: () => {
-      toast({ variant: "success", title: t("file.reprocessStarted") });
-      void queryClient.invalidateQueries({ queryKey: libraryKeys.root });
-    },
-  });
 
   async function onPick(file: File | undefined) {
     if (!file) return;
@@ -67,7 +54,6 @@ export function LibraryFileCard({ book }: { book: AdminBook }) {
           {t(`errors.${failedCode}`)}
         </p>
       )}
-      {!uploading && <LibraryProgress book={book} />}
 
       {uploading && (
         <div className="flex flex-col gap-2">
@@ -90,11 +76,6 @@ export function LibraryFileCard({ book }: { book: AdminBook }) {
           {errorText(upload.state.error)}
         </p>
       )}
-      {reprocess.isError && (
-        <p role="alert" className="text-danger text-sm">
-          {errorText(reprocess.error)}
-        </p>
-      )}
 
       <input
         ref={inputRef}
@@ -109,26 +90,14 @@ export function LibraryFileCard({ book }: { book: AdminBook }) {
         <Button
           variant={book.has_file ? "secondary" : "primary"}
           size="sm"
-          disabled={uploading || processing}
+          disabled={uploading}
           onClick={() => inputRef.current?.click()}
         >
           <FileUp className="size-4" aria-hidden />
           {book.has_file ? t("file.replace") : t("file.choose")}
         </Button>
-        {book.has_file && book.status !== "ready" && (
-          <Button
-            variant="secondary"
-            size="sm"
-            disabled={uploading}
-            loading={reprocess.isPending}
-            onClick={() => reprocess.mutate()}
-          >
-            <RefreshCw className="size-4" aria-hidden />
-            {t("file.reprocess")}
-          </Button>
-        )}
       </div>
-      {!book.has_file && <p className="text-muted text-sm">{t("file.hint")}</p>}
+      <p className="text-muted text-sm">{t("file.hint")}</p>
     </section>
   );
 }

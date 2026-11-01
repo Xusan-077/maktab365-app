@@ -119,30 +119,6 @@ class BookAdminViewSet(AdminViewSet):
         return self._response(book)
 
     @extend_schema(
-        operation_id="admin_books_reprocess",
-        tags=TAG,
-        summary="Sahifalarni qayta tayyorlash (xato yoki PDF o'zgargandan keyin)",
-        request=None,
-        responses={202: BookAdminSerializer},
-    )
-    @action(detail=True, methods=["post"], throttle_classes=[PdfUploadThrottle])
-    def reprocess(self, request, pk=None):
-        from .tasks import process_book
-
-        book = self.get_object()
-        if not book.source_file:
-            raise UploadError("no_file", 409)
-        if book.status == BookStatus.PROCESSING and not services.is_stalled(book):
-            raise UploadError("processing_in_progress", 409)
-        before = self.snap(book)
-        with transaction.atomic():
-            book.status, book.status_error, book.processed_pages = BookStatus.PROCESSING, "", 0
-            book.save()
-            transaction.on_commit(lambda: process_book.delay(str(book.pk)))
-            self.log("reprocess", book, before=before, after=self.snap(book))
-        return self._response(book, 202)
-
-    @extend_schema(
         operation_id="admin_books_upload_init",
         tags=TAG,
         summary="PDF yuklashni boshlash (yangi fayl yoki almashtirish)",
@@ -174,7 +150,7 @@ class BookAdminViewSet(AdminViewSet):
     @extend_schema(
         operation_id="admin_books_upload_complete",
         tags=TAG,
-        summary="S3 multipart yuklashni yakunlash: tekshiruv va sahifalarni tayyorlashni boshlash",
+        summary="S3 multipart yuklashni yakunlash: PDF sinxron tekshiriladi, kitob darhol tayyor",
         request=PdfUploadCompleteSerializer,
         responses=BookAdminSerializer,
     )

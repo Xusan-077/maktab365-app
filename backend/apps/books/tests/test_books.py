@@ -1,13 +1,10 @@
-from datetime import timedelta
-
 import pytest
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.utils import timezone
 
 from apps.accounts.models import AuditLog
-from apps.books import services
 from apps.books.models import Book, BookPage, BookStatus, BookType
+from apps.content.storage import covers_storage
 from apps.content.tests.test_admin_api import client_as
 
 from .conftest import blank_pdf, text_pdf
@@ -120,10 +117,10 @@ def test_only_admin_deletes(editor, admin):
     assert not BookPage.objects.exists()
 
 
-# --- Yuklash va sahifalarni tayyorlash ---
+# --- Yuklash: PDF sinxron tekshiriladi, kitob darhol tayyor ---
 
 
-def test_upload_converts_pdf_into_webp_pages(editor):
+def test_upload_makes_book_ready_with_page_count_and_cover(editor):
     book = make_book()
     response = editor.post(
         f"{ADMIN}/{book.pk}/upload/",
@@ -131,109 +128,230 @@ def test_upload_converts_pdf_into_webp_pages(editor):
         format="multipart",
     )
     assert response.status_code == 200, response.content
-    assert response.json()["page_count"] == 2
+    body = response.json()
+    assert body["page_count"] == 2 and body["status"] == "ready" and body["status_error"] == ""
+    assert body["allowed_transitions"] == ["published"]
+    assert body["has_text_layer"] is True
 
-    book.refresh_from_db()  # Celery eager: aylantirish allaqachon tugagan
-    assert book.status == BookStatus.READY
-    assert book.processed_pages == 2
-    assert book.cover_image  # birinchi sahifadan avto muqova
+    book.refresh_from_db()
+    assert book.cover_image and book.cover_generated
+    with book.cover_image.open("rb") as handle:
+        data = handle.read()
+    assert data[8:12] == b"WEBP"
+    import io
 
-    pages = list(book.pages.order_by("number"))
-    assert [p.number for p in pages] == [1, 2]
-    first = pages[0]
-    assert first.image.name.endswith(".webp") and first.thumbnail.name.endswith("-t.webp")
-    # 300x420pt sahifa: masshtab MAX_SCALE (3) bilan cheklanadi
-    assert (first.width, first.height) == (900, 1260)
-    assert "Birinchi sahifa" in first.text
-    with first.image.open("rb") as handle:
-        assert handle.read(12)[8:12] == b"WEBP"
+    from PIL import Image
+
+    width, height = Image.open(io.BytesIO(data)).size
+    assert width == 800 and height == 1120  # 300x420pt, eni 800
+    assert not BookPage.objects.filter(book=book).exists()  # yangi kitobga sahifa rasmlari yo'q
 
 
-def test_blank_pages_have_no_text(editor):
+def test_scanned_pdf_has_no_text_layer(editor):
+    book = make_book()
+    body = editor.post(
+        f"{ADMIN}/{book.pk}/upload/", pdf_upload(blank_pdf(6)), format="multipart"
+    ).json()
+    assert body["has_text_layer"] is False and body["page_count"] == 6
+
+
+def test_manual_cover_is_never_replaced_by_pdf_cover(editor):
+    book = make_book(cover_image="covers/manual.webp")
+    editor.post(f"{ADMIN}/{book.pk}/upload/", pdf_upload(blank_pdf(2)), format="multipart")
+    book.refresh_from_db()
+    assert book.cover_image.name == "covers/manual.webp" and not book.cover_generated
+
+
+def test_generated_cover_is_refreshed_when_pdf_is_replaced(editor):
     book = make_book()
     editor.post(f"{ADMIN}/{book.pk}/upload/", pdf_upload(blank_pdf(2)), format="multipart")
-    assert list(book.pages.values_list("text", flat=True)) == ["", ""]
-
-
-def test_upload_rejects_non_pdf_and_encrypted(editor):
-    book = make_book()
-    fake = editor.post(
-        f"{ADMIN}/{book.pk}/upload/",
-        {"file": SimpleUploadedFile("kitob.pdf", b"not a pdf at all", "application/pdf")},
-        format="multipart",
-    )
-    assert fake.status_code == 415 and fake.json()["code"] == "unsupported_type"
-
-    locked = editor.post(
-        f"{ADMIN}/{book.pk}/upload/",
-        pdf_upload(blank_pdf(1, encrypt=True)),
-        format="multipart",
-    )
-    assert locked.status_code == 400 and locked.json()["code"] == "pdf_encrypted"
     book.refresh_from_db()
-    assert not book.source_file and not book.pages.exists()
-
-
-def test_corrupt_pdf_marks_book_failed():
-    book = make_book(
-        source_file=ContentFile(b"%PDF-1.4\n garbage without objects", name="book-sources/x.pdf")
-    )
-    services.process_book(book.pk)
-    book.refresh_from_db()
-    assert book.status == BookStatus.FAILED
-    assert book.status_error == "invalid_pdf"
-    assert not book.pages.exists()
-
-
-def test_replacing_pdf_replaces_pages_and_files(editor):
-    book = make_book()
+    first = book.cover_image.name
     editor.post(f"{ADMIN}/{book.pk}/upload/", pdf_upload(blank_pdf(3)), format="multipart")
-    old = [p.image.name for p in book.pages.all()]
-    assert len(old) == 3
+    book.refresh_from_db()
+    assert book.cover_generated and book.cover_image.name != first
+    assert book.page_count == 3
+    assert not book.cover_image.storage.exists(first)  # eski avto muqova tozalandi
 
+
+def test_clearing_cover_regenerates_it_from_pdf(editor):
+    book = make_book()
+    editor.post(f"{ADMIN}/{book.pk}/upload/", pdf_upload(blank_pdf(2)), format="multipart")
+    covers_storage().save("covers/qolda2.webp", ContentFile(b"RIFF....WEBPmanual"))
+    editor.patch(f"{ADMIN}/{book.pk}/", {"cover_image": "covers/qolda2.webp"}, format="json")
+    cleared = editor.patch(f"{ADMIN}/{book.pk}/", {"cover_image": ""}, format="json")
+    assert cleared.status_code == 200, cleared.content
+    book.refresh_from_db()
+    assert book.cover_generated and book.cover_image.name.endswith(".webp")
+    assert book.cover_image.name != "covers/qolda2.webp"
+    assert book.cover_image.storage.exists(book.cover_image.name)
+
+
+def test_admin_cover_upload_wins_over_generated(editor):
+    book = make_book()
+    editor.post(f"{ADMIN}/{book.pk}/upload/", pdf_upload(blank_pdf(2)), format="multipart")
+    covers_storage().save("covers/qolda.webp", ContentFile(b"RIFF....WEBPmanual"))
+    patched = editor.patch(
+        f"{ADMIN}/{book.pk}/", {"cover_image": "covers/qolda.webp"}, format="json"
+    )
+    assert patched.status_code == 200, patched.content
+    book.refresh_from_db()
+    assert book.cover_image.name == "covers/qolda.webp" and not book.cover_generated
+    editor.post(f"{ADMIN}/{book.pk}/upload/", pdf_upload(blank_pdf(4)), format="multipart")
+    book.refresh_from_db()
+    assert book.cover_image.name == "covers/qolda.webp"
+
+
+def test_upload_rejects_non_pdf_encrypted_and_corrupt(editor):
+    book = make_book()
+
+    def attempt(data):
+        return editor.post(
+            f"{ADMIN}/{book.pk}/upload/",
+            {"file": SimpleUploadedFile("kitob.pdf", data, "application/pdf")},
+            format="multipart",
+        )
+
+    fake = attempt(b"not a pdf at all")
+    assert fake.status_code == 415 and fake.json()["code"] == "unsupported_type"
+    locked = attempt(blank_pdf(1, encrypt=True))
+    assert locked.status_code == 400 and locked.json()["code"] == "pdf_encrypted"
+    corrupt = attempt(b"%PDF-1.4\n garbage without objects")
+    assert corrupt.status_code == 400 and corrupt.json()["code"] == "invalid_pdf"
+    book.refresh_from_db()
+    assert not book.source_file and book.status == BookStatus.FAILED
+
+
+def test_rejected_replacement_keeps_previous_file(editor):
+    book = make_book()
+    editor.post(f"{ADMIN}/{book.pk}/upload/", pdf_upload(blank_pdf(2)), format="multipart")
+    book.refresh_from_db()
+    old = book.source_file.name
+    bad = editor.post(
+        f"{ADMIN}/{book.pk}/upload/", pdf_upload(b"%PDF-1.4\n broken"), format="multipart"
+    )
+    assert bad.status_code == 400
+    book.refresh_from_db()
+    assert book.source_file.name == old and book.status == BookStatus.READY
+
+
+def test_upload_size_limit(editor, settings):
+    settings.BOOK_PDF_MAX_BYTES = 100
+    book = make_book()
+    big = editor.post(f"{ADMIN}/{book.pk}/upload/", pdf_upload(blank_pdf(5)), format="multipart")
+    assert big.status_code == 413 and big.json()["code"] == "file_too_large"
+    init = editor.post(
+        f"{ADMIN}/{book.pk}/upload-init/",
+        {"filename": "k.pdf", "size": 5000, "content_type": "application/pdf"},
+        format="json",
+    )
+    assert init.status_code == 413 and init.json()["code"] == "file_too_large"
+
+
+def test_no_reprocess_endpoint(editor):
+    book = make_book()
+    assert editor.post(f"{ADMIN}/{book.pk}/reprocess/").status_code == 404
+
+
+# --- PDF o'qish URL'i va HTTP Range ---
+
+
+def uploaded(editor, pages=3, **over):
+    book = make_book(is_published=True, **over)
+    editor.post(f"{ADMIN}/{book.pk}/upload/", pdf_upload(blank_pdf(pages)), format="multipart")
+    book.refresh_from_db()
+    return book
+
+
+def test_file_url_is_signed_uncached_and_hides_storage_key(anon, editor):
+    book = uploaded(editor)
+    response = anon.get(f"{PUBLIC}/{book.pk}/file-url/")
+    assert response.status_code == 200
+    assert response["Cache-Control"] == "private, no-store"
+    body = response.json()
+    assert body["url"].startswith(f"/api/v1/books/{book.pk}/file/?token=")
+    assert body["expires_in"] > 0
+    assert "book-sources" not in body["url"]
+
+
+def test_file_url_requires_visible_book_with_file(anon, editor):
+    draft = uploaded(editor)
+    Book.objects.filter(pk=draft.pk).update(is_published=False)
+    assert anon.get(f"{PUBLIC}/{draft.pk}/file-url/").status_code == 404
+    assert editor.get(f"{PUBLIC}/{draft.pk}/file-url/").status_code == 200  # staff ko'radi
+    assert anon.get(f"{PUBLIC}/{make_book(is_published=True).pk}/file-url/").status_code == 404
+
+
+def test_local_file_supports_range_requests(anon, editor):
+    book = uploaded(editor)
+    url = anon.get(f"{PUBLIC}/{book.pk}/file-url/").json()["url"]
+    size = book.size_bytes
+
+    whole = anon.get(url)
+    assert whole.status_code == 200 and whole["Accept-Ranges"] == "bytes"
+    assert b"".join(whole.streaming_content)[:5] == b"%PDF-"
+
+    part = anon.get(url, HTTP_RANGE="bytes=0-99")
+    assert part.status_code == 206
+    assert part["Content-Range"] == f"bytes 0-99/{size}" and part["Content-Length"] == "100"
+    assert len(b"".join(part.streaming_content)) == 100
+
+    tail = anon.get(url, HTTP_RANGE="bytes=-50")
+    assert (
+        tail.status_code == 206 and tail["Content-Range"] == f"bytes {size - 50}-{size - 1}/{size}"
+    )
+    assert anon.get(url, HTTP_RANGE=f"bytes={size + 10}-").status_code == 416
+
+
+def test_local_file_rejects_bad_or_replaced_token(anon, editor):
+    book = uploaded(editor)
+    url = anon.get(f"{PUBLIC}/{book.pk}/file-url/").json()["url"]
+    assert anon.get(f"/api/v1/books/{book.pk}/file/").status_code == 404
+    assert anon.get(f"/api/v1/books/{book.pk}/file/?token=nope").status_code == 404
+    # Fayl almashtirilgach eski havola yaroqsiz.
     editor.post(f"{ADMIN}/{book.pk}/upload/", pdf_upload(blank_pdf(1)), format="multipart")
-    book.refresh_from_db()
-    assert book.page_count == 1 and book.pages.count() == 1
-    assert not any(book.pages.first().image.storage.exists(name) for name in old)
+    assert anon.get(url).status_code == 404
 
 
-def test_reprocess_requires_file_and_runs_again(editor):
-    book = make_book()
-    assert editor.post(f"{ADMIN}/{book.pk}/reprocess/").status_code == 409
-    editor.post(f"{ADMIN}/{book.pk}/upload/", pdf_upload(blank_pdf(2)), format="multipart")
-    again = editor.post(f"{ADMIN}/{book.pk}/reprocess/")
-    assert again.status_code == 202
-    assert again.json()["status"] == "ready" and again.json()["page_count"] == 2
+# --- Eski ma'lumotni xavfsiz o'tkazish (migratsiya) ---
 
 
-def test_reprocess_refuses_active_but_retries_stalled_processing(editor):
-    book = make_book()
-    editor.post(f"{ADMIN}/{book.pk}/upload/", pdf_upload(blank_pdf(2)), format="multipart")
-    # Worker hozir ishlayapti (yangi progress): qayta boshlash mumkin emas.
-    Book.objects.filter(pk=book.pk).update(status=BookStatus.PROCESSING)
-    assert editor.post(f"{ADMIN}/{book.pk}/reprocess/").status_code == 409
+def test_legacy_migration_keeps_pages_and_unsticks_books():
+    import importlib
 
-    # Progress ancha vaqt o'zgarmagan (worker o'ldi): qayta ishlashga ruxsat.
-    long_ago = timezone.now() - timedelta(seconds=services.STALL_AFTER_SECONDS + 60)
-    Book.objects.filter(pk=book.pk).update(updated_at=long_ago)
-    again = editor.post(f"{ADMIN}/{book.pk}/reprocess/")
-    assert again.status_code == 202
-    assert again.json()["status"] == "ready"
+    from django.apps import apps as global_apps
 
+    migration = importlib.import_module("apps.books.migrations.0004_books_pdf_viewer")
+    stuck = make_book(
+        title="Qotgan", status=BookStatus.PROCESSING, source_file="book-sources/a.pdf"
+    )
+    failed = make_book(
+        title="Render xatosi", status=BookStatus.FAILED, status_error="render_failed",
+        source_file="book-sources/b.pdf",
+    )  # fmt: skip
+    broken = make_book(
+        title="Buzuq", status=BookStatus.FAILED, status_error="invalid_pdf",
+        source_file="book-sources/c.pdf",
+    )  # fmt: skip
+    empty = make_book(title="Faylsiz")
+    legacy = ready_book(title="Eski tayyor")
+    pages_before = BookPage.objects.count()
 
-def test_time_limit_marks_book_failed_with_timeout(monkeypatch):
-    from celery.exceptions import SoftTimeLimitExceeded
+    migration.legacy_to_ready(global_apps, None)
 
-    book = make_book(source_file=ContentFile(blank_pdf(2), name="book-sources/t.pdf"))
-
-    def too_slow(*args, **kwargs):
-        raise SoftTimeLimitExceeded
-
-    monkeypatch.setattr(services.rasterize, "render_page", too_slow)
-    services.process_book(book.pk)
-    book.refresh_from_db()
-    assert book.status == BookStatus.FAILED and book.status_error == "timeout"
-    assert not book.pages.exists()
+    for book, status, error in [
+        (stuck, "ready", ""),
+        (failed, "ready", ""),
+        (broken, "failed", "invalid_pdf"),
+        (empty, "failed", "no_file"),
+    ]:
+        book.refresh_from_db()
+        assert (book.status, book.status_error) == (status, error), book.title
+    assert BookPage.objects.count() == pages_before  # eski sahifalar o'chmadi
+    legacy.refresh_from_db()
+    assert legacy.has_text_layer is True  # 1-sahifada matn bor edi
+    stuck.refresh_from_db()
+    assert stuck.has_text_layer is None  # noma'lum: mijoz o'zi tekshiradi
 
 
 # --- Nashr ---
@@ -257,7 +375,7 @@ def test_publish_flow_and_roles(editor, admin):
 def test_public_list_shows_only_published_ready(anon):
     ready_book(title="Ochiq")
     make_book(title="Qoralama")  # fayli yo'q
-    make_book(title="Tayyorlanmoqda", status=BookStatus.PROCESSING, is_published=True)
+    make_book(title="Eski, tayyorlanmoqda", status=BookStatus.PROCESSING, is_published=True)
     body = anon.get(f"{PUBLIC}/").json()
     assert [b["title"] for b in body["results"]] == ["Ochiq"]
     assert set(body["results"][0]) == {
@@ -314,25 +432,3 @@ def test_public_cache_is_invalidated_on_change(anon, admin):
     assert anon.get(f"{PUBLIC}/{book.pk}/").json()["title"] == "Eski nom"
     admin.patch(f"{ADMIN}/{book.pk}/", {"title": "Yangi nom"}, format="json")
     assert anon.get(f"{PUBLIC}/{book.pk}/").json()["title"] == "Yangi nom"
-
-
-# --- Qotgan kitoblarni qayta yuborish ---
-
-
-def test_reprocess_books_command_requeues_only_stalled(editor):
-    from django.core.management import call_command
-
-    fresh = make_book(title="Yangi")
-    stalled = make_book(title="Qotgan")
-    for book in (fresh, stalled):
-        editor.post(f"{ADMIN}/{book.pk}/upload/", pdf_upload(blank_pdf(2)), format="multipart")
-        Book.objects.filter(pk=book.pk).update(status=BookStatus.PROCESSING, processed_pages=0)
-    long_ago = timezone.now() - timedelta(minutes=30)
-    Book.objects.filter(pk=stalled.pk).update(updated_at=long_ago)
-
-    call_command("reprocess_books", "--dry-run")
-    assert Book.objects.get(pk=stalled.pk).status == BookStatus.PROCESSING
-
-    call_command("reprocess_books")
-    assert Book.objects.get(pk=stalled.pk).status == BookStatus.READY  # eager: darhol tayyor
-    assert Book.objects.get(pk=fresh.pk).status == BookStatus.PROCESSING  # faol, tegilmadi

@@ -44,7 +44,7 @@ class BookDetailSerializer(BookSerializer):
     chapters = BookChapterSerializer(many=True, read_only=True)
 
     class Meta(BookSerializer.Meta):
-        fields = [*BookSerializer.Meta.fields, "description", "chapters"]
+        fields = [*BookSerializer.Meta.fields, "description", "chapters", "has_text_layer"]
         read_only_fields = fields
 
 

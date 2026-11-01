@@ -10,6 +10,7 @@ import {
   type PDFDocumentLoadingTask,
   type PDFDocumentProxy,
 } from "@/lib/pdf/pdfjs";
+import { bookQueries } from "@/lib/books/queries";
 import { pdfQueries } from "@/lib/pdf-books/queries";
 
 /** Bir so'rovda shuncha bayt (HTTP Range): kitob to'liq yuklanishini kutmaydi. */
@@ -54,6 +55,8 @@ function usePdfFromUrl(
                 ...pdfjsAssetOptions(),
                 rangeChunkSize: RANGE_CHUNK_BYTES,
                 disableAutoFetch: true,
+                // Oqim o'chiq: pdf.js sarlavhadan so'ng birinchi so'rovni darhol uzadi (aks holda butun fayl keladi).
+                disableStream: true,
               });
         const doc = await task.promise;
         if (cancelled) {
@@ -92,6 +95,17 @@ export function usePdfDocument(bookId: string) {
     if (saved) return { data: saved };
     return queryClient.fetchQuery(pdfQueries.fileUrl(bookId));
   });
+}
+
+/**
+ * Kutubxona kitobi (`/kitoblar`): shu mexanizm, lekin imzolangan URL `books/<id>/file-url/` dan.
+ * Oflayn nusxa yo'q.
+ */
+export function useLibraryBookDocument(bookId: string) {
+  const queryClient = useQueryClient();
+  return usePdfFromUrl(`library:${bookId}`, () =>
+    queryClient.fetchQuery(bookQueries.fileUrl(bookId)),
+  );
 }
 
 /** Bo'lim prezentatsiyasi (PDF slaydlar): kitob PDF'i bilan bir xil mexanizm. */

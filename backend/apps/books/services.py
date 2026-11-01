@@ -1,41 +1,40 @@
-"""Kitoblar mantiqi: PDF yuklash, sahifa rasmlariga aylantirish, nashr, o'chirish.
+"""Kitoblar mantiqi: PDF yuklash (sinxron tekshiruv + muqova), nashr, mundarija, o'chirish.
 
 PDF saqlash/multipart mexanizmi `apps.content.pdf_storage` dan qayta ishlatiladi (kalit prefiksi
-`book-sources/`); sahifa rasmlari ommaviy `covers` saqlashga tushadi.
+`book-sources/`); muqova ommaviy `covers` saqlashga tushadi. Fonda ishlov yo'q: yuklash tugashi
+bilan kitob `ready`.
 """
 
 import uuid
-from datetime import timedelta
 
-import structlog
-from celery.exceptions import SoftTimeLimitExceeded
+from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.db import transaction
-from django.utils import timezone
-from pypdfium2 import PdfiumError
 
 from apps.content import pdf_services as pdf
 from apps.content import pdf_storage as storage
 from apps.content.admin_services import InvalidTransition, TransitionForbidden, UploadError
 from apps.content.storage import covers_storage
 
-from . import rasterize
+from . import pdfmeta
 from .models import Book, BookChapter, BookPage, BookStatus
 
-logger = structlog.get_logger(__name__)
-
 SOURCE_PREFIX = "book-sources"
-FLUSH_EVERY = 10  # shuncha sahifadan keyin bazaga yoziladi va jarayon ko'rsatkichi yangilanadi
 CHAPTERS_MAX = 300
-STALL_AFTER_SECONDS = 3 * 60  # progress shuncha vaqt o'zgarmasa, qayta ishlash qotgan hisoblanadi
 
 
 # --- Yuklash ---
 
 
+def _check_size(size: int) -> None:
+    if size > settings.BOOK_PDF_MAX_BYTES:
+        raise UploadError("file_too_large", 413)
+
+
 def begin_upload(book: Book, filename: str, size: int, content_type: str) -> storage.UploadPlan:
-    pdf.validate_declared(filename, size, content_type)
+    pdf.validate_declared_pdf(filename, size, content_type)
+    _check_size(size)
     plan = storage.start_upload(size, SOURCE_PREFIX)
     with transaction.atomic():
         book = Book.objects.select_for_update().get(pk=book.pk)
@@ -54,19 +53,34 @@ def _drop_pending(book: Book, key: str, upload_id: str = "") -> None:
     Book.objects.filter(pk=book.pk).update(pending_file="", pending_upload_id="")
 
 
-def activate(book: Book, key: str, upload_id: str = "") -> Book:
-    """Saqlangan PDF'ni tekshirib biriktiradi va sahifalarni fonda tayyorlashni boshlaydi."""
-    from .tasks import process_book
+def wants_auto_cover(book: Book) -> bool:
+    """Muqova yo'q yoki avvalgisi avtomatik: PDF'ning 1-betidan olinadi. Qo'lda yuklangan ustun."""
+    return not book.cover_image or book.cover_generated
 
+
+def activate(book: Book, key: str, upload_id: str = "") -> Book:
+    """Saqlangan PDF'ni sinxron tekshiradi (sahifalar soni, matn qatlami, muqova) va biriktiradi.
+
+    Kitob darhol `ready`. Buzuq/shifrlangan/katta PDF rad etiladi va yuklangan fayl o'chiriladi:
+    kitobda oldingi fayl o'z holicha qoladi.
+    """
+    cover_name = ""
     try:
         if not storage.exists(key):
             raise UploadError("upload_incomplete")
         size = storage.stored_size(key)
         if size <= 0:
             raise UploadError("file_empty")
+        _check_size(size)
         if not storage.read_head(key, 8).startswith(storage.PDF_MAGIC):
             raise UploadError("unsupported_type", 415)
-        pages = storage.count_pages(key)
+        current = Book.objects.get(pk=book.pk)
+        with storage.opened(key) as handle:
+            info = pdfmeta.inspect_pdf(handle, want_cover=wants_auto_cover(current))
+        if info.cover:
+            cover_name = covers_storage().save(
+                f"covers/{book.pk}-{uuid.uuid4().hex[:8]}.webp", ContentFile(info.cover)
+            )
     except UploadError:
         _drop_pending(book, key, upload_id)
         raise
@@ -74,14 +88,41 @@ def activate(book: Book, key: str, upload_id: str = "") -> Book:
     with transaction.atomic():
         book = Book.objects.select_for_update().get(pk=book.pk)
         old_key = book.source_file.name if book.source_file else ""
+        old_cover = ""
         book.source_file = key
-        book.size_bytes, book.page_count, book.processed_pages = size, pages, 0
-        book.status, book.status_error = BookStatus.PROCESSING, ""
+        book.size_bytes, book.page_count = size, info.page_count
+        book.has_text_layer = info.has_text_layer
+        book.status, book.status_error = BookStatus.READY, ""
         book.pending_file = book.pending_upload_id = ""
+        if cover_name and wants_auto_cover(book):
+            old_cover = book.cover_image.name if book.cover_image else ""
+            book.cover_image, book.cover_generated = cover_name, True
+        elif cover_name:  # yuklash paytida admin muqova qo'ydi: avtomatigi kerak emas
+            transaction.on_commit(lambda: storage.delete(cover_name, covers_storage()))
         book.save()
         if old_key and old_key != key:
             transaction.on_commit(lambda: storage.delete(old_key))
-        transaction.on_commit(lambda: process_book.delay(str(book.pk)))
+        if old_cover:
+            transaction.on_commit(lambda: storage.delete(old_cover, covers_storage()))
+    return book
+
+
+def regenerate_cover(book: Book) -> Book:
+    """Muqovani PDF'ning 1-betidan sinxron qayta oladi (admin "Avtomatik muqova"ni tanlaganda)."""
+    if not book.source_file:
+        return book
+    try:
+        with storage.opened(book.source_file.name) as handle:
+            info = pdfmeta.inspect_pdf(handle, want_cover=True)
+    except UploadError:
+        return book  # buzuq fayl: muqova yo'q holda qoladi (kitobning o'zi o'zgarmaydi)
+    if not info.cover:
+        return book
+    name = covers_storage().save(
+        f"covers/{book.pk}-{uuid.uuid4().hex[:8]}.webp", ContentFile(info.cover)
+    )
+    book.cover_image, book.cover_generated = name, True
+    book.save(update_fields=["cover_image", "cover_generated", "updated_at"])
     return book
 
 
@@ -100,9 +141,10 @@ def complete_direct(book: Book, parts: list[dict]) -> Book:
 
 def store_proxy(book: Book, file) -> Book:
     """Lokal (dev) rejim: fayl backend orqali keladi."""
-    pdf.validate_declared(
+    pdf.validate_declared_pdf(
         file.name or "", file.size, getattr(file, "content_type", "") or storage.PDF_MIME
     )
+    _check_size(file.size)
     head = file.read(8)
     file.seek(0)
     if not head.startswith(storage.PDF_MAGIC):
@@ -112,98 +154,10 @@ def store_proxy(book: Book, file) -> Book:
     return activate(book, key)
 
 
-# --- Sahifalarni tayyorlash (Celery) ---
-
-
-def _fail(book_id, code: str) -> None:
-    Book.objects.filter(pk=book_id).update(status=BookStatus.FAILED, status_error=code)
-
-
-def _purge_pages(book: Book) -> None:
-    """Kitobning mavjud sahifa rasmlari va qatorlari (qayta ishlash / xato tozalash)."""
-    store = covers_storage()
-    for page in BookPage.objects.filter(book=book).only("image", "thumbnail"):
-        storage.delete(page.image.name, store)
-        storage.delete(page.thumbnail.name, store)
-    BookPage.objects.filter(book=book).delete()
-
-
-def process_book(book_id) -> None:
-    """Manba PDF → har sahifa uchun WebP rasm + eskiz (+ matn); birinchi sahifadan avto muqova."""
-    book = Book.objects.filter(pk=book_id).first()
-    if book is None:
-        return
-    key = book.source_file.name if book.source_file else ""
-    if not key:
-        _fail(book_id, "no_file")
-        return
-    store = covers_storage()
-    run = uuid.uuid4().hex[:8]  # qayta ishlashda kalitlar yangi: eski CDN keshi aralashmaydi
-    _purge_pages(book)
-    rows: list[BookPage] = []
-    try:
-        with storage.opened(key) as handle:
-            document = rasterize.open_document(handle)
-            try:
-                total = len(document)
-                for index in range(total):
-                    rendered = rasterize.render_page(document, index)
-                    number = index + 1
-                    base = f"book-pages/{book.pk}/{run}-{number}"
-                    rows.append(
-                        BookPage(
-                            book=book,
-                            number=number,
-                            image=store.save(f"{base}.webp", ContentFile(rendered.image)),
-                            thumbnail=store.save(f"{base}-t.webp", ContentFile(rendered.thumbnail)),
-                            width=rendered.width,
-                            height=rendered.height,
-                            text=rendered.text,
-                        )
-                    )
-                    if number == 1 and not book.cover_image:
-                        name = store.save(
-                            f"covers/{book.pk}-{run}.webp", ContentFile(rendered.cover)
-                        )
-                        Book.objects.filter(pk=book.pk).update(cover_image=name)
-                    if len(rows) >= FLUSH_EVERY:
-                        _flush(book, rows, number)
-                        rows = []
-                _flush(book, rows, total)
-            finally:
-                document.close()
-    except PdfiumError:
-        logger.warning("book_invalid_pdf", book=str(book.pk))
-        _purge_pages(book)
-        _fail(book.pk, "invalid_pdf")
-        return
-    except SoftTimeLimitExceeded:
-        logger.error("book_render_timeout", book=str(book.pk))
-        _purge_pages(book)
-        _fail(book.pk, "timeout")
-        return
-    except Exception:
-        logger.exception("book_render_failed", book=str(book.pk))
-        _purge_pages(book)
-        _fail(book.pk, "render_failed")
-        raise
-    ready = Book.objects.get(pk=book.pk)
-    ready.status, ready.status_error = BookStatus.READY, ""
-    ready.page_count = ready.processed_pages = total
-    ready.save()  # signal: ochiq keshni yangilaydi
-
-
-def _flush(book: Book, rows: list[BookPage], processed: int) -> None:
-    if rows:
-        BookPage.objects.bulk_create(rows)
-    # `updated_at` ham yangilanadi: progress to'xtab qolgan (qotgan) kitobni `is_stalled` ajratadi.
-    Book.objects.filter(pk=book.pk).update(processed_pages=processed, updated_at=timezone.now())
-
-
-def is_stalled(book: Book) -> bool:
-    """Qayta ishlanmoqda, lekin `STALL_AFTER` dan beri jarayon yo'q (worker o'ldi/yo'q)."""
-    return book.status == BookStatus.PROCESSING and timezone.now() - book.updated_at > timedelta(
-        seconds=STALL_AFTER_SECONDS
+def read_url(book: Book) -> dict:
+    """PDF o'qish URL'i: S3'da imzolangan GET, lokalda imzolangan backend yo'li (qisqa muddatli)."""
+    return storage.key_read_url(
+        book.source_file.name, str(book.pk), f"/api/v1/books/{book.pk}/file/"
     )
 
 
@@ -272,7 +226,7 @@ def replace_chapters(book: Book, chapters: list[dict]) -> None:
 
 
 def delete_book(book: Book) -> None:
-    """Qator va saqlashdagi fayllar (manba PDF, muqova, sahifa rasmlari) bir tranzaksiyada.
+    """Qator va saqlashdagi fayllar (PDF, muqova, eski sahifa rasmlari) bir tranzaksiyada.
 
     Saqlash xatosida `storage_error` (502): tranzaksiya qaytadi, kitob saqlanib qoladi.
     """

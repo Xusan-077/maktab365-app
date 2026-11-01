@@ -1038,26 +1038,6 @@ export interface paths {
         patch: operations["admin_books_update"];
         trace?: never;
     };
-    "/api/v1/admin/books/{id}/reprocess/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Sahifalarni qayta tayyorlash (xato yoki PDF o'zgargandan keyin)
-         * @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin.
-         */
-        post: operations["admin_books_reprocess"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/admin/books/{id}/transition/": {
         parameters: {
             query?: never;
@@ -1108,7 +1088,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * S3 multipart yuklashni yakunlash: tekshiruv va sahifalarni tayyorlashni boshlash
+         * S3 multipart yuklashni yakunlash: PDF sinxron tekshiriladi, kitob darhol tayyor
          * @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin.
          */
         post: operations["admin_books_upload_complete"];
@@ -1902,6 +1882,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/books/{id}/file-url/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * PDF o'qish URL'i: qisqa muddatli, keshlanmaydi, HTTP Range ishlaydi
+         * @description Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi o'rniga kesh ishlaydi.
+         */
+        get: operations["books_file_url"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/books/{id}/pages/": {
         parameters: {
             query?: never;
@@ -1910,7 +1910,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Kitob sahifalari: rasm, eskiz va o'lchamlar (tartib bilan)
+         * ESKI: sahifa rasmlari (faqat avval tayyorlangan kitoblar; endi PDF.js)
+         * @deprecated
          * @description Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi o'rniga kesh ishlaydi.
          */
         get: operations["books_pages"];
@@ -1931,6 +1932,7 @@ export interface paths {
         };
         /**
          * Sahifa matni (badiiy kitobning matnli o'qish rejimi)
+         * @deprecated
          * @description Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi o'rniga kesh ishlaydi.
          */
         get: operations["books_page_text"];
@@ -1951,6 +1953,7 @@ export interface paths {
         };
         /**
          * Kitob ichida qidirish: moslik topilgan betlar va matn parchalari
+         * @deprecated
          * @description Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi o'rniga kesh ishlaydi.
          */
         get: operations["books_search"];
@@ -2322,7 +2325,7 @@ export interface components {
             readonly has_file: boolean;
             readonly size_bytes: number;
             readonly page_count: number;
-            readonly processed_pages: number;
+            readonly has_text_layer: boolean | null;
             readonly status: components["schemas"]["BookStatusEnum"];
             readonly status_error: string;
             readonly is_published: boolean;
@@ -2371,6 +2374,7 @@ export interface components {
             readonly created_at: string;
             readonly description: string;
             readonly chapters: components["schemas"]["BookChapter"][];
+            readonly has_text_layer: boolean | null;
         };
         BookPage: {
             readonly number: number;
@@ -5786,28 +5790,6 @@ export interface operations {
             };
         };
     };
-    admin_books_reprocess: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A UUID string identifying this book. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            202: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BookAdmin"];
-                };
-            };
-        };
-    };
     admin_books_transition: {
         parameters: {
             query?: never;
@@ -7175,6 +7157,27 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BookDetail"];
+                };
+            };
+        };
+    };
+    books_file_url: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PdfFileUrl"];
                 };
             };
         };

@@ -165,6 +165,10 @@ OCR_LANGUAGES = env("OCR_LANGUAGES", default="uzb+rus")  # tesseract: uzb, uzb_c
 # Admin yuklash endpointlari (init/upload/complete): foydalanuvchi bo'yicha.
 PDF_UPLOAD_THROTTLE_RATE = env("PDF_UPLOAD_THROTTLE_RATE", default="60/hour")
 
+# Kitoblar kutubxonasi (`apps/books`): PDF hajmi chegarasi. PDF yuklash tugagach so'rov ichida
+# sinxron tekshiriladi, shuning uchun cheksiz emas.
+BOOK_PDF_MAX_BYTES = env.int("BOOK_PDF_MAX_BYTES", default=200 * 1024 * 1024)
+
 # --- Ochiq kontent API ---
 # Ochiq ro'yxatlar doim faqat nashr qilingan kitoblar (`PdfBook.objects.published()`); draft'ni
 # ochiq ko'rsatish sozlamasi yo'q (avvalgi `SHOW_DRAFTS_PUBLICLY` olib tashlangan).

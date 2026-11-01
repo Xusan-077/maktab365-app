@@ -6,10 +6,8 @@ type Schemas = components["schemas"];
 
 export type Book = Schemas["Book"];
 export type BookDetail = Schemas["BookDetail"];
-export type BookPage = Schemas["BookPage"];
+export type BookFileUrl = Schemas["PdfFileUrl"];
 export type BookChapter = Schemas["BookChapter"];
-export type BookSearchHit = Schemas["BookSearchHit"];
-export type BookPageText = Schemas["BookPageText"];
 export type BookProgress = Schemas["BookProgress"];
 export type Bookmark = Schemas["Bookmark"];
 export type PageNote = Schemas["PageNote"];
@@ -38,7 +36,7 @@ export interface BooksPage {
   results: Book[];
 }
 
-/** Ochiq kitoblar API'si (katalog, tafsilot, sahifa rasmlari). */
+/** Ochiq kitoblar API'si (katalog, tafsilot, PDF o'qish URL'i). */
 export class BooksApi {
   constructor(private readonly client: HttpClient = createHttpClient()) {}
 
@@ -63,23 +61,10 @@ export class BooksApi {
     return unwrap(await this.client.GET("/api/v1/books/{id}/", { params: { path: { id } } }));
   }
 
-  /** Kitobning hamma sahifalari (tartib bilan): rasm, eskiz, o'lcham. */
-  async pages(id: string): Promise<BookPage[]> {
-    return unwrap(await this.client.GET("/api/v1/books/{id}/pages/", { params: { path: { id } } }));
-  }
-
-  /** Sahifa matni (badiiy kitobning matnli o'qish rejimi). */
-  async pageText(id: string, number: number): Promise<BookPageText> {
-    const result = await this.client.GET("/api/v1/books/{id}/pages/{number}/text/", {
-      params: { path: { id, number } },
-    });
-    return unwrap(result);
-  }
-
-  /** Kitob ichida qidirish (kamida 2 belgi): moslik topilgan betlar va parchalar. */
-  async search(id: string, q: string): Promise<BookSearchHit[]> {
-    const result = await this.client.GET("/api/v1/books/{id}/search/", {
-      params: { path: { id }, query: { q } },
+  /** PDF'ning qisqa muddatli o'qish URL'i (har ochilishda yangi; HTTP Range ishlaydi). */
+  async fileUrl(id: string): Promise<BookFileUrl> {
+    const result = await this.client.GET("/api/v1/books/{id}/file-url/", {
+      params: { path: { id } },
     });
     return unwrap(result);
   }

@@ -1,6 +1,6 @@
 import { cacheLife, cacheTag } from "next/cache";
 import { ApiError } from "@/lib/api/types";
-import { BooksApi, type BookDetail, type BookFilters, type BookPage, type BooksPage } from "./api";
+import { BooksApi, type BookDetail, type BookFilters, type BooksPage } from "./api";
 
 /**
  * Ochiq sahifalar uchun serverda keshlanadigan o'qishlar (faqat nashr qilingan kitoblar).
@@ -26,18 +26,6 @@ export async function getBook(id: string): Promise<BookDetail | null> {
     return await new BooksApi().book(id);
   } catch (error) {
     if (error instanceof ApiError && error.status === 404) return null;
-    throw error;
-  }
-}
-
-/** Kitob sahifalari (o'qish oynasi): rasm, eskiz, o'lcham; yo'q bo'lsa bo'sh ro'yxat. */
-export async function getBookPages(id: string): Promise<BookPage[]> {
-  "use cache";
-  lifetime();
-  try {
-    return await new BooksApi().pages(id);
-  } catch (error) {
-    if (error instanceof ApiError && error.status === 404) return [];
     throw error;
   }
 }

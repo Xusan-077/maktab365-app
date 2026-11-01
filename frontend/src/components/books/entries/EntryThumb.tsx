@@ -1,20 +1,66 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { renderAll } from "@/lib/books/annotation-render";
 import { parsedAnnotations } from "@/lib/books/entries";
 import type { PageEntry } from "@/lib/books/api";
+import { libraryDocument, renderPageBlob } from "@/lib/books/page-image";
 
 const THUMB_WIDTH = 240;
+/** Eskiz PDF'dan chiziladi: retina uchun 2× (CSS eni ~160–240 px). */
+const PDF_THUMB_WIDTH = THUMB_WIDTH * 2;
+const DEFAULT_ASPECT = 1.4;
+
+interface PdfThumb {
+  url: string;
+  aspect: number;
+}
+
+/**
+ * Serverda tayyor eskizi yo'q betlar (PDF o'qish): bet PDF'ning o'zidan brauzerda kichik rasmga
+ * chiziladi. `enabled=false` bo'lsa hech narsa qilinmaydi (eski kitoblar tayyor eskizdan foydalanadi).
+ */
+function usePdfThumb(bookId: string, page: number, enabled: boolean): PdfThumb | null {
+  const [thumb, setThumb] = useState<(PdfThumb & { key: string }) | null>(null);
+  const key = `${bookId}:${page}`;
+
+  useEffect(() => {
+    if (!enabled) return;
+    let cancelled = false;
+    let url: string | null = null;
+    void (async () => {
+      try {
+        const doc = await libraryDocument(bookId);
+        const blob = await renderPageBlob(doc, page, PDF_THUMB_WIDTH, "image/webp");
+        const bitmap = await createImageBitmap(blob);
+        const aspect = bitmap.height / bitmap.width;
+        bitmap.close();
+        if (cancelled) return;
+        url = URL.createObjectURL(blob);
+        setThumb({ key, url, aspect });
+      } catch {
+        // eskiz ixtiyoriy: yozuv (matn/chizma) baribir ko'rinadi
+      }
+    })();
+    return () => {
+      cancelled = true;
+      if (url) URL.revokeObjectURL(url);
+    };
+  }, [bookId, page, enabled, key]);
+
+  return thumb?.key === key ? thumb : null;
+}
 
 /** Bet eskizi + chizma/belgilash/matn qatlami (eksportdagi bilan bir xil chizish kodi). */
 export function EntryThumb({ entry, alt }: { entry: PageEntry; alt: string }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const image = entry.image;
-  const aspect = image && image.width > 0 ? image.height / image.width : 1.4;
+  const fromPdf = usePdfThumb(entry.book.id, entry.page, !image);
+  const aspect =
+    image && image.width > 0 ? image.height / image.width : (fromPdf?.aspect ?? DEFAULT_ASPECT);
   const height = Math.round(THUMB_WIDTH * aspect);
-  const src = image ? image.thumbnail || image.image : null;
+  const src = image ? image.thumbnail || image.image : (fromPdf?.url ?? null);
 
   useEffect(() => {
     const element = canvas.current;

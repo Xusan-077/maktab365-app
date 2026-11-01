@@ -241,6 +241,11 @@ def _read_url(key: str, owner: str, local_path: str, filename: str | None = None
     return {"url": url, "expires_in": ttl}
 
 
+def key_read_url(key: str, owner: str, local_path: str) -> dict:
+    """Ixtiyoriy kalit uchun o'qish URL'i (kitoblar kutubxonasi): `_read_url` bilan bir xil."""
+    return _read_url(key, owner, local_path)
+
+
 def content_disposition(filename: str | None) -> str:
     """`inline` yoki `attachment` (ASCII zaxira + RFC 5987 `filename*` — o'zbekcha harflar)."""
     if not filename:

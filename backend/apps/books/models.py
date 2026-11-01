@@ -19,7 +19,8 @@ class BookType(models.TextChoices):
 
 
 class BookStatus(models.TextChoices):
-    # Manba PDF'dan sahifa rasmlari tayyorlanmoqda / tayyor / xato bilan to'xtagan.
+    # Yuklangan PDF sinxron tekshiriladi: fayl bo'lsa kitob darhol `ready`. `processing` faqat
+    # eski (sahifa rasmlari fonda tayyorlangan) yozuvlar uchun qoldirilgan; yangi kod uni qo'ymaydi.
     PROCESSING = "processing", "Tayyorlanmoqda"
     READY = "ready", "Tayyor"
     FAILED = "failed", "Xato"
@@ -32,7 +33,7 @@ class BookQuerySet(models.QuerySet):
 
 
 class Book(UUIDModel, TimeStampedModel):
-    """Kitob: PDF serverda sahifa rasmlariga aylantiriladi, o'quvchi rasmlarni o'qiydi."""
+    """Kitob: o'quvchi PDF'ni brauzerda PDF.js bilan chizadi (HTTP Range, imzolangan URL)."""
 
     objects = BookQuerySet.as_manager()
 
@@ -49,19 +50,25 @@ class Book(UUIDModel, TimeStampedModel):
     )
     language = models.CharField(max_length=8, choices=BookLanguage.choices, default=BookLanguage.UZ)
     description = models.TextField(blank=True, validators=[MaxLengthValidator(DESCRIPTION_MAX)])
-    # Ommaviy `covers` saqlash (sahifa rasmlari ham shu yerda: CDN orqali beriladi).
+    # Ommaviy `covers` saqlash (CDN orqali beriladi).
     cover_image = models.FileField(upload_to="covers/", blank=True, storage=covers_storage)
-    # Manba PDF shaxsiy `default` saqlashda qoladi va hech qachon ochiq API'da chiqmaydi.
+    # Muqova PDF'ning 1-betidan avtomatik olingan (admin qo'lda yuklagan muqova ustun va
+    # hech qachon almashtirilmaydi; avto muqova PDF almashganda yangilanadi).
+    cover_generated = models.BooleanField(default=False, editable=False)
+    # PDF shaxsiy `default` saqlashda qoladi; o'quvchiga faqat qisqa muddatli imzolangan URL
+    # (`books/<id>/file-url/`) beriladi, kalitning o'zi API'da chiqmaydi.
     source_file = models.FileField(upload_to="book-sources/", blank=True)
     size_bytes = models.PositiveBigIntegerField(default=0)
     page_count = models.PositiveIntegerField(default=0)
-    # Jarayon ko'rsatkichi (admin "37 / 120"): tayyor sahifalar soni.
+    # Eski (fonda tayyorlash) davridan qolgan ko'rsatkich: yangi kodda ishlatilmaydi.
     processed_pages = models.PositiveIntegerField(default=0, editable=False)
-    # Fayl yuklanmaguncha kitob "xato" emas, "tayyorlanmoqda" ham emas: sahifalari yo'q.
+    # PDF'da matn qatlami bor (qidiruv, matnli rejim); `None` — noma'lum (eski yozuv).
+    has_text_layer = models.BooleanField(null=True, blank=True, editable=False)
+    # Fayl yuklanmaguncha kitob "tayyor" emas (`no_file`).
     status = models.CharField(
         max_length=16, choices=BookStatus.choices, default=BookStatus.FAILED, db_index=True
     )
-    # Mashina o'qiydigan kod (matn emas): `no_file` | `invalid_pdf` | `render_failed`.
+    # Mashina o'qiydigan kod (matn emas): `no_file` (yangi kitob); eski yozuvlarda `invalid_pdf`.
     status_error = models.CharField(max_length=64, blank=True, default="no_file", editable=False)
     is_published = models.BooleanField(default=False, db_index=True)
     published_at = models.DateTimeField(null=True, blank=True)
@@ -83,6 +90,9 @@ class Book(UUIDModel, TimeStampedModel):
 
 
 class BookPage(UUIDModel):
+    """ESKI: sahifa rasmlari (fonda tayyorlangan kitoblar). Yangi kitoblar uchun yaratilmaydi; eski
+    yozuvlar o'chirilmaydi (yozuvlar eskizi va eksport ularni hali ishlatadi)."""
+
     book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name="pages")
     number = models.PositiveIntegerField()
     image = models.FileField(upload_to="book-pages/", storage=covers_storage)

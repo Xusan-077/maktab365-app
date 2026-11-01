@@ -1534,18 +1534,13 @@
       "untitled": "Untitled",
       "statusLabel": "Status",
       "status": {
-        "processing": "Processing",
         "ready": "Ready",
         "failed": "Failed",
         "noFile": "No PDF uploaded"
       },
-      "progress": "{done} / {total} pages",
-      "progressLabel": "Preparing pages",
       "errors": {
         "no_file": "No PDF uploaded.",
-        "invalid_pdf": "The PDF is damaged or cannot be opened. Upload another file.",
-        "render_failed": "Preparing the pages failed.",
-        "timeout": "Preparing took too long. Press Prepare again."
+        "invalid_pdf": "The PDF is damaged or cannot be opened. Upload another file."
       },
       "form": {
         "newTitle": "New book",
@@ -1577,11 +1572,9 @@
         "replace": "Replace PDF",
         "uploading": "Uploading… {percent}%",
         "cancel": "Cancel",
-        "uploaded": "PDF uploaded. Pages are being prepared.",
+        "uploaded": "PDF uploaded and checked.",
         "ready": "{pages} pages · {size}",
-        "reprocess": "Prepare again",
-        "reprocessStarted": "Pages are being prepared again.",
-        "hint": "PDF only. Pages are converted to WebP images, which can take a few minutes.",
+        "hint": "PDF only, up to 200 MB. Page count and cover are detected automatically after upload.",
         "notPdf": "Choose a PDF file."
       },
       "cover": {
@@ -2919,7 +2912,7 @@
         "count": "{count} pages found",
         "none": "Nothing found for “{query}”.",
         "error": "Search failed. Try again.",
-        "unavailable": "This book has no text layer (scanned), so search isn't available.",
+        "unavailable": "Search is not available in this book (scanned, no text layer).",
         "result": "Page {page}"
       },
       "look": {

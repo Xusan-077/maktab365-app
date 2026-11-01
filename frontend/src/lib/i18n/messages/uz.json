@@ -1534,18 +1534,13 @@
       "untitled": "Nomsiz",
       "statusLabel": "Holat",
       "status": {
-        "processing": "Tayyorlanmoqda",
         "ready": "Tayyor",
         "failed": "Xato",
         "noFile": "PDF yuklanmagan"
       },
-      "progress": "{done} / {total} bet",
-      "progressLabel": "Sahifalar tayyorlanmoqda",
       "errors": {
         "no_file": "PDF yuklanmagan.",
-        "invalid_pdf": "PDF fayl buzilgan yoki ochilmadi. Boshqa fayl yuklang.",
-        "render_failed": "Sahifalarni tayyorlashda xato bo'ldi.",
-        "timeout": "Tayyorlash juda uzoq cho'zildi. Qayta tayyorlashni bosing."
+        "invalid_pdf": "PDF fayl buzilgan yoki ochilmadi. Boshqa fayl yuklang."
       },
       "form": {
         "newTitle": "Yangi kitob",
@@ -1577,11 +1572,9 @@
         "replace": "PDF almashtirish",
         "uploading": "Yuklanmoqda… {percent}%",
         "cancel": "Bekor qilish",
-        "uploaded": "PDF yuklandi. Sahifalar tayyorlanmoqda.",
+        "uploaded": "PDF yuklandi va tekshirildi.",
         "ready": "{pages} bet · {size}",
-        "reprocess": "Qayta tayyorlash",
-        "reprocessStarted": "Sahifalar qayta tayyorlanmoqda.",
-        "hint": "Faqat PDF. Sahifalar WebP rasmga aylantiriladi, bu bir necha daqiqa olishi mumkin.",
+        "hint": "Faqat PDF, 200 MB gacha. Yuklangach sahifalar soni va muqova avtomatik aniqlanadi.",
         "notPdf": "Faqat PDF fayl tanlang."
       },
       "cover": {
@@ -2919,7 +2912,7 @@
         "count": "{count} ta bet topildi",
         "none": "«{query}» topilmadi.",
         "error": "Qidirib bo'lmadi. Qayta urinib ko'ring.",
-        "unavailable": "Bu kitobda matn qatlami yo'q (skanerlangan), shuning uchun qidiruv ishlamaydi.",
+        "unavailable": "Bu kitobda qidiruv mavjud emas (skanerlangan, matn qatlami yo'q).",
         "result": "{page}-bet"
       },
       "look": {

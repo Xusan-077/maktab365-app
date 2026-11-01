@@ -1,21 +1,23 @@
 "use client";
 
 import { useEffect, useMemo, useRef, type PointerEvent } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { FileText, RotateCw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { bookQueries } from "@/lib/books/queries";
-import { pagesToPrefetch, toParagraphs, type BookReaderPrefs } from "@/lib/books/reader";
+import { usePageText } from "@/lib/books/pdf-page";
+import { toParagraphs, type BookReaderPrefs } from "@/lib/books/reader";
+import type { PDFDocumentProxy } from "@/lib/pdf/pdfjs";
 import { swipeDirection } from "@/lib/pdf/swipe";
 import { cn } from "@/lib/utils/cn";
 import { BAR_INSET } from "./reader-styles";
 
 export interface TextViewProps {
-  bookId: string;
+  /** PDF.js hujjati; yuklanguncha `null`. */
+  doc: PDFDocumentProxy | null;
+  docError: boolean;
+  onReload: () => void;
   page: number;
-  total: number;
   prefs: Pick<BookReaderPrefs, "font" | "fontSize" | "lineHeight">;
   onStep: (direction: 1 | -1) => void;
   onTap: () => void;
@@ -23,22 +25,27 @@ export interface TextViewProps {
 }
 
 /**
- * Badiiy kitobning matnli rejimi: bet matni (PDF matn qatlamidan), tanlangan shrift, hajm va qator
- * oralig'i bilan. Keyingi 2 betning matni oldindan yuklanadi.
+ * Badiiy kitobning matnli rejimi: bet matni PDF'ning o'zidan (PDF.js matn qatlami), tanlangan
+ * shrift, hajm va qator oralig'i bilan. Matn qatlami yo'q betda — "matn yo'q" va rasmli ko'rinishga
+ * o'tish tugmasi.
  */
-export function TextView({ bookId, page, total, prefs, onStep, onTap, onShowPage }: TextViewProps) {
+export function TextView({
+  doc,
+  docError,
+  onReload,
+  page,
+  prefs,
+  onStep,
+  onTap,
+  onShowPage,
+}: TextViewProps) {
   const t = useTranslations("books.reader");
-  const queryClient = useQueryClient();
   const scroller = useRef<HTMLDivElement>(null);
   const swipeStart = useRef<{ x: number; y: number; at: number } | null>(null);
-  const query = useQuery(bookQueries.pageText(bookId, page));
-  const paragraphs = useMemo(() => toParagraphs(query.data?.text ?? ""), [query.data]);
-
-  useEffect(() => {
-    for (const next of pagesToPrefetch(page, total)) {
-      void queryClient.prefetchQuery(bookQueries.pageText(bookId, next));
-    }
-  }, [bookId, page, total, queryClient]);
+  const query = usePageText(doc, page);
+  const paragraphs = useMemo(() => toParagraphs(query.text), [query.text]);
+  const loading = query.status === "loading" && !docError;
+  const failed = query.status === "error" || docError;
 
   useEffect(() => {
     scroller.current?.scrollTo({ top: 0 });
@@ -78,9 +85,9 @@ export function TextView({ bookId, page, total, prefs, onStep, onTap, onShowPage
           prefs.font === "serif" ? "font-book" : "font-sans",
         )}
         style={{ fontSize: prefs.fontSize, lineHeight: prefs.lineHeight }}
-        aria-busy={query.isPending}
+        aria-busy={loading}
       >
-        {query.isPending && (
+        {loading && (
           <div className="flex flex-col gap-3" role="status" aria-label={t("pageLoading")}>
             {Array.from({ length: 9 }, (_, index) => (
               <Skeleton
@@ -91,17 +98,24 @@ export function TextView({ bookId, page, total, prefs, onStep, onTap, onShowPage
           </div>
         )}
 
-        {query.isError && (
+        {failed && (
           <div role="alert" className="text-bk-muted flex flex-col items-start gap-3 text-base">
             {t("textError")}
-            <Button variant="secondary" size="sm" onClick={() => void query.refetch()}>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                if (docError) onReload();
+                else query.retry();
+              }}
+            >
               <RotateCw className="size-4" aria-hidden />
               {t("retry")}
             </Button>
           </div>
         )}
 
-        {query.isSuccess && paragraphs.length === 0 && (
+        {query.status === "ready" && paragraphs.length === 0 && (
           <div className="text-bk-muted flex flex-col items-start gap-3 font-sans text-base">
             <FileText className="size-7" aria-hidden />
             <p>

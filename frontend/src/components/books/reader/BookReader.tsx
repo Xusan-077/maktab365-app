@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useLibraryBookDocument } from "@/components/pdf/usePdfDocument";
 import { useAnnotationLoader } from "@/hooks/useAnnotationLoader";
 import { useAnnotationSync } from "@/hooks/useAnnotationSync";
 import { useAuth } from "@/hooks/useAuth";
@@ -14,7 +15,7 @@ import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { useToast } from "@/hooks/useToast";
 import type { AnnotationTool } from "@/lib/books/annotations";
 import type { SheetState } from "@/lib/books/workspace";
-import type { BookDetail, BookPage } from "@/lib/books/api";
+import type { BookDetail } from "@/lib/books/api";
 import { currentChapter, effectiveView, stepPage } from "@/lib/books/reader";
 import { clampPage, parsePageParam } from "@/lib/pdf/page-nav";
 import { clampZoom, DEFAULT_ZOOM, MAX_ZOOM } from "@/lib/pdf/zoom";
@@ -52,16 +53,16 @@ function isTyping(target: EventTarget | null): boolean {
 
 export interface BookReaderProps {
   book: BookDetail;
-  pages: readonly BookPage[];
 }
 
 /**
- * Kitob o'qish oynasi: bet rasmi (yoki matnli rejim), tepa/pastki panel (o'zi yashiriladi),
- * mundarija + xatcho'plar, kitob ichida qidirish, zoom, to'liq ekran, klaviatura va swipe.
- * Oxirgi bet avtomatik saqlanadi (kirgan — server, mehmon — brauzer); URL'da `?bet=N`.
+ * Kitob o'qish oynasi: PDF.js bilan chizilgan bet (yoki matnli rejim), tepa/pastki panel (o'zi
+ * yashiriladi), mundarija + xatcho'plar, kitob ichida qidirish, zoom, to'liq ekran, klaviatura va
+ * swipe. Oxirgi bet avtomatik saqlanadi (kirgan — server, mehmon — brauzer); URL'da `?bet=N`.
  */
-export function BookReader({ book, pages }: BookReaderProps) {
-  const total = pages.length;
+export function BookReader({ book }: BookReaderProps) {
+  const pdf = useLibraryBookDocument(book.id);
+  const total = pdf.doc?.numPages ?? book.page_count;
   const searchParams = useSearchParams();
   const root = useRef<HTMLDivElement>(null);
   const pageScroller = useRef<HTMLDivElement>(null);
@@ -124,19 +125,25 @@ export function BookReader({ book, pages }: BookReaderProps) {
   const canRedo = useBookAnnotationsStore(selectCanRedo(currentPage));
   const notesOpen = isDesktop ? workspace.notesOpen : sheet !== "closed";
 
-  const hasText = pages.some((item) => item.has_text);
+  // Matn qatlami: backend yuklashda aniqlaydi (`null` — eski yozuv, noma'lum: mavjud deb olinadi).
+  const hasText = book.has_text_layer !== false;
+  const [highlight, setHighlight] = useState("");
   const activeView = effectiveView(view, hasText);
   const { save } = progress;
 
   const go = useCallback(
-    (target: number) => {
+    (target: number, term = "") => {
       setChosen(clampPage(target, total));
       setZoom(DEFAULT_ZOOM);
+      setHighlight(term);
     },
     [total],
   );
   const step = useCallback(
-    (direction: 1 | -1) => setChosen((current) => stepPage(current ?? 1, total, direction)),
+    (direction: 1 | -1) => {
+      setChosen((current) => stepPage(current ?? 1, total, direction));
+      setHighlight("");
+    },
     [total],
   );
   const changeZoom = useCallback((value: number) => {
@@ -288,9 +295,10 @@ export function BookReader({ book, pages }: BookReaderProps) {
       <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
         {activeView === "text" ? (
           <TextView
-            bookId={book.id}
+            doc={pdf.doc}
+            docError={Boolean(pdf.error)}
+            onReload={pdf.reload}
             page={page}
-            total={total}
             prefs={{ font, fontSize, lineHeight }}
             onStep={step}
             onTap={chrome.toggle}
@@ -299,8 +307,13 @@ export function BookReader({ book, pages }: BookReaderProps) {
         ) : (
           <PageView
             title={book.title}
-            pages={pages}
+            doc={pdf.doc}
+            docLoading={pdf.loading}
+            docError={Boolean(pdf.error)}
+            onReload={pdf.reload}
             page={page}
+            total={total}
+            highlight={highlight}
             zoom={zoom}
             onZoomChange={changeZoom}
             onStep={step}
@@ -429,7 +442,7 @@ export function BookReader({ book, pages }: BookReaderProps) {
       <FindDialog
         open={findOpen}
         onOpenChange={setFindOpen}
-        bookId={book.id}
+        doc={pdf.doc}
         searchable={hasText}
         onGo={go}
       />

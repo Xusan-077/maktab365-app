@@ -28,10 +28,10 @@ import { libraryQueries } from "@/lib/library/admin-queries";
 import { formatDate } from "@/lib/utils/format-date";
 import { useLocale } from "next-intl";
 import type { Locale } from "@/lib/i18n/config";
-import { LibraryProgress, LibraryStatusBadge } from "./LibraryStatus";
+import { LibraryStatusBadge } from "./LibraryStatus";
 
 const ALL = "all";
-const STATUSES: AdminBookStatus[] = ["ready", "processing", "failed"];
+const STATUSES: AdminBookStatus[] = ["ready", "failed"];
 
 function BookRow({ book }: { book: AdminBook }) {
   const t = useTranslations("admin.library");
@@ -63,7 +63,6 @@ function BookRow({ book }: { book: AdminBook }) {
           <LibraryStatusBadge book={book} />
           <BookStatusBadge published={book.is_published} />
         </div>
-        <LibraryProgress book={book} className="max-w-xs" />
       </div>
       <Link
         href={adminLibraryBookPath(book.id)}

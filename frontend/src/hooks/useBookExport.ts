@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { getMyBooksApi, type PageEntry } from "@/lib/books/api";
+import { fetchPageImage } from "@/lib/books/page-image";
 import { parsedAnnotations } from "@/lib/books/entries";
 import {
   bookNotesMarkdown,
@@ -60,8 +61,8 @@ export function useBookExport(bookId: string, title: string, labels: BookExportL
         }
         setState({ status: "running", done: index, total: entries.length });
         const items = parsedAnnotations(entry);
-        if (!entry.image || items.length === 0) continue;
-        const image = await api.pageImage(bookId, entry.page);
+        if (items.length === 0) continue;
+        const image = await fetchPageImage(bookId, entry.page);
         files.push({
           name: pageFileName(title, entry.page, "png"),
           blob: await renderAnnotatedPage(image, items),
