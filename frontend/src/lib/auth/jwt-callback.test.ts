@@ -176,6 +176,60 @@ describe("refreshOnce", () => {
   });
 });
 
+describe("parallel so'rovlar + bir martalik refresh (rotation/blacklist)", () => {
+  beforeEach(() => resetRefreshStore());
+
+  /** Haqiqiy backend kabi: refresh bir marta ishlaydi, qayta kelsa 401 (`invalid`). */
+  function strictBackend() {
+    const used = new Set<string>();
+    const fresh = tokens("new-access", "new-refresh", NOW + 15 * MINUTE);
+    const refreshBackend = vi.fn(async (refresh: string): Promise<RefreshResult> => {
+      await Promise.resolve();
+      if (used.has(refresh)) return { ok: false, reason: "invalid" };
+      used.add(refresh);
+      return { ok: true, tokens: fresh };
+    });
+    return { refreshBackend, fresh };
+  }
+
+  it("muddati yaqin sessiya bilan parallel o'qishlar: bitta refresh, hech biri chiqarib yubormaydi", async () => {
+    const { refreshBackend, fresh } = strictBackend();
+    const d: JwtDeps = {
+      now: () => NOW,
+      refresh: (refresh) => refreshOnce(refresh, refreshBackend, () => NOW),
+      fetchMe: async () => me(),
+    };
+    // Access endi tugagan: refresh rad etilsa sessiya `null` (chiqish) bo'lardi.
+    const token = { ...session(NOW - 1), account: { ...session(0).account!, onboarded: true } };
+    const results = await Promise.all(Array.from({ length: 6 }, () => backendJwt({ token }, d)));
+    expect(refreshBackend).toHaveBeenCalledTimes(1);
+    for (const result of results) {
+      expect(result).not.toBeNull();
+      expect(result?.backend).toEqual(fresh);
+      expect(result?.error).toBeUndefined();
+    }
+  });
+
+  it("birinchi refreshdan keyin kelgan eski cookie'li so'rov ham yangi juftlikni oladi (60 s ichida)", async () => {
+    const { refreshBackend, fresh } = strictBackend();
+    let now = NOW;
+    const d: JwtDeps = {
+      now: () => now,
+      refresh: (refresh) => refreshOnce(refresh, refreshBackend, () => now),
+      fetchMe: async () => me(),
+    };
+    const token = {
+      ...session(NOW + MINUTE),
+      account: { ...session(0).account!, onboarded: true },
+    };
+    await backendJwt({ token }, d);
+    now += 5_000;
+    const late = await backendJwt({ token }, d);
+    expect(refreshBackend).toHaveBeenCalledTimes(1);
+    expect(late?.backend).toEqual(fresh);
+  });
+});
+
 describe("jwtExpiresAt", () => {
   it("exp claim'ni ms ga aylantiradi, buzuq token — 0", () => {
     expect(jwtExpiresAt(fakeJwt(NOW))).toBe(NOW);
