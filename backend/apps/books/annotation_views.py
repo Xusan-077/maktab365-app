@@ -137,6 +137,7 @@ class MyAnnotationsView(APIView):
         book = visible_book(request, pk)
         data = serializer.validated_data
         page = valid_page(book, data["page"])
+        validation.ensure_type_allowed(book, data["type"])
         annotation_id = data.get("id") or uuid.uuid4()
 
         existing = PageAnnotation.objects.filter(pk=annotation_id).first()
@@ -217,6 +218,8 @@ class MyPageAnnotationsView(APIView):
         book = visible_book(request, pk)
         page = valid_page(book, number)
         items = serializer.validated_data["annotations"]
+        for item in items:
+            validation.ensure_type_allowed(book, item["type"])
         validation.check_page_budget([validation.data_size(item["data"]) for item in items])
 
         user = request.user

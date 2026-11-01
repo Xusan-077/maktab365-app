@@ -1576,7 +1576,8 @@
         "ready": "{pages} pages · {size}",
         "hint": "PDF only, up to 200 MB. Page count and cover are detected automatically after upload.",
         "notPdf": "Choose a PDF file.",
-        "slowOpen": "This PDF is very large or has a non-standard structure, so it wasn't optimized for fast opening and pages may open slowly. Reduce its size (e.g. lower the image quality), re-save it and upload it again."
+        "slowOpen": "This PDF is very large or has a non-standard structure, so it wasn't optimized for fast opening and pages may open slowly. Reduce its size (e.g. lower the image quality), re-save it and upload it again.",
+        "processingTimeout": "Checking the file took too long: the PDF is too large. Reduce its size (e.g. lower image quality) and upload it again."
       },
       "cover": {
         "title": "Cover",
@@ -1610,6 +1611,44 @@
         "description": "“{title}” and all its pages will be removed. This cannot be undone.",
         "confirm": "Delete",
         "done": "Book deleted"
+      },
+      "answerKey": {
+        "title": "Answer key",
+        "needFile": "Upload the PDF first: the key is checked against the page count.",
+        "loading": "Loading…",
+        "count": "Questions entered: {count}",
+        "inputLabel": "Enter or add to the key",
+        "placeholder": "1, 1, A\n1, 2, C\n2, 1, B\n2, 2, 12.5",
+        "help": "One line per answer: page, question, answer (separated by comma, semicolon, tab or space). Letters A–E are choices; anything else is a text answer. Pages 1–{pages}. A header line and lines starting with # are skipped.",
+        "modeLabel": "How to save",
+        "mode": {
+          "replace": "Replace the whole key",
+          "merge": "Add to and update the current key"
+        },
+        "save": "Save key",
+        "load": "Load current key into the box",
+        "clear": "Clear key",
+        "saved": "Key saved: {count} lines, {total} questions in total.",
+        "cleared": "Key cleared.",
+        "clearTitle": "Clear the key?",
+        "clearDescription": "All questions and students' answers for this book are removed. Past results stay in their history.",
+        "clearConfirm": "Clear",
+        "errors": {
+          "lines": "Lines with errors: {count}. Nothing was saved.",
+          "line": "Line {line}: {reason}",
+          "more": "{count} more errors.",
+          "codes": {
+            "invalid_line": "wrong format (needs page, question, answer)",
+            "page_out_of_range": "the book has no such page",
+            "question_out_of_range": "question number must be 1–999",
+            "answer_empty": "empty answer",
+            "answer_too_long": "answer is too long",
+            "duplicate": "page and question repeated",
+            "too_many_rows": "too many lines",
+            "empty": "no lines entered",
+            "not_test_book": "the book type is not Test"
+          }
+        }
       }
     }
   },
@@ -2969,7 +3008,8 @@
         "pen": "Pen",
         "highlight": "Highlighter",
         "text": "Text",
-        "eraser": "Eraser"
+        "eraser": "Eraser",
+        "solution": "Worked solution"
       },
       "undo": "Undo",
       "redo": "Redo",
@@ -3010,7 +3050,8 @@
         "undo": "Ctrl+Z",
         "redo": "Ctrl+Shift+Z",
         "close": "Esc",
-        "notes": "N"
+        "notes": "N",
+        "solution": "Y"
       },
       "save": {
         "saving": "Saving…",
@@ -3030,7 +3071,9 @@
         "retry": "Try again",
         "close": "Close notes panel",
         "resize": "Panel width",
-        "handle": "Expand or collapse the notes panel"
+        "handle": "Expand or collapse the notes panel",
+        "tab": "Notes",
+        "tabs": "Notebook sections"
       }
     },
     "entries": {
@@ -3049,7 +3092,8 @@
         "highlight": "Highlights",
         "drawing": "Drawings",
         "text": "Text",
-        "bookmark": "Bookmarks"
+        "bookmark": "Bookmarks",
+        "solution": "Solution"
       },
       "colorLabel": "Highlight color",
       "reset": "Clear filters",
@@ -3062,7 +3106,8 @@
         "highlights": "{count, plural, one {# highlight} other {# highlights}}",
         "drawings": "{count, plural, one {# drawing} other {# drawings}}",
         "texts": "{count, plural, one {# text} other {# texts}}",
-        "bookmark": "Bookmark"
+        "bookmark": "Bookmark",
+        "solutions": "{count} solutions"
       },
       "recolor": "Change highlight color",
       "recolorFailed": "Couldn't change the color.",
@@ -3091,6 +3136,105 @@
         "pageHeading": "Page {page}",
         "texts": "Text on the page",
         "notesFile": "side-notes.md"
+      },
+      "solutionUntitled": "Problem {number}"
+    },
+    "math": {
+      "tab": "Solutions",
+      "dialog": {
+        "createTitle": "Page {page}: new solution",
+        "editTitle": "Page {page}: edit solution",
+        "titleLabel": "Problem number or name",
+        "titlePlaceholder": "For example: Problem 12",
+        "bodyLabel": "Solution",
+        "bodyPlaceholder": "Write your solution. Put formulas between $ signs: $x^2+1$",
+        "preview": "Preview",
+        "previewEmpty": "What you write appears here.",
+        "save": "Save",
+        "cancel": "Cancel",
+        "delete": "Delete solution"
+      },
+      "pad": {
+        "label": "Formula symbols",
+        "groups": {
+          "structure": "Operations",
+          "greek": "Greek letters"
+        },
+        "items": {
+          "fraction": "Fraction",
+          "root": "Square root",
+          "power": "Power",
+          "subscript": "Subscript",
+          "integral": "Integral",
+          "sum": "Sum",
+          "pm": "Plus-minus",
+          "leq": "Less than or equal",
+          "geq": "Greater than or equal",
+          "neq": "Not equal",
+          "alpha": "Alpha",
+          "beta": "Beta",
+          "gamma": "Gamma",
+          "delta": "Delta",
+          "theta": "Theta",
+          "lambda": "Lambda",
+          "pi": "Pi",
+          "sigma": "Sigma",
+          "phi": "Phi",
+          "omega": "Omega"
+        }
+      },
+      "panel": {
+        "guest": "Sign in to save solutions.",
+        "signIn": "Sign in",
+        "empty": "No solutions on page {page}. Use the Worked solution tool to box a problem, then write its solution.",
+        "list": "Solutions on page {page}",
+        "untitled": "Problem {number}",
+        "emptyBody": "No solution written yet.",
+        "edit": "Edit {title}"
+      }
+    },
+    "test": {
+      "tab": "Answers",
+      "answerLabel": "Answer to question {question}",
+      "choice": "Option {letter}",
+      "textPlaceholder": "Type the answer",
+      "quick": {
+        "label": "Quick answers for page {page}",
+        "previous": "Previous question",
+        "next": "Next question",
+        "question": "Question",
+        "openSheet": "Answer sheet: {answered} of {total} answered"
+      },
+      "panel": {
+        "guest": "Sign in to mark answers and check them.",
+        "signIn": "Sign in",
+        "loading": "Loading questions…",
+        "loadError": "Could not load the answer sheet.",
+        "retry": "Try again",
+        "noKey": "This test has no answer key yet, so it can't be checked.",
+        "progress": "{answered} of {total} answered",
+        "check": "Check answers",
+        "checkFailed": "Could not check. Please try again.",
+        "answerFailed": "Answer not saved. Check your connection and mark it again.",
+        "page": "Page {page}",
+        "history": "Attempt history",
+        "historyEmpty": "Not checked yet."
+      },
+      "result": {
+        "title": "Test result",
+        "percent": "{percent}%",
+        "wrongHeading": "Wrong: {count}",
+        "allCorrect": "All correct!",
+        "wrongHint": "Select a question to jump to its page.",
+        "where": "Page {page}, question {question}",
+        "notAnswered": "not answered",
+        "yourAnswer": "Your answer: {answer}",
+        "unansweredNote": "Unanswered questions count as wrong ({count}).",
+        "correctHeading": "Correct: {count}",
+        "short": "{page}/{question}",
+        "close": "Close",
+        "loading": "Loading result…",
+        "loadError": "Could not load the result."
       }
     }
   }

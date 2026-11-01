@@ -7,6 +7,7 @@ import {
   PenLine,
   Pencil,
   Redo2,
+  Sigma,
   Type,
   Undo2,
   X,
@@ -37,6 +38,10 @@ const TOOLS: { tool: ActiveTool; icon: LucideIcon }[] = [
   { tool: "eraser", icon: Eraser },
 ];
 
+/** Matematika kitob: «Misol yechimi» asbobi matn va o'chirgich orasida. */
+const SOLUTION_TOOL: { tool: ActiveTool; icon: LucideIcon } = { tool: "solution", icon: Sigma };
+const MATH_TOOLS = [...TOOLS.slice(0, 4), SOLUTION_TOOL, ...TOOLS.slice(4)];
+
 export interface ToolBarProps {
   tool: AnnotationTool;
   settings: DrawSettings;
@@ -44,6 +49,8 @@ export interface ToolBarProps {
   theme: BookTheme;
   canUndo: boolean;
   canRedo: boolean;
+  /** Matematika kitob: «Misol yechimi» asbobi ko'rinadi. */
+  mathMode?: boolean;
   /** Asboblar yig'iq turganda (panellar yashirilganda) ko'rinmaydi; asbob tanlangan bo'lsa doim ko'rinadi. */
   visible: boolean;
   onToolChange: (tool: AnnotationTool) => void;
@@ -122,6 +129,7 @@ export function ToolBar({
   theme,
   canUndo,
   canRedo,
+  mathMode = false,
   visible,
   onToolChange,
   onUndo,
@@ -250,7 +258,7 @@ export function ToolBar({
                 "flex max-w-full [scrollbar-width:none] items-center gap-0 overflow-x-auto p-0.5 lg:flex-col lg:gap-0.5 lg:overflow-visible lg:p-1",
               )}
             >
-              {TOOLS.map(({ tool: item, icon: Icon }) => (
+              {(mathMode ? MATH_TOOLS : TOOLS).map(({ tool: item, icon: Icon }) => (
                 <button
                   key={item}
                   type="button"

@@ -1576,7 +1576,8 @@
         "ready": "{pages} bet · {size}",
         "hint": "Faqat PDF, 200 MB gacha. Yuklangach sahifalar soni va muqova avtomatik aniqlanadi.",
         "notPdf": "Faqat PDF fayl tanlang.",
-        "slowOpen": "Bu PDF juda katta yoki tuzilmasi nostandart bo'lgani uchun tez ochish uchun optimallashtirilmadi: sahifalar sekin ochilishi mumkin. Rasm sifatini kamaytirib (hajmini qisqartirib) qayta saqlang va yangidan yuklang."
+        "slowOpen": "Bu PDF juda katta yoki tuzilmasi nostandart bo'lgani uchun tez ochish uchun optimallashtirilmadi: sahifalar sekin ochilishi mumkin. Rasm sifatini kamaytirib (hajmini qisqartirib) qayta saqlang va yangidan yuklang.",
+        "processingTimeout": "Faylni tekshirish vaqt chegarasidan oshdi: PDF juda katta. Rasm sifatini kamaytirib (hajmini qisqartirib) qayta yuklang."
       },
       "cover": {
         "title": "Muqova",
@@ -1610,6 +1611,44 @@
         "description": "«{title}» va uning barcha sahifalari o'chadi. Buni qaytarib bo'lmaydi.",
         "confirm": "O'chirish",
         "done": "Kitob o'chirildi"
+      },
+      "answerKey": {
+        "title": "Javoblar kaliti",
+        "needFile": "Avval PDF yuklang: kalit betlar soniga qarab tekshiriladi.",
+        "loading": "Yuklanmoqda…",
+        "count": "Kiritilgan savollar: {count}",
+        "inputLabel": "Kalitni kiriting yoki qo'shing",
+        "placeholder": "1, 1, A\n1, 2, C\n2, 1, B\n2, 2, 12,5",
+        "help": "Har qator: bet, savol, javob (vergul, nuqta-vergul, tab yoki bo'shliq bilan). Variant harfi A–E, boshqa javob matn bo'ladi. Bet 1–{pages}. Sarlavha qatori va # bilan boshlangan qatorlar o'tkaziladi.",
+        "modeLabel": "Saqlash usuli",
+        "mode": {
+          "replace": "Butun kalitni almashtirish",
+          "merge": "Mavjud kalitga qo'shish va yangilash"
+        },
+        "save": "Saqlash",
+        "load": "Hozirgi kalitni matnga yuklash",
+        "clear": "Kalitni tozalash",
+        "saved": "Kalit saqlandi: {count} ta qator, jami {total} ta savol.",
+        "cleared": "Kalit tozalandi.",
+        "clearTitle": "Kalit tozalansinmi?",
+        "clearDescription": "Barcha savollar va o'quvchilarning shu kitobdagi javoblari o'chadi. O'quvchilarning avvalgi natijalari tarixda qoladi.",
+        "clearConfirm": "Tozalash",
+        "errors": {
+          "lines": "Xato qatorlar: {count}. Hech narsa saqlanmadi.",
+          "line": "{line}-qator: {reason}",
+          "more": "Yana {count} ta xato bor.",
+          "codes": {
+            "invalid_line": "format noto'g'ri (bet, savol, javob kerak)",
+            "page_out_of_range": "bet raqami kitobda yo'q",
+            "question_out_of_range": "savol raqami 1–999 bo'lishi kerak",
+            "answer_empty": "javob bo'sh",
+            "answer_too_long": "javob juda uzun",
+            "duplicate": "bu bet va savol takrorlangan",
+            "too_many_rows": "qatorlar juda ko'p",
+            "empty": "kiritilgan qator yo'q",
+            "not_test_book": "bu kitob turi «test» emas"
+          }
+        }
       }
     }
   },
@@ -2969,7 +3008,8 @@
         "pen": "Qalam",
         "highlight": "Belgilash",
         "text": "Matn",
-        "eraser": "O'chirgich"
+        "eraser": "O'chirgich",
+        "solution": "Misol yechimi"
       },
       "undo": "Bekor qilish",
       "redo": "Qaytarish",
@@ -3010,7 +3050,8 @@
         "undo": "Ctrl+Z",
         "redo": "Ctrl+Shift+Z",
         "close": "Esc",
-        "notes": "N"
+        "notes": "N",
+        "solution": "Y"
       },
       "save": {
         "saving": "Saqlanmoqda…",
@@ -3030,7 +3071,9 @@
         "retry": "Qayta urinish",
         "close": "Yozuvlar panelini yopish",
         "resize": "Panel kengligi",
-        "handle": "Yozuvlar panelini kattalashtirish yoki kichraytirish"
+        "handle": "Yozuvlar panelini kattalashtirish yoki kichraytirish",
+        "tab": "Yozuv",
+        "tabs": "Yon daftar bo'limlari"
       }
     },
     "entries": {
@@ -3049,7 +3092,8 @@
         "highlight": "Belgilash",
         "drawing": "Chizma",
         "text": "Matn",
-        "bookmark": "Xatcho'p"
+        "bookmark": "Xatcho'p",
+        "solution": "Yechim"
       },
       "colorLabel": "Belgilash rangi",
       "reset": "Filtrlarni tozalash",
@@ -3062,7 +3106,8 @@
         "highlights": "{count} ta belgilash",
         "drawings": "{count} ta chizma",
         "texts": "{count} ta matn",
-        "bookmark": "Xatcho'p"
+        "bookmark": "Xatcho'p",
+        "solutions": "{count} ta yechim"
       },
       "recolor": "Belgilash rangini almashtirish",
       "recolorFailed": "Rangni almashtirib bo'lmadi.",
@@ -3091,6 +3136,105 @@
         "pageHeading": "{page}-bet",
         "texts": "Betdagi matnlar",
         "notesFile": "yon-daftar.md"
+      },
+      "solutionUntitled": "Misol {number}"
+    },
+    "math": {
+      "tab": "Yechimlar",
+      "dialog": {
+        "createTitle": "{page}-bet: yangi yechim",
+        "editTitle": "{page}-bet: yechimni tahrirlash",
+        "titleLabel": "Misol raqami yoki nomi",
+        "titlePlaceholder": "Masalan: 12-misol",
+        "bodyLabel": "Yechim",
+        "bodyPlaceholder": "Yechimni yozing. Formulalar $ belgilari orasida: $x^2+1$",
+        "preview": "Ko'rinishi",
+        "previewEmpty": "Yozganingiz shu yerda ko'rinadi.",
+        "save": "Saqlash",
+        "cancel": "Bekor qilish",
+        "delete": "Yechimni o'chirish"
+      },
+      "pad": {
+        "label": "Formula belgilari",
+        "groups": {
+          "structure": "Amallar",
+          "greek": "Yunon harflari"
+        },
+        "items": {
+          "fraction": "Kasr",
+          "root": "Ildiz",
+          "power": "Daraja",
+          "subscript": "Pastki indeks",
+          "integral": "Integral",
+          "sum": "Yig'indi",
+          "pm": "Plyus-minus",
+          "leq": "Kichik yoki teng",
+          "geq": "Katta yoki teng",
+          "neq": "Teng emas",
+          "alpha": "Alfa",
+          "beta": "Beta",
+          "gamma": "Gamma",
+          "delta": "Delta",
+          "theta": "Teta",
+          "lambda": "Lambda",
+          "pi": "Pi",
+          "sigma": "Sigma",
+          "phi": "Fi",
+          "omega": "Omega"
+        }
+      },
+      "panel": {
+        "guest": "Yechimlarni saqlash uchun hisobingizga kiring.",
+        "signIn": "Kirish",
+        "empty": "{page}-betda yechim yo'q. «Misol yechimi» asbobi bilan misolni to'rtburchakka oling va yechimini yozing.",
+        "list": "{page}-betdagi yechimlar",
+        "untitled": "Misol {number}",
+        "emptyBody": "Yechim hali yozilmagan.",
+        "edit": "{title}: tahrirlash"
+      }
+    },
+    "test": {
+      "tab": "Javoblar",
+      "answerLabel": "{question}-savol javobi",
+      "choice": "{letter} variant",
+      "textPlaceholder": "Javobni yozing",
+      "quick": {
+        "label": "{page}-bet savollariga tez javob",
+        "previous": "Oldingi savol",
+        "next": "Keyingi savol",
+        "question": "Savol",
+        "openSheet": "Javoblar varag'i: {answered} / {total} javob berildi"
+      },
+      "panel": {
+        "guest": "Javoblarni belgilash va tekshirish uchun hisobingizga kiring.",
+        "signIn": "Kirish",
+        "loading": "Savollar yuklanmoqda…",
+        "loadError": "Javoblar varag'ini yuklab bo'lmadi.",
+        "retry": "Qayta urinish",
+        "noKey": "Bu test uchun javoblar kaliti hali kiritilmagan, shuning uchun tekshirib bo'lmaydi.",
+        "progress": "{answered} / {total} savolga javob berildi",
+        "check": "Tekshirish",
+        "checkFailed": "Tekshirib bo'lmadi. Qayta urinib ko'ring.",
+        "answerFailed": "Javob saqlanmadi. Internetni tekshirib, qayta belgilang.",
+        "page": "{page}-bet",
+        "history": "Urinishlar tarixi",
+        "historyEmpty": "Hali tekshirilmagan."
+      },
+      "result": {
+        "title": "Test natijasi",
+        "percent": "{percent}%",
+        "wrongHeading": "Xatolar: {count}",
+        "allCorrect": "Hammasi to'g'ri!",
+        "wrongHint": "Savolni bossangiz, shu betga o'tasiz.",
+        "where": "{page}-bet, {question}-savol",
+        "notAnswered": "javob berilmagan",
+        "yourAnswer": "Javobingiz: {answer}",
+        "unansweredNote": "Javobsiz savollar xato hisoblanadi ({count} ta).",
+        "correctHeading": "To'g'ri javoblar: {count}",
+        "short": "{page}/{question}",
+        "close": "Yopish",
+        "loading": "Natija yuklanmoqda…",
+        "loadError": "Natijani yuklab bo'lmadi."
       }
     }
   }

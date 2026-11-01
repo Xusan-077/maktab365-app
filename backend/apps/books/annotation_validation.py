@@ -113,7 +113,46 @@ def clean_text(data: Any) -> dict:
     }
 
 
-CLEANERS = {"drawing": clean_drawing, "highlight": clean_highlight, "text": clean_text}
+SOLUTION_TITLE_MAX = 80
+SOLUTION_BODY_MAX = 4000
+
+
+def clean_solution(data: Any) -> dict:
+    """Misol yechimi: bet ustidagi to'rtburchak + sarlavha + matn (LaTeX `$...$` bilan)."""
+    data = _mapping(data)
+    rect = data.get("rect")
+    if not isinstance(rect, dict):
+        raise _fail("rect", "rect_required")
+    x = _number(rect.get("x"), 0, 1, "rect")
+    y = _number(rect.get("y"), 0, 1, "rect")
+    width = _number(rect.get("w"), 0, 1, "rect")
+    height = _number(rect.get("h"), 0, 1, "rect")
+    if width <= 0 or height <= 0 or x + width > 1.0001 or y + height > 1.0001:
+        raise _fail("rect", "out_of_range")
+    title = data.get("title", "")
+    body = data.get("body", "")
+    if not isinstance(title, str) or not isinstance(body, str):
+        raise _fail("body", "invalid_text")
+    title = title.strip()
+    if len(title) > SOLUTION_TITLE_MAX:
+        raise _fail("title", "title_too_long")
+    if len(body) > SOLUTION_BODY_MAX:
+        raise _fail("body", "text_too_long")
+    return {"rect": {"x": x, "y": y, "w": width, "h": height}, "title": title, "body": body}
+
+
+def ensure_type_allowed(book, annotation_type: str) -> None:
+    """Maxsus rejim turlari faqat o'z kitob turida: `solution` — faqat math kitobda."""
+    if annotation_type == "solution" and book.type != "math":
+        raise ValidationError({"type": ["solution_not_allowed"]})
+
+
+CLEANERS = {
+    "drawing": clean_drawing,
+    "highlight": clean_highlight,
+    "text": clean_text,
+    "solution": clean_solution,
+}
 
 
 def clean_data(annotation_type: str, data: Any) -> dict:

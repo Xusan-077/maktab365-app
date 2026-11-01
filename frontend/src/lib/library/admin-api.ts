@@ -9,8 +9,17 @@ export type AdminBookInput = Schemas["BookAdminRequest"];
 export type AdminBookPatch = Schemas["PatchedBookAdminRequest"];
 export type AdminBookType = Schemas["BookTypeEnum"];
 export type AdminBookStatus = Schemas["BookStatusEnum"];
+export type AnswerKeyRow = Schemas["AnswerKeyItem"];
+export type AnswerKeyMode = Schemas["AnswerKeyImportModeEnum"];
+export type AnswerKeySaved = Schemas["AnswerKeySaved"];
 
 export const LIBRARY_PAGE_SIZE = 20;
+
+/**
+ * PDF yuklash tugagach server faylni so'rov ichida tekshiradi (hajmga qarab o'nlab soniya):
+ * umumiy 10 s dan uzoq kutiladi (backend gunicorn timeout'i 180 s dan oshmasin).
+ */
+export const UPLOAD_COMPLETE_TIMEOUT_MS = 170_000;
 
 export interface LibraryListParams {
   page?: number;
@@ -26,7 +35,12 @@ export interface LibraryPage {
 
 /** Kutubxona (kitoblar bo'limi) admin API'si: faqat staff, brauzerda BFF orqali. */
 export class AdminLibraryApi {
-  constructor(private readonly client: HttpClient = createHttpClient()) {}
+  constructor(
+    private readonly client: HttpClient = createHttpClient(),
+    private readonly slowClient: HttpClient = createHttpClient({
+      timeoutMs: UPLOAD_COMPLETE_TIMEOUT_MS,
+    }),
+  ) {}
 
   async list(params: LibraryListParams = {}): Promise<LibraryPage> {
     const result = await this.client.GET("/api/v1/admin/books/", {
@@ -75,6 +89,29 @@ export class AdminLibraryApi {
     return unwrap(result);
   }
 
+  /** Test kitob: javoblar kaliti (faqat editor/admin ko'radi). */
+  async answerKey(id: string): Promise<AnswerKeyRow[]> {
+    return unwrap(
+      await this.client.GET("/api/v1/admin/books/{id}/answer-key/", { params: { path: { id } } }),
+    );
+  }
+
+  async importAnswerKey(id: string, text: string, mode: AnswerKeyMode): Promise<AnswerKeySaved> {
+    const result = await this.client.POST("/api/v1/admin/books/{id}/answer-key/import/", {
+      params: { path: { id } },
+      body: { text, mode },
+    });
+    return unwrap(result);
+  }
+
+  async clearAnswerKey(id: string): Promise<void> {
+    const result: { error?: unknown; response: Response } = await this.client.DELETE(
+      "/api/v1/admin/books/{id}/answer-key/",
+      { params: { path: { id } } },
+    );
+    if (result.error !== undefined) unwrap({ error: result.error, response: result.response });
+  }
+
   async initUpload(
     id: string,
     file: { name: string; size: number; type: string },
@@ -87,7 +124,7 @@ export class AdminLibraryApi {
   }
 
   async completeUpload(id: string, parts: PdfUploadPart[]): Promise<AdminBook> {
-    const result = await this.client.POST("/api/v1/admin/books/{id}/upload-complete/", {
+    const result = await this.slowClient.POST("/api/v1/admin/books/{id}/upload-complete/", {
       params: { path: { id } },
       body: { parts },
     });

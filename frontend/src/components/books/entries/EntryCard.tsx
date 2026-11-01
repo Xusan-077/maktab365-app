@@ -1,16 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { Bookmark, Highlighter, PenLine, Trash2, Type, type LucideIcon } from "lucide-react";
+import { Bookmark, Highlighter, PenLine, Sigma, Trash2, Type, type LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { Dialog } from "@/components/ui/Dialog";
 import { useEntryMutations } from "@/hooks/useEntryMutations";
 import { useToast } from "@/hooks/useToast";
 import type { PageEntry } from "@/lib/books/api";
-import { summarizeEntry } from "@/lib/books/entries";
+import { solutionsOf, summarizeEntry } from "@/lib/books/entries";
 import { Link } from "@/lib/i18n/navigation";
 import { bookReaderPath } from "@/lib/utils/routes";
+import { MathText } from "@/components/books/reader/modes/MathText";
 import { EntryThumb } from "./EntryThumb";
 import { HighlightColors } from "./HighlightColors";
 
@@ -26,6 +27,7 @@ export function EntryCard({ entry }: { entry: PageEntry }) {
   const { remove, recolor } = useEntryMutations();
   const [confirm, setConfirm] = useState(false);
   const summary = summarizeEntry(entry);
+  const solutions = solutionsOf(entry);
   const highlights = entry.annotations.filter((item) => item.type === "highlight");
   const color = summary.colors.length === 1 ? summary.colors[0] : null;
   const href = bookReaderPath(entry.book.id, entry.page);
@@ -37,6 +39,8 @@ export function EntryCard({ entry }: { entry: PageEntry }) {
     chips.push({ Icon: PenLine, text: t("counts.drawings", { count: summary.drawings }) });
   if (summary.texts > 0)
     chips.push({ Icon: Type, text: t("counts.texts", { count: summary.texts }) });
+  if (summary.solutions > 0)
+    chips.push({ Icon: Sigma, text: t("counts.solutions", { count: summary.solutions }) });
   if (summary.bookmarked) chips.push({ Icon: Bookmark, text: t("counts.bookmark") });
 
   function recolorAll(next: string) {
@@ -70,6 +74,24 @@ export function EntryCard({ entry }: { entry: PageEntry }) {
         </div>
         {summary.hasNote && (
           <p className="text-foreground line-clamp-4 text-sm whitespace-pre-line">{entry.note}</p>
+        )}
+        {solutions.length > 0 && (
+          <ul aria-label={t("types.solution")} className="flex flex-col gap-2">
+            {solutions.map((solution, index) => (
+              <li
+                key={solution.id}
+                data-entry-solution={solution.id}
+                className="border-border bg-subtle rounded-lg border px-3 py-2 text-sm"
+              >
+                <p className="font-semibold">
+                  {solution.title || t("solutionUntitled", { number: index + 1 })}
+                </p>
+                {solution.body.trim() && (
+                  <MathText text={solution.body} className="mt-1 line-clamp-6" />
+                )}
+              </li>
+            ))}
+          </ul>
         )}
         {chips.length > 0 && (
           <ul className="text-muted flex flex-wrap gap-x-3 gap-y-1 text-xs">

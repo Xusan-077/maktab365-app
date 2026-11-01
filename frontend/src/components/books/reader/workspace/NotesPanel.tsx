@@ -1,12 +1,22 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { RotateCw, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { usePageNote } from "@/hooks/usePageNote";
 import { NOTE_MAX_LENGTH } from "@/lib/books/annotations";
 import { BK_ICON_BUTTON, withKey } from "../reader-styles";
+import { cn } from "@/lib/utils/cn";
 import { SaveStatus } from "./SaveStatus";
+
+export interface NotesTab {
+  id: string;
+  label: string;
+  content: ReactNode;
+}
+
+export const NOTE_TAB = "note";
 
 export interface NotesPanelProps {
   bookId: string;
@@ -17,6 +27,10 @@ export interface NotesPanelProps {
   onRetrySave: () => void;
   /** Panelni yopish tugmasi (mobil sheet o'zining tutqichiga ega). */
   onClose?: () => void;
+  /** Maxsus rejim bo'limlari (yechimlar, javoblar varag'i): «Yozuv» yonida tablar sifatida. */
+  tabs?: readonly NotesTab[];
+  tab?: string;
+  onTabChange?: (id: string) => void;
 }
 
 function NoteEditor({
@@ -80,9 +94,14 @@ export function NotesPanel({
   onRequireAuth,
   onRetrySave,
   onClose,
+  tabs = [],
+  tab = NOTE_TAB,
+  onTabChange,
 }: NotesPanelProps) {
   const t = useTranslations("books.workspace.notes");
   const keys = useTranslations("books.workspace.keys");
+  const extra = tabs.find((item) => item.id === tab);
+  const allTabs: NotesTab[] = [{ id: NOTE_TAB, label: t("tab"), content: null }, ...tabs];
 
   return (
     <section aria-label={t("title")} className="bg-bk-bar text-bk-ink flex min-h-0 flex-1 flex-col">
@@ -103,13 +122,51 @@ export function NotesPanel({
           </button>
         )}
       </header>
-      <NoteEditor
-        key={page}
-        bookId={bookId}
-        page={page}
-        signedIn={signedIn}
-        onRequireAuth={onRequireAuth}
-      />
+      {tabs.length > 0 && (
+        <div
+          role="tablist"
+          aria-label={t("tabs")}
+          className="border-bk-line flex gap-1 border-b px-2 py-1"
+        >
+          {allTabs.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              role="tab"
+              id={`notes-tab-${item.id}`}
+              aria-selected={(extra?.id ?? NOTE_TAB) === item.id}
+              aria-controls="notes-tabpanel"
+              onClick={() => onTabChange?.(item.id)}
+              className={cn(
+                "h-9 rounded-lg px-3 text-sm font-medium transition-colors",
+                (extra?.id ?? NOTE_TAB) === item.id
+                  ? "bg-bk-accent-soft text-bk-accent"
+                  : "text-bk-muted hover:bg-bk-accent-soft",
+              )}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      )}
+      <div
+        id="notes-tabpanel"
+        role={tabs.length > 0 ? "tabpanel" : undefined}
+        aria-labelledby={tabs.length > 0 ? `notes-tab-${extra?.id ?? NOTE_TAB}` : undefined}
+        className="flex min-h-0 flex-1 flex-col"
+      >
+        {extra ? (
+          extra.content
+        ) : (
+          <NoteEditor
+            key={page}
+            bookId={bookId}
+            page={page}
+            signedIn={signedIn}
+            onRequireAuth={onRequireAuth}
+          />
+        )}
+      </div>
     </section>
   );
 }

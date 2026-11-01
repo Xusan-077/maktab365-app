@@ -23,7 +23,7 @@ from apps.core.permissions import IsLearner
 from .models import AnnotationType, Book, Bookmark, BookPage, BookStatus, PageAnnotation, PageNote
 
 TAGS = ["books"]
-ENTRY_TYPES = ("note", "highlight", "drawing", "text", "bookmark")
+ENTRY_TYPES = ("note", "highlight", "drawing", "text", "solution", "bookmark")
 DEFAULT_PAGE_SIZE = 20
 MAX_PAGE_SIZE = 50
 MAX_QUERY_LENGTH = 100
@@ -116,7 +116,7 @@ def _allowed_sources(filters: dict) -> set[str]:
     if filters["color"]:
         allowed &= {"highlight"}
     if filters["q"]:
-        allowed &= {"note", "text"}
+        allowed &= {"note", "text", "solution"}
     return allowed
 
 
@@ -141,7 +141,7 @@ def entry_keys(user, filters: dict) -> dict[Key, object]:
             notes = notes.filter(text__icontains=filters["q"])
         collect(notes, "updated_at")
     annotations = PageAnnotation.objects.filter(user=user)
-    for kind in ("highlight", "drawing", "text"):
+    for kind in ("highlight", "drawing", "text", "solution"):
         if kind not in allowed:
             continue
         rows = annotations.filter(type=kind)
@@ -149,6 +149,10 @@ def entry_keys(user, filters: dict) -> dict[Key, object]:
             rows = rows.filter(data__color__iexact=filters["color"])
         if kind == "text" and filters["q"]:
             rows = rows.filter(data__text__icontains=filters["q"])
+        if kind == "solution" and filters["q"]:
+            rows = rows.filter(
+                Q(data__body__icontains=filters["q"]) | Q(data__title__icontains=filters["q"])
+            )
         collect(rows, "updated_at")
     if "bookmark" in allowed:
         collect(Bookmark.objects.filter(user=user), "created_at")

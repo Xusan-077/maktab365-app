@@ -12,6 +12,7 @@ import { useBookProgress } from "@/hooks/useBookProgress";
 import { useFullscreen } from "@/hooks/useFullscreen";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
+import { useTestSheet } from "@/hooks/useTestSheet";
 import { useToast } from "@/hooks/useToast";
 import type { AnnotationTool } from "@/lib/books/annotations";
 import type { SheetState } from "@/lib/books/workspace";
@@ -34,9 +35,14 @@ import { ReaderBottomBar, ReaderTopBar } from "./ReaderBars";
 import { TextView } from "./TextView";
 import { TocDialog } from "./TocDialog";
 import { useIdleChrome } from "./useIdleChrome";
+import { AnswerSheetPanel } from "./modes/AnswerSheetPanel";
+import { QuickAnswerBar } from "./modes/QuickAnswerBar";
+import { SolutionDialog } from "./modes/SolutionDialog";
+import { SolutionList } from "./modes/SolutionList";
+import { useSolutionEditor } from "./modes/useSolutionEditor";
 import { AnnotationCanvas } from "./workspace/AnnotationCanvas";
 import { NotesAside } from "./workspace/NotesAside";
-import { NotesPanel } from "./workspace/NotesPanel";
+import { NOTE_TAB, NotesPanel, type NotesTab } from "./workspace/NotesPanel";
 import { NotesSheet } from "./workspace/NotesSheet";
 import { ToolBar } from "./workspace/ToolBar";
 
@@ -78,6 +84,7 @@ export function BookReader({ book }: BookReaderProps) {
   const setView = useBookReaderStore((state) => state.setView);
 
   const t = useTranslations("books.workspace");
+  const modeT = useTranslations("books");
   const { toast } = useToast();
   const { signedIn } = useAuth();
   const requireAuth = useRequireAuth();
@@ -87,6 +94,11 @@ export function BookReader({ book }: BookReaderProps) {
   const selectedId = useBookAnnotationsStore((state) => state.selectedId);
   const drawMode = tool !== "none";
   const [sheet, setSheet] = useState<SheetState>("closed");
+  // Kitob turiga xos rejimlar: faqat `math` va `test`; boshqa turlar o'zgarmaydi.
+  const mathMode = book.type === "math";
+  const testMode = book.type === "test";
+  const [notesTab, setNotesTab] = useState<string>(NOTE_TAB);
+  const testSheet = useTestSheet(book.id, testMode && signedIn);
 
   const [tocOpen, setTocOpen] = useState(false);
   const [tocTab, setTocTab] = useState<"contents" | "bookmarks">("contents");
@@ -207,6 +219,16 @@ export function BookReader({ book }: BookReaderProps) {
     pageScroller.current?.scrollBy({ left: dx, top: dy });
   }, []);
   const notifyLimit = useCallback(() => toast({ variant: "error", title: t("limit") }), [toast, t]);
+  const solutions = useSolutionEditor({
+    items: pageItems,
+    onCommit: commitItems,
+    onLimit: notifyLimit,
+  });
+  const openAnswerSheet = useCallback(() => {
+    setNotesTab("answers");
+    if (isDesktop) workspace.setNotesOpen(true);
+    else setSheet((state) => (state === "closed" ? "half" : state));
+  }, [isDesktop, workspace]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -243,6 +265,7 @@ export function BookReader({ book }: BookReaderProps) {
       else if (!textView && lower === "p") chooseTool("pen");
       else if (!textView && lower === "h") chooseTool("highlight");
       else if (!textView && lower === "t") chooseTool("text");
+      else if (!textView && mathMode && lower === "y") chooseTool("solution");
       else if (!textView && lower === "e") chooseTool("eraser");
       else if (!textView && lower === "v") chooseTool("select");
       else if (drawMode && key === "Escape") chooseTool("none");
@@ -272,6 +295,7 @@ export function BookReader({ book }: BookReaderProps) {
     findOpen,
     drawMode,
     textView,
+    mathMode,
     selectedId,
     currentPage,
     chooseTool,
@@ -342,6 +366,7 @@ export function BookReader({ book }: BookReaderProps) {
                   onZoomChange={changeZoom}
                   onPan={panPage}
                   onLimit={notifyLimit}
+                  onSolution={mathMode ? solutions.start : undefined}
                 />
               ) : null
             }
@@ -377,6 +402,17 @@ export function BookReader({ book }: BookReaderProps) {
           onGo={go}
         />
 
+        {testMode && !textView && signedIn && testSheet.sheet && (
+          <QuickAnswerBar
+            sheet={testSheet.sheet}
+            page={page}
+            answers={testSheet.answers}
+            progress={testSheet.progress}
+            onOpenSheet={openAnswerSheet}
+            onAnswer={testSheet.setAnswer}
+          />
+        )}
+
         {!textView && (
           <ToolBar
             tool={tool}
@@ -391,6 +427,7 @@ export function BookReader({ book }: BookReaderProps) {
             theme={theme}
             canUndo={canUndo}
             canRedo={canRedo}
+            mathMode={mathMode}
             visible={chrome.visible}
             onToolChange={chooseTool}
             onUndo={undo}
@@ -405,8 +442,43 @@ export function BookReader({ book }: BookReaderProps) {
       </div>
 
       {(() => {
+        const tabs: NotesTab[] = [];
+        if (mathMode) {
+          tabs.push({
+            id: "solutions",
+            label: modeT("math.tab"),
+            content: (
+              <SolutionList
+                page={page}
+                items={pageItems}
+                signedIn={signedIn}
+                onEdit={(id) => solutions.start({ kind: "edit", id })}
+                onRequireAuth={() => requireAuth(undefined, "note")}
+              />
+            ),
+          });
+        }
+        if (testMode) {
+          tabs.push({
+            id: "answers",
+            label: modeT("test.tab"),
+            content: (
+              <AnswerSheetPanel
+                bookId={book.id}
+                signedIn={signedIn}
+                sheet={testSheet}
+                page={page}
+                onGoPage={go}
+                onRequireAuth={() => requireAuth(undefined, "note")}
+              />
+            ),
+          });
+        }
         const panel = (
           <NotesPanel
+            tabs={tabs}
+            tab={notesTab}
+            onTabChange={setNotesTab}
             bookId={book.id}
             page={page}
             signedIn={signedIn}
@@ -428,6 +500,17 @@ export function BookReader({ book }: BookReaderProps) {
         );
       })()}
 
+      {mathMode && (
+        <SolutionDialog
+          open={solutions.open !== null}
+          editing={solutions.open?.id != null}
+          initial={solutions.open?.draft ?? { title: "", body: "" }}
+          page={page}
+          onSave={solutions.save}
+          onDelete={solutions.remove}
+          onClose={solutions.close}
+        />
+      )}
       <TocDialog
         open={tocOpen}
         onOpenChange={setTocOpen}

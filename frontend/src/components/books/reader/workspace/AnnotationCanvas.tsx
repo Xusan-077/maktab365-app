@@ -26,6 +26,7 @@ import {
   hitAnnotation,
   type Annotation,
   type AnnotationTool,
+  type NormRect,
   type StrokePoint,
 } from "@/lib/books/annotations";
 import {
@@ -62,11 +63,16 @@ export interface AnnotationCanvasProps {
   onPan: (dx: number, dy: number) => void;
   /** Bet to'lib ketdi (`MAX_PER_PAGE`). */
   onLimit: () => void;
+  /** Matematika: yangi yechim maydoni chizildi yoki mavjudi bosildi. */
+  onSolution?: (target: SolutionTarget) => void;
 }
+
+export type SolutionTarget = { kind: "new"; rect: NormRect } | { kind: "edit"; id: string };
 
 type Gesture =
   | { kind: "pen"; id: number; points: StrokePoint[] }
   | { kind: "highlight"; id: number; from: [number, number]; to: [number, number] }
+  | { kind: "solution"; id: number; from: [number, number]; to: [number, number] }
   | { kind: "erase"; id: number; hit: Set<string> }
   | { kind: "text"; id: number }
   | {
@@ -97,6 +103,7 @@ const CURSORS: Record<AnnotationTool, string> = {
   pen: "crosshair",
   highlight: "crosshair",
   text: "text",
+  solution: "crosshair",
   eraser: "cell",
 };
 
@@ -118,6 +125,7 @@ export function AnnotationCanvas({
   onZoomChange,
   onPan,
   onLimit,
+  onSolution,
 }: AnnotationCanvasProps) {
   const t = useTranslations("books.workspace");
   const root = useRef<HTMLDivElement>(null);
@@ -161,6 +169,21 @@ export function AnnotationCanvas({
     } else if (current?.kind === "highlight") {
       const rect = rectFromDrag(current.from, current.to, 0);
       if (rect) drawHighlightRects(ctx, settings.highlightColor, [rect], size, theme);
+    } else if (current?.kind === "solution") {
+      const rect = rectFromDrag(current.from, current.to, 0);
+      if (rect) {
+        ctx.save();
+        ctx.strokeStyle = resolveColor("#3b82f6", theme);
+        ctx.lineWidth = 2;
+        ctx.setLineDash([6, 4]);
+        ctx.strokeRect(
+          rect.x * size.width,
+          rect.y * size.height,
+          rect.w * size.width,
+          rect.h * size.height,
+        );
+        ctx.restore();
+      }
     }
   }, [size, settings.penColor, settings.penWidth, settings.highlightColor, theme]);
 
@@ -252,6 +275,22 @@ export function AnnotationCanvas({
         }
         break;
       }
+      case "solution": {
+        const rect = rectFromDrag(current.from, [x, y]);
+        if (rect) {
+          onSolution?.({ kind: "new", rect });
+        } else {
+          const existing = topAnnotationAt(
+            items.filter((item) => item.type === "solution"),
+            x,
+            y,
+            aspect,
+            HIT_RADIUS,
+          );
+          if (existing) onSolution?.({ kind: "edit", id: existing.id });
+        }
+        break;
+      }
       case "erase": {
         setErasing(new Set());
         if (current.hit.size > 0) onCommit(items.filter((item) => !current.hit.has(item.id)));
@@ -329,10 +368,14 @@ export function AnnotationCanvas({
       gesture.current = { kind: "pen", id: event.pointerId, points: [[x, y, pressure]] };
     } else if (tool === "highlight") {
       gesture.current = { kind: "highlight", id: event.pointerId, from: [x, y], to: [x, y] };
+    } else if (tool === "solution") {
+      gesture.current = { kind: "solution", id: event.pointerId, from: [x, y], to: [x, y] };
     } else if (tool === "eraser") {
       const hit = new Set<string>();
       for (const item of items) {
-        if (hitAnnotation(item, x, y, aspect, ERASE_RADIUS)) hit.add(item.id);
+        // Yechim maydoni sirpanib o'chib ketmasin: u faqat «Tanlash» + Delete yoki tahrirlash oynasidan.
+        if (item.type !== "solution" && hitAnnotation(item, x, y, aspect, ERASE_RADIUS))
+          hit.add(item.id);
       }
       gesture.current = { kind: "erase", id: event.pointerId, hit };
       setErasing(hit);
@@ -385,12 +428,16 @@ export function AnnotationCanvas({
         const dx = (next[0] - last[0]) * size.width;
         const dy = (next[1] - last[1]) * size.height;
         if (Math.hypot(dx, dy) >= 0.6) current.points.push(next);
-      } else if (current.kind === "highlight") {
+      } else if (current.kind === "highlight" || current.kind === "solution") {
         current.to = [x, y];
       } else if (current.kind === "erase") {
         let added = false;
         for (const item of items) {
-          if (!current.hit.has(item.id) && hitAnnotation(item, x, y, aspect, ERASE_RADIUS)) {
+          if (
+            item.type !== "solution" &&
+            !current.hit.has(item.id) &&
+            hitAnnotation(item, x, y, aspect, ERASE_RADIUS)
+          ) {
             current.hit.add(item.id);
             added = true;
           }
@@ -458,6 +505,7 @@ export function AnnotationCanvas({
     const [x, y] = point(event);
     const target = topAnnotationAt(items, x, y, aspect, HIT_RADIUS);
     if (target?.type === "text") setEditing({ annotationId: target.id, ...target.data });
+    else if (target?.type === "solution") onSolution?.({ kind: "edit", id: target.id });
   };
 
   const selected = selectedId ? shown.find((item) => item.id === selectedId) : undefined;
@@ -514,6 +562,26 @@ export function AnnotationCanvas({
             }}
           >
             {item.data.text}
+          </div>
+        ) : null,
+      )}
+
+      {shown.map((item) =>
+        item.type === "solution" ? (
+          <div
+            key={item.id}
+            data-solution-box={item.id}
+            className="border-bk-accent/80 pointer-events-none absolute rounded-sm border-2 border-dashed"
+            style={{
+              left: `${item.data.rect.x * 100}%`,
+              top: `${item.data.rect.y * 100}%`,
+              width: `${item.data.rect.w * 100}%`,
+              height: `${item.data.rect.h * 100}%`,
+            }}
+          >
+            <span className="bg-bk-accent absolute -top-px -left-px max-w-full truncate rounded-br-md px-1.5 py-0.5 text-[0.6875rem] leading-tight font-semibold text-white">
+              {item.data.title || "∑"}
+            </span>
           </div>
         ) : null,
       )}

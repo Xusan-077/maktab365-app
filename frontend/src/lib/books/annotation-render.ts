@@ -4,6 +4,7 @@ import {
   type Annotation,
   type DrawingData,
   type NormRect,
+  type SolutionData,
   type StrokePoint,
   type TextData,
 } from "./annotations";
@@ -202,6 +203,37 @@ export function drawTextAnnotation(
   ctx.restore();
 }
 
+/** Misol yechimi maydoni: punktir ramka va burchakda sarlavha (kitobdagi ko'rinish bilan bir xil). */
+export function drawSolutionBox(
+  ctx: CanvasRenderingContext2D,
+  data: SolutionData,
+  size: CanvasSize,
+  theme: BookTheme,
+  fontFamily?: string,
+): void {
+  const { rect } = data;
+  const x = rect.x * size.width;
+  const y = rect.y * size.height;
+  const color = theme === "night" ? "#7aa2f7" : "#1f4fb8";
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = Math.max(1, size.width * 0.003);
+  ctx.setLineDash([size.width * 0.012, size.width * 0.008]);
+  ctx.strokeRect(x, y, rect.w * size.width, rect.h * size.height);
+  ctx.setLineDash([]);
+  const label = data.title || "∑";
+  const fontSize = Math.max(8, size.width * 0.026);
+  ctx.font = `600 ${fontSize}px ${fontFamily ?? "sans-serif"}`;
+  ctx.textBaseline = "top";
+  const padding = fontSize * 0.35;
+  const width = Math.min(rect.w * size.width, ctx.measureText(label).width + padding * 2);
+  ctx.fillStyle = color;
+  ctx.fillRect(x, y, width, fontSize + padding * 1.2);
+  ctx.fillStyle = "#ffffff";
+  ctx.fillText(label, x + padding, y + padding * 0.6, Math.max(0, width - padding * 2));
+  ctx.restore();
+}
+
 /** Barcha annotatsiyalarni tartib bilan (belgilash → chizma → matn) bitta canvas'ga chizadi. */
 export function renderAll(
   ctx: CanvasRenderingContext2D,
@@ -221,5 +253,8 @@ export function renderAll(
   for (const item of items) if (item.type === "drawing") drawStroke(ctx, item.data, size, theme);
   for (const item of items) {
     if (item.type === "text") drawTextAnnotation(ctx, item.data, size, theme, fontFamily);
+  }
+  for (const item of items) {
+    if (item.type === "solution") drawSolutionBox(ctx, item.data, size, theme, fontFamily);
   }
 }

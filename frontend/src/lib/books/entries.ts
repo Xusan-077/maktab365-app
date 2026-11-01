@@ -8,6 +8,7 @@ export const ENTRY_TYPES = [
   "highlight",
   "drawing",
   "text",
+  "solution",
   "bookmark",
 ] as const satisfies readonly PageEntryType[];
 export type EntryType = (typeof ENTRY_TYPES)[number];
@@ -106,6 +107,7 @@ export interface EntrySummary {
   highlights: number;
   drawings: number;
   texts: number;
+  solutions: number;
   hasNote: boolean;
   bookmarked: boolean;
   /** Belgilash ranglari (takrorsiz, birinchi uchragan tartibda). */
@@ -122,18 +124,21 @@ export function summarizeEntry(entry: PageEntry): EntrySummary {
   let highlights = 0;
   let drawings = 0;
   let texts = 0;
+  let solutions = 0;
   for (const item of entry.annotations) {
     if (item.type === "highlight") {
       highlights += 1;
       const color = highlightColorOf(item.data);
       if (color && !colors.includes(color)) colors.push(color);
     } else if (item.type === "drawing") drawings += 1;
+    else if (item.type === "solution") solutions += 1;
     else texts += 1;
   }
   return {
     highlights,
     drawings,
     texts,
+    solutions,
     hasNote: entry.note.trim() !== "",
     bookmarked: entry.bookmarked,
     colors,
@@ -143,6 +148,19 @@ export function summarizeEntry(entry: PageEntry): EntrySummary {
 /** Yozuvda hech narsa qolmadimi (ro'yxatdan olib tashlanadi). */
 export function isEntryEmpty(entry: PageEntry): boolean {
   return entry.annotations.length === 0 && entry.note.trim() === "" && !entry.bookmarked;
+}
+
+export interface EntrySolution {
+  id: string;
+  title: string;
+  body: string;
+}
+
+/** Betdagi misol yechimlari (matematika kitob), yaratilish tartibida. */
+export function solutionsOf(entry: PageEntry): EntrySolution[] {
+  return parseAnnotations(entry.annotations).flatMap((item) =>
+    item.type === "solution" ? [{ id: item.id, title: item.data.title, body: item.data.body }] : [],
+  );
 }
 
 export const parsedAnnotations = (entry: PageEntry): Annotation[] =>

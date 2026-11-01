@@ -190,6 +190,8 @@ class AnnotationType(models.TextChoices):
     DRAWING = "drawing", "Chizma"
     HIGHLIGHT = "highlight", "Belgilash"
     TEXT = "text", "Matn"
+    # Faqat math kitoblar: misolga bog'langan yechim maydoni (to'rtburchak + sarlavha + LaTeX matn).
+    SOLUTION = "solution", "Misol yechimi"
 
 
 class PageAnnotation(UUIDModel, TimeStampedModel):
@@ -210,3 +212,68 @@ class PageAnnotation(UUIDModel, TimeStampedModel):
 
     def __str__(self):
         return f"{self.user_id}/{self.book_id}/{self.page}/{self.type}"
+
+
+class AnswerKeyItem(UUIDModel):
+    """Test kitobining to'g'ri javobi (admin kiritadi): bet + savol raqami bo'yicha bitta.
+
+    Foydalanuvchiga HECH QACHON yuborilmaydi: tekshirish faqat serverda (`testmode.grade`).
+    """
+
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name="answer_key")
+    page = models.PositiveIntegerField(validators=[MinValueValidator(1)])
+    question = models.PositiveIntegerField(validators=[MinValueValidator(1)])
+    answer = models.CharField(max_length=120)
+
+    class Meta:
+        ordering = ["page", "question"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["book", "page", "question"], name="books_key_once_per_question"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.book_id}/{self.page}/{self.question}"
+
+
+class SheetAnswer(UUIDModel, TimeStampedModel):
+    """Foydalanuvchining javob varag'idagi javobi (bet + savol bo'yicha bitta, qoralama)."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="book_sheet_answers"
+    )
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name="sheet_answers")
+    page = models.PositiveIntegerField(validators=[MinValueValidator(1)])
+    question = models.PositiveIntegerField(validators=[MinValueValidator(1)])
+    answer = models.CharField(max_length=120)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "book", "page", "question"], name="books_sheet_once_per_question"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.user_id}/{self.book_id}/{self.page}/{self.question}"
+
+
+class AnswerAttempt(UUIDModel):
+    """Tekshirish urinishi: ball va har savol uchun to'g'ri/xato (kalitning o'zi saqlanmaydi)."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="book_attempts"
+    )
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name="attempts")
+    created_at = models.DateTimeField(auto_now_add=True)
+    score = models.PositiveIntegerField()
+    total = models.PositiveIntegerField()
+    results = models.JSONField(default=list)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [models.Index(fields=["user", "book", "-created_at"])]
+
+    def __str__(self):
+        return f"{self.user_id}/{self.book_id}: {self.score}/{self.total}"

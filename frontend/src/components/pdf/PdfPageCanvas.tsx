@@ -140,7 +140,9 @@ export function PdfPageCanvas({
           canvas.width = source.width;
           canvas.height = source.height;
           canvas.style.width = `${Math.floor(css.width)}px`;
-          canvas.style.height = `${Math.floor(css.height)}px`;
+          // Balandlik kasr qoladi: annotatsiya qatlami aynan shu qutiga (eni*nisbat) tayanadi; floor
+          // pastga qarab 1 px gacha (zoomda ko'proq) siljish berardi.
+          canvas.style.height = `${css.height}px`;
           canvas.getContext("2d")?.drawImage(source, 0, 0);
           canvas.dataset.drawn = "true";
           return true;

@@ -88,9 +88,21 @@ ham to'liq yuklaydi; adminning "Fast Web View" bilan yuklagan fayli ham shu yerd
   qpdf — Apache-2.0 (ikkalasi ham tijoriy loyihada xavfsiz; pdfium BSD/Apache, o'zgarmagan).
 - Eski kitoblar qayta yozilmagan (`is_optimized=false`): ularni adminda PDF'ni qayta yuklab optimallashtirish mumkin.
 
-Tekshiruv yuklash tugagach **so'rov ichida** (sinxron) bajariladi: gunicorn `--timeout 60` — juda katta
-(~150 MB+) skaner PDF'larda vaqt yetmasligi mumkin; shunday kitoblar bo'lsa `BOOK_PDF_MAX_BYTES` ni kamaytiring
-yoki gunicorn timeout'ni oshiring.
+Katta PDF yuklash: fayl baytlari brauzerdan **to'g'ridan-to'g'ri R2'ga** (multipart) ketadi — gunicorn'dan
+o'tmaydi, shuning uchun hajm uni to'xtatmaydi. Faqat yuklash tugagach `upload-complete` so'rovi ichida
+(sinxron) tekshiruv bajariladi: R2'dan yuklab olish, pdfium bilan tahlil, pikepdf bilan qayta yozish va
+qayta yuklash. Katta skaner PDF'da bu 60 soniyadan oshishi mumkin, shuning uchun:
+
+- gunicorn timeout — `GUNICORN_TIMEOUT` (standart **180** s, `backend/Dockerfile`). Railway'da
+  o'zgartirish shart emas; ko'proq kerak bo'lsa env orqali oshiring.
+- Brauzer so'rovi `upload-complete` uchun 170 s kutadi (boshqa so'rovlarda 10 s); undan oshsa admin
+  «Tekshiruv uzoq davom etdi, sahifani yangilab ko'ring» xabarini ko'radi (kitob holati yangilanishda ko'rinadi).
+- Chegaralar: `BOOK_PDF_MAX_BYTES` (200 MiB) — undan kattasi rad etiladi; `BOOK_OPTIMIZE_MAX_BYTES` (120 MiB)
+  dan kattasi qayta yozilmaydi (faqat tekshiriladi), shuning uchun eng og'ir ish ham chegaralangan.
+
+Nega aynan shu: signed-upload allaqachon bor, shuning uchun alohida navbat/fon ishchi (worker) qo'shish
+murakkablik beradi; timeout + hajm chegarasi eng oddiy va ishonchli yechim. 200 MiB dan katta fayllar kerak
+bo'lsa, tekshiruvni Celery'ga ko'chirish keyingi qadam.
 
 ### R2 CORS (PDF bucket) — **majburiy**
 
@@ -159,3 +171,11 @@ Ularni alohida ishga tushirish shart emas: backend'ning Railway pre-deploy'i (`s
 | Yuklashda `invalid_pdf` / `pdf_encrypted`          | PDF buzilgan yoki parol bilan himoyalangan      | Boshqa fayl yuklang / parolni olib tashlang              |
 | Muqova saytda 403                                  | `COVERS_*` env yo'q — rasmlar private bucket'da | `COVERS_BUCKET_NAME` va `COVERS_S3_CUSTOM_DOMAIN`        |
 | Brauzerda PDF yuklash to'xtaydi (R2)               | Bucket CORS'ida `PUT` / `ETag` yo'q             | R2 CORS'ni yuqoridagicha sozlang                         |
+
+## 5-bosqich: kitob turiga xos rejimlar (`math`, `test`)
+
+- Migratsiya `books.0006_books_modes` (yangi jadvallar: `AnswerKeyItem`, `SheetAnswer`, `AnswerAttempt`;
+  `PageAnnotation.type` ga `solution`). Mavjud ma'lumotga tegmaydi; `migrate` yetarli.
+- Test kitobda javoblar kaliti adminda (kitob tahriri → «Javoblar kaliti») kiritiladi. Kalit foydalanuvchiga
+  hech qachon yuborilmaydi: faqat savollar ro'yxati va tekshirishdan keyin har savol uchun to'g'ri/xato.
+- Yangi env yo'q; `katex` — frontend bog'liqligi (allaqachon `package.json` da).

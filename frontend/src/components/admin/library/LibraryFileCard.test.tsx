@@ -3,10 +3,14 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import type { AdminBook } from "@/lib/library/admin-api";
+import { ApiError } from "@/lib/api/types";
 import uz from "@/lib/i18n/messages/uz.json";
 
+const upload = vi.hoisted(() => ({
+  state: { phase: "idle", progress: 0, error: null } as unknown,
+}));
 vi.mock("./useBookPdfUpload", () => ({
-  useBookPdfUpload: () => ({ state: { phase: "idle" }, run: vi.fn(), cancel: vi.fn() }),
+  useBookPdfUpload: () => ({ state: upload.state, run: vi.fn(), cancel: vi.fn() }),
 }));
 vi.mock("@/components/admin/useAdminErrorText", () => ({ useAdminErrorText: () => () => "" }));
 vi.mock("@/hooks/useToast", () => ({ useToast: () => ({ toast: vi.fn() }) }));
@@ -33,7 +37,10 @@ function setup(value: AdminBook) {
   );
 }
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  upload.state = { phase: "idle", progress: 0, error: null };
+});
 
 describe("LibraryFileCard: sekin ochilish ogohlantirishi", () => {
   it("linearize qilinmagan katta PDF uchun ogohlantirish ko'rsatadi", () => {
@@ -44,5 +51,14 @@ describe("LibraryFileCard: sekin ochilish ogohlantirishi", () => {
   it("ogohlantirish bo'lmasa ko'rsatmaydi", () => {
     setup(book());
     expect(screen.queryByRole("status")).toBeNull();
+  });
+
+  it("tekshiruv vaqti tugasa (timeout yoki 504) katta fayl haqida aniq xabar beradi", () => {
+    for (const error of [new ApiError("x", 0, { code: "timeout" }), new ApiError("x", 504)]) {
+      upload.state = { phase: "error", progress: 0, error };
+      setup(book());
+      expect(screen.getByRole("alert").textContent).toBe(uz.admin.library.file.processingTimeout);
+      cleanup();
+    }
   });
 });

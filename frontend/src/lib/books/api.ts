@@ -15,7 +15,12 @@ export type ServerAnnotation = Schemas["PageAnnotation"];
 export type PageEntry = Schemas["PageEntry"];
 export type PageEntryList = Schemas["PageEntryList"];
 export type EntryBookCount = Schemas["EntryBookCount"];
-export type PageEntryType = "note" | "highlight" | "drawing" | "text" | "bookmark";
+export type PageEntryType = "note" | "highlight" | "drawing" | "text" | "solution" | "bookmark";
+export type AnswerSheet = Schemas["AnswerSheet"];
+export type AnswerSheetEntry = Schemas["AnswerSheetEntry"];
+export type AnswerSheetQuestion = Schemas["AnswerSheetQuestion"];
+export type AnswerAttemptSummary = Schemas["AnswerAttemptSummary"];
+export type AnswerAttemptDetail = Schemas["AnswerAttemptDetail"];
 export type BookType = Schemas["BookTypeEnum"];
 export type BookLanguage = Schemas["LanguageEnum"];
 
@@ -178,6 +183,48 @@ export class MyBooksApi {
       { params: { path: { id, annotation_id: annotationId } } },
     );
     if (result.error !== undefined) unwrap({ error: result.error, response: result.response });
+  }
+
+  /** Test kitob: savollar (kalitsiz) va mening javoblarim. */
+  async testSheet(id: string): Promise<AnswerSheet> {
+    const result = await this.client.GET("/api/v1/me/books/{id}/test/", {
+      params: { path: { id } },
+    });
+    return unwrap(result);
+  }
+
+  /** Bitta savolga javob (bo'sh javob — o'chirish). */
+  async saveTestAnswer(
+    id: string,
+    body: { page: number; question: number; answer: string },
+  ): Promise<AnswerSheetEntry> {
+    const result = await this.client.PUT("/api/v1/me/books/{id}/test/answer/", {
+      params: { path: { id } },
+      body,
+    });
+    return unwrap(result);
+  }
+
+  /** Tekshirish: server kalit bo'yicha ball hisoblaydi (kalit javobda yo'q). */
+  async checkTest(id: string): Promise<AnswerAttemptDetail> {
+    const result = await this.client.POST("/api/v1/me/books/{id}/test/check/", {
+      params: { path: { id } },
+    });
+    return unwrap(result);
+  }
+
+  async testAttempts(id: string): Promise<AnswerAttemptSummary[]> {
+    const result = await this.client.GET("/api/v1/me/books/{id}/test/attempts/", {
+      params: { path: { id } },
+    });
+    return unwrap(result);
+  }
+
+  async testAttempt(id: string, attemptId: string): Promise<AnswerAttemptDetail> {
+    const result = await this.client.GET("/api/v1/me/books/{id}/test/attempts/{attempt_id}/", {
+      params: { path: { id, attempt_id: attemptId } },
+    });
+    return unwrap(result);
   }
 
   async removeBookmark(id: string, page: number): Promise<void> {

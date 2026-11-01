@@ -1038,6 +1038,50 @@ export interface paths {
         patch: operations["admin_books_update"];
         trace?: never;
     };
+    "/api/v1/admin/books/{id}/answer-key/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Test kitob: javoblar kaliti (faqat editor/admin)
+         * @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin.
+         */
+        get: operations["admin_books_answer_key"];
+        put?: never;
+        post?: never;
+        /**
+         * Kalitni to'liq o'chirish (foydalanuvchi javoblari ham tozalanadi)
+         * @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin.
+         */
+        delete: operations["admin_books_answer_key_clear"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/books/{id}/answer-key/import/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Kalitni ommaviy kiritish: har qator `bet, savol, javob`
+         * @description Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o'chirish — faqat admin.
+         */
+        post: operations["admin_books_answer_key_import"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/books/{id}/transition/": {
         parameters: {
             query?: never;
@@ -2139,6 +2183,91 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/books/{id}/test/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Test: savollar ro'yxati va mening javoblarim (kalitsiz) */
+        get: operations["me_books_test_sheet"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/books/{id}/test/answer/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Javob varag'iga javob yozish (idempotent; bo'sh javob o'chiradi) */
+        put: operations["me_books_test_answer"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/books/{id}/test/check/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Tekshirish: kalit bo'yicha ball (kalitning o'zi yuborilmaydi) */
+        post: operations["me_books_test_check"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/books/{id}/test/attempts/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Urinishlar tarixi (sana, ball), yangisi birinchi */
+        get: operations["me_books_test_attempts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/books/{id}/test/attempts/{attempt_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Bitta urinish: har savol uchun to'g'ri/xato */
+        get: operations["me_books_test_attempt"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2201,9 +2330,10 @@ export interface components {
          * @description * `drawing` - Chizma
          *     * `highlight` - Belgilash
          *     * `text` - Matn
+         *     * `solution` - Misol yechimi
          * @enum {string}
          */
-        AnnotationTypeEnum: "drawing" | "highlight" | "text";
+        AnnotationTypeEnum: "drawing" | "highlight" | "text" | "solution";
         /** @description PUT: belgi (`id` yo'lda, mijozda yaratilgan UUID). */
         AnnotationWriteRequest: {
             pdf_book_id: string;
@@ -2212,6 +2342,76 @@ export interface components {
             rects: components["schemas"]["AnnotationRectRequest"][];
             /** @default  */
             note: string;
+        };
+        AnswerAttemptDetail: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            created_at: string;
+            score: number;
+            total: number;
+            items: components["schemas"]["AnswerAttemptItem"][];
+        };
+        AnswerAttemptItem: {
+            page: number;
+            question: number;
+            correct: boolean;
+            given: string | null;
+        };
+        AnswerAttemptSummary: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            created_at: string;
+            score: number;
+            total: number;
+        };
+        /**
+         * @description * `replace` - replace
+         *     * `merge` - merge
+         * @enum {string}
+         */
+        AnswerKeyImportModeEnum: "replace" | "merge";
+        AnswerKeyImportRequest: {
+            text: string;
+            /** @default replace */
+            mode: components["schemas"]["AnswerKeyImportModeEnum"];
+        };
+        AnswerKeyItem: {
+            page: number;
+            question: number;
+            answer: string;
+        };
+        AnswerKeySaved: {
+            saved: number;
+            total: number;
+        };
+        AnswerSheet: {
+            questions: components["schemas"]["AnswerSheetQuestion"][];
+            /** @description Variantlar soni (A–D yoki A–E) */
+            choices: number;
+            answers: components["schemas"]["AnswerSheetEntry"][];
+        };
+        AnswerSheetEntry: {
+            page: number;
+            question: number;
+            answer: string;
+        };
+        AnswerSheetQuestion: {
+            page: number;
+            question: number;
+            kind: components["schemas"]["AnswerSheetQuestionKindEnum"];
+        };
+        /**
+         * @description * `choice` - choice
+         *     * `text` - text
+         * @enum {string}
+         */
+        AnswerSheetQuestionKindEnum: "choice" | "text";
+        AnswerSheetWriteRequest: {
+            page: number;
+            question: number;
+            answer: string;
         };
         Attempt: {
             /** Format: uuid */
@@ -2875,12 +3075,6 @@ export interface components {
             pdf_annotations: number;
             failed: string[];
         };
-        /**
-         * @description * `direct` - direct
-         *     * `proxy` - proxy
-         * @enum {string}
-         */
-        ModeEnum: "direct" | "proxy";
         /** @enum {unknown} */
         NullEnum: null;
         /**
@@ -3377,13 +3571,19 @@ export interface components {
             etag: string;
         };
         PdfUploadPlan: {
-            mode: components["schemas"]["ModeEnum"];
+            mode: components["schemas"]["PdfUploadPlanModeEnum"];
             /** @description direct: har bo'lak hajmi (oxirgisidan boshqa); fayl hajmiga qarab hisoblanadi, bo'laklar soni 10 000 dan oshmaydi */
             part_size: number;
             /** @description direct: har bo'lak uchun imzolangan PUT URL */
             part_urls: string[];
             expires_in: number;
         };
+        /**
+         * @description * `direct` - direct
+         *     * `proxy` - proxy
+         * @enum {string}
+         */
+        PdfUploadPlanModeEnum: "direct" | "proxy";
         Profile: {
             readonly display_name: string;
             /** Format: uri */
@@ -5772,6 +5972,82 @@ export interface operations {
             };
         };
     };
+    admin_books_answer_key: {
+        parameters: {
+            query?: {
+                /** @description Which field to use when ordering the results. */
+                ordering?: string;
+                /** @description A search term. */
+                search?: string;
+            };
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this book. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnswerKeyItem"][];
+                };
+            };
+        };
+    };
+    admin_books_answer_key_clear: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this book. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    admin_books_answer_key_import: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this book. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnswerKeyImportRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["AnswerKeyImportRequest"];
+                "multipart/form-data": components["schemas"]["AnswerKeyImportRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnswerKeySaved"];
+                };
+            };
+        };
+    };
     admin_books_transition: {
         parameters: {
             query?: never;
@@ -7577,7 +7853,7 @@ export interface operations {
                 /** @description Yon daftar va matn bo'yicha */
                 q?: string;
                 /** @description Yozuv turi */
-                type?: "bookmark" | "drawing" | "highlight" | "note" | "text";
+                type?: "bookmark" | "drawing" | "highlight" | "note" | "solution" | "text";
             };
             header?: never;
             path?: never;
@@ -7610,6 +7886,118 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EntryBookCount"][];
+                };
+            };
+        };
+    };
+    me_books_test_sheet: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnswerSheet"];
+                };
+            };
+        };
+    };
+    me_books_test_answer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnswerSheetWriteRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["AnswerSheetWriteRequest"];
+                "multipart/form-data": components["schemas"]["AnswerSheetWriteRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnswerSheetEntry"];
+                };
+            };
+        };
+    };
+    me_books_test_check: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnswerAttemptDetail"];
+                };
+            };
+        };
+    };
+    me_books_test_attempts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnswerAttemptSummary"][];
+                };
+            };
+        };
+    };
+    me_books_test_attempt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attempt_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnswerAttemptDetail"];
                 };
             };
         };

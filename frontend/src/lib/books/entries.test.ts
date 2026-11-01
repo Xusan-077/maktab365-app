@@ -117,6 +117,7 @@ describe("summarizeEntry / isEntryEmpty", () => {
           highlight("c", "#86efac"),
           { id: "d", type: "drawing", data: {}, updated_at: "" },
           { id: "t", type: "text", data: {}, updated_at: "" },
+          { id: "s", type: "solution", data: {}, updated_at: "" },
         ],
       }),
     );
@@ -124,6 +125,7 @@ describe("summarizeEntry / isEntryEmpty", () => {
       highlights: 3,
       drawings: 1,
       texts: 1,
+      solutions: 1,
       hasNote: true,
       bookmarked: true,
       colors: ["#fde047", "#86efac"],

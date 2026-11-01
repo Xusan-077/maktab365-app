@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { FileUp, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useAdminErrorText } from "@/components/admin/useAdminErrorText";
+import { ApiError } from "@/lib/api/types";
 import { Button } from "@/components/ui/Button";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { useToast } from "@/hooks/useToast";
@@ -32,6 +33,13 @@ export function LibraryFileCard({ book }: { book: AdminBook }) {
     }
     if (await upload.run(file)) toast({ variant: "success", title: t("file.uploaded") });
   }
+
+  /** Tekshiruv oynasi tugadi (timeout yoki 5xx shlyuz xatosi): fayl juda katta. */
+  const uploadErrorText = (error: unknown) =>
+    error instanceof ApiError &&
+    (error.code === "timeout" || error.status === 504 || error.status === 502)
+      ? t("file.processingTimeout")
+      : errorText(error);
 
   const failedCode = BOOK_ERRORS.find((code) => code === book.status_error);
 
@@ -81,7 +89,7 @@ export function LibraryFileCard({ book }: { book: AdminBook }) {
 
       {upload.state.phase === "error" && (
         <p role="alert" className="text-danger text-sm">
-          {errorText(upload.state.error)}
+          {uploadErrorText(upload.state.error)}
         </p>
       )}
 

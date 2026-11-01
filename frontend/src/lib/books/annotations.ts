@@ -10,7 +10,15 @@ import type { BookTheme } from "./reader";
 
 // --- Tiplar ---
 
-export const ANNOTATION_TOOLS = ["none", "select", "pen", "highlight", "text", "eraser"] as const;
+export const ANNOTATION_TOOLS = [
+  "none",
+  "select",
+  "pen",
+  "highlight",
+  "text",
+  "solution",
+  "eraser",
+] as const;
 export type AnnotationTool = (typeof ANNOTATION_TOOLS)[number];
 
 /** [x, y, bosim]; bosim 0..1 (sichqonchada 0.5). */
@@ -43,10 +51,18 @@ export interface TextData {
   size: number;
 }
 
+/** Matematika kitob: misolga bog'langan yechim maydoni (to'rtburchak + sarlavha + LaTeX matn). */
+export interface SolutionData {
+  rect: NormRect;
+  title: string;
+  body: string;
+}
+
 export type Annotation =
   | { id: string; type: "drawing"; data: DrawingData }
   | { id: string; type: "highlight"; data: HighlightData }
-  | { id: string; type: "text"; data: TextData };
+  | { id: string; type: "text"; data: TextData }
+  | { id: string; type: "solution"; data: SolutionData };
 
 export type AnnotationType = Annotation["type"];
 
@@ -63,6 +79,8 @@ export const MAX_STROKE_POINTS = 5000;
 export const MAX_PER_PAGE = 300;
 export const MAX_TEXT_LENGTH = 2000;
 export const NOTE_MAX_LENGTH = 20000;
+export const SOLUTION_TITLE_MAX = 80;
+export const SOLUTION_BODY_MAX = 4000;
 const DEFAULT_PRESSURE = 0.5;
 
 // --- Koordinatalar ---
@@ -216,6 +234,8 @@ export function annotationBounds(annotation: Annotation, aspect: number): NormRe
     }
     case "text":
       return textBounds(annotation.data, aspect);
+    case "solution":
+      return annotation.data.rect;
   }
 }
 
@@ -254,6 +274,8 @@ export function hitAnnotation(
       return annotation.data.rects.some((rect) => inside(x, y, rect, radius / 2));
     case "text":
       return inside(x, y, textBounds(annotation.data, aspect), radius / 2);
+    case "solution":
+      return inside(x, y, annotation.data.rect, radius / 2);
   }
 }
 
@@ -265,8 +287,13 @@ export function topAnnotationAt(
   aspect: number,
   radius: number,
 ): Annotation | null {
-  for (let index = annotations.length - 1; index >= 0; index -= 1) {
-    if (hitAnnotation(annotations[index], x, y, aspect, radius)) return annotations[index];
+  // Yechim maydoni katta to'rtburchak: ichidagi chizma/matn birinchi tanlanadi, maydon oxirida.
+  for (const solutions of [false, true]) {
+    for (let index = annotations.length - 1; index >= 0; index -= 1) {
+      const item = annotations[index];
+      if ((item.type === "solution") !== solutions) continue;
+      if (hitAnnotation(item, x, y, aspect, radius)) return item;
+    }
   }
   return null;
 }
@@ -311,6 +338,13 @@ export function moveAnnotation(
         ...annotation,
         data: { ...annotation.data, x: annotation.data.x + shiftX, y: annotation.data.y + shiftY },
       };
+    case "solution": {
+      const { rect } = annotation.data;
+      return {
+        ...annotation,
+        data: { ...annotation.data, rect: { ...rect, x: rect.x + shiftX, y: rect.y + shiftY } },
+      };
+    }
   }
 }
 
@@ -400,6 +434,14 @@ function parseRects(value: unknown): NormRect[] | null {
   return rects;
 }
 
+function parseSolution(id: string, data: unknown): Annotation | null {
+  if (!isRecord(data)) return null;
+  const rects = parseRects([data.rect]);
+  if (!rects || typeof data.body !== "string") return null;
+  const title = typeof data.title === "string" ? data.title : "";
+  return { id, type: "solution", data: { rect: rects[0], title, body: data.body } };
+}
+
 /** Server qatori → tipli annotatsiya; tuzilishi buzuq (yoki noma'lum tur) bo'lsa `null` (jim tashlanadi). */
 export function parseAnnotation(row: {
   id: string;
@@ -407,6 +449,7 @@ export function parseAnnotation(row: {
   data: unknown;
 }): Annotation | null {
   const data = row.data;
+  if (row.type === "solution") return parseSolution(row.id, data);
   if (!isRecord(data) || typeof data.color !== "string") return null;
   if (row.type === "drawing") {
     const points = parsePoints(data.points);

@@ -23,4 +23,4 @@ EXPOSE 8000
 
 # Prod (Railway): gunicorn. Dev'da docker-compose `command` bilan runserver ishlatiladi.
 # Worker servisi `celery -A config worker -l info` bilan (Start Command) almashtiradi.
-CMD ["sh", "-c", "exec gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers ${WEB_CONCURRENCY:-2} --timeout 60 --access-logfile -"]
+CMD ["sh", "-c", "exec gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers ${WEB_CONCURRENCY:-2} --timeout ${GUNICORN_TIMEOUT:-180} --access-logfile -"]
