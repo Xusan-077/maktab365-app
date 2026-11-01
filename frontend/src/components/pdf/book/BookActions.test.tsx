@@ -3,10 +3,8 @@ import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
-import { ApiError } from "@/lib/api/types";
 import uz from "@/lib/i18n/messages/uz.json";
 
-const api = vi.hoisted(() => ({ download: vi.fn() }));
 const progress = vi.hoisted(() => ({
   map: {} as Record<string, { page: number; status: null }>,
 }));
@@ -18,7 +16,6 @@ vi.mock("@/hooks/usePdfProgressMap", async () => {
       entry !== undefined && mergeReadStatus(entry.status, entry.page, total) === "read",
   };
 });
-vi.mock("@/lib/pdf-books/api", () => ({ getPdfBooksApi: () => api }));
 vi.mock("@/lib/i18n/navigation", () => ({
   Link: ({ href, children, ...rest }: { href: string; children: ReactNode }) => (
     <a href={href} {...rest}>
@@ -36,7 +33,6 @@ const props = {
   slug: "9-sinf-algebra",
   title: "Algebra",
   pageCount: 200,
-  allowDownload: true,
 };
 
 function setup(over: Partial<typeof props> = {}) {
@@ -77,40 +73,12 @@ describe("BookActions", () => {
     expect(screen.getByRole("link", { name: t.read })).toBeTruthy();
   });
 
-  it("yuklab olish: URL olinadi va fayl nomi bilan yuklash boshlanadi", async () => {
-    api.download.mockResolvedValue({
-      url: "https://r2.test/book.pdf?sig=1",
-      filename: "Algebra - 9-sinf - Darslik365.pdf",
-      expires_in: 600,
-    });
-    const click = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+  it("foydalanuvchi interfeysida yuklab olish tugmasi ham, havolasi ham yo'q", () => {
     setup();
-    fireEvent.click(screen.getByRole("button", { name: /PDF yuklab olish/ }));
-    await waitFor(() => expect(click).toHaveBeenCalled());
-    expect(api.download).toHaveBeenCalledWith("b1");
-    click.mockRestore();
-  });
-
-  it("yuklab olish o'chirilgan kitobda tugma yo'q, izoh bor", () => {
-    setup({ allowDownload: false });
-    expect(screen.queryByRole("button", { name: /PDF yuklab olish/ })).toBeNull();
-    expect(screen.getByText(t.downloadDisabled)).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /yuklab olish/i })).toBeNull();
+    expect(screen.queryByText(/yuklab olish/i)).toBeNull();
+    expect(document.querySelector("a[download]")).toBeNull();
     expect(screen.getByRole("link", { name: t.read })).toBeTruthy();
-  });
-
-  it("server 403 download_disabled qaytarsa izoh ko'rsatiladi, boshqa xatoda — xato", async () => {
-    api.download.mockRejectedValueOnce(
-      new ApiError("x", 403, { code: "download_disabled", requestId: "r" }),
-    );
-    setup();
-    fireEvent.click(screen.getByRole("button", { name: /PDF yuklab olish/ }));
-    expect(await screen.findByText(t.downloadDisabled)).toBeTruthy();
-    cleanup();
-
-    api.download.mockRejectedValueOnce(new ApiError("x", 500, { code: "server_error" }));
-    setup();
-    fireEvent.click(screen.getByRole("button", { name: /PDF yuklab olish/ }));
-    expect(await screen.findByText(t.downloadFailed)).toBeTruthy();
   });
 
   it("ulashish menyusi: Telegram havolasi va nusxalash", async () => {

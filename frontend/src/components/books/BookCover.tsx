@@ -3,14 +3,15 @@
 import { useState, type CSSProperties } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { BOOK_TYPE_GROUP } from "@/lib/books/filters";
-import type { BookType } from "@/lib/books/api";
 import { groupColor } from "@/lib/subject-colors";
 import { cn } from "@/lib/utils/cn";
 
 export interface BookCoverProps {
   title: string;
-  type: BookType;
+  /** Tur nomi (muqova zaxirasining yuqorisida). */
+  typeLabel: string;
+  /** Zaxira rangi guruhi (`bookGroup`). */
+  group: string;
   /** Muqova rasmi (WebP); yo'q yoki yuklanmasa tur rangidagi zaxira qoladi. */
   src?: string | null;
   /** Birinchi ekrandagi muqova (LCP): darrov yuklanadi. */
@@ -25,7 +26,8 @@ export interface BookCoverProps {
  */
 export function BookCover({
   title,
-  type,
+  typeLabel,
+  group,
   src,
   priority = false,
   sizes = "(min-width: 1024px) 200px, 45vw",
@@ -35,7 +37,7 @@ export function BookCover({
   const [failedSrc, setFailedSrc] = useState<string | null>(null);
   const showImage = Boolean(src) && failedSrc !== src;
   const fallbackStyle: CSSProperties = {
-    backgroundColor: groupColor(BOOK_TYPE_GROUP[type]).vars.color,
+    backgroundColor: groupColor(group).vars.color,
     color: "var(--on-group)",
   };
 
@@ -55,7 +57,7 @@ export function BookCover({
           aria-hidden
           className="pointer-events-none absolute inset-y-0 left-0 w-[6%] bg-black/15"
         />
-        <span className="relative text-xs font-semibold opacity-90">{t(`typeName.${type}`)}</span>
+        <span className="relative text-xs font-semibold opacity-90">{typeLabel}</span>
         <span className="relative line-clamp-5 text-lg leading-tight font-extrabold [overflow-wrap:anywhere]">
           {title}
         </span>
@@ -69,7 +71,9 @@ export function BookCover({
           priority={priority}
           sizes={sizes}
           onError={() => setFailedSrc(src)}
-          className="object-cover"
+          draggable={false}
+          onContextMenu={(event) => event.preventDefault()}
+          className="object-cover select-none"
         />
       )}
     </div>

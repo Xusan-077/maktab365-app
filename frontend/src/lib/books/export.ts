@@ -3,7 +3,7 @@ import { renderAll } from "./annotation-render";
 import type { PageEntry } from "./api";
 import { buildZip } from "./zip";
 
-/** Yozuvlarni yuklab olish: bet (PNG, annotatsiyalari bilan), yon daftar (.md), kitob (.zip). */
+/** Yozuvlarni yuklab olish: yon daftar (.md) va kitob yozuvlari (.zip: faqat annotatsiyalar, sahifa fonisiz). */
 
 /** Eksport rasmi eni chegarasi (px): katta sahifalar xotirani to'ldirmasin. */
 export const EXPORT_MAX_WIDTH = 2000;
@@ -73,31 +73,28 @@ export function bookNotesMarkdown(
   return parts.join("\n");
 }
 
-/** Sahifa rasmi + annotatsiyalar → PNG (brauzer canvas'i). */
-export async function renderAnnotatedPage(
-  image: Blob,
+/**
+ * Faqat foydalanuvchining o'z annotatsiyalari → shaffof PNG. Kitob sahifasi (fon) chizilmaydi:
+ * eksportdan kitobning betini olib bo'lmaydi.
+ */
+export async function renderAnnotationsOnly(
+  size: { width: number; height: number },
   items: readonly Annotation[],
   theme: "paper" | "sepia" | "night" = "paper",
 ): Promise<Blob> {
-  const bitmap = await createImageBitmap(image);
-  try {
-    const size = exportSize(bitmap.width, bitmap.height);
-    const canvas = document.createElement("canvas");
-    canvas.width = size.width;
-    canvas.height = size.height;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) throw new Error("canvas_unavailable");
-    ctx.drawImage(bitmap, 0, 0, size.width, size.height);
-    renderAll(ctx, items, size, theme, getComputedStyle(document.body).fontFamily);
-    return await new Promise<Blob>((resolve, reject) => {
-      canvas.toBlob(
-        (blob) => (blob ? resolve(blob) : reject(new Error("export_failed"))),
-        "image/png",
-      );
-    });
-  } finally {
-    bitmap.close();
-  }
+  const fitted = exportSize(size.width, size.height);
+  const canvas = document.createElement("canvas");
+  canvas.width = fitted.width;
+  canvas.height = fitted.height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("canvas_unavailable");
+  renderAll(ctx, items, fitted, theme, getComputedStyle(document.body).fontFamily);
+  return await new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => (blob ? resolve(blob) : reject(new Error("export_failed"))),
+      "image/png",
+    );
+  });
 }
 
 export function downloadBlob(blob: Blob, name: string): void {

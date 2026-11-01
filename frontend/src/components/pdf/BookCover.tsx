@@ -55,8 +55,10 @@ export function BookCover({
         loading={priority ? "eager" : "lazy"}
         decoding="async"
         fetchPriority={priority ? "high" : "auto"}
+        draggable={false}
+        onContextMenu={(event) => event.preventDefault()}
         onError={() => setFailedSrc(src)}
-        className="absolute inset-0 size-full rounded-md object-cover shadow-sm"
+        className="absolute inset-0 size-full rounded-md object-cover shadow-sm select-none"
       />
     </div>
   );

@@ -9,7 +9,7 @@ import {
 } from "@/lib/pdf/pdfjs";
 import { resolveFileUrl } from "@/lib/pdf/file-url";
 
-/** Eksport uchun bet rasmi eni (px): annotatsiyalar shu o'lchamda chiziladi. */
+/** Eksport rasmi eni (px): annotatsiyalar shu o'lchamda chiziladi. */
 export const EXPORT_PAGE_WIDTH = 1400;
 /** Xotirada shuncha kitob hujjati saqlanadi (eksport/eskizlar bir kitobni qayta-qayta ochmasin). */
 const DOC_CACHE_SIZE = 2;
@@ -95,7 +95,16 @@ export async function renderPageBlob(
   }
 }
 
-/** Bet rasmi (eksport uchun): bet PDF'ning o'zidan brauzerda chiziladi (serverda tayyor rasm yo'q). */
-export async function fetchPageImage(bookId: string, page: number): Promise<Blob> {
-  return renderPageBlob(await libraryDocument(bookId), page, EXPORT_PAGE_WIDTH);
+/**
+ * Bet nisbati (eksport uchun): faqat o'lcham — betning o'zi chizilmaydi, shuning uchun
+ * eksportda kitob sahifasi hech qachon bo'lmaydi.
+ */
+export async function fetchPageSize(
+  bookId: string,
+  page: number,
+): Promise<{ width: number; height: number }> {
+  const proxy = await (await libraryDocument(bookId)).getPage(page);
+  const natural = proxy.getViewport({ scale: 1 });
+  const scale = EXPORT_PAGE_WIDTH / natural.width;
+  return { width: EXPORT_PAGE_WIDTH, height: Math.round(natural.height * scale) };
 }

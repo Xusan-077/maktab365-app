@@ -21,13 +21,17 @@ export type AnswerSheetEntry = Schemas["AnswerSheetEntry"];
 export type AnswerSheetQuestion = Schemas["AnswerSheetQuestion"];
 export type AnswerAttemptSummary = Schemas["AnswerAttemptSummary"];
 export type AnswerAttemptDetail = Schemas["AnswerAttemptDetail"];
-export type BookType = Schemas["BookTypeEnum"];
+export type ReadingMode = Schemas["ReadingModeEnum"];
+/** Katalog turi (admin boshqaradi): tablar uchun, `book_count` — nashr qilinganlar soni. */
+export type BookTypeInfo = Schemas["BookType"];
+export type BookTypeRef = Schemas["BookTypeRef"];
 export type BookLanguage = Schemas["LanguageEnum"];
 
 export const BOOKS_PAGE_SIZE = 24;
 
 export interface BookFilters {
-  type?: BookType;
+  /** Tur slug'i (`badiiy-kitoblar`). */
+  type?: string;
   grade?: number;
   language?: BookLanguage;
   q?: string;
@@ -64,6 +68,19 @@ export class BooksApi {
 
   async book(id: string): Promise<BookDetail> {
     return unwrap(await this.client.GET("/api/v1/books/{id}/", { params: { path: { id } } }));
+  }
+
+  /** Kitob slug bo'yicha (`/kutubxona/<slug>`). */
+  async bookBySlug(slug: string): Promise<BookDetail> {
+    const result = await this.client.GET("/api/v1/books/by-slug/{slug}/", {
+      params: { path: { slug } },
+    });
+    return unwrap(result);
+  }
+
+  /** Faol turlar (tablar). */
+  async types(): Promise<BookTypeInfo[]> {
+    return unwrap(await this.client.GET("/api/v1/book-types/"));
   }
 
   /** PDF'ning qisqa muddatli o'qish URL'i (har ochilishda yangi; HTTP Range ishlaydi). */

@@ -1214,6 +1214,58 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/admin/pdf-books/{id}/cover-download/:
+    get:
+      operationId: admin_pdf_books_cover_download
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      summary: Muqovaning asl faylini yuklab olish (FAQAT admin)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this pdf book.
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /api/v1/admin/pdf-books/{id}/download/:
+    get:
+      operationId: admin_pdf_books_download
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      summary: PDF'ni yuklab olish URL'i (FAQAT admin; foydalanuvchilarda yuklab olish
+        yo'q)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this pdf book.
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PdfDownload'
+          description: ''
   /api/v1/admin/pdf-books/{id}/duplicate/:
     post:
       operationId: admin_pdf_books_duplicate
@@ -1916,6 +1968,178 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/admin/library/:
+    get:
+      operationId: admin_library_list
+      summary: 'Kutubxona: darsliklar va kitoblar bitta ro''yxatda (yangilari birinchi)'
+      parameters:
+      - in: query
+        name: page
+        schema:
+          type: integer
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+      - in: query
+        name: published
+        schema:
+          type: boolean
+      - in: query
+        name: q
+        schema:
+          type: string
+      - in: query
+        name: type
+        schema:
+          type: string
+        description: Tur slug'i; bo'sh — hammasi
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LibraryPage'
+          description: ''
+  /api/v1/admin/book-types/:
+    get:
+      operationId: admin_book_types_list
+      description: 'Katalog turlari: editor+admin yaratadi/tahrirlaydi, o''chirish
+        — admin (bo''sh va tizimsiz).'
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookTypeAdmin'
+          description: ''
+    post:
+      operationId: admin_book_types_create
+      description: 'Katalog turlari: editor+admin yaratadi/tahrirlaydi, o''chirish
+        — admin (bo''sh va tizimsiz).'
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookTypeAdminRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BookTypeAdminRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BookTypeAdminRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookTypeAdmin'
+          description: ''
+  /api/v1/admin/book-types/{id}/:
+    get:
+      operationId: admin_book_types_retrieve
+      description: 'Katalog turlari: editor+admin yaratadi/tahrirlaydi, o''chirish
+        — admin (bo''sh va tizimsiz).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this book type.
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookTypeAdmin'
+          description: ''
+    patch:
+      operationId: admin_book_types_update
+      description: 'Katalog turlari: editor+admin yaratadi/tahrirlaydi, o''chirish
+        — admin (bo''sh va tizimsiz).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this book type.
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBookTypeAdminRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBookTypeAdminRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBookTypeAdminRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookTypeAdmin'
+          description: ''
+    delete:
+      operationId: admin_book_types_delete
+      description: 'Katalog turlari: editor+admin yaratadi/tahrirlaydi, o''chirish
+        — admin (bo''sh va tizimsiz).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this book type.
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/v1/admin/books/:
     get:
       operationId: admin_books_list
@@ -1944,6 +2168,15 @@ paths:
         name: published
         schema:
           type: boolean
+      - in: query
+        name: reading_mode
+        schema:
+          type: string
+          enum:
+          - fiction
+          - math
+          - standard
+          - test
       - name: search
         required: false
         in: query
@@ -1962,12 +2195,7 @@ paths:
         name: type
         schema:
           type: string
-          enum:
-          - fiction
-          - math
-          - other
-          - test
-          - textbook
+        description: Tur slug'i
       tags:
       - admin
       security:
@@ -2178,6 +2406,58 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AnswerKeySaved'
+          description: ''
+  /api/v1/admin/books/{id}/cover-download/:
+    get:
+      operationId: admin_books_cover_download
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      summary: Muqovaning asl (katta) faylini yuklab olish (FAQAT admin)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this book.
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /api/v1/admin/books/{id}/download/:
+    get:
+      operationId: admin_books_download
+      description: 'Audit bilan CRUD: editor/admin yaratadi va tahrirlaydi, o''chirish
+        — faqat admin.'
+      summary: PDF'ni yuklab olish URL'i (FAQAT admin; foydalanuvchilarda yuklab olish
+        yo'q)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this book.
+        required: true
+      tags:
+      - admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PdfDownload'
           description: ''
   /api/v1/admin/books/{id}/transition/:
     post:
@@ -2536,32 +2816,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PdfBookDetail'
-          description: ''
-  /api/v1/pdf-books/{id}/download/:
-    get:
-      operationId: pdf_books_download
-      description: Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi
-        o'rniga kesh ishlaydi.
-      summary: Yuklab olish URL'i (`attachment`, chiroyli nom); yuklab olishlar soni
-        oshadi
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: string
-          format: uuid
-        required: true
-      tags:
-      - content
-      security:
-      - jwtAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PdfDownload'
           description: ''
   /api/v1/pdf-books/{id}/file-url/:
     get:
@@ -3709,15 +3963,19 @@ paths:
           type: string
         description: Nom yoki muallif bo'yicha
       - in: query
-        name: type
+        name: reading_mode
         schema:
           type: string
           enum:
           - fiction
           - math
-          - other
+          - standard
           - test
-          - textbook
+      - in: query
+        name: type
+        schema:
+          type: string
+        description: Tur slug'i (BookType)
       tags:
       - books
       security:
@@ -3729,6 +3987,50 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedBookList'
+          description: ''
+  /api/v1/book-types/:
+    get:
+      operationId: book_types_list
+      description: Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi
+        o'rniga kesh ishlaydi.
+      summary: Faol kitob turlari (nashr qilingan kitoblar soni bilan)
+      tags:
+      - books
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookType'
+          description: ''
+  /api/v1/books/by-slug/{slug}/:
+    get:
+      operationId: books_retrieve_by_slug
+      description: Ochiq (loginsiz) o'qish uchun umumiy sozlama; tezlik chegarasi
+        o'rniga kesh ishlaydi.
+      summary: Kitob tafsiloti (slug bo'yicha)
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - books
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookDetail'
           description: ''
   /api/v1/books/{id}/:
     get:
@@ -5005,15 +5307,23 @@ components:
           type: string
           format: uuid
           readOnly: true
+        slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
         title:
           type: string
           readOnly: true
         author:
           type: string
           readOnly: true
-        type:
+        book_type:
           allOf:
-          - $ref: '#/components/schemas/BookTypeEnum'
+          - $ref: '#/components/schemas/BookTypeRef'
+          readOnly: true
+        reading_mode:
+          allOf:
+          - $ref: '#/components/schemas/ReadingModeEnum'
           readOnly: true
         grade_level:
           type: integer
@@ -5037,14 +5347,16 @@ components:
           readOnly: true
       required:
       - author
+      - book_type
       - cover
       - created_at
       - grade_level
       - id
       - language
       - page_count
+      - reading_mode
+      - slug
       - title
-      - type
     BookAdmin:
       type: object
       properties:
@@ -5052,14 +5364,25 @@ components:
           type: string
           format: uuid
           readOnly: true
+        slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
         title:
           type: string
           maxLength: 255
         author:
           type: string
           maxLength: 255
-        type:
-          $ref: '#/components/schemas/BookTypeEnum'
+        book_type:
+          type: string
+          format: uuid
+        book_type_info:
+          allOf:
+          - $ref: '#/components/schemas/BookTypeInfo'
+          readOnly: true
+        reading_mode:
+          $ref: '#/components/schemas/ReadingModeEnum'
         grade_level:
           type: integer
           maximum: 11
@@ -5135,6 +5458,7 @@ components:
           readOnly: true
       required:
       - allowed_transitions
+      - book_type_info
       - cover_url
       - created_at
       - has_file
@@ -5146,6 +5470,7 @@ components:
       - page_count
       - published_at
       - size_bytes
+      - slug
       - status
       - status_error
       - title
@@ -5161,8 +5486,11 @@ components:
         author:
           type: string
           maxLength: 255
-        type:
-          $ref: '#/components/schemas/BookTypeEnum'
+        book_type:
+          type: string
+          format: uuid
+        reading_mode:
+          $ref: '#/components/schemas/ReadingModeEnum'
         grade_level:
           type: integer
           maximum: 11
@@ -5218,15 +5546,23 @@ components:
           type: string
           format: uuid
           readOnly: true
+        slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
         title:
           type: string
           readOnly: true
         author:
           type: string
           readOnly: true
-        type:
+        book_type:
           allOf:
-          - $ref: '#/components/schemas/BookTypeEnum'
+          - $ref: '#/components/schemas/BookTypeRef'
+          readOnly: true
+        reading_mode:
+          allOf:
+          - $ref: '#/components/schemas/ReadingModeEnum'
           readOnly: true
         grade_level:
           type: integer
@@ -5262,6 +5598,7 @@ components:
           nullable: true
       required:
       - author
+      - book_type
       - chapters
       - cover
       - created_at
@@ -5271,8 +5608,9 @@ components:
       - id
       - language
       - page_count
+      - reading_mode
+      - slug
       - title
-      - type
     BookPage:
       type: object
       properties:
@@ -5383,20 +5721,123 @@ components:
           $ref: '#/components/schemas/ToEnum'
       required:
       - to
-    BookTypeEnum:
-      enum:
-      - textbook
-      - fiction
-      - math
-      - test
-      - other
-      type: string
-      description: |-
-        * `textbook` - Darslik
-        * `fiction` - Badiiy kitob
-        * `math` - Matematika
-        * `test` - Test to'plami
-        * `other` - Boshqa
+    BookType:
+      type: object
+      description: 'Ochiq tur: katalog tablari (nom 3 tilda; uz-Cyrl frontendda o''giriladi).'
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          $ref: '#/components/schemas/LocalizedText'
+        order:
+          type: integer
+          readOnly: true
+        book_count:
+          type: integer
+          readOnly: true
+          default: 0
+      required:
+      - book_count
+      - id
+      - name
+      - order
+      - slug
+    BookTypeAdmin:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        slug:
+          type: string
+          maxLength: 120
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          $ref: '#/components/schemas/LocalizedText'
+        order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        is_active:
+          type: boolean
+        is_system:
+          type: boolean
+          readOnly: true
+        book_count:
+          type: integer
+          readOnly: true
+          default: 0
+      required:
+      - book_count
+      - id
+      - is_system
+      - name
+    BookTypeAdminRequest:
+      type: object
+      properties:
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 120
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          $ref: '#/components/schemas/LocalizedTextRequest'
+        order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        is_active:
+          type: boolean
+      required:
+      - name
+    BookTypeInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          $ref: '#/components/schemas/LocalizedText'
+      required:
+      - id
+      - name
+      - slug
+    BookTypeInfoRequest:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/LocalizedTextRequest'
+      required:
+      - name
+    BookTypeRef:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          $ref: '#/components/schemas/LocalizedText'
+      required:
+      - id
+      - name
+      - slug
     Bookmark:
       type: object
       properties:
@@ -6388,6 +6829,93 @@ components:
         * `uz` - Uzbek
         * `ru` - Russian
         * `en` - English
+    LibraryPage:
+      type: object
+      properties:
+        count:
+          type: integer
+        next:
+          type: string
+          nullable: true
+        previous:
+          type: string
+          nullable: true
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/LibraryRow'
+      required:
+      - count
+      - next
+      - previous
+      - results
+    LibraryRow:
+      type: object
+      properties:
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/LibraryRowKindEnum'
+          description: |-
+            `textbook` — PdfBook (maktab darsligi)
+
+            * `book` - book
+            * `textbook` - textbook
+        id:
+          type: string
+          format: uuid
+        slug:
+          type: string
+        title:
+          type: string
+        subtitle:
+          type: string
+        type_slug:
+          type: string
+        type_name:
+          $ref: '#/components/schemas/LocalizedText'
+        reading_mode:
+          type: string
+        grade:
+          type: integer
+          nullable: true
+        language:
+          type: string
+        cover:
+          type: string
+          nullable: true
+        page_count:
+          type: integer
+        is_published:
+          type: boolean
+        status:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - cover
+      - created_at
+      - grade
+      - id
+      - is_published
+      - kind
+      - language
+      - page_count
+      - reading_mode
+      - slug
+      - status
+      - subtitle
+      - title
+      - type_name
+      - type_slug
+    LibraryRowKindEnum:
+      enum:
+      - book
+      - textbook
+      type: string
+      description: |-
+        * `book` - book
+        * `textbook` - textbook
     LinkIdentityRequestRequest:
       oneOf:
       - $ref: '#/components/schemas/GoogleAuthRequest'
@@ -7049,8 +7577,11 @@ components:
         author:
           type: string
           maxLength: 255
-        type:
-          $ref: '#/components/schemas/BookTypeEnum'
+        book_type:
+          type: string
+          format: uuid
+        reading_mode:
+          $ref: '#/components/schemas/ReadingModeEnum'
         grade_level:
           type: integer
           maximum: 11
@@ -7067,6 +7598,22 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ChapterInputRequest'
+    PatchedBookTypeAdminRequest:
+      type: object
+      properties:
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 120
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          $ref: '#/components/schemas/LocalizedTextRequest'
+        order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        is_active:
+          type: boolean
     PatchedGoalWriteRequest:
       type: object
       description: 'POST: title (+ kitob, muddat). PATCH: istalgan maydon; `done`
@@ -7481,8 +8028,6 @@ components:
           format: uri
           nullable: true
           description: 600px WebP (kitob sahifasi); null bo'lsa `cover` ishlatiladi
-        allow_download:
-          type: boolean
         has_text_layer:
           type: boolean
           nullable: true
@@ -7493,7 +8038,6 @@ components:
           items:
             $ref: '#/components/schemas/PublicChapter'
       required:
-      - allow_download
       - chapters
       - cover
       - cover_large
@@ -8265,6 +8809,18 @@ components:
       description: |-
         * `in_progress` - In progress
         * `read` - Read
+    ReadingModeEnum:
+      enum:
+      - standard
+      - fiction
+      - math
+      - test
+      type: string
+      description: |-
+        * `standard` - Oddiy
+        * `fiction` - Badiiy kitob
+        * `math` - Matematika
+        * `test` - Test to'plami
     RecentMessage:
       type: object
       properties:

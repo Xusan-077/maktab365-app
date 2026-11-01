@@ -2,6 +2,8 @@
 
 from rest_framework import serializers
 
+from apps.content.serializers import LocalizedField
+
 from . import annotation_validation as validation
 from .models import (
     AnnotationType,
@@ -9,21 +11,47 @@ from .models import (
     BookChapter,
     Bookmark,
     BookPage,
+    BookType,
     PageAnnotation,
     UserBookProgress,
 )
 
 
+class BookTypeSerializer(serializers.ModelSerializer):
+    """Ochiq tur: katalog tablari (nom 3 tilda; uz-Cyrl frontendda o'giriladi)."""
+
+    name = LocalizedField()
+
+    book_count = serializers.IntegerField(read_only=True, default=0)
+
+    class Meta:
+        model = BookType
+        fields = ["id", "slug", "name", "order", "book_count"]
+        read_only_fields = fields
+
+
+class BookTypeRefSerializer(serializers.ModelSerializer):
+    name = LocalizedField()
+
+    class Meta:
+        model = BookType
+        fields = ["id", "slug", "name"]
+        read_only_fields = fields
+
+
 class BookSerializer(serializers.ModelSerializer):
-    cover = serializers.FileField(source="cover_image", use_url=True, read_only=True)
+    cover = serializers.FileField(source="public_cover", use_url=True, read_only=True)
+    book_type = BookTypeRefSerializer(read_only=True)
 
     class Meta:
         model = Book
         fields = [
             "id",
+            "slug",
             "title",
             "author",
-            "type",
+            "book_type",
+            "reading_mode",
             "grade_level",
             "language",
             "page_count",

@@ -20,7 +20,6 @@ export type Results = Schemas["Results"];
 export type Goal = Schemas["Goal"];
 export type GoalInput = Schemas["GoalWriteRequest"];
 export type GoalPatch = Schemas["PatchedGoalWriteRequest"];
-export type PdfDownload = Schemas["PdfDownload"];
 export type ChapterHit = Schemas["ChapterHit"];
 export type GuestAnnotation = Schemas["GuestAnnotationRequest"];
 export type ReadEvent = Schemas["EventKindEnum"];
@@ -98,14 +97,6 @@ export class PdfBooksApi {
   async bookBySlug(slug: string): Promise<PdfBookDetail> {
     const result = await this.client.GET("/api/v1/pdf-books/by-slug/{slug}/", {
       params: { path: { slug } },
-    });
-    return unwrap(result);
-  }
-
-  /** Yuklab olish URL'i (`attachment`); yuklab olishlar sonini oshiradi. O'chirilgan bo'lsa 403 `download_disabled`. */
-  async download(id: string): Promise<PdfDownload> {
-    const result = await this.client.GET("/api/v1/pdf-books/{id}/download/", {
-      params: { path: { id } },
     });
     return unwrap(result);
   }

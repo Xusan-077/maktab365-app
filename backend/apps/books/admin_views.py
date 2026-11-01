@@ -2,28 +2,35 @@
 
 from django.conf import settings
 from django.db import transaction
+from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
 from rest_framework import serializers
 from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import APIException, NotFound, ValidationError
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 
 from apps.accounts import audit
 from apps.content import pdf_storage as storage
 from apps.content.admin_services import UploadError
-from apps.content.admin_views import TAG, AdminViewSet
+from apps.content.admin_views import TAG, AdminViewSet, IsAdmin
 from apps.content.pdf_serializers import (
+    PdfDownloadSerializer,
     PdfUploadCompleteSerializer,
     PdfUploadFileSerializer,
     PdfUploadInitSerializer,
     PdfUploadPlanSerializer,
 )
+from apps.core.admin_download import cover_response, safe_filename
 from apps.core.throttling import PdfUploadThrottle
 
 from . import services, testmode
-from .admin_serializers import BookAdminSerializer, BookTransitionSerializer
-from .models import AnswerKeyItem, Book, BookStatus, BookType
+from .admin_serializers import (
+    BookAdminSerializer,
+    BookTransitionSerializer,
+    BookTypeAdminSerializer,
+)
+from .models import AnswerKeyItem, Book, BookStatus, BookType, ReadingMode
 
 
 class AnswerKeyItemSerializer(serializers.Serializer):
@@ -47,7 +54,8 @@ class AnswerKeySavedSerializer(serializers.Serializer):
         operation_id="admin_books_list",
         tags=TAG,
         parameters=[
-            OpenApiParameter("type", str, enum=list(BookType.values)),
+            OpenApiParameter("type", str, description="Tur slug'i"),
+            OpenApiParameter("reading_mode", str, enum=list(ReadingMode.values)),
             OpenApiParameter("status", str, enum=list(BookStatus.values)),
             OpenApiParameter("published", bool),
         ],
@@ -62,7 +70,8 @@ class BookAdminViewSet(AdminViewSet):
     snapshot_fields = (
         "title",
         "author",
-        "type",
+        "book_type_id",
+        "reading_mode",
         "grade_level",
         "language",
         "description",
@@ -88,10 +97,12 @@ class BookAdminViewSet(AdminViewSet):
         return data
 
     def get_queryset(self):
-        qs = Book.objects.prefetch_related("chapters")
+        qs = Book.objects.select_related("book_type").prefetch_related("chapters")
         params = self.request.query_params
-        if params.get("type") in BookType.values:
-            qs = qs.filter(type=params["type"])
+        if params.get("type"):
+            qs = qs.filter(book_type__slug=params["type"])
+        if params.get("reading_mode") in ReadingMode.values:
+            qs = qs.filter(reading_mode=params["reading_mode"])
         if params.get("status") in BookStatus.values:
             qs = qs.filter(status=params["status"])
         if params.get("published") in ("true", "false"):
@@ -212,9 +223,46 @@ class BookAdminViewSet(AdminViewSet):
         self.log("upload", book, before=before, after=self.snap(book))
         return self._response(book)
 
+    def get_permissions(self):
+        if self.action in ("download", "cover_download"):
+            return [IsAdmin()]
+        return super().get_permissions()
+
+    @extend_schema(
+        operation_id="admin_books_download",
+        tags=TAG,
+        summary="PDF'ni yuklab olish URL'i (FAQAT admin; foydalanuvchilarda yuklab olish yo'q)",
+        responses=PdfDownloadSerializer,
+    )
+    @action(detail=True, methods=["get"])
+    def download(self, request, pk=None):
+        book = self.get_object()
+        if not book.source_file:
+            raise NotFound
+        name = safe_filename(book.title, "pdf")
+        data = storage.key_download_url(
+            book.source_file.name, str(book.pk), f"/api/v1/books/{book.pk}/file/", name
+        )
+        self.log("download_pdf", book)
+        response = Response(PdfDownloadSerializer(data).data)
+        response["Cache-Control"] = "private, no-store"
+        return response
+
+    @extend_schema(
+        operation_id="admin_books_cover_download",
+        tags=TAG,
+        summary="Muqovaning asl (katta) faylini yuklab olish (FAQAT admin)",
+        responses={(200, "application/octet-stream"): OpenApiTypes.BINARY},
+    )
+    @action(detail=True, methods=["get"], url_path="cover-download")
+    def cover_download(self, request, pk=None):
+        book = self.get_object()
+        self.log("download_cover", book)
+        return cover_response(book.cover_image, book.title)
+
     def _test_book(self) -> Book:
         book = self.get_object()
-        if book.type != BookType.TEST:
+        if book.reading_mode != ReadingMode.TEST:
             raise ValidationError({"detail": ["not_test_book"]})
         return book
 
@@ -276,3 +324,40 @@ class BookAdminViewSet(AdminViewSet):
             total = AnswerKeyItem.objects.filter(book=book).count()
             self.log("answer_key_import", book, before=before, after={"items": total})
         return Response({"saved": saved, "total": total})
+
+
+@extend_schema_view(
+    list=extend_schema(operation_id="admin_book_types_list", tags=TAG),
+    create=extend_schema(operation_id="admin_book_types_create", tags=TAG),
+    retrieve=extend_schema(operation_id="admin_book_types_retrieve", tags=TAG),
+    partial_update=extend_schema(operation_id="admin_book_types_update", tags=TAG),
+    destroy=extend_schema(operation_id="admin_book_types_delete", tags=TAG),
+)
+class BookTypeAdminViewSet(AdminViewSet):
+    """Katalog turlari: editor+admin yaratadi/tahrirlaydi, o'chirish — admin (bo'sh va tizimsiz)."""
+
+    target_type = "book_type"
+    snapshot_fields = ("slug", "name", "order", "is_active")
+    serializer_class = BookTypeAdminSerializer
+    http_method_names = ["get", "post", "patch", "delete", "head", "options"]
+    pagination_class = None
+    ordering = ["order", "slug"]
+
+    def get_queryset(self):
+        from django.db.models import Count
+
+        return BookType.objects.annotate(book_count=Count("books")).order_by("order", "slug")
+
+    def label(self, instance) -> str:
+        return instance.slug
+
+    def perform_destroy(self, instance):
+        if instance.is_system:
+            raise SystemTypeError
+        super().perform_destroy(instance)
+
+
+class SystemTypeError(APIException):
+    status_code = 409
+    default_code = "system_type"
+    default_detail = "System type cannot be deleted."

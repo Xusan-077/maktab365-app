@@ -2,7 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { getMyBooksApi, type PageEntry } from "@/lib/books/api";
-import { fetchPageImage } from "@/lib/books/page-image";
+import { fetchPageSize } from "@/lib/books/page-image";
 import { parsedAnnotations } from "@/lib/books/entries";
 import {
   bookNotesMarkdown,
@@ -10,7 +10,7 @@ import {
   EXPORT_MAX_PAGES,
   fileSlug,
   pageFileName,
-  renderAnnotatedPage,
+  renderAnnotationsOnly,
   textBlob,
   zipBlobs,
   type ZipEntryInput,
@@ -29,7 +29,7 @@ export interface BookExportLabels {
 }
 
 /**
- * Kitobning barcha yozuvlarini ZIP qilib yuklaydi: har bet — annotatsiyali PNG, yana yon daftar `.md`.
+ * Kitobning barcha yozuvlarini ZIP qilib yuklaydi: har bet — faqat annotatsiyali shaffof PNG (kitob sahifasisiz), yana yon daftar `.md`.
  * Brauzer xotirasi uchun `EXPORT_MAX_PAGES` bet bilan cheklangan (oxirgi o'zgartirilganlari).
  */
 export function useBookExport(bookId: string, title: string, labels: BookExportLabels) {
@@ -62,10 +62,10 @@ export function useBookExport(bookId: string, title: string, labels: BookExportL
         setState({ status: "running", done: index, total: entries.length });
         const items = parsedAnnotations(entry);
         if (items.length === 0) continue;
-        const image = await fetchPageImage(bookId, entry.page);
+        const size = await fetchPageSize(bookId, entry.page);
         files.push({
           name: pageFileName(title, entry.page, "png"),
-          blob: await renderAnnotatedPage(image, items),
+          blob: await renderAnnotationsOnly(size, items),
         });
       }
       const notes = bookNotesMarkdown(title, entries, labels);

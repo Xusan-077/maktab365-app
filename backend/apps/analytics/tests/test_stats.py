@@ -53,11 +53,6 @@ def test_event_validation(book):
     assert api.post(EVENT.format(book.pk), {"kind": "page", "page": 0}, "json").status_code == 400
 
 
-def test_download_endpoint_counts_download(book):
-    APIClient().get(f"/api/v1/pdf-books/{book.pk}/download/")
-    assert BookDailyStat.objects.get(book=book).downloads == 1
-
-
 def test_summary_windows_and_no_personal_data(book):
     old = services._today() - timedelta(days=20)
     BookDailyStat.objects.create(book=book, day=old, opens=5, downloads=1)

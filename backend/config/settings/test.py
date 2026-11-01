@@ -32,6 +32,8 @@ REST_FRAMEWORK = {  # noqa: F405
         "auth_email": "1000/min",
         "support": "1000/hour",
         "pdf_upload": "1000/hour",
+        "file_url_ip": "1000/min",
+        "file_url_user": "1000/min",
         "telegram_start": "1000/min",
         "telegram_status": "1000/min",
     },

@@ -1,6 +1,12 @@
 import { cacheLife, cacheTag } from "next/cache";
 import { ApiError } from "@/lib/api/types";
-import { BooksApi, type BookDetail, type BookFilters, type BooksPage } from "./api";
+import {
+  BooksApi,
+  type BookDetail,
+  type BookFilters,
+  type BooksPage,
+  type BookTypeInfo,
+} from "./api";
 
 /**
  * Ochiq sahifalar uchun serverda keshlanadigan o'qishlar (faqat nashr qilingan kitoblar).
@@ -27,5 +33,28 @@ export async function getBook(id: string): Promise<BookDetail | null> {
   } catch (error) {
     if (error instanceof ApiError && error.status === 404) return null;
     throw error;
+  }
+}
+
+/** Kitob slug bo'yicha; yo'q yoki ko'rinmasa `null`. */
+export async function getBookBySlug(slug: string): Promise<BookDetail | null> {
+  "use cache";
+  lifetime();
+  try {
+    return await new BooksApi().bookBySlug(slug);
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) return null;
+    throw error;
+  }
+}
+
+/** Faol turlar (kitob soni bilan); xatoda bo'sh ro'yxat (tablar yo'qoladi, sahifa ishlaydi). */
+export async function getBookTypes(): Promise<BookTypeInfo[]> {
+  "use cache";
+  lifetime();
+  try {
+    return await new BooksApi().types();
+  } catch {
+    return [];
   }
 }

@@ -5,7 +5,7 @@ from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 from apps.accounts.models import AuditLog
-from apps.books.models import Book, BookPage, BookStatus, BookType
+from apps.books.models import Book, BookPage, BookStatus, ReadingMode
 from apps.content.storage import covers_storage
 from apps.content.tests.test_admin_api import client_as
 
@@ -22,7 +22,11 @@ def pdf_upload(data, name="kitob.pdf"):
 
 
 def make_book(**over) -> Book:
-    fields = {"title": "Sariq devni minib", "author": "X. To'xtaboyev", "type": BookType.FICTION}
+    fields = {
+        "title": "Sariq devni minib",
+        "author": "X. To'xtaboyev",
+        "reading_mode": ReadingMode.FICTION,
+    }
     return Book.objects.create(**{**fields, **over})
 
 
@@ -65,7 +69,7 @@ def test_admin_api_requires_editor(anon):
 def test_create_book_starts_without_file(editor):
     response = editor.post(
         f"{ADMIN}/",
-        {"title": " Matematika 1 ", "type": "math", "grade_level": 5, "language": "uz"},
+        {"title": " Matematika 1 ", "reading_mode": "math", "grade_level": 5, "language": "uz"},
         format="json",
     )
     assert response.status_code == 201, response.content
@@ -81,10 +85,10 @@ def test_create_book_starts_without_file(editor):
 
 def test_validation_rejects_bad_type_grade_and_blank_title(editor):
     bad = editor.post(
-        f"{ADMIN}/", {"title": "  ", "type": "novel", "grade_level": 12}, format="json"
+        f"{ADMIN}/", {"title": "  ", "reading_mode": "novel", "grade_level": 12}, format="json"
     )
     assert bad.status_code == 400
-    assert {"title", "type", "grade_level"} <= set(bad.json()["details"])
+    assert {"title", "reading_mode", "grade_level"} <= set(bad.json()["details"])
 
 
 def test_chapters_are_validated_and_replaced(editor):
@@ -466,26 +470,30 @@ def test_public_list_shows_only_published_ready(anon):
     body = anon.get(f"{PUBLIC}/").json()
     assert [b["title"] for b in body["results"]] == ["Ochiq"]
     assert set(body["results"][0]) == {
-        "id", "title", "author", "type", "grade_level", "language", "page_count", "cover",
-        "created_at",
+        "id", "slug", "title", "author", "book_type", "reading_mode", "grade_level", "language",
+        "page_count", "cover", "created_at",
     }  # fmt: skip
 
 
 def test_public_list_filters(anon):
-    ready_book(title="Algebra", author="A", type=BookType.MATH, grade_level=7)
+    ready_book(title="Algebra", author="A", reading_mode=ReadingMode.MATH, grade_level=7)
     ready_book(
-        title="O'tkan kunlar", author="Abdulla Qodiriy", type=BookType.FICTION, language="ru"
+        title="O'tkan kunlar",
+        author="Abdulla Qodiriy",
+        reading_mode=ReadingMode.FICTION,
+        language="ru",
     )
 
     def titles(query):
         return [b["title"] for b in anon.get(f"{PUBLIC}/{query}").json()["results"]]
 
-    assert titles("?type=math") == ["Algebra"]
+    assert titles("?reading_mode=math") == ["Algebra"]
     assert titles("?grade=7") == ["Algebra"]
     assert titles("?language=ru") == ["O'tkan kunlar"]
     assert titles("?q=qodiriy") == ["O'tkan kunlar"]
     assert titles("?ordering=title") == ["Algebra", "O'tkan kunlar"]
     assert anon.get(f"{PUBLIC}/?type=nope").status_code == 400
+    assert anon.get(f"{PUBLIC}/?reading_mode=nope").status_code == 400
     assert anon.get(f"{PUBLIC}/?language=de").status_code == 400
 
 

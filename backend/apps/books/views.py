@@ -1,6 +1,6 @@
 """Ochiq kitoblar API'si: katalog, kitob tafsiloti, sahifa rasmlari. Hammasi `public_cached`."""
 
-from django.db.models import Q
+from django.db.models import Count, Q
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import generics
@@ -14,15 +14,17 @@ from apps.content.models import BookLanguage
 from apps.content.pdf_serializers import PdfFileUrlSerializer
 from apps.content.pdf_views import _serve_ranged
 from apps.content.views import GRADE_PARAM, PublicView, _int_param
+from apps.core.file_access import FILE_URL_THROTTLES, check_origin, log_file_url
 
 from . import services
-from .models import Book, BookStatus, BookType
+from .models import Book, BookStatus, BookType, ReadingMode
 from .serializers import (
     BookDetailSerializer,
     BookPageSerializer,
     BookPageTextSerializer,
     BookSearchHitSerializer,
     BookSerializer,
+    BookTypeSerializer,
 )
 
 TAGS = ["books"]
@@ -47,11 +49,15 @@ class BookListView(PublicView, generics.ListAPIView):
 
     def get_queryset(self):
         request = self.request
-        books = visible_books(request)
+        books = visible_books(request).select_related("book_type")
         if (book_type := request.query_params.get("type")) is not None:
-            if book_type not in BookType.values:
+            if not BookType.objects.filter(slug=book_type).exists():
                 raise ValidationError({"type": ["invalid"]})
-            books = books.filter(type=book_type)
+            books = books.filter(book_type__slug=book_type)
+        if (mode := request.query_params.get("reading_mode")) is not None:
+            if mode not in ReadingMode.values:
+                raise ValidationError({"reading_mode": ["invalid"]})
+            books = books.filter(reading_mode=mode)
         if (grade := _int_param(request, "grade")) is not None:
             books = books.filter(grade_level=grade)
         if language := request.query_params.get("language"):
@@ -67,7 +73,8 @@ class BookListView(PublicView, generics.ListAPIView):
     @extend_schema(
         operation_id="books_list",
         parameters=[
-            OpenApiParameter("type", OpenApiTypes.STR, enum=list(BookType.values)),
+            OpenApiParameter("type", OpenApiTypes.STR, description="Tur slug'i (BookType)"),
+            OpenApiParameter("reading_mode", OpenApiTypes.STR, enum=list(ReadingMode.values)),
             GRADE_PARAM,
             OpenApiParameter("language", OpenApiTypes.STR, enum=list(BookLanguage.values)),
             OpenApiParameter("q", OpenApiTypes.STR, description="Nom yoki muallif bo'yicha"),
@@ -99,8 +106,47 @@ class BookDetailView(PublicView, APIView):
         return Response(BookDetailSerializer(book, context={"request": request}).data)
 
 
+class BookBySlugView(PublicView, APIView):
+    @extend_schema(
+        operation_id="books_retrieve_by_slug",
+        responses=BookDetailSerializer,
+        summary="Kitob tafsiloti (slug bo'yicha)",
+        tags=TAGS,
+    )
+    @public_cached
+    def get(self, request, slug):
+        books = Book.objects.all() if is_staff(request.user) else Book.objects.public()
+        book = books.filter(slug=slug).select_related("book_type").first()
+        if book is None:
+            raise NotFound
+        return Response(BookDetailSerializer(book, context={"request": request}).data)
+
+
+class BookTypeListView(PublicView, APIView):
+    @extend_schema(
+        operation_id="book_types_list",
+        responses=BookTypeSerializer(many=True),
+        summary="Faol kitob turlari (nashr qilingan kitoblar soni bilan)",
+        tags=TAGS,
+    )
+    @public_cached
+    def get(self, request):
+        types = (
+            BookType.objects.filter(is_active=True)
+            .annotate(
+                book_count=Count(
+                    "books",
+                    filter=Q(books__is_published=True, books__status=BookStatus.READY),
+                )
+            )
+            .order_by("order", "slug")
+        )
+        return Response(BookTypeSerializer(types, many=True).data)
+
+
 class BookFileUrlView(PublicView, APIView):
-    throttle_classes = APIView.throttle_classes  # imzo berish: umumiy tezlik chegarasida
+    # O'qish URL'i: IP va foydalanuvchi bo'yicha alohida chegara (+ umumiy), origin tekshiruvi.
+    throttle_classes = [*APIView.throttle_classes, *FILE_URL_THROTTLES]
 
     @extend_schema(
         operation_id="books_file_url",
@@ -109,9 +155,11 @@ class BookFileUrlView(PublicView, APIView):
         tags=TAGS,
     )
     def get(self, request, pk):
+        check_origin(request)
         book = visible_book(request, pk)
         if not book.source_file:
             raise NotFound
+        log_file_url(request, "book", book.pk)
         response = Response(PdfFileUrlSerializer(services.read_url(book)).data)
         response["Cache-Control"] = "private, no-store"
         return response

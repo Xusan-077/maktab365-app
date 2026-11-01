@@ -1,7 +1,9 @@
 import { array, mixed, number, object, string, type InferType } from "yup";
-import type { AdminBook, AdminBookInput, AdminBookType } from "@/lib/library/admin-api";
+import type { AdminBook, AdminBookInput, ReadingMode } from "@/lib/library/admin-api";
 import type { BookLanguage } from "@/lib/books/api";
-import { BOOK_LANGUAGES, BOOK_TYPES } from "@/lib/books/filters";
+import { BOOK_LANGUAGES } from "@/lib/books/filters";
+
+export const READING_MODES: readonly ReadingMode[] = ["standard", "fiction", "math", "test"];
 
 export const TITLE_MAX = 255;
 export const AUTHOR_MAX = 255;
@@ -14,8 +16,10 @@ export const DESCRIPTION_MAX = 4000;
 export const libraryBookSchema = object({
   title: string().trim().required("titleRequired").max(TITLE_MAX, "titleTooLong"),
   author: string().trim().max(AUTHOR_MAX, "authorTooLong").default(""),
-  type: mixed<AdminBookType>()
-    .oneOf([...BOOK_TYPES])
+  /** Katalog turi (BookType id); bo'sh — "Boshqa". */
+  bookType: string().default(""),
+  readingMode: mixed<ReadingMode>()
+    .oneOf([...READING_MODES])
     .required(),
   grade: string().default(""),
   language: mixed<BookLanguage>()
@@ -39,7 +43,8 @@ export type LibraryBookValues = InferType<typeof libraryBookSchema>;
 export const EMPTY_LIBRARY_BOOK: LibraryBookValues = {
   title: "",
   author: "",
-  type: "other",
+  bookType: "",
+  readingMode: "standard",
   grade: "",
   language: "uz",
   description: "",
@@ -50,11 +55,15 @@ export function toFormValues(book: AdminBook): LibraryBookValues {
   return {
     title: book.title,
     author: book.author ?? "",
-    type: book.type ?? "other",
+    bookType: book.book_type ?? "",
+    readingMode: book.reading_mode ?? "standard",
     grade: book.grade_level ? String(book.grade_level) : "",
     language: book.language ?? "uz",
     description: book.description ?? "",
-    chapters: (book.chapters ?? []).map((row) => ({ title: row.title, page: row.start_page })),
+    chapters: (book.chapters ?? []).map((row: { title: string; start_page: number }) => ({
+      title: row.title,
+      page: row.start_page,
+    })),
   };
 }
 
@@ -62,7 +71,8 @@ export function toPayload(values: LibraryBookValues): AdminBookInput {
   return {
     title: values.title.trim(),
     author: values.author.trim(),
-    type: values.type,
+    ...(values.bookType ? { book_type: values.bookType } : {}),
+    reading_mode: values.readingMode,
     grade_level: values.grade ? Number(values.grade) : null,
     language: values.language,
     description: values.description.trim(),

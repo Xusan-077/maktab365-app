@@ -8,6 +8,7 @@ export const ADMIN_ROUTES = {
   bulkPdfBooks: `${ROUTES.admin}/kitoblar/ommaviy`,
   library: `${ROUTES.admin}/kutubxona`,
   newLibraryBook: `${ROUTES.admin}/kutubxona/yangi`,
+  libraryTypes: `${ROUTES.admin}/kutubxona/turlar`,
   subjects: `${ROUTES.admin}/fanlar`,
   stats: `${ROUTES.admin}/statistika`,
   users: `${ROUTES.admin}/foydalanuvchilar`,

@@ -3,11 +3,12 @@ from django.db import transaction
 from rest_framework import serializers
 
 from apps.content import pdf_storage as storage
-from apps.content.admin_serializers import StoredPathField
+from apps.content.admin_serializers import LocalizedInput, StoredPathField
+from apps.content.serializers import LocalizedField
 from apps.content.storage import covers_storage
 
 from . import services
-from .models import Book
+from .models import Book, BookType, make_slug
 
 
 class ChapterInputSerializer(serializers.Serializer):
@@ -17,7 +18,51 @@ class ChapterInputSerializer(serializers.Serializer):
     start_page = serializers.IntegerField()
 
 
+class BookTypeAdminSerializer(serializers.ModelSerializer):
+    name = LocalizedInput()
+    book_count = serializers.IntegerField(read_only=True, default=0)
+    slug = serializers.SlugField(max_length=120, required=False)
+
+    class Meta:
+        model = BookType
+        fields = ["id", "slug", "name", "order", "is_active", "is_system", "book_count"]
+        read_only_fields = ["id", "is_system", "book_count"]
+
+    def validate_slug(self, value):
+        if self.instance is not None and value != self.instance.slug:
+            raise serializers.ValidationError("slug_immutable")
+        if self.instance is None and BookType.objects.filter(slug=value).exists():
+            raise serializers.ValidationError("slug_taken")
+        return value
+
+    def validate_is_active(self, value):
+        if self.instance is not None and self.instance.is_system and not value:
+            raise serializers.ValidationError("system_type")
+        return value
+
+    def create(self, validated_data):
+        if not validated_data.get("slug"):
+            base = make_slug(validated_data["name"].get("uz", ""), "tur")
+            slug, n = base, 1
+            while BookType.objects.filter(slug=slug).exists():
+                n += 1
+                slug = f"{base}-{n}"
+            validated_data["slug"] = slug
+        return super().create(validated_data)
+
+
+class BookTypeInfoSerializer(serializers.ModelSerializer):
+    name = LocalizedField()
+
+    class Meta:
+        model = BookType
+        fields = ["id", "slug", "name"]
+        read_only_fields = fields
+
+
 class BookAdminSerializer(serializers.ModelSerializer):
+    book_type = serializers.PrimaryKeyRelatedField(queryset=BookType.objects.all(), required=False)
+    book_type_info = BookTypeInfoSerializer(source="book_type", read_only=True)
     cover_image = StoredPathField("covers", storage=covers_storage, required=False)
     cover_url = serializers.FileField(
         source="cover_image", use_url=True, read_only=True, allow_null=True
@@ -32,9 +77,12 @@ class BookAdminSerializer(serializers.ModelSerializer):
         model = Book
         fields = [
             "id",
+            "slug",
             "title",
             "author",
-            "type",
+            "book_type",
+            "book_type_info",
+            "reading_mode",
             "grade_level",
             "language",
             "description",
@@ -58,6 +106,7 @@ class BookAdminSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = [
             "id",
+            "slug",
             "size_bytes",
             "page_count",
             "has_text_layer",
@@ -81,6 +130,12 @@ class BookAdminSerializer(serializers.ModelSerializer):
         value = value.strip()
         if not value:
             raise serializers.ValidationError("title_required")
+        return value
+
+    def validate_book_type(self, value):
+        current = self.instance.book_type_id if self.instance is not None else None
+        if not value.is_active and value.pk != current:
+            raise serializers.ValidationError("type_inactive")
         return value
 
     def validate_chapters(self, value):

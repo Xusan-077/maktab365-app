@@ -9,14 +9,14 @@ describe("appNavFor", () => {
       "/kabinet/fanlar",
       "/kabinet/natijalar",
       "/kabinet/saqlanganlar",
-      "/kitoblar/yozuvlarim",
+      "/kutubxona/yozuvlarim",
     ]);
     expect(appNavFor("ustoz").map((item) => item.href)).toEqual([
       "/ustoz",
       "/darsliklar",
       "/ustoz/testlar",
       "/ustoz/saqlanganlar",
-      "/kitoblar/yozuvlarim",
+      "/kutubxona/yozuvlarim",
     ]);
   });
 

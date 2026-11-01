@@ -278,7 +278,6 @@ class PdfBookDetailSerializer(PdfBookSerializer):
         allow_null=True,
         help_text="600px WebP (kitob sahifasi); null bo'lsa `cover` ishlatiladi",
     )
-    allow_download = serializers.BooleanField()
     has_text_layer = serializers.BooleanField(
         allow_null=True,
         help_text="false — matn qatlami yo'q (skan), qidiruv ishlamaydi; null — noma'lum",

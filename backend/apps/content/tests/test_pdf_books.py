@@ -448,7 +448,7 @@ def served(admin, anon, uploaded):
     info = anon.get(f"{PUBLIC}/{uploaded['id']}/file-url/")
     assert info.status_code == 200 and "no-store" in info["Cache-Control"]
     body = info.json()
-    assert body["expires_in"] == 15 * 60
+    assert body["expires_in"] == 10 * 60
     return uploaded["id"], body["url"]
 
 
@@ -497,7 +497,7 @@ def test_file_requires_a_valid_current_token(admin, anon, served):
 
 def test_file_token_expires(anon, served, settings):
     _id, url = served
-    settings.PDF_SIGNED_URL_SECONDS = -120
+    settings.PDF_READ_URL_SECONDS = -120
 
     assert anon.get(url).status_code == 404
 
@@ -709,7 +709,7 @@ def test_complete_without_init_conflicts(admin, algebra):
 
 
 def test_signed_read_url_is_short_lived(catalog, anon, algebra, remote, settings):
-    settings.PDF_SIGNED_URL_SECONDS = 600
+    settings.PDF_READ_URL_SECONDS = 600
     book = catalog.pdf_book(algebra)
 
     body = anon.get(f"{PUBLIC}/{book.pk}/file-url/").json()

@@ -29,8 +29,9 @@ export const ROUTES = {
   privacy: "/maxfiylik",
   offline: "/oflayn",
   games: "/games",
-  books: "/kitoblar",
-  myEntries: "/kitoblar/yozuvlarim",
+  /** Kutubxona (maktab darsliklaridan boshqa barcha kitoblar). */
+  books: "/kutubxona",
+  myEntries: "/kutubxona/yozuvlarim",
 } as const;
 
 /** Faqat shu yo'llar (va ichkilari) sessiya talab qiladi; qolgan hamma sahifa ochiq. */
@@ -127,9 +128,14 @@ export const quizPaths = {
   /** Havola orqali ochiladigan ommaviy test (login shart emas). */
   publicQuiz: (id: string) => `/test/${id}`,
 };
-/** Kitob sahifasi (Kitoblar bo'limi): `/kitoblar/<id>`. */
-export const bookPath = (id: string) => `${ROUTES.books}/${id}`;
+/** Kutubxona kitobi: `/kutubxona/<slug>`. */
+export const libraryBookPath = (slug: string) => `${ROUTES.books}/${slug}`;
 
-/** Kitoblar o'qish oynasi: `/kitoblar/<id>/oqish[?bet=N]`. */
-export const bookReaderPath = (id: string, page?: number) =>
-  `${bookPath(id)}/oqish${page && page > 1 ? `?bet=${page}` : ""}`;
+/** Kutubxona o'qish oynasi: `/kutubxona/<slug>/oqish[?bet=N]`. */
+export const libraryReaderPath = (slug: string, page?: number) =>
+  `${libraryBookPath(slug)}/oqish${page && page > 1 ? `?bet=${page}` : ""}`;
+
+/** Id bilan havola (kitob slug'i qo'lda bo'lmagan joylar: yozuvlar, o'qish paneli); sahifa slug'ga yo'naltiradi. */
+export const bookPath = (idOrSlug: string) => `${ROUTES.books}/${idOrSlug}`;
+export const bookReaderPath = (idOrSlug: string, page?: number) =>
+  libraryReaderPath(idOrSlug, page);

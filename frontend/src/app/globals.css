@@ -1707,3 +1707,22 @@ html[data-book-lock] body {
     animation-duration: 0.01ms !important;
   }
 }
+
+/* O'qish oynasi: matn belgilash va rasmni sudrash o'chiq (to'siq darajasi; qidiruv matn qatlamiga tayanmaydi). */
+:is([data-testid="pdf-reader"], [data-book-reader]) {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+:is([data-testid="pdf-reader"], [data-book-reader]) :is(input, textarea, [contenteditable="true"]) {
+  -webkit-user-select: text;
+  user-select: text;
+}
+:is([data-testid="pdf-reader"], [data-book-reader]) :is(img, canvas) {
+  -webkit-user-drag: none;
+}
+@media print {
+  :is([data-testid="pdf-reader"], [data-book-reader]) {
+    display: none !important;
+  }
+}

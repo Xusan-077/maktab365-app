@@ -179,3 +179,46 @@ Ularni alohida ishga tushirish shart emas: backend'ning Railway pre-deploy'i (`s
 - Test kitobda javoblar kaliti adminda (kitob tahriri → «Javoblar kaliti») kiritiladi. Kalit foydalanuvchiga
   hech qachon yuborilmaydi: faqat savollar ro'yxati va tekshirishdan keyin har savol uchun to'g'ri/xato.
 - Yangi env yo'q; `katex` — frontend bog'liqligi (allaqachon `package.json` da).
+
+## Yuklab olishdan himoya va yagona Kutubxona (migratsiya va env)
+
+**Migratsiya:** `books 0007_book_types` (`python manage.py migrate` — pre-deploy'da avtomatik). Eski `Book.type`
+ikkiga bo'linadi: `reading_mode` (standard/fiction/math/test) va katalog turi `BookType`
+(`maktab-darsliklari`, `badiiy-kitoblar`, `boshqa` — tizim turlari migratsiyada yaratiladi); orqaga
+qaytarish (`migrate books 0006`) `type` ni tiklaydi. Hamma kitobga `slug` beriladi.
+Keyin bir marta: `python manage.py build_book_covers` — mavjud kitoblar uchun kichik (~400px) muqova
+(yangi/saqlangan kitoblar uchun u avtomatik quriladi). Saytda faqat kichik muqova ko'rinadi, asl fayl — faqat admin.
+
+**Yangi env (backend):**
+
+| O'zgaruvchi                   | Sukut  | Izoh                                                                    |
+| ----------------------------- | ------ | ----------------------------------------------------------------------- |
+| `PDF_READ_URL_SECONDS`        | 600    | O'qish URL'i muddati (yuklash URL'i `PDF_SIGNED_URL_SECONDS` da qoladi). |
+| `FILE_URL_IP_THROTTLE_RATE`   | 40/min | `file-url` so'rovlari: IP bo'yicha.                                      |
+| `FILE_URL_USER_THROTTLE_RATE` | 60/min | `file-url` so'rovlari: foydalanuvchi bo'yicha.                           |
+| `FILE_URL_BURST_LOG`          | 20     | Bir mijozdan shuncha so'rovdan keyin `file_url_burst` ogohlantirish logi. |
+
+**Frontend (ixtiyoriy):** `NEXT_PUBLIC_READER_WATERMARK=1` — o'qish oynasida kirgan foydalanuvchi ismi/emaili
+diagonal xira suv belgisi sifatida chiqadi (sukut: o'chiq).
+
+**Cloudflare R2 (qo'lda):**
+
+- PDF bucket **private** bo'lib qoladi (ommaviy domen ulamang). Faqat qisqa muddatli imzolangan URL.
+- Bucket CORS `AllowedOrigins` ga **faqat sayt domenlari** (`https://darslik365.uz`, `https://www.darslik365.uz`;
+  preview kerak bo'lsa aniq preview domeni) qo'ying; `*` emas. `AllowedMethods`: GET, HEAD (yuklash uchun PUT).
+- Backend `file-url` da `Origin`/`Referer` ni `CORS_ALLOWED_ORIGINS` + `FRONTEND_URL` bilan tekshiradi (hotlink himoyasi).
+
+**Yuklab olish siyosati:** foydalanuvchi uchun hech qayerda PDF yuklab olish yo'q (kitob sahifasi, o'qish oynasi,
+eksport). O'qish URL'i `Content-Disposition: inline`. PDF.js'da yuklash/chop etish/fayl ochish tugmalari yo'q,
+o'qish oynasida kontekst menyu, nusxa olish, matn belgilash, sudrash, Ctrl+S/Ctrl+P o'chirilgan.
+Yozuvlar eksporti (ZIP) — faqat o'quvchining o'z yozuvlari (`.md` + shaffof PNG, kitob sahifasisiz).
+Admin: `GET /admin/books/<id>/download/`, `.../cover-download/` va `/admin/pdf-books/<id>/download/`
+(faqat `admin` roli, boshqalarga 403, audit logga yoziladi).
+
+> **Halollik:** bu **to'siq darajasi**, to'liq himoya emas. PDF.js sahifani brauzerga yuboradi, shuning uchun
+> skrinshot, DevTools yoki tarmoq so'rovlari orqali nusxa olish mumkin; muqovalar ham `img` sifatida ko'rinadi.
+> Maqsad — oddiy foydalanuvchi uchun yuklab olishni qiyinlashtirish, URL'larni qisqa muddatli va
+> cheklangan qilish, suiiste'molni log orqali payqash.
+
+**Eski manzillar:** `/kitoblar/...` → `/kutubxona/...` (301, query saqlanadi); `/kutubxona/<uuid>` → slug (308),
+`?bet=N` ishlayveradi.

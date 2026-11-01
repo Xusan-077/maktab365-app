@@ -135,7 +135,6 @@ async function BookContent({ params }: Pick<Props, "params">) {
                 slug={book.slug}
                 title={title}
                 pageCount={book.page_count}
-                allowDownload={book.allow_download}
               >
                 <BookSaveButton bookId={book.id} />
               </BookActions>

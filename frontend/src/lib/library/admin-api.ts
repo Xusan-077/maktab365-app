@@ -7,7 +7,11 @@ type Schemas = components["schemas"];
 export type AdminBook = Schemas["BookAdmin"];
 export type AdminBookInput = Schemas["BookAdminRequest"];
 export type AdminBookPatch = Schemas["PatchedBookAdminRequest"];
-export type AdminBookType = Schemas["BookTypeEnum"];
+export type AdminBookTypeRow = Schemas["BookTypeAdmin"];
+export type AdminBookTypeInput = Schemas["BookTypeAdminRequest"];
+export type AdminBookTypePatch = Schemas["PatchedBookTypeAdminRequest"];
+export type LibraryRow = Schemas["LibraryRow"];
+export type ReadingMode = Schemas["ReadingModeEnum"];
 export type AdminBookStatus = Schemas["BookStatusEnum"];
 export type AnswerKeyRow = Schemas["AnswerKeyItem"];
 export type AnswerKeyMode = Schemas["AnswerKeyImportModeEnum"];
@@ -24,13 +28,13 @@ export const UPLOAD_COMPLETE_TIMEOUT_MS = 170_000;
 export interface LibraryListParams {
   page?: number;
   search?: string;
-  type?: AdminBookType;
-  status?: AdminBookStatus;
+  /** Tur slug'i; bo'sh — hammasi (darsliklar ham). */
+  type?: string;
 }
 
 export interface LibraryPage {
   count: number;
-  results: AdminBook[];
+  results: LibraryRow[];
 }
 
 /** Kutubxona (kitoblar bo'limi) admin API'si: faqat staff, brauzerda BFF orqali. */
@@ -43,16 +47,47 @@ export class AdminLibraryApi {
   ) {}
 
   async list(params: LibraryListParams = {}): Promise<LibraryPage> {
-    const result = await this.client.GET("/api/v1/admin/books/", {
+    const result = await this.client.GET("/api/v1/admin/library/", {
       params: {
         query: {
           page: params.page,
           page_size: LIBRARY_PAGE_SIZE,
-          search: params.search || undefined,
-          type: params.type,
-          status: params.status,
+          q: params.search || undefined,
+          type: params.type || undefined,
         },
       },
+    });
+    return unwrap(result);
+  }
+
+  async types(): Promise<AdminBookTypeRow[]> {
+    return unwrap(await this.client.GET("/api/v1/admin/book-types/"));
+  }
+
+  async createType(input: AdminBookTypeInput): Promise<AdminBookTypeRow> {
+    return unwrap(await this.client.POST("/api/v1/admin/book-types/", { body: input }));
+  }
+
+  async updateType(id: string, patch: AdminBookTypePatch): Promise<AdminBookTypeRow> {
+    const result = await this.client.PATCH("/api/v1/admin/book-types/{id}/", {
+      params: { path: { id } },
+      body: patch,
+    });
+    return unwrap(result);
+  }
+
+  async removeType(id: string): Promise<void> {
+    const result: { error?: unknown; response: Response } = await this.client.DELETE(
+      "/api/v1/admin/book-types/{id}/",
+      { params: { path: { id } } },
+    );
+    if (result.error !== undefined) unwrap({ error: result.error, response: result.response });
+  }
+
+  /** FAQAT admin: PDF'ning `attachment` URL'i (backend ham tekshiradi — begonaga 403). */
+  async downloadUrl(id: string): Promise<{ url: string; filename: string }> {
+    const result = await this.client.GET("/api/v1/admin/books/{id}/download/", {
+      params: { path: { id } },
     });
     return unwrap(result);
   }

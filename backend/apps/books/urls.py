@@ -4,6 +4,8 @@ from . import annotation_views, entry_views, me_views, testmode_views, views
 
 urlpatterns = [
     path("books/", views.BookListView.as_view(), name="books-list"),
+    path("book-types/", views.BookTypeListView.as_view(), name="book-types"),
+    path("books/by-slug/<slug:slug>/", views.BookBySlugView.as_view(), name="books-by-slug"),
     path("books/<uuid:pk>/", views.BookDetailView.as_view(), name="books-detail"),
     path("books/<uuid:pk>/file-url/", views.BookFileUrlView.as_view(), name="books-file-url"),
     path("books/<uuid:pk>/file/", views.BookFileView.as_view(), name="books-file"),

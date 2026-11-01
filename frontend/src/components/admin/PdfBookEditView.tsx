@@ -41,6 +41,7 @@ import { OcrSection } from "./OcrSection";
 import { PdfFilePicker } from "./PdfFilePicker";
 import { QueryError } from "./QueryError";
 import { BookStatusBadge } from "./StatusBadge";
+import { DownloadButtons } from "./DownloadButtons";
 import { useAdminErrorText, useAdminFieldErrorText } from "./useAdminErrorText";
 import { usePdfUpload } from "./usePdfUpload";
 
@@ -49,7 +50,6 @@ interface FormValues {
   subject: string;
   title: LocalizedText;
   language: string;
-  allowDownload: boolean;
 }
 
 const LANGUAGES = ["uz", "ru", "en"] as const;
@@ -395,7 +395,6 @@ function PdfBookForm({ book }: { book: AdminPdfBook }) {
       subject: book.subject,
       title: { uz: book.title.uz, ru: book.title.ru ?? "", en: book.title.en ?? "" },
       language: book.language ?? "uz",
-      allowDownload: book.allow_download ?? true,
     },
   });
 
@@ -406,7 +405,6 @@ function PdfBookForm({ book }: { book: AdminPdfBook }) {
         grade: Number(values.grade),
         subject: values.subject,
         language: values.language as AdminPdfBook["language"],
-        allow_download: values.allowDownload,
       }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ADMIN_ROOT_KEY });
@@ -516,28 +514,6 @@ function PdfBookForm({ book }: { book: AdminPdfBook }) {
               />
             )}
           />
-          <Controller
-            control={control}
-            name="allowDownload"
-            render={({ field }) => (
-              <label className="flex items-start gap-3 text-sm sm:pt-7">
-                <input
-                  type="checkbox"
-                  className="mt-0.5 size-4"
-                  data-testid="allow-download"
-                  checked={field.value}
-                  onChange={(event) => field.onChange(event.target.checked)}
-                />
-                <span className="flex flex-col">
-                  <span className="font-medium">{t("allowDownload")}</span>
-                  <span className="text-muted">{t("allowDownloadHint")}</span>
-                  <span className="text-muted tabular-nums">
-                    {t("downloads", { count: book.download_count ?? 0 })}
-                  </span>
-                </span>
-              </label>
-            )}
-          />
         </div>
         {save.isError && (
           <p role="alert" className="text-danger text-sm">
@@ -600,6 +576,12 @@ export function PdfBookEditView({ id }: { id: string }) {
       </Link>
       <div className="flex flex-col gap-6">
         <div className="flex min-w-0 flex-col gap-4">
+          <DownloadButtons
+            target={{ kind: "textbook", id: book.id }}
+            title={getLocalized(book.title, locale)}
+            hasFile={book.has_file}
+            hasCover={book.cover_mode !== "auto" && Boolean(book.cover_url)}
+          />
           <Details book={book} />
           <PublishActions book={book} />
           <BookTools book={book} />

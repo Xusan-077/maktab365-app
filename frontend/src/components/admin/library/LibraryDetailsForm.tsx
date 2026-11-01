@@ -2,16 +2,21 @@
 
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Plus, Trash2 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useQuery } from "@tanstack/react-query";
+import { useLocale, useTranslations } from "next-intl";
 import { Controller, useFieldArray, useForm, type Resolver } from "react-hook-form";
 import { useAdminErrorText } from "@/components/admin/useAdminErrorText";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select, type SelectOption } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
-import { BOOK_LANGUAGES, BOOK_TYPES } from "@/lib/books/filters";
+import { BOOK_LANGUAGES } from "@/lib/books/filters";
+import { getLocalized } from "@/lib/i18n/localized";
+import type { Locale } from "@/lib/i18n/config";
+import { libraryQueries } from "@/lib/library/admin-queries";
 import {
   libraryBookSchema,
+  READING_MODES,
   toPayload,
   type LibraryBookValues,
 } from "@/lib/validation/library-book";
@@ -44,9 +49,14 @@ export function LibraryDetailsForm({ initial, submitLabel, onSubmit }: LibraryDe
 
   const message = (key: string | undefined) => (key && tf.has(key) ? tf(key) : undefined);
 
-  const typeOptions: SelectOption[] = BOOK_TYPES.map((value) => ({
+  const locale = useLocale() as Locale;
+  const types = useQuery(libraryQueries.types());
+  const typeOptions: SelectOption[] = (types.data ?? [])
+    .filter((type) => type.is_active || type.id === initial.bookType)
+    .map((type) => ({ value: type.id, label: getLocalized(type.name, locale) }));
+  const modeOptions: SelectOption[] = READING_MODES.map((value) => ({
     value,
-    label: tc(`typeName.${value}`),
+    label: tf(`readingModes.${value}`),
   }));
   const gradeOptions: SelectOption[] = [
     { value: "", label: tf("noGrade") },
@@ -85,10 +95,10 @@ export function LibraryDetailsForm({ initial, submitLabel, onSubmit }: LibraryDe
           error={message(errors.author?.message)}
           {...register("author")}
         />
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2">
           <Controller
             control={control}
-            name="type"
+            name="bookType"
             render={({ field }) => (
               <Select
                 label={tf("typeLabel")}
@@ -101,6 +111,23 @@ export function LibraryDetailsForm({ initial, submitLabel, onSubmit }: LibraryDe
               />
             )}
           />
+          <Controller
+            control={control}
+            name="readingMode"
+            render={({ field }) => (
+              <Select
+                label={tf("readingModeLabel")}
+                searchable={false}
+                options={modeOptions}
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                ref={field.ref}
+              />
+            )}
+          />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
           <Controller
             control={control}
             name="grade"

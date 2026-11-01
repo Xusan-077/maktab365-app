@@ -1,8 +1,11 @@
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/Badge";
 import type { BookDetail } from "@/lib/books/api";
+import { bookGroup } from "@/lib/books/filters";
+import type { Locale } from "@/lib/i18n/config";
+import { getLocalized } from "@/lib/i18n/localized";
 import { Link } from "@/lib/i18n/navigation";
-import { bookReaderPath } from "@/lib/utils/routes";
+import { libraryReaderPath } from "@/lib/utils/routes";
 import { BookCover } from "./BookCover";
 import { BookReadButton } from "./BookReadButton";
 
@@ -13,6 +16,8 @@ import { BookReadButton } from "./BookReadButton";
 export function BookDetailView({ book }: { book: BookDetail }) {
   const t = useTranslations("books");
   const td = useTranslations("books.detail");
+  const locale = useLocale() as Locale;
+  const typeName = getLocalized(book.book_type.name, locale);
 
   const facts = [
     book.grade_level ? t("gradeLabel", { grade: book.grade_level }) : null,
@@ -23,13 +28,20 @@ export function BookDetailView({ book }: { book: BookDetail }) {
   return (
     <div className="grid items-start gap-8 md:grid-cols-[minmax(0,16rem)_minmax(0,1fr)] md:gap-12 lg:grid-cols-[minmax(0,19rem)_minmax(0,1fr)] lg:gap-16">
       <div className="mx-auto w-full max-w-[14rem] md:sticky md:top-24 md:max-w-none">
-        <BookCover title={book.title} type={book.type} src={book.cover} priority sizes="304px" />
+        <BookCover
+          title={book.title}
+          typeLabel={typeName}
+          group={bookGroup(book.book_type.slug, book.reading_mode)}
+          src={book.cover}
+          priority
+          sizes="304px"
+        />
       </div>
 
       <div className="flex min-w-0 flex-col gap-8">
         <header className="flex flex-col gap-3">
           <Badge variant="primary" className="self-start">
-            {t(`typeName.${book.type}`)}
+            {typeName}
           </Badge>
           <h1 className="text-[2rem] leading-tight font-extrabold tracking-[-0.03em] text-balance sm:text-[2.5rem]">
             {book.title}
@@ -43,7 +55,7 @@ export function BookDetailView({ book }: { book: BookDetail }) {
         </header>
 
         <div>
-          <BookReadButton bookId={book.id} pageCount={book.page_count} />
+          <BookReadButton bookId={book.id} slug={book.slug} pageCount={book.page_count} />
         </div>
 
         {book.description.trim() && (
@@ -68,7 +80,7 @@ export function BookDetailView({ book }: { book: BookDetail }) {
               {book.chapters.map((chapter) => (
                 <li key={chapter.id}>
                   <Link
-                    href={bookReaderPath(book.id, chapter.start_page)}
+                    href={libraryReaderPath(book.slug, chapter.start_page)}
                     className="hover:bg-subtle flex min-h-11 items-baseline justify-between gap-4 rounded-md px-1 py-2.5 transition-colors"
                   >
                     <span className="min-w-0 font-medium">{chapter.title}</span>

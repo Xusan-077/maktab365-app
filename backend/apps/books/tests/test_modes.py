@@ -5,7 +5,7 @@ import json
 import pytest
 
 from apps.books import testmode
-from apps.books.models import AnswerAttempt, AnswerKeyItem, BookStatus, BookType, SheetAnswer
+from apps.books.models import AnswerAttempt, AnswerKeyItem, BookStatus, ReadingMode, SheetAnswer
 from apps.content.tests.test_admin_api import client_as
 from apps.learning.tests.conftest import client_for, make_user
 
@@ -19,7 +19,7 @@ KEY = "1, 1, A\n1, 2, b\n2, 1, C\n2, 2, 12,5\n"
 
 @pytest.fixture
 def test_book_():
-    return ready_book(type=BookType.TEST)
+    return ready_book(reading_mode=ReadingMode.TEST)
 
 
 @pytest.fixture
@@ -108,7 +108,7 @@ class TestAdminKey:
         assert replaced == {"saved": 1, "total": 1}
 
     def test_only_test_books_have_a_key(self, editor):
-        book = ready_book(type=BookType.TEXTBOOK)
+        book = ready_book(reading_mode=ReadingMode.STANDARD)
         assert import_key(editor, book).status_code == 400
 
     def test_learners_and_guests_cannot_touch_the_key(self, me, anon, test_book_):
@@ -169,9 +169,11 @@ class TestSheet:
         assert other.get(f"{ME}/{test_book_.pk}/test/").json()["answers"] == []
 
     def test_mode_exists_only_for_test_books_and_visible_ones(self, me):
-        textbook = ready_book(type=BookType.TEXTBOOK)
+        textbook = ready_book(reading_mode=ReadingMode.STANDARD)
         assert me.get(f"{ME}/{textbook.pk}/test/").status_code == 404
-        hidden = make_book(type=BookType.TEST, status=BookStatus.READY, is_published=False)
+        hidden = make_book(
+            reading_mode=ReadingMode.TEST, status=BookStatus.READY, is_published=False
+        )
         assert me.get(f"{ME}/{hidden.pk}/test/").status_code == 404
 
     def test_requires_login(self, anon, test_book_):
@@ -242,15 +244,15 @@ class TestSolutions:
         )
 
     def test_solution_only_in_math_books(self, me):
-        math = ready_book(type=BookType.MATH)
+        math = ready_book(reading_mode=ReadingMode.MATH)
         ok = self.put(me, math, [{"type": "solution", "data": self.BODY}])
         assert ok.status_code == 200
-        textbook = ready_book(type=BookType.TEXTBOOK)
+        textbook = ready_book(reading_mode=ReadingMode.STANDARD)
         bad = self.put(me, textbook, [{"type": "solution", "data": self.BODY}])
         assert bad.status_code == 400
 
     def test_validation(self, me):
-        math = ready_book(type=BookType.MATH)
+        math = ready_book(reading_mode=ReadingMode.MATH)
         for data in (
             {**self.BODY, "rect": {"x": 0.9, "y": 0.2, "w": 0.5, "h": 0.2}},
             {**self.BODY, "body": "x" * 4001},
@@ -261,7 +263,7 @@ class TestSolutions:
             assert response.status_code == 400, data
 
     def test_listed_in_entries_and_searchable(self, me):
-        math = ready_book(type=BookType.MATH)
+        math = ready_book(reading_mode=ReadingMode.MATH)
         self.put(me, math, [{"type": "solution", "data": self.BODY}])
         entries = me.get("/api/v1/me/annotations/?type=solution").json()
         flat = json.dumps(entries)

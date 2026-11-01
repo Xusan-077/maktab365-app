@@ -22,7 +22,13 @@ const book = (over: Partial<Book> = {}): Book => ({
   id: "11111111-1111-4111-8111-111111111111",
   title: "O'tkan kunlar",
   author: "Abdulla Qodiriy",
-  type: "fiction",
+  slug: "otkan-kunlar",
+  book_type: {
+    id: "22222222-2222-4222-8222-222222222222",
+    slug: "badiiy-kitoblar",
+    name: { uz: "Badiiy kitoblar" },
+  },
+  reading_mode: "fiction",
   grade_level: null,
   language: "uz",
   page_count: 320,
@@ -45,10 +51,10 @@ describe("BookCard", () => {
   it("kitob sahifasiga havola, nom, muallif, tur va betlar soni", () => {
     setup();
     const card = screen.getByTestId("book-card");
-    expect(card.getAttribute("href")).toBe("/kitoblar/11111111-1111-4111-8111-111111111111");
+    expect(card.getAttribute("href")).toBe("/kutubxona/otkan-kunlar");
     expect(card.textContent).toContain("O'tkan kunlar");
     expect(card.textContent).toContain("Abdulla Qodiriy");
-    expect(card.textContent).toContain("Badiiy kitob · 320 bet");
+    expect(card.textContent).toContain("Badiiy kitoblar · 320 bet");
   });
 
   it("muqova rasmi bo'lmasa tur rangidagi zaxira muqova, nisbat 2:3", () => {

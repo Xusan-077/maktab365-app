@@ -57,6 +57,9 @@ export function SiteFooter({ variant = "compact" }: { variant?: "full" | "compac
           <Link href={ROUTES.textbooks} className={linkClasses}>
             {t("textbooks")}
           </Link>
+          <Link href={ROUTES.books} className={linkClasses}>
+            {t("library")}
+          </Link>
           <Link href={ROUTES.about} className={linkClasses}>
             {t("about")}
           </Link>

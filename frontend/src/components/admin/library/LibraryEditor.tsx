@@ -1,5 +1,6 @@
 "use client";
 
+import { DownloadButtons } from "@/components/admin/DownloadButtons";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Trash2 } from "lucide-react";
@@ -131,8 +132,14 @@ export function LibraryEditView({ id }: { id: string }) {
           onSubmit={save}
         />
         <aside className="flex flex-col gap-4" aria-label={t("form.editTitle")}>
+          <DownloadButtons
+            target={{ kind: "library", id: book.id }}
+            title={book.title}
+            hasFile={book.has_file}
+            hasCover={Boolean(book.cover_url)}
+          />
           <LibraryFileCard book={book} />
-          {book.type === "test" && <LibraryAnswerKeyCard book={book} />}
+          {book.reading_mode === "test" && <LibraryAnswerKeyCard book={book} />}
           <LibraryCoverCard book={book} />
           <LibraryPublishCard book={book} />
           {canDelete(role) && (

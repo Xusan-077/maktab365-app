@@ -191,7 +191,7 @@ def test_upload_cleans_view_file_and_download_serves_the_marked_copy(
     admin.post(f"{BASE}/{book['id']}/transition/", {"to": "published"}, "json")
     anon = APIClient()
     reading = anon.get(f"/api/v1/pdf-books/{book['id']}/file-url/").json()["url"]
-    downloading = anon.get(f"/api/v1/pdf-books/{book['id']}/download/").json()["url"]
+    downloading = admin.get(f"{BASE}/{book['id']}/download/").json()["url"]
     view_bytes = b"".join(anon.get(reading).streaming_content)
     download_bytes = b"".join(anon.get(downloading).streaming_content)
     assert "darslik365" not in texts(PdfReader(io.BytesIO(view_bytes)))[0]

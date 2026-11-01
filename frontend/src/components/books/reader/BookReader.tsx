@@ -42,6 +42,8 @@ import { SolutionList } from "./modes/SolutionList";
 import { useSolutionEditor } from "./modes/useSolutionEditor";
 import { AnnotationCanvas } from "./workspace/AnnotationCanvas";
 import { NotesAside } from "./workspace/NotesAside";
+import { ReaderWatermark } from "@/components/reader/ReaderWatermark";
+import { useReaderProtection } from "@/hooks/useReaderProtection";
 import { NOTE_TAB, NotesPanel, type NotesTab } from "./workspace/NotesPanel";
 import { NotesSheet } from "./workspace/NotesSheet";
 import { ToolBar } from "./workspace/ToolBar";
@@ -71,6 +73,7 @@ export function BookReader({ book }: BookReaderProps) {
   const total = pdf.doc?.numPages ?? book.page_count;
   const searchParams = useSearchParams();
   const root = useRef<HTMLDivElement>(null);
+  useReaderProtection(root);
   const pageScroller = useRef<HTMLDivElement>(null);
   const fullscreen = useFullscreen(root);
   const hydrated = useSyncExternalStore(subscribeHydration, isHydrated, () => false);
@@ -95,8 +98,8 @@ export function BookReader({ book }: BookReaderProps) {
   const drawMode = tool !== "none";
   const [sheet, setSheet] = useState<SheetState>("closed");
   // Kitob turiga xos rejimlar: faqat `math` va `test`; boshqa turlar o'zgarmaydi.
-  const mathMode = book.type === "math";
-  const testMode = book.type === "test";
+  const mathMode = book.reading_mode === "math";
+  const testMode = book.reading_mode === "test";
   const [notesTab, setNotesTab] = useState<string>(NOTE_TAB);
   const testSheet = useTestSheet(book.id, testMode && signedIn);
 
@@ -316,6 +319,7 @@ export function BookReader({ book }: BookReaderProps) {
       data-draw-mode={drawMode || undefined}
       className="bg-bk-stage text-bk-ink relative flex h-dvh flex-col overflow-hidden lg:flex-row"
     >
+      <ReaderWatermark />
       <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
         {activeView === "text" ? (
           <TextView
@@ -389,7 +393,6 @@ export function BookReader({ book }: BookReaderProps) {
           onOpenFind={() => setFindOpen(true)}
           onToggleBookmark={toggleBookmarkHere}
           page={page}
-          pageItems={pageItems}
         />
         <ReaderBottomBar
           visible={chrome.visible}

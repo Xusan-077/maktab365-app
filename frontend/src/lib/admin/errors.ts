@@ -33,6 +33,7 @@ export const KNOWN_ERROR_CODES = [
   "ocr_not_needed",
   "ocr_in_progress",
   "processing_in_progress",
+  "system_type",
 ] as const;
 
 export type KnownErrorCode = (typeof KNOWN_ERROR_CODES)[number];

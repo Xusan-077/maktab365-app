@@ -121,8 +121,10 @@ export function BookCover({
           fill
           priority={priority}
           sizes={sizes}
+          draggable={false}
+          onContextMenu={(event) => event.preventDefault()}
           onError={() => setFailedSrc(primary)}
-          className="object-cover"
+          className="object-cover select-none"
         />
       )}
     </div>

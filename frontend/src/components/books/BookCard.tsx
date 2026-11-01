@@ -1,7 +1,10 @@
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import type { Book } from "@/lib/books/api";
+import { bookGroup } from "@/lib/books/filters";
+import type { Locale } from "@/lib/i18n/config";
+import { getLocalized } from "@/lib/i18n/localized";
 import { Link } from "@/lib/i18n/navigation";
-import { bookPath } from "@/lib/utils/routes";
+import { libraryBookPath } from "@/lib/utils/routes";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { BookCardProgress } from "./BookCardProgress";
 import { BookCover } from "./BookCover";
@@ -15,18 +18,21 @@ export interface BookCardProps {
 /** Katalog kartasi: muqova (2:3), nom, muallif, tur va betlar soni. Butun karta — bitta havola. */
 export function BookCard({ book, priority, sizes }: BookCardProps) {
   const t = useTranslations("books");
-  const meta = [t(`typeName.${book.type}`), t("pages", { count: book.page_count })].join(" · ");
+  const locale = useLocale() as Locale;
+  const typeName = getLocalized(book.book_type.name, locale);
+  const meta = [typeName, t("pages", { count: book.page_count })].join(" · ");
 
   return (
     <Link
-      href={bookPath(book.id)}
+      href={libraryBookPath(book.slug)}
       data-testid="book-card"
       className="group flex flex-col gap-3 rounded-xl focus-visible:outline-offset-4"
     >
       <span className="relative block">
         <BookCover
           title={book.title}
-          type={book.type}
+          typeLabel={typeName}
+          group={bookGroup(book.book_type.slug, book.reading_mode)}
           src={book.cover}
           priority={priority}
           sizes={sizes}

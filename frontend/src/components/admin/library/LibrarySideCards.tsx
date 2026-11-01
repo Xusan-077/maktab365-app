@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ImageUp, RotateCcw } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { BookCover } from "@/components/books/BookCover";
 import { useAdminErrorText } from "@/components/admin/useAdminErrorText";
 import { BookStatusBadge } from "@/components/admin/StatusBadge";
@@ -12,6 +12,9 @@ import { useToast } from "@/hooks/useToast";
 import { getAdminApi } from "@/lib/admin/api";
 import { coverImageProblem } from "@/lib/admin/cover";
 import { getAdminLibraryApi, type AdminBook } from "@/lib/library/admin-api";
+import { bookGroup } from "@/lib/books/filters";
+import type { Locale } from "@/lib/i18n/config";
+import { getLocalized } from "@/lib/i18n/localized";
 import { libraryKeys } from "@/lib/library/admin-queries";
 
 const CARD = "border-border bg-surface flex flex-col gap-3 rounded-xl border p-4";
@@ -19,6 +22,7 @@ const CARD = "border-border bg-surface flex flex-col gap-3 rounded-xl border p-4
 /** Muqova: hozirgisi, o'z rasmini yuklash yoki birinchi betdan qayta olish. */
 export function LibraryCoverCard({ book }: { book: AdminBook }) {
   const t = useTranslations("admin.library.cover");
+  const locale = useLocale() as Locale;
   const errorText = useAdminErrorText();
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -61,7 +65,12 @@ export function LibraryCoverCard({ book }: { book: AdminBook }) {
         {t("title")}
       </h2>
       <div className="w-32">
-        <BookCover title={book.title} type={book.type ?? "other"} src={book.cover_url} />
+        <BookCover
+          title={book.title}
+          typeLabel={getLocalized(book.book_type_info.name, locale)}
+          group={bookGroup(book.book_type_info.slug, book.reading_mode ?? "standard")}
+          src={book.cover_url}
+        />
       </div>
       <input
         ref={inputRef}

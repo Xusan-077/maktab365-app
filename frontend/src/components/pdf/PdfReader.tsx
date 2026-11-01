@@ -31,6 +31,8 @@ import { Dialog } from "@/components/ui/Dialog";
 import { OverflowMenu, type OverflowMenuItem } from "@/components/ui/OverflowMenu";
 import { TopicPanel, type TopicTab } from "@/components/topic/TopicPanel";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { useReaderProtection } from "@/hooks/useReaderProtection";
+import { ReaderWatermark } from "@/components/reader/ReaderWatermark";
 import { useBookStats } from "@/hooks/useBookStats";
 import { useFullscreen } from "@/hooks/useFullscreen";
 import { usePdfAnnotations } from "@/hooks/usePdfAnnotations";
@@ -182,6 +184,7 @@ export function PdfReader({
   const [offlineOpen, setOfflineOpen] = useState(false);
   const reloads = useRef(0);
   const stageRef = useRef<HTMLDivElement>(null);
+  useReaderProtection(stageRef);
   const pageBoxRef = useRef<HTMLDivElement>(null);
   const prefs = useReaderPrefsStore();
   // Saqlangan rejim o'qilguncha ko'rinish chizilmaydi (rejim "miltillamasin").
@@ -697,6 +700,7 @@ export function PdfReader({
         fullscreen.active && !bookMode && "overflow-auto",
       )}
     >
+      <ReaderWatermark />
       <RecordRecentBook book={counted ? book.data : undefined} />
 
       <header

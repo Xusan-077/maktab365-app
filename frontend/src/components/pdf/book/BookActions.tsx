@@ -1,13 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { BookOpen, Check, Download, Link2, Loader2, Send, Share2 } from "lucide-react";
+import { BookOpen, Check, Link2, Send, Share2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useBookResume } from "@/hooks/useBookResume";
-import { ApiError } from "@/lib/api/types";
 import { Link } from "@/lib/i18n/navigation";
-import { resolveFileUrl } from "@/lib/pdf/file-url";
-import { getPdfBooksApi } from "@/lib/pdf-books/api";
 import { cn } from "@/lib/utils/cn";
 import { readerPath } from "@/lib/utils/routes";
 
@@ -17,8 +14,7 @@ export interface BookActionsProps {
   slug: string;
   title: string;
   pageCount: number;
-  allowDownload: boolean;
-  /** "Saqlash" kabi qo'shimcha tugmalar (yuklab olishdan keyin, ulashishdan oldin). */
+  /** "Saqlash" kabi qo'shimcha tugmalar (ulashishdan oldin). */
   children?: ReactNode;
 }
 
@@ -28,17 +24,6 @@ const outlineButton =
 /** `https://t.me/share/url` havolasi (Telegram'da ulashish). */
 export function telegramShareUrl(url: string, text: string): string {
   return `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
-}
-
-/** Brauzerga fayl saqlashni topshiradi (imzolangan URL `attachment` sarlavhasi bilan keladi). */
-function startDownload(url: string, filename: string) {
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  link.rel = "noopener";
-  document.body.append(link);
-  link.click();
-  link.remove();
 }
 
 function ShareMenu({ title, grade }: { title: string; grade: number }) {
@@ -151,31 +136,10 @@ export function BookActionsFallback({ grade, slug }: Pick<BookActionsProps, "gra
   );
 }
 
-/** Kitob sahifasining harakatlari: o'qish yoki davom ettirish (asosiy), yuklab olish, saqlash, ulashish. */
-export function BookActions({
-  id,
-  grade,
-  slug,
-  title,
-  pageCount,
-  allowDownload,
-  children,
-}: BookActionsProps) {
+/** Kitob sahifasining harakatlari: o'qish yoki davom ettirish (asosiy), saqlash, ulashish (yuklab olish yo'q). */
+export function BookActions({ id, grade, slug, title, pageCount, children }: BookActionsProps) {
   const t = useTranslations("pdfBooks.page");
-  const [state, setState] = useState<"idle" | "loading" | "failed" | "disabled">("idle");
   const { resumePage } = useBookResume(id, pageCount);
-
-  const download = async () => {
-    setState("loading");
-    try {
-      const file = await getPdfBooksApi().download(id);
-      startDownload(resolveFileUrl(file.url, window.location.origin), file.filename);
-      setState("idle");
-    } catch (error) {
-      const disabled = error instanceof ApiError && error.code === "download_disabled";
-      setState(disabled ? "disabled" : "failed");
-    }
-  };
 
   return (
     <div className="flex flex-col gap-3">
@@ -184,35 +148,9 @@ export function BookActions({
           <BookOpen className="size-5" aria-hidden />
           {resumePage ? t("resume", { page: resumePage }) : t("read")}
         </Link>
-        {allowDownload && (
-          <button
-            type="button"
-            disabled={state === "loading"}
-            aria-busy={state === "loading" || undefined}
-            onClick={() => void download()}
-            className={cn(outlineButton, "h-14 gap-2.5 px-5 text-base")}
-          >
-            {state === "loading" ? (
-              <Loader2 className="size-5 animate-spin" aria-hidden />
-            ) : (
-              <Download className="size-5" aria-hidden />
-            )}
-            {state === "loading" ? t("downloading") : t("download")}
-          </button>
-        )}
         {children}
         <ShareMenu title={title} grade={grade} />
       </div>
-      {(!allowDownload || state === "disabled") && (
-        <p className="text-muted text-sm" role="status">
-          {t("downloadDisabled")}
-        </p>
-      )}
-      {state === "failed" && (
-        <p className="text-danger text-sm" role="alert">
-          {t("downloadFailed")}
-        </p>
-      )}
     </div>
   );
 }

@@ -8,6 +8,7 @@ from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 
 from apps.accounts import audit
+from apps.core.admin_download import cover_response, safe_filename
 from apps.core.throttling import PdfUploadThrottle
 
 from . import ocr as ocr_service
@@ -19,6 +20,7 @@ from .admin_views import TAG, AdminViewSet, IsAdmin
 from .models import PdfBook, PdfBookChapter
 from .pdf_serializers import (
     PdfBookAdminSerializer,
+    PdfDownloadSerializer,
     PdfTransitionSerializer,
     PdfUploadCompleteSerializer,
     PdfUploadFileSerializer,
@@ -65,12 +67,44 @@ class PdfBookAdminViewSet(AdminViewSet):
 
     def get_permissions(self):
         # Prezentatsiyani olib tashlash kitobni o'chirish kabi — faqat admin.
-        if self.action == "slides_delete":
+        if self.action in ("slides_delete", "download", "cover_download"):
             return [IsAdmin()]
         return super().get_permissions()
 
     def label(self, instance) -> str:
         return (instance.title or {}).get("uz", str(instance.pk))
+
+    @extend_schema(
+        operation_id="admin_pdf_books_download",
+        tags=TAG,
+        summary="PDF'ni yuklab olish URL'i (FAQAT admin; foydalanuvchilarda yuklab olish yo'q)",
+        responses=PdfDownloadSerializer,
+    )
+    @action(detail=True, methods=["get"])
+    def download(self, request, pk=None):
+        book = self.get_object()
+        if not book.file:
+            raise NotFound
+        name = safe_filename((book.title or {}).get("uz", book.slug), "pdf")
+        data = storage.key_download_url(
+            storage.download_key(book), str(book.pk), f"/api/v1/pdf-books/{book.pk}/file/", name
+        )
+        self.log("download_pdf", book)
+        response = Response(PdfDownloadSerializer(data).data)
+        response["Cache-Control"] = "private, no-store"
+        return response
+
+    @extend_schema(
+        operation_id="admin_pdf_books_cover_download",
+        tags=TAG,
+        summary="Muqovaning asl faylini yuklab olish (FAQAT admin)",
+        responses={(200, "application/octet-stream"): OpenApiTypes.BINARY},
+    )
+    @action(detail=True, methods=["get"], url_path="cover-download")
+    def cover_download(self, request, pk=None):
+        book = self.get_object()
+        self.log("download_cover", book)
+        return cover_response(book.cover, (book.title or {}).get("uz", book.slug))
 
     def snap(self, instance):
         data = super().snap(instance)

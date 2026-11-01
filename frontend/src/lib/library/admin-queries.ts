@@ -7,6 +7,7 @@ export const libraryKeys = {
   root: [...ADMIN_ROOT_KEY, "library"] as const,
   list: (params: LibraryListParams) => [...ADMIN_ROOT_KEY, "library", "list", params] as const,
   book: (id: string) => [...ADMIN_ROOT_KEY, "library", "book", id] as const,
+  types: [...ADMIN_ROOT_KEY, "library", "types"] as const,
   answerKey: (id: string) => [...ADMIN_ROOT_KEY, "library", "answer-key", id] as const,
 };
 
@@ -16,6 +17,11 @@ export const libraryQueries = {
       queryKey: libraryKeys.list(params),
       queryFn: () => getAdminLibraryApi().list(params),
       placeholderData: (previous) => previous,
+    }),
+  types: () =>
+    queryOptions({
+      queryKey: libraryKeys.types,
+      queryFn: () => getAdminLibraryApi().types(),
     }),
   book: (id: string) =>
     queryOptions({

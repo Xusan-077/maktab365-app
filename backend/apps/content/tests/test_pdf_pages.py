@@ -40,7 +40,7 @@ def test_public_list_and_detail_expose_slug_group_language(catalog):
     assert item["slug"] == "9-sinf-algebra" and item["subject_group"] == "exact"
     by_slug = api.get(f"{PUBLIC}/by-slug/{book.slug}/")
     assert by_slug.status_code == 200 and by_slug.json()["id"] == str(book.pk)
-    assert by_slug.json()["language"] == "uz" and by_slug.json()["allow_download"] is True
+    assert by_slug.json()["language"] == "uz"
     assert api.get(f"{PUBLIC}/by-slug/yoq-kitob/").status_code == 404
 
 
@@ -49,29 +49,23 @@ def test_by_slug_hides_drafts(catalog):
     assert APIClient().get(f"{PUBLIC}/by-slug/{book.slug}/").status_code == 404
 
 
-def test_download_returns_attachment_url_and_counts(catalog):
-    subject = catalog.subject("algebra")
-    book = catalog.pdf_book(subject, title={"uz": "Algebra: 9/sinf"})
-    api = APIClient()
+def test_public_download_endpoint_is_gone(catalog):
+    """Foydalanuvchilar uchun yuklab olish yo'q: endpoint olib tashlangan."""
+    book = catalog.pdf_book(catalog.subject("algebra"))
+    assert APIClient().get(f"{PUBLIC}/{book.pk}/download/").status_code == 404
+    assert "allow_download" not in APIClient().get(f"{PUBLIC}/{book.pk}/").json()
 
-    resp = api.get(f"{PUBLIC}/{book.pk}/download/")
+
+def test_admin_only_pdf_download(catalog):
+    book = catalog.pdf_book(catalog.subject("algebra"), title={"uz": "Algebra: 9/sinf"})
+    url = f"/api/v1/admin/pdf-books/{book.pk}/download/"
+    for role in (None, "student", "teacher", "editor"):
+        assert client_as(role).get(url).status_code in (401, 403), role
+    resp = client_as("admin").get(url)
     assert resp.status_code == 200
     data = resp.json()
-    assert data["filename"] == "Algebra 9 sinf - 9-sinf - Darslik365.pdf"
-    assert "download=" in data["url"] and data["url"].startswith(f"{PUBLIC}/{book.pk}/file/")
-    assert resp["Cache-Control"] == "private, no-store"
-    book.refresh_from_db()
-    assert book.download_count == 1
-
-
-def test_download_disabled_per_book(catalog):
-    book = catalog.pdf_book(catalog.subject("algebra"), allow_download=False)
-    resp = APIClient().get(f"{PUBLIC}/{book.pk}/download/")
-    assert resp.status_code == 403 and resp.json()["code"] == "download_disabled"
-    book.refresh_from_db()
-    assert book.download_count == 0
-    # O'qish baribir ochiq
-    assert APIClient().get(f"{PUBLIC}/{book.pk}/file-url/").status_code == 200
+    assert data["filename"] == "Algebra 9 sinf.pdf"
+    assert "download=" in data["url"] and resp["Cache-Control"] == "private, no-store"
 
 
 def test_local_file_serves_attachment_when_download_param(catalog):

@@ -2,20 +2,82 @@ from django.conf import settings
 from django.core.validators import MaxLengthValidator, MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
+from django.utils.text import slugify
 
 from apps.content.models import BookLanguage
 from apps.content.storage import covers_storage
+from apps.core.fields import LocalizedTextField
 from apps.core.models import TimeStampedModel, UUIDModel
 
 DESCRIPTION_MAX = 4000
+SLUG_MAX = 120
+
+# Tizimli tur: maktab darsliklari (`apps.content.PdfBook`) shu tur ostida ko'rsatiladi.
+TEXTBOOK_TYPE_SLUG = "maktab-darsliklari"
+FICTION_TYPE_SLUG = "badiiy-kitoblar"
+OTHER_TYPE_SLUG = "boshqa"
 
 
-class BookType(models.TextChoices):
-    TEXTBOOK = "textbook", "Darslik"
+class ReadingMode(models.TextChoices):
+    """O'qish oynasi rejimi (katalog turidan alohida): math yechim, test kaliti, badiiy matn."""
+
+    STANDARD = "standard", "Oddiy"
     FICTION = "fiction", "Badiiy kitob"
     MATH = "math", "Matematika"
     TEST = "test", "Test to'plami"
-    OTHER = "other", "Boshqa"
+
+
+class BookType(UUIDModel, TimeStampedModel):
+    """Katalog guruhi (admin boshqaradi): "Maktab darsliklari", "Badiiy kitoblar", "Boshqa"…"""
+
+    name = LocalizedTextField()
+    slug = models.SlugField(max_length=SLUG_MAX, unique=True)
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    # Tizimli tur o'chirilmaydi va slug'i o'zgarmaydi.
+    is_system = models.BooleanField(default=False, editable=False)
+
+    class Meta:
+        ordering = ["order", "slug"]
+
+    def __str__(self):
+        return self.slug
+
+
+_CYRILLIC = {
+    **dict(zip("абвгдезийклмнопрстуфыэ", "abvgdezijklmnoprstufye", strict=True)),
+    **{"ж": "j", "х": "x", "ц": "ts", "ч": "ch", "ш": "sh", "щ": "sh", "ю": "yu", "я": "ya"},
+    **{"ё": "yo", "ў": "o", "қ": "q", "ғ": "g", "ҳ": "h", "ъ": "", "ь": ""},
+}
+
+
+def make_slug(text: str, fallback: str = "kitob") -> str:
+    """URL uchun slug: kirill harflar lotinga o'giriladi, bo'sh chiqsa `fallback`."""
+    latin = "".join(_CYRILLIC.get(ch, ch) for ch in text.lower())
+    return slugify(latin.replace("'", "").replace("ʻ", ""))[: SLUG_MAX - 6].strip("-") or fallback
+
+
+def unique_book_slug(title: str, exclude_pk=None) -> str:
+    base = make_slug(title)
+    taken = set(
+        Book.objects.filter(slug__startswith=base)
+        .exclude(pk=exclude_pk)
+        .values_list("slug", flat=True)
+    )
+    slug, n = base, 1
+    while slug in taken:
+        n += 1
+        slug = f"{base}-{n}"
+    return slug
+
+
+def default_book_type_id():
+    """Tur berilmagan kitob uchun "Boshqa" (migratsiya yaratadi; yo'q bo'lsa — shu yerda)."""
+    obj, _ = BookType.objects.get_or_create(
+        slug=OTHER_TYPE_SLUG,
+        defaults={"name": {"uz": "Boshqa", "ru": "Другое", "en": "Other"}, "order": 100},
+    )
+    return obj.pk
 
 
 class BookStatus(models.TextChoices):
@@ -38,9 +100,18 @@ class Book(UUIDModel, TimeStampedModel):
     objects = BookQuerySet.as_manager()
 
     title = models.CharField(max_length=255)
+    # URL uchun barqaror identifikator (yaratilganda sarlavhadan; keyin o'zgarmaydi).
+    slug = models.SlugField(max_length=SLUG_MAX, unique=True, blank=True)
     author = models.CharField(max_length=255, blank=True)
-    type = models.CharField(
-        max_length=16, choices=BookType.choices, default=BookType.OTHER, db_index=True
+    # Katalog guruhi (admin boshqaradi) va o'qish rejimi (reader xatti-harakati) alohida.
+    book_type = models.ForeignKey(
+        BookType,
+        on_delete=models.PROTECT,
+        related_name="books",
+        default=default_book_type_id,
+    )
+    reading_mode = models.CharField(
+        max_length=16, choices=ReadingMode.choices, default=ReadingMode.STANDARD, db_index=True
     )
     grade_level = models.PositiveSmallIntegerField(
         null=True,
@@ -52,6 +123,10 @@ class Book(UUIDModel, TimeStampedModel):
     description = models.TextField(blank=True, validators=[MaxLengthValidator(DESCRIPTION_MAX)])
     # Ommaviy `covers` saqlash (CDN orqali beriladi).
     cover_image = models.FileField(upload_to="covers/", blank=True, storage=covers_storage)
+    # Saytga beriladigan kichik (~400px) WebP variant: `cover_image` o'zgarsa `save()` qayta quradi.
+    cover_small = models.FileField(
+        upload_to="covers/", blank=True, editable=False, storage=covers_storage
+    )
     # Muqova PDF'ning 1-betidan avtomatik olingan (admin qo'lda yuklagan muqova ustun va
     # hech qachon almashtirilmaydi; avto muqova PDF almashganda yangilanadi).
     cover_generated = models.BooleanField(default=False, editable=False)
@@ -80,14 +155,29 @@ class Book(UUIDModel, TimeStampedModel):
 
     class Meta:
         ordering = ["-created_at", "pk"]
-        indexes = [models.Index(fields=["type", "is_published", "status"])]
+        indexes = [models.Index(fields=["book_type", "is_published", "status"])]
 
     def __str__(self):
         return self.title
 
+    @property
+    def public_cover(self):
+        """Saytga beriladigan muqova: kichik variant (yo'q bo'lsa — asl)."""
+        return self.cover_small or self.cover_image
+
     def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = unique_book_slug(self.title, exclude_pk=self.pk)
         if self.is_published and self.published_at is None:
             self.published_at = timezone.now()
+        from .covers import build_small
+
+        before = self.cover_small.name if self.cover_small else ""
+        build_small(self)
+        if (self.cover_small.name if self.cover_small else "") != before:
+            update_fields = kwargs.get("update_fields")
+            if update_fields is not None:
+                kwargs["update_fields"] = {*update_fields, "cover_small"}
         super().save(*args, **kwargs)
 
 

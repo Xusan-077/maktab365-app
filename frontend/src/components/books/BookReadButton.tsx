@@ -12,13 +12,21 @@ import { bookReaderPath } from "@/lib/utils/routes";
  * Kitob sahifasidagi asosiy tugma: "O'qishni boshlash" / "Davom ettirish (45-bet)" / "Qayta o'qish".
  * Saqlangan bet aniqlanguncha "boshlash" ko'rsatiladi (tugma joyi o'zgarmaydi), keyin matn almashadi.
  */
-export function BookReadButton({ bookId, pageCount }: { bookId: string; pageCount: number }) {
+export function BookReadButton({
+  bookId,
+  slug,
+  pageCount,
+}: {
+  bookId: string;
+  slug: string;
+  pageCount: number;
+}) {
   const t = useTranslations("books.detail");
   const { lastPage } = useBookProgress(bookId);
   const state = resumeState(lastPage, pageCount);
 
   const href =
-    state === "continue" && lastPage ? bookReaderPath(bookId, lastPage) : bookReaderPath(bookId);
+    state === "continue" && lastPage ? bookReaderPath(slug, lastPage) : bookReaderPath(slug);
   const Icon = state === "finished" ? RotateCcw : BookOpen;
   const label =
     state === "continue" && lastPage

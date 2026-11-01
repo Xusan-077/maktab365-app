@@ -221,7 +221,7 @@ def _read_url(key: str, owner: str, local_path: str, filename: str | None = None
 
     `filename` berilsa `Content-Disposition: attachment` (yuklab olish), aks holda `inline`.
     """
-    ttl = settings.PDF_SIGNED_URL_SECONDS
+    ttl = settings.PDF_READ_URL_SECONDS
     if is_remote():
         url = _client().generate_presigned_url(
             "get_object",
@@ -239,6 +239,11 @@ def _read_url(key: str, owner: str, local_path: str, filename: str | None = None
         if filename:
             url += f"&{urlencode({'download': filename})}"
     return {"url": url, "expires_in": ttl}
+
+
+def key_download_url(key: str, owner: str, local_path: str, filename: str) -> dict:
+    """Faqat admin endpoint'i uchun: `attachment` bilan imzolangan URL."""
+    return {**_read_url(key, owner, local_path, filename=filename), "filename": filename}
 
 
 def key_read_url(key: str, owner: str, local_path: str) -> dict:
@@ -289,7 +294,7 @@ def slides_read_url(book, chapter) -> dict:
 def check_key_token(token: str, book_id, key: str) -> bool:
     try:
         data = signing.loads(
-            token, salt=FILE_TOKEN_SALT, max_age=settings.PDF_SIGNED_URL_SECONDS + 60
+            token, salt=FILE_TOKEN_SALT, max_age=settings.PDF_READ_URL_SECONDS + 60
         )
     except signing.BadSignature:
         return False

@@ -1,21 +1,12 @@
 import { GRADES } from "@/types/catalog";
-import type { BookFilters, BookLanguage, BookType } from "./api";
+import type { BookFilters, BookLanguage, ReadingMode } from "./api";
 import { BOOKS_PAGE_SIZE } from "./api";
 
-/** Tur → URL qiymati (`/kitoblar?tur=badiiy`). Tartib — tablar tartibi. */
-export const BOOK_TYPE_URL = {
-  textbook: "darslik",
-  fiction: "badiiy",
-  math: "matematika",
-  test: "test",
-  other: "boshqa",
-} as const satisfies Record<BookType, string>;
-
-export const BOOK_TYPES = Object.keys(BOOK_TYPE_URL) as BookType[];
 export const BOOK_LANGUAGES: readonly BookLanguage[] = ["uz", "ru", "en"];
 
 export interface BooksUrlFilters {
-  type?: BookType;
+  /** Tur slug'i (`?tur=badiiy-kitoblar`). */
+  type?: string;
   grade?: number;
   language?: BookLanguage;
   q?: string;
@@ -34,7 +25,7 @@ const MAX_QUERY_LENGTH = 100;
 /** URL parametrlari → filtrlar; noto'g'ri qiymatlar jimgina tashlanadi. */
 export function parseBookFilters(raw: RawParams): BooksUrlFilters {
   const typeRaw = first(raw.tur);
-  const type = BOOK_TYPES.find((value) => BOOK_TYPE_URL[value] === typeRaw);
+  const type = typeRaw && /^[a-z0-9-]{1,120}$/.test(typeRaw) ? typeRaw : undefined;
   const gradeRaw = first(raw.sinf);
   const grade = gradeRaw && /^\d{1,2}$/.test(gradeRaw) ? Number(gradeRaw) : undefined;
   const language = first(raw.til) as BookLanguage | undefined;
@@ -52,7 +43,7 @@ export function parseBookFilters(raw: RawParams): BooksUrlFilters {
 /** Filtrlar → query string (kanonik tartib: bir xil filtr — bir xil URL). */
 export function bookQuery(filters: BooksUrlFilters): string {
   const query = new URLSearchParams();
-  if (filters.type) query.set("tur", BOOK_TYPE_URL[filters.type]);
+  if (filters.type) query.set("tur", filters.type);
   if (filters.grade) query.set("sinf", String(filters.grade));
   if (filters.language) query.set("til", filters.language);
   if (filters.q) query.set("q", filters.q);
@@ -85,11 +76,20 @@ export function toBooksApiFilters(filters: BooksUrlFilters): BookFilters {
   };
 }
 
-/** Tur → fan yo'nalishi rangi (`globals.css` `--group-*`): muqova zaxirasi va belgi. */
-export const BOOK_TYPE_GROUP = {
-  textbook: "natural",
-  fiction: "language",
-  math: "exact",
-  test: "social",
-  other: "arts",
-} as const satisfies Record<BookType, string>;
+const TYPE_GROUP: Record<string, string> = {
+  "maktab-darsliklari": "natural",
+  "badiiy-kitoblar": "language",
+  boshqa: "arts",
+};
+const GROUPS = ["exact", "natural", "language", "social", "arts"] as const;
+
+/** Muqova zaxirasi rangi (`globals.css` `--group-*`): o'qish rejimi yoki tur slug'idan. */
+export function bookGroup(typeSlug: string, mode: ReadingMode): string {
+  if (mode === "math") return "exact";
+  if (mode === "test") return "social";
+  const known = TYPE_GROUP[typeSlug];
+  if (known) return known;
+  let hash = 0;
+  for (const char of typeSlug) hash = (hash * 31 + char.charCodeAt(0)) % GROUPS.length;
+  return GROUPS[hash];
+}

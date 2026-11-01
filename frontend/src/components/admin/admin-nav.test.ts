@@ -7,27 +7,20 @@ describe("adminNavFor", () => {
   it("foydalanuvchilar bo'limi faqat admin'ga", () => {
     expect(keys("admin")).toEqual([
       "dashboard",
-      "books",
       "library",
       "messages",
       "subjects",
       "stats",
       "users",
     ]);
-    expect(keys("editor")).toEqual([
-      "dashboard",
-      "books",
-      "library",
-      "messages",
-      "subjects",
-      "stats",
-    ]);
+    expect(keys("editor")).toEqual(["dashboard", "library", "messages", "subjects", "stats"]);
   });
 
-  it("kitob sahifalari Kitoblar bo'limini faol qiladi", () => {
-    const books = adminNavFor("editor").find((item) => item.key === "books")!;
+  it("darslik va kitob sahifalari yagona Kutubxona bo'limini faol qiladi", () => {
+    const books = adminNavFor("editor").find((item) => item.key === "library")!;
     expect(books.isActive("/admin/kitoblar")).toBe(true);
     expect(books.isActive("/admin/kitoblar/abc")).toBe(true);
+    expect(books.isActive("/admin/kutubxona/turlar")).toBe(true);
     expect(books.isActive("/admin/fanlar")).toBe(false);
     expect(books.isActive("/admin")).toBe(false);
   });

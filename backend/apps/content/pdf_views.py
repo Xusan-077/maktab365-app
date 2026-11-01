@@ -4,17 +4,17 @@ import re
 from email.utils import formatdate
 
 from django.core.files.storage import default_storage
-from django.db.models import Count, F, Q
+from django.db.models import Count, Q
 from django.http import HttpResponse, StreamingHttpResponse
 from django.utils import timezone
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import generics
-from rest_framework.exceptions import APIException, NotFound, ValidationError
+from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.analytics import services as analytics
+from apps.core.file_access import FILE_URL_THROTTLES, check_origin, log_file_url
 
 from . import pdf_storage as storage
 from .cache import public_cached
@@ -23,7 +23,6 @@ from .pdf_serializers import (
     ChapterHitSerializer,
     PdfBookDetailSerializer,
     PdfBookSerializer,
-    PdfDownloadSerializer,
     PdfFileUrlSerializer,
 )
 from .pdf_services import public_pdf_books, visible_pdf_books
@@ -211,35 +210,9 @@ class PdfBookBySlugView(PublicView, APIView):
         return Response(PdfBookDetailSerializer(book, context={"request": request}).data)
 
 
-class DownloadDisabled(APIException):
-    status_code = 403
-    default_code = "download_disabled"
-    default_detail = "Download is disabled for this book."
-
-
-class PdfDownloadView(PublicView, APIView):
-    throttle_classes = APIView.throttle_classes  # imzo berish: umumiy tezlik chegarasida
-
-    @extend_schema(
-        operation_id="pdf_books_download",
-        responses=PdfDownloadSerializer,
-        summary="Yuklab olish URL'i (`attachment`, chiroyli nom); yuklab olishlar soni oshadi",
-        tags=TAGS,
-    )
-    def get(self, request, pk):
-        book = _visible_book_or_404(request, pk)
-        if not book.allow_download:
-            raise DownloadDisabled()
-        # `update()` — `updated_at` va ochiq kesh versiyasiga tegmaydi.
-        PdfBook.objects.filter(pk=book.pk).update(download_count=F("download_count") + 1)
-        analytics.record_download(book.pk)
-        response = Response(PdfDownloadSerializer(storage.download_url(book)).data)
-        response["Cache-Control"] = "private, no-store"
-        return response
-
-
 class PdfFileUrlView(PublicView, APIView):
-    throttle_classes = APIView.throttle_classes  # imzo berish: umumiy tezlik chegarasida
+    # O'qish URL'i: IP va foydalanuvchi bo'yicha alohida chegara (+ umumiy), origin tekshiruvi.
+    throttle_classes = [*APIView.throttle_classes, *FILE_URL_THROTTLES]
 
     @extend_schema(
         operation_id="pdf_books_file_url",
@@ -248,7 +221,9 @@ class PdfFileUrlView(PublicView, APIView):
         tags=TAGS,
     )
     def get(self, request, pk):
+        check_origin(request)
         book = _visible_book_or_404(request, pk)
+        log_file_url(request, "pdf_book", book.pk)
         response = Response(PdfFileUrlSerializer(storage.read_url(book)).data)
         response["Cache-Control"] = "private, no-store"
         return response

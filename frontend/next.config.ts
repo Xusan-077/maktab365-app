@@ -42,6 +42,16 @@ const MOVED: { source: string; destination: string }[] = [
   { source: `/${LOCALE}/admin/mavzular/:path*`, destination: "/:locale/admin/kitoblar" },
 ];
 
+/**
+ * Kitoblar bo'limi "Kutubxona"ga birlashdi: eski `/kitoblar/...` havolalari 301 bilan (saqlangan
+ * havolalar va qidiruv indeksi uchun). Query (`?bet=`) saqlanadi; `/kitoblar/<uuid>` sahifaning
+ * o'zida slug'ga yo'naltiriladi.
+ */
+const MOVED_301: { source: string; destination: string }[] = [
+  { source: `/${LOCALE}/kitoblar`, destination: "/:locale/kutubxona" },
+  { source: `/${LOCALE}/kitoblar/:path*`, destination: "/:locale/kutubxona/:path*" },
+];
+
 const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
@@ -53,7 +63,10 @@ const nextConfig: NextConfig = {
       },
     },
   },
-  redirects: async () => MOVED.map((rule) => ({ ...rule, permanent: true })),
+  redirects: async () => [
+    ...MOVED_301.map((rule) => ({ ...rule, statusCode: 301 as const })),
+    ...MOVED.map((rule) => ({ ...rule, permanent: true })),
+  ],
   // Kirish sahifalari brauzer keshida turmasin: kirgan foydalanuvchini proxy har safar o'z paneliga
   // yo'naltiradi (aks holda `s-maxage`/`stale-while-revalidate` bilan eski "kirish" sahifasi ko'rinib qoladi).
   headers: async () => [

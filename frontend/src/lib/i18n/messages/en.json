@@ -154,7 +154,7 @@
     "skipToContent": "Skip to main content"
   },
   "nav": {
-    "textbooks": "Textbooks",
+    "textbooks": "School textbooks",
     "subjects": "Subjects",
     "about": "About",
     "help": "Help",
@@ -167,7 +167,7 @@
     "goToCabinet": "Go to dashboard",
     "goToTeacher": "Go to teacher panel",
     "games": "Games",
-    "books": "Books"
+    "books": "Library"
   },
   "search": {
     "label": "Search the site",
@@ -914,7 +914,8 @@
         "ocr_disabled": "OCR is not enabled on the server yet.",
         "ocr_not_needed": "This book already has a text layer — OCR is not needed.",
         "ocr_in_progress": "OCR is already queued or running.",
-        "processing_in_progress": "Pages are being prepared right now. Wait until it finishes."
+        "processing_in_progress": "Pages are being prepared right now. Wait until it finishes.",
+        "system_type": "A system type cannot be deleted or disabled."
       },
       "fields": {
         "invalid": "Invalid value",
@@ -1108,8 +1109,6 @@
       "deleteTitle": "Delete PDF book",
       "deleteDescription": "“{title}”, its PDF file, table of contents and readers’ progress will be deleted. This cannot be undone.",
       "language": "Book language",
-      "allowDownload": "Allow download",
-      "allowDownloadHint": "When off, the book can only be read online (copyright).",
       "downloads": "Downloads: {count}",
       "duplicate": "Duplicate",
       "duplicated": "Copy created as a draft",
@@ -1526,7 +1525,8 @@
       "searchLabel": "Search by title or author",
       "filters": {
         "allTypes": "All types",
-        "allStatuses": "All statuses"
+        "allStatuses": "All statuses",
+        "typesLabel": "Book types"
       },
       "empty": "No books yet. Add the first one.",
       "emptyFiltered": "No books match these filters.",
@@ -1564,7 +1564,14 @@
         "descriptionTooLong": "Up to 4000 characters",
         "chapterTitleRequired": "Enter a section title",
         "chapterTitleTooLong": "Up to 200 characters",
-        "chapterPageInvalid": "Page numbers start at 1"
+        "chapterPageInvalid": "Page numbers start at 1",
+        "readingModeLabel": "Reading mode",
+        "readingModes": {
+          "standard": "Standard",
+          "fiction": "Fiction text",
+          "math": "Math (solutions)",
+          "test": "Test collection (key)"
+        }
       },
       "file": {
         "title": "PDF file",
@@ -1649,7 +1656,38 @@
             "not_test_book": "the book type is not Test"
           }
         }
+      },
+      "manageTypes": "Manage types",
+      "addTextbook": "Add school textbook",
+      "textbooksHint": "School textbooks have their own detailed management (grade, subject, contents).",
+      "textbooksManage": "Go to textbooks",
+      "types": {
+        "metaTitle": "Library types",
+        "title": "Library types",
+        "description": "Catalog groups for books. An empty type can be deleted; the system type cannot.",
+        "back": "Back to library",
+        "add": "Add type",
+        "createTitle": "New type",
+        "editTitle": "Edit type",
+        "name": "Name",
+        "nameRequired": "Enter the Uzbek name",
+        "order": "Order",
+        "orderHint": "Lower numbers appear first.",
+        "active": "Visible on the site",
+        "activeHint": "If off, the type and its books are hidden from the catalog.",
+        "system": "System type",
+        "systemHint": "A system type cannot be deleted",
+        "inactive": "hidden",
+        "meta": "{count} books · order {order}",
+        "deleteTitle": "Delete type",
+        "deleteText": "The type “{name}” will be deleted. This cannot be undone."
       }
+    },
+    "downloads": {
+      "pdf": "Download PDF",
+      "cover": "Download cover",
+      "forbidden": "Downloading is allowed for administrators only.",
+      "failed": "Could not download. Please try again."
     }
   },
   "pdfBooks": {
@@ -1844,11 +1882,6 @@
     },
     "page": {
       "read": "Read online",
-      "download": "Download PDF",
-      "downloadSize": "Download PDF ({size})",
-      "downloading": "Preparing…",
-      "downloadFailed": "Could not download. Please try again.",
-      "downloadDisabled": "Downloading this book is turned off for copyright reasons. You can read it online.",
       "share": "Share",
       "shareTelegram": "Share on Telegram",
       "copyLink": "Copy link",
@@ -2300,7 +2333,7 @@
       "tagline": "Grade 1–11 school textbooks — free and open to everyone.",
       "pages": "Pages",
       "subjects": "Subjects",
-      "textbooks": "Textbooks",
+      "textbooks": "School textbooks",
       "telegram": "Telegram bot",
       "help": "Help",
       "contact": "Contact us",
@@ -2309,7 +2342,8 @@
       "copyright": "© {year} darslik365",
       "terms": "Terms of use",
       "privacy": "Privacy policy",
-      "legal": "Legal"
+      "legal": "Legal",
+      "library": "Library"
     },
     "showcase": {
       "title": "Site components",
@@ -2989,7 +3023,6 @@
       "notesClose": "Close notes",
       "export": {
         "menu": "Download",
-        "page": "Download page (PNG)",
         "notes": "Download side notes (.md)",
         "failed": "Download failed. Try again.",
         "pageHeading": "Page {page}"
@@ -3236,6 +3269,7 @@
         "loading": "Loading result…",
         "loadError": "Could not load the result."
       }
-    }
+    },
+    "intro": "Fiction, study aids and other publications — read online for free."
   }
 }

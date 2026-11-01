@@ -14,7 +14,7 @@ from apps.core.permissions import IsLearner
 
 from . import testmode
 from .me_views import valid_page
-from .models import AnswerAttempt, AnswerKeyItem, BookType, SheetAnswer
+from .models import AnswerAttempt, AnswerKeyItem, ReadingMode, SheetAnswer
 from .views import visible_book
 
 TAGS = ["books"]
@@ -24,7 +24,7 @@ ATTEMPTS_LIMIT = 50
 def test_book(request, pk):
     """Ko'rinadigan test kitobi; boshqa tur uchun rejim yo'q (404)."""
     book = visible_book(request, pk)
-    if book.type != BookType.TEST:
+    if book.reading_mode != ReadingMode.TEST:
         raise NotFound
     return book
 

@@ -4,12 +4,13 @@ from django.dispatch import receiver
 
 from apps.content.cache import bump_content_version
 
-from .models import Book, BookChapter, BookPage
+from .models import Book, BookChapter, BookPage, BookType
 
 
 @receiver([post_save, post_delete], sender=Book)
 @receiver([post_save, post_delete], sender=BookChapter)
 @receiver([post_save, post_delete], sender=BookPage)
+@receiver([post_save, post_delete], sender=BookType)
 def invalidate_content_cache(sender, **kwargs):
     """Ochiq `books/*` javoblari `public_cached` da turadi: o'zgarishda kesh versiyasi almashadi."""
     transaction.on_commit(bump_content_version)

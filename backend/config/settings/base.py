@@ -158,6 +158,13 @@ PDF_BOOK_MAX_BYTES = int(env.str("PDF_BOOK_MAX_BYTES", default="").strip() or 0)
 PDF_UPLOAD_PART_BYTES = env.int("PDF_UPLOAD_PART_BYTES", default=8 * 1024 * 1024)
 # Imzolangan o'qish/yuklash URL'lari muddati (soniya); 10–15 daqiqa tavsiya etiladi.
 PDF_SIGNED_URL_SECONDS = env.int("PDF_SIGNED_URL_SECONDS", default=15 * 60)
+# PDF O'QISH/yuklab olish URL'lari muddati (qisqa: hotlink va ulashishga qarshi, 5-10 daqiqa).
+PDF_READ_URL_SECONDS = env.int("PDF_READ_URL_SECONDS", default=10 * 60)
+# O'qish URL'i endpoint'i (har PDF ochilishi): IP va foydalanuvchi bo'yicha alohida chegara;
+# bir IP daqiqada shundan ko'p so'rasa `file_url_burst` ogohlantirishi loglanadi.
+FILE_URL_IP_THROTTLE_RATE = env("FILE_URL_IP_THROTTLE_RATE", default="40/min")
+FILE_URL_USER_THROTTLE_RATE = env("FILE_URL_USER_THROTTLE_RATE", default="60/min")
+FILE_URL_BURST_LOG = env.int("FILE_URL_BURST_LOG", default=20)
 # OCR (matn qatlami yo'q kitoblar, `apps/content/ocr.py`): hozircha skelet — yoqilmaguncha admin
 # tugmasi o'chiq. Yoqilganda alohida `ocr` navbatini o'qiydigan worker kerak (ocrmypdf + tesseract).
 OCR_ENABLED = env.bool("OCR_ENABLED", default=False)
@@ -216,6 +223,8 @@ REST_FRAMEWORK = {
         # Ketma-ket yuborish (bir daqiqada 2 tadan ko'p emas); e2e uchun env bilan oshiriladi.
         "support_burst": env("SUPPORT_BURST_THROTTLE_RATE", default="2/min"),
         "pdf_upload": PDF_UPLOAD_THROTTLE_RATE,
+        "file_url_ip": FILE_URL_IP_THROTTLE_RATE,
+        "file_url_user": FILE_URL_USER_THROTTLE_RATE,
         "stats": env("STATS_THROTTLE_RATE", default="600/hour"),
         # Telegram bot orqali kirish: yangi havola (IP) va holatni 2 s da so'rash (IP).
         "telegram_start": env("TELEGRAM_START_THROTTLE_RATE", default="10/min"),
@@ -297,7 +306,7 @@ SPECTACULAR_SETTINGS = {
         "LocaleEnum": "apps.accounts.models.Locale.choices",
         "SupportKindEnum": "apps.support.models.Kind.choices",
         "SupportStatusEnum": "apps.support.models.Status.choices",
-        "BookTypeEnum": "apps.books.models.BookType.choices",
+        "ReadingModeEnum": "apps.books.models.ReadingMode.choices",
         "BookStatusEnum": "apps.books.models.BookStatus.choices",
         "AnnotationTypeEnum": "apps.books.models.AnnotationType.choices",
     },

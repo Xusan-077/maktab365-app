@@ -154,7 +154,7 @@
     "skipToContent": "Asosiy kontentga o'tish"
   },
   "nav": {
-    "textbooks": "Darsliklar",
+    "textbooks": "Maktab darsliklari",
     "subjects": "Fanlar",
     "about": "Loyiha haqida",
     "help": "Yordam",
@@ -167,7 +167,7 @@
     "goToCabinet": "Kabinetga o'tish",
     "goToTeacher": "Ustoz paneliga o'tish",
     "games": "O'yinlar",
-    "books": "Kitoblar"
+    "books": "Kutubxona"
   },
   "search": {
     "label": "Saytdan qidirish",
@@ -914,7 +914,8 @@
         "ocr_disabled": "OCR serverda hali yoqilmagan.",
         "ocr_not_needed": "Bu kitobda matn qatlami bor — OCR kerak emas.",
         "ocr_in_progress": "OCR allaqachon navbatda yoki bajarilmoqda.",
-        "processing_in_progress": "Sahifalar hozir tayyorlanmoqda. Tugashini kuting."
+        "processing_in_progress": "Sahifalar hozir tayyorlanmoqda. Tugashini kuting.",
+        "system_type": "Tizim turini o'chirib yoki yashirib bo'lmaydi."
       },
       "fields": {
         "invalid": "Noto'g'ri qiymat",
@@ -1108,8 +1109,6 @@
       "deleteTitle": "PDF kitobni o'chirish",
       "deleteDescription": "«{title}», uning PDF fayli, mundarijasi va o'quvchilarning shu kitob bo'yicha o'qish holati o'chiriladi. Buni qaytarib bo'lmaydi.",
       "language": "Kitob tili",
-      "allowDownload": "Yuklab olishga ruxsat",
-      "allowDownloadHint": "O'chirilsa, kitob faqat onlayn o'qiladi (mualliflik huquqi).",
       "downloads": "Yuklab olishlar soni: {count}",
       "duplicate": "Nusxalash",
       "duplicated": "Nusxa qoralama sifatida yaratildi",
@@ -1526,7 +1525,8 @@
       "searchLabel": "Kitob yoki muallif qidirish",
       "filters": {
         "allTypes": "Barcha turlar",
-        "allStatuses": "Barcha holatlar"
+        "allStatuses": "Barcha holatlar",
+        "typesLabel": "Kitob turlari"
       },
       "empty": "Hali kitob yo'q. Birinchi kitobni qo'shing.",
       "emptyFiltered": "Bu filtrlarga mos kitob yo'q.",
@@ -1564,7 +1564,14 @@
         "descriptionTooLong": "Tavsif 4000 belgidan oshmasin",
         "chapterTitleRequired": "Bo'lim nomini kiriting",
         "chapterTitleTooLong": "Bo'lim nomi 200 belgidan oshmasin",
-        "chapterPageInvalid": "Bet raqami 1 dan boshlanadi"
+        "chapterPageInvalid": "Bet raqami 1 dan boshlanadi",
+        "readingModeLabel": "O'qish rejimi",
+        "readingModes": {
+          "standard": "Oddiy",
+          "fiction": "Badiiy matn",
+          "math": "Matematika (yechimlar)",
+          "test": "Test to'plami (kalit)"
+        }
       },
       "file": {
         "title": "PDF fayl",
@@ -1649,7 +1656,38 @@
             "not_test_book": "bu kitob turi «test» emas"
           }
         }
+      },
+      "manageTypes": "Turlarni boshqarish",
+      "addTextbook": "Maktab darsligi qo'shish",
+      "textbooksHint": "Maktab darsliklari alohida, batafsil boshqaruvga ega (sinf, fan, mundarija).",
+      "textbooksManage": "Darsliklar bo'limiga o'tish",
+      "types": {
+        "metaTitle": "Kutubxona turlari",
+        "title": "Kutubxona turlari",
+        "description": "Kitoblar katalogdagi guruhlari. Bo'sh turni o'chirish mumkin; tizim turi o'chirilmaydi.",
+        "back": "Kutubxonaga qaytish",
+        "add": "Tur qo'shish",
+        "createTitle": "Yangi tur",
+        "editTitle": "Turni tahrirlash",
+        "name": "Nomi",
+        "nameRequired": "O'zbekcha nom kiriting",
+        "order": "Tartib raqami",
+        "orderHint": "Kichik raqam oldinda ko'rinadi.",
+        "active": "Saytda ko'rinsin",
+        "activeHint": "O'chirilsa, tur va uning kitoblari katalogda chiqmaydi.",
+        "system": "Tizim turi",
+        "systemHint": "Tizim turini o'chirib bo'lmaydi",
+        "inactive": "yashirin",
+        "meta": "{count} ta kitob · tartib {order}",
+        "deleteTitle": "Turni o'chirish",
+        "deleteText": "«{name}» turi o'chiriladi. Bu amalni qaytarib bo'lmaydi."
       }
+    },
+    "downloads": {
+      "pdf": "PDF yuklab olish",
+      "cover": "Muqovani yuklab olish",
+      "forbidden": "Yuklab olish faqat administratorga ruxsat etilgan.",
+      "failed": "Yuklab olib bo'lmadi. Qayta urinib ko'ring."
     }
   },
   "pdfBooks": {
@@ -1844,11 +1882,6 @@
     },
     "page": {
       "read": "Onlayn o'qish",
-      "download": "PDF yuklab olish",
-      "downloadSize": "PDF yuklab olish ({size})",
-      "downloading": "Tayyorlanmoqda…",
-      "downloadFailed": "Yuklab olib bo'lmadi. Qayta urinib ko'ring.",
-      "downloadDisabled": "Bu kitobni yuklab olish mualliflik huquqi sababli o'chirilgan. Onlayn o'qishingiz mumkin.",
       "share": "Ulashish",
       "shareTelegram": "Telegram orqali ulashish",
       "copyLink": "Havolani nusxalash",
@@ -2300,7 +2333,7 @@
       "tagline": "1–11-sinf maktab darsliklari — bepul va hamma uchun ochiq.",
       "pages": "Sahifalar",
       "subjects": "Fanlar",
-      "textbooks": "Darsliklar",
+      "textbooks": "Maktab darsliklari",
       "telegram": "Telegram bot",
       "help": "Yordam",
       "contact": "Bog'lanish",
@@ -2309,7 +2342,8 @@
       "copyright": "© {year} darslik365",
       "terms": "Foydalanish shartlari",
       "privacy": "Maxfiylik siyosati",
-      "legal": "Huquqiy ma'lumot"
+      "legal": "Huquqiy ma'lumot",
+      "library": "Kutubxona"
     },
     "showcase": {
       "title": "Sayt komponentlari",
@@ -2989,7 +3023,6 @@
       "notesClose": "Yozuvlar panelini yopish",
       "export": {
         "menu": "Yuklab olish",
-        "page": "Betni yuklab olish (PNG)",
         "notes": "Yon daftarni yuklab olish (.md)",
         "failed": "Yuklab bo'lmadi. Qayta urinib ko'ring.",
         "pageHeading": "{page}-bet"
@@ -3236,6 +3269,7 @@
         "loading": "Natija yuklanmoqda…",
         "loadError": "Natijani yuklab bo'lmadi."
       }
-    }
+    },
+    "intro": "Badiiy kitoblar, o'quv qo'llanmalar va boshqa nashrlar — onlayn va bepul o'qing."
   }
 }

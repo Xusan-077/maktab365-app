@@ -10,7 +10,7 @@ import { routing } from "@/lib/i18n/routing";
 import { getAlternates } from "@/lib/i18n/seo";
 import { ROUTES } from "@/lib/utils/routes";
 
-type Props = PageProps<"/[locale]/kitoblar/yozuvlarim">;
+type Props = PageProps<"/[locale]/kutubxona/yozuvlarim">;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
