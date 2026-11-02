@@ -220,6 +220,12 @@ export interface PdfTocDrawerProps {
   onOpenSlides?: (chapterId: string, slide: number) => void;
   annotations: Annotation[];
   onPickAnnotation: (annotation: Annotation) => void;
+  /** Belgini ro'yxatdan o'chirish. */
+  onRemoveAnnotation?: (annotation: Annotation) => void;
+  /** Kitobdagi barcha yozuvlarni (belgilar + chizmalar) o'chirish. */
+  onClearAll?: () => void;
+  /** Kitobda chizma bor. */
+  hasDrawings?: boolean;
 }
 
 const MOBILE_QUERY = "(max-width: 639px)";
@@ -239,6 +245,9 @@ export function PdfTocDrawer({
   onOpenSlides,
   annotations,
   onPickAnnotation,
+  onRemoveAnnotation,
+  onClearAll,
+  hasDrawings,
 }: PdfTocDrawerProps) {
   const t = useTranslations("pdfBooks.toc");
   const tt = useTranslations("pdfBooks.reader.tabs");
@@ -306,6 +315,9 @@ export function PdfTocDrawer({
                       onPickAnnotation(annotation);
                       close();
                     }}
+                    onRemove={onRemoveAnnotation}
+                    onClearAll={onClearAll}
+                    hasDrawings={hasDrawings}
                   />
                 ),
               },

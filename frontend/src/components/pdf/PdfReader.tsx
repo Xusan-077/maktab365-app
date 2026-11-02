@@ -155,6 +155,7 @@ export function PdfReader({
   const tcontrols = useTranslations("pdfBooks.controls");
   const td = useTranslations("pdfBooks.draw");
   const ts = useTranslations("pdfBooks.selection");
+  const tannotations = useTranslations("pdfBooks.annotations");
   const tb = useTranslations("brand");
   const locale = useLocale() as Locale;
   const searchParams = useSearchParams();
@@ -201,7 +202,7 @@ export function PdfReader({
   const [prefsReady, setPrefsReady] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [findOpen, setFindOpen] = useState(false);
-  const annotations = usePdfAnnotations(bookId, !isLibrary);
+  const annotations = usePdfAnnotations(bookId);
   const addNote = useTopicNotesStore((state) => state.add);
   const requireAuth = useRequireAuth();
   const [drawing, setDrawing] = useState(false);
@@ -279,7 +280,7 @@ export function PdfReader({
   } = useReaderZoom({ stageRef, fullscreen: fullscreen.active });
 
   // Chizish rejimi (qalam, marker, o'chirgich): darslik ham, Kutubxona kitobi ham.
-  const draw = useDrawMode({ bookId, page, total, tone: prefs.tone });
+  const draw = useDrawMode({ bookId, page, tone: prefs.tone });
   /** Uzluksiz rejimda chizish yoqiq: ikki barmoq (yoki stylusdan keyin bitta barmoq) bilan surish. */
   const panVertical = useCallback(
     (dx: number, dy: number) => {
@@ -662,6 +663,21 @@ export function PdfReader({
       toast({ variant: "success", title: ts("noted") });
     }, "note");
   };
+  /** Belgi o'chiriladi va 8 s davomida «Qaytarish» taklif qilinadi. */
+  const removeAnnotation = (id: string) => {
+    const removed = annotations.remove(id);
+    if (!removed) return;
+    toast({
+      title: tannotations("deleted"),
+      action: { label: tannotations("restore"), onClick: () => annotations.restore([removed]) },
+    });
+  };
+  /** Kitobdagi barcha belgilar va chizmalar (tasdiqlangandan keyin) shu qurilmadan o'chiriladi. */
+  const clearAllNotes = () => {
+    annotations.removeAll();
+    void draw.clearBook();
+    toast({ variant: "success", title: tannotations("clearedAll") });
+  };
   const onSelectionHighlight = (selection: TextSelection) => {
     const [first] = selection.rects;
     if (!first) return;
@@ -1019,14 +1035,13 @@ export function PdfReader({
           theme={draw.theme}
           canUndo={draw.canUndo}
           canRedo={draw.canRedo}
-          save={draw.save}
+          canClear={draw.pageHasDrawings}
           onTool={draw.setTool}
           onColor={draw.setColor}
           onWidth={draw.setWidth}
           onUndo={draw.undo}
           onRedo={draw.redo}
-          onRetry={draw.retry}
-          onSignIn={draw.signIn}
+          onClearPage={draw.clearPage}
           onClose={draw.close}
         />
       )}
@@ -1065,6 +1080,9 @@ export function PdfReader({
           onOpenSlides={openSlides}
           annotations={annotations.items}
           onPickAnnotation={(annotation) => goTo(annotation.page)}
+          onRemoveAnnotation={(annotation) => removeAnnotation(annotation.id)}
+          onClearAll={clearAllNotes}
+          hasDrawings={draw.hasDrawings}
         />
       )}
 
@@ -1138,7 +1156,7 @@ export function PdfReader({
           onDelete={
             draft.kind === "edit"
               ? () => {
-                  annotations.remove(draft.annotation.id);
+                  removeAnnotation(draft.annotation.id);
                   setDraft(null);
                 }
               : undefined

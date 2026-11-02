@@ -48,7 +48,13 @@ vi.mock("@/hooks/useRequireAuth", () => ({
   },
 }));
 vi.mock("@/hooks/usePdfAnnotations", () => ({
-  usePdfAnnotations: () => ({ items: [], save: vi.fn(), remove: vi.fn(), failed: false }),
+  usePdfAnnotations: () => ({
+    items: [],
+    save: vi.fn(),
+    remove: vi.fn(),
+    removeAll: vi.fn(),
+    restore: vi.fn(),
+  }),
 }));
 vi.mock("@/lib/pdf-books/api", () => ({
   getPdfBooksApi: () => api,
@@ -81,6 +87,9 @@ vi.mock("./PdfPageCanvas", () => ({
   ),
 }));
 
+import type { Annotation } from "@/lib/books/annotations";
+import { selectPageItems, useBookAnnotationsStore } from "@/stores/book-annotations.store";
+import { useToastStore } from "@/stores/toast.store";
 import { PdfReader } from "./PdfReader";
 
 function setup(query = "", extra: Record<string, unknown> = {}) {
@@ -991,11 +1000,34 @@ describe("PdfReader: chizish rejimi", () => {
     expect(within(toolbar).getAllByTestId("draw-width")).toHaveLength(3);
     fireEvent.click(within(toolbar).getByTestId("draw-tool-marker"));
     expect(within(toolbar).getAllByTestId("draw-color")).toHaveLength(6);
-    // Mehmon: yumshoq «Saqlash uchun kiring».
-    expect(within(toolbar).getByTestId("draw-sign-in")).toBeTruthy();
+    // Chizmalar faqat shu qurilmada (kirish so'ralmaydi); bo'sh betni tozalab bo'lmaydi.
+    expect(within(toolbar).getByTestId("draw-save-status").dataset.state).toBe("local");
+    expect(within(toolbar).queryByTestId("draw-sign-in")).toBeNull();
+    expect(within(toolbar).getByTestId("draw-clear-page").hasAttribute("disabled")).toBe(true);
     fireEvent.keyDown(window, { key: "Escape" });
     expect(screen.queryByTestId("draw-toolbar")).toBeNull();
     expect(screen.getByTestId("reader-floating-nav")).toBeTruthy();
+  });
+
+  it("«Betni tozalash» joriy betni tozalaydi va «Qaytarish» chizmalarni qaytaradi", async () => {
+    setup("page=5");
+    await currentPage();
+    fireEvent.click(screen.getByTestId("draw-toggle"));
+    const toolbar = await screen.findByTestId("draw-toolbar");
+    const stroke = {
+      id: "s1",
+      type: "drawing",
+      data: { tool: "pen", color: "ink", width: 0.004, points: [[0.1, 0.1, 0.5]] },
+    } as Annotation;
+    act(() => useBookAnnotationsStore.getState().commit(5, [stroke]));
+    const clear = within(toolbar).getByTestId("draw-clear-page");
+    await waitFor(() => expect(clear.hasAttribute("disabled")).toBe(false));
+    fireEvent.click(clear);
+    expect(selectPageItems(5)(useBookAnnotationsStore.getState())).toHaveLength(0);
+    const toast = useToastStore.getState().toasts.at(-1);
+    expect(toast?.title).toBe(uz.pdfBooks.draw.pageCleared);
+    act(() => toast?.action?.onClick());
+    expect(selectPageItems(5)(useBookAnnotationsStore.getState()).map((i) => i.id)).toEqual(["s1"]);
   });
 
   it("chizish qatlami faqat joriy bet ±1 da (rejim yoqilganda)", async () => {

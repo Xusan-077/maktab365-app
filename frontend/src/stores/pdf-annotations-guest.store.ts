@@ -8,16 +8,23 @@ interface GuestAnnotationsState {
   items: Annotation[];
   save: (annotation: Annotation) => void;
   remove: (id: string) => void;
+  /** Bitta kitobning barcha belgilari. */
+  removeBook: (bookId: string) => void;
   clear: () => void;
 }
 
-/** Mehmonning belgilari (faqat shu brauzerda); kirgandan keyin `merge-guest-data/` bilan qo'shiladi. */
+/**
+ * O'qish oynasidagi belgilar va eslatmalar — mehmonda ham, kirgan foydalanuvchida ham faqat shu
+ * brauzerda (`localStorage`); serverga yuborilmaydi. (Kalit nomi eski — ma'lumot yo'qolmasin.)
+ */
 export const usePdfAnnotationsGuestStore = create<GuestAnnotationsState>()(
   persist(
     (set) => ({
       items: [],
       save: (annotation) => set((state) => ({ items: upsertAnnotation(state.items, annotation) })),
       remove: (id) => set((state) => ({ items: state.items.filter((item) => item.id !== id) })),
+      removeBook: (bookId) =>
+        set((state) => ({ items: state.items.filter((item) => item.pdf_book_id !== bookId) })),
       clear: () => set({ items: [] }),
     }),
     {

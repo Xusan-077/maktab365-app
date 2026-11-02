@@ -10,7 +10,7 @@ import {
 } from "@/lib/books/annotation-history";
 import type { Annotation, AnnotationTool } from "@/lib/books/annotations";
 
-/** Server bilan sinxronlash uchun: oxirgi o'zgargan bet va uning yangi ro'yxati. */
+/** Saqlash uchun (qurilmaga): oxirgi o'zgargan bet va uning yangi ro'yxati. */
 export interface AnnotationChange {
   seq: number;
   bookId: string;
@@ -20,7 +20,7 @@ export interface AnnotationChange {
 
 interface AnnotationsState {
   bookId: string | null;
-  /** Kimning chizmalari: foydalanuvchi id'si yoki `"guest"` (kirganda betlar qayta yuklanadi). */
+  /** Kimning chizmalari (hozir doim qurilma — `"local"`); almashsa betlar qayta yuklanadi. */
   owner: string | null;
   tool: AnnotationTool;
   selectedId: string | null;
@@ -31,12 +31,17 @@ interface AnnotationsState {
   attach: (bookId: string, owner?: string) => void;
   setTool: (tool: AnnotationTool) => void;
   select: (id: string | null) => void;
-  /** Serverdan kelgan ro'yxat (tarixsiz, faqat bet hali yuklanmagan bo'lsa). */
+  /** Qurilmadan o'qilgan ro'yxat (tarixsiz, faqat bet hali yuklanmagan bo'lsa). */
   hydrate: (page: number, items: readonly Annotation[]) => void;
-  /** Foydalanuvchi o'zgartirdi: tarixga qadam va serverga yuborish. */
+  /** Foydalanuvchi o'zgartirdi: tarixga qadam va qurilmaga yozish. */
   commit: (page: number, items: readonly Annotation[]) => void;
   undo: (page: number) => boolean;
   redo: (page: number) => boolean;
+  /**
+   * Kitobdagi barcha chizmalarni o'chiradi (tasdiqlangandan keyin; tarix ham tozalanadi).
+   * `lastChange` yozilmaydi — qurilmadagi nusxani chaqiruvchi o'zi o'chiradi.
+   */
+  clearAll: () => void;
 }
 
 const EMPTY: readonly Annotation[] = [];
@@ -97,6 +102,11 @@ export const useBookAnnotationsStore = create<AnnotationsState>()((set, get) => 
       record(page, redoHistory(current), bookId);
       return true;
     },
+    clearAll: () => {
+      const pages: Record<number, PageHistory> = {};
+      for (const page of Object.keys(get().pages)) pages[Number(page)] = createHistory();
+      set({ pages, selectedId: null });
+    },
   };
 });
 
@@ -112,3 +122,6 @@ export const selectCanRedo = (page: number) => (state: AnnotationsState) => {
   const history = state.pages[page];
   return history ? canRedo(history) : false;
 };
+/** Kitobda (yuklangan betlarda) kamida bitta chizma bor. */
+export const selectHasDrawings = (state: AnnotationsState): boolean =>
+  Object.values(state.pages).some((history) => history.items.length > 0);

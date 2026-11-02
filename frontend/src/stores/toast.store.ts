@@ -7,6 +7,8 @@ export interface Toast {
   variant: ToastVariant;
   title: string;
   description?: string;
+  /** Ixtiyoriy amal tugmasi (masalan «Qaytarish»): bosilsa bajariladi va xabar yopiladi. */
+  action?: { label: string; onClick: () => void };
 }
 
 interface ToastState {

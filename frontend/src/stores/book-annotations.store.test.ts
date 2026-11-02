@@ -3,6 +3,7 @@ import type { Annotation } from "@/lib/books/annotations";
 import {
   selectCanRedo,
   selectCanUndo,
+  selectHasDrawings,
   selectPageItems,
   useBookAnnotationsStore,
 } from "./book-annotations.store";
@@ -82,5 +83,17 @@ describe("book-annotations.store", () => {
     store().select("a");
     store().setTool("pen");
     expect(store().selectedId).toBeNull();
+  });
+
+  it("clearAll hamma betni tozalaydi (tarix bilan), qurilmaga yozish chaqiruvchida", () => {
+    store().commit(1, [stroke("a")]);
+    store().commit(3, [stroke("b")]);
+    expect(selectHasDrawings(store())).toBe(true);
+    const seq = store().lastChange?.seq;
+    store().clearAll();
+    expect(selectHasDrawings(store())).toBe(false);
+    expect(selectPageItems(1)(store())).toHaveLength(0);
+    expect(selectCanUndo(1)(store())).toBe(false);
+    expect(store().lastChange?.seq).toBe(seq);
   });
 });

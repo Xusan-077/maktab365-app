@@ -1,9 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useDrawings } from "@/hooks/useDrawings";
-import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { useToast } from "@/hooks/useToast";
 import {
   MARKER_COLORS,
@@ -14,15 +13,14 @@ import {
 } from "@/lib/books/annotations";
 import type { BookTheme } from "@/lib/books/reader";
 import type { ReaderTone } from "@/lib/pdf/reader-prefs";
-import { deriveSaveState, useAnnotationSyncStore } from "@/stores/annotation-sync.store";
 import {
   selectCanRedo,
   selectCanUndo,
+  selectHasDrawings,
   selectPageItems,
   useBookAnnotationsStore,
 } from "@/stores/book-annotations.store";
 import { DrawLayer, type DrawTool } from "./DrawLayer";
-import type { DrawSaveState } from "./DrawToolbar";
 
 type ActiveTool = Exclude<DrawTool, "none">;
 
@@ -86,23 +84,21 @@ const THEME_BY_TONE: Record<ReaderTone, BookTheme> = {
 
 /**
  * O'qish oynasidagi chizish rejimi: yoqish/o'chirish, asbob va sozlamalar, joriy bet undo/redo,
- * saqlash holati (kirgan — navbat, mehmon — qurilma). Chizmalar ma'lumoti — `useDrawings`.
+ * betni tozalash («Qaytarish» bilan) va kitobdagi barcha chizmalarni o'chirish. Chizmalar faqat
+ * shu qurilmada saqlanadi — `useDrawings`.
  */
 export function useDrawMode({
   bookId,
   page,
-  total,
   tone,
 }: {
   bookId: string;
   page: number | null;
-  total: number;
   tone: ReaderTone;
 }) {
   const t = useTranslations("pdfBooks.draw");
   const { toast } = useToast();
-  const requireAuth = useRequireAuth();
-  const drawings = useDrawings(bookId, page, total);
+  const drawings = useDrawings(bookId);
   const [on, setOn] = useState(false);
   // `PdfReader` faqat brauzerda (SSR'siz) render bo'ladi: localStorage darhol o'qiladi.
   const [prefs, setPrefs] = useState<DrawPrefs>(loadPrefs);
@@ -119,7 +115,7 @@ export function useDrawMode({
     });
   }, []);
 
-  // Chizmalar hali yuklanmagan betda chizish yopiq (server/qurilma nusxasi ustidan yozilmasin).
+  // Chizmalar qurilmadan o'qilmaguncha chizish yopiq (saqlangan nusxa ustidan yozilmasin).
   const tool: DrawTool = on && drawings.ready ? prefs.tool : "none";
   const marker = prefs.tool === "marker";
   const colors = marker ? MARKER_COLORS : PEN_COLORS;
@@ -129,6 +125,8 @@ export function useDrawMode({
   const theme = THEME_BY_TONE[tone];
 
   const canUndo = useBookAnnotationsStore(selectCanUndo(page ?? 0));
+  const pageItems = useBookAnnotationsStore(selectPageItems(page ?? 0));
+  const hasDrawings = useBookAnnotationsStore(selectHasDrawings);
   const canRedo = useBookAnnotationsStore(selectCanRedo(page ?? 0));
   const undo = useCallback(() => {
     if (page !== null) useBookAnnotationsStore.getState().undo(page);
@@ -159,23 +157,32 @@ export function useDrawMode({
     return () => window.removeEventListener("keydown", onKey);
   }, [on, undo, redo]);
 
-  const queue = useAnnotationSyncStore((state) => state.queue);
-  const savedAt = useAnnotationSyncStore((state) => state.savedAt);
-  const save = useMemo<DrawSaveState>(() => {
-    if (!drawings.signedIn) return "guest";
-    if (drawings.error) return "error";
-    const state = deriveSaveState(queue, savedAt);
-    if (state === "rejected") return queue.code === "page_too_large" ? "tooLarge" : "rejected";
-    if (state === "error" && typeof navigator !== "undefined" && navigator.onLine === false) {
-      return "offline";
-    }
-    return state;
-  }, [drawings.signedIn, drawings.error, queue, savedAt]);
-
   const commit = useCallback((pageNumber: number, items: readonly Annotation[]) => {
     useBookAnnotationsStore.getState().commit(pageNumber, items);
   }, []);
   const onLimit = useCallback(() => toast({ variant: "error", title: t("limit") }), [toast, t]);
+
+  /** Joriy betdagi barcha chizmalar o'chadi (undo tarixida ham qoladi) va «Qaytarish» taklif qilinadi. */
+  const clearPage = useCallback(() => {
+    if (page === null) return;
+    const store = useBookAnnotationsStore.getState();
+    const previous = selectPageItems(page)(store);
+    if (previous.length === 0) return;
+    store.commit(page, []);
+    toast({
+      title: t("pageCleared"),
+      action: {
+        label: t("restore"),
+        onClick: () => {
+          const now = useBookAnnotationsStore.getState();
+          // Tozalangandan keyin yangi chizilgan bo'lsa — eskilari ustiga qo'shiladi.
+          const current = selectPageItems(page)(now);
+          const ids = new Set(current.map((item) => item.id));
+          now.commit(page, [...previous.filter((item) => !ids.has(item.id)), ...current]);
+        },
+      },
+    });
+  }, [page, toast, t]);
 
   return {
     on,
@@ -188,7 +195,10 @@ export function useDrawMode({
     activeTool: prefs.tool,
     canUndo,
     canRedo,
-    save,
+    /** Joriy betda chizma bor (tozalash tugmasi). */
+    pageHasDrawings: pageItems.length > 0,
+    /** Kitobda chizma bor («Hammasini o'chirish»). */
+    hasDrawings,
     toggle: () => setOn((value) => !value),
     close: () => setOn(false),
     setTool: (next: ActiveTool) => update({ tool: next }),
@@ -196,11 +206,8 @@ export function useDrawMode({
     setWidth: (next: number) => update(marker ? { markerWidth: next } : { penWidth: next }),
     undo,
     redo,
-    retry: () => {
-      if (drawings.error) drawings.retry();
-      void drawings.flushNow();
-    },
-    signIn: () => requireAuth(undefined, "save"),
+    clearPage,
+    clearBook: drawings.clearAll,
     commit,
     onLimit,
   };

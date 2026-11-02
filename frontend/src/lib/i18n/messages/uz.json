@@ -1987,7 +1987,16 @@
       "listTitle": "Belgilar va eslatmalar",
       "empty": "Hozircha belgi yo'q. Belgilash tugmasini bosib, sahifada kerakli joyni sudrab belgilang.",
       "page": "{page}-bet",
-      "noNote": "Eslatmasiz"
+      "noNote": "Eslatmasiz",
+      "deleted": "Belgi o'chirildi",
+      "restore": "Qaytarish",
+      "deleteOne": "{page}-betdagi belgini o'chirish",
+      "localOnly": "Yozuvlar faqat shu qurilmada saqlanadi.",
+      "clearAll": "Barcha yozuvlarni o'chirish",
+      "clearAllTitle": "Kitobdagi barcha yozuvlar o'chirilsinmi?",
+      "clearAllText": "Belgilar, eslatmalar va chizmalar shu qurilmadan butunlay o'chiriladi. Buni qaytarib bo'lmaydi.",
+      "clearAllConfirm": "Ha, o'chirish",
+      "clearedAll": "Kitobdagi barcha yozuvlar o'chirildi"
     },
     "appearance": {
       "title": "Ko‘rinish sozlamalari",
@@ -2121,17 +2130,12 @@
         "c4b5fd": "Lavanda"
       },
       "status": {
-        "saving": "Saqlanmoqda…",
-        "saved": "Saqlandi",
-        "offline": "Internet yo'q — qurilmada saqlandi",
-        "failed": "Saqlanmadi",
-        "retry": "Qayta urinish",
-        "tooLarge": "Bu betda chizma juda ko'p",
-        "guest": "Faqat shu qurilmada saqlandi",
-        "signIn": "Saqlash uchun kiring",
-        "loadError": "Chizmalar yuklanmadi"
+        "local": "Faqat shu qurilmada saqlanadi"
       },
-      "limit": "Bu betda chizmalar juda ko'p. Ba'zilarini o'chiring."
+      "limit": "Bu betda chizmalar juda ko'p. Ba'zilarini o'chiring.",
+      "clearPage": "Betni tozalash",
+      "pageCleared": "Betdagi chizmalar o'chirildi",
+      "restore": "Qaytarish"
     }
   },
   "library": {

@@ -1,25 +1,12 @@
 "use client";
 
-import {
-  AlertTriangle,
-  Check,
-  Eraser,
-  Highlighter,
-  Loader2,
-  Pen,
-  Redo2,
-  Undo2,
-  X,
-} from "lucide-react";
+import { Eraser, Highlighter, Pen, Redo2, Smartphone, Trash2, Undo2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { colorLabelKey, resolveColor } from "@/lib/books/annotations";
 import type { BookTheme } from "@/lib/books/reader";
 import { cn } from "@/lib/utils/cn";
 import { READER_ICON_BUTTON } from "../reader/reader-styles";
 import type { DrawTool } from "./DrawLayer";
-
-export type DrawSaveState =
-  "idle" | "saving" | "saved" | "offline" | "error" | "rejected" | "tooLarge" | "guest";
 
 export interface DrawToolbarProps {
   tool: Exclude<DrawTool, "none">;
@@ -30,14 +17,14 @@ export interface DrawToolbarProps {
   theme: BookTheme;
   canUndo: boolean;
   canRedo: boolean;
-  save: DrawSaveState;
+  /** Joriy betda chizma bor — «Betni tozalash» faol. */
+  canClear: boolean;
   onTool: (tool: Exclude<DrawTool, "none">) => void;
   onColor: (color: string) => void;
   onWidth: (index: number) => void;
   onUndo: () => void;
   onRedo: () => void;
-  onRetry: () => void;
-  onSignIn: () => void;
+  onClearPage: () => void;
   onClose: () => void;
 }
 
@@ -50,72 +37,26 @@ const TOOLS = [
 /** Qalinlik namunasi (nuqta diametri, px). */
 const WIDTH_DOTS = [4, 8, 13];
 
-function SaveIndicator({
-  save,
-  onRetry,
-  onSignIn,
-}: Pick<DrawToolbarProps, "save" | "onRetry" | "onSignIn">) {
+/** Chizmalar faqat shu qurilmada saqlanadi (serverga yuborilmaydi). */
+function LocalNotice() {
   const t = useTranslations("pdfBooks.draw.status");
-  if (save === "idle") return <span role="status" className="sr-only" />;
-  if (save === "guest") {
-    return (
-      <span role="status" className="text-ds-muted flex min-w-0 items-center gap-1.5 text-xs">
-        <span className="truncate max-sm:hidden">{t("guest")}</span>
-        <button
-          type="button"
-          onClick={onSignIn}
-          data-testid="draw-sign-in"
-          className="text-ds-accent-ink min-h-8 shrink-0 rounded px-1 font-semibold underline underline-offset-2"
-        >
-          {t("signIn")}
-        </button>
-      </span>
-    );
-  }
-  const problem = save === "error" || save === "rejected" || save === "tooLarge";
   return (
     <span
       role="status"
       data-testid="draw-save-status"
-      data-state={save}
-      className={cn(
-        "flex min-w-0 items-center gap-1.5 text-xs",
-        problem ? "text-red-700 dark:text-red-300" : "text-ds-muted",
-      )}
+      data-state="local"
+      title={t("local")}
+      className="text-ds-muted flex min-w-0 items-center gap-1.5 text-xs"
     >
-      {save === "saving" ? (
-        <Loader2
-          className="size-3.5 shrink-0 animate-spin motion-reduce:animate-none"
-          aria-hidden
-        />
-      ) : problem || save === "offline" ? (
-        <AlertTriangle className="size-3.5 shrink-0" aria-hidden />
-      ) : (
-        <Check className="size-3.5 shrink-0" aria-hidden />
-      )}
-      <span className="truncate">
-        {save === "tooLarge"
-          ? t("tooLarge")
-          : save === "rejected" || save === "error"
-            ? t("failed")
-            : t(save)}
-      </span>
-      {save === "error" && (
-        <button
-          type="button"
-          onClick={onRetry}
-          className="text-ds-accent-ink min-h-8 shrink-0 rounded px-1 font-semibold underline underline-offset-2"
-        >
-          {t("retry")}
-        </button>
-      )}
+      <Smartphone className="size-3.5 shrink-0" aria-hidden />
+      <span className="truncate max-sm:sr-only">{t("local")}</span>
     </span>
   );
 }
 
 /**
  * Chizish rejimining pastki paneli (suzuvchi navigatsiya o'rnida): qalam, marker, o'chirgich,
- * undo/redo, 6 ta rang, 3 ta qalinlik va saqlash holati. Telefonda ikki qator, kengda bitta.
+ * undo/redo, betni tozalash, 6 ta rang, 3 ta qalinlik va «faqat shu qurilmada» belgisi. Telefonda ikki qator, kengda bitta.
  */
 export function DrawToolbar(props: DrawToolbarProps) {
   const t = useTranslations("pdfBooks.draw");
@@ -169,6 +110,17 @@ export function DrawToolbar(props: DrawToolbarProps) {
             className={READER_ICON_BUTTON}
           >
             <Redo2 className="size-5" aria-hidden />
+          </button>
+          <button
+            type="button"
+            aria-label={t("clearPage")}
+            title={t("clearPage")}
+            disabled={!props.canClear}
+            data-testid="draw-clear-page"
+            onClick={props.onClearPage}
+            className={READER_ICON_BUTTON}
+          >
+            <Trash2 className="size-5" aria-hidden />
           </button>
         </div>
 
@@ -243,7 +195,7 @@ export function DrawToolbar(props: DrawToolbarProps) {
         </div>
 
         <div className="ml-auto flex min-w-0 items-center gap-1">
-          <SaveIndicator save={props.save} onRetry={props.onRetry} onSignIn={props.onSignIn} />
+          <LocalNotice />
           <button
             type="button"
             aria-label={t("close")}

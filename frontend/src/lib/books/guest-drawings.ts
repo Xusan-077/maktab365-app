@@ -2,9 +2,9 @@ import { idbAvailable, idbDelete, idbGet, idbSet } from "@/lib/offline/idb-kv";
 import type { AnnotationItem } from "./annotations";
 
 /**
- * Mehmon (kirmagan) foydalanuvchi chizmalari — faqat shu qurilmada: kitob bo'yicha bitta yozuv
- * `{ [bet]: items }`. Brauzerda IndexedDB, bo'lmasa localStorage. Kirgandan keyin o'qish oynasi
- * ularni akkauntga qo'shadi va bu yerdan o'chiradi (`useDrawings`).
+ * O'qish oynasidagi chizmalar — mehmonda ham, kirgan foydalanuvchida ham faqat shu qurilmada
+ * (serverga yuborilmaydi): kitob bo'yicha bitta yozuv `{ [bet]: items }`. Brauzerda IndexedDB,
+ * bo'lmasa localStorage (`useDrawings`). Kalit nomi eski — avvalgi chizmalar yo'qolmasin.
  */
 export const GUEST_DRAWINGS_PREFIX = "maktab365-guest-drawings:";
 
@@ -52,7 +52,7 @@ function sanitize(value: unknown): GuestPages {
 }
 
 /**
- * Bitta kitobning mehmon chizmalari. Yozuvlar ketma-ket (oldingisi tugagach) bajariladi — tez
+ * Bitta kitobning qurilmadagi chizmalari. Yozuvlar ketma-ket (oldingisi tugagach) bajariladi — tez
  * chizilganda eski holat yangisining ustiga yozilib qolmaydi.
  */
 export class GuestDrawings {
@@ -89,22 +89,8 @@ export class GuestDrawings {
     });
   }
 
-  /** Akkauntga ko'chirilgan betlar o'chiriladi. */
-  removePages(numbers: readonly number[]): Promise<void> {
-    return this.queue(async () => {
-      const pages = sanitize(await this.backend.get(this.key).catch(() => undefined));
-      for (const page of numbers) delete pages[page];
-      if (Object.keys(pages).length === 0) await this.backend.remove(this.key);
-      else await this.backend.set(this.key, pages);
-    });
+  /** Kitobning barcha chizmalari o'chiriladi. */
+  clear(): Promise<void> {
+    return this.queue(() => this.backend.remove(this.key));
   }
-}
-
-/** Server (yoki navbat) ro'yxati + mehmon chizmalari: id bo'yicha takrorlanmaydi, mehmonniki oxirida. */
-export function mergeGuestItems<T extends { id: string; type: string; data: unknown }>(
-  account: readonly T[],
-  guest: readonly T[],
-): T[] {
-  const ids = new Set(account.map((item) => item.id));
-  return [...account, ...guest.filter((item) => !ids.has(item.id))];
 }

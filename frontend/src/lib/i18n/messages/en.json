@@ -1987,7 +1987,16 @@
       "listTitle": "Highlights and notes",
       "empty": "No highlights yet. Turn on highlight mode and drag over the part of the page you want.",
       "page": "Page {page}",
-      "noNote": "No note"
+      "noNote": "No note",
+      "deleted": "Highlight deleted",
+      "restore": "Undo",
+      "deleteOne": "Delete highlight on page {page}",
+      "localOnly": "Notes are saved on this device only.",
+      "clearAll": "Delete all notes",
+      "clearAllTitle": "Delete all notes in this book?",
+      "clearAllText": "Highlights, notes and drawings will be permanently removed from this device. This can't be undone.",
+      "clearAllConfirm": "Yes, delete",
+      "clearedAll": "All notes in this book were deleted"
     },
     "appearance": {
       "title": "Display settings",
@@ -2121,17 +2130,12 @@
         "c4b5fd": "Lavender"
       },
       "status": {
-        "saving": "Saving…",
-        "saved": "Saved",
-        "offline": "Offline — saved on this device",
-        "failed": "Not saved",
-        "retry": "Retry",
-        "tooLarge": "Too many drawings on this page",
-        "guest": "Saved on this device only",
-        "signIn": "Sign in to save",
-        "loadError": "Drawings failed to load"
+        "local": "Saved on this device only"
       },
-      "limit": "Too many drawings on this page. Erase some first."
+      "limit": "Too many drawings on this page. Erase some first.",
+      "clearPage": "Clear page",
+      "pageCleared": "Drawings on this page were cleared",
+      "restore": "Undo"
     }
   },
   "library": {

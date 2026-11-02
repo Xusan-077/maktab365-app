@@ -160,4 +160,34 @@ describe("AnnotationsList", () => {
     render(intl(<AnnotationsList items={[]} onPick={onPick} />));
     expect(screen.getByText(t.empty)).toBeTruthy();
   });
+
+  it("savat bitta belgini o'chiradi; «faqat shu qurilmada» izohi bor", () => {
+    const onRemove = vi.fn();
+    const onPick = vi.fn();
+    render(intl(<AnnotationsList items={[note]} onPick={onPick} onRemove={onRemove} />));
+    expect(screen.getByTestId("annotations-local").textContent).toContain(t.localOnly);
+    fireEvent.click(screen.getByTestId("annotation-list-delete"));
+    expect(onRemove).toHaveBeenCalledWith(note);
+    expect(onPick).not.toHaveBeenCalled();
+  });
+
+  it("hammasini o'chirish faqat tasdiqdan keyin; bekor qilsa hech narsa o'chmaydi", () => {
+    const onClearAll = vi.fn();
+    render(intl(<AnnotationsList items={[note]} onPick={vi.fn()} onClearAll={onClearAll} />));
+    fireEvent.click(screen.getByTestId("annotations-clear-all"));
+    expect(onClearAll).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: t.cancel }));
+    expect(screen.queryByTestId("annotations-clear-confirm")).toBeNull();
+    fireEvent.click(screen.getByTestId("annotations-clear-all"));
+    fireEvent.click(screen.getByTestId("annotations-clear-yes"));
+    expect(onClearAll).toHaveBeenCalledTimes(1);
+  });
+
+  it("belgi yo'q, lekin chizma bor — «hammasini o'chirish» ko'rinadi; hech narsa yo'q — yo'q", () => {
+    render(intl(<AnnotationsList items={[]} onPick={vi.fn()} onClearAll={vi.fn()} hasDrawings />));
+    expect(screen.getByTestId("annotations-clear-all")).toBeTruthy();
+    cleanup();
+    render(intl(<AnnotationsList items={[]} onPick={vi.fn()} onClearAll={vi.fn()} />));
+    expect(screen.queryByTestId("annotations-clear-all")).toBeNull();
+  });
 });

@@ -8,6 +8,8 @@ import { AnimatePresence, EASE_OUT, m } from "./motion";
 import { useToastStore, type Toast as ToastData, type ToastVariant } from "@/stores/toast.store";
 
 const AUTO_DISMISS_MS = 5000;
+/** Amal tugmali xabar (masalan «Qaytarish») uzoqroq turadi — bosishga ulgurilsin. */
+const ACTION_DISMISS_MS = 8000;
 
 const icons = { info: Info, success: CheckCircle2, error: AlertCircle } satisfies Record<
   ToastVariant,
@@ -25,9 +27,12 @@ function ToastItem({ toast }: { toast: ToastData }) {
   const Icon = icons[toast.variant];
 
   useEffect(() => {
-    const timer = setTimeout(() => dismiss(toast.id), AUTO_DISMISS_MS);
+    const timer = setTimeout(
+      () => dismiss(toast.id),
+      toast.action ? ACTION_DISMISS_MS : AUTO_DISMISS_MS,
+    );
     return () => clearTimeout(timer);
-  }, [dismiss, toast.id]);
+  }, [dismiss, toast.id, toast.action]);
 
   return (
     <m.div
@@ -42,6 +47,19 @@ function ToastItem({ toast }: { toast: ToastData }) {
         <p className="text-foreground text-sm font-medium">{toast.title}</p>
         {toast.description && <p className="text-muted mt-0.5 text-sm">{toast.description}</p>}
       </div>
+      {toast.action && (
+        <button
+          type="button"
+          onClick={() => {
+            toast.action?.onClick();
+            dismiss(toast.id);
+          }}
+          data-testid="toast-action"
+          className="text-link hover:bg-subtle -my-1.5 inline-flex min-h-8 shrink-0 items-center rounded-md px-2 text-sm font-semibold"
+        >
+          {toast.action.label}
+        </button>
+      )}
       <button
         type="button"
         onClick={() => dismiss(toast.id)}

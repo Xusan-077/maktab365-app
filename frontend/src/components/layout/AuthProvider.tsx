@@ -19,7 +19,6 @@ import {
   invalidateReadingData,
 } from "@/lib/pdf-books/cache";
 import { ReturnToRestorer } from "./ReturnToRestorer";
-import { usePdfAnnotationsGuestStore } from "@/stores/pdf-annotations-guest.store";
 import { usePdfGuestStore } from "@/stores/pdf-guest.store";
 
 const USER_QUERY_KEYS = [
@@ -27,7 +26,6 @@ const USER_QUERY_KEYS = [
   ["pdf-progress"],
   ["pdf-bookmarks"],
   ["pdf-bookmarks-pending"],
-  ["pdf-annotations"],
   ["pdf-library"],
   ["pdf-dashboard"],
   ["pdf-results"],
@@ -115,14 +113,12 @@ function AuthBridge({ children }: { children: ReactNode }) {
         api: getPdfBooksApi(),
         load: async () => {
           await usePdfGuestStore.persist.rehydrate();
-          await usePdfAnnotationsGuestStore.persist.rehydrate();
           const { positions, bookmarks } = usePdfGuestStore.getState();
-          const annotations = usePdfAnnotationsGuestStore.getState().items;
-          return { positions, bookmarks, annotations };
+          // O'qish oynasidagi belgilar/chizmalar akkauntga yuborilmaydi — qurilmada qoladi.
+          return { positions, bookmarks };
         },
         onMerged: () => {
           usePdfGuestStore.getState().clear();
-          usePdfAnnotationsGuestStore.getState().clear();
           for (const queryKey of USER_QUERY_KEYS) void queryClient.invalidateQueries({ queryKey });
           toastRef.current({
             variant: "success",

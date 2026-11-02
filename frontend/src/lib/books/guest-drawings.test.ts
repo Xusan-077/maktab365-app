@@ -3,7 +3,6 @@ import type { AnnotationItem } from "./annotations";
 import {
   GUEST_DRAWINGS_PREFIX,
   GuestDrawings,
-  mergeGuestItems,
   type GuestDrawingsBackend,
   type GuestPages,
 } from "./guest-drawings";
@@ -39,22 +38,24 @@ describe("GuestDrawings", () => {
     await store.savePage(3, [item("c")]);
     expect((await store.load())[1]).toHaveLength(2);
     await store.savePage(1, []);
-    await store.removePages([3]);
+    await store.savePage(3, []);
     expect(data.size).toBe(0);
+  });
+
+  it("clear kitobning hamma chizmalarini o'chiradi, boshqa kitobga tegmaydi", async () => {
+    const { data, backend } = memoryBackend();
+    const store = new GuestDrawings("k", backend);
+    await store.savePage(1, [item("a")]);
+    await store.savePage(4, [item("b")]);
+    await new GuestDrawings("boshqa", backend).savePage(1, [item("c")]);
+    await store.clear();
+    expect(await store.load()).toEqual({});
+    expect(data.size).toBe(1);
   });
 
   it("buzuq yozuvni e'tiborsiz qoldiradi", async () => {
     const { data, backend } = memoryBackend();
     data.set(`${GUEST_DRAWINGS_PREFIX}k`, { 0: [item("x")], 2: [] } as unknown as GuestPages);
     expect(await new GuestDrawings("k", backend).load()).toEqual({});
-  });
-});
-
-describe("mergeGuestItems", () => {
-  it("id bo'yicha takrorlanmaydi, mehmon chizmalari oxirida", () => {
-    expect(mergeGuestItems([item("a")], [item("a"), item("b")]).map((i) => i.id)).toEqual([
-      "a",
-      "b",
-    ]);
   });
 });
